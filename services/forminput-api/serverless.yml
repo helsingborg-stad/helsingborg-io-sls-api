@@ -15,3 +15,15 @@ provider:
   tracing:
     apiGateway: true
     lambda: true
+
+functions:
+  # Defines an HTTP API endpoint that calls the main function in create.js
+  # - path: url path is /forms
+  # - method: POST request
+  create:
+    handler: create.main
+    events:
+      - http:
+          path: form
+          method: post
+          cors: true
