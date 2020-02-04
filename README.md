@@ -3,10 +3,12 @@
 POC - Using Serverless Framework with AWS
 
 - Service
-  A service is what you might call a Serverless project. It has a single serverless.yml file driving it.
+
+A service is what you might call a Serverless project. It has a single serverless.yml file driving it.
 
 - Application
-  An application or app is a collection of multiple services.
+
+An application or app is a collection of multiple services.
 
 ### An example
 
