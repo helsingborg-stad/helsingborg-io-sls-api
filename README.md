@@ -1,2 +1,2 @@
-# forminput-helsingborg-io-sls-api
-POC - AWS Lambda
+# Serverless
+POC - Using AWS Lambda
