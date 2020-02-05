@@ -24,6 +24,13 @@ functions:
     handler: create.main
     events:
       - http:
-          path: form
+          path: api/v1/forms
           method: post
+          cors: true
+  list:
+    handler: list.main
+    events:
+      - http:
+          path: api/v1/forms
+          method: get
           cors: true
