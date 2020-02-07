@@ -1,8 +1,11 @@
 service: helsingborg-io-sls-forminput-api
 
+
 plugins:
   - serverless-bundle
   - serverless-offline
+  
+custom: ${file(../../serverless.common.yml):custom}
 
 package:
   individually: true
@@ -16,6 +19,24 @@ provider:
     apiGateway: true
     lambda: true
 
+  environment:
+    stage: ${self:custom.stage}
+    resourcesStage: ${self:custom.resourcesStage}
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      # Restrict our IAM role permissions to the specific table for the stage
+      Resource:
+        - 'Fn::ImportValue': ${self:custom.resourcesStage}-SubmissionsTableArn
+
 functions:
   # Defines an HTTP API endpoint that calls the main function in create.js
   # - path: url path is /forms
@@ -27,6 +48,8 @@ functions:
           path: api/v1/forms
           method: post
           cors: true
+          authorizer: aws_iam
+
   list:
     handler: list.main
     events:
@@ -34,3 +57,4 @@ functions:
           path: api/v1/forms
           method: get
           cors: true
+          authorizer: aws_iam
