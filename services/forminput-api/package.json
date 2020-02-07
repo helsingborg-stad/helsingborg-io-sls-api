@@ -10,7 +10,10 @@
   "author": "Dan Nilsson",
   "license": "MIT",
   "dependencies": {
-    "@financial-times/lambda-logger": "^2.0.4",
     "uuid": "^3.4.0"
+  },
+  "devDependencies": {
+    "@financial-times/lambda-logger": "^2.0.4",
+    "aws-sdk": "^2.613.0"
   }
 }
