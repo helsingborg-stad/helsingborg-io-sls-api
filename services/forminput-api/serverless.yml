@@ -1,6 +1,5 @@
 service: helsingborg-io-sls-forminput-api
 
-
 plugins:
   - serverless-bundle
   - serverless-offline
