@@ -7,13 +7,18 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient();
 // create (POST)
 export const main = (event, context, callback) => {
   const data = JSON.parse(event.body);
+  logger.info(data);
+
+  const tableName = `${process.env.resourcesStage}-submissions`;
+  logger.info(tableName);
 
   const params = {
-    TableName: process.env.tableName,
+    TableName: tableName,
     Item: {
+      userId: data.userId,
       submissionId: uuid.v1(),
       createdAt: Date.now(),
-      ...data,
+      answers: data.answers,
     },
   };
 
@@ -25,12 +30,12 @@ export const main = (event, context, callback) => {
     };
 
     if(error) {
-      logger.info(error)
+      logger.info(error);
 
       const response = {
         statusCode: 500,
         headers,
-        body: JSON.stringify({ status: false }),
+        body: JSON.stringify({ status: false }),
       };
 
       callback(null, response);
