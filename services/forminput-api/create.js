@@ -1,24 +1,48 @@
+import AWS from '../../libs/aws-sdk';
 import uuid from 'uuid';
 import logger from '@financial-times/lambda-logger';
 
-// POST
+const dynamoDb = new AWS.DynamoDB.DocumentClient();
+
+// create (POST)
 export const main = (event, context, callback) => {
   const data = JSON.parse(event.body);
 
-  const item = {
-    id: uuid.v1(),
-    createdAt: Date.now(),
-    ...data,
+  const params = {
+    TableName: process.env.tableName,
+    Item: {
+      submissionId: uuid.v1(),
+      createdAt: Date.now(),
+      ...data,
+    },
   };
 
-  logger.info(item);
+  dynamoDb.put(params, (error, data) => {
 
-  const response = {
-    statusCode: 200,
-    body: JSON.stringify({
-      id: item.id,
-    }),
-  };
+    const headers = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': true,
+    };
 
-  callback(null, response);
+    if(error) {
+      logger.info(error)
+
+      const response = {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ status: false }),
+      };
+
+      callback(null, response);
+      return;
+    }
+
+    const response = {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify(params.Item),
+    };
+
+    callback(null, response);
+  });
 };
