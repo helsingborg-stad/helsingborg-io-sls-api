@@ -2,7 +2,8 @@ import AWS from '../../libs/aws-sdk';
 import uuid from 'uuid';
 import logger from '@financial-times/lambda-logger';
 
-const dynamoDb = new AWS.DynamoDB.DocumentClient();
+const dynamoDb = new AWS.DynamoDB({ region: 'eu-west-1' });
+const dbClient = new AWS.DynamoDB.DocumentClient({ service: dynamoDb });
 
 // create (POST)
 export const main = (event, context, callback) => {
@@ -22,14 +23,13 @@ export const main = (event, context, callback) => {
     },
   };
 
-  dynamoDb.put(params, (error, data) => {
-
+  dbClient.put(params, (error, data) => {
     const headers = {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Credentials': true,
     };
 
-    if(error) {
+    if (error) {
       logger.info(error);
 
       const response = {
