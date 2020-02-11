@@ -1,4 +1,4 @@
-POST https://h3fm7drq7l.execute-api.eu-north-1.amazonaws.com/dev/api/v1/forms HTTP/1.1
+POST https://localhost:3000/api/v1/forms HTTP/1.1
 
 {
   "body": {
