@@ -47,7 +47,6 @@ functions:
           path: api/v1/forms
           method: post
           cors: true
-          authorizer: aws_iam
 
   list:
     handler: list.main
@@ -56,4 +55,3 @@ functions:
           path: api/v1/forms
           method: get
           cors: true
-          authorizer: aws_iam
