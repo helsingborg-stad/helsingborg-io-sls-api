@@ -11,7 +11,6 @@ export const main = (event, context, callback) => {
   logger.info(data);
 
   const tableName = `${process.env.resourcesStage}-submissions`;
-  logger.info(tableName);
 
   const params = {
     TableName: tableName,
@@ -46,7 +45,7 @@ export const main = (event, context, callback) => {
     const response = {
       statusCode: 200,
       headers,
-      body: JSON.stringify(params.Item),
+      body: JSON.stringify(params.Item.submissionId),
     };
 
     callback(null, response);
