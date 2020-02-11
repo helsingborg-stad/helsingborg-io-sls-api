@@ -1,6 +1,6 @@
-import AWS from '../../libs/aws-sdk';
 import uuid from 'uuid';
 import logger from '@financial-times/lambda-logger';
+import AWS from '../../libs/aws-sdk';
 
 // const dynamoDb = new AWS.DynamoDB({ region: 'eu-north-1' });
 const dynamoClient = new AWS.DynamoDB.DocumentClient();
