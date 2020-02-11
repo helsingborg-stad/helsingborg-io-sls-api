@@ -3,7 +3,7 @@ import uuid from 'uuid';
 import logger from '@financial-times/lambda-logger';
 
 const dynamoDb = new AWS.DynamoDB({ region: 'eu-west-1' });
-const dbClient = new AWS.DynamoDB.DocumentClient({ service: dynamoDb });
+const dynamoClient = new AWS.DynamoDB.DocumentClient({ service: dynamoDb });
 
 // create (POST)
 export const main = (event, context, callback) => {
@@ -23,7 +23,8 @@ export const main = (event, context, callback) => {
     },
   };
 
-  dbClient.put(params, (error, data) => {
+  dynamoClient.put(params, (error, data) => {
+
     const headers = {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Credentials': true,
@@ -35,7 +36,7 @@ export const main = (event, context, callback) => {
       const response = {
         statusCode: 500,
         headers,
-        body: JSON.stringify({ status: false }),
+        body: JSON.stringify({ status: false, error }),
       };
 
       callback(null, response);
