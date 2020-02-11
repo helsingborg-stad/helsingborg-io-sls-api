@@ -2,8 +2,8 @@ import AWS from '../../libs/aws-sdk';
 import uuid from 'uuid';
 import logger from '@financial-times/lambda-logger';
 
-const dynamoDb = new AWS.DynamoDB({ region: 'eu-north-1' });
-const dynamoClient = new AWS.DynamoDB.DocumentClient({ service: dynamoDb });
+// const dynamoDb = new AWS.DynamoDB({ region: 'eu-north-1' });
+const dynamoClient = new AWS.DynamoDB.DocumentClient();
 
 // create (POST)
 export const main = (event, context, callback) => {
