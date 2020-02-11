@@ -61,5 +61,5 @@ functions:
     events:
       - http:
           path: api/v1/forms/{id}
-          method: post
+          method: delete
           cors: true
