@@ -1,41 +1,34 @@
-import AWS from '../../libs/aws-sdk';
-// import logger from '@financial-times/lambda-logger';
-import { catchError } from '../../libs/helpers';
-
-const dynamoClient = new AWS.DynamoDB.DocumentClient();
+import logger from '@financial-times/lambda-logger';
+import * as dynamoDb from '../../libs/dynamoDb';
+import { success, failure } from '../../libs/response';
+import { to } from '../../libs/helpers';
 
 // delete (DELETE)
-export const main = (event, context, callback) => {
-  const TableName = `${process.env.resourcesStage}-submissions`;
+export const main = async (event, context) => {
+  const data = JSON.parse(event.body);
+  const { userId } = data;
+
+  if (!userId) {
+    return failure({ status: false, error: 'Missing userId!' });
+  }
+
+  const { submissionId } = event.pathParameters;
 
   const params = {
-    TableName: TableName,
+    TableName: 'submissions',
     Key: {
-      userId: event.body.userId,
-      submissionId: event.pathParameters.submissionId,
+      userId,
+      submissionId,
     },
   };
 
-  const { ok, response } = catchError(
-    dynamoClient.delete(params).promise(),
-  );
-
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Credentials': true,
-  };
+  const { ok, response } = await to(dynamoDb.call('delete', params));
 
   if (!ok) {
-    callback(null, {
-      statusCode: 500,
-      headers,
-      body: JSON.stringify({ status: false, error: response }),
-    });
+    const { error } = response;
+    logger.error(error);
+    return failure({ status: false, error });
   }
 
-  callback(null, {
-    statusCode: 200,
-    headers,
-    body: JSON.stringify({ status: true }),
-  });
+  return success({ status: true });
 };
