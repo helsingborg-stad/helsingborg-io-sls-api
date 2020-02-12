@@ -5,7 +5,7 @@ import { catchError } from '../../libs/helpers';
 const dynamoClient = new AWS.DynamoDB.DocumentClient();
 
 // delete (DELETE)
-export const main = async (event, context, callback) => {
+export const main = (event, context, callback) => {
   const TableName = `${process.env.resourcesStage}-submissions`;
 
   const params = {
@@ -16,7 +16,7 @@ export const main = async (event, context, callback) => {
     },
   };
 
-  const { ok, response } = await catchError(
+  const { ok, response } = catchError(
     dynamoClient.delete(params).promise(),
   );
 
@@ -25,20 +25,17 @@ export const main = async (event, context, callback) => {
     'Access-Control-Allow-Credentials': true,
   };
 
-  logger.info(response);
-
   if (!ok) {
-
-    return {
+    callback(null, {
       statusCode: 500,
       headers,
       body: JSON.stringify({ status: false, error: response }),
-    };
+    });
   }
 
-  return {
+  callback(null, {
     statusCode: 200,
     headers,
     body: JSON.stringify({ status: true }),
-  };
+  });
 };
