@@ -25,8 +25,9 @@ export const main = async (event, context, callback) => {
     'Access-Control-Allow-Credentials': true,
   };
 
+  logger.info(response);
+
   if (!ok) {
-    logger.info(response);
 
     return {
       statusCode: 500,
