@@ -1,5 +1,5 @@
 import AWS from '../../libs/aws-sdk';
-import logger from '@financial-times/lambda-logger';
+// import logger from '@financial-times/lambda-logger';
 import { catchError } from '../../libs/helpers';
 
 const dynamoClient = new AWS.DynamoDB.DocumentClient();
