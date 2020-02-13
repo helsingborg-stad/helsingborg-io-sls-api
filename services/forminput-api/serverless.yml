@@ -48,6 +48,14 @@ functions:
           method: post
           cors: true
 
+  get:
+    handler: get.main
+    events:
+      - http:
+          path: api/v1/forms/{submissionId}
+          method: get
+          cors: true
+
   list:
     handler: list.main
     events:
