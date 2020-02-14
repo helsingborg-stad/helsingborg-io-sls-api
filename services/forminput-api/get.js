@@ -5,7 +5,7 @@ import { to } from '../../libs/helpers';
 
 // get item (GET)
 export const main = async (event, context) => {
-  const { userId } = event.queryStringParameters;
+  const { userId } = event.queryStringParameters;
   const { submissionId } = event.pathParameters;
 
   const params = {
