@@ -4,14 +4,8 @@ import { success, failure } from '../../libs/response';
 import { to } from '../../libs/helpers';
 
 // get item (GET)
-export const main = async (event, context, callback) => {
-  const data = JSON.parse(event.body);
-  const { userId } = data;
-
-  if (!userId) {
-    return failure({ status: false, error: 'Missing userId!' });
-  }
-
+export const main = async (event, context) => {
+  const { userId } = event.queryStringParameters;
   const { submissionId } = event.pathParameters;
 
   const params = {
@@ -26,6 +20,10 @@ export const main = async (event, context, callback) => {
 
   if (!ok) {
     logger.error(result);
+    return failure({ status: ok, error: result });
+  }
+
+  if (!result.Item) {
     return failure({ status: false, error: 'Item not found.' });
   }
 
