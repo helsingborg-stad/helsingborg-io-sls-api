@@ -22,12 +22,11 @@ export const main = async (event, context) => {
     },
   };
 
-  const { ok, response } = await to(dynamoDb.call('delete', params));
+  const { ok, result } = await to(dynamoDb.call('delete', params));
 
   if (!ok) {
-    const { error } = response;
-    logger.error(error);
-    return failure({ status: false, error });
+    logger.error(result);
+    return failure({ status: ok, error: result });
   }
 
   return success({ status: true });
