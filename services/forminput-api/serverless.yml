@@ -71,3 +71,11 @@ functions:
           path: api/v1/forms/{submissionId}
           method: delete
           cors: true
+
+  update:
+    handler: update.main
+    events:
+      - http:
+          path: api/v1/forms/{submissionId}
+          method: put
+          cors: true
