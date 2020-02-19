@@ -1,4 +1,4 @@
-import logger from '@financial-times/lambda-logger';
+// import logger from '@financial-times/lambda-logger';
 import AssistantV2 from 'ibm-watson/assistant/v2';
 import { IamAuthenticator } from 'ibm-watson/auth';
 import { to } from '../../../libs/helpers';
