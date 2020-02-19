@@ -13,27 +13,9 @@ export const main = async (event) => {
     sessionId,
   } = event.body;
 
-  const verifiedSessionId = verifySessionId(sessionId);
+  let verifiedSessionId = sessionId || null;
 
-  const { ok, result } = await to(
-    message(textInput, verifiedSessionId, assistantId, context, intents, entities),
-  );
-
-  if (!ok) {
-    logger.error(result);
-    return failure({ status: ok, error: result });
-  }
-
-  return success({
-    status: true,
-    message: { ...result, session_id: verifiedSessionId },
-  });
-};
-
-function verifySessionId(id) {
-  let _id = id || null;
-
-  if (!_id) {
+  if (!verifiedSessionId) {
     const { ok, result } = await to(createSession(assistantId));
 
     if (!ok) {
@@ -41,8 +23,20 @@ function verifySessionId(id) {
       failure({ status: false, error: result });
     }
 
-    _id = result.result.session_id;
+    verifiedSessionId = result.result.session_id;
   }
 
-  return _id;
-}
+  const { ok, result } = await to(
+    message(textInput, verifiedSessionId, assistantId, context, intents, entities),
+  );
+
+  if (!ok) {
+    logger.error(result);
+    return failure({ status: false, error: result });
+  }
+
+  return success({
+    status: true,
+    message: { ...result, session_id: verifiedSessionId },
+  });
+};
