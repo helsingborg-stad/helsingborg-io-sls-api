@@ -3,6 +3,7 @@ service: helsingborg-io-sls-watson-api
 plugins:
   - serverless-bundle
   - serverless-offline
+  - serverless-dotenv-plugin
 
 custom: ${file(../../serverless.common.yml):custom}
 
