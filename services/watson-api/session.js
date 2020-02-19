@@ -10,7 +10,7 @@ export const main = async (event, context) => {
 
   if(!ok) {
     logger.error(result);
-    return failure({ status: ok, error: result });
+    return failure({ status: false, error: result });
   }
 
   return success({ status: true, session: result });
