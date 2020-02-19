@@ -1,5 +1,7 @@
+import logger from '@financial-times/lambda-logger';
 import AssistantV2 from 'ibm-watson/assistant/v2';
 import { IamAuthenticator } from 'ibm-watson/auth';
+import { to } from '../../../libs/helpers';
 
 // ENV
 const {
@@ -18,16 +20,20 @@ const options = {
 /**
  * Interact with Watson API
  */
-assistant = new AssistantV2(options);
+const assistant = new AssistantV2(options);
 
 /**
  * Create a session
  * @param {string} assistantId
  */
 export const createSession = async (assistantId = WATSON_ASSISTANT_ID) => {
-  const request = await to(assistant.createSession({ assistantId }));
-  const response = await to(request);
-  return response;
+  const { ok, result } = await to(assistant.createSession({ assistantId }));
+
+  if (!ok) {
+    return Promise.reject(result);
+  }
+
+  return result;
 };
 
 /**
