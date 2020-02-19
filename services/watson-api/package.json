@@ -1,12 +1,20 @@
 {
-  "name": "watson-api",
-  "version": "1.0.0",
-  "description": "",
+  "name": "helsingborg-io-sls-watson-api",
+  "version": "0.0.1",
+  "description": "Microservice for interactions with IBM Watson Assistant",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "sls offline",
+    "deploy": "sls deploy -v --aws-s3-accelerate"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "author": "Helsingborgs Stad",
+  "license": "MIT",
+  "dependencies": {
+    "ibm-watson": "^5.1.0"
+  },
+  "devDependencies": {
+    "@financial-times/lambda-logger": "^2.0.4"
+  }
 }
