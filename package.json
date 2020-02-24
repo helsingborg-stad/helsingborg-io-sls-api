@@ -5,10 +5,7 @@
   "scripts": {
     "test": "serverless-bundle test"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/helsingborg-stad/helsingborg-io-sls-api.git"
-  },
+  "repository": "git+https://github.com/helsingborg-stad/helsingborg-io-sls-api.git",
   "keywords": [],
   "author": "Dan Nilsson",
   "license": "MIT",

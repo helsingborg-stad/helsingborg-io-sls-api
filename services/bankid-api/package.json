@@ -1,0 +1,17 @@
+{
+  "name": "helsingborg-io-sls-bankid-api",
+  "version": "0.0.1",
+  "description": "",
+  "main": "create.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Helsingborg Stad",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "aws-sdk": "^2.613.0"
+  },
+  "devDependencies": {}
+}

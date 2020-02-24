@@ -17,7 +17,7 @@ export const main = async (event) => {
       payload
     );
 
-    return success({ status: true });
+    return success({ status: true, body: data });
   } catch (error) {
     return failure({ status: false });
   }
