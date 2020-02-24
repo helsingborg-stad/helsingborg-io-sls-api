@@ -1,30 +1,30 @@
-import { to } from '../../libs/helpers';
 import { failure, success } from '../../libs/response';
 import * as request from '../../libs/request';
 import * as bankId from './helpers/bankId';
 
 export const main = async (event) => {
+  try {
+    const { endUserIp, personalNumber, userVisibleData } = JSON.parse(event.body);
 
-  const { endUserIp, personalNumber, userVisibleData } = JSON.parse(event.body);
-
-  const payload = {
-    endUserIp,
-    personalNumber,
-    userVisibleData: userVisibleData
+    const payload = {
+      endUserIp,
+      personalNumber,
+      userVisibleData: userVisibleData
         ? Buffer.from(userVisibleData).toString('base64')
         : undefined,
     };
 
-  const { ok, result } =  await to(request.call(
-    bankId.client(),
-    'post',
-    bankId.url('/sign'),
-    payload
-  ));
+    const bankIdClient = await bankId.client();
 
-  if ( !ok ) {
-    return failure({status: false, error: result.response.data});
-  }
+    const data = request.call(
+      bankIdClient,
+      'post',
+      bankId.url('/sign'),
+      payload,
+    );
 
-  return success({status: true, body: result.data});
+    return success({ status: true, body: data });
+  } catch (error) {
+    return failure({ status: false, error });
+  }  
 };
