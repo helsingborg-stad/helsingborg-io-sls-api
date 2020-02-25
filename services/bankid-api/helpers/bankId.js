@@ -2,11 +2,11 @@ import { requestClient } from '../../../libs/request';
 import * as certs from './certificates';
 
 const {
-  BANKID_API_URL,
+  // BANKID_API_URL,
   BANKID_PASSPHRASE,
 } = process.env;
 
-export const url = path => `${BANKID_API_URL}${path}`;
+// export const url = path => `${BANKID_API_URL}${path}`;
 
 export const client = async () => {
   try {

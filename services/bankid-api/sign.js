@@ -26,5 +26,5 @@ export const main = async (event) => {
     return success({ status: true, body: data });
   } catch (error) {
     return failure({ status: false, error });
-  }  
+  }
 };
