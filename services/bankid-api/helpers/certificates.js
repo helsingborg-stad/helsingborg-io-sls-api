@@ -7,6 +7,6 @@ export const read = async (Bucket, Key) => {
     const file = await S3.getObject({ Bucket, Key }).promise();
     return file;
   } catch (error) {
-    throw `${error.code}:${error.message}`;
+    throw `S3 - ${error.code}:${error.message}`;
   }
 };
