@@ -16,8 +16,6 @@ provider:
   stage: dev
   region: eu-north-1
   endpointType: regional
-  logs:
-    restApi: true
   tracing:
     apiGateway: true
     lambda: true
