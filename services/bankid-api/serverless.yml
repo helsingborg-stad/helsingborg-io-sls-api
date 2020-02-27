@@ -22,6 +22,7 @@ provider:
   environment:
     stage: ${self:custom.stage}
     resourcesStage: ${self:custom.resourcesStage}
+    bankidEnvs: ${ssm:/bankidTest/${self:custom.resourcesStage}~true}
 
 functions:
   # Defines an HTTP API endpoint that calls the main function in create.js
