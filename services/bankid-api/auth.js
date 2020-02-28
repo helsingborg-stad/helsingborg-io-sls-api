@@ -4,23 +4,25 @@ import * as request from '../../libs/request';
 import * as bankId from './helpers/bankId';
 
 export const main = async event => {
+  const { endUserIp, personalNumber } = JSON.parse(event.body);
+
   const payload = {
-    endUserIp: '127.0.0.1',
-    personalNumber: '195611260629',
+    endUserIp,
+    personalNumber,
   };
 
-  const [bOk, bankIdClient] = await to(bankId.client());
+  const [bankIdOk, bankIdClient] = await to(bankId.client());
 
-  if (!bOk) {
+  if (!bankIdOk) {
     return failure({ status: false, error: bankIdClient });
   }
 
-  const [rOk, data] = await to(
+  const [dataOk, { data }] = await to(
     request.call(bankIdClient, 'post', bankId.url('/auth'), payload),
   );
 
-  if (!rOk) {
-    return failure({ status: false, error: data });
+  if (!dataOk) {
+    return failure({ status: false });
   }
 
   return success({ status: true, body: data });
