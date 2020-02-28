@@ -10,8 +10,9 @@
   "author": "Helsingborg Stad",
   "license": "MIT",
   "dependencies": {
+    "aws-sdk": "^2.613.0",
     "axios": "^0.19.2",
-    "aws-sdk": "^2.613.0"
+    "serverless-export-env": "^1.2.0"
   },
   "devDependencies": {}
 }
