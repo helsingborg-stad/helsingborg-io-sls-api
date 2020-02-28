@@ -16,15 +16,10 @@ export const main = async (event) => {
 
     const bankIdClient = await bankId.client();
 
-    const data = request.call(
-      bankIdClient,
-      'post',
-      bankId.url('/sign'),
-      payload,
-    );
+    const { data } = request.call(bankIdClient, 'post', bankId.url('/sign'), payload);
 
     return success({ status: true, body: data });
   } catch (error) {
-    return failure({ status: false, error });
+    return failure({ status: false });
   }
 };

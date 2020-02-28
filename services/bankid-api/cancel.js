@@ -10,7 +10,7 @@ export const main = async (event) => {
 
     const bankIdClient = await bankId.client();
 
-    const data = await request.call(
+    const { data } = await request.call(
       bankIdClient,
       'post',
       bankId.url('/cancel'),
@@ -19,6 +19,6 @@ export const main = async (event) => {
 
     return success({ status: true, body: data });
   } catch (error) {
-    return failure({ status: false, error });
+    return failure({ status: false });
   }
 };
