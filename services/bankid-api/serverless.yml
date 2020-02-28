@@ -4,6 +4,7 @@ plugins:
   - serverless-bundle
   - serverless-offline
   - serverless-dotenv-plugin
+  - serverless-export-env
 
 custom: ${file(../../serverless.common.yml):custom}
 
@@ -23,13 +24,14 @@ provider:
   environment:
     stage: ${self:custom.stage}
     resourcesStage: ${self:custom.resourcesStage}
+    certBucket:
+      'Fn::ImportValue': ${self:custom.resourcesStage}-CertificatesBucket
 
   iamRoleStatements:
     - Effect: Allow
       Action:
         - s3:*
-      Resource:
-        - 'Fn::ImportValue': ${self:custom.resourcesStage}-CertificatesBucketArn
+      Resource: '*'
 
 functions:
   # Defines an HTTP API endpoint that calls the main function in create.js
