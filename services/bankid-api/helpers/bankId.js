@@ -1,25 +1,25 @@
 import { requestClient } from '../../../libs/request';
-import fs from "fs";
+import * as certs from './certificates';
 
-const {
-  BANKID_API_URL,
-  BANKID_PASSPHRASE,
-  BANKID_CA_PATH,
-  BANKID_PFX_BASE64_PATH
-} = process.env;
+const { BANKID_API_URL, BANKID_PASSPHRASE } = process.env;
 
 export const url = path => `${BANKID_API_URL}${path}`;
 
-export const client = () => {
+export const client = async () => {
+  try {
+    const bankIdCa = await certs.read('bankd.crt');
+    const bankIdPfx = await certs.read('FPTestcert2.pfx');
 
-  const bankIdCa = fs.readFileSync(BANKID_CA_PATH);
-  const bankIdPfx = fs.readFileSync(BANKID_PFX_BASE64_PATH);
+    const options = {
+      ca: bankIdCa.Body,
+      pfx: bankIdPfx.Body,
+      passphrase: BANKID_PASSPHRASE,
+      rejectUnauthorized: false
+    };
 
-  const clientOptions = {
-    ca: bankIdCa,
-    pfx: bankIdPfx,
-    passphrase: BANKID_PASSPHRASE,
-    rejectUnauthorized: false
-  };
-  return requestClient(clientOptions);
+    return requestClient(options);
+
+  } catch (error) {
+    throw error;
+  }
 };

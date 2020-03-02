@@ -4,6 +4,7 @@ plugins:
   - serverless-bundle
   - serverless-offline
   - serverless-dotenv-plugin
+  - serverless-export-env
 
 custom: ${file(../../serverless.common.yml):custom}
 
@@ -15,6 +16,7 @@ provider:
   runtime: nodejs12.x
   stage: dev
   region: eu-north-1
+  endpointType: regional
   tracing:
     apiGateway: true
     lambda: true
@@ -22,36 +24,44 @@ provider:
   environment:
     stage: ${self:custom.stage}
     resourcesStage: ${self:custom.resourcesStage}
+    certBucket:
+      'Fn::ImportValue': ${self:custom.resourcesStage}-CertificatesBucket
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:*
+      Resource: '*'
 
 functions:
   # Defines an HTTP API endpoint that calls the main function in create.js
   # - path: url path is /forms
   # - method: POST request
   auth:
-    handler: auth.main
+    handler: lambdas/auth.main
     events:
       - http:
-          path: api/v1/bankid/auth
+          path: auth
           method: post
           cors: true
   sign:
-    handler: sign.main
+    handler: lambdas/sign.main
     events:
       - http:
-          path: api/v1/bankid/sign
+          path: sign
           method: post
           cors: true
   collect:
-    handler: collect.main
+    handler: lambdas/collect.main
     events:
       - http:
-          path: api/v1/bankid/collect
+          path: collect
           method: post
           cors: true
   cancel:
-    handler: collect.main
+    handler: lambdas/collect.main
     events:
       - http:
-          path: api/v1/bankid/cancel
+          path: cancel
           method: post
           cors: true
