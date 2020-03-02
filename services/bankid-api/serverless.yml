@@ -38,28 +38,28 @@ functions:
   # - path: url path is /forms
   # - method: POST request
   auth:
-    handler: auth.main
+    handler: lambdas/auth.main
     events:
       - http:
           path: auth
           method: post
           cors: true
   sign:
-    handler: sign.main
+    handler: lambdas/sign.main
     events:
       - http:
           path: sign
           method: post
           cors: true
   collect:
-    handler: collect.main
+    handler: lambdas/collect.main
     events:
       - http:
           path: collect
           method: post
           cors: true
   cancel:
-    handler: collect.main
+    handler: lambdas/collect.main
     events:
       - http:
           path: cancel
