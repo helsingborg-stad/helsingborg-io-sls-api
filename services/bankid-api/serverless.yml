@@ -3,8 +3,6 @@ service: helsingborg-io-sls-bankid-api
 plugins:
   - serverless-bundle
   - serverless-offline
-  - serverless-dotenv-plugin
-  - serverless-export-env
 
 custom: ${file(../../serverless.common.yml):custom}
 
@@ -24,14 +22,12 @@ provider:
   environment:
     stage: ${self:custom.stage}
     resourcesStage: ${self:custom.resourcesStage}
-    certBucket:
-      'Fn::ImportValue': ${self:custom.resourcesStage}-CertificatesBucket
 
   iamRoleStatements:
     - Effect: Allow
       Action:
         - s3:*
-      Resource: '*'
+      Resource: "*"
 
 functions:
   # Defines an HTTP API endpoint that calls the main function in create.js
@@ -59,7 +55,7 @@ functions:
           method: post
           cors: true
   cancel:
-    handler: lambdas/collect.main
+    handler: lambdas/cancel.main
     events:
       - http:
           path: cancel
