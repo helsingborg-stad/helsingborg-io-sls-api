@@ -1,0 +1,63 @@
+service: helsingborg-io-sls-bankid-api
+
+plugins:
+  - serverless-bundle
+  - serverless-offline
+
+custom: ${file(../../serverless.common.yml):custom}
+
+package:
+  individually: true
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: eu-north-1
+  endpointType: regional
+  tracing:
+    apiGateway: true
+    lambda: true
+
+  environment:
+    stage: ${self:custom.stage}
+    resourcesStage: ${self:custom.resourcesStage}
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:*
+      Resource: "*"
+
+functions:
+  # Defines an HTTP API endpoint that calls the main function in create.js
+  # - path: url path is /forms
+  # - method: POST request
+  auth:
+    handler: lambdas/auth.main
+    events:
+      - http:
+          path: auth
+          method: post
+          cors: true
+  sign:
+    handler: lambdas/sign.main
+    events:
+      - http:
+          path: sign
+          method: post
+          cors: true
+  collect:
+    handler: lambdas/collect.main
+    events:
+      - http:
+          path: collect
+          method: post
+          cors: true
+  cancel:
+    handler: lambdas/cancel.main
+    events:
+      - http:
+          path: cancel
+          method: post
+          cors: true

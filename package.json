@@ -5,10 +5,7 @@
   "scripts": {
     "test": "serverless-bundle test"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/helsingborg-stad/helsingborg-io-sls-api.git"
-  },
+  "repository": "git+https://github.com/helsingborg-stad/helsingborg-io-sls-api.git",
   "keywords": [],
   "author": "Dan Nilsson",
   "license": "MIT",
@@ -20,5 +17,10 @@
     "serverless-bundle": "^1.2.5",
     "serverless-dotenv-plugin": "^2.3.2",
     "serverless-offline": "^5.12.1"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "serverless-dotenv-plugin": "^2.3.2"
   }
 }
