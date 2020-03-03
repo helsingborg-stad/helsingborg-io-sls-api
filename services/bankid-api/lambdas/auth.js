@@ -4,7 +4,7 @@ import * as request from '../../../libs/request';
 import * as bankId from '../helpers/bankId';
 import { getConfig } from '../helpers/ssmParameters';
 
-const SSMParams = getConfig("/bankidEnvs/dev");
+const SSMParams = getConfig('/bankidEnvs/dev');
 
 export const main = async event => {
   const bankidSSMparams = await SSMParams;
@@ -18,13 +18,17 @@ export const main = async event => {
 
   const [bankIdOk, bankIdClient] = await to(bankId.client(bankidSSMparams));
 
-
   if (!bankIdOk) {
     return failure({ status: false, error: bankIdClient });
   }
 
   const [dataOk, response] = await to(
-    request.call(bankIdClient, 'post', bankId.url(bankidSSMparams.apiUrl, '/auth'), payload),
+    request.call(
+      bankIdClient,
+      'post',
+      bankId.url(bankidSSMparams.apiUrl, '/auth'),
+      payload,
+    ),
   );
 
   if (!dataOk) {

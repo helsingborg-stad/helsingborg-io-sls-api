@@ -1,12 +1,12 @@
 import { failure, success } from '../../../libs/response';
-import { getConfig } from "../helpers/ssmParameters";
+import { getConfig } from '../helpers/ssmParameters';
 import * as request from '../../../libs/request';
 import * as bankId from '../helpers/bankId';
 
-const SSMParams = getConfig("/bankidEnvs/dev");
+const SSMParams = getConfig('/bankidEnvs/dev');
 
-export const main = async (event) => {
-  const bankidSSMParams = await SSMParams
+export const main = async event => {
+  const bankidSSMParams = await SSMParams;
   try {
     const { orderRef } = JSON.parse(event.body);
 
