@@ -29,7 +29,15 @@ export const main = async event => {
       payload,
     );
 
-    return success({ status: true, body: data });
+    const { orderRef, autoStartToken } = data;
+
+    return success({
+      type: 'bankIdSign',
+      attributes: {
+        order_ref: orderRef,
+        auto_start_token: autoStartToken,
+      },
+    });
   } catch (error) {
     return failure({ status: false, error: error.message });
   }

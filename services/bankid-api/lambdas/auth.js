@@ -35,5 +35,13 @@ export const main = async event => {
     return failure({ status: false, error: response });
   }
 
-  return success({ status: true, body: response.data });
+  const { orderRef, autoStartToken } = response.data;
+
+  return success({
+    type: 'bankIdAuth',
+    attributes: {
+      order_ref: orderRef,
+      auto_start_token: autoStartToken,
+    },
+  });
 };

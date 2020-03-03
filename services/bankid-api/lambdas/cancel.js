@@ -21,7 +21,10 @@ export const main = async event => {
       payload,
     );
 
-    return success({ status: true, body: data });
+    return success({
+      type: 'bankIdCancel',
+      data,
+    });
   } catch (error) {
     return failure({ status: false, error: error.message });
   }
