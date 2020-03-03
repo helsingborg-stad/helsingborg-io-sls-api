@@ -2,7 +2,7 @@ import AWS from "aws-sdk";
 
 const ssm = new AWS.SSM();
 
-export const getConfig = (name) =>
+const read = (name) =>
   new Promise((resolve, reject) => {
     ssm.getParameter(
       {
@@ -20,3 +20,7 @@ export const getConfig = (name) =>
       }
     );
   });
+
+export default {
+  read
+}
