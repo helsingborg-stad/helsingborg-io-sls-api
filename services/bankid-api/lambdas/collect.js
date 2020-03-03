@@ -21,7 +21,16 @@ export const main = async event => {
       payload,
     );
 
-    return success({ status: true, body: data });
+    const { status, hintCode } = data;
+
+    return success({
+      type: 'bankIdCollect',
+      attributes: {
+        order_ref: orderRef,
+        status,
+        hint_code: hintCode,
+      },
+    });
   } catch (error) {
     return failure({ status: false, error: error.message });
   }
