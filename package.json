@@ -15,10 +15,12 @@
   "homepage": "https://github.com/helsingborg-stad/helsingborg-io-sls-api#readme",
   "devDependencies": {
     "serverless-bundle": "^1.2.5",
+    "serverless-dotenv-plugin": "^2.3.2",
     "serverless-offline": "^5.12.1"
   },
   "main": "index.js",
   "dependencies": {
+    "aws-sdk": "^2.631.0",
     "axios": "^0.19.2",
     "serverless-dotenv-plugin": "^2.3.2"
   }

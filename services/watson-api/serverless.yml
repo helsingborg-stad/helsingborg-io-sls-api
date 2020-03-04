@@ -1,0 +1,61 @@
+service: helsingborg-io-sls-watson-api
+
+plugins:
+  - serverless-bundle
+  - serverless-offline
+
+custom: ${file(../../serverless.common.yml):custom}
+
+package:
+  individually: true
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: eu-north-1
+  endpointType: regional
+  # apiGateway:
+  #   apiKeySourceType: HEADER
+  # apiKeys:
+  #   - ${self:custom.stage}-hbg-watson-apikey
+  # usagePlan:
+  #   quota:
+  #     limit: 10
+  #     offset: 0
+  #     period: DAY
+  #   throttle:
+  #     burstLimit: 10
+  #     rateLimit: 10
+  logs:
+    restApi: true
+  tracing:
+    apiGateway: true
+    lambda: true
+
+  environment:
+    stage: ${self:custom.stage}
+    resourcesStage: ${self:custom.resourcesStage}
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - ssm:GetParameter
+      Resource: "*"
+
+functions:
+  session:
+    handler: lambdas/session.main
+    events:
+      - http:
+          path: session
+          method: post
+          cors: true
+
+  message:
+    handler: lambdas/message.main
+    events:
+      - http:
+          path: message
+          method: post
+          cors: true
