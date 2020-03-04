@@ -5,7 +5,7 @@ import * as bankId from '../helpers/bankId';
 
 const SSMParams = params.read("/bankidEnvs/dev");
 
-export const main = async (event) => {
+export const main = async event => {
   const bankidSSMParams = await SSMParams;
   try {
     const { orderRef } = JSON.parse(event.body);
@@ -21,7 +21,10 @@ export const main = async (event) => {
       payload,
     );
 
-    return success({ status: true, body: data });
+    return success({
+      type: 'bankIdCancel',
+      data,
+    });
   } catch (error) {
     return failure({ status: false, error: error.message });
   }

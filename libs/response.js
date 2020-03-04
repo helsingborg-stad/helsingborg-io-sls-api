@@ -7,12 +7,18 @@ export function failure(body) {
 }
 
 function buildResponse(statusCode, body) {
+  const jsonApi = {
+    jsonapi: {
+      version: '1.0',
+    },
+    data: body,
+  };
   return {
     statusCode: statusCode,
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Credentials': true,
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify(jsonApi),
   };
 }

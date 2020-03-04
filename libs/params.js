@@ -1,4 +1,4 @@
-import AWS from "aws-sdk";
+import AWS from 'aws-sdk';
 
 const ssm = new AWS.SSM();
 
@@ -7,7 +7,7 @@ const read = (name) =>
     ssm.getParameter(
       {
         Name: name,
-        WithDecryption: true
+        WithDecryption: true,
       },
       (err, data) => {
         if (err) {
@@ -17,7 +17,7 @@ const read = (name) =>
           const param = JSON.parse(data.Parameter.Value);
           resolve(param);
         }
-      }
+      },
     );
   });
 
