@@ -1,5 +1,5 @@
 import { failure, success } from "../../../libs/response";
-import { getConfig } from "../../../libs/params";
+import params from "../../../libs/params";
 import * as request from "../../../libs/request";
 import * as bankId from '../helpers/bankId';
 
