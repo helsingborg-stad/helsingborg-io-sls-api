@@ -3,7 +3,6 @@ service: helsingborg-io-sls-watson-api
 plugins:
   - serverless-bundle
   - serverless-offline
-  - serverless-dotenv-plugin
 
 custom: ${file(../../serverless.common.yml):custom}
 
@@ -38,24 +37,25 @@ provider:
     stage: ${self:custom.stage}
     resourcesStage: ${self:custom.resourcesStage}
 
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - ssm:GetParameter
+      Resource: "*"
+
 functions:
-  # Defines an HTTP API endpoint that calls the main function in create.js
-  # - path: url path is /forms
-  # - method: POST request
   session:
-    handler: session.main
+    handler: lambdas/session.main
     events:
       - http:
-          path: api/v1/session
+          path: session
           method: post
           cors: true
-          # private: true
 
   message:
-    handler: message.main
+    handler: lambdas/message.main
     events:
       - http:
-          path: api/v1/message
+          path: message
           method: post
           cors: true
-          # private: true

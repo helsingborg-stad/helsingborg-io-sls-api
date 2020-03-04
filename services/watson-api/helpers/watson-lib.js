@@ -2,32 +2,45 @@
 import AssistantV2 from 'ibm-watson/assistant/v2';
 import { IamAuthenticator } from 'ibm-watson/auth';
 import { to } from '../../../libs/helpers';
+import params from '../../../libs/params';
 
-// ENV
-const {
-  WATSON_ASSISTANT_VERSION_DATE,
-  WATSON_ASSISTANT_IAM_APIKEY,
-  WATSON_ASSISTANT_ID,
-  WATSON_SERVICE_ENDPOINT,
-} = process.env;
+// SSM PARAMS
+const watsonParams = params.read(
+  "/watsonEnvs/dev"
+);
 
-const options = {
-  version: WATSON_ASSISTANT_VERSION_DATE,
-  authenticator: new IamAuthenticator({ apikey: WATSON_ASSISTANT_IAM_APIKEY }),
-  url: WATSON_SERVICE_ENDPOINT,
+/**
+ * Function for creating a new instance of the Watson Assistans v2
+ */
+const createAssistant = async () => {
+  const {
+    assistantVersionDate,
+    assistantIAMKey,
+    serviceEndpoint
+  } = await watsonParams;
+
+  const options = {
+    version: assistantVersionDate,
+    authenticator: new IamAuthenticator({ apikey: assistantIAMKey }),
+    url: serviceEndpoint
+  };
+  return new AssistantV2(options);
 };
 
 /**
- * Interact with Watson API
+ * Create a new Assistant instance to use.
  */
-const assistant = new AssistantV2(options);
+const assistant = createAssistant();
 
 /**
  * Create a session
  * @param {string} assistantId
  */
-export const createSession = async (assistantId = WATSON_ASSISTANT_ID) => {
-  const { ok, result } = await to(assistant.createSession({ assistantId }));
+export const createAssistantSession = async assistantId => {
+  const watsonAssistant = await assistant;
+  const [ok, result] = await to(
+    watsonAssistant.createSession({ assistantId })
+  );
 
   if (!ok) {
     return Promise.reject(result);
@@ -44,14 +57,15 @@ export const createSession = async (assistantId = WATSON_ASSISTANT_ID) => {
  * @param {String} context Conversation ID, defaults to undefined (to initiate a new conversation)
  * @return {promise} Watson response
  */
-export const message = (
+export const sendMessage = async (
   text,
   sessionId,
-  assistantId = WATSON_ASSISTANT_ID,
+  assistantId,
   context = undefined,
   intents = undefined,
   entities = undefined,
 ) => {
+  const watsonAssistant = await assistant;
   const payload = {
     assistantId,
     sessionId,
@@ -68,7 +82,7 @@ export const message = (
   };
 
   return new Promise((resolve, reject) =>
-    assistant.message(payload, (err, data) => {
+    watsonAssistant.message(payload, (err, data) => {
       if (err) {
         reject(err);
       } else {

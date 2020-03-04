@@ -14,13 +14,15 @@ const read = (name) =>
           console.log(err, err.stack);
           reject(err);
         } else {
-          const param = JSON.parse(data.Parameter.Value)
+          const param = JSON.parse(data.Parameter.Value);
           resolve(param);
         }
       }
     );
   });
 
-export default {
+const params = {
   read
-}
+};
+
+export default params;
