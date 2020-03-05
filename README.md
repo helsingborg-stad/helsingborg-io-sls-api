@@ -36,7 +36,7 @@ This ensures each change is tested on real infrastructure before being promoted 
 ## Requirements
 
 **Do this first**
-The services are dependent on the resources that are created in this [accompanying repo](git@github.com:helsingborg-stad/helsingborg-io-sls-resources.git).
+The services are dependent on the resources that are created in this [accompanying repo](https://github.com/helsingborg-stad/helsingborg-io-sls-resources).
 
 - AWS Account
 - AWS IAM user
