@@ -35,13 +35,15 @@ This ensures each change is tested on real infrastructure before being promoted 
 
 ## Requirements
 
-- AWS CLI
+**Do this first**
+The services are dependent on the resources that are created in this [accompanying repo](git@github.com:helsingborg-stad/helsingborg-io-sls-resources.git).
+
 - AWS Account
 - AWS IAM user
 - Homebrew (macOS)
 - NodeJS
 - NPM
-- Serverless Framework
+- [Serverless Framework](https://serverless.com/)
 
 ### AWS CLI (Homebrew on macOS)
 
@@ -49,19 +51,19 @@ This ensures each change is tested on real infrastructure before being promoted 
 brew install awscli
 ```
 
-### Create an AWS Account
+### Create an AWS Account (Personal)
 
-- Follow [this](https://serverless-stack.com/chapters/create-an-iam-user.html) guide
+- [Create an AWS account here](https://portal.aws.amazon.com/billing/signup#/start)
+
+Ask your supervisor for credit card number
 
 ### Create an AWS IAM User
 
-- Follow [this](https://serverless-stack.com/chapters/create-an-aws-account.html) guide
+- Follow [this](https://serverless-stack.com/chapters/create-an-iam-user.html) guide
 
 **Take a note of the Access key ID and Secret access key.**
 
 ### Add your access key for the IAM User to AWS CLI
-
-Simply run the following with your Secret Key ID and your Access Key.
 
 It should look something like this:
 
@@ -70,34 +72,58 @@ It should look something like this:
 
 You can leave the **Default region** name and **Default output** format the way they are.
 
+Simply run the following with your Secret Key ID and your Access Key.
+
 ```
 aws configure
 ```
 
-### Serverless Framework (NPM)
+### Serverless Framework
+
+The Serverless Framework helps you develop and deploy your AWS Lambda functions, along with the AWS infrastructure resources they require. It's a CLI that offers structure, automation and best practices out-of-the-box, allowing you to focus on building sophisticated, event-driven, serverless architectures, comprised of Functions and Events.
+
+The Serverless Framework is different from other application frameworks because:
+
+- It manages your code as well as your infrastructure
+- It supports multiple languages (Node.js, Python, Java, and more)
 
 ```
 npm install serverless -g
 ```
 
-### API Platform
+# API Services
+
+### Clone the Serverless API repo
 
 ```
-git clone https://github.com/helsingborg/helsingborg-io-sls-api
+git clone git@github.com:helsingborg-stad/helsingborg-io-sls-api.git
 cd helsingborg-io-sls-api
 npm install
-cd services/<service-name>
+```
+
+Run this to deploy to your AWS account.
+
+### BankId
+
+```
+cd services/bankid-api
 npm install
-```
-
-## Local workflow
-
-```
-sls offline
-```
-
-## Deploy
-
-```
 sls deploy
+```
+
+### Watson
+
+```
+cd services/watson-api
+npm install
+sls deploy
+```
+
+### How to run the service on your local development environment
+
+Emulate AWS λ and API Gateway locally when developing your Serverless project
+
+```
+cd services/<service-name>
+sls offline
 ```
