@@ -1,4 +1,4 @@
-# Serverless Framework (AWS)
+# API Platform - Serverless Framework - AWS
 
 ## The concept
 
@@ -33,11 +33,11 @@ This ensures each change is tested on real infrastructure before being promoted 
 
 # Setup
 
-## Requirements
-
 **Do this first**
 
 The services are dependent on the resources that are created in this [accompanying repo](https://github.com/helsingborg-stad/helsingborg-io-sls-resources).
+
+## Requirements
 
 - AWS CLI
 - AWS Account
@@ -47,17 +47,24 @@ The services are dependent on the resources that are created in this [accompanyi
 - NPM
 - [Serverless Framework](https://serverless.com/)
 
-# API Services
+## Usage
 
-### Clone the Serverless API repo
+### Clone this repo
 
 ```
 git clone git@github.com:helsingborg-stad/helsingborg-io-sls-api.git
+```
+
+Install shared packages
+
+```
 cd helsingborg-io-sls-api
 npm install
 ```
 
-Run this to deploy to your AWS account.
+## Services
+
+Run this to deploy to your AWS account
 
 ### BankId
 
