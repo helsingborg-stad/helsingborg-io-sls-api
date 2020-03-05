@@ -36,60 +36,16 @@ This ensures each change is tested on real infrastructure before being promoted 
 ## Requirements
 
 **Do this first**
+
 The services are dependent on the resources that are created in this [accompanying repo](https://github.com/helsingborg-stad/helsingborg-io-sls-resources).
 
+- AWS CLI
 - AWS Account
 - AWS IAM user
 - Homebrew (macOS)
 - NodeJS
 - NPM
 - [Serverless Framework](https://serverless.com/)
-
-### AWS CLI (Homebrew on macOS)
-
-```
-brew install awscli
-```
-
-### Create an AWS Account (Personal)
-
-- [Create an AWS account here](https://portal.aws.amazon.com/billing/signup#/start)
-
-Ask your supervisor for credit card number
-
-### Create an AWS IAM User
-
-- Follow [this](https://serverless-stack.com/chapters/create-an-iam-user.html) guide
-
-**Take a note of the Access key ID and Secret access key.**
-
-### Add your access key for the IAM User to AWS CLI
-
-It should look something like this:
-
-- **Access key ID:** AKIAIOSFODNN7EXAMPLE
-- **Secret access key:** wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-
-You can leave the **Default region** name and **Default output** format the way they are.
-
-Simply run the following with your Secret Key ID and your Access Key.
-
-```
-aws configure
-```
-
-### Serverless Framework
-
-The Serverless Framework helps you develop and deploy your AWS Lambda functions, along with the AWS infrastructure resources they require. It's a CLI that offers structure, automation and best practices out-of-the-box, allowing you to focus on building sophisticated, event-driven, serverless architectures, comprised of Functions and Events.
-
-The Serverless Framework is different from other application frameworks because:
-
-- It manages your code as well as your infrastructure
-- It supports multiple languages (Node.js, Python, Java, and more)
-
-```
-npm install serverless -g
-```
 
 # API Services
 
