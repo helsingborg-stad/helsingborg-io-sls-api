@@ -1,13 +1,14 @@
-import { failure, success } from '../../../libs/response';
-import { to } from '../../../libs/helpers';
+import * as response from '../../../libs/response';
+import to from 'await-to-js';
 import * as request from '../../../libs/request';
 import * as bankId from '../helpers/bankId';
 import { getConfig } from '../helpers/ssmParameters';
+import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
 const SSMParams = getConfig('/bankidEnvs/dev');
 
 export const main = async event => {
-  const bankidSSMparams = await SSMParams;
+  const bankIdSSMparams = await SSMParams;
 
   const { endUserIp, personalNumber } = JSON.parse(event.body);
 
@@ -16,28 +17,12 @@ export const main = async event => {
     personalNumber,
   };
 
-  const [bankIdOk, bankIdClient] = await to(bankId.client(bankidSSMparams));
+  const [error, bankIdResponse] = await to(requestBankIdAuth(payload, bankIdSSMparams));
+  if (!bankIdResponse) return response.failure(error);
 
-  if (!bankIdOk) {
-    return failure({ status: false, error: bankIdClient });
-  }
+  const { orderRef, autoStartToken } = bankIdResponse.data;
 
-  const [dataOk, response] = await to(
-    request.call(
-      bankIdClient,
-      'post',
-      bankId.url(bankidSSMparams.apiUrl, '/auth'),
-      payload,
-    ),
-  );
-
-  if (!dataOk) {
-    return failure({ status: false, error: response });
-  }
-
-  const { orderRef, autoStartToken } = response.data;
-
-  return success({
+  return response.success({
     type: 'bankIdAuth',
     attributes: {
       order_ref: orderRef,
@@ -45,3 +30,23 @@ export const main = async event => {
     },
   });
 };
+
+async function requestBankIdAuth(payload, params) {
+  let err, bankIdClient, bankIdAuth;
+
+  [err, bankIdClient] = await to(bankId.client(params));
+  if (!bankIdClient) throwError(503);
+
+  [err, bankIdAuth] = await to(
+    request.call(
+      bankIdClient,
+      "post",
+      bankId.url(params.apiUrl, "/auth"),
+      payload
+    )
+  );
+
+  if (!bankIdAuth) throwError(err.status);
+
+  return bankIdAuth;
+}
