@@ -1,31 +1,49 @@
-import { failure, success } from "../../../libs/response";
+import { snakeCaseKeys } from 'snakecase-keys';
+import to from "await-to-js";
+import { throwError } from "@helsingborg-stad/npm-api-error-handling";
 import params from "../../../libs/params";
+import * as response from "../../../libs/response";
 import * as request from "../../../libs/request";
-import * as bankId from '../helpers/bankId';
+import * as bankId from "../helpers/bankId";
 
 const SSMParams = params.read("/bankidEnvs/dev");
 
 export const main = async event => {
+  const {orderRef} = JSON.parse(event.body)
+
   const bankidSSMParams = await SSMParams;
-  try {
-    const { orderRef } = JSON.parse(event.body);
 
-    const payload = { orderRef };
+  const payload = {
+    orderRef
+  };
 
-    const bankIdClient = await bankId.client(bankidSSMParams);
+  const [error, bankIdCancelResponse] = await to(sendBankIdCancelRequest(bankidSSMParams, payload));
+  if(!bankIdCancelResponse) response.failure(error);
 
-    const { data } = await request.call(
-      bankIdClient,
-      'post',
-      bankId.url(bankidSSMParams.apiurl, '/cancel'),
-      payload,
-    );
+  return {
+    type: 'bankidCancel',
+    attributes: {
+      ...snakeCaseKeys(bankIdCancelResponse.data)
+    }
+  };
+};
 
-    return success({
-      type: 'bankIdCancel',
-      data,
-    });
-  } catch (error) {
-    return failure({ status: false, error: error.message });
-  }
+async function sendBankIdCancelRequest(params, payload) {
+  let err, bankIdClientResponse, bankIdCancelResponse;
+
+  [err, bankIdClientResponse] = await to(bankId.client(params));
+  if (!bankIdClientResponse) throwError(503);
+
+  [err, bankIdCancelResponse] = await to(
+    request.call(
+      bankIdCancelResponse,
+      "post",
+      bankId.url(params.apiUrl, "/auth"),
+      payload
+    )
+  );
+
+  if (!bankIdCancelResponse) throwError(err.status);
+
+  return bankIdCancelResponse;
 };
