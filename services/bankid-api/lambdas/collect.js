@@ -20,7 +20,7 @@ export const main = async event => {
       bankId.url(bankidSSMParams.apiUrl, '/collect'),
       payload,
     );
-
+    console.log(data);
     const { status, hintCode } = data;
 
     return success({
