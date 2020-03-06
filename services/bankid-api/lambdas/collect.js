@@ -1,37 +1,42 @@
-import { failure, success } from '../../../libs/response';
+import * as response from '../../../libs/response';
 import params from "../../../libs/params";
 import * as request from '../../../libs/request';
 import * as bankId from '../helpers/bankId';
+import { to } from 'await-to-js';
+import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
 const SSMParams = params.read("/bankidEnvs/dev");
 
 export const main = async event => {
+  const { orderRef } = JSON.parse(event.body);
   const bankidSSMParams = await SSMParams;
-  try {
-    const { orderRef } = JSON.parse(event.body);
 
-    const payload = { orderRef };
+  const payload = { orderRef };
 
-    const bankIdClient = await bankId.client(bankidSSMParams);
+  [error, bankIdResponse] = await to(sendBankIdCollectRequest(bankidSSMParams, payload))
+  if(!bankIdResponse) return response.failure()
 
-    const { data } = await request.call(
+  return response.success({
+    type: 'bankIdCollect',
+     attributes: {
+       ...snakeCaseKeys(bankIdResponse.data),
+      },
+  })
+};
+
+function sendBankIdCollectRequest (params, payload) {
+  let error, bankIdClientResponse, bankIdCollectResponse;
+
+  [error, bankIdClientResponse] = await to(bankId.client(params));
+  if(!bankIdClientResponse) throwError(error)
+
+  [error, bankIdCollectResponse] = await to(request.call(
       bankIdClient,
       'post',
-      bankId.url(bankidSSMParams.apiUrl, '/collect'),
+      bankId.url(params.apiUrl, '/collect'),
       payload,
-    );
+  ));
+  if(!bankIdCollectResponse) throwError(error)
 
-    const { status, hintCode } = data;
-
-    return success({
-      type: 'bankIdCollect',
-      attributes: {
-        order_ref: orderRef,
-        status,
-        hint_code: hintCode,
-      },
-    });
-  } catch (error) {
-    return failure({ status: false, error: error.message });
-  }
-};
+  return bankIdCollectResponse;
+}
