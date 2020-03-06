@@ -1,6 +1,6 @@
-# Serverless
+# API Platform - Serverless Framework - AWS
 
-POC - Using Serverless Framework with AWS
+## The concept
 
 - Service
 
@@ -30,3 +30,63 @@ Why? Most of the code changes are going to happen in this repo. When your team i
 For example, a team can have dozens of ephemeral stages such as: prod, staging, dev, feature-x, feature-y, feature-z, bugfix-x, bugfix-y, pr-128, pr-132, etc.
 
 This ensures each change is tested on real infrastructure before being promoted to production.
+
+# Setup
+
+**Do this first**
+
+The services are dependent on the resources that are created in this [accompanying repo](https://github.com/helsingborg-stad/helsingborg-io-sls-resources).
+
+## Requirements
+
+- AWS CLI
+- AWS Account
+- AWS IAM user
+- Homebrew (macOS)
+- NodeJS
+- NPM
+- [Serverless Framework](https://serverless.com/)
+
+## Usage
+
+### Clone this repo
+
+```
+git clone git@github.com:helsingborg-stad/helsingborg-io-sls-api.git
+```
+
+Install shared packages
+
+```
+cd helsingborg-io-sls-api
+npm install
+```
+
+## Services
+
+Run this to deploy to your AWS account
+
+### BankId
+
+```
+cd services/bankid-api
+npm install
+sls deploy
+```
+
+### Watson
+
+```
+cd services/watson-api
+npm install
+sls deploy
+```
+
+### How to run the service on your local development environment
+
+Emulate AWS λ and API Gateway locally when developing your Serverless project
+
+```
+cd services/<service-name>
+sls offline
+```

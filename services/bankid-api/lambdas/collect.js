@@ -1,9 +1,9 @@
 import { failure, success } from '../../../libs/response';
-import { getConfig } from '../helpers/ssmParameters';
+import params from "../../../libs/params";
 import * as request from '../../../libs/request';
 import * as bankId from '../helpers/bankId';
 
-const SSMParams = getConfig('/bankidEnvs/dev');
+const SSMParams = params.read("/bankidEnvs/dev");
 
 export const main = async event => {
   const bankidSSMParams = await SSMParams;

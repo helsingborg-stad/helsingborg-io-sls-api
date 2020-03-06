@@ -2,10 +2,10 @@ import * as response from '../../../libs/response';
 import to from 'await-to-js';
 import * as request from '../../../libs/request';
 import * as bankId from '../helpers/bankId';
-import { getConfig } from '../helpers/ssmParameters';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
+import params from '../../../libs/params';
 
-const SSMParams = getConfig('/bankidEnvs/dev');
+const SSMParams = params.read("/bankidEnvs/dev");
 
 export const main = async event => {
   const bankIdSSMparams = await SSMParams;
