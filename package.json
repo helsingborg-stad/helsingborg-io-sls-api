@@ -20,6 +20,8 @@
   },
   "main": "index.js",
   "dependencies": {
+    "@helsingborg-stad/npm-api-error-handling": "^0.15.0",
+    "await-to-js": "^2.1.1",
     "aws-sdk": "^2.631.0",
     "axios": "^0.19.2",
     "serverless-dotenv-plugin": "^2.3.2"
