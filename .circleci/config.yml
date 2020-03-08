@@ -4,6 +4,9 @@ jobs:
   deploy-service:
     docker:
       - image: circleci/node:12
+    branches:
+      only:
+        - feature/circle-ci-dev-setup
     parameters:
       service_path:
         type: string
