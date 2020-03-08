@@ -4,9 +4,6 @@ jobs:
   deploy-service:
     docker:
       - image: circleci/node:12
-    branches:
-      only:
-        - feature/circle-ci-dev-setup
     parameters:
       service_path:
         type: string
@@ -43,7 +40,7 @@ jobs:
             - << parameters.service_path >>/node_modules
           key: dependencies-cache-{{ checksum "package-lock.json "}}-{{ checksum "<< parameters.service_path >>/package-lock.json" }}
 
-workflow:
+workflows:
   build-deploy:
     jobs:
       - deploy-service:
