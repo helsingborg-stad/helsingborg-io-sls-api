@@ -1,12 +1,12 @@
 import { snakeCaseKeys } from 'snakecase-keys';
-import to from "await-to-js";
-import { throwError } from "@helsingborg-stad/npm-api-error-handling";
-import params from "../../../libs/params";
-import * as response from "../../../libs/response";
-import * as request from "../../../libs/request";
-import * as bankId from "../helpers/bankId";
+import to from 'await-to-js';
+import { throwError } from '@helsingborg-stad/npm-api-error-handling';
+import params from '../../../libs/params';
+import * as response from '../../../libs/response';
+import * as request from '../../../libs/request';
+import * as bankId from '../helpers/bankId';
 
-const SSMParams = params.read("/bankidEnvs/dev");
+const SSMParams = params.read('/bankidEnvs/dev');
 
 export const main = async event => {
   const {orderRef} = JSON.parse(event.body)
@@ -37,8 +37,8 @@ async function sendBankIdCancelRequest(params, payload) {
   [err, bankIdCancelResponse] = await to(
     request.call(
       bankIdCancelResponse,
-      "post",
-      bankId.url(params.apiUrl, "/auth"),
+      'post',
+      bankId.url(params.apiUrl, '/auth'),
       payload
     )
   );

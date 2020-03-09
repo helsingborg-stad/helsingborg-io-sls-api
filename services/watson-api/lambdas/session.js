@@ -21,7 +21,7 @@ export const main = async (event) => {
 
   return response.success({
     status: true,
-    type: "watsonSession",
+    type: 'watsonSession',
     attributes: { ...sessionResponse.result }
   });
 };

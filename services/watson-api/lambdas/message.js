@@ -1,7 +1,7 @@
 import logger from '@financial-times/lambda-logger';
 import * as response from '../../../libs/response';
 import { to } from '../../../libs/helpers';
-import { sendMessage, createAssistantSession } from "../helpers/watson-lib";
+import { sendMessage, createAssistantSession } from '../helpers/watson-lib';
 
 export const main = async (event) => {
   const {
@@ -48,7 +48,7 @@ export const main = async (event) => {
 
   return response.success({
     status: true,
-    type: "watsonMessage",
+    type: 'watsonMessage',
     attributes: { ...messageResponse.result, session_id: verifiedSessionId }
   });
 };
