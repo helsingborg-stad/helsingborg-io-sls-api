@@ -24,9 +24,10 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            npm set //registry.npmjs.org/:_authToken=${NPM_TOKEN}
+            npm set //registry.npmjs.org/:_authToken=$NPM_TOKEN
             npm install
             cd << parameters.service_path >>
+            npm set //registry.npmjs.org/:_authToken=$NPM_TOKEN
             npm install
 
       - run:
