@@ -2,7 +2,7 @@ import AWS from 'aws-sdk';
 
 const ssm = new AWS.SSM();
 
-const read = (name) =>
+const read = name =>
   new Promise((resolve, reject) => {
     ssm.getParameter(
       {
@@ -11,18 +11,17 @@ const read = (name) =>
       },
       (err, data) => {
         if (err) {
-          console.log(err, err.stack);
           reject(err);
         } else {
           const param = JSON.parse(data.Parameter.Value);
           resolve(param);
         }
-      },
+      }
     );
   });
 
 const params = {
-  read
+  read,
 };
 
 export default params;

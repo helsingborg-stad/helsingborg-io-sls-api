@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "POC - Using Serverless Framework with AWS",
   "scripts": {
-    "test": "serverless-bundle test"
+    "test": "serverless-bundle test",
+    "lint": "eslint --ignore-path .gitignore ."
   },
   "repository": "git+https://github.com/helsingborg-stad/helsingborg-io-sls-api.git",
   "keywords": [],
@@ -14,6 +15,12 @@
   },
   "homepage": "https://github.com/helsingborg-stad/helsingborg-io-sls-api#readme",
   "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb": "^18.0.1",
+    "eslint-plugin-import": "^2.20.1",
+    "eslint-plugin-prettier": "^3.1.2",
+    "prettier": "^1.19.1",
     "serverless-bundle": "^1.2.5",
     "serverless-offline": "^5.12.1"
   },

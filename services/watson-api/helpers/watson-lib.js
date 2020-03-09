@@ -5,9 +5,7 @@ import { to } from '../../../libs/helpers';
 import params from '../../../libs/params';
 
 // SSM PARAMS
-const watsonParams = params.read(
-  '/watsonEnvs/dev'
-);
+const watsonParams = params.read('/watsonEnvs/dev');
 
 /**
  * Function for creating a new instance of the Watson Assistans v2
@@ -16,13 +14,13 @@ const createAssistant = async () => {
   const {
     assistantVersionDate,
     assistantIAMKey,
-    serviceEndpoint
+    serviceEndpoint,
   } = await watsonParams;
 
   const options = {
     version: assistantVersionDate,
     authenticator: new IamAuthenticator({ apikey: assistantIAMKey }),
-    url: serviceEndpoint
+    url: serviceEndpoint,
   };
   return new AssistantV2(options);
 };
@@ -38,9 +36,7 @@ const assistant = createAssistant();
  */
 export const createAssistantSession = async assistantId => {
   const watsonAssistant = await assistant;
-  const [ok, result] = await to(
-    watsonAssistant.createSession({ assistantId })
-  );
+  const [ok, result] = await to(watsonAssistant.createSession({ assistantId }));
 
   if (!ok) {
     return Promise.reject(result);
@@ -88,6 +84,6 @@ export const sendMessage = async (
       } else {
         resolve(data);
       }
-    })
+    }),
   );
 };

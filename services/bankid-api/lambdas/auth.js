@@ -38,12 +38,7 @@ async function requestBankIdAuth(payload, params) {
   if (!bankIdClient) throwError(503);
 
   [err, bankIdAuth] = await to(
-    request.call(
-      bankIdClient,
-      'post',
-      bankId.url(params.apiUrl, '/auth'),
-      payload
-    )
+    request.call(bankIdClient, 'post', bankId.url(params.apiUrl, '/auth'), payload)
   );
 
   if (!bankIdAuth) throwError(err.status);

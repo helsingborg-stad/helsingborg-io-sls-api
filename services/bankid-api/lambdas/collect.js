@@ -15,32 +15,34 @@ export const main = async event => {
 
   const payload = { orderRef };
 
-  const [error, bankIdResponse] = await to(sendBankIdCollectRequest(bankidSSMParams, payload));
-  if(!bankIdResponse) return response.failure(error);
+  const [error, bankIdResponse] = await to(
+    sendBankIdCollectRequest(bankidSSMParams, payload),
+  );
+  if (!bankIdResponse) return response.failure(error);
 
   return response.success({
     type: 'bankIdCollect',
-     attributes: {
-       ...snakeCaseKeys(bankIdResponse.data),
-      },
+    attributes: {
+      ...snakeCaseKeys(bankIdResponse.data),
+    },
   });
 };
 
-async function sendBankIdCollectRequest (params, payload) {
+async function sendBankIdCollectRequest(params, payload) {
   let error, bankIdClientResponse, bankIdCollectResponse;
 
   [error, bankIdClientResponse] = await to(bankId.client(params));
-  if(!bankIdClientResponse) throwError(503);
+  if (!bankIdClientResponse) throwError(503);
 
   [error, bankIdCollectResponse] = await to(
     request.call(
       bankIdClientResponse,
       'post',
       bankId.url(params.apiUrl, '/collect'),
-      payload
-    )
+      payload,
+    ),
   );
-  if(!bankIdCollectResponse) throwError(error.status);
+  if (!bankIdCollectResponse) throwError(error.status);
 
   return bankIdCollectResponse;
 }

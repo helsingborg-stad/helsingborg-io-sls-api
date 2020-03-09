@@ -3,8 +3,7 @@ import * as response from '../../../libs/response';
 import { to } from '../../../libs/helpers';
 import { createSession } from '../helpers/watson-lib';
 
-
-export const main = async (event) => {
+export const main = async event => {
   const { assistantId } = JSON.parse(event.body);
 
   const [success, sessionResponse] = await to(createSession(assistantId));
@@ -15,13 +14,13 @@ export const main = async (event) => {
     logger.error(sessionResponse);
     return response.failure({
       status: false,
-      error: { ...errorAttributes }
+      error: { ...errorAttributes },
     });
   }
 
   return response.success({
     status: true,
     type: 'watsonSession',
-    attributes: { ...sessionResponse.result }
+    attributes: { ...sessionResponse.result },
   });
 };

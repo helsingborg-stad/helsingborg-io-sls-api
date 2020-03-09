@@ -4,7 +4,7 @@ import { success, failure } from '../../libs/response';
 import { to } from '../../libs/helpers';
 
 // update (PUT)
-export const main = async (event, context) => {
+export const main = async event => {
   const data = JSON.parse(event.body);
 
   const { userId } = event.queryStringParameters;
