@@ -11,7 +11,7 @@ export function failure(error) {
   };
 
   return buildResponse(error.status, errorBody);
-};
+}
 
 function buildResponse(statusCode, body) {
   const jsonApi = {

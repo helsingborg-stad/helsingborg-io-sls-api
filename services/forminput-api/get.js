@@ -4,7 +4,7 @@ import { success, failure } from '../../libs/response';
 import { to } from '../../libs/helpers';
 
 // get item (GET)
-export const main = async (event, context) => {
+export const main = async event => {
   const { userId } = event.queryStringParameters;
   const { submissionId } = event.pathParameters;
 

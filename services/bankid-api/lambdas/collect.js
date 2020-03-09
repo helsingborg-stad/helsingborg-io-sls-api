@@ -1,9 +1,9 @@
 import { failure, success } from '../../../libs/response';
-import params from "../../../libs/params";
+import params from '../../../libs/params';
 import * as request from '../../../libs/request';
 import * as bankId from '../helpers/bankId';
 
-const SSMParams = params.read("/bankidEnvs/dev");
+const SSMParams = params.read('/bankidEnvs/dev');
 
 export const main = async event => {
   const bankidSSMParams = await SSMParams;
@@ -18,9 +18,9 @@ export const main = async event => {
       bankIdClient,
       'post',
       bankId.url(bankidSSMParams.apiUrl, '/collect'),
-      payload,
+      payload
     );
-    console.log(data);
+
     const { status, hintCode } = data;
 
     return success({

@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const stage = process.env.stage;
 const resourcesStage = process.env.resourcesStage;
 

@@ -10,6 +10,7 @@ export const main = (event, context, callback) => {
   const data = JSON.parse(event.body);
   logger.info(data);
 
+  // eslint-disable-next-line no-undef
   const tableName = `${process.env.resourcesStage}-submissions`;
 
   const params = {
@@ -22,8 +23,7 @@ export const main = (event, context, callback) => {
     },
   };
 
-  dynamoClient.put(params, (error, data) => {
-
+  dynamoClient.put(params, error => {
     const headers = {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Credentials': true,
