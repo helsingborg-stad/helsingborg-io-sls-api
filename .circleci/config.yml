@@ -33,7 +33,8 @@ jobs:
           name: Deploy application
           command: |
             cd << parameters.service_path >>
-            serverless deploy -s << parameters.stage_name >>
+            serverless deploy -s \
+            (echo << parameters.stage_name >> | sed -e 's/\//_/g')
 
       - save_cache:
           paths:
