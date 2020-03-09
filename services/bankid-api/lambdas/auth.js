@@ -5,7 +5,7 @@ import * as bankId from '../helpers/bankId';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import params from '../../../libs/params';
 
-const SSMParams = params.read("/bankidEnvs/dev");
+const SSMParams = params.read('/bankidEnvs/dev');
 
 export const main = async event => {
   const bankIdSSMparams = await SSMParams;
@@ -40,8 +40,8 @@ async function requestBankIdAuth(payload, params) {
   [err, bankIdAuth] = await to(
     request.call(
       bankIdClient,
-      "post",
-      bankId.url(params.apiUrl, "/auth"),
+      'post',
+      bankId.url(params.apiUrl, '/auth'),
       payload
     )
   );

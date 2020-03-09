@@ -6,7 +6,7 @@ import params from '../../../libs/params';
 
 // SSM PARAMS
 const watsonParams = params.read(
-  "/watsonEnvs/dev"
+  '/watsonEnvs/dev'
 );
 
 /**
