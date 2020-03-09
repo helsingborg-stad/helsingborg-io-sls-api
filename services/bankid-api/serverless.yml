@@ -1,4 +1,4 @@
-service: helsingborg-io-sls-bankid-api
+service: hbg-bankid
 
 plugins:
   - serverless-bundle

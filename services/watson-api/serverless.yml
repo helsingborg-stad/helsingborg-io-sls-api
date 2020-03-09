@@ -1,4 +1,4 @@
-service: helsingborg-io-sls-watson-api
+service: hbg-watson
 
 plugins:
   - serverless-bundle
