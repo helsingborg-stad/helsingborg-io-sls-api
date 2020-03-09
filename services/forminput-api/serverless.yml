@@ -1,4 +1,4 @@
-service: helsingborg-io-sls-forminput-api
+service: hbg-forminput
 
 plugins:
   - serverless-bundle
@@ -49,7 +49,7 @@ provider:
         - dynamodb:DeleteItem
       # Restrict our IAM role permissions to the specific table for the stage
       Resource:
-        - 'Fn::ImportValue': ${self:custom.resourcesStage}-SubmissionsTableArn
+        - "Fn::ImportValue": ${self:custom.resourcesStage}-SubmissionsTableArn
 
 functions:
   # Defines an HTTP API endpoint that calls the main function in create.js

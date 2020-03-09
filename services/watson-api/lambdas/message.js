@@ -4,13 +4,22 @@ import { to } from '../../../libs/helpers';
 import { sendMessage, createAssistantSession } from '../helpers/watson-lib';
 
 export const main = async event => {
-  const { assistantId, textInput, context, intents, entities, sessionId } = JSON.parse(event.body);
+  const {
+    assistantId,
+    textInput,
+    context,
+    intents,
+    entities,
+    sessionId,
+  } = JSON.parse(event.body);
 
   let verifiedSessionId = sessionId || null;
 
   // Create Watson Assistant Session
   if (!verifiedSessionId) {
-    const [success, sessionResponse] = await to(createAssistantSession(assistantId));
+    const [success, sessionResponse] = await to(
+      createAssistantSession(assistantId),
+    );
 
     if (!success) {
       // eslint-disable-next-line no-unused-vars
@@ -26,7 +35,14 @@ export const main = async event => {
 
   // Send text input to Watson Assistant and retrive message.
   const [success, messageResponse] = await to(
-    sendMessage(textInput, verifiedSessionId, assistantId, context, intents, entities)
+    sendMessage(
+      textInput,
+      verifiedSessionId,
+      assistantId,
+      context,
+      intents,
+      entities,
+    ),
   );
 
   if (!success) {

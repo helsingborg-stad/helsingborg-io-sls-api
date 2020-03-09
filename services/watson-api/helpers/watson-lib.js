@@ -11,7 +11,11 @@ const watsonParams = params.read('/watsonEnvs/dev');
  * Function for creating a new instance of the Watson Assistans v2
  */
 const createAssistant = async () => {
-  const { assistantVersionDate, assistantIAMKey, serviceEndpoint } = await watsonParams;
+  const {
+    assistantVersionDate,
+    assistantIAMKey,
+    serviceEndpoint,
+  } = await watsonParams;
 
   const options = {
     version: assistantVersionDate,
@@ -55,7 +59,7 @@ export const sendMessage = async (
   assistantId,
   context = undefined,
   intents = undefined,
-  entities = undefined
+  entities = undefined,
 ) => {
   const watsonAssistant = await assistant;
   const payload = {
@@ -80,6 +84,6 @@ export const sendMessage = async (
       } else {
         resolve(data);
       }
-    })
+    }),
   );
 };
