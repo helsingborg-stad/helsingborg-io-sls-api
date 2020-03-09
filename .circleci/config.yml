@@ -33,7 +33,7 @@ jobs:
           name: Deploy application
           command: |
             cd << parameters.service_path >>
-            serverless deploy -s $(echo << parameters.stage_name >> | sed -e 's/\//_/g')
+            serverless deploy -s << parameters.stage_name >>
 
       - save_cache:
           paths:
@@ -47,5 +47,5 @@ workflows:
       - deploy-service:
           name: Deploy BankID API
           service_path: services/bankid-api
-          stage_name: ${CIRCLE_BRANCH}
+          stage_name: $(echo ${CIRCLE_BRANCH} | sed -e 's/feature\//f-/g')
           context: Development
