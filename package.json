@@ -17,18 +17,18 @@
   "devDependencies": {
     "babel-eslint": "^10.1.0",
     "eslint": "^6.8.0",
-    "eslint-config-airbnb": "^18.0.1",
+    "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-import": "^2.20.1",
     "eslint-plugin-prettier": "^3.1.2",
     "prettier": "^1.19.1",
-    "serverless-bundle": "^1.2.5",
+    "serverless-bundle": "^1.3.2",
     "serverless-offline": "^5.12.1"
   },
   "main": "index.js",
   "dependencies": {
     "@helsingborg-stad/npm-api-error-handling": "^0.15.0",
     "await-to-js": "^2.1.1",
-    "aws-sdk": "^2.631.0",
+    "aws-sdk": "^2.636.0",
     "axios": "^0.19.2"
   }
 }

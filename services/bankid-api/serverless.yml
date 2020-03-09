@@ -27,11 +27,11 @@ provider:
     - Effect: Allow
       Action:
         - s3:*
-      Resource: '*'
+      Resource: "*"
     - Effect: Allow
       Action:
         - SSM:GetParameter
-      Resource: '*'
+      Resource: "*"
 
 functions:
   # Defines an HTTP API endpoint that calls the main function in create.js
