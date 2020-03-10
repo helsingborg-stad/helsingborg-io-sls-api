@@ -1,7 +1,8 @@
 import AssistantV2 from 'ibm-watson/assistant/v2';
 import { IamAuthenticator } from 'ibm-watson/auth';
-import { to } from '../../../libs/helpers';
+import to from 'await-to-js';
 import params from '../../../libs/params';
+import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
 // SSM PARAMS
 const watsonParams = params.read('/watsonEnvs/dev');
@@ -31,13 +32,10 @@ const assistant = createAssistant();
  */
 export const createAssistantSession = async assistantId => {
   const watsonAssistant = await assistant;
-  const [ok, result] = await to(watsonAssistant.createSession({ assistantId }));
 
-  if (!ok) {
-    return Promise.reject(result);
-  }
-
-  return result;
+  const [error, response] = await to(watsonAssistant.createSession({ assistantId }));
+  if (!response) throwError(error.status);
+  return response;
 };
 
 /**
@@ -72,13 +70,8 @@ export const sendMessage = async (
     entities,
   };
 
-  return new Promise((resolve, reject) =>
-    watsonAssistant.message(payload, (err, data) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(data);
-      }
-    })
-  );
+  const [error, messageResponse] = await to(watsonAssistant.message(payload));
+  if (!messageResponse) throwError(error.status);
+
+  return messageResponse;
 };
