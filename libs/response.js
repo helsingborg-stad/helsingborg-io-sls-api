@@ -8,6 +8,7 @@ export function failure(error) {
     code: error.status.toString(),
     title: error.name,
     detail: error.detail,
+    stack: error.stack,
   };
 
   return buildResponse(error.status, errorBody);
