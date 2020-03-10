@@ -1,46 +1,34 @@
 import logger from '@financial-times/lambda-logger';
 import * as response from '../../../libs/response';
-import { to } from '../../../libs/helpers';
+import to from 'await-to-js';
 import { sendMessage, createAssistantSession } from '../helpers/watson-lib';
+import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
 export const main = async event => {
   const { assistantId, textInput, context, intents, entities, sessionId } = JSON.parse(event.body);
 
+  let error, sessionResponse, messageResponse;
   let verifiedSessionId = sessionId || null;
-
-  // Create Watson Assistant Session
+  // Create Watson Assistant Session if There is none.
   if (!verifiedSessionId) {
-    const [success, sessionResponse] = await to(createAssistantSession(assistantId));
+    [error, sessionResponse] = await to(createAssistantSession(assistantId));
 
-    if (!success) {
-      // eslint-disable-next-line no-unused-vars
-      const { headers, ...errorAttributes } = sessionResponse;
-      logger.error(sessionResponse);
-      return response.failure({
-        status: false,
-        error: { ...errorAttributes },
-      });
-    }
+    if (!sessionResponse) return response.failure(error);
+
     verifiedSessionId = sessionResponse.result.session_id;
   }
 
   // Send text input to Watson Assistant and retrive message.
-  const [success, messageResponse] = await to(
+  [error, messageResponse] = await to(
     sendMessage(textInput, verifiedSessionId, assistantId, context, intents, entities)
   );
 
-  if (!success) {
-    // eslint-disable-next-line no-unused-vars
-    const { headers, ...errorAttributes } = messageResponse;
-    logger.error(messageResponse);
-    return response.failure({
-      status: false,
-      error: { ...errorAttributes },
-    });
+  if (!messageResponse) {
+    logger.error(error);
+    return response.failure(error);
   }
 
   return response.success({
-    status: true,
     type: 'watsonMessage',
     attributes: { ...messageResponse.result, session_id: verifiedSessionId },
   });
