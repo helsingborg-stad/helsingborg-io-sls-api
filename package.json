@@ -15,10 +15,9 @@
     "lint": "eslint --ignore-path .gitignore ."
   },
   "lint-staged": {
-    "**/*.js": [
+    "services/**/*.js": [
       "eslint --fix",
-      "prettier-eslint --write",
-      "git add"
+      "prettier-eslint --write"
     ]
   },
   "husky": {
