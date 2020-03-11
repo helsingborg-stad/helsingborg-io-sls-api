@@ -49,3 +49,6 @@ workflows:
           service_path: services/bankid-api
           stage_name: $(echo ${CIRCLE_BRANCH} | sed -e 's/feature\//f-/g')
           context: Development
+          filters:
+            branches:
+              only: feature/cicd-bankid-setup
