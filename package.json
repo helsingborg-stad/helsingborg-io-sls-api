@@ -16,8 +16,7 @@
   },
   "lint-staged": {
     "*.js": [
-      "eslint --fix",
-      "prettier-eslint --write"
+      "eslint --ignore-path .gitignore --fix"
     ]
   },
   "husky": {
