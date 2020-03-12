@@ -4,7 +4,7 @@
   "description": "POC - Using Serverless Framework with AWS",
   "repository": "git+https://github.com/helsingborg-stad/helsingborg-io-sls-api.git",
   "keywords": [],
-  "author": "Dan Nilsson",
+  "author": "Dan Nilson",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/helsingborg-stad/helsingborg-io-sls-api/issues"
@@ -21,7 +21,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged",
+      "pre-commit": "lint-staged && sh branchNamePolicy.sh",
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
   },
