@@ -7,7 +7,7 @@ local_branch="$(git rev-parse --abbrev-ref HEAD)"
 valid_branch_regex="^(feat|fix|docs|perf|wip|test|ci|build|release|hotfix)\/[a-z0-9._-]+$"
 
 message="${RED}Invalid Branch Name: ${NC}There is something wrong with your branch name. Branch names in this project must adhere to this contract: [type]/[unique-20-char-long-name]. Your commit will be rejected. You should rename your branch to a valid name and try again."
-FEAT_DESC="feat: A new feature."
+FEAT_DESC="feat: (Feature) A new feature."
 FIX_DESC="fix: (Bug fix) A bug Fix."
 HOTFIX_DESC="hotfix: A fix to patch production code."
 DOCS_DESC="docs: (Documentation) Documentation only changes."
