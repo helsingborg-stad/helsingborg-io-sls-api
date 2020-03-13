@@ -10,20 +10,24 @@ const SSMParams = params.read('/navetEnvs/dev');
 
 // get item (GET)
 export const main = async event => {
+  let err, navetResponse, parsedData;
+
   const { personalNumber } = event.pathParameters;
   const navetSSMparams = await SSMParams;
   navetSSMparams.personalNumber = personalNumber;
   const xml = parseXml(navetSSMparams);
 
-  const [error, navetResponse] = await to(requestNavetUser(xml, navetSSMparams));
+  [err, navetResponse] = await to(requestNavetUser(xml, navetSSMparams));
+  // TODO: HANDLE ERROR
 
-  const data = await parseJSON(navetResponse.data);
-  console.log('parseJSON', data);
-  //const res = data.Folkbokforingspost;
+  [err, parsedData] = await to(parseJSON(navetResponse.data));
+  // TODO: HANDLE ERROR
+
+  const userData = parsedData.Folkbokforingspost.Personpost;
 
   return success({
     type: 'user',
-    attributes: data,
+    attributes: userData,
   });
 };
 
