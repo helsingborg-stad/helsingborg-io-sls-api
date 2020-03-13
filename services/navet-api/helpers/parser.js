@@ -25,8 +25,8 @@ export const parseJSON = input =>
           trim: true,
           explicitArray: false,
         };
-
-        parser.parseString(parsedTwice[0], options, (_err, result) => {
+        parser.parseString(parsedTwice[0], options, (error, result) => {
+          if (error) throw error;
           resolve(result);
         });
       }
@@ -36,13 +36,13 @@ export const parseJSON = input =>
     }
   });
 
-// export const parseJSONError = input =>
-//   new Promise((resolve, reject) => {
-//     try {
-//       const parsedOnce = input.split('<faultstring>');
-//       const parsedTwice = parsedOnce[1].split('</faultstring>');
-//       resolve(parsedTwice[0]);
-//     } catch (error) {
-//       reject(error);
-//     }
-//   });
+export const parseJSONError = input =>
+  new Promise((resolve, reject) => {
+    try {
+      const parsedOnce = input.split('<faultstring>');
+      const parsedTwice = parsedOnce[1].split('</faultstring>');
+      resolve(parsedTwice[0]);
+    } catch (error) {
+      reject(error);
+    }
+  });
