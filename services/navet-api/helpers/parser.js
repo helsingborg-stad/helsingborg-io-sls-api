@@ -1,4 +1,4 @@
-import * as convert from 'xml-js';
+import parser from 'xml2js';
 
 export const parseXml = params => `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v1="${params.personpostXmlEnvUrl}">
   <soapenv:Header/>
@@ -20,12 +20,15 @@ export const parseJSON = input =>
       // If result has any posts the length will be bigger then 2.
       if (posts.length >= 2) {
         const parsedTwice = posts[1].split('</ns0:');
-        const resParsed = convert.xml2json(parsedTwice[0], {
-          compact: true,
-          spaces: 0,
+
+        const options = {
           trim: true,
+          explicitArray: false,
+        };
+
+        parser.parseString(parsedTwice[0], options, (_err, result) => {
+          resolve(result);
         });
-        resolve(JSON.parse(resParsed));
       }
       resolve(input);
     } catch (error) {
