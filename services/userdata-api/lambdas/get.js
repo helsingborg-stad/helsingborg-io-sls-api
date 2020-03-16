@@ -6,11 +6,20 @@ import * as dynamoDb from '../../../libs/dynamoDb';
 
 // get users (GET)
 export const main = async event => {
+  const { personalNumber } = event.pathParameters;
+
   const params = {
-    TableName: 'user',
+    TableName: 'users',
+    KeyConditionExpression: '#pn = :pppp',
+    ExpressionAttributeNames: {
+      '#pn': 'personalNumber',
+    },
+    ExpressionAttributeValues: {
+      ':pppp': personalNumber,
+    },
   };
 
-  const [error, result] = await to(dynamoDb.call('scan', params));
+  const [error, result] = await to(dynamoDb.call('query', params));
 
   if (error) {
     return response.failure({
@@ -18,7 +27,7 @@ export const main = async event => {
       code: 503,
       name: 'User',
       detail: event,
-      stack: null,
+      stack: error,
     });
   }
 
