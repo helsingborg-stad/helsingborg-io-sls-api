@@ -8,5 +8,8 @@
   },
   "keywords": [],
   "author": "Helsingborg Stad",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@financial-times/lambda-logger": "^2.0.4"
+  }
 }
