@@ -1,4 +1,4 @@
-service: helsingborg-io-sls-userdata-api
+service: hbg-userdata
 
 plugins:
   - serverless-bundle
@@ -15,18 +15,6 @@ provider:
   stage: dev
   region: eu-north-1
   endpointType: regional
-  apiGateway:
-    apiKeySourceType: HEADER
-  apiKeys:
-    - ${self:custom.stage}-hbg-userdata-apikey
-  usagePlan:
-    quota:
-      limit: 10
-      offset: 0
-      period: DAY
-    throttle:
-      burstLimit: 10
-      rateLimit: 10
   logs:
     restApi: true
   tracing:
@@ -38,14 +26,10 @@ provider:
     resourcesStage: ${self:custom.resourcesStage}
 
 functions:
-  # Defines an HTTP API endpoint that calls the main function in create.js
-  # - path: url path is /forms
-  # - method: POST request
   get:
-    handler: get.main
+    handler: lambdas/get.main
     events:
       - http:
-          path: api/v1/users
+          path: users
           method: get
           cors: true
-          private: true
