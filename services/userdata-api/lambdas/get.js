@@ -10,16 +10,12 @@ export const main = async event => {
 
   const params = {
     TableName: 'users',
-    KeyConditionExpression: '#pn = :pppp',
-    ExpressionAttributeNames: {
-      '#pn': 'personalNumber',
-    },
-    ExpressionAttributeValues: {
-      ':pppp': personalNumber,
+    Key: {
+      personalNumber,
     },
   };
 
-  const [error, result] = await to(dynamoDb.call('query', params));
+  const [error, result] = await to(dynamoDb.call('get', params));
 
   if (error) {
     return response.failure({
