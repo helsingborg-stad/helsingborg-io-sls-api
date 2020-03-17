@@ -12,7 +12,8 @@ export const main = async event => {
   const params = {
     TableName: 'users',
     Item: {
-      userId: uuid.v1(),
+      personalNumber: data.personalNumber,
+      uuid: uuid.v1(),
       createdAt: Date.now(),
       ...data,
     },
