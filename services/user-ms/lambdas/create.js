@@ -7,14 +7,15 @@ import * as dynamoDb from '../../../libs/dynamoDb';
 
 // create (POST)
 export const main = async event => {
-  const data = JSON.parse(event.body);
+  const data = event.detail;
 
   const params = {
     TableName: 'users',
     Item: {
-      personalNumber: data.personalNumber,
       uuid: uuid.v1(),
       createdAt: Date.now(),
+      email: null,
+      mobilePhone: null,
       ...data,
     },
   };

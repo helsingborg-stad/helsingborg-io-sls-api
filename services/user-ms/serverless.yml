@@ -1,0 +1,33 @@
+service: hbg-user-create-ms
+
+plugins:
+  - serverless-bundle
+  - serverless-offline
+
+custom: ${file(../../serverless.common.yml):custom}
+
+package:
+  individually: true
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: eu-north-1
+  endpointType: regional
+  tracing:
+    apiGateway: true
+    lambda: true
+
+  environment:
+    stage: ${self:custom.stage}
+    resourcesStage: ${self:custom.resourcesStage}
+
+functions:
+  create:
+    handler: lambdas/create.main
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - users.create
