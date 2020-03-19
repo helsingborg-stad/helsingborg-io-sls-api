@@ -1,6 +1,7 @@
+/* eslint-disable no-console */
 import * as response from '../../../libs/response';
 import to from 'await-to-js';
-import { parseXml, parseJSONError, parseJSON } from '../helpers/parser';
+import { parseXml, parseErrorMessageFromXML, parseJSON } from '../helpers/parser';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import * as request from '../../../libs/request';
 import { client } from '../helpers/client';
@@ -8,9 +9,8 @@ import params from '../../../libs/params';
 
 const SSMParams = params.read('/navetEnvs/dev');
 
-// get item (GET)
 export const main = async event => {
-  const { personalNumber } = event.pathParameters;
+  const { personalNumber } = event.detail;
   const navetSSMparams = await SSMParams;
   navetSSMparams.personalNumber = personalNumber;
   const xml = parseXml(navetSSMparams);
@@ -36,7 +36,8 @@ async function requestNavetUser(payload, params) {
     request.call(navetClient, 'post', params.personpostXmlEndpoint, payload)
   );
   if (err) {
-    const [parsedError, parsedErrorMessage] = await to(parseJSONError(err.response.data));
+    // Parse Error Message from XML.
+    const [, parsedErrorMessage] = await to(parseErrorMessageFromXML(err.response.data));
     throwError(err.response.status, parsedErrorMessage || null);
   }
 

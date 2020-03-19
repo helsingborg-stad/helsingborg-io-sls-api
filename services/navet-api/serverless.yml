@@ -32,15 +32,31 @@ provider:
       Action:
         - SSM:GetParameter
       Resource: "*"
+    - Effect: Allow
+      Action:
+        - events:PutEvents
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - cloudwatch:*
+      Resource: "*"
 
 functions:
   # Defines an HTTP API endpoint that calls the main function in create.js
   # - path: url path is /forms
   # - method: POST request
-  get:
-    handler: lambdas/get.main
+  poll:
+    handler: lambdas/poll.main
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - navet.poll
+
+  call:
+    handler: lambdas/call.main
     events:
       - http:
-          path: user/{personalNumber}
-          method: post
+          path: /navet
+          method: get
           cors: true
