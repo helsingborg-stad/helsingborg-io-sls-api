@@ -1,0 +1,52 @@
+service: viva-api
+
+plugins:
+  - serverless-offline
+
+custom: ${file(../../serverless.common.yml):custom}
+
+# package:
+#   individually: true
+
+provider:
+  name: aws
+  runtime: python3.7
+  stage: dev
+  region: eu-north-1
+  endpointType: regional
+  # apiGateway:
+  #   apiKeySourceType: HEADER
+  # apiKeys:
+  #   - ${self:custom.stage}-hbg-watson-apikey
+  # usagePlan:
+  #   quota:
+  #     limit: 10
+  #     offset: 0
+  #     period: DAY
+  #   throttle:
+  #     burstLimit: 10
+  #     rateLimit: 10
+  logs:
+    restApi: true
+  tracing:
+    apiGateway: true
+    lambda: true
+
+  environment:
+    stage: ${self:custom.stage}
+    resourcesStage: ${self:custom.resourcesStage}
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - ssm:GetParameter
+      Resource: "*"
+
+functions:
+  example:
+    handler: example.hello
+    events:
+      - http:
+          path: example
+          method: get
+          cors: true
