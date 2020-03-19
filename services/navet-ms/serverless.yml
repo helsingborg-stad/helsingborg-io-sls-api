@@ -42,9 +42,6 @@ provider:
       Resource: "*"
 
 functions:
-  # Defines an HTTP API endpoint that calls the main function in create.js
-  # - path: url path is /forms
-  # - method: POST request
   poll:
     handler: lambdas/poll.main
     events:
@@ -52,11 +49,3 @@ functions:
           pattern:
             source:
               - navet.poll
-
-  call:
-    handler: lambdas/call.main
-    events:
-      - http:
-          path: /navet
-          method: get
-          cors: true
