@@ -36,7 +36,7 @@ export const parseJSON = input =>
     }
   });
 
-export const parseJSONError = input =>
+export const parseErrorMessageFromXML = input =>
   new Promise((resolve, reject) => {
     try {
       const parsedOnce = input.split('<faultstring>');
