@@ -1,4 +1,4 @@
-service: hbg-userdata
+service: hbg-user
 
 plugins:
   - serverless-bundle
@@ -31,9 +31,6 @@ provider:
         - dynamodb:Query
         - dynamodb:Scan
         - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:UpdateItem
-        - dynamodb:DeleteItem
       # Restrict our IAM role permissions to the specific table for the stage
       Resource:
         - "Fn::ImportValue": ${self:custom.resourcesStage}-UsersTableArn
@@ -45,12 +42,4 @@ functions:
       - http:
           path: users/{personalNumber}
           method: get
-          cors: true
-
-  create:
-    handler: lambdas/create.main
-    events:
-      - http:
-          path: users
-          method: post
           cors: true
