@@ -30,4 +30,4 @@ functions:
       - eventBridge:
           pattern:
             source:
-              - users.create
+              - user.create
