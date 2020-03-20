@@ -6,6 +6,7 @@ import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import * as request from '../../../libs/request';
 import { client } from '../helpers/client';
 import params from '../../../libs/params';
+import { putEvent } from '../helpers/putEvent';
 
 const SSMParams = params.read('/navetEnvs/dev');
 
@@ -18,11 +19,24 @@ export const main = async event => {
   const [err, navetResponse] = await to(requestNavetUser(xml, navetSSMparams));
   if (err) return response.failure(err);
 
-  return response.success({
-    type: 'user',
-    attributes: navetResponse,
-  });
+  await putEvent(createUserEventDetail(navetResponse), 'UserCreate', 'user.create');
+  return;
 };
+
+function createUserEventDetail(navetData) {
+  const userObj = {
+    personalNumber: navetData.PersonId.PersonNr,
+    firstName: navetData.Namn.Fornamn,
+    lastName: navetData.Namn.Efternamn,
+    adress: {
+      street: navetData.Adresser.Folkbokforingsadress.Utdelningsadress2,
+      postalCode: navetData.Adresser.Folkbokforingsadress.PostNr,
+      city: navetData.Adresser.Folkbokforingsadress.PostOrt,
+    },
+    civilStatus: navetData.Civilstand.CivilstandKod,
+  };
+  return userObj;
+}
 
 async function requestNavetUser(payload, params) {
   let err, navetClient, navetUser, parsedData;
