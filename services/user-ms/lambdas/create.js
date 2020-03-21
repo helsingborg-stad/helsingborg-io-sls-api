@@ -5,7 +5,7 @@ import uuid from 'uuid';
 import * as response from '../../../libs/response';
 import * as dynamoDb from '../../../libs/dynamoDb';
 
-// create (POST)
+// create user
 export const main = async event => {
   const data = event.detail;
 
