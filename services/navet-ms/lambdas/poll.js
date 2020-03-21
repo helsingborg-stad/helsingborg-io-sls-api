@@ -1,12 +1,13 @@
 /* eslint-disable no-console */
-import * as response from '../../../libs/response';
 import to from 'await-to-js';
-import { parseXml, parseErrorMessageFromXML, parseJSON } from '../helpers/parser';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
-import * as request from '../../../libs/request';
-import { client } from '../helpers/client';
+
 import params from '../../../libs/params';
+import { parseXml, parseErrorMessageFromXML, parseJSON } from '../helpers/parser';
+import { client } from '../helpers/client';
 import { putEvent } from '../helpers/putEvent';
+import * as request from '../../../libs/request';
+import * as response from '../../../libs/response';
 
 const SSMParams = params.read('/navetEnvs/dev');
 
