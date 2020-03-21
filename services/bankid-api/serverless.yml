@@ -60,5 +60,5 @@ functions:
     events:
       - http:
           path: cancel
-          method: post
+          method: delete
           cors: true
