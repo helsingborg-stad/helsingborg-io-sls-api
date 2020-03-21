@@ -34,9 +34,6 @@ provider:
       Resource: "*"
 
 functions:
-  # Defines an HTTP API endpoint that calls the main function in create.js
-  # - path: url path is /forms
-  # - method: POST request
   auth:
     handler: lambdas/auth.main
     events:
