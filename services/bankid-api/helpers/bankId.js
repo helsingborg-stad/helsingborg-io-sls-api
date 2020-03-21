@@ -1,6 +1,6 @@
 /* eslint-disable no-useless-catch */
 import { requestClient } from '../../../libs/request';
-import * as certs from './certificates';
+import * as certs from '../../../libs/certificates';
 
 export const url = (baseUrl, path) => `${baseUrl}${path}`;
 
