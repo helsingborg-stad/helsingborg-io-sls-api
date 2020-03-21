@@ -2,14 +2,12 @@
   "name": "bankid-api",
   "version": "0.0.1",
   "description": "",
-  "main": "create.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "Helsingborg Stad",
   "license": "MIT",
-  "dependencies": {
-    "snakecase-keys": "^3.1.2"
-  }
+  "dependencies": {}
 }
