@@ -1,5 +1,5 @@
 {
-  "name": "helsingborg-io-sls-bankid-api",
+  "name": "bankid-api",
   "version": "0.0.1",
   "description": "",
   "main": "create.js",
@@ -10,9 +10,6 @@
   "author": "Helsingborg Stad",
   "license": "MIT",
   "dependencies": {
-    "aws-sdk": "^2.613.0",
-    "axios": "^0.19.2",
     "snakecase-keys": "^3.1.2"
-  },
-  "devDependencies": {}
+  }
 }
