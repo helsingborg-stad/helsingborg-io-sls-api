@@ -18,12 +18,12 @@ export const main = async event => {
   const [error, bankIdCancelResponse] = await to(sendBankIdCancelRequest(bankidSSMParams, payload));
   if (!bankIdCancelResponse) response.failure(error);
 
-  return {
+  return response.success({
     type: 'bankidCancel',
     attributes: {
       ...snakeCaseKeys(bankIdCancelResponse.data),
     },
-  };
+  });
 };
 
 async function sendBankIdCancelRequest(params, payload) {
