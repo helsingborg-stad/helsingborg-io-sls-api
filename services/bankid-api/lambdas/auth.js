@@ -1,9 +1,12 @@
-import * as response from '../../../libs/response';
 import to from 'await-to-js';
+import snakeCaseKeys from 'snakecase-keys';
+import { throwError } from '@helsingborg-stad/npm-api-error-handling';
+
+import config from '../../../config';
+import params from '../../../libs/params';
+import * as response from '../../../libs/response';
 import * as request from '../../../libs/request';
 import * as bankId from '../helpers/bankId';
-import { throwError } from '@helsingborg-stad/npm-api-error-handling';
-import params from '../../../libs/params';
 
 const SSMParams = params.read('/bankidEnvs/dev');
 
