@@ -3,7 +3,11 @@ const stage = process.env.stage;
 const resourcesStage = process.env.resourcesStage;
 
 const stageConfigs = {
-  dev: {},
+  dev: {
+    users: {
+      tableName: 'users',
+    },
+  },
   prod: {},
 };
 
