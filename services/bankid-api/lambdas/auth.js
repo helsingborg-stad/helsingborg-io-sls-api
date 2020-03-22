@@ -19,16 +19,13 @@ export const main = async event => {
     personalNumber,
   };
 
-  const [error, bankIdResponse] = await to(requestBankIdAuth(payload, bankIdSSMparams));
-  if (!bankIdResponse) return response.failure(error);
-
-  const { orderRef, autoStartToken } = bankIdResponse.data;
+  const [error, bankIdAuthResponse] = await to(sendBankIdAuthRequest(bankIdSSMparams, payload));
+  if (!bankIdAuthResponse) return response.failure(error);
 
   return response.success({
     type: 'bankIdAuth',
     attributes: {
-      order_ref: orderRef,
-      auto_start_token: autoStartToken,
+      ...snakeCaseKeys(bankIdAuthResponse.data),
     },
   });
 };
