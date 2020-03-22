@@ -8,12 +8,11 @@ import * as response from '../../../libs/response';
 import * as request from '../../../libs/request';
 import * as bankId from '../helpers/bankId';
 
-const SSMParams = params.read('/bankidEnvs/dev');
+const SSMParams = params.read(config.bankId.envsKeyName);
 
 export const main = async event => {
-  const bankIdSSMparams = await SSMParams;
-
   const { endUserIp, personalNumber } = JSON.parse(event.body);
+  const bankIdSSMparams = await SSMParams;
 
   const payload = {
     endUserIp,
