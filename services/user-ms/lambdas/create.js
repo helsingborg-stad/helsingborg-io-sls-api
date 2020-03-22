@@ -2,6 +2,7 @@ import to from 'await-to-js';
 import uuid from 'uuid';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
+import config from '../../../config';
 import * as response from '../../../libs/response';
 import * as dynamoDb from '../../../libs/dynamoDb';
 
@@ -10,7 +11,7 @@ export const main = async event => {
   const data = event.detail;
 
   const params = {
-    TableName: 'users',
+    TableName: config.users.tableName,
     Item: {
       uuid: uuid.v1(),
       createdAt: Date.now(),
