@@ -1,6 +1,6 @@
 import to from 'await-to-js';
+import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
-// import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import * as response from '../../../libs/response';
 import * as dynamoDb from '../../../libs/dynamoDb';
 
@@ -15,17 +15,19 @@ export const main = async event => {
     },
   };
 
-  const [error, result] = await to(dynamoDb.call('get', params));
+  const [error, userGetResponse] = await to(sendUserGetRequest(params));
+  if (!userGetResponse) return response.failure(error);
 
-  if (error) {
-    return response.failure({
-      status: false,
-      code: 503,
-      name: 'User',
-      detail: event,
-      stack: error,
-    });
-  }
-
-  return response.success(result);
+  return response.success({
+    type: 'userGet',
+    attributes: {
+      ...snakeCaseKeys(userGetResponse),
+    },
+  });
 };
+
+async function sendUserGetRequest(params) {
+  const [error, userGetResponse] = await to(dynamoDb.call('get', params));
+  if (!userGetResponse) throwError(error);
+  return userGetResponse;
+}
