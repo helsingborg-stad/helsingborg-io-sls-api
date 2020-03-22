@@ -30,17 +30,17 @@ export const main = async event => {
   });
 };
 
-async function requestBankIdAuth(payload, params) {
-  let err, bankIdClient, bankIdAuth;
+async function sendBankIdAuthRequest(params, payload) {
+  let error, bankIdClientResponse, bankIdAuthResponse;
 
-  [err, bankIdClient] = await to(bankId.client(params));
-  if (!bankIdClient) throwError(503);
+  [error, bankIdClientResponse] = await to(bankId.client(params));
+  if (!bankIdClientResponse) throwError(503);
 
-  [err, bankIdAuth] = await to(
-    request.call(bankIdClient, 'post', bankId.url(params.apiUrl, '/auth'), payload)
+  [error, bankIdAuthResponse] = await to(
+    request.call(bankIdClientResponse, 'post', bankId.url(params.apiUrl, '/auth'), payload)
   );
 
-  if (!bankIdAuth) throwError(err.status);
+  if (!bankIdAuthResponse) throwError(error.status);
 
-  return bankIdAuth;
+  return bankIdAuthResponse;
 }
