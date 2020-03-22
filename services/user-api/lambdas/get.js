@@ -2,6 +2,7 @@ import to from 'await-to-js';
 import snakeCaseKeys from 'snakecase-keys';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
+import config from '../../../config';
 import * as response from '../../../libs/response';
 import * as dynamoDb from '../../../libs/dynamoDb';
 
@@ -10,7 +11,7 @@ export const main = async event => {
   const { personalNumber } = event.pathParameters;
 
   const params = {
-    TableName: 'users',
+    TableName: config.users.TableName,
     Key: {
       personalNumber,
     },
