@@ -51,4 +51,4 @@ workflows:
           context: Development
           filters:
             branches:
-              only: feature/cicd-bankid-setup
+              only: dev
