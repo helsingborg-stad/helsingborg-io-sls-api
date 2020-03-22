@@ -6,15 +6,11 @@ const stageConfigs = {
   dev: {
     bankId: {
       envsKeyName: '/bankidEnvs/dev',
-      caName: 'bankid.ca',
-      pfxName: 'FPTestcert2.pfx',
     },
   },
   prod: {
     bankId: {
       envsKeyName: '/bankidEnvs/prod',
-      caName: 'bankid.ca',
-      pfxName: 'FPTestcert2.pfx',
     },
   },
 };
