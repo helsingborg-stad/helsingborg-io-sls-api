@@ -1,7 +1,7 @@
 import to from 'await-to-js';
 import uuid from 'uuid';
+import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
-// import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import * as response from '../../../libs/response';
 import * as dynamoDb from '../../../libs/dynamoDb';
 
@@ -20,17 +20,20 @@ export const main = async event => {
     },
   };
 
-  const [error, result] = await to(dynamoDb.call('put', params));
+  const [error, createUserResponse] = await to(sendCreateUserRequest(params));
+  if (!createUserResponse) return response.failure(error);
 
-  if (error) {
-    return response.failure({
-      status: false,
-      code: 503,
-      name: 'Put user',
-      detail: event,
-      stack: null,
-    });
-  }
-
-  return response.success(result);
+  return response.success({
+    type: 'createUser',
+    attributes: {
+      ...createUserResponse,
+    },
+  });
 };
+
+async function sendCreateUserRequest(params) {
+  const [error, createUserResponse] = await to(dynamoDb.call('put', params));
+  if (!createUserResponse) throwError(error);
+
+  return createUserResponse;
+}
