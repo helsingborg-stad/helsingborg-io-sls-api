@@ -11,7 +11,7 @@ export const main = async event => {
   const { personalNumber } = event.pathParameters;
 
   const params = {
-    TableName: config.users.TableName,
+    TableName: config.users.tableName,
     Key: {
       personalNumber,
     },
