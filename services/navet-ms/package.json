@@ -5,7 +5,7 @@
   "main": "poll.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "poll-user": "sls invoke -f poll --path mock/data.json"
+    "poll-user": "sls invoke --function poll --path mock/data.json"
   },
   "keywords": [],
   "author": "Helsingborg Stad",
