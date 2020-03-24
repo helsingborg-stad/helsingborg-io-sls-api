@@ -2,11 +2,12 @@ service: viva-api
 
 plugins:
   - serverless-offline
+  - serverless-python-requirements
 
 custom: ${file(../../serverless.common.yml):custom}
 
-# package:
-#   individually: true
+package:
+  individually: true
 
 provider:
   name: aws
@@ -14,18 +15,6 @@ provider:
   stage: dev
   region: eu-north-1
   endpointType: regional
-  # apiGateway:
-  #   apiKeySourceType: HEADER
-  # apiKeys:
-  #   - ${self:custom.stage}-hbg-watson-apikey
-  # usagePlan:
-  #   quota:
-  #     limit: 10
-  #     offset: 0
-  #     period: DAY
-  #   throttle:
-  #     burstLimit: 10
-  #     rateLimit: 10
   logs:
     restApi: true
   tracing:
