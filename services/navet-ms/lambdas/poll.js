@@ -5,7 +5,7 @@ import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import params from '../../../libs/params';
 import { parseXml, parseErrorMessageFromXML, parseJSON } from '../helpers/parser';
 import { client } from '../helpers/client';
-import { putEvent } from '../helpers/putEvent';
+import { putEvent } from '../../../libs/awsEventBridge';
 import * as request from '../../../libs/request';
 import * as response from '../../../libs/response';
 
