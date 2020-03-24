@@ -5,7 +5,7 @@ const resourcesStage = process.env.resourcesStage;
 const stageConfigs = {
   dev: {
     bankId: {
-      envsKeyName: '/bankidEnvs/env',
+      envsKeyName: '/bankidEnvs/dev',
     },
     users: {
       tableName: 'users',
