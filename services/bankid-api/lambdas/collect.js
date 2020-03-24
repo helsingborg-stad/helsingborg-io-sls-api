@@ -15,13 +15,15 @@ export const main = async event => {
 
   const payload = { orderRef };
 
-  const [error, bankIdResponse] = await to(sendBankIdCollectRequest(bankidSSMParams, payload));
-  if (!bankIdResponse) return response.failure(error);
+  const [error, bankIdCollectResponse] = await to(
+    sendBankIdCollectRequest(bankidSSMParams, payload)
+  );
+  if (!bankIdCollectResponse) return response.failure(error);
 
   return response.success({
     type: 'bankIdCollect',
     attributes: {
-      ...snakeCaseKeys(bankIdResponse.data),
+      ...snakeCaseKeys(bankIdCollectResponse.data),
     },
   });
 };
