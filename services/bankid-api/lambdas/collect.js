@@ -2,12 +2,14 @@ import to from 'await-to-js';
 import snakeCaseKeys from 'snakecase-keys';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
+import config from '../../../config';
 import params from '../../../libs/params';
 import * as response from '../../../libs/response';
 import * as request from '../../../libs/request';
 import * as bankId from '../helpers/bankId';
+import { putEvent } from '../../../libs/awsEventBridge';
 
-const SSMParams = params.read('/bankidEnvs/dev');
+const SSMParams = params.read(config.bankId.envsKeyName);
 
 export const main = async event => {
   const { orderRef } = JSON.parse(event.body);
@@ -19,6 +21,14 @@ export const main = async event => {
     sendBankIdCollectRequest(bankidSSMParams, payload)
   );
   if (!bankIdCollectResponse) return response.failure(error);
+
+  if (bankIdCollectResponse.data.status === 'complete') {
+    await putEvent(
+      bankIdCollectResponse.data.completionData,
+      'BankIdCollectComplete',
+      'bankId.collect'
+    );
+  }
 
   return response.success({
     type: 'bankIdCollect',
