@@ -38,4 +38,4 @@ functions:
       - eventBridge:
           pattern:
             source:
-              - user.create
+              - navet.poll

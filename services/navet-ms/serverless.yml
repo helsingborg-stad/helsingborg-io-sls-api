@@ -48,4 +48,4 @@ functions:
       - eventBridge:
           pattern:
             source:
-              - navet.poll
+              - bankId.collect
