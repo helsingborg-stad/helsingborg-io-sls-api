@@ -20,7 +20,7 @@ export const main = async event => {
   const [err, navetResponse] = await to(requestNavetUser(xml, navetSSMparams));
   if (err) return response.failure(err);
 
-  await putEvent(createUserEventDetail(navetResponse), 'UserCreate', 'user.create');
+  await putEvent(createUserEventDetail(navetResponse), 'NavetPoll', 'navet.poll');
   return;
 };
 
