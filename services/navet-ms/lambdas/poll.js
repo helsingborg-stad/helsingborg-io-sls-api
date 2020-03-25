@@ -12,14 +12,13 @@ import * as response from '../../../libs/response';
 const SSMParams = params.read('/navetEnvs/dev');
 
 export const main = async event => {
-  const { personalNumber } = event.detail;
+  const { user } = event.detail;
   const navetSSMparams = await SSMParams;
-  navetSSMparams.personalNumber = personalNumber;
+  navetSSMparams.personalNumber = user.personal_number;
   const xml = parseXml(navetSSMparams);
 
   const [err, navetResponse] = await to(requestNavetUser(xml, navetSSMparams));
   if (err) return response.failure(err);
-
   await putEvent(createNavetPollEventDetail(navetResponse), 'NavetPoll', 'navet.poll');
   return;
 };
