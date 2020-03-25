@@ -4,7 +4,16 @@ plugins:
   - serverless-offline
   - serverless-python-requirements
 
-custom: ${file(../../serverless.common.yml):custom}
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  resourcesStages:
+    prod: prod
+    dev: dev
+  resourcesStage: ${self:custom.resourcesStages.${self:custom.stage}, self:custom.resourcesStages.dev}
+  pythonRequirements:
+    vendor: ./libs
+    invalidateCaches: true
+    dockerizePip: false
 
 package:
   individually: true
