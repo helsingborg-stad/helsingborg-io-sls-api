@@ -14,7 +14,7 @@ const SSMParams = params.read('/navetEnvs/dev');
 export const main = async event => {
   const { user } = event.detail;
   const navetSSMparams = await SSMParams;
-  navetSSMparams.personalNumber = user.personal_number;
+  navetSSMparams.personalNumber = user.personalNumber;
   const xml = parseXml(navetSSMparams);
 
   const [err, navetResponse] = await to(requestNavetUser(xml, navetSSMparams));
