@@ -51,3 +51,24 @@ functions:
           path: example
           method: get
           cors: true
+  getApplication:
+    handler: lambdas/application/get.main
+    events:
+      - http:
+          path: viva/application/{personNumber}/{id}
+          method: get
+          cors: true
+  listApplications:
+    handler: lambdas/application/list.main
+    events:
+      - http:
+          path: viva/application/{personNumber}
+          method: get
+          cors: true
+  createApplication:
+    handler: lambdas/application/create.main
+    events:
+      - http:
+          path: viva/application/{personNumber}
+          method: post
+          cors: true
