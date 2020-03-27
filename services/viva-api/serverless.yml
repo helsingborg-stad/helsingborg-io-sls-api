@@ -51,24 +51,59 @@ functions:
           path: example
           method: get
           cors: true
-  getApplication:
-    handler: lambdas/application/get.main
+  applicationStatus:
+    handler: lambdas/application/application_status.main
     events:
       - http:
-          path: viva/application/{personNumber}/{id}
+          path: viva/application/applicationstatus
           method: get
           cors: true
-  listApplications:
-    handler: lambdas/application/list.main
+  deletedParkedApplication:
+    handler: lambdas/application/deleted_parked_application.main
     events:
       - http:
-          path: viva/application/{personNumber}
+          path: viva/application/deletedparkedapplication
           method: get
           cors: true
-  createApplication:
-    handler: lambdas/application/create.main
+  getParkedApplication:
+    handler: lambdas/application/get_parked_application.main
     events:
       - http:
-          path: viva/application/{personNumber}
-          method: post
+          path: viva/application/getparkedapplication
+          method: get
+          cors: true
+  newApplication:
+    handler: lambdas/application/new_application.main
+    events:
+      - http:
+          path: viva/application/newapplication
+          method: get
+          cors: true
+  newCompletion:
+    handler: lambdas/application/new_completion.main
+    events:
+      - http:
+          path: viva/application/newcompletion
+          method: get
+          cors: true
+  newReApplication:
+    handler: lambdas/application/new_re_application.main
+    events:
+      - http:
+          path: viva/application/newreapplication
+          method: get
+          cors: true
+  notification:
+    handler: lambdas/application/notification.main
+    events:
+      - http:
+          path: viva/application/notification
+          method: get
+          cors: true
+  parkApplication:
+    handler: lambdas/application/park_application.main
+    events:
+      - http:
+          path: viva/application/parkapplication
+          method: get
           cors: true

@@ -3,7 +3,7 @@ import json
 def main(event, context):
 
     body = {
-        "data": 'create'
+        "data": 'new_reapplication'
     }
 
     response = {
