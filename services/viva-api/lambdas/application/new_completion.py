@@ -3,7 +3,7 @@ import json
 def main(event, context):
 
     body = {
-        "data": 'get'
+        "data": 'new_completion'
     }
 
     response = {
