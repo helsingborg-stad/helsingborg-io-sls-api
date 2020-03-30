@@ -18,6 +18,14 @@ provider:
   tracing:
     apiGateway: true
     lambda: true
+  apiGateway:
+    restApiId:
+      "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayRestApiId
+    restApiRootResourceId:
+      "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
+    restApiResources:
+      auth:
+        "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayResourceAuth
 
   environment:
     stage: ${self:custom.stage}
@@ -42,27 +50,27 @@ functions:
     handler: lambdas/auth.main
     events:
       - http:
-          path: auth
+          path: auth/bankid/auth
           method: post
           cors: true
   sign:
     handler: lambdas/sign.main
     events:
       - http:
-          path: sign
+          path: auth/bankid/sign
           method: post
           cors: true
   collect:
     handler: lambdas/collect.main
     events:
       - http:
-          path: collect
+          path: auth/bankid/collect
           method: post
           cors: true
   cancel:
     handler: lambdas/cancel.main
     events:
       - http:
-          path: cancel
+          path: auth/bankid/cancel
           method: delete
           cors: true
