@@ -24,6 +24,14 @@ provider:
   environment:
     stage: ${self:custom.stage}
     resourcesStage: ${self:custom.resourcesStage}
+  apiGateway:
+    restApiId:
+      "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayRestApiId
+    restApiRootResourceId:
+      "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
+    restApiResources:
+      users:
+        "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayResourceUsers
 
   iamRoleStatements:
     - Effect: Allow
@@ -40,6 +48,6 @@ functions:
     handler: lambdas/get.main
     events:
       - http:
-          path: users/{personalNumber}
+          path: /users/{personalNumber}
           method: get
           cors: true
