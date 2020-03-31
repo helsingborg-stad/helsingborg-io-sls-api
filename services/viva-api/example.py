@@ -1,18 +1,21 @@
 try:
-  import unzip_requirements
+    import unzip_requirements
 except ImportError:
-  pass
+    pass
 
 import json
-from libs.viva import Viva
-
-viva = Viva()
+from libs.viva import MyPages
 
 
 def hello(event, context):
 
+    mypages = MyPages(
+        usr='19701010T8095',
+        pnr='19701010T8095'
+    )
+
     body = {
-        "cookie": viva.get_cookie()
+        "personInfoXML": mypages.person_info
     }
 
     response = {
