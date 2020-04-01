@@ -72,5 +72,5 @@ functions:
     events:
       - http:
           path: auth/bankid/cancel
-          method: delete
+          method: post
           cors: true
