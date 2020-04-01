@@ -4,7 +4,7 @@ except ImportError:
     pass
 
 import json
-from libs.viva import MyPages
+from libs.my_pages import MyPages
 
 
 def hello(event, context):
