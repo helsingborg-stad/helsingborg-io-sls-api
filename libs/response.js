@@ -1,10 +1,10 @@
+import config from '../config';
+
 export function success(body) {
   return buildResponse(200, body);
 }
 
 export function failure(error, stackTrace) {
-  const { stage } = process.env;
-
   const errorBody = {
     status: error.status.toString(),
     code: error.status.toString(),
@@ -13,7 +13,7 @@ export function failure(error, stackTrace) {
     message: error.message,
   };
 
-  const addStackTrace = ['dev'].includes(stage);
+  const addStackTrace = ['dev'].includes(config.stage);
   if (addStackTrace || stackTrace) errorBody.stack = error.stack;
 
   return buildResponse(error.status, errorBody);
