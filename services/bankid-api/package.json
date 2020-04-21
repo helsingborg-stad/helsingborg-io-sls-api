@@ -9,5 +9,7 @@
   "keywords": [],
   "author": "Helsingborg Stad",
   "license": "MIT",
-  "dependencies": {}
+  "dependencies": {
+    "jsonwebtoken": "^8.5.1"
+  }
 }
