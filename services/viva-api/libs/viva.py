@@ -3,7 +3,7 @@ import json
 import os
 from zeep import Client
 from zeep.transports import Transport
-from ssm_parameter_store import SSMParameterStore
+from libs.ssm_parameter_store import SSMParameterStore
 
 
 class Viva(object):
