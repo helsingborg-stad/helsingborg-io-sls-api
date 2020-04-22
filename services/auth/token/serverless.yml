@@ -60,11 +60,11 @@ functions:
           method: post
           cors: true
           private: true
-
-  hello:
-    handler: lambdas/hello.main
-    events:
-      - http:
-          path: hello
-          method: get
-          authorizer: authorize
+  # Lambda for testing the auhtorization
+  # hello:
+  #   handler: lambdas/hello.main
+  #   events:
+  #     - http:
+  #         path: hello
+  #         method: get
+  #         authorizer: authorize
