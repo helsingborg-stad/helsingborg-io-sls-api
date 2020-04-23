@@ -40,7 +40,7 @@ async function sendBankIdAuthRequest(params, payload) {
     request.call(bankIdClientResponse, 'post', bankId.url(params.apiUrl, '/auth'), payload)
   );
 
-  if (!bankIdAuthResponse) throwError(error.status);
+  if (!bankIdAuthResponse) throwError(error.response.status, error.response.data.details);
 
   return bankIdAuthResponse;
 }
