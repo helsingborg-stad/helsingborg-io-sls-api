@@ -51,6 +51,7 @@ functions:
           path: example
           method: get
           cors: true
+
   applicationStatus:
     handler: lambdas/application/application_status.main
     events:
@@ -58,6 +59,7 @@ functions:
           path: viva/application/applicationstatus
           method: get
           cors: true
+
   deletedParkedApplication:
     handler: lambdas/application/deleted_parked_application.main
     events:
@@ -65,6 +67,7 @@ functions:
           path: viva/application/deletedparkedapplication
           method: get
           cors: true
+
   getParkedApplication:
     handler: lambdas/application/get_parked_application.main
     events:
@@ -72,6 +75,7 @@ functions:
           path: viva/application/getparkedapplication
           method: get
           cors: true
+
   newApplication:
     handler: lambdas/application/new_application.main
     events:
@@ -79,6 +83,7 @@ functions:
           path: viva/application/newapplication
           method: get
           cors: true
+
   newCompletion:
     handler: lambdas/application/new_completion.main
     events:
@@ -86,6 +91,7 @@ functions:
           path: viva/application/newcompletion
           method: get
           cors: true
+
   newReApplication:
     handler: lambdas/application/new_re_application.main
     events:
@@ -93,6 +99,7 @@ functions:
           path: viva/application/newreapplication
           method: get
           cors: true
+
   notification:
     handler: lambdas/application/notification.main
     events:
@@ -100,6 +107,7 @@ functions:
           path: viva/application/notification
           method: get
           cors: true
+
   parkApplication:
     handler: lambdas/application/park_application.main
     events:
