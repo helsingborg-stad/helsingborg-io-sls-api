@@ -1,13 +1,13 @@
 // Helper function to generate an IAM policy
-const generateIAMPolicy = function(principalId, effect, resource) {
-  var authResponse = {};
+function generateIAMPolicy(principalId, effect, resource) {
+  const authResponse = {};
 
   authResponse.principalId = principalId;
   if (effect && resource) {
-    var policyDocument = {};
+    const policyDocument = {};
     policyDocument.Version = '2012-10-17';
     policyDocument.Statement = [];
-    var statementOne = {};
+    const statementOne = {};
     statementOne.Action = 'execute-api:Invoke';
     statementOne.Effect = effect;
     statementOne.Resource = resource;
@@ -16,6 +16,6 @@ const generateIAMPolicy = function(principalId, effect, resource) {
   }
 
   return authResponse;
-};
+}
 
 export default generateIAMPolicy;

@@ -1,6 +1,6 @@
 import { signToken } from '../helpers/token';
 
-export const main = async event => {
+export async function main(event) {
   const jsonRequest = JSON.parse(event.body);
   const token = signToken(jsonRequest);
 
@@ -10,4 +10,4 @@ export const main = async event => {
       accessToken: token,
     }),
   };
-};
+}
