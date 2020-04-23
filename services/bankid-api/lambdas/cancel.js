@@ -17,7 +17,8 @@ export const main = async event => {
   const payload = { orderRef };
 
   const [error, bankIdCancelResponse] = await to(sendBankIdCancelRequest(bankIdSSMparams, payload));
-  if (!bankIdCancelResponse) response.failure(error);
+
+  if (!bankIdCancelResponse) return response.failure(error);
 
   return response.success({
     type: 'bankidCancel',
@@ -36,8 +37,7 @@ async function sendBankIdCancelRequest(params, payload) {
   [error, bankIdCancelResponse] = await to(
     request.call(bankIdClientResponse, 'post', bankId.url(params.apiUrl, '/cancel'), payload)
   );
-
-  if (!bankIdCancelResponse) throwError(error.status);
+  if (!bankIdCancelResponse) throwError(error.response.status, error.response.data.details);
 
   return bankIdCancelResponse;
 }

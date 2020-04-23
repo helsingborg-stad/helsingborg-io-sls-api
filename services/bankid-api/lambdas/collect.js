@@ -20,6 +20,7 @@ export const main = async event => {
   const [error, bankIdCollectResponse] = await to(
     sendBankIdCollectRequest(bankidSSMParams, payload)
   );
+
   if (!bankIdCollectResponse) return response.failure(error);
 
   if (bankIdCollectResponse.data.status === 'complete') {
@@ -48,7 +49,7 @@ async function sendBankIdCollectRequest(params, payload) {
     request.call(bankIdClientResponse, 'post', bankId.url(params.apiUrl, '/collect'), payload)
   );
 
-  if (!bankIdCollectResponse) throwError(error.status);
+  if (!bankIdCollectResponse) throwError(error.response.status, error.response.data.details);
 
   return bankIdCollectResponse;
 }
