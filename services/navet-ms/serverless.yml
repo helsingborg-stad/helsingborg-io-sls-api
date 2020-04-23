@@ -1,0 +1,51 @@
+service: hbg-navet
+
+plugins:
+  - serverless-bundle
+  - serverless-offline
+
+custom: ${file(../../serverless.common.yml):custom}
+
+package:
+  individually: true
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: eu-north-1
+  endpointType: regional
+  tracing:
+    apiGateway: true
+    lambda: true
+
+  environment:
+    stage: ${self:custom.stage}
+    resourcesStage: ${self:custom.resourcesStage}
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:*
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - SSM:GetParameter
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - events:PutEvents
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - cloudwatch:*
+      Resource: "*"
+
+functions:
+  poll:
+    handler: lambdas/poll.main
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - bankId.collect

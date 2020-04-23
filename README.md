@@ -90,3 +90,10 @@ Emulate AWS λ and API Gateway locally when developing your Serverless project
 cd services/<service-name>
 sls offline
 ```
+
+## Extras
+
+This section contains extra information that is heplful for your development process, you will find
+thierdparty documentation and other useful links here.
+
+[Bank ID relying party guidelines (documentation)](https://www.bankid.com/bankid-i-dina-tjanster/rp-info)

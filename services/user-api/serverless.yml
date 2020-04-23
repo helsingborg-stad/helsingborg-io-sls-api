@@ -1,0 +1,53 @@
+service: hbg-user
+
+plugins:
+  - serverless-bundle
+  - serverless-offline
+
+custom: ${file(../../serverless.common.yml):custom}
+
+package:
+  individually: true
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: eu-north-1
+  endpointType: regional
+  logs:
+    restApi: true
+  tracing:
+    apiGateway: true
+    lambda: true
+
+  environment:
+    stage: ${self:custom.stage}
+    resourcesStage: ${self:custom.resourcesStage}
+  apiGateway:
+    restApiId:
+      "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayRestApiId
+    restApiRootResourceId:
+      "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
+    restApiResources:
+      users:
+        "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayResourceUsers
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+      # Restrict our IAM role permissions to the specific table for the stage
+      Resource:
+        - "Fn::ImportValue": ${self:custom.resourcesStage}-UsersTableArn
+
+functions:
+  get:
+    handler: lambdas/get.main
+    events:
+      - http:
+          path: /users/{personalNumber}
+          method: get
+          cors: true

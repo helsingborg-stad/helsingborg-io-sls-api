@@ -1,15 +1,20 @@
+import config from '../config';
+
 export function success(body) {
   return buildResponse(200, body);
 }
 
-export function failure(error) {
+export function failure(error, stackTrace) {
   const errorBody = {
     status: error.status.toString(),
     code: error.status.toString(),
     title: error.name,
     detail: error.detail,
-    stack: error.stack,
+    message: error.message,
   };
+
+  const addStackTrace = ['dev'].includes(config.stage);
+  if (addStackTrace || stackTrace) errorBody.stack = error.stack;
 
   return buildResponse(error.status, errorBody);
 }

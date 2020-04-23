@@ -1,15 +1,13 @@
 {
-  "name": "bankid-api",
+  "name": "user-api",
   "version": "0.0.1",
   "description": "",
-  "main": "index.js",
+  "main": "get.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "Helsingborg Stad",
   "license": "MIT",
-  "dependencies": {
-    "jsonwebtoken": "^8.5.1"
-  }
+  "dependencies": {}
 }

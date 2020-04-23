@@ -1,10 +1,10 @@
-service: hbg-bankid
+service: hbg-authorizer
 
 plugins:
   - serverless-bundle
   - serverless-offline
 
-custom: ${file(../../serverless.common.yml):custom}
+custom: ${file(../../../serverless.common.yml):custom}
 
 package:
   individually: true
@@ -15,6 +15,9 @@ provider:
   stage: dev
   region: eu-north-1
   endpointType: regional
+  apiKeys:
+    - helsingborg-io-apikey
+
   tracing:
     apiGateway: true
     lambda: true
@@ -46,31 +49,22 @@ provider:
       Resource: "*"
 
 functions:
-  auth:
-    handler: lambdas/auth.main
+  authorize:
+    handler: lambdas/authorize.main
+
+  generateToken:
+    handler: lambdas/generateToken.main
     events:
       - http:
-          path: auth/bankid/auth
+          path: auth/token
           method: post
           cors: true
-  sign:
-    handler: lambdas/sign.main
-    events:
-      - http:
-          path: auth/bankid/sign
-          method: post
-          cors: true
-  collect:
-    handler: lambdas/collect.main
-    events:
-      - http:
-          path: auth/bankid/collect
-          method: post
-          cors: true
-  cancel:
-    handler: lambdas/cancel.main
-    events:
-      - http:
-          path: auth/bankid/cancel
-          method: post
-          cors: true
+          private: true
+  # Lambda for testing the auhtorization
+  # hello:
+  #   handler: lambdas/hello.main
+  #   events:
+  #     - http:
+  #         path: hello
+  #         method: get
+  #         authorizer: authorize

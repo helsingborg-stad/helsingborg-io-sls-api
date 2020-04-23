@@ -1,0 +1,54 @@
+version: 2.1
+
+jobs:
+  deploy-service:
+    docker:
+      - image: circleci/node:12
+    parameters:
+      service_path:
+        type: string
+      stage_name:
+        type: string
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+            - dependencies-cache-{{ checksum "package-lock.json" }}-{{ checksum "<< parameters.service_path >>/package-lock.json" }}
+            - dependencies-cache
+
+      - run:
+          name: Install Serverless CLI
+          command: sudo npm i -g serverless
+
+      - run:
+          name: Install dependencies
+          command: |
+            npm set //npm.pkg.github.com/:_authToken=$NPM_TOKEN
+            npm install
+            cd << parameters.service_path >>
+            npm install
+
+      - run:
+          name: Deploy application
+          command: |
+            cd << parameters.service_path >>
+            serverless deploy -s << parameters.stage_name >>
+
+      - save_cache:
+          paths:
+            - node_modules
+            - << parameters.service_path >>/node_modules
+          key: dependencies-cache-{{ checksum "package-lock.json" }}-{{ checksum "<< parameters.service_path >>/package-lock.json" }}
+
+workflows:
+  build-deploy:
+    jobs:
+      - deploy-service:
+          name: Deploy BankID API
+          service_path: services/bankid-api
+          stage_name: $(echo ${CIRCLE_BRANCH} | sed -e 's/feature\//f-/g')
+          context: Development
+          filters:
+            branches:
+              only: dev
