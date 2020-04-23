@@ -1,5 +1,5 @@
 // Helper function to generate an IAM policy
-const generateIAMPolicy = function(principalId, effect, resource) {
+export default function generateIAMPolicy(principalId, effect, resource) {
   var authResponse = {};
 
   authResponse.principalId = principalId;
@@ -16,6 +16,4 @@ const generateIAMPolicy = function(principalId, effect, resource) {
   }
 
   return authResponse;
-};
-
-export default generateIAMPolicy;
+}
