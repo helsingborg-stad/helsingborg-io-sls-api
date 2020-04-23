@@ -1,0 +1,70 @@
+service: hbg-authorizer
+
+plugins:
+  - serverless-bundle
+  - serverless-offline
+
+custom: ${file(../../../serverless.common.yml):custom}
+
+package:
+  individually: true
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: eu-north-1
+  endpointType: regional
+  apiKeys:
+    - helsingborg-io-apikey
+
+  tracing:
+    apiGateway: true
+    lambda: true
+  apiGateway:
+    restApiId:
+      "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayRestApiId
+    restApiRootResourceId:
+      "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
+    restApiResources:
+      auth:
+        "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayResourceAuth
+
+  environment:
+    stage: ${self:custom.stage}
+    resourcesStage: ${self:custom.resourcesStage}
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:*
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - events:PutEvents
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - SSM:GetParameter
+      Resource: "*"
+
+functions:
+  authorize:
+    handler: lambdas/authorize.main
+
+  generateToken:
+    handler: lambdas/generateToken.main
+    events:
+      - http:
+          path: auth/token
+          method: post
+          cors: true
+          private: true
+  # Lambda for testing the auhtorization
+  # hello:
+  #   handler: lambdas/hello.main
+  #   events:
+  #     - http:
+  #         path: hello
+  #         method: get
+  #         authorizer: authorize
