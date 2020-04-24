@@ -51,11 +51,7 @@ class VivaApplication(Viva):
 
             # Identifierar ärendet i Viva med servernamn, databassökväg och unikt id
             # See MyPages.PersonCases
-            SSI={
-                "SERVER": "Pluto/ILAB Development",
-                "PATH": "Demo\\Viva\\IFO\\docstore0003.nsf",
-                "ID": "B93A7F13A2B72A13C12572830042D1B6"
-            },
+            SSI=self._ssi,
 
             # Identifierar Ansökanperioden (Fortsatt ansökan)
             # See MyPages.PersonCases
