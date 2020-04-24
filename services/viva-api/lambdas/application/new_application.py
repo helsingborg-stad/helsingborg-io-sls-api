@@ -4,6 +4,7 @@ except ImportError:
     pass
 
 import json
+
 from libs.viva_application import VivaApplication
 
 
@@ -13,40 +14,37 @@ def main(event, context):
 
     new_application_repsonse = vivaApplication.new_application(
         key="123",
-        user="19701010T8095",
+        user="19450817T5959",
         application={
             "RAWDATA": "Testing CREATE NEW APPLICATION",
             "RAWDATATYPE": "",
             "CLIENT": {
-                "PNUMBER": "19701010T8095",
-                "FNAME": "Ahmad",
-                "LNAME": "Saloui",
+                "PNUMBER": "19450817T5959",
+                "FNAME": "Ole",
+                "LNAME": "Doff",
                 "ADDRESSES": [
                     {
                         "ADDRESS": {
                             "TYPE": "FB",
-                            "ADDRESS": "Vinkelgatan 25",
+                            "ADDRESS": "Galagatan 20",
                             "CO": "",
-                            "ZIP": "252 25",
-                            "CITY": "Helsingborg",
-                        },
-                    },
+                            "ZIP": "222 20",
+                            "CITY": "Helsingborg"
+                        }
+                    }
                 ],
                 "EMAIL": {
                     "EMAIL": "vegard@nodomain.com",
-                    "NOTIFY": True,
+                    "NOTIFY": True
                 },
-                "FOREIGNCITIZEN": True,
-                "CIVILSTATUS": "SA",
-                "OTHER": "Lite text från Övriga upplysningar...",
-                "BANKACCOUNT": {
-                    "HOLDER": "Frugan",
-                    "BANKNAME": "SEB",
-                    "CLEARINGNUMBER": "1234",
-                    "ACCOUNTNUMBER": "12345678",
-                },
+                "FOREIGNCITIZEN": False,
+                "RESIDENCEPERMITTYPE": "",
+                "RESIDENCEPERMITDATE": "",
+                "CIVILSTATUS": "",
+                "ALTCIVILSTATUS": ""
             },
-        },
+            "OTHER": "HEPP"
+        }
     )
 
     body = {

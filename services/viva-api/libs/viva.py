@@ -1,14 +1,18 @@
 import requests
 import json
 import os
+import zeep.helpers as zeep_helpers
+
 from zeep import Client
 from zeep.transports import Transport
+
 from libs.ssm_parameter_store import SSMParameterStore
 
 
 class Viva(object):
 
-    def __init__(self, envs="/vivaEnvs"):
+    def __init__(self, envs="/vivaEnvs", zeep_helpers=zeep_helpers):
+        self._helpers = zeep_helpers
         self._params = self._get_params(envs)
         cookie = self._get_cookie()
         self._cookie_jar = self._set_cookie_jar(cookie)
