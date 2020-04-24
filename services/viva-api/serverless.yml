@@ -81,7 +81,7 @@ functions:
     events:
       - http:
           path: viva/application/newapplication
-          method: get
+          method: post
           cors: true
 
   newCompletion:
@@ -89,7 +89,7 @@ functions:
     events:
       - http:
           path: viva/application/newcompletion
-          method: get
+          method: post
           cors: true
 
   newReApplication:
@@ -97,7 +97,7 @@ functions:
     events:
       - http:
           path: viva/application/newreapplication
-          method: get
+          method: post
           cors: true
 
   notification:
@@ -113,5 +113,5 @@ functions:
     events:
       - http:
           path: viva/application/parkapplication
-          method: get
+          method: post
           cors: true
