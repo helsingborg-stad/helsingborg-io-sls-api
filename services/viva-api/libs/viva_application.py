@@ -19,7 +19,13 @@ class VivaApplication(Viva):
     def _get_person_cases(self):
         return self._my_pages.person_cases
 
-    def new_application(self, key, user, application, ip="127.0.0.1"):
+    def _get_ssi(self):
+        return self._person_cases["vivadata"]["vivacases"]["vivacase"]["casessi"]
+
+    def _get_workflow_id(self):
+        return self._person_cases["vivadata"]
+
+    def new_application(self, key, application, ip="127.0.0.1"):
         response_new_application = self._service.NEWAPPLICATION(
             KEY=key,        # Externt ID. Lagras som ID på ansökan. Kan lämnas tomt
             USER=user,      # Aktuell användares personnummer
