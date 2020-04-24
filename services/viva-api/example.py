@@ -9,14 +9,14 @@ from libs.my_pages import MyPages
 
 def hello(event, context):
 
-    mypages = MyPages(
+    myPages = MyPages(
         usr="19701010T8095",
         pnr="19701010T8095"
     )
 
     body = {
-        "personInfo": mypages.person_info,
-        "personCases": mypages.person_cases
+        "personInfo": myPages.person_info,
+        "personCases": myPages.person_cases
     }
 
     response = {
