@@ -1,13 +1,20 @@
 from libs.viva import Viva
+from libs.my_pages import MyPages
 
 
 class VivaApplication(Viva):
 
-    def __init__(self, wsdl="VivaApplication", my_pages=object):
+    def __init__(self, wsdl="VivaApplication", usr=str, pnr=str, my_pages=MyPages):
         super(VivaApplication, self).__init__()
         self._service = self._get_service(wsdl)
-        self._my_pages = my_pages
-        self.person_cases = self._get_person_cases()
+
+        self.usr = usr
+        self.pnr = pnr
+
+        self._my_pages = my_pages(usr, pnr)
+        self._person_cases = self._get_person_cases()
+        self._ssi = self._get_ssi()
+        self._workflow_id = self._get_workflow_id()
 
     def _get_person_cases(self):
         return self._my_pages.person_cases
