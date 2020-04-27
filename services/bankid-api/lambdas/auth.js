@@ -20,7 +20,6 @@ export const main = async event => {
   };
 
   const [error, bankIdAuthResponse] = await to(sendBankIdAuthRequest(bankIdSSMparams, payload));
-
   if (!bankIdAuthResponse) return response.failure(error);
 
   return response.success({
@@ -35,8 +34,7 @@ async function sendBankIdAuthRequest(params, payload) {
   let error, bankIdClientResponse, bankIdAuthResponse;
 
   [error, bankIdClientResponse] = await to(bankId.client(params));
-
-  if (!bankIdClientResponse) throwError(503, error);
+  if (!bankIdClientResponse) throwError(503);
 
   [error, bankIdAuthResponse] = await to(
     request.call(bankIdClientResponse, 'post', bankId.url(params.apiUrl, '/auth'), payload)
