@@ -3,7 +3,7 @@ import to from 'await-to-js';
 import { verifyToken } from '../helpers/token';
 import generateIAMPolicy from '../helpers/generateIAMPolicy';
 
-export const main = async event => {
+export async function main(event) {
   const { authorizationToken, methodArn } = event;
   let isAllowed = true;
 
@@ -16,4 +16,4 @@ export const main = async event => {
   const IAMPolicy = generateIAMPolicy('user', effect, methodArn);
 
   return IAMPolicy;
-};
+}
