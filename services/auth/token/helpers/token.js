@@ -9,7 +9,7 @@ export function signToken(jsonToSign) {
   return token;
 }
 
-export function verifyToken(token) {
+export async function verifyToken(token) {
   return jwt.verify(token, SECRET_KEY, (error, decoded) => {
     if (error) {
       throwError(401, error.message);
