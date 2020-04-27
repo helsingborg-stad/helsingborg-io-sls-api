@@ -68,3 +68,11 @@ functions:
   #         path: hello
   #         method: get
   #         authorizer: authorize
+
+resources:
+  Outputs:
+    AuthorizeLambdaFunctionArn:
+      Export:
+        Name: AuthorizeLambdaFunctionARN
+      Value:
+        Fn::GetAtt: [AuthorizeLambdaFunction, Arn]
