@@ -4,6 +4,12 @@ const resourcesStage = process.env.resourcesStage;
 
 const stageConfigs = {
   dev: {
+    token: {
+      secret: {
+        keyName: 'TokenGeneratorSecret',
+        name: 'dev/token/generation',
+      },
+    },
     bankId: {
       envsKeyName: '/bankidEnvs/dev',
     },
