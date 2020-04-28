@@ -1,8 +1,9 @@
 import jwt from 'jsonwebtoken';
+import config from '../../../../config';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import secrets from '../../../../libs/secrets';
 
-const SECRET_KEY = secrets.get('dev/token/generation', 'TokenGeneratorSecret');
+const SECRET_KEY = secrets.get(config.token.secret.name, config.token.secret.keyName);
 
 export async function signToken(jsonToSign) {
   const secret = await SECRET_KEY;
