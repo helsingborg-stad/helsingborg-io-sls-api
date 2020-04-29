@@ -49,7 +49,7 @@ function validateTokenRequestBody(json) {
  * @param {string} ssn
  */
 function isSwedishSocialSecurityNumber(ssn) {
-  if (/^(19|20)?(\d{6}(-|\s)\d{4}|(?!19|20)\d{10})$/.test(ssn)) {
+  if (/^(19|20)?(\d{6}(-|\s|\T)\d{4}|(?!19|20)\d{10})$/.test(ssn)) {
     return true;
   }
   return false;
