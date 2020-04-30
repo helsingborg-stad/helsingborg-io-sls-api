@@ -1,5 +1,4 @@
 import to from 'await-to-js';
-
 import * as response from '../../../../libs/response';
 import { signToken } from '../helpers/token';
 import { validateEventBody } from '../../../../libs/validateEventBody';
@@ -12,13 +11,13 @@ export const main = async event => {
   );
 
   if (error) return response.failure(error);
-
-  const accessToken = signToken(validatedEventBody);
+  const [error, token] = await to(signToken(jsonRequest));
+  if (error) return response.failure(error);
 
   const successResponsePayload = {
     type: 'authorizationToken',
     attributes: {
-      accessToken,
+      token,
     },
   };
   return response.success(successResponsePayload);
@@ -55,6 +54,11 @@ function isSwedishSocialSecurityNumber(ssn) {
   return false;
 }
 
+/**
+ * Check if keys exsists in object
+ * @param {object} obj
+ * @param {array} keys
+ */
 function validateKeys(obj, keys) {
   for (const i in keys) {
     if (!(keys[i] in obj)) {
