@@ -10,7 +10,7 @@ export function signToken(jsonToSign) {
 }
 
 export async function verifyToken(token) {
-  return jwt.verify(token, SECRET_KEY, (error, decoded) => {
+  return await jwt.verify(token, SECRET_KEY, (error, decoded) => {
     if (error) {
       throwError(401, error.message);
     }
