@@ -1,16 +1,24 @@
 import jwt from 'jsonwebtoken';
+import to from 'await-to-js';
+import config from '../../../../config';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
+import secrets from '../../../../libs/secrets';
 
-// TODO: Retrive and use real SECRET_KEY from AWS;
-const SECRET_KEY = 'secretKeey';
+const secretKey = secrets.get(config.token.secret.name, config.token.secret.keyName);
 
-export function signToken(jsonToSign) {
-  const token = jwt.sign(jsonToSign, SECRET_KEY);
+export async function signToken(jsonToSign) {
+  const [error, secret] = await to(secretKey);
+  if (error) throwError(500);
+
+  const token = jwt.sign(jsonToSign, secret);
   return token;
 }
 
 export async function verifyToken(token) {
-  return await jwt.verify(token, SECRET_KEY, (error, decoded) => {
+  const [error, secret] = await to(secretKey);
+  if (error) throwError(500);
+
+  return jwt.verify(token, secret, (error, decoded) => {
     if (error) {
       throwError(401, error.message);
     }
