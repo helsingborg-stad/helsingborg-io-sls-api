@@ -11,8 +11,8 @@ export const main = async event => {
   );
 
   if (error) return response.failure(error);
-  const [error, token] = await to(signToken(jsonRequest));
-  if (error) return response.failure(error);
+  const [errorSignToken, token] = await to(signToken(validatedEventBody));
+  if (errorSignToken) return response.failure(error);
 
   const successResponsePayload = {
     type: 'authorizationToken',
@@ -48,7 +48,7 @@ function validateTokenRequestBody(json) {
  * @param {string} ssn
  */
 function isSwedishSocialSecurityNumber(ssn) {
-  if (/^(19|20)?(\d{6}(-|\s|\T)\d{4}|(?!19|20)\d{10})$/.test(ssn)) {
+  if (/^(19|20)?(\d{6}(-|\s|T)\d{4}|(?!19|20)\d{10})$/.test(ssn)) {
     return true;
   }
   return false;
