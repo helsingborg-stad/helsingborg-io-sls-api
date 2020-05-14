@@ -32,12 +32,13 @@ export async function main(event) {
 
   const [dynamodbError, createFormResponse] = await to(sendCreateFormRequest(params));
   if (dynamodbError) return response.failure(dynamodbError);
+
   return response.success(201, {
     type: 'forms',
-    id: createFormResponse.rawParams.Item.formId,
+    id: formId,
     attributes: {
-      name: createFormResponse.rawParams.Item.name,
-      description: createFormResponse.rawParams.Item.description,
+      name: validatedEventBody.name,
+      description: validatedEventBody.description,
     },
   });
 }
