@@ -33,15 +33,15 @@ provider:
       forms:
         "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayResourceForms
 
-  # iamRoleStatements:
-  #   - Effect: Allow
-  #     Action:
-  #       - dynamodb:Query
-  #       - dynamodb:Scan
-  #       - dynamodb:GetItem
-  #     # Restrict our IAM role permissions to the specific table for the stage
-  #     Resource:
-  #       - "Fn::ImportValue": ${self:custom.resourcesStage}-UsersTableArn
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+
+      Resource:
+        - "Fn::ImportValue": ${self:custom.resourcesStage}-FormsTableArn
 
 functions:
   getForm:
