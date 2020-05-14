@@ -16,6 +16,9 @@ const stageConfigs = {
     users: {
       tableName: 'users',
     },
+    forms: {
+      tableName: 'forms',
+    },
   },
   prod: {
     bankId: {
