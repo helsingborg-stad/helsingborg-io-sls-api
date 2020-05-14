@@ -1,7 +1,7 @@
 import config from '../config';
 
-export function success(body) {
-  return buildResponse(200, body);
+export function success(statusCode = 200, body) {
+  return buildResponse(statusCode, body);
 }
 
 export function failure(error, stackTrace) {

@@ -24,10 +24,10 @@ export const main = async event => {
   const [error, createUserResponse] = await to(sendCreateUserRequest(params));
   if (!createUserResponse) return response.failure(error);
 
-  return response.success({
+  return response.success(201, {
     type: 'createUser',
     attributes: {
-      ...createUserResponse,
+      ...createUserResponse.rawParams.Item,
     },
   });
 };

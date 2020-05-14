@@ -1,11 +1,17 @@
 import AWS from './aws-sdk';
-import config from '../config';
-
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
-export function call(action, params) {
-  return dynamoDb[action]({
-    ...params,
-    TableName: `${config.resourcesStage}-${params.TableName}`,
-  }).promise();
+export async function call(action, params) {
+  return await dynamoDb[action](
+    {
+      ...params,
+    },
+    (err, data) => {
+      if (err) {
+        return err;
+      } else {
+        return data;
+      }
+    }
+  );
 }
