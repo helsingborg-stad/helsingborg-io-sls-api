@@ -6,31 +6,39 @@ import { validateEventBody } from '../../../libs/validateEventBody';
 import * as response from '../../../libs/response';
 import { validateKeys } from '../../../libs/validateKeys';
 import config from '../../../config';
-import * as dynamoDb from '../../../libs/dynamoDb';
+import { FORM_ITEM_TYPE } from '../helpers/constants';
+import { putItem } from '../helpers/queries';
+
 /**
- * Function for creating a form and saving it to a dynamodb.
+ * Handler function for creating a form and saving it to a dynamodb.
  */
 export async function main(event) {
   const requestBody = JSON.parse(event.body);
+
   const [validateError, validatedEventBody] = await to(
     validateEventBody(requestBody, validateCreateFormRequestBody)
   );
+
   if (validateError) return response.failure(validateError);
+
   const formId = uuid.v1();
+  const formPartitionKey = `FORM#${formId}`;
+
   const params = {
-    TableName: `${config.resourcesStage}-forms`,
+    TableName: config.forms.tableName,
     Item: {
-      PK: `FORM#${formId}`,
-      SK: `FORM#${formId}`,
-      TYPE: 'FORM',
-      formId: formId,
+      PK: formPartitionKey,
+      SK: formPartitionKey,
+      ITEM_TYPE: FORM_ITEM_TYPE,
+      id: formId,
       createdAt: Date.now(),
+      updatedAt: Date.now(),
       name: validatedEventBody.name,
       description: validatedEventBody.description,
     },
   };
 
-  const [dynamodbError, createFormResponse] = await to(sendCreateFormRequest(params));
+  const [dynamodbError] = await to(putItem(params));
   if (dynamodbError) return response.failure(dynamodbError);
 
   return response.success(201, {
@@ -41,13 +49,6 @@ export async function main(event) {
       description: validatedEventBody.description,
     },
   });
-}
-
-async function sendCreateFormRequest(params) {
-  const [error, dynamoDbResponse] = await to(dynamoDb.call('put', params));
-  if (error) throwError(error.statusCode);
-
-  return dynamoDbResponse;
 }
 
 /**
