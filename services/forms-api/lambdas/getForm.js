@@ -8,32 +8,102 @@ import * as dynamoDb from '../../../libs/dynamoDb';
 // get users (GET)
 export async function main(event) {
   const { formId } = event.pathParameters;
-  const hashKey = `FORM#${formId}`;
+  const formPartitionKey = `FORM#${formId}`;
   const params = {
     TableName: config.forms.tableName,
-    Key: {
-      PK: hashKey,
-      SK: hashKey,
+    KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
+    ExpressionAttributeValues: {
+      ':pk': formPartitionKey,
+      ':sk': formPartitionKey,
     },
   };
 
-  const [error, formGetResponse] = await to(getFormRequest(params));
+  const [error, queryResponse] = await to(getFormRequest(params));
   if (error) return response.failure(error);
 
+  const formObj = formQueryToObj(queryResponse.Items);
+  const { id, children: relationships, ...formAttributes } = formObj[formPartitionKey];
   return response.success(200, {
     type: 'forms',
-    id: formGetResponse.Item.formId,
+    id,
     attributes: {
-      name: formGetResponse.Item.name,
-      description: formGetResponse.Item.description,
-      steps: [],
-      logics: [],
+      ...formAttributes,
     },
+    relationships,
   });
 }
 
 async function getFormRequest(params) {
-  const [error, result] = await to(dynamoDb.call('get', params));
+  const [error, result] = await to(dynamoDb.call('query', params));
   if (error) throwError(error.statusCode);
+  if (result.Count === 0) throwError(404);
   return result;
+}
+
+/**
+ * Creates a nested object from a dynamoDB response;
+ * @param {array} data
+ */
+function formQueryToObj(items) {
+  const rootKey = '0';
+  const nestedHashArray = items.map(i => i.SK.match(/[^#]+(#[^#]+)?/g));
+  const obj = nestedHashArray.reduce((obj, hashArray) => {
+    const [firstHash, secondHash] = [...hashArray.slice(-2)];
+
+    /**
+     * Map the hash key from the current hashArray to an object
+     * If the hashArray only have one key we set the value of parent to rootKey
+     */
+    const hashMapping = {
+      current: secondHash || firstHash,
+      parent: secondHash ? firstHash : rootKey,
+    };
+
+    /**
+     * Create an item by combining all the hashKeys in the hashArray
+     * If the item exsists and have children add them to the item.
+     */
+    const itemSK = hashArray.join('#');
+    let item = omitObjectKeys(findItemInQuery(items, 'SK', itemSK), ['SK', 'PK']);
+
+    if (obj[hashMapping.current] && obj[hashMapping.current].children) {
+      item = {
+        ...item,
+        children: obj[hashMapping.current].children,
+      };
+    }
+
+    /**
+     * Create an item by combining all the hashKeys in the hashArray
+     * If the item exsists and have children add them to the item.
+     */
+    const newObj = {
+      ...obj,
+      [hashMapping.current]: item,
+    };
+
+    newObj[hashMapping.parent] = newObj[hashMapping.parent] || {};
+    newObj[hashMapping.parent].children = newObj[hashMapping.parent].children || {};
+    newObj[hashMapping.parent].children[hashMapping.current] = item;
+
+    return newObj;
+  }, {});
+
+  return obj[rootKey].children;
+}
+
+function findItemInQuery(items, key, value) {
+  return items.find(item => item[key] === value);
+}
+
+function omitObjectKeys(obj, keys) {
+  return Object.keys(obj).reduce(
+    (item, key) => {
+      if (keys.indexOf(key) >= 0) {
+        delete item[key];
+      }
+      return item;
+    },
+    { ...obj }
+  );
 }
