@@ -69,10 +69,10 @@ functions:
           cors: true
 
   addFormFields:
-    handler: lambdas/addFormFields.main
+    handler: lambdas/addFormQuestions.main
     events:
       - http:
-          path: /forms/{formId}/fields
+          path: /forms/{formId}/steps/{stepId}/questions
           method: post
           cors: true
 
