@@ -9,10 +9,10 @@ export const main = async event => {
   const [error, validatedEventBody] = await to(
     validateEventBody(jsonBody, validateTokenRequestBody)
   );
-
   if (error) return response.failure(error);
+
   const [errorSignToken, token] = await to(signToken(validatedEventBody));
-  if (errorSignToken) return response.failure(error);
+  if (errorSignToken) return response.failure(errorSignToken);
 
   const successResponsePayload = {
     type: 'authorizationToken',
