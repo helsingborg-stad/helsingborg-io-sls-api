@@ -8,7 +8,7 @@ const secretKey = secrets.get(config.token.secret.name, config.token.secret.keyN
 
 export async function signToken(jsonToSign) {
   const [error, secret] = await to(secretKey);
-  if (error) throwError(500);
+  if (error) throwError(error.code, error.message);
 
   const token = jwt.sign(jsonToSign, secret);
   return token;

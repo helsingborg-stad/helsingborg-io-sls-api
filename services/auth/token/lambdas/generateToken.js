@@ -20,7 +20,7 @@ export const main = async event => {
       token,
     },
   };
-  return response.success(successResponsePayload);
+  return response.success(200, successResponsePayload);
 };
 
 /**
