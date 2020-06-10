@@ -29,7 +29,7 @@ export const main = async event => {
 };
 
 async function sendUserGetRequest(params) {
-  const [error, userGetResponse] = await to(dynamoDb.call('get', params));
-  if (!userGetResponse) throwError(error);
-  return userGetResponse;
+  const [error, dbResponse] = await to(dynamoDb.call('get', params));
+  if (!dbResponse) throwError(error);
+  return dbResponse;
 }
