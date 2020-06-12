@@ -1,28 +1,17 @@
-service: viva-api
+service: viva
 
 plugins:
+  - serverless-bundle
   - serverless-offline
-  - serverless-python-requirements
 
-custom:
-  stage: ${opt:stage, self:provider.stage}
-  resourcesStages:
-    prod: prod
-    dev: dev
-  resourcesStage: ${self:custom.resourcesStages.${self:custom.stage}, self:custom.resourcesStages.dev}
-  pythonRequirements:
-    vendor: ./libs
-    invalidateCaches: true
-    dockerizePip: false
-    zip: true
-    slim: true
+custom: ${file(../../serverless.common.yml):custom}
 
 package:
   individually: true
 
 provider:
   name: aws
-  runtime: python3.7
+  runtime: nodejs12.x
   stage: dev
   region: eu-north-1
   endpointType: regional
@@ -36,6 +25,15 @@ provider:
     stage: ${self:custom.stage}
     resourcesStage: ${self:custom.resourcesStage}
 
+  apiGateway:
+    restApiId:
+      "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayRestApiId
+    restApiRootResourceId:
+      "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
+    restApiResources:
+      crm:
+        "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayResourceViva
+
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -44,74 +42,10 @@ provider:
       Resource: "*"
 
 functions:
-  example:
-    handler: example.hello
-    events:
-      - http:
-          path: example
-          method: get
-          cors: true
-
   applicationStatus:
-    handler: lambdas/application/application_status.main
+    handler: lambdas/applications.main
     events:
       - http:
-          path: viva/application/applicationstatus
-          method: get
-          cors: true
-
-  deletedParkedApplication:
-    handler: lambdas/application/deleted_parked_application.main
-    events:
-      - http:
-          path: viva/application/deletedparkedapplication
-          method: get
-          cors: true
-
-  getParkedApplication:
-    handler: lambdas/application/get_parked_application.main
-    events:
-      - http:
-          path: viva/application/getparkedapplication
-          method: get
-          cors: true
-
-  newApplication:
-    handler: lambdas/application/new_application.main
-    events:
-      - http:
-          path: viva/application/newapplication
-          method: post
-          cors: true
-
-  newCompletion:
-    handler: lambdas/application/new_completion.main
-    events:
-      - http:
-          path: viva/application/newcompletion
-          method: post
-          cors: true
-
-  newReApplication:
-    handler: lambdas/application/new_re_application.main
-    events:
-      - http:
-          path: viva/application/newreapplication
-          method: post
-          cors: true
-
-  notification:
-    handler: lambdas/application/notification.main
-    events:
-      - http:
-          path: viva/application/notification
-          method: get
-          cors: true
-
-  parkApplication:
-    handler: lambdas/application/park_application.main
-    events:
-      - http:
-          path: viva/application/parkapplication
+          path: /crm/viva/applications
           method: post
           cors: true
