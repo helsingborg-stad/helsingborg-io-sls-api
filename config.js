@@ -19,6 +19,9 @@ const stageConfigs = {
     forms: {
       tableName: 'forms',
     },
+    cases: {
+      tableName: 'cases',
+    },
   },
   prod: {
     bankId: {
@@ -26,6 +29,9 @@ const stageConfigs = {
     },
     users: {
       tableName: 'users',
+    },
+    cases: {
+      tableName: 'cases',
     },
   },
 };
