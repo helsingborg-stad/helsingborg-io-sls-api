@@ -64,3 +64,21 @@ functions:
           method: post
           cors: true
           # authorizer: ${cf:hbg-authorizer-${self:custom.stage}.AuthorizeLambdaFunctionQualifiedArn}
+
+  update:
+    handler: lambdas/update.main
+    events:
+      - http:
+          path: /cases/{id}
+          method: put
+          cors: true
+          # authorizer: ${cf:hbg-authorizer-${self:custom.stage}.AuthorizeLambdaFunctionQualifiedArn}
+
+  delete:
+    handler: lambdas/delete.main
+    events:
+      - http:
+          path: /cases/{id}
+          method: delete
+          cors: true
+          # authorizer: ${cf:hbg-authorizer-${self:custom.stage}.AuthorizeLambdaFunctionQualifiedArn}
