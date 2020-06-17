@@ -35,6 +35,7 @@ export async function main(event) {
       updatedAt: Date.now(),
       name: validatedEventBody.name,
       description: validatedEventBody.description,
+      stepOrder: [],
     },
   };
 

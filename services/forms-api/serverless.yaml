@@ -39,6 +39,7 @@ provider:
         - dynamodb:Query
         - dynamodb:GetItem
         - dynamodb:PutItem
+        - dynamodb:UpdateItem
 
       Resource:
         - "Fn::ImportValue": ${self:custom.resourcesStage}-FormsTableArn
