@@ -20,7 +20,7 @@ export const main = async event => {
   const [error, userGetResponse] = await to(sendUserGetRequest(params));
   if (!userGetResponse) return response.failure(error);
 
-  return response.success({
+  return response.success(200, {
     type: 'userGet',
     attributes: {
       ...snakeCaseKeys(userGetResponse),

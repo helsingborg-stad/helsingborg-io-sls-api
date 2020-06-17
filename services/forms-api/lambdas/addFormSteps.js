@@ -36,6 +36,8 @@ export async function main(event) {
       id: stepId,
       createdAt: Date.now(),
       updatedAt: Date.now(),
+      previousStep: requestBody.previousStep ? requestBody.previousStep : '',
+      nextStep: requestBody.nextStep ? requestBody.nextStep : '',
       show: requestBody.show,
       title: requestBody.title,
       description: requestBody.description,
