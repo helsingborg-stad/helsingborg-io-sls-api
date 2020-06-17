@@ -1,7 +1,7 @@
 /**
  * Return a copy of the object with the specified properties removed.
  * @param {obj} object
- * @param {keys} array of keys
+ * @param {keys} array The list of properties to remove.
  */
 export function objectWithoutProperties(obj, keys) {
   const target = {};

@@ -65,7 +65,7 @@ function formQueryToObj(items) {
      * If the item exsists and have children add them to the item.
      */
     const itemSK = hashArray.join('#');
-    let item = omitObjectKeys(findItemInQuery(items, 'SK', itemSK), ['SK', 'PK']);
+    let item = objectWithoutProperties(findItemInQuery(items, 'SK', itemSK), ['SK', 'PK']);
 
     if (obj[hashMapping.current] && obj[hashMapping.current].children) {
       item = {
@@ -95,18 +95,6 @@ function formQueryToObj(items) {
 
 function findItemInQuery(items, key, value) {
   return items.find(item => item[key] === value);
-}
-
-function omitObjectKeys(obj, keys) {
-  return Object.keys(obj).reduce(
-    (item, key) => {
-      if (keys.indexOf(key) >= 0) {
-        delete item[key];
-      }
-      return item;
-    },
-    { ...obj }
-  );
 }
 
 function cleanQuestion(question) {
