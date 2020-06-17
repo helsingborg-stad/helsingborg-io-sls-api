@@ -88,11 +88,16 @@ function validateCreateStepRequestBody(requestBody) {
       `The description key should be of type string and not ${typeof requestBody.title}`,
     ];
   }
+  if (requestBody.show && requestBody.show === 'true') {
+    requestBody.show = true;
+  } else if (requestBody.show && requestBody.show === 'false') {
+    requestBody.show = false;
+  }
   if (!(typeof requestBody.show === 'boolean')) {
     return [
       false,
       400,
-      `The formId key should be of type string and not ${typeof requestBody.title}`,
+      `The show key should be of type boolean and not ${typeof requestBody.title}`,
     ];
   }
   if (

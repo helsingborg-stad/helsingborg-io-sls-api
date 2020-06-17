@@ -4,6 +4,7 @@ import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import config from '../../../config';
 import * as response from '../../../libs/response';
 import * as dynamoDb from '../../../libs/dynamoDb';
+import { objectWithoutProperties } from '../../../libs/objects';
 
 // get users (GET)
 export async function main(event) {
@@ -23,14 +24,14 @@ export async function main(event) {
 
   const formObj = formQueryToObj(queryResponse.Items);
   const { id, children: relationships, ...formAttributes } = formObj[formPartitionKey];
-  return response.success(200, {
-    type: 'forms',
+  const formdata = {
     id,
     attributes: {
       ...formAttributes,
     },
     relationships,
-  });
+  };
+  return response.success(200, cleanForm(formdata));
 }
 
 async function getFormRequest(params) {
@@ -106,4 +107,45 @@ function omitObjectKeys(obj, keys) {
     },
     { ...obj }
   );
+}
+
+function cleanQuestion(question) {
+  return objectWithoutProperties(question, ['ITEM_TYPE', 'updatedAt', 'createdAt']);
+}
+
+function cleanStep(step) {
+  const cleanedStep = objectWithoutProperties(step, [
+    'ITEM_TYPE',
+    'children',
+    'updatedAt',
+    'createdAt',
+  ]);
+  const questions = step.children;
+  const questionList = [];
+  if (questions && Object.keys(questions).length > 0) {
+    for (const key of Object.keys(questions)) {
+      questionList.push(cleanQuestion(questions[key]));
+    }
+  }
+  cleanedStep.questions = questionList;
+  return cleanedStep;
+}
+/**
+ * Cleans the form data.
+ * @param {*} formdata
+ */
+function cleanForm(formdata) {
+  const cleanedForm = objectWithoutProperties(formdata, ['type', 'attributes', 'relationships']);
+  const attr = objectWithoutProperties(formdata.attributes, ['ITEM_TYPE']);
+  for (const k in attr) {
+    cleanedForm[k] = attr[k];
+  }
+  const steps = [];
+  if (formdata.relationships && Object.keys(formdata.relationships).length > 0) {
+    for (const key in formdata.relationships) {
+      steps.push(cleanStep(formdata.relationships[key]));
+    }
+  }
+  cleanedForm.steps = steps;
+  return cleanedForm;
 }
