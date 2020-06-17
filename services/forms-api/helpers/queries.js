@@ -53,3 +53,32 @@ export async function itemExists(
 
   return response;
 }
+/**
+ * Append a new item to a list in an item
+ * @param {string} TableName The name of the dynamodb table
+ * @param {string} PK The Partition Key to get in the table
+ * @param {string} SK The Sort Key to look for in the table
+ * @param {string} listName The attribute name of the list
+ * @param {any} item The item to append to the list
+ */
+export async function appendItemToList(tableName, PK, SK, listName, item) {
+  const params = {
+    TableName: tableName,
+    Key: {
+      PK,
+      SK: SK || PK,
+    },
+    UpdateExpression: 'SET #list = list_append(#list, :vals)',
+    ExpressionAttributeNames: {
+      '#list': listName,
+    },
+    ExpressionAttributeValues: {
+      ':vals': [item],
+    },
+    ReturnValues: 'ALL_NEW',
+  };
+  const [error, dynamoDbResponse] = await to(dynamoDb.call('update', params));
+  if (error) throwError(error.statusCode, error.message);
+
+  return dynamoDbResponse;
+}

@@ -5,7 +5,7 @@ import { validateEventBody } from '../../../libs/validateEventBody';
 import * as response from '../../../libs/response';
 import { validateKeys } from '../../../libs/validateKeys';
 import { STEP_ITEM_TYPE } from '../helpers/constants';
-import { putItem, itemExists } from '../helpers/queries';
+import { putItem, itemExists, appendItemToList } from '../helpers/queries';
 import config from '../../../config';
 
 /**
@@ -36,8 +36,6 @@ export async function main(event) {
       id: stepId,
       createdAt: Date.now(),
       updatedAt: Date.now(),
-      previousStep: requestBody.previousStep ? requestBody.previousStep : '',
-      nextStep: requestBody.nextStep ? requestBody.nextStep : '',
       show: requestBody.show,
       title: requestBody.title,
       description: requestBody.description,
@@ -46,6 +44,12 @@ export async function main(event) {
 
   const [dynamodbError] = await to(putItem(params));
   if (dynamodbError) return response.failure(dynamodbError);
+
+  //Adds the step to the list of steps in order that is kept in the form.
+  const [dynamoUpdateError] = await to(
+    appendItemToList(`forms`, formPartitionKey, formPartitionKey, 'stepOrder', stepId)
+  );
+  if (dynamoUpdateError) return response.failure(dynamoUpdateError);
 
   return response.success(201, {
     type: 'forms',
