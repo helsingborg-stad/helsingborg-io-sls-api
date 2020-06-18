@@ -5,11 +5,13 @@ import config from '../../../config';
 import * as response from '../../../libs/response';
 import * as dynamoDb from '../../../libs/dynamoDb';
 
-// update case by id
+/**
+ * Handler function for updateing user case by id from dynamodb
+ */
 export const main = async event => {
   const { id } = event.pathParameters;
 
-  // TODO
+  // todo: implement condition params
   const params = {
     TableName: config.cases.tableName,
     Key: {
@@ -20,7 +22,7 @@ export const main = async event => {
   const [error, casesUpdateResponse] = await to(sendCasesUpdateRequest(params));
   if (!casesUpdateResponse) return response.failure(error);
 
-  return response.success(200, {
+  return response.success(201, {
     type: 'casesUpdate',
     attributes: {
       ...casesUpdateResponse,
