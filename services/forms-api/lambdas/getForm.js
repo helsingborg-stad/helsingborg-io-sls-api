@@ -23,12 +23,10 @@ export async function main(event) {
   if (error) return response.failure(error);
 
   const formObj = formQueryToObj(queryResponse.Items);
-  const { id, children: relationships, ...formAttributes } = formObj[formPartitionKey];
+  const { id, children: relationships, ...attributes } = formObj[formPartitionKey];
   const formdata = {
     id,
-    attributes: {
-      ...formAttributes,
-    },
+    attributes,
     relationships,
   };
   return response.success(200, cleanForm(formdata));
@@ -65,7 +63,12 @@ function formQueryToObj(items) {
      * If the item exsists and have children add them to the item.
      */
     const itemSK = hashArray.join('#');
-    let item = objectWithoutProperties(findItemInQuery(items, 'SK', itemSK), ['SK', 'PK']);
+    let item = objectWithoutProperties(findItemInQuery(items, 'SK', itemSK), [
+      'SK',
+      'PK',
+      'updatedAt',
+      'createdAt',
+    ]);
 
     if (obj[hashMapping.current] && obj[hashMapping.current].children) {
       item = {
@@ -98,16 +101,11 @@ function findItemInQuery(items, key, value) {
 }
 
 function cleanQuestion(question) {
-  return objectWithoutProperties(question, ['ITEM_TYPE', 'updatedAt', 'createdAt']);
+  return objectWithoutProperties(question, ['ITEM_TYPE']);
 }
 
 function cleanStep(step) {
-  const cleanedStep = objectWithoutProperties(step, [
-    'ITEM_TYPE',
-    'children',
-    'updatedAt',
-    'createdAt',
-  ]);
+  const cleanedStep = objectWithoutProperties(step, ['ITEM_TYPE', 'children']);
   const questions = step.children;
   const questionList = [];
   if (questions && Object.keys(questions).length > 0) {
