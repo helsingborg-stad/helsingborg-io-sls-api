@@ -5,11 +5,13 @@ import config from '../../../config';
 import * as response from '../../../libs/response';
 import * as dynamoDb from '../../../libs/dynamoDb';
 
-// delete case by id
+/**
+ * Handler function for deleting user case by id in dynamodb
+ */
 export const main = async event => {
   const { id } = event.pathParameters;
 
-  // TODO
+  // todo: implement condition params
   const params = {
     TableName: config.cases.tableName,
     Key: {
