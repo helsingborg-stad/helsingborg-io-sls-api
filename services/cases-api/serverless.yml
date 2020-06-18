@@ -51,10 +51,17 @@ functions:
     handler: lambdas/get.main
     events:
       - http:
-          path: /cases/{id}
+          path: /cases/{caseId}
           method: get
           cors: true
-          # authorizer: ${cf:hbg-authorizer-${self:custom.stage}.AuthorizeLambdaFunctionQualifiedArn}
+
+  list:
+    handler: lambdas/list.main
+    events:
+      - http:
+          path: /cases
+          method: get
+          cors: true
 
   create:
     handler: lambdas/create.main
@@ -63,22 +70,19 @@ functions:
           path: /cases
           method: post
           cors: true
-          # authorizer: ${cf:hbg-authorizer-${self:custom.stage}.AuthorizeLambdaFunctionQualifiedArn}
 
   update:
     handler: lambdas/update.main
     events:
       - http:
-          path: /cases/{id}
+          path: /cases/{caseId}
           method: put
           cors: true
-          # authorizer: ${cf:hbg-authorizer-${self:custom.stage}.AuthorizeLambdaFunctionQualifiedArn}
 
   delete:
     handler: lambdas/delete.main
     events:
       - http:
-          path: /cases/{id}
+          path: /cases/{caseId}
           method: delete
           cors: true
-          # authorizer: ${cf:hbg-authorizer-${self:custom.stage}.AuthorizeLambdaFunctionQualifiedArn}
