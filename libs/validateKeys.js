@@ -1,4 +1,4 @@
-// A helper  function for validation of keys in an object
+// A helper function for validation of keys in an object
 
 export function validateKeys(obj, keys) {
   for (const i in keys) {
