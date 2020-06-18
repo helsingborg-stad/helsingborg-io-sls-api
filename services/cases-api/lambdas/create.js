@@ -1,37 +1,88 @@
 import to from 'await-to-js';
 import uuid from 'uuid';
-import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
-import config from '../../../config';
+import { validateEventBody } from '../../../libs/validateEventBody';
 import * as response from '../../../libs/response';
-import * as dynamoDb from '../../../libs/dynamoDb';
+import { validateKeys } from '../../../libs/validateKeys';
+import config from '../../../config';
+import { CASE_ITEM_TYPE } from '../helpers/constants';
 
-// create case
-export const main = async event => {
-  const data = event.detail;
+// todo: move to libs as it's used by forms too
+import { putItem } from '../helpers/queries';
 
+/**
+ * Handler function for creating a case and store in dynamodb
+ */
+export async function main(event) {
+  const requestBody = JSON.parse(event.body);
+
+  const [validateError, validatedEventBody] = await to(
+    validateEventBody(requestBody, validateCreateCaseRequestBody)
+  );
+
+  if (validateError) return response.failure(validateError);
+
+  const caseId = uuid.v1();
+  const casePartitionKey = `USER#${validatedEventBody.personalNumber}`;
+  const createdAt = Date.now();
+
+  // Case item
   const params = {
     TableName: config.cases.tableName,
     Item: {
-      uuid: uuid.v1(),
-      createdAt: Date.now(),
-      ...data,
+      PK: casePartitionKey,
+      SK: `${casePartitionKey}#CASE#${caseId}`,
+      ITEM_TYPE: CASE_ITEM_TYPE,
+      id: caseId,
+      createdAt: createdAt,
+      updatedAt: createdAt,
+      personalNumber: validatedEventBody.personalNumber,
+      type: validatedEventBody.type,
+      status: validatedEventBody.status,
+      data: validatedEventBody.data,
     },
   };
 
-  const [error, casesCreateResponse] = await to(sendCasesCreateRequest(params));
-  if (!casesCreateResponse) return response.failure(error);
+  const [dynamodbError] = await to(putItem(params));
+  if (dynamodbError) return response.failure(dynamodbError);
 
   return response.success(201, {
-    type: 'casesCreate',
+    type: 'cases',
+    id: caseId,
     attributes: {
-      ...casesCreateResponse.rawParams.Item,
+      personalNumber: validatedEventBody.personalNumber,
+      type: validatedEventBody.type,
+      status: validatedEventBody.status,
+      data: validatedEventBody.data,
     },
   });
-};
+}
 
-async function sendCasesCreateRequest(params) {
-  const [dbError, dbResponse] = await to(dynamoDb.call('put', params));
-  if (!dbResponse) throwError(dbError);
-  return dbResponse;
+/**
+ * Function for running validation on the request body.
+ * @param {obj} requestBody
+ */
+function validateCreateCaseRequestBody(requestBody) {
+  const keys = ['personalNumber', 'type', 'data'];
+  if (!validateKeys(requestBody, keys)) {
+    return [false, 400];
+  }
+
+  if (typeof requestBody.personalNumber !== 'number') {
+    return [
+      false,
+      400,
+      `personalNumber key should be of type number. Got ${typeof requestBody.personalNumber}`,
+    ];
+  }
+
+  if (typeof requestBody.type !== 'string') {
+    return [false, 400, `type key should be of type string. Got ${typeof requestBody.type}`];
+  }
+
+  if (typeof requestBody.data !== 'object') {
+    return [false, 400, `data key should be of type object. Got ${typeof requestBody.data}`];
+  }
+
+  return [true];
 }
