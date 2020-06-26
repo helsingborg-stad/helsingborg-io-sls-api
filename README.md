@@ -33,7 +33,7 @@ This ensures each change is tested on real infrastructure before being promoted 
 
 # Setup
 
-**Do this first**
+**Do first**
 
 The services are dependent on the resources that are created in this [accompanying repo](https://github.com/helsingborg-stad/helsingborg-io-sls-resources).
 
@@ -49,13 +49,13 @@ The services are dependent on the resources that are created in this [accompanyi
 
 ## Usage
 
-### Clone this repo
+### Clone repo
 
 ```
 git clone git@github.com:helsingborg-stad/helsingborg-io-sls-api.git
 ```
 
-Install shared packages
+Install shared npm packages
 
 ```
 cd helsingborg-io-sls-api
@@ -64,36 +64,18 @@ npm install
 
 ## Services
 
-Run this to deploy to your AWS account
+[BankId](https://github.com/helsingborg-stad/helsingborg-io-sls-api/tree/dev/services/bankid-api)
 
-### BankId
+[Cases](https://github.com/helsingborg-stad/helsingborg-io-sls-api/tree/dev/services/cases-api)
 
-```
-cd services/bankid-api
-npm install
-sls deploy
-```
+[Forms](https://github.com/helsingborg-stad/helsingborg-io-sls-api/tree/dev/services/forms-api)
 
-### Watson
+[Navet Microservice](https://github.com/helsingborg-stad/helsingborg-io-sls-api/tree/dev/services/navet-ms)
 
-```
-cd services/watson-api
-npm install
-sls deploy
-```
+[Users](https://github.com/helsingborg-stad/helsingborg-io-sls-api/tree/dev/services/user-api)
 
-### How to run the service on your local development environment
+[User Microservice](https://github.com/helsingborg-stad/helsingborg-io-sls-api/tree/dev/services/user-ms)
 
-Emulate AWS λ and API Gateway locally when developing your Serverless project
+[Token](https://github.com/helsingborg-stad/helsingborg-io-sls-api/tree/dev/services/auth/token)
 
-```
-cd services/<service-name>
-sls offline
-```
-
-## Extras
-
-This section contains extra information that is heplful for your development process, you will find
-thierdparty documentation and other useful links here.
-
-[Bank ID relying party guidelines (documentation)](https://www.bankid.com/bankid-i-dina-tjanster/rp-info)
+[Watson](https://github.com/helsingborg-stad/helsingborg-io-sls-api/tree/dev/services/watson-api)
