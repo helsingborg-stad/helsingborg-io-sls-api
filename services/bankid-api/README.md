@@ -16,11 +16,11 @@ Read the global requierments for this repo, can be found [here](https://github.c
 
 ### AWS API GATEWAY
 
-A running instance of a API GATEWAY on AWS that includes a gateway resource named /forms. You can find and deploy this in our [resource](https://github.com/helsingborg-stad/helsingborg-io-sls-resources/tree/dev/services/gateway) repository.
+A running instance of a API GATEWAY on AWS that includes a gateway resource named /auth. You can find and deploy this in our [resource](https://github.com/helsingborg-stad/helsingborg-io-sls-resources/tree/dev/services/gateway/resources/auth) repository.
 
 ### AWS PARAMETERSTORE
 
-A setup of AWS paramterstore on aws. This can be created from the resource api. You can find and deploy this in our [resource](https://github.com/helsingborg-stad/helsingborg-io-sls-resources/tree/dev/services/dynamos/forms) repository.
+A setup of AWS paramterstore on aws. This can be created from the resource api. You can find and deploy this in our [resource](https://github.com/helsingborg-stad/helsingborg-io-sls-resources/tree/dev/services/parameterStore) repository.
 
 ### Installation
 
@@ -48,7 +48,7 @@ When you deploy the service, serverless will output the generated url in the ter
 
 ## API
 
-### POST AUTH
+### BANKID AUTH
 
 #### Request Type
 
@@ -56,7 +56,7 @@ When you deploy the service, serverless will output the generated url in the ter
 
 #### Endpoint
 
-`/forms/{id}`
+`/bankid/auth`
 
 #### JSON PAYLOAD
 
