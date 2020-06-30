@@ -32,6 +32,8 @@ export async function main(event) {
   );
   if (validateError) return response.failure(validateError);
 
+  const { label, description, type, validations, ...other } = validatedEventBody;
+
   const params = {
     TableName: config.forms.tableName,
     Item: {
@@ -41,10 +43,11 @@ export async function main(event) {
       id: questionId,
       createdAt: Date.now(),
       updatedAt: Date.now(),
-      label: validatedEventBody.title,
-      description: validatedEventBody.description,
-      type: validatedEventBody.type,
-      validations: validatedEventBody.validations,
+      label,
+      description,
+      type,
+      validations,
+      ...other,
     },
   };
 
@@ -55,7 +58,7 @@ export async function main(event) {
     type: 'forms',
     id: formId,
     attributes: {
-      label: requestBody.title,
+      label: requestBody.label,
       description: requestBody.description,
       fieldType: requestBody.type,
       validations: requestBody.validations,
@@ -77,7 +80,7 @@ function validateCreateStepRequestBody(requestBody) {
     return [
       false,
       400,
-      `The name key should be of type string and not ${typeof requestBody.title}`,
+      `The label key should be of type string and not ${typeof requestBody.label}`,
     ];
   }
 
@@ -85,7 +88,7 @@ function validateCreateStepRequestBody(requestBody) {
     return [
       false,
       400,
-      `The description key should be of type string and not ${typeof requestBody.title}`,
+      `The description key should be of type string and not ${typeof requestBody.description}`,
     ];
   }
   if (requestBody.show && requestBody.show === 'true') {
@@ -97,7 +100,7 @@ function validateCreateStepRequestBody(requestBody) {
     return [
       false,
       400,
-      `The show key should be of type boolean and not ${typeof requestBody.title}`,
+      `The show key should be of type boolean and not ${typeof requestBody.show}`,
     ];
   }
   if (
