@@ -38,6 +38,7 @@ export async function main(event) {
       updatedAt: createdAt,
       personalNumber: validatedEventBody.personalNumber,
       type: validatedEventBody.type,
+      formId: validateEventBody.formId,
       status: validatedEventBody.status,
       data: validatedEventBody.data,
     },
@@ -63,7 +64,7 @@ export async function main(event) {
  * @param {obj} requestBody
  */
 function validateCreateCaseRequestBody(requestBody) {
-  const keys = ['personalNumber', 'type', 'data'];
+  const keys = ['personalNumber', 'type', 'data', 'formId'];
   if (!validateKeys(requestBody, keys)) {
     return [false, 400];
   }
@@ -78,6 +79,10 @@ function validateCreateCaseRequestBody(requestBody) {
 
   if (typeof requestBody.type !== 'string') {
     return [false, 400, `type key should be of type string. Got ${typeof requestBody.type}`];
+  }
+
+  if (typeof requestBody.formId !== 'string') {
+    return [false, 400, `formId key should be of type string. Got ${typeof requestBody.formId}`];
   }
 
   if (typeof requestBody.data !== 'object') {
