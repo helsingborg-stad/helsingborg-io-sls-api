@@ -37,8 +37,8 @@ export async function main(event) {
       createdAt: Date.now(),
       updatedAt: Date.now(),
       show: validatedEventBody.show || true,
-      title: validatedEventBody.title || '',
-      description: validatedEventBody.description || '',
+      title: validatedEventBody.title,
+      description: validatedEventBody.description,
       group: validatedEventBody.group || '',
       theme: validatedEventBody.theme || 'light',
       icon: validatedEventBody.icon || '',
@@ -65,7 +65,7 @@ export async function main(event) {
     id: stepId,
     message: 'step added',
     attributes: {
-      title: validatedEventBody.title || '',
+      title: validatedEventBody.title,
       description: validatedEventBody.description,
       show: validatedEventBody.show || true,
       group: validatedEventBody.group || '',
@@ -86,7 +86,7 @@ export async function main(event) {
  * @param {obj} requestBody
  */
 function validateCreateStepRequestBody(requestBody) {
-  const keys = ['title', 'show'];
+  const keys = ['title', 'description'];
   if (!validateKeys(requestBody, keys)) {
     return [false, 400];
   }
@@ -103,22 +103,11 @@ function validateCreateStepRequestBody(requestBody) {
     return [
       false,
       400,
-      `The formId key should be of type string and not ${typeof requestBody.title}`,
+      `The description key should be of type string and not ${typeof requestBody.description}`,
     ];
   }
-  if (!(typeof requestBody.show === 'boolean')) {
-    return [
-      false,
-      400,
-      `The formId key should be of type string and not ${typeof requestBody.title}`,
-    ];
-  }
-  if (!(typeof requestBody.show === 'boolean')) {
-    return [
-      false,
-      400,
-      `The formId key should be of type string and not ${typeof requestBody.title}`,
-    ];
+  if (requestBody.show && !(typeof requestBody.show === 'boolean')) {
+    return [false, 400, `The show key should be of type string and not ${typeof requestBody.show}`];
   }
 
   return [true];
