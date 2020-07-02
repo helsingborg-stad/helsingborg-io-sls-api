@@ -36,9 +36,18 @@ export async function main(event) {
       id: stepId,
       createdAt: Date.now(),
       updatedAt: Date.now(),
-      show: requestBody.show,
-      title: requestBody.title,
-      description: requestBody.description,
+      show: validatedEventBody.show || true,
+      title: validatedEventBody.title || '',
+      description: validatedEventBody.description || '',
+      group: validatedEventBody.group || '',
+      theme: validatedEventBody.theme || 'light',
+      icon: validatedEventBody.icon || '',
+      actions: validatedEventBody.actions || [
+        {
+          type: 'next',
+          label: 'Nästa',
+        },
+      ],
     },
   };
 
@@ -54,9 +63,20 @@ export async function main(event) {
   return response.success(201, {
     type: 'forms',
     id: stepId,
+    message: 'step added',
     attributes: {
-      message: 'ok',
+      title: validatedEventBody.title || '',
       description: validatedEventBody.description,
+      show: validatedEventBody.show || true,
+      group: validatedEventBody.group || '',
+      theme: validatedEventBody.theme || 'light',
+      icon: validatedEventBody.icon || '',
+      actions: validatedEventBody.actions || [
+        {
+          type: 'next',
+          label: 'Nästa',
+        },
+      ],
     },
   });
 }
@@ -75,11 +95,18 @@ function validateCreateStepRequestBody(requestBody) {
     return [
       false,
       400,
-      `The name key should be of type string and not ${typeof requestBody.title}`,
+      `The title key should be of type string and not ${typeof requestBody.title}`,
     ];
   }
 
   if (!(typeof requestBody.description === 'string')) {
+    return [
+      false,
+      400,
+      `The formId key should be of type string and not ${typeof requestBody.title}`,
+    ];
+  }
+  if (!(typeof requestBody.show === 'boolean')) {
     return [
       false,
       400,
