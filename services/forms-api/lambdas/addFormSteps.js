@@ -86,7 +86,7 @@ export async function main(event) {
  * @param {obj} requestBody
  */
 function validateCreateStepRequestBody(requestBody) {
-  const keys = ['title', 'show'];
+  const keys = ['title', 'description'];
   if (!validateKeys(requestBody, keys)) {
     return [false, 400];
   }
