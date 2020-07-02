@@ -29,8 +29,8 @@ export async function main(event) {
     const cases = queryResponse.Items.map(item => {
       const { id, ...attributes } = omitObjectKeys(item, [
         'ITEM_TYPE',
-        'updatedAt',
-        'createdAt',
+        // 'updatedAt',
+        // 'createdAt',
         'PK',
         'SK',
       ]);

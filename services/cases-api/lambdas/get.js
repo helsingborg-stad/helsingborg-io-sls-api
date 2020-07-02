@@ -30,8 +30,8 @@ export async function main(event) {
     const [item] = queryResponse.Items;
     const { id, ...attributes } = omitObjectKeys(item, [
       'ITEM_TYPE',
-      'updatedAt',
-      'createdAt',
+      // 'updatedAt',
+      // 'createdAt',
       'PK',
       'SK',
     ]);
