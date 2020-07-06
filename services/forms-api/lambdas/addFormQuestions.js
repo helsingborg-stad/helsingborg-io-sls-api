@@ -62,6 +62,7 @@ export async function main(event) {
       description: requestBody.description,
       fieldType: requestBody.type,
       validations: requestBody.validations,
+      ...other,
     },
   });
 }
