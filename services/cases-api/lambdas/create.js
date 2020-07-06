@@ -38,7 +38,7 @@ export async function main(event) {
       updatedAt: createdAt,
       personalNumber: validatedEventBody.personalNumber,
       type: validatedEventBody.type,
-      formId: validateEventBody.formId,
+      formId: validatedEventBody.formId,
       status: validatedEventBody.status,
       data: validatedEventBody.data,
     },
