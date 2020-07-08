@@ -1,6 +1,7 @@
 import to from 'await-to-js';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import * as dynamoDb from '../../../libs/dynamoDb';
+import config from '../../../config';
 
 /**
  * Get request towards dynomdb to retrive an item in a table.
@@ -81,4 +82,64 @@ export async function appendItemToList(tableName, PK, SK, listName, item) {
   if (error) throwError(error.statusCode, error.message);
 
   return dynamoDbResponse;
+}
+
+export async function updateItem(
+  TableName,
+  PK,
+  SK,
+  UpdateExpression,
+  ExpressionAttributeNames,
+  ExpressionAttributeValues
+) {
+  const params = {
+    TableName,
+    Key: {
+      PK,
+      SK: SK || PK,
+    },
+    UpdateExpression,
+    ExpressionAttributeNames,
+    ExpressionAttributeValues,
+    ReturnValues: 'ALL_NEW',
+  };
+
+  // eslint-disable-next-line no-console
+  console.log(params);
+
+  const [error, dynamoDbResponse] = await to(dynamoDb.call('update', params));
+  if (error) throwError(error.statusCode, error.message);
+
+  return dynamoDbResponse;
+}
+
+export function createUpdateExpression(
+  validKeys,
+  keys,
+  ExpressionAttributeNames,
+  ExpressionAttributeValues
+) {
+  let UpdateExpression = 'SET ';
+  let keyCounter = Object.keys(keys).length;
+
+  if (keyCounter > 0) {
+    for (const key in keys) {
+      // Prevent creation of invalid attributes.
+      if (!validKeys.includes(key)) {
+        throwError(404, 'Invalid DynamoDB update');
+        // TODO: Return error.
+      }
+
+      UpdateExpression += `#${key} = :new${key}`;
+      ExpressionAttributeNames[`#${key}`] = key;
+      ExpressionAttributeValues[`:new${key}`] = keys[key];
+
+      if (keyCounter > 1) {
+        UpdateExpression += ', ';
+        keyCounter--;
+      }
+    }
+  }
+
+  return UpdateExpression;
 }
