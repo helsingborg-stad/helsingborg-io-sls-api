@@ -1,7 +1,6 @@
 import to from 'await-to-js';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import * as dynamoDb from '../../../libs/dynamoDb';
-import config from '../../../config';
 
 /**
  * Get request towards dynomdb to retrive an item in a table.
@@ -84,14 +83,17 @@ export async function appendItemToList(tableName, PK, SK, listName, item) {
   return dynamoDbResponse;
 }
 
-export async function updateItem(
-  TableName,
-  PK,
-  SK,
-  UpdateExpression,
-  ExpressionAttributeNames,
-  ExpressionAttributeValues
-) {
+export async function updateItem(TableName, PK, SK, keys, validKeys) {
+  const ExpressionAttributeNames = {};
+  const ExpressionAttributeValues = {};
+
+  const UpdateExpression = createUpdateExpression(
+    validKeys,
+    keys,
+    ExpressionAttributeNames,
+    ExpressionAttributeValues
+  );
+
   const params = {
     TableName,
     Key: {
@@ -103,9 +105,6 @@ export async function updateItem(
     ExpressionAttributeValues,
     ReturnValues: 'ALL_NEW',
   };
-
-  // eslint-disable-next-line no-console
-  console.log(params);
 
   const [error, dynamoDbResponse] = await to(dynamoDb.call('update', params));
   if (error) throwError(error.statusCode, error.message);

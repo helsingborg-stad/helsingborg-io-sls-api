@@ -2,7 +2,7 @@ import to from 'await-to-js';
 
 import config from '../../../config';
 import * as response from '../../../libs/response';
-import { createUpdateExpression, updateItem } from '../helpers/queries';
+import { updateItem } from '../helpers/queries';
 
 export async function main(event) {
   const { formId, stepId, questionId } = event.pathParameters;
@@ -10,27 +10,16 @@ export async function main(event) {
   const questionSortKey = `${questionPartitionKey}#STEP#${stepId}#QUESTION#${questionId}`;
 
   const requestBody = JSON.parse(event.body);
-  let UpdateExpression = '';
-  const ExpressionAttributeNames = {};
-  const ExpressionAttributeValues = {};
 
   const validKeys = ['label', 'description', 'show', 'type'];
-
-  UpdateExpression = createUpdateExpression(
-    validKeys,
-    requestBody,
-    ExpressionAttributeNames,
-    ExpressionAttributeValues
-  );
 
   const [error, queryResponse] = await to(
     updateItem(
       config.forms.tableName,
       questionPartitionKey,
       questionSortKey,
-      UpdateExpression,
-      ExpressionAttributeNames,
-      ExpressionAttributeValues
+      requestBody,
+      validKeys
     )
   );
   if (error) return response.failure(error);
