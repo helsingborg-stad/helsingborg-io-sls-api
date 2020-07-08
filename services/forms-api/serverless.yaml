@@ -84,3 +84,28 @@ functions:
           path: /forms/{formId}/logics
           method: post
           cors: true
+
+  updateForm:
+    handler: lambdas/updateForm.main
+    events:
+      - http:
+          path: /forms/{formId}
+          method: put
+          cors: true
+
+  updateStep:
+    handler: lambdas/updateStep.main
+    events:
+      - http:
+          path: /forms/{formId}/steps/{stepId}
+          method: put
+          cors: true
+
+  updateQuestion:
+    handler: lambdas/updateQuestion.main
+    events:
+      - http:
+          path: /forms/{formId}/steps/{stepId}/questions/{questionId}
+          method: put
+          cors: true
+
