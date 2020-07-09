@@ -1,0 +1,79 @@
+service: hbg-forms3
+
+plugins:
+  - serverless-bundle
+  - serverless-offline
+
+custom: ${file(../../serverless.common.yml):custom}
+
+package:
+  individually: true
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: eu-north-1
+  endpointType: regional
+  logs:
+    restApi: true
+  tracing:
+    apiGateway: true
+    lambda: true
+
+  environment:
+    stage: ${self:custom.stage}
+    resourcesStage: ${self:custom.resourcesStage}
+  apiGateway:
+    restApiId:
+      "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayRestApiId
+    restApiRootResourceId:
+      "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
+    restApiResources:
+      forms3:
+        "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayResourceForms3
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+
+      Resource:
+        - "Fn::ImportValue": ${self:custom.resourcesStage}-Forms3TableArn
+
+functions:
+  getFormList:
+    handler: lambdas/getFormList.main
+    events:
+      - http:
+          path: /forms3
+          method: get
+          cors: true
+
+  getForm:
+    handler: lambdas/getForm.main
+    events:
+      - http:
+          path: /forms3/{formId}
+          method: get
+          cors: true
+
+  createForm:
+    handler: lambdas/createForm.main
+    events:
+      - http:
+          path: /forms3
+          method: post
+          cors: true
+  
+  updateForm:
+    handler: lambdas/updateForm.main
+    events:
+      - http:
+          path: /forms3/{formId}
+          method: put
+          cors: true
