@@ -19,7 +19,7 @@ export function failure(error, stackTrace) {
   return buildResponse(error.status, errorBody);
 }
 
-function buildResponse(statusCode, body) {
+export function buildResponse(statusCode, body) {
   const jsonApi = {
     jsonapi: {
       version: '1.0',
