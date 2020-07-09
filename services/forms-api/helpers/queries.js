@@ -83,6 +83,16 @@ export async function appendItemToList(tableName, PK, SK, listName, item) {
   return dynamoDbResponse;
 }
 
+/**
+ * Update an dynamoDB item
+ *
+ * @param TableName   {string} TableName of the dynamoDB table
+ * @param PK {string} Partition key for the item that shall be updated
+ * @param SK {string} Sort key for the item that shall be updated
+ * @param keys        Set of key value pars that shall be used as expression values
+ * @param validKeys   Set of allowed keys for the item that shall be updated
+ * @returns {Promise<unknown>}  Response from dynamoDB with all attributes of the updated item
+ */
 export async function updateItem(TableName, PK, SK, keys, validKeys) {
   const ExpressionAttributeNames = {};
   const ExpressionAttributeValues = {};
