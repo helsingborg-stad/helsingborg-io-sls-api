@@ -65,8 +65,9 @@ When you deploy the service, serverless will output the generated url in the ter
     },
     "data": [ 
       { form1 }, 
-      {form2}, 
-      ... ]
+      {form2 }, 
+      ... 
+      ]
 }
 ```
 

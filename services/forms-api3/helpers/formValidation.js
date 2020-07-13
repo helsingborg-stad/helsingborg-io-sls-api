@@ -12,7 +12,6 @@ const requiredStepProperties = [
 const requiredQuestionProperties = [
   { name: 'id', type: 'string' },
   { name: 'type', type: 'string' },
-  { name: 'label', type: 'string' },
 ];
 
 function validateTypes(data, requiredProps) {
