@@ -20,7 +20,7 @@ export async function main(event) {
   if (queryResponse[1].Count === 0) {
     return buildResponse(404, { error: 'Form with that id not found in the database.' });
   }
-  return buildResponse(200, queryResponse[1].Items);
+  return buildResponse(200, queryResponse[1].Items[0]);
 }
 
 export async function getFormRequest(params) {
