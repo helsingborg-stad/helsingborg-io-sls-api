@@ -10,9 +10,23 @@ The Bankid Service is a RESTful API that allows you use the following bankid int
 
 Complete documentation [Bank ID relying party guidelines (documentation)](https://www.bankid.com/bankid-i-dina-tjanster/rp-info)
 
-## Requirements
+## Getting started
 
-Read the global requierments for this repo, can be found [here](https://github.com/helsingborg-stad/helsingborg-io-sls-api/blob/dev/README.md)
+1. Read the global requierments for this repo, can be found [here](https://github.com/helsingborg-stad/helsingborg-io-sls-api/blob/dev/README.md)
+
+2. Create a S3 Bucket and upload bankd-id certificates - two files .ca and .pfx. Save the bucket name for reference in step 3.
+
+3. Setup env variables (aka. AWS PARAMETERSTORE)
+
+```
+{
+    "apiUrl": "https://something/rp/v5", //BankId Root URL
+    "passphrase": "yourPassPhrase", //Bankid Passphrase
+    "bucketName": "example-bucketname-1i52eggtf17ir", //Bucket name reference
+    "caName": "bankid.ca",  //Filename of your .ca file
+    "pfxName": "FPTestcert2.pfx" //Filename of your .pfx file
+}
+```
 
 ### AWS API GATEWAY
 
