@@ -7,11 +7,15 @@ import * as dynamoDb from '../../../libs/dynamoDb';
  * Handler function for all forms from the database.
  */
 export async function main(event) {
-  const params = { TableName: config.forms3.tableName };
+  const params = {
+    TableName: config.forms3.tableName,
+    ProjectionExpression: '#n, description, id, createdAt, updatedAt',
+    ExpressionAttributeNames: { '#n': 'name' },
+  };
   const [error, queryResponse] = await to(makeScanQuery(params));
   if (error) return buildResponse(400, error);
 
-  return buildResponse(200, queryResponse[1].Items);
+  return buildResponse(200, { count: queryResponse[1].Count, forms: queryResponse[1].Items });
 }
 
 async function makeScanQuery(params) {
