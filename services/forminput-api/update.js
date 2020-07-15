@@ -31,5 +31,5 @@ export const main = async event => {
     return failure({ status: ok, error: result });
   }
 
-  return success({ status: true });
+  return success(200, { status: true });
 };

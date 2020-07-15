@@ -12,7 +12,7 @@ export const main = async event => {
     return response.failure(error);
   }
 
-  return response.success({
+  return response.success(200, {
     status: true,
     type: 'watsonSession',
     attributes: { ...sessionResponse.result },

@@ -31,7 +31,7 @@ export const main = async event => {
 
   const [error, bankIdSignResponse] = await to(sendBankIdSignRequest(bankidSSMParams, payload));
   if (!bankIdSignResponse) return failure(error);
-  return success({
+  return success(200, {
     type: 'bankIdSign',
     attributes: {
       ...bankIdSignResponse.data,

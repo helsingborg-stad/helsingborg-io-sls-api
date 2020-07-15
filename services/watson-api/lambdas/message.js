@@ -28,7 +28,7 @@ export const main = async event => {
     return response.failure(error);
   }
 
-  return response.success({
+  return response.success(200, {
     type: 'watsonMessage',
     attributes: { ...messageResponse.result, session_id: verifiedSessionId },
   });

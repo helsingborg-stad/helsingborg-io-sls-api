@@ -20,7 +20,7 @@ export const main = async event => {
 
   if (!bankIdCancelResponse) return response.failure(error);
 
-  return response.success({
+  return response.success(200, {
     type: 'bankidCancel',
     attributes: {
       ...snakeCaseKeys(bankIdCancelResponse.data),

@@ -22,7 +22,7 @@ export const main = async event => {
   const [error, bankIdAuthResponse] = await to(sendBankIdAuthRequest(bankIdSSMparams, payload));
   if (!bankIdAuthResponse) return response.failure(error);
 
-  return response.success({
+  return response.success(200, {
     type: 'bankIdAuth',
     attributes: {
       ...snakeCaseKeys(bankIdAuthResponse.data),

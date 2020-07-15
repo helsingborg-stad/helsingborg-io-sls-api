@@ -31,7 +31,7 @@ export const main = async event => {
     );
   }
 
-  return response.success({
+  return response.success(200, {
     type: 'bankIdCollect',
     attributes: {
       ...snakeCaseKeys(bankIdCollectResponse.data),

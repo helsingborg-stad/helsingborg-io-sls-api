@@ -27,5 +27,5 @@ export const main = async event => {
     return failure({ status: false, error: 'Item not found.' });
   }
 
-  return success(result.Item);
+  return success(200, result.Item);
 };
