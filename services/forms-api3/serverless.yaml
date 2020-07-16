@@ -41,6 +41,7 @@ provider:
         - dynamodb:GetItem
         - dynamodb:PutItem
         - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
 
       Resource:
         - "Fn::ImportValue": ${self:custom.resourcesStage}-Forms3TableArn
@@ -69,11 +70,19 @@ functions:
           path: /forms3
           method: post
           cors: true
-  
+
   updateForm:
     handler: lambdas/updateForm.main
     events:
       - http:
           path: /forms3/{formId}
           method: put
+          cors: true
+
+  deleteForm:
+    handler: lambdas/deleteForm.main
+    events:
+      - http:
+          path: /forms3/{formId}
+          method: delete
           cors: true
