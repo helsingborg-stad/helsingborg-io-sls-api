@@ -6,11 +6,11 @@ The Form Service purpose is to provide templates of forms that describes the con
 
 ## Description
 
-The Form Serivce is a RESTful API that allows you to create, update, read and delete (not implemented yet) Form templates.
+The Form Service is a RESTful API that allows you to create, update, read and delete (not implemented yet) Form templates.
 
 ## Requirements
 
-Read the global requierments for this repo, can be found [here](https://github.com/helsingborg-stad/helsingborg-io-sls-api/blob/dev/README.md)
+Read the global requirements for this repo, can be found [here](https://github.com/helsingborg-stad/helsingborg-io-sls-api/blob/dev/README.md)
 
 ### AWS API GATEWAY
 
@@ -63,10 +63,10 @@ When you deploy the service, serverless will output the generated url in the ter
     "jsonapi": {
         "version": "1.0"
     },
-    "data": [ 
-      { form1 }, 
-      {form2 }, 
-      ... 
+    "data": [
+      { form1 },
+      {form2 },
+      ...
       ]
 }
 ```
@@ -81,7 +81,7 @@ When you deploy the service, serverless will output the generated url in the ter
 
 `/forms3/{id}`
 
-#### Excpected Response
+#### Expected Response
 
 ```
 {
@@ -128,22 +128,22 @@ When you deploy the service, serverless will output the generated url in the ter
 
 ```
 {
-            "description": "A nice form",
-            "name": "Form Name"
-            "steps": [
+    "description": "A nice form",
+    "name": "Form Name",
+    "steps": [
+        {
+            "title": "first step",
+            "description": "A good beginning",
+            "questions": [
                 {
-                    "title": "first step",
-                    "description": "A good beginning"
-                    "questions": [
-                        {
-                            "type": "text",
-                            "id": "123123",
-                            "label": "Good stuff"
-                        }
-                    ],
+                    "type": "text",
+                    "id": "123123",
+                    "label": "Good stuff"
                 }
-            ],
+            ]
         }
+    ]
+}
 ```
 
 #### Expected JSON Response
@@ -254,3 +254,23 @@ When you deploy the service, serverless will output the generated url in the ter
 }
 ```
 
+### DELETE FORM
+
+#### Request Type
+
+`DELETE`
+
+#### Endpoint
+
+`/forms3/{id}`
+
+#### Expected Response
+
+```
+{
+    "jsonapi": {
+        "version": "1.0"
+    },
+    "data": {}
+}
+```
