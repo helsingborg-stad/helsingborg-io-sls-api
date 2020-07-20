@@ -1,6 +1,5 @@
 import to from 'await-to-js';
 import snakeCaseKeys from 'snakecase-keys';
-import jwt from 'jsonwebtoken';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
 import config from '../../../config';
@@ -23,16 +22,10 @@ export const main = async event => {
   const [error, bankIdAuthResponse] = await to(sendBankIdAuthRequest(bankIdSSMparams, payload));
   if (!bankIdAuthResponse) return response.failure(error);
 
-  // TODO: Setup proper production ready authentication with token
-  const token = jwt.sign({ pno: personalNumber }, `bankid`, {
-    expiresIn: '24h',
-  });
-
   return response.success(200, {
     type: 'bankIdAuth',
     attributes: {
       ...snakeCaseKeys(bankIdAuthResponse.data),
-      token,
     },
   });
 };
