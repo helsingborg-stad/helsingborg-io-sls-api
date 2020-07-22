@@ -1,5 +1,6 @@
 import to from 'await-to-js';
 import { buildResponse } from '../../../libs/response';
+import { objectWithoutProperties } from '../../../libs/objects';
 import config from '../../../config';
 import { validateFormData } from '../helpers/formValidation';
 import * as dynamoDb from '../../../libs/dynamoDb';
@@ -13,7 +14,8 @@ const forbiddenKeys = ['id', 'PK', 'createdAt'];
 export async function main(event) {
   const { formId } = event.pathParameters;
   const PK = `FORM#${formId}`;
-  const requestBody = JSON.parse(event.body);
+  //remove forbidden keys so that they are not updated
+  const requestBody = objectWithoutProperties(JSON.parse(event.body), forbiddenKeys);
 
   const ExpressionAttributeNames = {};
   const ExpressionAttributeValues = {};
@@ -46,7 +48,6 @@ export async function main(event) {
   };
 
   const [error, dynamoDbResponse] = await to(dynamoDb.call('update', params));
-
   if (error) return buildResponse(error.status, error);
 
   return buildResponse(200, dynamoDbResponse);
@@ -64,11 +65,6 @@ export function createUpdateExpression(
 
   if (keyCounter > 0) {
     for (const key in newData) {
-      // Prevent updating or creating invalid attributes
-      if (forbiddenKeys.includes(key)) {
-        errors.push(`The property '${key}' cannot be updated.`);
-      }
-
       UpdateExpression += `#${key} = :new${key}`;
       ExpressionAttributeNames[`#${key}`] = key;
       ExpressionAttributeValues[`:new${key}`] = newData[key];
