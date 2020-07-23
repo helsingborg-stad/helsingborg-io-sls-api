@@ -48,8 +48,12 @@ async function sendBankIdCollectRequest(params, payload) {
   [error, bankIdCollectResponse] = await to(
     request.call(bankIdClientResponse, 'post', bankId.url(params.apiUrl, '/collect'), payload)
   );
-
-  if (!bankIdCollectResponse) throwError(error.response.status, error.response.data.details);
+  if (!bankIdCollectResponse) {
+    if (error.response.data.details === 'No such order') {
+      throwError(404, error.response.data.details);
+    }
+    throwError(error.response.status, error.response.data.details);
+  }
 
   return bankIdCollectResponse;
 }
