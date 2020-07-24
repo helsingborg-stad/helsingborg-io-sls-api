@@ -35,7 +35,7 @@ export async function main(event) {
   const data = requestBody.data || {};
   //update the data (answers) only if we've sent some.
   if (Object.keys(data).length > 0) {
-    if (requestBody.currentPage) {
+    if (requestBody.currentPage || requestBody.status) {
       UpdateExpression += ', ';
     }
     ExpressionAttributeNames['#data'] = 'data';
@@ -71,6 +71,7 @@ export async function main(event) {
     caseId,
     personalNumber: userId,
     type: queryResponse.Attributes.type,
+    currentPage: queryResponse.Attributes.currentPage,
     status: queryResponse.Attributes.status,
     data: queryResponse.Attributes.data,
   });
