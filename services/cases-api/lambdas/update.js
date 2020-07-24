@@ -26,10 +26,16 @@ export async function main(event) {
     ExpressionAttributeNames['#status'] = 'status';
     ExpressionAttributeValues[':newStatus'] = requestBody.status;
   }
+  if (requestBody.status && requestBody.currentPage) UpdateExpression += ', ';
+  if (requestBody.currentPage) {
+    UpdateExpression += '#currentPage = :newPage';
+    ExpressionAttributeNames['#currentPage'] = 'currentPage';
+    ExpressionAttributeValues[':newPage'] = requestBody.currentPage;
+  }
   const data = requestBody.data || {};
   //update the data (answers) only if we've sent some.
   if (Object.keys(data).length > 0) {
-    if (requestBody.status) {
+    if (requestBody.currentPage) {
       UpdateExpression += ', ';
     }
     ExpressionAttributeNames['#data'] = 'data';
