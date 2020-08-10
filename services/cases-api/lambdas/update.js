@@ -26,16 +26,16 @@ export async function main(event) {
     ExpressionAttributeNames['#status'] = 'status';
     ExpressionAttributeValues[':newStatus'] = requestBody.status;
   }
-  if (requestBody.status && requestBody.currentPage) UpdateExpression += ', ';
-  if (requestBody.currentPage) {
-    UpdateExpression += '#currentPage = :newPage';
-    ExpressionAttributeNames['#currentPage'] = 'currentPage';
-    ExpressionAttributeValues[':newPage'] = requestBody.currentPage;
+  if (requestBody.status && requestBody.currentStep) UpdateExpression += ', ';
+  if (requestBody.currentStep) {
+    UpdateExpression += '#currentStep = :newStep';
+    ExpressionAttributeNames['#currentStep'] = 'currentStep';
+    ExpressionAttributeValues[':newStep'] = requestBody.currentStep;
   }
   const data = requestBody.data || {};
   //update the data (answers) only if we've sent some.
   if (Object.keys(data).length > 0) {
-    if (requestBody.currentPage || requestBody.status) {
+    if (requestBody.currentStep || requestBody.status) {
       UpdateExpression += ', ';
     }
     ExpressionAttributeNames['#data'] = 'data';
@@ -71,7 +71,7 @@ export async function main(event) {
     caseId,
     personalNumber: userId,
     type: queryResponse.Attributes.type,
-    currentPage: queryResponse.Attributes.currentPage,
+    currentStep: queryResponse.Attributes.currentStep,
     status: queryResponse.Attributes.status,
     data: queryResponse.Attributes.data,
   });
