@@ -11,6 +11,9 @@ export const main = async event => {
   );
   if (error) return response.failure(error);
 
+  // Add expiration time to JWT token, 15 min.
+  // The format is in seconds since Jan 1, 1970, not milliseconds, to match the default iat format of JWT.
+  validatedEventBody.exp = parseInt(Date.now() / 1000) + 15 * 60;
   const [errorSignToken, token] = await to(signToken(validatedEventBody));
   if (errorSignToken) return response.failure(errorSignToken);
 
