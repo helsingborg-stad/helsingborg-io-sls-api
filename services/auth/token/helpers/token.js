@@ -10,6 +10,10 @@ export async function signToken(jsonToSign) {
   const [error, secret] = await to(secretKey);
   if (error) throwError(error.code, error.message);
 
+  // Add expiration time to JWT token, 15 min.
+  // The format is in seconds since Jan 1, 1970, not milliseconds, to match the default iat format of JWT.
+  jsonToSign.exp = parseInt(Date.now() / 1000) + 15 * 60;
+
   const token = jwt.sign(jsonToSign, secret);
   return token;
 }
