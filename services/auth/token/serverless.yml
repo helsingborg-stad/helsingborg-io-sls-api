@@ -41,7 +41,7 @@ provider:
       Resource: "*"
 
 functions:
-  authorize:
+  authorizer:
     handler: lambdas/authorize.main
 
   generateToken:
@@ -52,19 +52,36 @@ functions:
           method: post
           cors: true
           private: true
-  # Lambda for testing the auhtorization
-  # hello:
-  #   handler: lambdas/hello.main
-  #   events:
-  #     - http:
-  #         path: hello
-  #         method: get
-  #         authorizer: authorize
 
 resources:
+  Resources:
+    AuthorizerPermission:
+      Type: AWS::Lambda::Permission
+      Properties:
+        FunctionName:
+          Fn::GetAtt: AuthorizerLambdaFunction.Arn
+        Action: lambda:InvokeFunction
+        Principal:
+          Fn::Join: ["", ["apigateway.", { Ref: "AWS::URLSuffix" }]]
+    Authorizer:
+      Type: AWS::ApiGateway::Authorizer
+      Properties:
+        Name: ${self:custom.stage}-Authorizer
+        RestApiId: ${self:provider.apiGateway.restApiId}
+        Type: TOKEN
+        IdentitySource: method.request.header.Authorization
+        AuthorizerResultTtlInSeconds: 300
+        AuthorizerUri:
+          Fn::Join:
+            - ""
+            - - "arn:aws:apigateway:"
+              - Ref: "AWS::Region"
+              - ":lambda:path/2015-03-31/functions/"
+              - Fn::GetAtt: "AuthorizerLambdaFunction.Arn"
+              - "/invocations"
   Outputs:
-    AuthorizeLambdaFunctionArn:
-      Export:
-        Name: AuthorizeLambdaFunctionARN
+    AuthorizerId:
       Value:
-        Fn::GetAtt: [AuthorizeLambdaFunction, Arn]
+        Ref: Authorizer
+      Export:
+        Name: ${self:custom.stage}-authorizerId
