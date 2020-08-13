@@ -51,4 +51,6 @@ functions:
           path: /users/{personalNumber}
           method: get
           cors: true
-          # authorizer: ${cf:hbg-authorizer-${self:custom.stage}.AuthorizeLambdaFunctionQualifiedArn}
+          authorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue ${self:custom.stage}-authorizerId
