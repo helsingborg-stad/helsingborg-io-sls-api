@@ -17,18 +17,18 @@ export async function main(event) {
 
   const requestBody = JSON.parse(event.body);
   let keyCounter = 0;
-  let UpdateExpression = 'SET ';
-  const ExpressionAttributeNames = {};
-  const ExpressionAttributeValues = {};
+  let UpdateExpression = 'SET #updated = :updated';
+  const ExpressionAttributeNames = { '#updated': 'updatedAt' };
+  const ExpressionAttributeValues = { ':updated': Date.now() };
   //if we sent a status, then we update it.
   if (requestBody.status) {
-    UpdateExpression += '#status = :newStatus';
+    UpdateExpression += ', #status = :newStatus';
     ExpressionAttributeNames['#status'] = 'status';
     ExpressionAttributeValues[':newStatus'] = requestBody.status;
   }
-  if (requestBody.status && requestBody.currentStep) UpdateExpression += ', ';
+  // if (requestBody.status && requestBody.currentStep) UpdateExpression += ', ';
   if (requestBody.currentStep) {
-    UpdateExpression += '#currentStep = :newStep';
+    UpdateExpression += ', #currentStep = :newStep';
     ExpressionAttributeNames['#currentStep'] = 'currentStep';
     ExpressionAttributeValues[':newStep'] = requestBody.currentStep;
   }
@@ -73,6 +73,7 @@ export async function main(event) {
     type: queryResponse.Attributes.type,
     currentStep: queryResponse.Attributes.currentStep,
     status: queryResponse.Attributes.status,
+    updatedAt: queryResponse.Attributes.updatedAt,
     data: queryResponse.Attributes.data,
   });
 }
