@@ -62,6 +62,9 @@ functions:
           path: /cases
           method: get
           cors: true
+          authorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   create:
     handler: lambdas/create.main
