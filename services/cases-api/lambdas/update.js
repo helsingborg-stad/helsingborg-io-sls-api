@@ -68,13 +68,15 @@ export async function main(event) {
   if (error) return response.failure(error);
 
   return response.success(200, {
-    caseId,
-    personalNumber: userId,
-    type: queryResponse.Attributes.type,
-    currentStep: queryResponse.Attributes.currentStep,
-    status: queryResponse.Attributes.status,
-    updatedAt: queryResponse.Attributes.updatedAt,
-    data: queryResponse.Attributes.data,
+    type: 'cases',
+    id: caseId,
+    attributes: {
+      personalNumber: userId,
+      type: queryResponse.Attributes.type,
+      currentStep: queryResponse.Attributes.currentStep,
+      status: queryResponse.Attributes.status,
+      data: queryResponse.Attributes.data,
+    },
   });
 }
 

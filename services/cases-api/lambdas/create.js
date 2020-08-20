@@ -51,6 +51,7 @@ export async function main(event) {
     type: 'cases',
     id: caseId,
     attributes: {
+      formId: validatedEventBody.formId,
       personalNumber: validatedEventBody.personalNumber,
       type: validatedEventBody.type,
       status: validatedEventBody.status,
