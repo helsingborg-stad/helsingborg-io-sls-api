@@ -1,4 +1,5 @@
 import to from 'await-to-js';
+import jwt from 'jsonwebtoken';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
 import config from '../../../config';
@@ -9,8 +10,15 @@ import * as dynamoDb from '../../../libs/dynamoDb';
  * Handler function for retrieving user cases from dynamodb
  */
 export async function main(event) {
-  const userId = event.headers.Authorization;
-  const casePartitionKey = `USER#${userId}`;
+  const authorizationValue = event.headers.Authorization;
+
+  const token = authorizationValue.includes('Bearer')
+    ? authorizationValue.substr(authorizationValue.indexOf(' ') + 1)
+    : authorizationValue;
+
+  const decodedToken = jwt.decode(token);
+
+  const casePartitionKey = `USER#${decodedToken.personalNumber}`;
   const caseSortKey = casePartitionKey;
 
   const params = {
