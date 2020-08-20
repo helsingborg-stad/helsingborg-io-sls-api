@@ -68,7 +68,8 @@ export async function main(event) {
   if (error) return response.failure(error);
 
   return response.success(200, {
-    caseId,
+    id: caseId,
+    formId: queryResponse.Attributes.formId,
     personalNumber: userId,
     type: queryResponse.Attributes.type,
     currentStep: queryResponse.Attributes.currentStep,

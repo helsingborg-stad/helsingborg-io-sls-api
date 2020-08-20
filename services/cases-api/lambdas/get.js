@@ -28,19 +28,9 @@ export async function main(event) {
 
   if (queryResponse.Count > 0) {
     const [item] = queryResponse.Items;
-    const { id, ...attributes } = omitObjectKeys(item, [
-      'ITEM_TYPE',
-      // 'updatedAt',
-      // 'createdAt',
-      'PK',
-      'SK',
-    ]);
+    const filteredItem = omitObjectKeys(item, ['ITEM_TYPE', 'PK', 'SK']);
 
-    return response.success(200, {
-      type: 'cases',
-      id,
-      attributes,
-    });
+    return response.success(200, filteredItem);
   } else {
     return response.success(200, {
       type: 'cases',

@@ -48,14 +48,14 @@ export async function main(event) {
   if (dynamodbError) return response.failure(dynamodbError);
 
   return response.success(201, {
-    type: 'cases',
     id: caseId,
-    attributes: {
-      personalNumber: validatedEventBody.personalNumber,
-      type: validatedEventBody.type,
-      status: validatedEventBody.status,
-      data: validatedEventBody.data,
-    },
+    formId: validatedEventBody.formId,
+    personalNumber: validatedEventBody.personalNumber,
+    type: validatedEventBody.type,
+    status: validatedEventBody.status,
+    data: validatedEventBody.data,
+    createdAt: createdAt,
+    updatedAt: createdAt,
   });
 }
 
