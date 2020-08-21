@@ -15,6 +15,8 @@ provider:
   stage: dev
   region: eu-north-1
   endpointType: regional
+  apiKeys:
+    - helsingborg-io-forms-apikey
   logs:
     restApi: true
   tracing:
@@ -54,6 +56,7 @@ functions:
           path: /forms3
           method: get
           cors: true
+          private: true
 
   getForm:
     handler: lambdas/getForm.main
@@ -62,6 +65,8 @@ functions:
           path: /forms3/{formId}
           method: get
           cors: true
+          private: true
+
 
   createForm:
     handler: lambdas/createForm.main
@@ -70,6 +75,8 @@ functions:
           path: /forms3
           method: post
           cors: true
+          private: true
+
 
   updateForm:
     handler: lambdas/updateForm.main
@@ -78,6 +85,8 @@ functions:
           path: /forms3/{formId}
           method: put
           cors: true
+          private: true
+
 
   deleteForm:
     handler: lambdas/deleteForm.main
@@ -86,3 +95,5 @@ functions:
           path: /forms3/{formId}
           method: delete
           cors: true
+          private: true
+
