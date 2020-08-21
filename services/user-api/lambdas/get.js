@@ -1,4 +1,5 @@
 import to from 'await-to-js';
+import jwt from 'jsonwebtoken';
 import camelCase from 'camelcase';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
@@ -10,12 +11,18 @@ import * as dynamoDb from '../../../libs/dynamoDb';
  * Get the user with the personal number specified in the path
  */
 export const main = async event => {
-  const { personalNumber } = event.pathParameters;
+  const authorizationValue = event.headers.Authorization;
+
+  const token = authorizationValue.includes('Bearer')
+    ? authorizationValue.substr(authorizationValue.indexOf(' ') + 1)
+    : authorizationValue;
+
+  const decodedToken = jwt.decode(token);
 
   const params = {
     TableName: config.users.tableName,
     Key: {
-      personalNumber,
+      personalNumber: decodedToken.personalNumber,
     },
   };
 

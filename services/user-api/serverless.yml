@@ -54,3 +54,14 @@ functions:
           authorizer:
             type: CUSTOM
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
+
+  me:
+    handler: lambdas/get.main
+    events:
+      - http:
+          path: /users/me
+          method: get
+          cors: true
+          authorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue ${self:custom.stage}-authorizerId
