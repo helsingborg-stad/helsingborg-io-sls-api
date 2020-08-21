@@ -6,7 +6,7 @@ import * as response from '../../../libs/response';
 import { validateKeys } from '../../../libs/validateKeys';
 import config from '../../../config';
 import { CASE_ITEM_TYPE } from '../helpers/constants';
-
+import { decodeToken } from '../../../libs/token';
 // todo: move to libs as it's used by forms too
 import { putItem } from '../helpers/queries';
 
@@ -14,6 +14,7 @@ import { putItem } from '../helpers/queries';
  * Handler function for creating a case and store in dynamodb
  */
 export async function main(event) {
+  const decodedToken = decodeToken(event);
   const requestBody = JSON.parse(event.body);
 
   const [validateError, validatedEventBody] = await to(
@@ -23,7 +24,7 @@ export async function main(event) {
   if (validateError) return response.failure(validateError);
 
   const caseId = uuid.v1();
-  const casePartitionKey = `USER#${validatedEventBody.personalNumber}`;
+  const casePartitionKey = `USER#${decodedToken.personalNumber}`;
   const createdAt = Date.now();
 
   // Case item
@@ -36,7 +37,7 @@ export async function main(event) {
       id: caseId,
       createdAt: createdAt,
       updatedAt: createdAt,
-      personalNumber: validatedEventBody.personalNumber,
+      personalNumber: decodedToken.personalNumber,
       type: validatedEventBody.type,
       formId: validatedEventBody.formId,
       status: validatedEventBody.status,
@@ -52,7 +53,7 @@ export async function main(event) {
     id: caseId,
     attributes: {
       formId: validatedEventBody.formId,
-      personalNumber: validatedEventBody.personalNumber,
+      personalNumber: decodedToken.personalNumber,
       type: validatedEventBody.type,
       status: validatedEventBody.status,
       data: validatedEventBody.data,
@@ -65,17 +66,9 @@ export async function main(event) {
  * @param {obj} requestBody
  */
 function validateCreateCaseRequestBody(requestBody) {
-  const keys = ['personalNumber', 'type', 'data', 'formId'];
+  const keys = ['type', 'data', 'formId'];
   if (!validateKeys(requestBody, keys)) {
     return [false, 400];
-  }
-
-  if (typeof requestBody.personalNumber !== 'number') {
-    return [
-      false,
-      400,
-      `personalNumber key should be of type number. Got ${typeof requestBody.personalNumber}`,
-    ];
   }
 
   if (typeof requestBody.type !== 'string') {

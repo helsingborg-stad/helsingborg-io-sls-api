@@ -1,17 +1,20 @@
 import to from 'await-to-js';
+import jwt from 'jsonwebtoken';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
-
 import config from '../../../config';
 import * as response from '../../../libs/response';
 import * as dynamoDb from '../../../libs/dynamoDb';
+import { objectWithoutProperties } from '../../../libs/objects';
+import { decodeToken } from '../../../libs/token';
 
 /**
  * Handler function for retrieving user case by id from dynamodb
  */
 export async function main(event) {
   const { caseId } = event.pathParameters;
-  const userId = event.headers.Authorization;
-  const casePartitionKey = `USER#${userId}`;
+  const decodedToken = decodeToken(event);
+
+  const casePartitionKey = `USER#${decodedToken.personalNumber}`;
   const caseSortKey = `${casePartitionKey}#CASE#${caseId}`;
 
   const params = {
@@ -28,7 +31,7 @@ export async function main(event) {
 
   if (queryResponse.Count > 0) {
     const [item] = queryResponse.Items;
-    const { id, ...attributes } = omitObjectKeys(item, [
+    const { id, ...attributes } = objectWithoutProperties(item, [
       'ITEM_TYPE',
       // 'updatedAt',
       // 'createdAt',
@@ -53,17 +56,4 @@ async function sendGetCaseRequest(params) {
   const [error, result] = await to(dynamoDb.call('query', params));
   if (error) throwError(error.statusCode);
   return result;
-}
-
-// todo: move to libs
-function omitObjectKeys(obj, keys) {
-  return Object.keys(obj).reduce(
-    (item, key) => {
-      if (keys.indexOf(key) >= 0) {
-        delete item[key];
-      }
-      return item;
-    },
-    { ...obj }
-  );
 }
