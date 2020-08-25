@@ -54,6 +54,9 @@ functions:
           path: /cases/{caseId}
           method: get
           cors: true
+          authorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   list:
     handler: lambdas/list.main
@@ -73,6 +76,9 @@ functions:
           path: /cases
           method: post
           cors: true
+          authorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   update:
     handler: lambdas/update.main
@@ -81,6 +87,9 @@ functions:
           path: /cases/{caseId}
           method: put
           cors: true
+          authorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   delete:
     handler: lambdas/delete.main
@@ -89,3 +98,6 @@ functions:
           path: /cases/{caseId}
           method: delete
           cors: true
+          authorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue ${self:custom.stage}-authorizerId
