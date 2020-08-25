@@ -4,6 +4,7 @@ import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import config from '../../../config';
 import * as response from '../../../libs/response';
 import * as dynamoDb from '../../../libs/dynamoDb';
+import { decodeToken } from '../../../libs/token';
 
 /**
  * Handler function for updating user case by id from dynamodb
@@ -11,8 +12,9 @@ import * as dynamoDb from '../../../libs/dynamoDb';
  */
 export async function main(event) {
   const { caseId } = event.pathParameters;
-  const userId = event.headers.Authorization;
-  const casePartitionKey = `USER#${userId}`;
+  const decodedToken = decodeToken(event);
+
+  const casePartitionKey = `USER#${decodedToken.personalNumber}`;
   const caseSortKey = `${casePartitionKey}#CASE#${caseId}`;
 
   const requestBody = JSON.parse(event.body);
@@ -26,7 +28,6 @@ export async function main(event) {
     ExpressionAttributeNames['#status'] = 'status';
     ExpressionAttributeValues[':newStatus'] = requestBody.status;
   }
-  // if (requestBody.status && requestBody.currentStep) UpdateExpression += ', ';
   if (requestBody.currentStep) {
     UpdateExpression += ', #currentStep = :newStep';
     ExpressionAttributeNames['#currentStep'] = 'currentStep';
@@ -71,7 +72,7 @@ export async function main(event) {
     type: 'cases',
     id: caseId,
     attributes: {
-      personalNumber: userId,
+      personalNumber: decodedToken.personalNumber,
       type: queryResponse.Attributes.type,
       currentStep: queryResponse.Attributes.currentStep,
       status: queryResponse.Attributes.status,

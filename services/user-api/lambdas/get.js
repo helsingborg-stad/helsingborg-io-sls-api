@@ -6,18 +6,13 @@ import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import config from '../../../config';
 import * as response from '../../../libs/response';
 import * as dynamoDb from '../../../libs/dynamoDb';
+import { decodeToken } from '../../../libs/token';
 
 /**
  * Get the user with the personal number specified in the path
  */
 export const main = async event => {
-  const authorizationValue = event.headers.Authorization;
-
-  const token = authorizationValue.includes('Bearer')
-    ? authorizationValue.substr(authorizationValue.indexOf(' ') + 1)
-    : authorizationValue;
-
-  const decodedToken = jwt.decode(token);
+  const decodedToken = decodeToken(event);
 
   const params = {
     TableName: config.users.tableName,

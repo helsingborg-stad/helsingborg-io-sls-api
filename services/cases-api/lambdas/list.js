@@ -5,19 +5,13 @@ import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import config from '../../../config';
 import * as response from '../../../libs/response';
 import * as dynamoDb from '../../../libs/dynamoDb';
+import { decodeToken } from '../../../libs/token';
 
 /**
  * Handler function for retrieving user cases from dynamodb
  */
 export async function main(event) {
-  const authorizationValue = event.headers.Authorization;
-
-  const token = authorizationValue.includes('Bearer')
-    ? authorizationValue.substr(authorizationValue.indexOf(' ') + 1)
-    : authorizationValue;
-
-  const decodedToken = jwt.decode(token);
-
+  const decodedToken = decodeToken(event);
   const casePartitionKey = `USER#${decodedToken.personalNumber}`;
   const caseSortKey = casePartitionKey;
 
