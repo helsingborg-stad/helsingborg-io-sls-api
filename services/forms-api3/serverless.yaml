@@ -3,6 +3,7 @@ service: hbg-forms3
 plugins:
   - serverless-bundle
   - serverless-offline
+  - serverless-add-api-key
 
 custom: ${file(../../serverless.common.yml):custom}
 
@@ -15,8 +16,6 @@ provider:
   stage: dev
   region: eu-north-1
   endpointType: regional
-  apiKeys:
-    - helsingborg-io-forms-apikey
   logs:
     restApi: true
   tracing:
