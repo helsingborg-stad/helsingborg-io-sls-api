@@ -12,5 +12,5 @@ export function decodeToken(httpEvent) {
     : authorizationValue;
 
   const decodedToken = jwt.decode(token);
-  return decodeToken;
+  return decodedToken;
 }
