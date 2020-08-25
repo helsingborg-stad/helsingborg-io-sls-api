@@ -1,0 +1,45 @@
+service: hbg-viva-integration
+
+plugins:
+  - serverless-bundle
+  - serverless-offline
+
+custom: ${file(../../serverless.common.yml):custom}
+
+package:
+  individually: true
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: eu-north-1
+  endpointType: regional
+  logs:
+    restApi: true
+  tracing:
+    apiGateway: true
+    lambda: true
+
+  environment:
+    stage: ${self:custom.stage}
+    resourcesStage: ${self:custom.resourcesStage}
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - "dynamodb:ListStreams"
+      # Restrict our IAM role permissions to the specific table for the stage
+      Resource:
+        - "Fn::ImportValue": ${self:custom.resourcesStage}-CasesTableArn
+
+functions:
+  triggerStream:
+    handler: lambdas/triggerStream.main
+    events:
+      - stream:
+          type: dynamodb
+          batchSize: 1
+          startingPosition: LATEST
+          arn:
+            Fn::ImportValue: ${self:custom.resourcesStage}-CasesTableStreamArn
