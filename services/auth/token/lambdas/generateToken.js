@@ -1,6 +1,6 @@
 import to from 'await-to-js';
 import * as response from '../../../../libs/response';
-import { signToken } from '../helpers/token';
+import { signToken } from '../../../../libs/token';
 import { validateEventBody } from '../../../../libs/validateEventBody';
 
 export const main = async event => {

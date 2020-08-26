@@ -1,4 +1,9 @@
-// Helper function to generate an IAM policy
+/**
+ * Generates a AWS IAMPolicy with a given effect on a given resource
+ * @param {string} principalId any unique identifier for the IAM Policy.
+ * @param {string} effect the effect of the IAM Policy.
+ * @param {string} resource the target resource of the IAM Policy.
+ */
 export default function generateIAMPolicy(principalId, effect, resource) {
   const authResponse = {};
 
