@@ -5,6 +5,7 @@ import config from '../../../config';
 import * as response from '../../../libs/response';
 import * as dynamoDb from '../../../libs/dynamoDb';
 import { decodeToken } from '../../../libs/token';
+import { objectWithoutProperties } from '../../../libs/objects';
 
 /**
  * Handler function for updating user case by id from dynamodb
@@ -68,15 +69,13 @@ export async function main(event) {
   const [error, queryResponse] = await to(sendUpdateCaseRequest(params));
   if (error) return response.failure(error);
 
+  const attributes = objectWithoutProperties(queryResponse.Attributes, ['ITEM_TYPE', 'PK', 'SK']);
   return response.success(200, {
     type: 'cases',
     id: caseId,
     attributes: {
       personalNumber: decodedToken.personalNumber,
-      type: queryResponse.Attributes.type,
-      currentStep: queryResponse.Attributes.currentStep,
-      status: queryResponse.Attributes.status,
-      data: queryResponse.Attributes.data,
+      ...attributes,
     },
   });
 }
