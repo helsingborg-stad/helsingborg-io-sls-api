@@ -1,5 +1,5 @@
 import to from 'await-to-js';
-import { verifyToken } from '../helpers/token';
+import { verifyToken } from '../../../../libs/token';
 import generateIAMPolicy from '../helpers/generateIAMPolicy';
 
 export async function main(event) {
