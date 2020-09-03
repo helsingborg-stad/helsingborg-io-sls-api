@@ -50,7 +50,11 @@ provider:
         - s3:ListObject
         - s3:GetObject
       Resource:
-        - "Fn::ImportValue": ${self:custom.resourcesStage}-AttachementsBucketArn
+        - Fn::ImportValue: ${self:custom.resourcesStage}-AttachementsBucketArn
+        - Fn::Join:
+            - ""
+            - - Fn::ImportValue: ${self:custom.resourcesStage}-AttachementsBucketArn
+              - "/*"
 
 functions:
   get:
