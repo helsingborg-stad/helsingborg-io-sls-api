@@ -1,7 +1,6 @@
 import * as response from '../../../libs/response';
 import S3 from '../../../libs/S3';
-import { v4 as uuid } from 'uuid';
-import { throwError, BadRequestError } from '@helsingborg-stad/npm-api-error-handling';
+import { BadRequestError } from '@helsingborg-stad/npm-api-error-handling';
 import { decodeToken } from '../../../libs/token';
 
 // File formats that we accept.
@@ -11,18 +10,20 @@ const allowedMimes = ['image/jpeg', 'image/png', 'image/jpg'];
  * Get the user with the personal number specified in the path
  */
 export async function main(event) {
+  // eslint-disable-next-line no-console
   const decodedToken = decodeToken(event);
 
-  const { body } = event;
-  const jsonData = JSON.parse(body);
-  if (!allowedMimes.includes(body.mime)) {
-    return response.failure(new BadRequestError(`The mimeType ${body.mime} is not allowed`));
+  const { fileName, mime } = JSON.parse(event.body);
+
+  if (!allowedMimes.includes(mime)) {
+    return response.failure(new BadRequestError(`The mimeType ${mime} is not allowed`));
   }
 
-  const s3Key = `${decodedToken.personalNumber}/${body.fileName}`;
+  // TODO: Decide the filename convention when generating a url.
+  const s3Key = `${decodedToken.personalNumber}/${fileName}`;
 
   const params = {
-    ContentType: jsonData.mime,
+    ContentType: mime,
     ACL: 'public-read',
     Key: s3Key,
     Expires: 60 * 10,
@@ -34,6 +35,7 @@ export async function main(event) {
     type: 'userAttachment',
     attributes: {
       uploadUrl,
+      filePath: s3Key,
     },
   });
 }
