@@ -43,6 +43,15 @@ provider:
       Resource:
         - "Fn::ImportValue": ${self:custom.resourcesStage}-UsersTableArn
 
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+        - s3:PutObjectAcl
+        - s3:ListObject
+        - s3:GetObject
+      Resource:
+        - "Fn::ImportValue": ${self:custom.resourcesStage}-AttachementsBucketArn
+
 functions:
   get:
     handler: lambdas/get.main
@@ -61,6 +70,28 @@ functions:
       - http:
           path: /users/me
           method: get
+          cors: true
+          authorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue ${self:custom.stage}-authorizerId
+
+  getAttachements:
+    handler: lambdas/getAttachments.main
+    events:
+      - http:
+          path: /users/me/attachments
+          method: get
+          cors: true
+          authorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue ${self:custom.stage}-authorizerId
+
+  uploadAttachements:
+    handler: lambdas/uploadAttachments.main
+    events:
+      - http:
+          path: /users/me/attachments
+          method: post
           cors: true
           authorizer:
             type: CUSTOM
