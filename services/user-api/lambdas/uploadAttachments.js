@@ -31,38 +31,27 @@ export async function main(event) {
     return response.failure(new BadRequestError(`The mimeType ${mime} is not allowed`));
   }
 
-  // TODO: Decide the filename convention when generating a url.
-
   // The path to where we want to upload a file in the s3 bucket.
-  const s3Key = `${decodedToken.personalNumber}/${uuid()}_${fileName}`;
+  const s3FileName = `${uuid()}_${fileName}`;
+  const s3Key = `${decodedToken.personalNumber}/${s3FileName}`;
 
-  // // TODO: Check if we can set a file size limit in these params.
-  // const params = {
-  //   ContentType: mime,
-  //   ACL: 'public-read',
-  //   Key: s3Key,
-  //   Expires: 60 * 10,
-  // };
-
+  // TODO: Check if we can set a file size limit in these params.
   const params = {
-    bucketName: 'hbg-attachments',
-    key: s3Key,
-    contentType: mime,
-    expireTime: 60,
+    ContentType: mime,
+    ACL: 'public-read',
+    Key: s3Key,
+    Expires: 60 * 10,
   };
 
   // Request pre signed upload url from aws s3.
-  const [error, uploadUrl] = await to(S3.createPresignedPost(params));
+  const [error, uploadUrl] = await to(S3.getSignedUrl('hbg-attachments', 'putObject', params));
   if (error) return response.failure(error);
-
-  // // Request pre signed upload url from aws s3.
-  // const [error, uploadUrl] = await to(S3.getSignedUrl('hbg-attachments', 'putObject', params));
-  // if (error) return response.failure(error);
 
   return response.success(200, {
     type: 'userAttachment',
     attributes: {
-      ...uploadUrl,
+      uploadUrl,
+      fileName: s3FileName,
     },
   });
 }
