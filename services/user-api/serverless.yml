@@ -50,10 +50,10 @@ provider:
         - s3:ListObject
         - s3:GetObject
       Resource:
-        - Fn::ImportValue: ${self:custom.resourcesStage}-AttachementsBucketArn
+        - Fn::ImportValue: ${self:custom.resourcesStage}-AttachmentsBucketArn
         - Fn::Join:
             - ""
-            - - Fn::ImportValue: ${self:custom.resourcesStage}-AttachementsBucketArn
+            - - Fn::ImportValue: ${self:custom.resourcesStage}-AttachmentsBucketArn
               - "/*"
 
 functions:
@@ -92,6 +92,8 @@ functions:
 
   uploadAttachements:
     handler: lambdas/uploadAttachments.main
+    environment:
+      BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-AttachmentsBucketName
     events:
       - http:
           path: /users/me/attachments

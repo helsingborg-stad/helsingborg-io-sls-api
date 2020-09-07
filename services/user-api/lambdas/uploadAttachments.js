@@ -44,7 +44,9 @@ export async function main(event) {
   };
 
   // Request pre signed upload url from aws s3.
-  const [error, uploadUrl] = await to(S3.getSignedUrl('hbg-attachments', 'putObject', params));
+  const [error, uploadUrl] = await to(
+    S3.getSignedUrl(process.env.BUCKET_NAME, 'putObject', params)
+  );
   if (error) return response.failure(error);
 
   return response.success(200, {
