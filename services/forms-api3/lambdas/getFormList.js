@@ -9,7 +9,7 @@ import * as dynamoDb from '../../../libs/dynamoDb';
 export async function main(event) {
   const params = {
     TableName: config.forms3.tableName,
-    ProjectionExpression: '#n, description, id, createdAt, updatedAt, subform',
+    ProjectionExpression: '#n, description, id, createdAt, updatedAt, subform, formType',
     ExpressionAttributeNames: { '#n': 'name' },
   };
   const [error, queryResponse] = await to(makeScanQuery(params));
