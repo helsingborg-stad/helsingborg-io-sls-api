@@ -32,20 +32,31 @@ provider:
       "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
     restApiResources:
       crm:
-        "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayResourceViva
+        "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayResourceCrm
 
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - ssm:GetParameter
-        - ssm:DescribeParameters
-      Resource: "*"
+  # iamRoleStatements:
+  #   - Effect: Allow
+  #     Action:
+  #       - ssm:GetParameter
+  #       - ssm:DescribeParameters
+  #     Resource: "*"
 
 functions:
-  applicationStatus:
+  applications:
     handler: lambdas/applications.main
     events:
       - http:
           path: /crm/viva/applications
-          method: post
+          method: get
           cors: true
+
+  mypages:
+    handler: lambdas/mypages.main
+    events:
+      - http:
+          path: /crm/viva/mypages
+          method: get
+          cors: true
+          # authorizer:
+          #   type: CUSTOM
+          #   authorizerId: !ImportValue ${self:custom.stage}-authorizerId
