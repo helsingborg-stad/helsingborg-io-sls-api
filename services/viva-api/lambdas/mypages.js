@@ -9,14 +9,14 @@ import * as response from '../../../libs/response';
 // import { decodeToken } from '../../../libs/token';
 
 /**
- * Get user info (mypages) from viva api
+ * Get user info (mypages) from viva api adapter
  */
 
 export const main = async event => {
   /**
    * TODO:
    * Put salt in env config of some sort.
-   * Salt must match salt stored in env used by adapter api
+   * Salt must match salt stored in env used by viva api adapter
    */
   const hashids = new Hashids(
     '6Ujh)XSDB+.39DO`/R|/wWa>64*k=T3>?Xn-*$1:g T&Vv`|X 5<!CzC,YaM&e#U',
@@ -40,8 +40,7 @@ async function sendVadaMypagesRequest(hashid) {
   /**
    * TODO:
    * Put url in env config of some sort
-   * 
-   * / 
+   */
   const [err, vadaMypages] = await to(
     request.call(vadaClient, 'get', `https://viva-adapter.helsingborg.io/viva/mypages/${hashid}`)
   );
