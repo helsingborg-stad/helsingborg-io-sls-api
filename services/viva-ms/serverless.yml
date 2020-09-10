@@ -1,4 +1,4 @@
-service: hbg-viva-integration
+service: viva-ms
 
 plugins:
   - serverless-bundle
@@ -34,8 +34,18 @@ provider:
         - "Fn::ImportValue": ${self:custom.resourcesStage}-CasesTableArn
 
 functions:
-  triggerStream:
-    handler: lambdas/triggerStream.main
+  # triggerStream:
+  #   handler: lambdas/triggerStream.main
+  #   events:
+  #     - stream:
+  #         type: dynamodb
+  #         batchSize: 1
+  #         startingPosition: LATEST
+  #         arn:
+  #           Fn::ImportValue: ${self:custom.resourcesStage}-CasesTableStreamArn
+
+  applicationCreateOnStream:
+    handler: lambdas/applicationCreateOnStream.main
     events:
       - stream:
           type: dynamodb
