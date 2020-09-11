@@ -1,5 +1,0 @@
-# Viva API
-
-## Requirements
-
-## Usage
