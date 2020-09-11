@@ -34,7 +34,7 @@ provider:
         - "Fn::ImportValue": ${self:custom.resourcesStage}-CasesTableArn
 
 functions:
-   submitApplication:
+  submitApplication:
     handler: lambdas/ submitApplication.main
     events:
       - stream:
@@ -49,8 +49,8 @@ functions:
     events:
       - schedule:
           name: TestingVadaStoreMypages
-          description: 'Testing that the lambda is receiving data from vada'
-          rate: rate(1 minute)
+          description: "Testing that the lambda is receiving data from vada"
+          rate: rate(2 minute)
           enabled: false
           input:
-            user: 'Mr Spex'
+            user: "Mr Spex"
