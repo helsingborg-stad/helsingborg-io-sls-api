@@ -34,18 +34,8 @@ provider:
         - "Fn::ImportValue": ${self:custom.resourcesStage}-CasesTableArn
 
 functions:
-  # triggerStream:
-  #   handler: lambdas/triggerStream.main
-  #   events:
-  #     - stream:
-  #         type: dynamodb
-  #         batchSize: 1
-  #         startingPosition: LATEST
-  #         arn:
-  #           Fn::ImportValue: ${self:custom.resourcesStage}-CasesTableStreamArn
-
-  applicationCreateOnStream:
-    handler: lambdas/applicationCreateOnStream.main
+   submitApplication:
+    handler: lambdas/ submitApplication.main
     events:
       - stream:
           type: dynamodb
@@ -54,15 +44,13 @@ functions:
           arn:
             Fn::ImportValue: ${self:custom.resourcesStage}-CasesTableStreamArn
 
-  mypagesOnEvent:
-    handler: lambdas/mypagesOnEvent.main
+  storeMypages:
+    handler: lambdas/storeMypages.main
     events:
       - schedule:
-          name: TestingVadaMypagesOnEvent
+          name: TestingVadaStoreMypages
           description: 'Testing that the lambda is receiving data from vada'
           rate: rate(1 minute)
           enabled: false
           input:
             user: 'Mr Spex'
-            stageParams:
-              stage: ${self:custom.stage}
