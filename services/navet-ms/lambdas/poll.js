@@ -28,7 +28,7 @@ function createNavetPollEventDetail(navetData) {
     personalNumber: navetData.PersonId.PersonNr,
     firstName: navetData.Namn.Fornamn,
     lastName: navetData.Namn.Efternamn,
-    adress: {
+    address: {
       street: navetData.Adresser.Folkbokforingsadress.Utdelningsadress2,
       postalCode: navetData.Adresser.Folkbokforingsadress.PostNr,
       city: navetData.Adresser.Folkbokforingsadress.PostOrt,
