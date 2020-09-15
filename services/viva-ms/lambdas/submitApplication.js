@@ -5,6 +5,7 @@ import Hashids from 'hashids';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
 // import config from '../../../config';
+import { VIVA_CASE_TYPE, CASE_STATUS_SUBMIT } from '../../../libs/constants';
 import * as request from '../../../libs/request';
 import * as response from '../../../libs/response';
 
@@ -21,7 +22,7 @@ const hashids = new Hashids('6Ujh)XSDB+.39DO`/R|/wWa>64*k=T3>?Xn-*$1:g T&Vv`|X 5
  * Handler function for reacting to a stream from the cases table
  */
 export const main = async (event, context) => {
-  console.log('LAMBDA: applicationCreateOnStream triggered');
+  console.log('LAMBDA: submitApplication triggered');
   const [record] = event.Records;
 
   if (record.dynamodb.NewImage === undefined) return null;
@@ -30,8 +31,9 @@ export const main = async (event, context) => {
   const unmarshalledData = dynamoDbConverter.unmarshall(record.dynamodb.NewImage);
 
   // Send to Viva only if case is of the correct type
-  const isVivaCase = unmarshalledData.type || undefined;
-  if (isVivaCase !== 'VIVA_CASE' || isVivaCase === undefined) return null;
+  const isVivaCase = unmarshalledData.type === VIVA_CASE_TYPE;
+  const isCaseSubmitted = unmarshalledData.status === CASE_STATUS_SUBMIT;
+  if (!isVivaCase && !isCaseSubmitted) return null;
 
   // Send payload to Viva
   const [err, vadaResponse] = await to(sendVadaRequest(unmarshalledData));
@@ -43,8 +45,8 @@ export const main = async (event, context) => {
   return context.logStreamName;
 };
 
-async function sendVadaRequest(unmarshalledData) {
-  const { data, personalNumber } = unmarshalledData;
+async function sendVadaRequest(payload) {
+  const { data, personalNumber } = payload;
 
   // Build Viva api adapter payload blob
   const vadaPayload = {
@@ -61,13 +63,13 @@ async function sendVadaRequest(unmarshalledData) {
     request.call(
       request.requestClient({}),
       'post',
-      'https://viva-adapter.helsingborg.io/viva/applications',
+      'http://vicki.dannilsson.se:5000/applications',
       vadaPayload
     )
   );
 
   if (err) {
-    console.log('request client repsonse err', err);
+    console.error('Request call repsonse', err);
     throwError(500);
   }
 
