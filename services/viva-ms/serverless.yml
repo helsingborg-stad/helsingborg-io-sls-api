@@ -35,7 +35,7 @@ provider:
 
 functions:
   submitApplication:
-    handler: lambdas/ submitApplication.main
+    handler: lambdas/submitApplication.main
     events:
       - stream:
           type: dynamodb
@@ -50,7 +50,7 @@ functions:
       - schedule:
           name: TestingVadaStoreMypages
           description: "Testing that the lambda is receiving data from vada"
-          rate: rate(2 minute)
+          rate: rate(2 minutes)
           enabled: false
           input:
             user: "Mr Spex"
