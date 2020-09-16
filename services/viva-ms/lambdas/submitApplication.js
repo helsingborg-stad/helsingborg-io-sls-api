@@ -23,34 +23,48 @@ const hashids = new Hashids('6Ujh)XSDB+.39DO`/R|/wWa>64*k=T3>?Xn-*$1:g T&Vv`|X 5
  */
 export const main = async (event, context) => {
   console.log('LAMBDA: submitApplication triggered');
+  // console.log('event', event);
+
   const [record] = event.Records;
+  // console.log('record', record);
 
   if (record.dynamodb.NewImage === undefined) return null;
 
   // Viva is not keen on the DynamoDb data structure
   const unmarshalledData = dynamoDbConverter.unmarshall(record.dynamodb.NewImage);
+  console.log('unmarshalledData', unmarshalledData);
 
   // Send to Viva only if case is of the correct type
   const isVivaCase = unmarshalledData.type === VIVA_CASE_TYPE;
   const isCaseSubmitted = unmarshalledData.status === CASE_STATUS_SUBMIT;
-  if (!isVivaCase && !isCaseSubmitted) return null;
+  // console.log('isVivaCase', isVivaCase);
+  // console.log('isCaseSubmitted', isCaseSubmitted);
+  if (!isVivaCase || !isCaseSubmitted) return null;
 
-  // Send payload to Viva
+  // Send payload to VADA
   const [err, vadaResponse] = await to(sendVadaRequest(unmarshalledData));
   if (err) return response.failure(err);
 
-  // response
-  console.log('Vada repsonse data', vadaResponse.data);
+  /**
+   * Response obj:
+   * ERRORCODE
+   * ERRORMESSAGE
+   * ID (workflow id)
+   * IDENCLAIR
+   * STATUS
+   */
+  console.log('VADA repsonse data', vadaResponse.data);
 
-  return context.logStreamName;
+  return true;
 };
 
 async function sendVadaRequest(payload) {
+  console.log('Submit application data to VADA');
   const { data, personalNumber } = payload;
 
   // Build Viva api adapter payload blob
   const vadaPayload = {
-    application_type: 'new', // new | renew
+    application_type: 'renew', // new | renew
     user_hash: hashids.encode(personalNumber),
     data,
   };
@@ -69,7 +83,7 @@ async function sendVadaRequest(payload) {
   );
 
   if (err) {
-    console.error('Request call repsonse', err);
+    console.error('Request', err);
     throwError(500);
   }
 
