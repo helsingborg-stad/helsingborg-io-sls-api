@@ -4,8 +4,6 @@ import config from '../config';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import secrets from './secrets';
 
-const secretKey = secrets.get(config.token.secret.name, config.token.secret.keyName);
-
 /**
  * Takes an http event with an jwt authorization header, and returns the decoded info from it. Does not check if the token is valid, that should be handled by an authorizer.
  * @param {*} httpEvent the event passed to the lambda
@@ -27,7 +25,9 @@ export function decodeToken(httpEvent) {
  * @param {string} secretKey
  */
 export async function signToken(jsonToSign) {
-  const [error, secret] = await to(secretKey);
+  const [error, secret] = await to(
+    secrets.get(config.token.secret.name, config.token.secret.keyName)
+  );
   if (error) throwError(error.code, error.message);
 
   // Add expiration time to JWT token, 15 min.
@@ -43,7 +43,9 @@ export async function signToken(jsonToSign) {
  * @param {string} token a json web token
  */
 export async function verifyToken(token) {
-  const [error, secret] = await to(secretKey);
+  const [error, secret] = await to(
+    secrets.get(config.token.secret.name, config.token.secret.keyName)
+  );
   if (error) throwError(500);
 
   return jwt.verify(token, secret, (error, decoded) => {
