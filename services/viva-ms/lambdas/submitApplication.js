@@ -46,7 +46,7 @@ export const main = async (event, context) => {
   if (err) return response.failure(err);
 
   /**
-   * Response obj:
+   * Expected response obj:
    * ERRORCODE
    * ERRORMESSAGE
    * ID (workflow id)
@@ -77,7 +77,7 @@ async function sendVadaRequest(payload) {
     request.call(
       request.requestClient({}),
       'post',
-      'http://vicki.dannilsson.se:5000/applications',
+      'https://viva-adapter.helsingborg.io/applications',
       vadaPayload
     )
   );
