@@ -28,9 +28,9 @@ export async function main(event) {
   return IAMPolicy;
 }
 
-function createEventDetail(pnr) {
-  const eventObj = {
-    personalNumber: pnr,
-  };
-  return eventObj;
-}
+// function createEventDetail(pnr) {
+//   const eventObj = {
+//     personalNumber: pnr,
+//   };
+//   return eventObj;
+// }
