@@ -7,7 +7,7 @@ import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 // import config from '../../../config';
 import { VIVA_CASE_TYPE, CASE_STATUS_SUBMIT } from '../../../libs/constants';
 import * as request from '../../../libs/request';
-import * as response from '../../../libs/response';
+// import * as response from '../../../libs/response';
 
 const dynamoDbConverter = AWS.DynamoDB.Converter;
 
