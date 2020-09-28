@@ -52,7 +52,7 @@ export const main = async event => {
 async function sendVadaRequest(payload) {
   const { data: applicationBody, personalNumber } = payload;
 
-  // Build Viva api adapter payload blob
+  // Build Viva api adapter payload
   const vadaPayload = {
     applicationType: 'recurrent', // basic | recurrent
     personalNumber: hashids.encode(personalNumber),
