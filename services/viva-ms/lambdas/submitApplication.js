@@ -69,7 +69,7 @@ async function sendVadaRequest(payload) {
    * TODO:
    * Put Viva api adapter url in env config of some sort
    */
-  const [err, vadaCreateApplicationResponse] = await to(
+  const [error, vadaCreateRecurrentApplicationResponse] = await to(
     request.call(
       request.requestClient({}),
       'post',
@@ -82,5 +82,5 @@ async function sendVadaRequest(payload) {
     throwError(500, error);
   }
 
-  return vadaCreateApplicationResponse;
+  return vadaCreateRecurrentApplicationResponse;
 }
