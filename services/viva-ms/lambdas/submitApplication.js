@@ -51,13 +51,19 @@ export const main = async event => {
 
 async function sendVadaRequest(payload) {
   console.log('Submit application data to VADA');
-  const { data, personalNumber } = payload;
+  const { data: applicationBody, personalNumber } = payload;
 
   // Build Viva api adapter payload blob
   const vadaPayload = {
-    application_type: 'renew', // new | renew
-    user_hash: hashids.encode(personalNumber),
-    data,
+    applicationType: 'recurrent', // basic | recurrent
+    personalNumber: hashids.encode(personalNumber),
+    workflowId: '',
+    clientIp: '0.0.0.0',
+    period: {
+      startDate: '2020-10-01',
+      endDate: '2020-10-31',
+    },
+    applicationBody,
   };
 
   /**
