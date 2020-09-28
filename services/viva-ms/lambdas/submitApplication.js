@@ -32,28 +32,18 @@ export const main = async event => {
 
   // Viva is not keen on the DynamoDb data structure
   const unmarshalledData = dynamoDbConverter.unmarshall(record.dynamodb.NewImage);
-  console.log('unmarshalledData', unmarshalledData);
+  // console.log('unmarshalledData', unmarshalledData);
 
   // Send to Viva only if case is of the correct type
   const isVivaCase = unmarshalledData.type === VIVA_CASE_TYPE;
   const isCaseSubmitted = unmarshalledData.status === CASE_STATUS_SUBMIT;
-  // console.log('isVivaCase', isVivaCase);
-  // console.log('isCaseSubmitted', isCaseSubmitted);
   if (!isVivaCase || !isCaseSubmitted) return null;
 
   // Send payload to VADA
   const [err, vadaResponse] = await to(sendVadaRequest(unmarshalledData));
   if (err) return response.failure(err);
 
-  /**
-   * Expected response obj:
-   * ERRORCODE
-   * ERRORMESSAGE
-   * ID (workflow id)
-   * IDENCLAIR
-   * STATUS
-   */
-  console.log('VADA repsonse data', vadaResponse.data);
+  console.log('VADA api response', vadaResponse.data);
 
   return true;
 };
