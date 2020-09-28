@@ -39,9 +39,10 @@ export const main = async event => {
   const isCaseSubmitted = unmarshalledData.status === CASE_STATUS_SUBMIT;
   if (!isVivaCase || !isCaseSubmitted) return null;
 
-  // Send payload to VADA
-  const [err, vadaResponse] = await to(sendVadaRequest(unmarshalledData));
-  if (err) return response.failure(err);
+  const [error, vadaResponse] = await to(sendVadaRequest(unmarshalledData));
+  if (error) {
+    return console.error(error);
+  }
 
   console.log('VADA api response', vadaResponse.data);
 
