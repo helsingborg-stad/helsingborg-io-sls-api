@@ -50,7 +50,6 @@ export const main = async event => {
 };
 
 async function sendVadaRequest(payload) {
-  console.log('Submit application data to VADA');
   const { data: applicationBody, personalNumber } = payload;
 
   // Build Viva api adapter payload blob
