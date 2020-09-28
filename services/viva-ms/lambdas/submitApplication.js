@@ -73,9 +73,8 @@ async function sendVadaRequest(payload) {
     )
   );
 
-  if (err) {
-    console.error('Request', err);
-    throwError(500);
+  if (error) {
+    throwError(500, error);
   }
 
   return vadaCreateApplicationResponse;
