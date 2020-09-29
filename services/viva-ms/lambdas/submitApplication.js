@@ -46,8 +46,8 @@ export const main = async event => {
   return true;
 };
 
-async function sendVadaRequest(payload) {
-  const { data: applicationBody, personalNumber } = payload;
+async function sendVadaRequest(caseData) {
+  const { data: applicationBody, personalNumber, period } = caseData;
 
   // Build Viva api adapter payload
   const vadaPayload = {
