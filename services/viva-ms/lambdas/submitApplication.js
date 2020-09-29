@@ -22,9 +22,6 @@ const hashids = new Hashids('6Ujh)XSDB+.39DO`/R|/wWa>64*k=T3>?Xn-*$1:g T&Vv`|X 5
  * Handler function for reacting to a stream from the cases table
  */
 export const main = async event => {
-  console.log('Viva-ms: submitApplication triggered');
-  // console.log('event', event);
-
   const [record] = event.Records;
   // console.log('record', record);
 
