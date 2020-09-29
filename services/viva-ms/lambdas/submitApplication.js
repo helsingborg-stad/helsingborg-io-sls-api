@@ -22,7 +22,7 @@ const hashids = new Hashids('6Ujh)XSDB+.39DO`/R|/wWa>64*k=T3>?Xn-*$1:g T&Vv`|X 5
  * Handler function for reacting to a stream from the cases table
  */
 export const main = async event => {
-  console.log('LAMBDA: submitApplication triggered');
+  console.log('Viva-ms: submitApplication triggered');
   // console.log('event', event);
 
   const [record] = event.Records;
@@ -41,10 +41,10 @@ export const main = async event => {
 
   const [error, vadaResponse] = await to(sendVadaRequest(unmarshalledData));
   if (error) {
-    return console.error(error);
+    return console.error('Viva-ms', error);
   }
 
-  console.log('VADA api response', vadaResponse.data);
+  console.log('Viva-ms: VADA api response', vadaResponse.data);
 
   return true;
 };
