@@ -43,14 +43,3 @@ functions:
           startingPosition: LATEST
           arn:
             Fn::ImportValue: ${self:custom.resourcesStage}-CasesTableStreamArn
-
-  storeMypages:
-    handler: lambdas/storeMypages.main
-    events:
-      - schedule:
-          name: TestingVadaStoreMypages
-          description: "Testing that the lambda is receiving data from vada"
-          rate: rate(2 minutes)
-          enabled: false
-          input:
-            user: "Mr Spex"
