@@ -55,7 +55,11 @@ async function sendVadaRequest(caseData) {
     personalNumber: hashids.encode(personalNumber),
     workflowId: '',
     clientIp: '0.0.0.0',
-    period,
+    // TODO:
+    period: {
+      startDate: '2020-10-01',
+      endDate: '2020-10-31',
+    },
     applicationBody,
   };
 
