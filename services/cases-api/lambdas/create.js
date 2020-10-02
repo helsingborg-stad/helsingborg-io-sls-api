@@ -42,6 +42,7 @@ export async function main(event) {
       formId: validatedEventBody.formId,
       status: validatedEventBody.status,
       data: validatedEventBody.data,
+      // TODO: add meta to store viva period stuff
     },
   };
 
