@@ -8,7 +8,6 @@ import config from '../../../config';
 import params from '../../../libs/params';
 import { VIVA_CASE_TYPE, CASE_STATUS_SUBMIT } from '../../../libs/constants';
 import * as request from '../../../libs/request';
-// import * as response from '../../../libs/response';
 
 const SSMParams = params.read(config.vada.envsKeyName);
 
@@ -19,13 +18,11 @@ const dynamoDbConverter = AWS.DynamoDB.Converter;
  */
 export const main = async event => {
   const [record] = event.Records;
-  // console.log('record', record);
 
   if (record.dynamodb.NewImage === undefined) return null;
 
   // Viva is not keen on the DynamoDb data structure
   const unmarshalledData = dynamoDbConverter.unmarshall(record.dynamodb.NewImage);
-  // console.log('unmarshalledData', unmarshalledData);
 
   // Send to Viva only if case is of the correct type
   const isVivaCase = unmarshalledData.type === VIVA_CASE_TYPE;
