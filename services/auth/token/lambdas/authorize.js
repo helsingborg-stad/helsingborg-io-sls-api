@@ -2,7 +2,6 @@ import to from 'await-to-js';
 
 import generateIAMPolicy from '../helpers/generateIAMPolicy';
 import { verifyToken } from '../../../../libs/token';
-// TODO: import { putEvent } from '../../../libs/awsEventBridge';
 
 export async function main(event) {
   const { authorizationToken } = event;
@@ -17,20 +16,6 @@ export async function main(event) {
     throw Error('Unauthorized');
   }
 
-  // TODO: Eventbridge
-  // await putEvent(
-  //   createEventDetail(decodedToken.personalNumber),
-  //   'TokenAuthorize',
-  //   'token.authorize'
-  // );
-
   const IAMPolicy = generateIAMPolicy(decodedToken.personalNumber, 'Allow', '*');
   return IAMPolicy;
 }
-
-// function createEventDetail(pnr) {
-//   const eventObj = {
-//     personalNumber: pnr,
-//   };
-//   return eventObj;
-// }
