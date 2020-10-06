@@ -4,19 +4,15 @@ import to from 'await-to-js';
 import Hashids from 'hashids';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
-// import config from '../../../config';
+import config from '../../../config';
+import params from '../../../libs/params';
 import { VIVA_CASE_TYPE, CASE_STATUS_SUBMIT } from '../../../libs/constants';
 import * as request from '../../../libs/request';
 // import * as response from '../../../libs/response';
 
-const dynamoDbConverter = AWS.DynamoDB.Converter;
+const SSMParams = params.read(config.vada.envsKeyName);
 
-/**
- * TODO:
- * Put salt in env config of some sort
- * Salt must match salt stored in env used by viva api adapter
- */
-const hashids = new Hashids('6Ujh)XSDB+.39DO`/R|/wWa>64*k=T3>?Xn-*$1:g T&Vv`|X 5<!CzC,YaM&e#U', 32);
+const dynamoDbConverter = AWS.DynamoDB.Converter;
 
 /**
  * Handler function for reacting to a stream from the cases table
@@ -50,6 +46,8 @@ async function sendVadaRequest(caseData) {
   const { data: applicationBody, personalNumber, period } = caseData;
 
   // Build Viva api adapter payload
+  const { hashSalt, hashSaltLength, vadaUrl } = await SSMParams;
+  const hashids = new Hashids(hashSalt, hashSaltLength);
   const vadaPayload = {
     applicationType: 'recurrent', // basic | recurrent
     personalNumber: hashids.encode(personalNumber),
@@ -68,14 +66,8 @@ async function sendVadaRequest(caseData) {
    * Put Viva api adapter url in env config of some sort
    */
   const [error, vadaCreateRecurrentApplicationResponse] = await to(
-    request.call(
-      request.requestClient({}),
-      'post',
-      'https://viva-adapter.helsingborg.io/applications',
-      vadaPayload
-    )
+    request.call(request.requestClient({}), 'post', `${vadaUrl}/applications`, vadaPayload)
   );
-
   if (error) {
     throwError(500, error);
   }
