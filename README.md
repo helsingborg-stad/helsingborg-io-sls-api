@@ -76,6 +76,8 @@ npm install
 
 [User Microservice](https://github.com/helsingborg-stad/helsingborg-io-sls-api/tree/dev/services/user-ms)
 
+[Viva Microservice](https://github.com/helsingborg-stad/helsingborg-io-sls-api/tree/dev/services/viva-ms)
+
 [Token](https://github.com/helsingborg-stad/helsingborg-io-sls-api/tree/dev/services/auth/token)
 
 [Watson](https://github.com/helsingborg-stad/helsingborg-io-sls-api/tree/dev/services/watson-api)
