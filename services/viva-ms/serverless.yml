@@ -28,6 +28,10 @@ provider:
   iamRoleStatements:
     - Effect: Allow
       Action:
+        - SSM:GetParameter
+      Resource: "*"
+    - Effect: Allow
+      Action:
         - "dynamodb:ListStreams"
       # Restrict our IAM role permissions to the specific table for the stage
       Resource:

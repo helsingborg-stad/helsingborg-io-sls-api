@@ -25,6 +25,9 @@ const stageConfigs = {
     cases: {
       tableName: 'cases',
     },
+    vada: {
+      envsKeyName: '/vadaEnvs/dev',
+    },
   },
   prod: {
     bankId: {
