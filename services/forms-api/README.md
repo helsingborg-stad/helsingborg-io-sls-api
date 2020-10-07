@@ -1,4 +1,4 @@
-<h1> HELSINGBORG IO SLS FORM SERVICE, updated and simplified</h1> <br>
+<h1> HELSINGBORG IO SLS FORM SERVICE</h1> <br>
 
 ## Purpose
 
@@ -18,7 +18,7 @@ A running instance of a API GATEWAY on AWS that includes a gateway resource name
 
 ### AWS DYNAMODB
 
-A running instance of a DYNAMODB. You can find and deploy this in our [resource](https://github.com/helsingborg-stad/helsingborg-io-sls-resources/tree/dev/services/dynamos/forms2) repository.
+A running instance of a DYNAMODB. You can find and deploy this in our [resource](https://github.com/helsingborg-stad/helsingborg-io-sls-resources/tree/dev/services/dynamos/forms) repository.
 
 ### Installation
 
@@ -65,7 +65,7 @@ When you deploy the service, serverless will output the generated url in the ter
     },
     "data": [
       { form1 },
-      {form2 },
+      { form2 },
       ...
       ]
 }
