@@ -19,9 +19,6 @@ const stageConfigs = {
     forms: {
       tableName: 'forms',
     },
-    forms3: {
-      tableName: 'forms3',
-    },
     cases: {
       tableName: 'cases',
     },

@@ -1,4 +1,4 @@
-service: hbg-forms3
+service: hbg-forms
 
 plugins:
   - serverless-bundle
@@ -31,8 +31,8 @@ provider:
     restApiRootResourceId:
       "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
     restApiResources:
-      forms3:
-        "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayResourceForms3
+      forms:
+        "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayResourceForms
 
   iamRoleStatements:
     - Effect: Allow
@@ -45,14 +45,14 @@ provider:
         - dynamodb:DeleteItem
 
       Resource:
-        - "Fn::ImportValue": ${self:custom.resourcesStage}-Forms3TableArn
+        - "Fn::ImportValue": ${self:custom.resourcesStage}-FormsTableArn
 
 functions:
   getFormList:
     handler: lambdas/getFormList.main
     events:
       - http:
-          path: /forms3
+          path: /forms
           method: get
           cors: true
           private: true
@@ -61,7 +61,7 @@ functions:
     handler: lambdas/getForm.main
     events:
       - http:
-          path: /forms3/{formId}
+          path: /forms/{formId}
           method: get
           cors: true
           private: true
@@ -71,7 +71,7 @@ functions:
     handler: lambdas/createForm.main
     events:
       - http:
-          path: /forms3
+          path: /forms
           method: post
           cors: true
           private: true
@@ -81,7 +81,7 @@ functions:
     handler: lambdas/updateForm.main
     events:
       - http:
-          path: /forms3/{formId}
+          path: /forms/{formId}
           method: put
           cors: true
           private: true
@@ -91,7 +91,7 @@ functions:
     handler: lambdas/deleteForm.main
     events:
       - http:
-          path: /forms3/{formId}
+          path: /forms/{formId}
           method: delete
           cors: true
           private: true
