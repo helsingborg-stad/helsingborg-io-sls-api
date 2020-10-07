@@ -8,7 +8,7 @@ import config from '../../../config';
 import { CASE_ITEM_TYPE } from '../helpers/constants';
 import { decodeToken } from '../../../libs/token';
 // todo: move to libs as it's used by forms too
-import { putItem } from '../helpers/queries';
+import { putItem } from '../../../libs/queries';
 
 /**
  * Handler function for creating a case and store in dynamodb

@@ -4,7 +4,7 @@ import uuid from 'uuid';
 import { buildResponse } from '../../../libs/response';
 import config from '../../../config';
 import { validateFormData } from '../helpers/formValidation';
-import { putItem } from '../helpers/queries';
+import { putItem } from '../../..libs/queries';
 
 /**
  * Handler function for creating a form and saving it to a dynamodb.

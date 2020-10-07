@@ -1,6 +1,6 @@
 import to from 'await-to-js';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
-import * as dynamoDb from '../../../libs/dynamoDb';
+import * as dynamoDb from './dynamoDb';
 
 /**
  * Get request towards dynomdb to retrive an item in a table.
@@ -53,6 +53,7 @@ export async function itemExists(
 
   return response;
 }
+
 /**
  * Append a new item to a list in an item
  * @param {string} TableName The name of the dynamodb table
