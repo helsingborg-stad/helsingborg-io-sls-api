@@ -15,9 +15,7 @@ export const main = async event => {
   const bankidSSMParams = await SSMParams;
   const { endUserIp, personalNumber, userVisibleData } = JSON.parse(event.body);
 
-  const [validationError, validationEventBody] = await to(
-    validateEventBody(event.body, validateTokenEventBody)
-  );
+  const [validationError] = await to(validateEventBody(event.body, validateTokenEventBody));
 
   if (validationError && !valid) return failure(validationError);
 

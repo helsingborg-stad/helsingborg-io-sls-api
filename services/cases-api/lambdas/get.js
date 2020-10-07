@@ -1,5 +1,4 @@
 import to from 'await-to-js';
-import jwt from 'jsonwebtoken';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import config from '../../../config';
 import * as response from '../../../libs/response';

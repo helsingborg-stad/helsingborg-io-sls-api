@@ -1,5 +1,4 @@
 import to from 'await-to-js';
-import jwt from 'jsonwebtoken';
 import camelCase from 'camelcase';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
