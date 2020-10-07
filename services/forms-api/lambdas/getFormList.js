@@ -8,7 +8,7 @@ import * as dynamoDb from '../../../libs/dynamoDb';
  */
 export async function main(event) {
   const params = {
-    TableName: config.forms3.tableName,
+    TableName: config.forms.tableName,
     ProjectionExpression: '#n, description, id, createdAt, updatedAt, subform, formType',
     ExpressionAttributeNames: { '#n': 'name' },
   };

@@ -54,7 +54,7 @@ When you deploy the service, serverless will output the generated url in the ter
 
 #### Endpoint
 
-`/forms3`
+`/forms`
 
 #### Excpected Response
 
@@ -79,7 +79,7 @@ When you deploy the service, serverless will output the generated url in the ter
 
 #### Endpoint
 
-`/forms3/{id}`
+`/forms/{id}`
 
 #### Expected Response
 
@@ -122,7 +122,7 @@ When you deploy the service, serverless will output the generated url in the ter
 
 #### Endpoint
 
-`/forms3`
+`/forms`
 
 #### JSON Payload
 
@@ -187,7 +187,7 @@ When you deploy the service, serverless will output the generated url in the ter
 
 #### Endpoint
 
-`/forms3/{formId}`
+`/forms/{formId}`
 
 #### JSON Payload
 
@@ -262,7 +262,7 @@ When you deploy the service, serverless will output the generated url in the ter
 
 #### Endpoint
 
-`/forms3/{id}`
+`/forms/{id}`
 
 #### Expected Response
 

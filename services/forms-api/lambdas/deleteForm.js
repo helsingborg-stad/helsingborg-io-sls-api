@@ -11,7 +11,7 @@ export const main = async event => {
   const PK = `FORM#${formId}`;
 
   const params = {
-    TableName: config.forms3.tableName,
+    TableName: config.forms.tableName,
     Key: {
       PK,
     },

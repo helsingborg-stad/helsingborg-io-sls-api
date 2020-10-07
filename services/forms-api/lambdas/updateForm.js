@@ -39,7 +39,7 @@ export async function main(event) {
   }
 
   const params = {
-    TableName: config.forms3.tableName,
+    TableName: config.forms.tableName,
     Key: { PK },
     UpdateExpression,
     ExpressionAttributeNames,
