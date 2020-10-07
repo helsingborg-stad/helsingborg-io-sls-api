@@ -2,7 +2,6 @@ import logger from '@financial-times/lambda-logger';
 import * as response from '../../../libs/response';
 import to from 'await-to-js';
 import { sendMessage, createAssistantSession } from '../helpers/watson-lib';
-import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
 export const main = async event => {
   const { assistantId, textInput, context, intents, entities, sessionId } = JSON.parse(event.body);

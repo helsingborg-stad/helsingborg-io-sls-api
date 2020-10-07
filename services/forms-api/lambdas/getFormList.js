@@ -6,7 +6,7 @@ import * as dynamoDb from '../../../libs/dynamoDb';
 /**
  * Handler function for all forms from the database.
  */
-export async function main(event) {
+export async function main(_event) {
   const params = {
     TableName: config.forms.tableName,
     ProjectionExpression: '#n, description, id, createdAt, updatedAt, subform, formType',
