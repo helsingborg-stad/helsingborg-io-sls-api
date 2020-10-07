@@ -1,5 +1,8 @@
 {
-  "extends": ["eslint:recommended", "prettier"],
+  "extends": [
+    "eslint:recommended",
+    "prettier"
+  ],
   "env": {
     "node": true,
     "browser": true,
@@ -13,7 +16,9 @@
     "ecmaVersion": 2018,
     "sourceType": "module"
   },
-  "plugins": ["prettier"],
+  "plugins": [
+    "prettier"
+  ],
   "rules": {
     "no-console": 2,
     "no-debugger": 0,
@@ -23,7 +28,7 @@
       1,
       {
         "ignoreSiblings": true,
-        "argsIgnorePattern": "res|next|^err"
+        "argsIgnorePattern": "res|next|^err|^_"
       }
     ],
     "no-unused-expressions": [
@@ -53,7 +58,10 @@
         "destructuring": "all"
       }
     ],
-    "arrow-body-style": [2, "as-needed"],
+    "arrow-body-style": [
+      2,
+      "as-needed"
+    ],
     "prettier/prettier": [
       "error",
       {
@@ -62,8 +70,14 @@
         "printWidth": 100
       }
     ],
-    "indent": ["error", 2],
-    "linebreak-style": ["error", "unix"],
+    "indent": [
+      "error",
+      2
+    ],
+    "linebreak-style": [
+      "error",
+      "unix"
+    ],
     "quotes": [
       2,
       "single",
@@ -72,6 +86,9 @@
         "allowTemplateLiterals": true
       }
     ],
-    "semi": ["error", "always"]
+    "semi": [
+      "error",
+      "always"
+    ]
   }
 }
