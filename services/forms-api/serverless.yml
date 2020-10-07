@@ -1,4 +1,4 @@
-service: hbg-forms
+service: forms-api
 
 plugins:
   - serverless-bundle
