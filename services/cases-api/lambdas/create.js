@@ -1,20 +1,35 @@
 import to from 'await-to-js';
 import uuid from 'uuid';
+import * as dynamoose from 'dynamoose';
 
 import { validateEventBody } from '../../../libs/validateEventBody';
 import * as response from '../../../libs/response';
 import { validateKeys } from '../../../libs/validateKeys';
 import config from '../../../config';
-import { CASE_ITEM_TYPE } from '../helpers/constants';
+import { CASE_ITEM_TYPE as ITEM_TYPE } from '../helpers/constants';
 import { decodeToken } from '../../../libs/token';
 // todo: move to libs as it's used by forms too
 import { putItem } from '../helpers/queries';
 
+const ddb = new dynamoose.aws.sdk.DynamoDB();
+dynamoose.aws.ddb.set(ddb);
+
+const schema = new dynamoose.Schema(
+  {
+    id: String,
+    age: Number,
+  },
+  {
+    saveUnknown: true,
+    timestamps: true,
+  }
+);
+
 /**
- * Handler function for creating a case and store in dynamodb
+ * Handler function for create and store case in DynamoDB
  */
 export async function main(event) {
-  const decodedToken = decodeToken(event);
+  const { personalNumber } = decodeToken(event);
   const requestBody = JSON.parse(event.body);
 
   const [validateError, validatedEventBody] = await to(
@@ -23,25 +38,29 @@ export async function main(event) {
 
   if (validateError) return response.failure(validateError);
 
-  const caseId = uuid.v1();
-  const casePartitionKey = `USER#${decodedToken.personalNumber}`;
+  const id = uuid.v1();
+  const PK = `USER#${personalNumber}`; // Partition key
+  const SK = `USER#${personalNumber}#CASE#${id}`; // Sort key
   const createdAt = Date.now();
+  const updatedAt = Date.now();
+
+  const { type, formId, status, data } = validatedEventBody;
 
   // Case item
   const params = {
     TableName: config.cases.tableName,
     Item: {
-      PK: casePartitionKey,
-      SK: `${casePartitionKey}#CASE#${caseId}`,
-      ITEM_TYPE: CASE_ITEM_TYPE,
-      id: caseId,
-      createdAt: createdAt,
-      updatedAt: createdAt,
-      personalNumber: decodedToken.personalNumber,
-      type: validatedEventBody.type,
-      formId: validatedEventBody.formId,
-      status: validatedEventBody.status,
-      data: validatedEventBody.data,
+      PK,
+      SK,
+      ITEM_TYPE,
+      id,
+      createdAt,
+      updatedAt,
+      personalNumber,
+      type,
+      formId,
+      status,
+      data,
       // TODO: add meta to store viva period stuff
     },
   };
@@ -51,13 +70,13 @@ export async function main(event) {
 
   return response.success(201, {
     type: 'cases',
-    id: caseId,
+    id,
     attributes: {
-      formId: validatedEventBody.formId,
-      personalNumber: decodedToken.personalNumber,
-      type: validatedEventBody.type,
-      status: validatedEventBody.status,
-      data: validatedEventBody.data,
+      formId,
+      personalNumber,
+      type,
+      status,
+      data,
     },
   });
 }
