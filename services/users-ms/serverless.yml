@@ -1,4 +1,4 @@
-service: hbg-user-create-ms
+service: users-ms
 
 plugins:
   - serverless-bundle
@@ -33,7 +33,7 @@ provider:
 
 functions:
   create:
-    handler: lambdas/create.main
+    handler: lambdas/createUser.main
     events:
       - eventBridge:
           pattern:
