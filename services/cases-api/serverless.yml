@@ -1,4 +1,4 @@
-service: cases
+service: cases-api
 
 plugins:
   - serverless-bundle
@@ -47,8 +47,8 @@ provider:
         - "Fn::ImportValue": ${self:custom.resourcesStage}-CasesTableArn
 
 functions:
-  get:
-    handler: lambdas/get.main
+  getCase:
+    handler: lambdas/getCase.main
     events:
       - http:
           path: /cases/{caseId}
@@ -58,8 +58,8 @@ functions:
             type: CUSTOM
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
-  list:
-    handler: lambdas/list.main
+  getCaseList:
+    handler: lambdas/getCaseList.main
     events:
       - http:
           path: /cases
@@ -69,8 +69,8 @@ functions:
             type: CUSTOM
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
-  create:
-    handler: lambdas/create.main
+  createCase:
+    handler: lambdas/createCase.main
     events:
       - http:
           path: /cases
@@ -80,8 +80,8 @@ functions:
             type: CUSTOM
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
-  update:
-    handler: lambdas/update.main
+  updateCase:
+    handler: lambdas/updateCase.main
     events:
       - http:
           path: /cases/{caseId}
@@ -91,8 +91,8 @@ functions:
             type: CUSTOM
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
-  delete:
-    handler: lambdas/delete.main
+  deleteCase:
+    handler: lambdas/deleteCase.main
     events:
       - http:
           path: /cases/{caseId}
