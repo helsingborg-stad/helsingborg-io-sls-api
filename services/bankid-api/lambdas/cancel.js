@@ -1,11 +1,9 @@
-import to from 'await-to-js';
-import snakeCaseKeys from 'snakecase-keys';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
-
+import to from 'await-to-js';
 import config from '../../../config';
 import params from '../../../libs/params';
-import * as response from '../../../libs/response';
 import * as request from '../../../libs/request';
+import * as response from '../../../libs/response';
 import * as bankId from '../helpers/bankId';
 
 const SSMParams = params.read(config.bankId.envsKeyName);
@@ -20,11 +18,11 @@ export const main = async event => {
 
   if (!bankIdCancelResponse) return response.failure(error);
 
+  const attributes = bankIdCancelResponse.data ? bankIdCancelResponse.data : {};
+
   return response.success(200, {
     type: 'bankidCancel',
-    attributes: {
-      ...snakeCaseKeys(bankIdCancelResponse.data),
-    },
+    attributes,
   });
 };
 
