@@ -7,7 +7,6 @@ import { validateKeys } from '../../../libs/validateKeys';
 import config from '../../../config';
 import { CASE_ITEM_TYPE } from '../helpers/constants';
 import { decodeToken } from '../../../libs/token';
-// todo: move to libs as it's used by forms too
 import { putItem } from '../../../libs/queries';
 
 /**
