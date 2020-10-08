@@ -91,8 +91,8 @@ When you deploy the service, serverless will output the generated url in the ter
   "data": {
     "type": "bankIdAuth",
     "attributes": {
-      "order_ref": "a-order-ref-id",
-      "auto_start_token": "a-auto-start-token"
+      "orderRef": "a-order-ref-id",
+      "autoStartToken": "a-auto-start-token"
     }
   }
 }
@@ -126,9 +126,9 @@ When you deploy the service, serverless will output the generated url in the ter
   "data": {
     "type": "bankIdCollect",
     "attributes": {
-      "order_ref": "a-order-ref-id",
+      "orderRef": "a-order-ref-id",
       "status": "pending",
-      "hint_code": "noClient"
+      "hintCode": "noClient"
     }
   }
 }
@@ -171,4 +171,37 @@ When you deploy the service, serverless will output the generated url in the ter
 
 ### BANKID SIGN
 
-NOT YET IMPLEMENTED
+#### Request Type
+
+`POST`
+
+#### Endpoint
+
+`/bankid/sign`
+
+#### JSON Payload
+
+```
+{
+	"personalNumber": "190101010101",
+	"endUserIp": "0.0.0.0",
+	"userVisibleData": "example-message"
+}
+```
+
+#### Expected JSON Response
+
+```
+{
+  "jsonapi": {
+    "version": "1.0"
+  },
+  "data": {
+    "type": "bankIdSign",
+    "attributes": {
+      "orderRef": "a-order-ref-id",
+      "autoStartToken": "an-auto-start-token"
+    }
+  }
+}
+```
