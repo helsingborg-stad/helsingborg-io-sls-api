@@ -1,4 +1,4 @@
-service: hbg-bankid
+service: bankid-api
 
 plugins:
   - serverless-bundle
