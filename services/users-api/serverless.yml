@@ -1,4 +1,4 @@
-service: hbg-user
+service: users-api
 
 plugins:
   - serverless-bundle
@@ -57,8 +57,8 @@ provider:
               - "/*"
 
 functions:
-  get:
-    handler: lambdas/get.main
+  getUser:
+    handler: lambdas/getUser.main
     events:
       - http:
           path: /users/{personalNumber}
@@ -69,7 +69,7 @@ functions:
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   me:
-    handler: lambdas/get.main
+    handler: lambdas/getUser.main
     events:
       - http:
           path: /users/me
@@ -79,8 +79,8 @@ functions:
             type: CUSTOM
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
-  getAttachements:
-    handler: lambdas/getAttachments.main
+  getAttachmentList:
+    handler: lambdas/getAttachmentList.main
     events:
       - http:
           path: /users/me/attachments
@@ -90,8 +90,8 @@ functions:
             type: CUSTOM
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
-  uploadAttachements:
-    handler: lambdas/uploadAttachments.main
+  uploadAttachment:
+    handler: lambdas/uploadAttachment.main
     environment:
       BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-AttachmentsBucketName
     events:
