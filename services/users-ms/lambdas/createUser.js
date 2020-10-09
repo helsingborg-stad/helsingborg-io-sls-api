@@ -1,10 +1,9 @@
+import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import to from 'await-to-js';
 import uuid from 'uuid';
-import { throwError } from '@helsingborg-stad/npm-api-error-handling';
-
 import config from '../../../config';
-import * as response from '../../../libs/response';
 import * as dynamoDb from '../../../libs/dynamoDb';
+import * as response from '../../../libs/response';
 
 // create user
 export const main = async event => {
