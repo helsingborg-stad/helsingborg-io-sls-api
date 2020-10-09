@@ -28,6 +28,7 @@
 - [Getting Started](#getting-started)
   - [Do first](#do-first)
   - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
 - [Services](#services)
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
@@ -84,6 +85,9 @@ The services are dependent on the resources that are created in this [accompanyi
 - NodeJS
 - NPM
 - [Serverless Framework](https://serverless.com/)
+
+
+### Installation
 
 
 Clone repo
