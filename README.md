@@ -1,27 +1,55 @@
-# API Platform - Serverless Framework - AWS
+<!-- SHIELDS -->
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![License][license-shield]][contributors-url]
 
-## The concept
+<p>
+  <a href="https://github.com/helsingborg-stad/helsingborg-io-sls-api">
+    <img src="images/logo.jpg" alt="Logo" width="300">
+  </a>
+</p>
+<h3>API Platform Services</h3>
+<p>
+  Services that run on Helsingborgs stads API platform <a href="https://helsingborg.io/">helsingborg.io</a>
+  <br />
+  <a href="https://github.com/helsingborg-stad/helsingborg-io-sls-api/issues">Report Bug</a>
+  ·
+  <a href="https://github.com/helsingborg-stad/helsingborg-io-sls-api/issues">Request Feature</a>
+</p>
 
-- Service
 
+## Table of Contents
+- [Table of Contents](#table-of-contents)
+- [About API Platform Services](#about-api-platform-services)
+  - [An example](#an-example)
+  - [Built With](#built-with)
+- [Getting Started](#getting-started)
+  - [Do first](#do-first)
+  - [Prerequisites](#prerequisites)
+- [Services](#services)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [License](#license)
+
+
+## About API Platform Services
 A service is what you might call a Serverless project. It has a single serverless.yml file driving it.
 
-- Application
-
-An application or app is a collection of multiple services.
 
 ### An example
 
 Our app has two API services, each has their own well defined business logic:
 
-- forminput-api service: Handles managing the form data.
+- forms-api service: Handles managing the forms data.
 - cool-api service: Handles making cool suff.
 
 ```
 /
   libs/
   services/
-    forminput-api/
+    forms-api/
     cool-api/
 ```
 
@@ -31,13 +59,23 @@ For example, a team can have dozens of ephemeral stages such as: prod, staging, 
 
 This ensures each change is tested on real infrastructure before being promoted to production.
 
-# Setup
 
-**Do first**
+### Built With
+
+* [Serverless Framework](https://www.serverless.com/)
+* [AWS](https://aws.amazon.com)
+
+
+## Getting Started
+
+To get a local copy up and running follow these simple steps.
+
+
+### Do first
 
 The services are dependent on the resources that are created in this [accompanying repo](https://github.com/helsingborg-stad/helsingborg-io-sls-resources).
 
-## Requirements
+### Prerequisites
 
 - AWS CLI
 - AWS Account
@@ -47,37 +85,64 @@ The services are dependent on the resources that are created in this [accompanyi
 - NPM
 - [Serverless Framework](https://serverless.com/)
 
-## Usage
 
-### Clone repo
-
-```
+Clone repo
+```sh
 git clone git@github.com:helsingborg-stad/helsingborg-io-sls-api.git
 ```
 
 Install shared npm packages
-
-```
+```sh
 cd helsingborg-io-sls-api
 npm install
 ```
 
 ## Services
+Every service in this mono repo has its own documentation. Follow links below.
 
-[BankId](https://github.com/helsingborg-stad/helsingborg-io-sls-api/tree/dev/services/bankid-api)
+- [Bankid API](/services/bankid-api)
+- [Cases API](/services/cases-api)
+- [Forms API](/services/forms-api)
+- [Navet MS](/services/navet-ms)
+- [Token](/services/auth/token)
+- [Users API](/services/users-api)
+- [Users MS](/services/users-ms)
+- [Viva MS](/services/viva-ms)
 
-[Cases](https://github.com/helsingborg-stad/helsingborg-io-sls-api/tree/dev/services/cases-api)
 
-[Forms](https://github.com/helsingborg-stad/helsingborg-io-sls-api/tree/dev/services/forms-api)
 
-[Navet Microservice](https://github.com/helsingborg-stad/helsingborg-io-sls-api/tree/dev/services/navet-ms)
+## Roadmap
+This repo is part of a project called Mitt Helsingborg. See the [project backlog](https://share.clickup.com/l/h/6-33382576-1/763b706816dbf53) for a complete list of upcoming features, known issues and releases.
 
-[Users](https://github.com/helsingborg-stad/helsingborg-io-sls-api/tree/dev/services/user-api)
 
-[User Microservice](https://github.com/helsingborg-stad/helsingborg-io-sls-api/tree/dev/services/user-ms)
 
-[Viva Microservice](https://github.com/helsingborg-stad/helsingborg-io-sls-api/tree/dev/services/viva-ms)
+## Contributing
 
-[Token](https://github.com/helsingborg-stad/helsingborg-io-sls-api/tree/dev/services/auth/token)
+Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
-[Watson](https://github.com/helsingborg-stad/helsingborg-io-sls-api/tree/dev/services/watson-api)
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+
+
+## License
+
+Distributed under the [MIT License][license-url].
+
+
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+[contributors-shield]: https://img.shields.io/github/contributors/helsingborg-stad/helsingborg-io-sls-api.svg?style=flat-square
+[contributors-url]: https://github.com/helsingborg-stad/helsingborg-io-sls-api/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/helsingborg-stad/helsingborg-io-sls-api.svg?style=flat-square
+[forks-url]: https://github.com/helsingborg-stad/helsingborg-io-sls-api/network/members
+[stars-shield]: https://img.shields.io/github/stars/helsingborg-stad/helsingborg-io-sls-api.svg?style=flat-square
+[stars-url]: https://github.com/helsingborg-stad/helsingborg-io-sls-api/stargazers
+[issues-shield]: https://img.shields.io/github/issues/helsingborg-stad/helsingborg-io-sls-api.svg?style=flat-square
+[issues-url]: https://github.com/helsingborg-stad/helsingborg-io-sls-api/issues
+[license-shield]: https://img.shields.io/github/license/helsingborg-stad/helsingborg-io-sls-api.svg?style=flat-square
+[license-url]: https://raw.githubusercontent.com/helsingborg-stad/helsingborg-io-sls-api/master/LICENSE
+[product-screenshot]: images/screenshot.png
