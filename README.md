@@ -3,7 +3,7 @@
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
-[![License][license-shield]][contributors-url]
+[![License][license-shield]][license-url]
 
 <p>
   <a href="https://github.com/helsingborg-stad/helsingborg-io-sls-api">
