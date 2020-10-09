@@ -10,7 +10,7 @@
     <img src="images/logo.jpg" alt="Logo" width="300">
   </a>
 </p>
-<h3>API Platform Services</h3>
+<h3>Helsingborg IO SLS</h3>
 <p>
   Services that run on Helsingborgs stads API platform <a href="https://helsingborg.io/">helsingborg.io</a>
   <br />
@@ -22,7 +22,7 @@
 
 ## Table of Contents
 - [Table of Contents](#table-of-contents)
-- [About API Platform Services](#about-api-platform-services)
+- [About Helsingborg IO SLS](#about-helsingborg-io-sls)
   - [An example](#an-example)
   - [Built With](#built-with)
 - [Getting Started](#getting-started)
@@ -35,7 +35,7 @@
 - [License](#license)
 
 
-## About API Platform Services
+## About Helsingborg IO SLS
 A service is what you might call a Serverless project. It has a single serverless.yml file driving it.
 
 
@@ -104,12 +104,12 @@ npm install
 ## Services
 Every service in this mono repo has its own documentation. Follow links below.
 
+- Auth
+  - [Token](/services/auth/token)
 - [Bankid API](/services/bankid-api)
 - [Cases API](/services/cases-api)
 - [Forms API](/services/forms-api)
 - [Navet MS](/services/navet-ms)
-- [Auth](/services/auth/)
-  - [Token](/services/auth/token)
 - [Users API](/services/users-api)
 - [Users MS](/services/users-ms)
 - [Viva MS](/services/viva-ms)
