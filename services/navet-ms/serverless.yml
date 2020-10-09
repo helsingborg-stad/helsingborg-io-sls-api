@@ -1,4 +1,4 @@
-service: hbg-navet
+service: navet-ms
 
 plugins:
   - serverless-bundle
@@ -43,7 +43,7 @@ provider:
 
 functions:
   poll:
-    handler: lambdas/poll.main
+    handler: lambdas/pollUser.main
     events:
       - eventBridge:
           pattern:
