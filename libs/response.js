@@ -4,7 +4,7 @@ export function success(statusCode = 200, body) {
   return buildResponse(statusCode, body);
 }
 
-export function failure(error, stackTrace) {
+export function failure(error, enableStackTrace) {
   const errorBody = {
     status: error.status.toString(),
     code: error.status.toString(),
@@ -13,8 +13,8 @@ export function failure(error, stackTrace) {
     message: error.message,
   };
 
-  const addStackTrace = ['dev'].includes(config.stage);
-  if (addStackTrace || stackTrace) errorBody.stack = error.stack;
+  const isConfigStageDev = ['dev'].includes(config.stage);
+  if (isConfigStageDev || enableStackTrace) errorBody.stack = error.stack;
 
   return buildResponse(error.status, errorBody);
 }
@@ -26,6 +26,7 @@ export function buildResponse(statusCode, body) {
     },
     data: body,
   };
+
   return {
     statusCode: statusCode,
     headers: {
