@@ -6,7 +6,7 @@ const requiredFormProperties = [
 
 const requiredStepProperties = [
   { name: 'title', type: 'string' },
-  { name: 'description', type: 'string' },
+  { name: 'id', type: 'string' },
 ];
 
 const requiredQuestionProperties = [
