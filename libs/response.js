@@ -14,7 +14,9 @@ export function failure(error, enableStackTrace) {
   };
 
   const isConfigStageDev = ['dev'].includes(config.stage);
-  if (isConfigStageDev || enableStackTrace) errorBody.stack = error.stack;
+  if (isConfigStageDev || enableStackTrace) {
+    errorBody.stack = error.stack;
+  }
 
   return buildResponse(error.status, errorBody);
 }
