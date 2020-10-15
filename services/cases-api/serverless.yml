@@ -42,6 +42,7 @@ provider:
         - dynamodb:PutItem
         - dynamodb:DeleteItem
         - dynamodb:UpdateItem
+        - dynamodb:DescribeTable
       # Restrict our IAM role permissions to the specific table for the stage
       Resource:
         - "Fn::ImportValue": ${self:custom.resourcesStage}-CasesTableArn
