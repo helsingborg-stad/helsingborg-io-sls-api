@@ -69,8 +69,6 @@ This ensures each change is tested on real infrastructure before being promoted 
 
 ## Getting Started
 
-To get a local copy up and running follow these simple steps.
-
 
 ### Do first
 
