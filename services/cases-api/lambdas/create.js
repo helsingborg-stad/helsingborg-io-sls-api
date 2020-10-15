@@ -21,7 +21,8 @@ const Cases = dynamoose.model(`${config.resourcesStage}-${config.cases.tableName
  * Handler create and store cases into AWS DynamoDB
  */
 export async function main(event) {
-  const { personalNumber } = decodeToken(event);
+  const decodedToken = decodeToken(event);
+  const personalNumber = parseInt(decodedToken.personalNumber);
   const eventBody = JSON.parse(event.body);
 
   const id = uuid.v1();
