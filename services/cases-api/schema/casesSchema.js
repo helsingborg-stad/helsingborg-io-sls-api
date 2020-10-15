@@ -69,6 +69,7 @@ const casesSchema = new dynamoose.Schema(
     },
   },
   {
+    saveUnknown: true,
     timestamps: true,
   }
 );
