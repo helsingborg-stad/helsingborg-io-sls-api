@@ -10,15 +10,17 @@ import * as response from '../../../libs/response';
 
 import casesSchema from '../schema/casesSchema';
 
-const ddb = new dynamoose.aws.sdk.DynamoDB();
-dynamoose.aws.ddb.set(ddb);
+// Create and set new DynamoDB instance
+dynamoose.aws.ddb.set(new dynamoose.aws.sdk.DynamoDB());
 
-const Cases = dynamoose.model(`${config.resourcesStage}-${config.cases.tableName}`, casesSchema, {
-  create: false,
-});
+const CasesModel = dynamoose.model(
+  `${config.resourcesStage}-${config.cases.tableName}`,
+  casesSchema,
+  { create: false }
+);
 
 /**
- * Handler create and store cases into AWS DynamoDB
+ * Lambda handling post request preparing for storing user cases into AWS DynamoDB
  */
 export async function main(event) {
   const decodedToken = decodeToken(event);
@@ -29,7 +31,7 @@ export async function main(event) {
   const PK = `USER#${personalNumber}`; // Partition key
   const SK = `USER#${personalNumber}#CASE#${id}`; // Sort key
 
-  const casesDocument = new Cases({
+  const casesDocument = new CasesModel({
     PK,
     SK,
     ITEM_TYPE,
@@ -56,7 +58,10 @@ export async function main(event) {
 
 /**
  * Handler validate and saving the case document into AWS DynamoDB
- * @param {Document} document
+ * A document is representing one item in a AWS DynamoDB table
+ *
+ * @param {Document}
+ * @returns {Recently saved document item}
  */
 async function sendDynamoDbDocSaveRequest(document) {
   const [documentSaveError, documentSaveResponse] = await to(document.save());
