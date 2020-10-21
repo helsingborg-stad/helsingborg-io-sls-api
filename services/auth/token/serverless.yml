@@ -3,6 +3,7 @@ service: authorizer
 plugins:
   - serverless-bundle
   - serverless-offline
+  - serverless-add-api-key
 
 custom: ${file(../../../serverless.common.yml):custom}
 
