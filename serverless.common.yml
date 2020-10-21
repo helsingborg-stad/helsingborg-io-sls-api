@@ -9,5 +9,6 @@ custom:
 
   apiKeys:
     - name: helsingborg-io-apikey
+      deleteAtRemoval: false
       usagePlan:
         name: hbg-authorizer-${self:custom.stage}
