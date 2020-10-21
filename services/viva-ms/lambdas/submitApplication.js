@@ -43,7 +43,7 @@ export const main = async event => {
  * which in turn creates a case in Viva
  */
 async function sendVadaRequest(caseData) {
-  const { data: applicationBody, personalNumber, period } = caseData;
+  const { data: applicationBody, personalNumber } = caseData;
 
   const { hashSalt, hashSaltLength, vadaUrl } = await SSMParams;
   const hashids = new Hashids(hashSalt, hashSaltLength);

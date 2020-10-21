@@ -1,11 +1,11 @@
+import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import to from 'await-to-js';
+import config from '../../../config';
+import params from '../../../libs/params';
+import * as request from '../../../libs/request';
 import { failure, success } from '../../../libs/response';
 import { validateEventBody } from '../../../libs/validateEventBody';
 import { validateKeys } from '../../../libs/validateKeys';
-import { throwError } from '@helsingborg-stad/npm-api-error-handling';
-import params from '../../../libs/params';
-import config from '../../../config';
-import * as request from '../../../libs/request';
 import * as bankId from '../helpers/bankId';
 
 const SSMParams = params.read(config.bankId.envsKeyName);
@@ -15,9 +15,7 @@ export const main = async event => {
   const bankidSSMParams = await SSMParams;
   const { endUserIp, personalNumber, userVisibleData } = JSON.parse(event.body);
 
-  const [validationError, validationEventBody] = await to(
-    validateEventBody(event.body, validateTokenEventBody)
-  );
+  const [validationError] = await to(validateEventBody(event.body, validateTokenEventBody));
 
   if (validationError && !valid) return failure(validationError);
 
@@ -30,12 +28,16 @@ export const main = async event => {
   };
 
   const [error, bankIdSignResponse] = await to(sendBankIdSignRequest(bankidSSMParams, payload));
-  if (!bankIdSignResponse) return failure(error);
+
+  if (!bankIdSignResponse) {
+    return failure(error);
+  }
+
+  const attributes = bankIdSignResponse.data ? bankIdSignResponse.data : {};
+
   return success(200, {
     type: 'bankIdSign',
-    attributes: {
-      ...bankIdSignResponse.data,
-    },
+    attributes,
   });
 };
 // Not validating personalNumber as it is an optional Parameter

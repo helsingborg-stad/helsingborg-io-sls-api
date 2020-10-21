@@ -6,8 +6,9 @@ custom:
     prod: prod
     dev: dev
   resourcesStage: ${self:custom.resourcesStages.${self:custom.stage}, self:custom.resourcesStages.dev}
-  
+
   apiKeys:
     - name: helsingborg-io-apikey
+      deleteAtRemoval: false
       usagePlan:
-        name: "hbg-authorizer-dev"
+        name: hbg-authorizer-${self:custom.stage}

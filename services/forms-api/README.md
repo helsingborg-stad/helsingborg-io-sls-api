@@ -6,11 +6,11 @@ The Form Service purpose is to provide templates of forms that describes the con
 
 ## Description
 
-The Form Serivce is a RESTful API that allows you to create, update, read and delete Form templates.
+The Form Service is a RESTful API that allows you to create, update, read and delete (not implemented yet) Form templates.
 
 ## Requirements
 
-Read the global requierments for this repo, can be found [here](https://github.com/helsingborg-stad/helsingborg-io-sls-api/blob/dev/README.md)
+Read the global requirements for this repo, can be found [here](https://github.com/helsingborg-stad/helsingborg-io-sls-api/blob/dev/README.md)
 
 ### AWS API GATEWAY
 
@@ -46,6 +46,31 @@ When you deploy the service, serverless will output the generated url in the ter
 
 ## API
 
+### GET ALL FORMS
+
+#### Request Type
+
+`GET`
+
+#### Endpoint
+
+`/forms`
+
+#### Excpected Response
+
+```
+{
+    "jsonapi": {
+        "version": "1.0"
+    },
+    "data": [
+      { form1 },
+      { form2 },
+      ...
+      ]
+}
+```
+
 ### READ FORM
 
 #### Request Type
@@ -56,61 +81,36 @@ When you deploy the service, serverless will output the generated url in the ter
 
 `/forms/{id}`
 
-#### Excpected Response
+#### Expected Response
 
 ```
 {
-  "jsonapi": {
-    "version": "1.0"
-  },
-  "data": {
-    "type": "forms",
-    "id": "4bc10130-af17-11ea-b35b-c9388ccd1548",
-    "attributes": {
-      "ITEM_TYPE": "FORM",
-      "updatedAt": 1592232517827,
-      "createdAt": 1592232517827,
-      "description": "cool",
-      "name": "cool"
+    "jsonapi": {
+        "version": "1.0"
     },
-    "relationships": {
-      "STEP#4ce70fc0-afc9-11ea-a66e-cba35ef5b2c3": {
-        "ITEM_TYPE": "STEP",
-        "updatedAt": 1592308970251,
-        "createdAt": 1592308970251,
-        "description": "This is some step",
-        "id": "4ce70fc0-afc9-11ea-a66e-cba35ef5b2c3",
-        "show": true,
-        "title": "Cool title",
-        "children": {
-          "QUESTION#5de98640-afdd-11ea-8c83-bff51a1c0f37": {
-            "ITEM_TYPE": "QUESTION",
-            "updatedAt": 1592317588731,
-            "createdAt": 1592317588731,
-            "description": "Number",
-            "id": "5de98640-afdd-11ea-8c83-bff51a1c0f37",
-            "type": "number"
-          },
-          "QUESTION#7821fe50-afd5-11ea-b501-a7f243db1d17": {
-            "ITEM_TYPE": "QUESTION",
-            "updatedAt": 1592314196693,
-            "createdAt": 1592314196693,
-            "description": "Color",
-            "id": "7821fe50-afd5-11ea-b501-a7f243db1d17",
-            "type": "string"
-          },
-          "QUESTION#aa448d60-b090-11ea-8e4e-dd547c5c6f4a": {
-            "ITEM_TYPE": "QUESTION",
-            "updatedAt": 1592394596763,
-            "createdAt": 1592394596763,
-            "description": "Number",
-            "id": "aa448d60-b090-11ea-8e4e-dd547c5c6f4a",
-            "type": "asdf"
-          }
+    "data": [
+        {
+            "description": "A nice form",
+            "id": "c04d7b00-c1eb-11ea-8e48-57bbdcb70948",
+            "PK": "FORM#c04d7b00-c1eb-11ea-8e48-57bbdcb70948",
+            "name": "Form Name"
+            "updatedAt": 1594302887600,
+            "createdAt": 1594302887600,
+            "steps": [
+                {
+                    "title": "first step",
+                    "description": "A good beginning"
+                    "questions": [
+                        {
+                            "type": "text",
+                            "id": "123123",
+                            "label": "Good stuff"
+                        }
+                    ],
+                }
+            ],
         }
-      }
-    }
-  }
+    ]
 }
 ```
 
@@ -128,8 +128,21 @@ When you deploy the service, serverless will output the generated url in the ter
 
 ```
 {
-	"name": "example_form_name",
-	"description": "Some description of the form"
+    "description": "A nice form",
+    "name": "Form Name",
+    "steps": [
+        {
+            "title": "first step",
+            "description": "A good beginning",
+            "questions": [
+                {
+                    "type": "text",
+                    "id": "123123",
+                    "label": "Good stuff"
+                }
+            ]
+        }
+    ]
 }
 ```
 
@@ -137,93 +150,127 @@ When you deploy the service, serverless will output the generated url in the ter
 
 ```
 {
-  "jsonapi": {
-    "version": "1.0"
-  },
-  "data": {
-    "type": "forms",
-    "id": "4bc10130-af17-11ea-b35b-c9388ccd1548",
-    "attributes": {
-      "name": "example_form_name",
-      "description": "Some description of the form"
+    "jsonapi": {
+        "version": "1.0"
+    },
+    "data": {
+        "Item": {
+            "id": "c04d7b00-c1eb-11ea-8e48-57bbdcb70948",
+            "PK": "FORM#c04d7b00-c1eb-11ea-8e48-57bbdcb70948",
+            "createdAt": 1594302887600,
+            "updatedAt": 1594302887600,
+            "steps": [
+                {
+                    "title": "first step",
+                    "description": "A good beginning",
+                    "questions": [
+                        {
+                            "id": "123123",
+                            "type": "text",
+                            "label": "Good stuff"
+                        }
+                    ]
+                }
+            ],
+            "description": "A nice form",
+            "name": "Form Name"
+        }
     }
-  }
 }
 ```
 
-### CREATE FORM STEP
+### UPDATE FORM
 
 #### Request Type
 
-`POST`
+`PUT`
 
 #### Endpoint
 
-`/form/{formId}/steps`
+`/forms/{formId}`
 
 #### JSON Payload
 
 ```
 {
-	"show": true,
-	"title": "An example title",
-	"description": "Example description"
-}
+            "description": "A nice form",
+            "name": "Form Name"
+            "steps": [
+                {
+                    "title": "first step",
+                    "description": "A good beginning"
+                    "questions": [
+                        {
+                            "type": "text",
+                            "id": "newId",
+                            "label": "newLabel"
+                        },
+                        {
+                            "type": "number",
+                            "id": "newId",
+                            "label": "newLabel"
+                        }
+                    ],
+                }
+            ],
+        }
 ```
 
 #### Expected JSON Response
 
 ```
 {
-  "jsonapi": {
-    "version": "1.0"
-  },
-  "data": {
-    "type": "forms",
-    "id": "90ddeb80-b48e-11ea-b7d9-15a29e63554c",
-    "attributes": {
-      "message": "ok",
-      "description": "Example description"
+    "jsonapi": {
+        "version": "1.0"
+    },
+    "data": {
+        "Item": {
+            "id": "c04d7b00-c1eb-11ea-8e48-57bbdcb70948",
+            "PK": "FORM#c04d7b00-c1eb-11ea-8e48-57bbdcb70948",
+            "createdAt": 1594302887600,
+            "updatedAt": 1594302887600,
+            "steps": [
+                {
+                    "title": "first step",
+                    "description": "A good beginning"
+                    "questions": [
+                        {
+                            "type": "text",
+                            "id": "newId",
+                            "label": "newLabel"
+                        },
+                        {
+                            "type": "number",
+                            "id": "newId",
+                            "label": "newLabel"
+                        }
+                    ],
+                }
+            ],
+            "description": "A nice form",
+            "name": "Form Name"
+        }
     }
-  }
 }
 ```
 
-### CREATE FORM STEP QUESTION
+### DELETE FORM
 
 #### Request Type
 
-`POST`
+`DELETE`
 
 #### Endpoint
 
-`/form/{formId}/steps/{stepId}/questions`
+`/forms/{id}`
 
-#### JSON Payload
-
-```
-{
-	"label": "some bullshit request",
-	"description": "some example question description",
-	"show": true,
-	"type":"multiple_choice",
-}
-```
-
-#### Expected JSON Response
+#### Expected Response
 
 ```
 {
-  "jsonapi": {
-    "version": "1.0"
-  },
-  "data": {
-    "type": "forms",
-    "id": "4bc10130-af17-11ea-b35b-c9388ccd1548",
-    "attributes": {
-      "description": "some example question description",
-      "fieldType": "multiple_choice"
-    }
-  }
+    "jsonapi": {
+        "version": "1.0"
+    },
+    "data": {}
 }
 ```

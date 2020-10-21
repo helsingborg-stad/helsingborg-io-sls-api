@@ -1,4 +1,4 @@
-service: navet-ms
+service: users-ms
 
 plugins:
   - serverless-bundle
@@ -26,26 +26,16 @@ provider:
   iamRoleStatements:
     - Effect: Allow
       Action:
-        - s3:*
-      Resource: "*"
-    - Effect: Allow
-      Action:
-        - SSM:GetParameter
-      Resource: "*"
-    - Effect: Allow
-      Action:
-        - events:PutEvents
-      Resource: "*"
-    - Effect: Allow
-      Action:
-        - cloudwatch:*
-      Resource: "*"
+        - dynamodb:PutItem
+      # Restrict our IAM role permissions to the specific table for the stage
+      Resource:
+        - "Fn::ImportValue": ${self:custom.resourcesStage}-UsersTableArn
 
 functions:
-  poll:
-    handler: lambdas/pollUser.main
+  create:
+    handler: lambdas/createUser.main
     events:
       - eventBridge:
           pattern:
             source:
-              - bankId.collect
+              - navet.poll

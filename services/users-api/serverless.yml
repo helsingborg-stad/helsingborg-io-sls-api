@@ -1,4 +1,4 @@
-service: cases-api
+service: users-api
 
 plugins:
   - serverless-bundle
@@ -24,79 +24,80 @@ provider:
   environment:
     stage: ${self:custom.stage}
     resourcesStage: ${self:custom.resourcesStage}
-
   apiGateway:
     restApiId:
       "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayRestApiId
     restApiRootResourceId:
       "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
     restApiResources:
-      cases:
-        "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayResourceCases
+      users:
+        "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayResourceUsers
 
   iamRoleStatements:
     - Effect: Allow
       Action:
         - dynamodb:Query
+        - dynamodb:Scan
         - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:DeleteItem
-        - dynamodb:UpdateItem
       # Restrict our IAM role permissions to the specific table for the stage
       Resource:
-        - "Fn::ImportValue": ${self:custom.resourcesStage}-CasesTableArn
+        - "Fn::ImportValue": ${self:custom.resourcesStage}-UsersTableArn
+
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+        - s3:PutObjectAcl
+        - s3:ListObject
+        - s3:GetObject
+      Resource:
+        - Fn::ImportValue: ${self:custom.resourcesStage}-AttachmentsBucketArn
+        - Fn::Join:
+            - ""
+            - - Fn::ImportValue: ${self:custom.resourcesStage}-AttachmentsBucketArn
+              - "/*"
 
 functions:
-  getCase:
-    handler: lambdas/getCase.main
+  getUser:
+    handler: lambdas/getUser.main
     events:
       - http:
-          path: /cases/{caseId}
+          path: /users/{personalNumber}
           method: get
           cors: true
           authorizer:
             type: CUSTOM
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
-  getCaseList:
-    handler: lambdas/getCaseList.main
+  me:
+    handler: lambdas/getUser.main
     events:
       - http:
-          path: /cases
+          path: /users/me
           method: get
           cors: true
           authorizer:
             type: CUSTOM
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
-  createCase:
-    handler: lambdas/createCase.main
+  getAttachmentList:
+    handler: lambdas/getAttachmentList.main
     events:
       - http:
-          path: /cases
+          path: /users/me/attachments
+          method: get
+          cors: true
+          authorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue ${self:custom.stage}-authorizerId
+
+  uploadAttachment:
+    handler: lambdas/uploadAttachment.main
+    environment:
+      BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-AttachmentsBucketName
+    events:
+      - http:
+          path: /users/me/attachments
           method: post
-          cors: true
-          authorizer:
-            type: CUSTOM
-            authorizerId: !ImportValue ${self:custom.stage}-authorizerId
-
-  updateCase:
-    handler: lambdas/updateCase.main
-    events:
-      - http:
-          path: /cases/{caseId}
-          method: put
-          cors: true
-          authorizer:
-            type: CUSTOM
-            authorizerId: !ImportValue ${self:custom.stage}-authorizerId
-
-  deleteCase:
-    handler: lambdas/deleteCase.main
-    events:
-      - http:
-          path: /cases/{caseId}
-          method: delete
           cors: true
           authorizer:
             type: CUSTOM

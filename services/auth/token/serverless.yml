@@ -1,8 +1,9 @@
-service: hbg-authorizer
+service: authorizer
 
 plugins:
   - serverless-bundle
   - serverless-offline
+  - serverless-add-api-key
 
 custom: ${file(../../../serverless.common.yml):custom}
 
@@ -15,9 +16,6 @@ provider:
   stage: dev
   region: eu-north-1
   endpointType: regional
-  apiKeys:
-    - helsingborg-io-apikey
-
   tracing:
     apiGateway: true
     lambda: true
