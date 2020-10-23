@@ -8,7 +8,9 @@ The BankID Service purpose is to provide integration towards [the swedish bankid
 
 The Bankid Service is a RESTful API that allows you use the following bankid integrations: authentication, sign, collect and cancel.
 
-Complete documentation [Bank ID relying party guidelines (documentation)](https://www.bankid.com/bankid-i-dina-tjanster/rp-info)
+Complete documentation [Bank ID relying party guidelines (documentation)](https://www.bankid.com/bankid-i-dina-tjanster/rp-info).
+
+The workflow to perform a login is as follows: you make an authentication request, and then start periodically polling against the collect end-point. This continues until the session expires, or the user cancels, or the user successfully logs in, in which case we receive a success response.
 
 ## Getting started
 
@@ -117,7 +119,7 @@ When you deploy the service, serverless will output the generated url in the ter
 ```
 
 #### Expected JSON Response
-
+While pending:
 ```
 {
   "jsonapi": {
@@ -129,6 +131,35 @@ When you deploy the service, serverless will output the generated url in the ter
       "orderRef": "a-order-ref-id",
       "status": "pending",
       "hintCode": "noClient"
+    }
+  }
+}
+```
+After completed login:
+```
+{
+  "jsonapi": {
+    "version": "1.0"
+  },
+  "data": {
+    "orderRef":"131daac9-16c6-4618-beb0-365768f37288",
+    "status":"complete",
+    "completionData":{
+      "user":{
+        "personalNumber":"190000000000",
+        "name":"Karl Karlsson",
+        "givenName":"Karl",
+        "surname":"Karlsson"
+      },
+      "device":{
+        "ipAddress":"192.168.0.1"
+      },
+      "cert":{
+        "notBefore":"1502983274000",
+        "notAfter":"1563549674000"
+      },
+      "signature":"<base64-encoded data>",
+      "ocspResponse":"<base64-encoded data>"
     }
   }
 }
