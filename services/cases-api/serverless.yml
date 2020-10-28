@@ -84,7 +84,7 @@ functions:
     handler: lambdas/updateCase.main
     events:
       - http:
-          path: /cases/{caseId}
+          path: /cases/{id}
           method: put
           cors: true
           authorizer:
