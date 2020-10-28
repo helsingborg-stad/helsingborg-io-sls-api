@@ -60,9 +60,10 @@ export async function main(event) {
   return response.success(201, {
     type: 'createCases',
     attributes: {
-      id,
       message: 'Case created successfully!',
-      createdAt,
+      id,
+      formId,
+      answers,
     },
   });
 }
