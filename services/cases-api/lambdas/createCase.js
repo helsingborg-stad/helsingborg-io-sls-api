@@ -1,11 +1,11 @@
 import to from 'await-to-js';
 import uuid from 'uuid';
 
-import { validateEventBody } from '../../../libs/validateEventBody';
-import * as response from '../../../libs/response';
-import { validateKeys } from '../../../libs/validateKeys';
 import config from '../../../config';
-import { CASE_ITEM_TYPE } from '../helpers/constants';
+
+import * as response from '../../../libs/response';
+import { validateEventBody } from '../../../libs/validateEventBody';
+import { validateKeys } from '../../../libs/validateKeys';
 import { decodeToken } from '../../../libs/token';
 import { putItem } from '../../../libs/queries';
 
@@ -20,43 +20,49 @@ export async function main(event) {
     validateEventBody(requestBody, validateCreateCaseRequestBody)
   );
 
-  if (validateError) return response.failure(validateError);
+  if (validateError) {
+    return response.failure(validateError);
+  }
 
-  const caseId = uuid.v1();
-  const casePartitionKey = `USER#${decodedToken.personalNumber}`;
+  const TableName = config.cases.tableName;
+
+  const id = uuid.v1();
   const createdAt = Date.now();
+  const updatedAt = Date.now();
 
-  // Case item
-  const params = {
-    TableName: config.cases.tableName,
+  const { personalNumber } = decodedToken;
+  const { provider, formId, status, details, answers } = validatedEventBody;
+
+  const PK = `USER#${personalNumber}`;
+  const SK = `USER#${personalNumber}#CASE#${id}`;
+
+  const caseItem = {
+    TableName,
     Item: {
-      PK: casePartitionKey,
-      SK: `${casePartitionKey}#CASE#${caseId}`,
-      ITEM_TYPE: CASE_ITEM_TYPE,
-      id: caseId,
-      createdAt: createdAt,
-      updatedAt: createdAt,
-      personalNumber: decodedToken.personalNumber,
-      type: validatedEventBody.type,
-      formId: validatedEventBody.formId,
-      status: validatedEventBody.status,
-      data: validatedEventBody.data,
-      // TODO: add meta to store viva period stuff
+      PK,
+      SK,
+      id,
+      provider,
+      formId,
+      status,
+      details,
+      answers,
+      createdAt,
+      updatedAt,
     },
   };
 
-  const [dynamodbError] = await to(putItem(params));
-  if (dynamodbError) return response.failure(dynamodbError);
+  const [dynamodbError] = await to(putItem(caseItem));
+  if (dynamodbError) {
+    return response.failure(dynamodbError);
+  }
 
   return response.success(201, {
-    type: 'cases',
-    id: caseId,
+    type: 'createCases',
     attributes: {
-      formId: validatedEventBody.formId,
-      personalNumber: decodedToken.personalNumber,
-      type: validatedEventBody.type,
-      status: validatedEventBody.status,
-      data: validatedEventBody.data,
+      id,
+      message: 'Case created successfully!',
+      createdAt,
     },
   });
 }
@@ -66,21 +72,57 @@ export async function main(event) {
  * @param {obj} requestBody
  */
 function validateCreateCaseRequestBody(requestBody) {
-  const keys = ['type', 'data', 'formId'];
+  const keys = ['provider', 'formId', 'status', 'details', 'answers'];
   if (!validateKeys(requestBody, keys)) {
-    return [false, 400];
+    return [false, 400, 'missing one of more of [provider, formId, status, details, answers]'];
   }
 
-  if (typeof requestBody.type !== 'string') {
-    return [false, 400, `type key should be of type string. Got ${typeof requestBody.type}`];
+  if (typeof requestBody.provider !== 'string') {
+    return [
+      false,
+      400,
+      `provider key should be of type string [VIVA]. Got ${typeof requestBody.provider}`,
+    ];
+  }
+
+  if (typeof requestBody.status !== 'string') {
+    return [
+      false,
+      400,
+      `status key should be of type string [submitted | ongiong]. Got ${typeof requestBody.status}`,
+    ];
   }
 
   if (typeof requestBody.formId !== 'string') {
     return [false, 400, `formId key should be of type string. Got ${typeof requestBody.formId}`];
   }
 
-  if (typeof requestBody.data !== 'object') {
-    return [false, 400, `data key should be of type object. Got ${typeof requestBody.data}`];
+  if (typeof requestBody.details !== 'object') {
+    return [false, 400, `details key should be of type object. Got ${typeof requestBody.details}`];
+  } else if (typeof requestBody.details.period !== 'object') {
+    return [
+      false,
+      400,
+      `details.period key should be of type object. Got ${typeof requestBody.details.period}`,
+    ];
+  } else if (typeof requestBody.details.period.startDate !== 'number') {
+    return [
+      false,
+      400,
+      `details.period.startDate key should be of type number. Got ${typeof requestBody.details
+        .period.startDate}`,
+    ];
+  } else if (typeof requestBody.details.period.endDate !== 'number') {
+    return [
+      false,
+      400,
+      `details.period.endDate key should be of type number. Got ${typeof requestBody.details.period
+        .endDate}`,
+    ];
+  }
+
+  if (typeof requestBody.answers !== 'object') {
+    return [false, 400, `answers key should be of type object. Got ${typeof requestBody.answers}`];
   }
 
   return [true];
