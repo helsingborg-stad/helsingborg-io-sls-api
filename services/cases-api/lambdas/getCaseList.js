@@ -2,8 +2,10 @@ import to from 'await-to-js';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
 import config from '../../../config';
+
 import * as response from '../../../libs/response';
 import * as dynamoDb from '../../../libs/dynamoDb';
+import { objectWithoutProperties } from '../../../libs/objects';
 import { decodeToken } from '../../../libs/token';
 
 /**
@@ -11,61 +13,50 @@ import { decodeToken } from '../../../libs/token';
  */
 export async function main(event) {
   const decodedToken = decodeToken(event);
-  const casePartitionKey = `USER#${decodedToken.personalNumber}`;
-  const caseSortKey = casePartitionKey;
+
+  const { personalNumber } = decodedToken;
+
+  const PK = `USER#${personalNumber}`;
+  const SK = PK;
+
+  const TableName = config.cases.tableName;
 
   const params = {
-    TableName: config.cases.tableName,
+    TableName,
     ExpressionAttributeValues: {
-      ':pk': casePartitionKey,
-      ':sk': caseSortKey,
+      ':pk': PK,
+      ':sk': SK,
     },
     KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
   };
 
-  const [error, queryResponse] = await to(sendListCasesRequest(params));
+  const [error, casesGetResponse] = await to(sendListCasesRequest(params));
   if (error) return response.failure(error);
 
-  if (queryResponse.Count > 0) {
-    const cases = queryResponse.Items.map(item => {
-      const { id, ...attributes } = omitObjectKeys(item, [
-        'ITEM_TYPE',
-        // 'updatedAt',
-        // 'createdAt',
-        'PK',
-        'SK',
-      ]);
-
-      return {
-        type: 'cases',
-        id,
-        attributes,
-      };
-    });
-
-    return response.success(200, cases);
-  } else {
-    return response.success(200, {
-      type: 'cases',
-      message: 'Items not found',
+  if (!casesGetResponse.Count) {
+    return response.success(404, {
+      type: 'getCasesList',
+      attributes: {
+        message: `Cases not found`,
+      },
     });
   }
+
+  const cases = casesGetResponse.Items.map(item => {
+    const attributes = objectWithoutProperties(item, ['PK', 'SK']);
+    return attributes;
+  });
+
+  return response.success(200, {
+    type: 'getCasesList',
+    attributes: {
+      cases,
+    },
+  });
 }
 
 async function sendListCasesRequest(params) {
   const [error, result] = await to(dynamoDb.call('query', params));
   if (error) throwError(error.statusCode);
   return result;
-}
-
-function omitObjectKeys(obj, keys) {
-  return Object.keys(obj).reduce(
-    (item, key) => {
-      if (keys.indexOf(key) >= 0) {
-        delete item[key];
-      }
-      return item;
-    },
-    { ...obj }
-  );
 }

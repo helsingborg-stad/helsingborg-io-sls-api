@@ -11,19 +11,23 @@ import * as dynamoDb from '../../../libs/dynamoDb';
 export const main = async event => {
   const { id } = event.pathParameters;
 
+  const TableName = config.cases.tableName;
+
   // todo: implement condition params
   const params = {
-    TableName: config.cases.tableName,
+    TableName,
     Key: {
       id,
     },
   };
 
   const [error, casesDeleteResponse] = await to(sendCasesDeleteRequest(params));
-  if (!casesDeleteResponse) return response.failure(error);
+  if (!casesDeleteResponse) {
+    return response.failure(error);
+  }
 
   return response.success(200, {
-    type: 'casesUpdate',
+    type: 'deleteCase',
     attributes: {
       ...casesDeleteResponse,
     },
@@ -31,7 +35,9 @@ export const main = async event => {
 };
 
 async function sendCasesDeleteRequest(params) {
-  const [dbError, dbResponse] = await to(dynamoDb.call('deleteItem', params));
-  if (!dbResponse) throwError(dbError);
-  return dbResponse;
+  const [error, response] = await to(dynamoDb.call('deleteItem', params));
+  if (!error) {
+    throwError(error);
+  }
+  return response;
 }

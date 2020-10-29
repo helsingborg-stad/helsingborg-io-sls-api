@@ -84,7 +84,7 @@ export async function main(event) {
 
   const attributes = objectWithoutProperties(queryResponse.Attributes, ['PK', 'SK']);
   return response.success(200, {
-    type: 'updateCases',
+    type: 'updateCase',
     attributes: {
       ...attributes,
     },

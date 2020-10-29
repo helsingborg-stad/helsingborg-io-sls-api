@@ -51,7 +51,7 @@ functions:
     handler: lambdas/getCase.main
     events:
       - http:
-          path: /cases/{caseId}
+          path: /cases/{id}
           method: get
           cors: true
           authorizer:
@@ -95,7 +95,7 @@ functions:
     handler: lambdas/deleteCase.main
     events:
       - http:
-          path: /cases/{caseId}
+          path: /cases/{id}
           method: delete
           cors: true
           authorizer:
