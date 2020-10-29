@@ -61,8 +61,13 @@ export async function main(event) {
     type: 'createCases',
     attributes: {
       id,
+      provider,
       formId,
+      status,
+      details,
       answers,
+      createdAt,
+      updatedAt,
     },
   });
 }
