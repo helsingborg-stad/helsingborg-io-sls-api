@@ -6,7 +6,7 @@ import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
 import config from '../../../config';
 import params from '../../../libs/params';
-import { VIVA_CASE_TYPE, CASE_STATUS_SUBMIT } from '../../../libs/constants';
+import { CASE_PROVIDER_VIVA, CASE_STATUS_SUBMITTED } from '../../../libs/constants';
 import * as request from '../../../libs/request';
 
 const SSMParams = params.read(config.vada.envsKeyName);
@@ -19,31 +19,52 @@ const dynamoDbConverter = AWS.DynamoDB.Converter;
 export const main = async event => {
   const [record] = event.Records;
 
-  if (record.dynamodb.NewImage === undefined) return null;
+  if (record.dynamodb.NewImage === undefined) {
+    return null;
+  }
 
   // Make DynamoDb data readable by the Viva API adapter
   const unmarshalledData = dynamoDbConverter.unmarshall(record.dynamodb.NewImage);
 
-  const isVivaCase = unmarshalledData.type === VIVA_CASE_TYPE;
-  const isCaseSubmitted = unmarshalledData.status === CASE_STATUS_SUBMIT;
-  if (!isVivaCase || !isCaseSubmitted) return null;
+  if (!checkIsVivaCase(unmarshalledData)) {
+    return null;
+  }
 
   const [error, vadaResponse] = await to(sendVadaRequest(unmarshalledData));
   if (error) {
-    return console.error('Viva-ms', error);
+    return console.error('Viva-ms response error:', error);
   }
 
-  console.log('Viva-ms: VADA api response', vadaResponse.data);
+  console.log('Viva-ms response:', vadaResponse.data);
 
   return true;
 };
+
+/**
+ * Helper to ensure we only handling cases of viva type
+ * @param {object} data
+ * @returns {boolean}
+ */
+function checkIsVivaCase(data) {
+  const isCaseProviderViva = data.provider === CASE_PROVIDER_VIVA;
+  const isCaseStatusSubmitted = data.status === CASE_STATUS_SUBMITTED;
+  if (!isCaseProviderViva || !isCaseStatusSubmitted) {
+    return false;
+  }
+  return true;
+}
 
 /**
  * Handler responsible for sending a POST call to Viva API adapter,
  * which in turn creates a case in Viva
  */
 async function sendVadaRequest(caseData) {
-  const { data: applicationBody, personalNumber } = caseData;
+  const {
+    PK,
+    details: { period },
+    answers,
+  } = caseData;
+  const personalNumber = PK.substring(5);
 
   const { hashSalt, hashSaltLength, vadaUrl } = await SSMParams;
   const hashids = new Hashids(hashSalt, hashSaltLength);
@@ -51,16 +72,11 @@ async function sendVadaRequest(caseData) {
   // Construct imperative Viva API adapter payload
   const vadaPayload = {
     applicationType: 'recurrent', // basic | recurrent
-    personalNumber: hashids.encode(personalNumber),
-    workflowId: '',
+    applicant: hashids.encode(personalNumber),
     clientIp: '0.0.0.0',
-    // TODO:
-    // period parameter needs to be sent from the app to complete the application request
-    period: {
-      startDate: '2020-10-01',
-      endDate: '2020-10-31',
-    },
-    applicationBody,
+    workflowId: '',
+    period,
+    answers,
   };
 
   const [error, vadaCreateRecurrentApplicationResponse] = await to(
