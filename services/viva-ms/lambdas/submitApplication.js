@@ -72,7 +72,7 @@ async function sendVadaRequest(caseData) {
   // Construct imperative Viva API adapter payload
   const vadaPayload = {
     applicationType: 'recurrent', // basic | recurrent
-    applicant: hashids.encode(personalNumber),
+    personalNumber: hashids.encode(personalNumber),
     clientIp: '0.0.0.0',
     workflowId: '',
     period,
