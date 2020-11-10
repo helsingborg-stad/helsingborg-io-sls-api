@@ -79,9 +79,15 @@ async function sendVadaRequest(caseData) {
     answers,
   };
 
+  const requestClient = request.requestClient();
+  requestClient.defaults.headers.post['x-api-key'] = config.vada.token;
+  // const url = `${vadaUrl}/applications`;
+  const url = 'http://vicki.dannilsson.se:5000/foo';
+
   const [error, vadaCreateRecurrentApplicationResponse] = await to(
-    request.call(request.requestClient({}), 'post', `${vadaUrl}/applications`, vadaPayload)
+    request.call(requestClient, 'post', url, vadaPayload)
   );
+
   if (error) {
     throwError(500, error);
   }
