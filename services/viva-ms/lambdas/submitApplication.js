@@ -89,7 +89,19 @@ async function sendVadaRequest(caseData) {
   );
 
   if (error) {
-    throwError(500, error);
+    if (error.response) {
+      // The request was made and the server responded with a
+      // status code that falls out of the range of 2xx
+      throwError(error.response.status, error.response.data.message);
+    } else if (error.request) {
+      // The request was made but no response was received
+      // `error.request` is an instance of http.ClientRequest in node.js
+      console.error(error.request);
+      throwError(500, error.request.message);
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      throwError(500, error.message);
+    }
   }
 
   return vadaCreateRecurrentApplicationResponse;
