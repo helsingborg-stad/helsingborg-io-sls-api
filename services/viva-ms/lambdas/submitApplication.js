@@ -32,10 +32,10 @@ export const main = async event => {
 
   const [error, vadaResponse] = await to(sendVadaRequest(unmarshalledData));
   if (error) {
-    return console.error('Viva-ms response error:', error);
+    return console.error('(Viva-ms)', error);
   }
 
-  console.log('Viva-ms response:', vadaResponse.data);
+  console.info('(Viva-ms)', vadaResponse.data);
 
   return true;
 };
