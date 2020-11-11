@@ -80,10 +80,10 @@ async function sendVadaRequest(caseData) {
   requestClient.defaults.headers.post['x-api-key'] = config.vada.token;
 
   const { vadaUrl } = await SSMParams;
-  const url = `${vadaUrl}/applications`;
+  const vadaApplicationsUrl = `${vadaUrl}/applications`;
 
   const [error, vadaCreateRecurrentApplicationResponse] = await to(
-    request.call(requestClient, 'post', url, vadaPayload)
+    request.call(requestClient, 'post', vadaApplicationsUrl, vadaPayload)
   );
 
   if (error) {
