@@ -66,13 +66,10 @@ async function sendVadaRequest(caseData) {
   } = caseData;
   const personalNumber = PK.substring(5);
 
-  const { hashSalt, hashSaltLength, vadaUrl } = await SSMParams;
-  const hashids = new Hashids(hashSalt, hashSaltLength);
-
   // Construct imperative Viva API adapter payload
   const vadaPayload = {
     applicationType: 'recurrent', // basic | recurrent
-    personalNumber: hashids.encode(personalNumber),
+    personalNumber: hashEncode(personalNumber),
     clientIp: '0.0.0.0',
     workflowId: '',
     period,
@@ -81,8 +78,9 @@ async function sendVadaRequest(caseData) {
 
   const requestClient = request.requestClient();
   requestClient.defaults.headers.post['x-api-key'] = config.vada.token;
-  // const url = `${vadaUrl}/applications`;
-  const url = 'http://vicki.dannilsson.se:5000/foo';
+
+  const { vadaUrl } = await SSMParams;
+  const url = `${vadaUrl}/applications`;
 
   const [error, vadaCreateRecurrentApplicationResponse] = await to(
     request.call(requestClient, 'post', url, vadaPayload)
@@ -96,7 +94,6 @@ async function sendVadaRequest(caseData) {
     } else if (error.request) {
       // The request was made but no response was received
       // `error.request` is an instance of http.ClientRequest in node.js
-      console.error(error.request);
       throwError(500, error.request.message);
     } else {
       // Something happened in setting up the request that triggered an Error
@@ -105,4 +102,15 @@ async function sendVadaRequest(caseData) {
   }
 
   return vadaCreateRecurrentApplicationResponse;
+}
+
+/**
+ * Helper function for hashing to set some sort of security
+ * @param {integer} number
+ * @returns {string} Hashed personal number
+ */
+async function hashEncode(number) {
+  const { hashSalt, hashSaltLength } = await SSMParams;
+  const hashids = new Hashids(hashSalt, hashSaltLength);
+  return hashids.encode(number);
 }
