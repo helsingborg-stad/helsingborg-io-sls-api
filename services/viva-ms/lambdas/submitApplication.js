@@ -1,11 +1,11 @@
 /* eslint-disable no-console */
 import AWS from 'aws-sdk';
 import to from 'await-to-js';
-import Hashids from 'hashids';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
 import config from '../../../config';
 import params from '../../../libs/params';
+import hash from '../../../libs/helperHashEncode';
 import { CASE_PROVIDER_VIVA, CASE_STATUS_SUBMITTED } from '../../../libs/constants';
 import * as request from '../../../libs/request';
 
@@ -65,11 +65,15 @@ async function sendVadaRequest(caseData) {
     answers,
   } = caseData;
   const personalNumber = PK.substring(5);
+  const ssmParams = await SSMParams;
+
+  const { hashSalt, hashSaltLength } = ssmParams;
+  const personalNumberEncoded = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
   // Construct imperative Viva API adapter payload
   const vadaPayload = {
     applicationType: 'recurrent', // basic | recurrent
-    personalNumber: hashEncode(personalNumber),
+    personalNumber: personalNumberEncoded,
     clientIp: '0.0.0.0',
     workflowId: '',
     period,
@@ -102,15 +106,4 @@ async function sendVadaRequest(caseData) {
   }
 
   return vadaCreateRecurrentApplicationResponse;
-}
-
-/**
- * Helper function for hashing to set some sort of security
- * @param {integer} number
- * @returns {string} Hashed personal number
- */
-async function hashEncode(number) {
-  const { hashSalt, hashSaltLength } = await SSMParams;
-  const hashids = new Hashids(hashSalt, hashSaltLength);
-  return hashids.encode(number);
 }
