@@ -80,10 +80,9 @@ async function sendVadaRequest(caseData) {
     answers,
   };
 
-  const requestClient = request.requestClient();
-  requestClient.defaults.headers.post['x-api-key'] = config.vada.token;
+  const { vadaUrl, xApiKeyToken } = ssmParams;
+  const requestClient = request.requestClient({}, { 'x-api-key': xApiKeyToken });
 
-  const { vadaUrl } = await SSMParams;
   const vadaApplicationsUrl = `${vadaUrl}/applications`;
 
   const [error, vadaCreateRecurrentApplicationResponse] = await to(
