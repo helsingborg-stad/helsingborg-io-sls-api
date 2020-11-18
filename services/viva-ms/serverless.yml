@@ -47,3 +47,13 @@ functions:
           startingPosition: LATEST
           arn:
             Fn::ImportValue: ${self:custom.resourcesStage}-CasesTableStreamArn
+
+  getOfficers:
+    handler: lambdas/getOfficers.main
+    events:
+      - stream:
+          type: dynamodb
+          batchSize: 1
+          startingPosition: LATEST
+          arn:
+            Fn::ImportValue: ${self:custom.resourcesStage}-CasesTableStreamArn
