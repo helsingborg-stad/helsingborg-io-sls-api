@@ -6,7 +6,7 @@ const eventBridge = new AWS.EventBridge();
  * Lambda function takes DynamoDB stream events and
  * publishes them to an EventBridge Event Bus
  */
-export const main = async (event) => {
+export const main = async event => {
   const eventsToPut = [];
 
   for (const record of event.Records) {

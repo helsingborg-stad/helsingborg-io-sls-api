@@ -46,26 +46,6 @@ functions:
           arn:
             Fn::ImportValue: ${self:custom.resourcesStage}-CasesTableStreamArn
 
-  # getOfficers:
-  #   handler: lambdas/getOfficers.main
-  #   events:
-  #     - stream:
-  #         type: dynamodb
-  #         batchSize: 1
-  #         startingPosition: LATEST
-  #         arn:
-  #           Fn::ImportValue: ${self:custom.resourcesStage}-CasesTableStreamArn
-
-  # getOfficers:
-  #   handler: lambdas/getOfficers.main
-  #   events:
-  #     - stream:
-  #         type: dynamodb
-  #         batchSize: 1
-  #         startingPosition: LATEST
-  #         arn:
-  #           Fn::ImportValue: ${self:custom.resourcesStage}-CasesTableStreamArn
-
   syncOfficers:
     handler: lambdas/syncOfficers.main
     events:
@@ -81,3 +61,4 @@ functions:
                 NewImage:
                   provider:
                     S: ["VIVA"]
+                    
