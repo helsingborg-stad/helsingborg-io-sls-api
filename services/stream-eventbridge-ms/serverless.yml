@@ -1,0 +1,47 @@
+service: stream-eventbridge-ms
+
+plugins:
+  - serverless-bundle
+  - serverless-s3-remover
+
+custom: ${file(../../serverless.common.yml):custom}
+
+package:
+  individually: true
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: eu-north-1
+  endpointType: regional
+  tracing:
+    apiGateway: false
+    lambda: true
+
+  environment:
+    stage: ${self:custom.stage}
+    resourcesStage: ${self:custom.resourcesStage}
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - events:PutEvents
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - "dynamodb:ListStreams"
+      # Restrict our IAM role permissions to the specific table for the stage
+      Resource:
+        - "Fn::ImportValue": ${self:custom.resourcesStage}-CasesTableArn
+
+functions:
+  streamProcessor:
+    handler: lambdas/streamProcessor.main
+    events:
+      - stream:
+          type: dynamodb
+          batchSize: 10
+          startingPosition: LATEST
+          arn:
+            Fn::ImportValue: ${self:custom.resourcesStage}-CasesTableStreamArn

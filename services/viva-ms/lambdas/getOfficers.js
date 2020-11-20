@@ -27,4 +27,18 @@ export const main = async event => {
 
   // Make DynamoDb data readable by the Viva API adapter (VADA)
   const unmarshalledData = dynamoDbConverter.unmarshall(record.dynamodb.NewImage);
+  const isCaseProviderViva = unmarshalledData.provider !== CASE_PROVIDER_VIVA;
+
+  if (!isCaseProviderViva) {
+    return null;
+  }
 };
+
+/**
+ * Handler responsible for sending a GET call to Viva API adapter
+ * and returns person info
+ * @returns {object} person info
+ */
+async function sendVadaRequest() {
+  return {};
+}

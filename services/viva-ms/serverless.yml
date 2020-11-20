@@ -2,7 +2,7 @@ service: viva-ms
 
 plugins:
   - serverless-bundle
-  - serverless-offline
+  - serverless-s3-remover
 
 custom: ${file(../../serverless.common.yml):custom}
 
@@ -15,10 +15,8 @@ provider:
   stage: dev
   region: eu-north-1
   endpointType: regional
-  logs:
-    restApi: true
   tracing:
-    apiGateway: true
+    apiGateway: false
     lambda: true
 
   environment:
@@ -48,12 +46,38 @@ functions:
           arn:
             Fn::ImportValue: ${self:custom.resourcesStage}-CasesTableStreamArn
 
-  getOfficers:
-    handler: lambdas/getOfficers.main
+  # getOfficers:
+  #   handler: lambdas/getOfficers.main
+  #   events:
+  #     - stream:
+  #         type: dynamodb
+  #         batchSize: 1
+  #         startingPosition: LATEST
+  #         arn:
+  #           Fn::ImportValue: ${self:custom.resourcesStage}-CasesTableStreamArn
+
+  # getOfficers:
+  #   handler: lambdas/getOfficers.main
+  #   events:
+  #     - stream:
+  #         type: dynamodb
+  #         batchSize: 1
+  #         startingPosition: LATEST
+  #         arn:
+  #           Fn::ImportValue: ${self:custom.resourcesStage}-CasesTableStreamArn
+
+  syncOfficers:
+    handler: lambdas/syncOfficers.main
     events:
-      - stream:
-          type: dynamodb
-          batchSize: 1
-          startingPosition: LATEST
-          arn:
-            Fn::ImportValue: ${self:custom.resourcesStage}-CasesTableStreamArn
+      - eventBridge:
+          pattern:
+            source:
+              - my-service.database
+            detail-type:
+              - INSERT
+              - MODIFY
+            detail:
+              dynamodb:
+                NewImage:
+                  provider:
+                    S: ["VIVA"]
