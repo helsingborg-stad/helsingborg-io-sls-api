@@ -20,14 +20,14 @@
     "prettier"
   ],
   "rules": {
-    "no-console": 2,
+    "no-console": 1,
     "no-debugger": 0,
     "no-alert": 0,
     "no-await-in-loop": 0,
     "no-unused-vars": [
-      1,
+      2,
       {
-        "ignoreSiblings": true,
+        "ignoreRestSiblings": true,
         "argsIgnorePattern": "res|next|^err|^_"
       }
     ],
@@ -67,7 +67,8 @@
       {
         "trailingComma": "es5",
         "singleQuote": true,
-        "printWidth": 100
+        "printWidth": 100,
+        "arrowParens": "avoid"
       }
     ],
     "indent": [
