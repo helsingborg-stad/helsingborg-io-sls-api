@@ -28,14 +28,14 @@ export const main = async event => {
     return console.error('(Viva-ms) syncOfficers', error);
   }
 
-  const { vivaperson } = vadaResponse.data.person.info;
-  console.log(vivaperson);
+  const { vivacases } = vadaResponse.data.person.cases;
+  console.log('(Viva-ms) syncOfficers - vivacases', vivacases);
 
   // If administrators array not exists update case
 
   // else sync with admins data from viva
 
-  console.info('(Viva-ms) syncOfficers', vadaResponse.data);
+  console.info('(Viva-ms) syncOfficers - vadaResponse.data', vadaResponse.data);
 
   return true;
 };
