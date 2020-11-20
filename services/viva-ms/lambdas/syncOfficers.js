@@ -13,7 +13,7 @@ const SSMParams = params.read(config.vada.envsKeyName);
 const dynamoDbConverter = AWS.DynamoDB.Converter;
 
 /**
- * Handler reacting on VIVA case event
+ * Handler reacting on case event
  */
 export const main = async event => {
   if (event.detail.dynamodb.NewImage === undefined) {
