@@ -51,6 +51,7 @@
     "aws-sdk": "^2.796.0",
     "axios": "^0.21.0",
     "camelcase": "^6.2.0",
+    "deep-equal": "^2.0.4",
     "hashids": "^2.2.2"
   },
   "config": {
