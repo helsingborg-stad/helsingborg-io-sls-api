@@ -30,7 +30,8 @@ provider:
       Resource: "*"
     - Effect: Allow
       Action:
-        - "dynamodb:ListStreams"
+        - dynamodb:ListStreams
+        - dynamodb:UpdateItem
       # Restrict our IAM role permissions to the specific table for the stage
       Resource:
         - "Fn::ImportValue": ${self:custom.resourcesStage}-CasesTableArn
