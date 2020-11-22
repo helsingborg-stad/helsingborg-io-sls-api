@@ -1,12 +1,14 @@
 /* eslint-disable no-console */
 import AWS from 'aws-sdk';
 import to from 'await-to-js';
+import deepEqual from 'deep-equal';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
 import config from '../../../config';
 import params from '../../../libs/params';
 import hash from '../../../libs/helperHashEncode';
 import * as request from '../../../libs/request';
+import * as dynamoDb from '../../../libs/dynamoDb';
 
 const SSMParams = params.read(config.vada.envsKeyName);
 
@@ -17,31 +19,65 @@ const dynamoDbConverter = AWS.DynamoDB.Converter;
  */
 export const main = async event => {
   if (event.detail.dynamodb.NewImage === undefined) {
+    // Something is missing... Should not happend
     return null;
   }
 
-  // Make DynamoDb data readable by the Viva API adapter
-  const unmarshalledData = dynamoDbConverter.unmarshall(event.detail.dynamodb.NewImage);
+  // Convert DynamoDB case data to plain object
+  const unMarshalledCaseData = dynamoDbConverter.unmarshall(event.detail.dynamodb.NewImage);
 
-  const [error, vadaResponse] = await to(sendVadaMyPagesRequest(unmarshalledData));
-  if (error) {
-    return console.error('(Viva-ms) syncOfficers', error);
+  const { details } = unMarshalledCaseData;
+  if (!('administrators' in details)) {
+    details['administrators'] = [];
+  }
+  const { administrators } = details;
+
+  // Get Viva applicant officer(s)
+  const [vadaMyPagesError, vadaMyPagesResponse] = await to(
+    sendVadaMyPagesRequest(unMarshalledCaseData)
+  );
+  if (vadaMyPagesError) {
+    return console.error('(Viva-ms) syncOfficers', vadaMyPagesError);
   }
 
-  const { vivacases } = vadaResponse.data.person.cases;
-  console.log('(Viva-ms) syncOfficers - vivacases', vivacases);
+  const { officer } = vadaMyPagesResponse;
+  const vivaAdministrators = parseVivaOfficers(officer);
 
-  // If administrators array not exists update case
+  if (deepEqual(vivaAdministrators, administrators)) {
+    return null;
+  }
 
-  // else sync with admins data from viva
+  // Out of sync. Update
+  const TableName = config.cases.tableName;
+  const { PK, SK } = unMarshalledCaseData;
 
-  console.info('(Viva-ms) syncOfficers - vadaResponse.data', vadaResponse.data);
+  const UpdateExpression = 'SET details.administrators = :newAdministrators';
+  const ExpressionAttributeValues = { ':newAdministrators': vivaAdministrators };
+
+  const dynamoDbParams = {
+    TableName,
+    Key: {
+      PK,
+      SK,
+    },
+    UpdateExpression,
+    ExpressionAttributeValues,
+    ReturnValues: 'UPDATED_NEW',
+  };
+
+  const [updateError] = await to(sendUpdateRequest(dynamoDbParams));
+  if (updateError) {
+    return console.error('(Viva-ms) syncOfficers', updateError);
+  }
 
   return true;
 };
 
 /**
- * Handler sending GET mypages call to Viva API adapter
+ * Handler sending GET call to the Viva API adapter mypages endpoint
+ *
+ * @param {object} caseData
+ * @return {object} Viva applicant officer(s)
  */
 async function sendVadaMyPagesRequest(caseData) {
   const { PK } = caseData;
@@ -75,5 +111,50 @@ async function sendVadaMyPagesRequest(caseData) {
     }
   }
 
-  return vadaMyPagesResponse;
+  return vadaMyPagesResponse.data.person.cases.vivacases.vivacase.officers;
+}
+
+/**
+ * Handler updateing data stored in DynamoDB
+ *
+ * @param {params} params
+ */
+async function sendUpdateRequest(params) {
+  const [error, result] = await to(dynamoDb.call('update', params));
+  if (error) {
+    throwError(500, error.message);
+  }
+
+  return result;
+}
+
+/**
+ * Parse and convert Viva officers to case administrators list
+ *
+ * @param {*} vivaOfficer object or array if applicant has many officers
+ * @returns list of case administrator objects
+ */
+function parseVivaOfficers(vivaOfficer) {
+  let vivaOfficers = [];
+
+  if (Array.isArray(vivaOfficer)) {
+    vivaOfficers = [...vivaOfficer];
+  } else {
+    // vivaOfficer is an object when viva applicant has only one officer
+    vivaOfficers.push(vivaOfficer);
+  }
+
+  const vivaAdministrators = vivaOfficers.map(officer => {
+    const { name: complexName, title, mail: email, phone } = officer;
+    const name = complexName.replace(/^CN=(.+)\/OU.*$/, `$1`);
+
+    return {
+      name,
+      title,
+      email,
+      phone,
+    };
+  });
+
+  return vivaAdministrators;
 }
