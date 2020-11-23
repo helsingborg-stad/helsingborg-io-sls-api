@@ -16,7 +16,7 @@ export async function main(event) {
   const requestBody = JSON.parse(event.body);
   const { id } = event.pathParameters;
 
-  const { provider, formId, currentStep, status, details, answers } = requestBody;
+  const { provider, formId, currentPosition, status, details, answers } = requestBody;
 
   let UpdateExpression = 'SET #updated = :updated';
   const ExpressionAttributeNames = { '#updated': 'updatedAt' };
@@ -34,10 +34,10 @@ export async function main(event) {
     ExpressionAttributeValues[':newFormId'] = formId;
   }
 
-  if (currentStep) {
-    UpdateExpression += ', #currentStep = :newStep';
-    ExpressionAttributeNames['#currentStep'] = 'currentStep';
-    ExpressionAttributeValues[':newStep'] = currentStep;
+  if (currentPosition) {
+    UpdateExpression += ', #currentPosition = :newPosition';
+    ExpressionAttributeNames['#currentPosition'] = 'currentPosition';
+    ExpressionAttributeValues[':newPosition'] = currentPosition;
   }
 
   if (status) {
