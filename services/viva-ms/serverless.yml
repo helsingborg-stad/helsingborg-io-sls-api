@@ -53,7 +53,7 @@ functions:
       - eventBridge:
           pattern:
             source:
-              - my-service.database
+              - cases.database
             detail-type:
               - INSERT
               - MODIFY
