@@ -15,7 +15,8 @@ const SSMParams = params.read(config.vada.envsKeyName);
 const dynamoDbConverter = AWS.DynamoDB.Converter;
 
 /**
- * Handler reacting on case event
+ * Handle case event (INSERT|MODIFY) to check
+ * and update case administrator data in DynamoDB
  */
 export const main = async event => {
   if (event.detail.dynamodb.NewImage === undefined) {
