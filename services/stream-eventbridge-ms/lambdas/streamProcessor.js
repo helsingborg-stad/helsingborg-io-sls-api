@@ -10,13 +10,14 @@ export const main = async event => {
   const eventsToPut = [];
 
   for (const record of event.Records) {
+    // eslint-disable-next-line no-console
     console.log(`Event: ${record.eventName}/${record.eventID}`);
 
     const [tableArn] = record.eventSourceARN.split('/stream');
 
     eventsToPut.push({
       Time: record.dynamodb.ApproximateCreationDateTime,
-      Source: 'my-service.database',
+      Source: 'cases.database',
       Resources: [tableArn],
       DetailType: record.eventName,
       Detail: JSON.stringify(record),
