@@ -115,7 +115,7 @@ async function sendVadaMyPagesRequest(caseData) {
 }
 
 /**
- * Handler updateing data stored in DynamoDB
+ * Handler updating data stored in DynamoDB
  *
  * @param {params} params
  */
