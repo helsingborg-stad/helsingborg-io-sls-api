@@ -20,7 +20,6 @@ const dynamoDbConverter = AWS.DynamoDB.Converter;
  */
 export const main = async event => {
   if (event.detail.dynamodb.NewImage === undefined) {
-    // Something is missing... Should not happend
     return null;
   }
 
