@@ -3,6 +3,7 @@ service: stream-eventbridge-ms
 plugins:
   - serverless-bundle
   - serverless-s3-remover
+  - serverless-offline
 
 custom: ${file(../../serverless.common.yml):custom}
 
