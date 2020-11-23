@@ -2,6 +2,7 @@ service: viva-ms
 
 plugins:
   - serverless-bundle
+  - serverless-offline
   - serverless-s3-remover
 
 custom: ${file(../../serverless.common.yml):custom}
@@ -62,4 +63,3 @@ functions:
                 NewImage:
                   provider:
                     S: ["VIVA"]
-                    
