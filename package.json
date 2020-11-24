@@ -32,7 +32,7 @@
     "babel-eslint": "^10.1.0",
     "commitizen": "^4.2.2",
     "commitlint": "^11.0.0",
-    "eslint": "^7.13.0",
+    "eslint": "^7.14.0",
     "eslint-config-prettier": "^6.15.0",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-prettier": "^3.1.4",
@@ -40,7 +40,7 @@
     "lint-staged": "^10.5.1",
     "prettier": "^2.2.0",
     "serverless-add-api-key": "^4.1.1",
-    "serverless-bundle": "^4.0.1",
+    "serverless-bundle": "^4.1.0",
     "serverless-offline": "^6.8.0",
     "serverless-s3-remover": "^0.6.0"
   },
@@ -48,7 +48,7 @@
   "dependencies": {
     "@helsingborg-stad/npm-api-error-handling": "^0.15.0",
     "await-to-js": "^2.1.1",
-    "aws-sdk": "^2.796.0",
+    "aws-sdk": "^2.797.0",
     "axios": "^0.21.0",
     "camelcase": "^6.2.0",
     "deep-equal": "^2.0.4",
