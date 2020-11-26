@@ -8,7 +8,6 @@ import * as response from '../../../libs/response';
 import { validateEventBody } from '../../../libs/validateEventBody';
 import { validateKeys } from '../../../libs/validateKeys';
 import { decodeToken } from '../../../libs/token';
-import { putEvent } from '../../../libs/awsEventBridge';
 import { putItem } from '../../../libs/queries';
 
 /**
@@ -58,17 +57,6 @@ export async function main(event) {
   if (putItemError) {
     return response.failure(putItemError);
   }
-
-  await putEvent(
-    {
-      id,
-      provider,
-      details,
-      status,
-    },
-    'CasesCreateComplete',
-    'cases.create'
-  );
 
   return response.success(201, {
     type: 'createCases',
