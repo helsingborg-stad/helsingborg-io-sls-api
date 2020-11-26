@@ -5,131 +5,83 @@ import uuid from 'uuid';
 import config from '../../../config';
 
 import * as response from '../../../libs/response';
-import { validateEventBody } from '../../../libs/validateEventBody';
-import { validateKeys } from '../../../libs/validateKeys';
+
 import { decodeToken } from '../../../libs/token';
 import { putItem } from '../../../libs/queries';
+
+import caseValidationSchema from '../helpers/schema';
+import { CASE_STATUS_ONGOING } from '../../../libs/constants';
+import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
 /**
  * Handler function for creating a case and store in dynamodb
  */
 export async function main(event) {
   const decodedToken = decodeToken(event);
-  const requestBody = JSON.parse(event.body);
 
-  const [validateError, validatedEventBody] = await to(
-    validateEventBody(requestBody, validateCreateCaseRequestBody)
+  const [validationError, validatedEventBody] = await to(
+    validateCreateCaseRequestBody(event.body, caseValidationSchema)
   );
 
-  if (validateError) {
-    return response.failure(validateError);
+  if (validationError) {
+    return response.failure(validationError);
   }
+
+  // TODO: check if the passed formId exsists in the form dynamo table.
 
   const TableName = config.cases.tableName;
 
-  const id = uuid.v1();
-  const createdAt = Date.now();
-  const updatedAt = Date.now();
-
   const { personalNumber } = decodedToken;
-  const { provider, formId, status, details, answers } = validatedEventBody;
-
-  const PK = `USER#${personalNumber}`;
-  const SK = `USER#${personalNumber}#CASE#${id}`;
+  const { provider, formId } = validatedEventBody;
+  const id = uuid.v4();
 
   const caseItem = {
     TableName,
     Item: {
-      PK,
-      SK,
+      PK: `USER#${personalNumber}`,
+      SK: `USER#${personalNumber}#CASE#${id}`,
       id,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      status: CASE_STATUS_ONGOING,
+      details: {},
+      answers: [],
       provider,
       formId,
-      status,
-      details,
-      answers,
-      createdAt,
-      updatedAt,
     },
   };
 
+  // TODO: putItem does not return data response from dynamodb value due to promise issues.
   const [putItemError] = await to(putItem(caseItem));
   if (putItemError) {
     return response.failure(putItemError);
   }
 
+  // TODO: response from dynamodb should be used here instead since that's the source of truth after creation of a case.
+  const { PK, SK, ...attributes } = caseItem.Item;
+
   return response.success(201, {
     type: 'createCases',
-    attributes: {
-      id,
-      provider,
-      formId,
-      status,
-      details,
-      answers,
-      createdAt,
-      updatedAt,
-    },
+    attributes,
   });
 }
 
 /**
- * Function for running validation on the request body.
- * @param {obj} requestBody
+ * Function for validating a json object towards a defined joi validation schema.
+ * @param {object} body an json object to be validated.
+ * @param {object} schema a joi validation schema
  */
-function validateCreateCaseRequestBody(requestBody) {
-  const keys = ['provider', 'formId', 'status', 'details', 'answers'];
-  if (!validateKeys(requestBody, keys)) {
-    return [false, 400, 'missing one of more of [provider, formId, status, details, answers]'];
+async function validateCreateCaseRequestBody(eventBody, schema) {
+  let dataObject = eventBody;
+  try {
+    dataObject = JSON.parse(dataObject);
+  } catch (error) {
+    throwError(400, error.message);
   }
 
-  if (typeof requestBody.provider !== 'string') {
-    return [
-      false,
-      400,
-      `provider key should be of type string [VIVA]. Got ${typeof requestBody.provider}`,
-    ];
+  const { error, value } = schema.validate(dataObject);
+  if (error) {
+    throwError(400, error.message);
   }
-
-  if (typeof requestBody.status !== 'string') {
-    return [
-      false,
-      400,
-      `status key should be of type string [submitted | ongiong]. Got ${typeof requestBody.status}`,
-    ];
-  }
-
-  if (typeof requestBody.formId !== 'string') {
-    return [false, 400, `formId key should be of type string. Got ${typeof requestBody.formId}`];
-  }
-
-  if (typeof requestBody.details !== 'object') {
-    return [false, 400, `details key should be of type object. Got ${typeof requestBody.details}`];
-  } else if (typeof requestBody.details.period !== 'object') {
-    return [
-      false,
-      400,
-      `details.period key should be of type object. Got ${typeof requestBody.details.period}`,
-    ];
-  } else if (typeof requestBody.details.period.startDate !== 'number') {
-    return [
-      false,
-      400,
-      `details.period.startDate key should be of type number. Got ${typeof requestBody.details
-        .period.startDate}`,
-    ];
-  } else if (typeof requestBody.details.period.endDate !== 'number') {
-    return [
-      false,
-      400,
-      `details.period.endDate key should be of type number. Got ${typeof requestBody.details.period
-        .endDate}`,
-    ];
-  }
-
-  if (typeof requestBody.answers !== 'object') {
-    return [false, 400, `answers key should be of type object. Got ${typeof requestBody.answers}`];
-  }
-
-  return [true];
+  return value;
 }
