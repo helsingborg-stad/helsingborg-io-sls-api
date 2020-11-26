@@ -22,13 +22,13 @@ export async function main(event) {
   const [validationError, validatedEventBody] = await to(
     validateCreateCaseRequestBody(event.body, caseValidationSchema)
   );
-
   if (validationError) {
     return response.failure(validationError);
   }
 
   // TODO: check if the passed formId exsists in the form dynamo table.
 
+  const { formId, provider, ...rest } = validatedEventBody;
   const { personalNumber } = decodedToken;
   const id = uuid.v4();
 
@@ -43,22 +43,23 @@ export async function main(event) {
       status: CASE_STATUS_ONGOING,
       details: {},
       answers: [],
-      ...validatedEventBody,
+      formId,
+      provider,
+      ...rest,
+      ReturnValues: 'ALL_NEW',
     },
   };
 
-  // TODO: putItem does not return data response from dynamodb value due to promise issues.
-  const [putItemError] = await to(putItem(caseItem));
+  const [putItemError, createdCase] = await to(putItem(caseItem));
   if (putItemError) {
     return response.failure(putItemError);
   }
 
-  // TODO: response from dynamodb should be used here instead since that's the source of truth after creation of a case.
-  const { PK, SK, ...attributes } = caseItem.Item;
-
   return response.success(201, {
     type: 'createCases',
-    attributes,
+    attributes: {
+      ...createdCase,
+    },
   });
 }
 
@@ -69,15 +70,17 @@ export async function main(event) {
  */
 async function validateCreateCaseRequestBody(eventBody, schema) {
   let dataObject = eventBody;
+
   try {
     dataObject = JSON.parse(dataObject);
   } catch (error) {
     throwError(400, error.message);
   }
 
-  const { error, value } = schema.validate(dataObject);
+  const { error, value } = schema.validate(dataObject, { abortEarly: false });
   if (error) {
-    throwError(400, error.message);
+    throwError(400, error.message.replace(/"/g, "'"));
   }
+
   return value;
 }
