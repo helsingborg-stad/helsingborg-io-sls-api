@@ -29,14 +29,11 @@ export async function main(event) {
 
   // TODO: check if the passed formId exsists in the form dynamo table.
 
-  const TableName = config.cases.tableName;
-
   const { personalNumber } = decodedToken;
-  const { provider, formId } = validatedEventBody;
   const id = uuid.v4();
 
   const caseItem = {
-    TableName,
+    TableName: config.cases.tableName,
     Item: {
       PK: `USER#${personalNumber}`,
       SK: `USER#${personalNumber}#CASE#${id}`,
@@ -46,8 +43,7 @@ export async function main(event) {
       status: CASE_STATUS_ONGOING,
       details: {},
       answers: [],
-      provider,
-      formId,
+      ...validatedEventBody,
     },
   };
 
