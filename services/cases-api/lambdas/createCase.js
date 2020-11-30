@@ -7,7 +7,7 @@ import config from '../../../config';
 import * as response from '../../../libs/response';
 
 import { decodeToken } from '../../../libs/token';
-import { putItem } from '../../../libs/queries';
+import { getItem, putItem } from '../../../libs/queries';
 
 import caseValidationSchema from '../helpers/schema';
 import { CASE_STATUS_ONGOING } from '../../../libs/constants';
@@ -31,34 +31,51 @@ export async function main(event) {
   const { formId, provider, ...rest } = validatedEventBody;
   const { personalNumber } = decodedToken;
   const id = uuid.v4();
+  const PK = `USER#${personalNumber}`;
+  const SK = `USER#${personalNumber}#CASE#${id}`;
+  const timestamp = Date.now();
 
-  const caseItem = {
-    TableName: config.cases.tableName,
-    Item: {
-      PK: `USER#${personalNumber}`,
-      SK: `USER#${personalNumber}#CASE#${id}`,
-      id,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-      status: CASE_STATUS_ONGOING,
-      details: {},
-      answers: [],
-      formId,
-      provider,
-      ...rest,
-      ReturnValues: 'ALL_NEW',
-    },
+  const Item = {
+    PK,
+    SK,
+    id,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    status: CASE_STATUS_ONGOING,
+    details: {},
+    answers: [],
+    formId,
+    provider,
+    ...rest,
   };
 
-  const [putItemError, createdCase] = await to(putItem(caseItem));
+  const putItemParams = {
+    TableName: config.cases.tableName,
+    Item,
+  };
+
+  const [putItemError] = await to(putItem(putItemParams));
   if (putItemError) {
     return response.failure(putItemError);
+  }
+
+  // Since we cannot use the ReturnValues attribute on the DynamoDB putItem operation to return the created item,
+  // we need to do a second request in order to retrive the item/case after successfull creation.
+  // This can be found in the AWS docs https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_PutItem.html#DDB-PutItem-request-ReturnValues
+  const [
+    getItemError,
+    {
+      Item: { PK: pk, SK: sk, ...caseItem },
+    },
+  ] = await getItem(config.cases.tableName, PK, SK);
+  if (getItemError) {
+    return response.failure(getItemError);
   }
 
   return response.success(201, {
     type: 'createCases',
     attributes: {
-      ...createdCase,
+      ...caseItem,
     },
   });
 }
