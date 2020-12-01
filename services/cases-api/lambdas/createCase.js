@@ -62,20 +62,21 @@ export async function main(event) {
   // Since we cannot use the ReturnValues attribute on the DynamoDB putItem operation to return the created item,
   // we need to do a second request in order to retrive the item/case after successfull creation.
   // This can be found in the AWS docs https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_PutItem.html#DDB-PutItem-request-ReturnValues
-  const [
-    getItemError,
-    {
-      Item: { PK: pk, SK: sk, ...caseItem },
-    },
-  ] = await getItem(config.cases.tableName, PK, SK);
+  const [getItemError, caseItem] = await getItem(config.cases.tableName, PK, SK);
   if (getItemError) {
     return response.failure(getItemError);
   }
-
   return response.success(201, {
     type: 'createCases',
     attributes: {
-      ...caseItem,
+      id: caseItem.Item.id,
+      formId: caseItem.Item.formId,
+      answers: caseItem.Item.answers,
+      details: caseItem.Item.details,
+      provider: caseItem.Item.provider,
+      status: caseItem.Item.status,
+      updatedAt: caseItem.Item.updatedAt,
+      createdAt: caseItem.Item.createdAt,
     },
   });
 }
