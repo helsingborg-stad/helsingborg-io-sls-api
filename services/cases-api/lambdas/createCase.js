@@ -39,6 +39,7 @@ export async function main(event) {
   const PK = `USER#${personalNumber}`;
   const SK = `USER#${personalNumber}#CASE#${id}`;
   const timestamp = Date.now();
+  const expirationTime = generateExpirationTime(72);
 
   const Item = {
     PK,
@@ -46,6 +47,7 @@ export async function main(event) {
     id,
     createdAt: timestamp,
     updatedAt: timestamp,
+    expirationTime,
     status: CASE_STATUS_ONGOING,
     details: {},
     answers: [],
@@ -85,6 +87,20 @@ export async function main(event) {
       createdAt: caseItem.Item.createdAt,
     },
   });
+}
+
+/**
+ * @param {number} futureHours hours in the future
+ * @returns {number} a future date in seconds
+ */
+function generateExpirationTime(futureHours) {
+  const days = Math.ceil(futureHours / 24);
+
+  const date = new Date();
+  const futureTime = date.setDate(date.getDate() + days);
+  const futureTimeInSeconds = Math.ceil(futureTime / 1000);
+
+  return futureTimeInSeconds;
 }
 
 /**
