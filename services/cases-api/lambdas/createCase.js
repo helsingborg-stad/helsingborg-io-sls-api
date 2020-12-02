@@ -18,10 +18,8 @@ import { throwError } from '@helsingborg-stad/npm-api-error-handling';
  */
 export async function main(event) {
   const decodedToken = decodeToken(event);
-  
-  const [parseJsonError, parsedJsonData] = await to(
-    parseJsonData(event.body)
-  );
+
+  const [parseJsonError, parsedJsonData] = await to(parseJsonData(event.body));
   if (parseJsonError) {
     return response.failure(parseJsonError);
   }
@@ -73,8 +71,9 @@ export async function main(event) {
   if (getItemError) {
     return response.failure(getItemError);
   }
+
   return response.success(201, {
-    type: 'createCases',
+    type: 'createCase',
     attributes: {
       id: caseItem.Item.id,
       formId: caseItem.Item.formId,
@@ -94,7 +93,6 @@ export async function main(event) {
  * @param {object} schema a joi validation schema
  */
 async function validateEventBody(eventBody, schema) {
-
   const { error, value } = schema.validate(eventBody, { abortEarly: false });
   if (error) {
     throwError(400, error.message.replace(/"/g, "'"));
