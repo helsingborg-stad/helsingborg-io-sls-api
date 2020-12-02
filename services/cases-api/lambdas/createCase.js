@@ -18,9 +18,16 @@ import { throwError } from '@helsingborg-stad/npm-api-error-handling';
  */
 export async function main(event) {
   const decodedToken = decodeToken(event);
+  
+  const [parseJsonError, parsedJsonData] = await to(
+    parseJsonData(event.body)
+  );
+  if (parseJsonError) {
+    return response.failure(parseJsonError);
+  }
 
   const [validationError, validatedEventBody] = await to(
-    validateCreateCaseRequestBody(event.body, caseValidationSchema)
+    validateEventBody(parsedJsonData, caseValidationSchema)
   );
   if (validationError) {
     return response.failure(validationError);
@@ -86,19 +93,25 @@ export async function main(event) {
  * @param {object} body an json object to be validated.
  * @param {object} schema a joi validation schema
  */
-async function validateCreateCaseRequestBody(eventBody, schema) {
-  let dataObject = eventBody;
+async function validateEventBody(eventBody, schema) {
 
-  try {
-    dataObject = JSON.parse(dataObject);
-  } catch (error) {
-    throwError(400, error.message);
-  }
-
-  const { error, value } = schema.validate(dataObject, { abortEarly: false });
+  const { error, value } = schema.validate(eventBody, { abortEarly: false });
   if (error) {
     throwError(400, error.message.replace(/"/g, "'"));
   }
 
   return value;
+}
+
+/**
+ * @param {string} data a valid json string
+ * @returns a promise object
+ */
+async function parseJsonData(data) {
+  try {
+    const parsedJsonData = JSON.parse(data);
+    return parsedJsonData;
+  } catch (error) {
+    throwError(400, error.message);
+  }
 }
