@@ -90,8 +90,8 @@ export async function main(event) {
 }
 
 /**
- * @param {number} futureHours hours in the future
- * @returns {number} a future date in seconds
+ * @param {number} futureHours
+ * @returns {number} future date in seconds
  */
 function generateExpirationTime(futureHours) {
   const days = Math.ceil(futureHours / 24);
