@@ -7,6 +7,9 @@ import * as dynamoDb from '../../../libs/dynamoDb';
 import { decodeToken } from '../../../libs/token';
 import { objectWithoutProperties } from '../../../libs/objects';
 
+import { getFutureTimestamp, millisecondsToSeconds } from '../helpers/timestampHelper';
+import { CASE_EXPIRATION_HOURS } from '../../../libs/constants';
+
 /**
  * Handler function for updating user case by id from dynamodb
  * Can update the data (i.e. the answers), and change the status of the case.
@@ -21,6 +24,11 @@ export async function main(event) {
   let UpdateExpression = 'SET #updated = :updated';
   const ExpressionAttributeNames = { '#updated': 'updatedAt' };
   const ExpressionAttributeValues = { ':updated': Date.now() };
+
+  const newExpirationTime = millisecondsToSeconds(getFutureTimestamp(CASE_EXPIRATION_HOURS));
+  UpdateExpression += ', #expirationTime = :newExpirationTime';
+  ExpressionAttributeNames['#expirationTime'] = 'expirationTime';
+  ExpressionAttributeValues[':newExpirationTime'] = newExpirationTime;
 
   if (provider) {
     UpdateExpression += ', #provider = :newProvider';
