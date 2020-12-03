@@ -10,7 +10,7 @@ import { decodeToken } from '../../../libs/token';
 import { getItem, putItem } from '../../../libs/queries';
 
 import caseValidationSchema from '../helpers/schema';
-import { CASE_STATUS_ONGOING } from '../../../libs/constants';
+import { CASE_STATUS_ONGOING, CASE_EXPIRATION_HOURS } from '../../../libs/constants';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
 /**
@@ -39,7 +39,7 @@ export async function main(event) {
   const PK = `USER#${personalNumber}`;
   const SK = `USER#${personalNumber}#CASE#${id}`;
   const timestamp = Date.now();
-  const expirationTime = generateExpirationTime(72);
+  const expirationTime = generateExpirationTime(CASE_EXPIRATION_HOURS);
 
   const Item = {
     PK,
