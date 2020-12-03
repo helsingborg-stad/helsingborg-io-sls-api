@@ -1,17 +1,16 @@
 /* eslint-disable no-console */
 import to from 'await-to-js';
+import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import uuid from 'uuid';
 
 import config from '../../../config';
-
 import * as response from '../../../libs/response';
-
 import { decodeToken } from '../../../libs/token';
 import { getItem, putItem } from '../../../libs/queries';
 
 import caseValidationSchema from '../helpers/schema';
+import { getFutureTimestamp, millisecondsToSeconds } from '../helpers/timestampHelper';
 import { CASE_STATUS_ONGOING, CASE_EXPIRATION_HOURS } from '../../../libs/constants';
-import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
 /**
  * Handler function for creating a case and store in dynamodb
@@ -39,7 +38,7 @@ export async function main(event) {
   const PK = `USER#${personalNumber}`;
   const SK = `USER#${personalNumber}#CASE#${id}`;
   const timestamp = Date.now();
-  const expirationTime = generateExpirationTime(CASE_EXPIRATION_HOURS);
+  const expirationTime = millisecondsToSeconds(getFutureTimestamp(CASE_EXPIRATION_HOURS));
 
   const Item = {
     PK,
@@ -87,20 +86,6 @@ export async function main(event) {
       createdAt: caseItem.Item.createdAt,
     },
   });
-}
-
-/**
- * @param {number} futureHours
- * @returns {number} future date in seconds
- */
-function generateExpirationTime(futureHours) {
-  const days = Math.ceil(futureHours / 24);
-
-  const date = new Date();
-  const futureTime = date.setDate(date.getDate() + days);
-  const futureTimeInSeconds = Math.ceil(futureTime / 1000);
-
-  return futureTimeInSeconds;
 }
 
 /**
