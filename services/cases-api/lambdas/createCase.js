@@ -32,7 +32,7 @@ export async function main(event) {
 
   // TODO: check if the passed formId exsists in the form dynamo table.
 
-  const { formId, provider, ...rest } = validatedEventBody;
+  const { formId, provider, details, answers, currentPosition } = validatedEventBody;
   const { personalNumber } = decodedToken;
   const id = uuid.v4();
   const PK = `USER#${personalNumber}`;
@@ -48,11 +48,11 @@ export async function main(event) {
     updatedAt: timestamp,
     expirationTime,
     status: CASE_STATUS_ONGOING,
-    details: {},
-    answers: [],
     formId,
     provider,
-    ...rest,
+    details,
+    answers,
+    currentPosition,
   };
 
   const putItemParams = {
