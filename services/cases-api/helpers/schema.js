@@ -13,7 +13,7 @@ const caseAnswers = Joi.array().items(
       id: Joi.string().required(),
       tags: Joi.array().items(Joi.string()).required(),
     }).required(),
-    value: Joi.string().required(),
+    value: Joi.any(),
   })
 );
 
