@@ -21,6 +21,12 @@ const caseValidationSchema = Joi.object({
   formId: uuid.required(),
   provider: caseProvider.required(),
   answers: caseAnswers.allow(),
+  currentPosition: Joi.object({
+    index: Joi.number().required(),
+    level: Joi.number().required(),
+    currentMainStep: Joi.number().required(),
+    currentMainStepIndex: Joi.number().required(),
+  }),
 });
 
 export default caseValidationSchema;
