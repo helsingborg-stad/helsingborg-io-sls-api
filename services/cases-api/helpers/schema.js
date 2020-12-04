@@ -10,7 +10,7 @@ const caseProvider = Joi.string().valid(CASE_PROVIDER_VIVA);
 const caseAnswers = Joi.array().items(
   Joi.object({
     field: Joi.object({
-      id: uuid.required(),
+      id: Joi.string().required(),
       tags: Joi.array().items(Joi.string()).required(),
     }).required(),
     value: Joi.string().required(),
