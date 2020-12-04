@@ -27,6 +27,7 @@ const caseValidationSchema = Joi.object({
     currentMainStep: Joi.number().required(),
     currentMainStepIndex: Joi.number().required(),
   }),
+  details: Joi.object().allow(),
 });
 
 export default caseValidationSchema;
