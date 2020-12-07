@@ -3,19 +3,27 @@ import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
 import config from '../../../config';
 import * as response from '../../../libs/response';
+import { decodeToken } from '../../../libs/token';
 import * as dynamoDb from '../../../libs/dynamoDb';
 
 /**
  * Lambda deleting case by id from DynamoDB table cases
  */
-export const main = async event => {
+export async function main(event) {
+  const decodedToken = decodeToken(event);
   const { id } = event.pathParameters;
 
   const deleteCaseParams = {
     TableName: config.cases.tableName,
     Key: {
-      id,
+      PK: `USER#${decodedToken.personalNumber}`,
+      SK: `USER#${decodedToken.personalNumber}#CASE#${id}`,
     },
+    ConditionExpression: 'id = :caseId',
+    ExpressionAttributeValues: {
+      ':caseId': id,
+    },
+    ReturnValues: 'ALL_OLD',
   };
 
   const [error, deleteCaseResponse] = await to(sendDeleteCaseRequest(deleteCaseParams));
@@ -26,15 +34,15 @@ export const main = async event => {
   return response.success(200, {
     type: 'deleteCase',
     attributes: {
-      ...deleteCaseResponse,
+      ...deleteCaseResponse.Attributes,
     },
   });
-};
+}
 
 async function sendDeleteCaseRequest(params) {
   const [error, response] = await to(dynamoDb.call('delete', params));
   if (error) {
-    throwError(400, error.message);
+    throwError(error.statusCode, error.message);
   }
   return response;
 }
