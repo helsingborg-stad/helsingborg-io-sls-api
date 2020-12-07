@@ -6,38 +6,35 @@ import * as response from '../../../libs/response';
 import * as dynamoDb from '../../../libs/dynamoDb';
 
 /**
- * Handler function for deleting user case by id in dynamodb
+ * Lambda deleting case by id from DynamoDB table cases
  */
 export const main = async event => {
   const { id } = event.pathParameters;
 
-  const TableName = config.cases.tableName;
-
-  // todo: implement condition params
-  const params = {
-    TableName,
+  const deleteCaseParams = {
+    TableName: config.cases.tableName,
     Key: {
       id,
     },
   };
 
-  const [error, casesDeleteResponse] = await to(sendCasesDeleteRequest(params));
-  if (!casesDeleteResponse) {
+  const [error, deleteCaseResponse] = await to(sendDeleteCaseRequest(deleteCaseParams));
+  if (error) {
     return response.failure(error);
   }
 
   return response.success(200, {
     type: 'deleteCase',
     attributes: {
-      ...casesDeleteResponse,
+      ...deleteCaseResponse,
     },
   });
 };
 
-async function sendCasesDeleteRequest(params) {
-  const [error, response] = await to(dynamoDb.call('deleteItem', params));
-  if (!error) {
-    throwError(error);
+async function sendDeleteCaseRequest(params) {
+  const [error, response] = await to(dynamoDb.call('delete', params));
+  if (error) {
+    throwError(400, error.message);
   }
   return response;
 }
