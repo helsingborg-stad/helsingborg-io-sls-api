@@ -1,0 +1,11 @@
+[
+  {
+    "Source": "bankId.collectMock",
+    "Detail": "{ \"user\": { \"personalNumber\": \"195809262743\" } }",
+    "Resources": [
+      "resourceMock"
+    ],
+    "DetailType": "BankIdCollectComplete",
+    "EventBusName": "default"
+  }
+]
