@@ -63,3 +63,13 @@ functions:
                 NewImage:
                   provider:
                     S: ["VIVA"]
+
+  syncStatus:
+    handler: lambdas/syncStatus.main
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - bankId.collectMock
+            detail-type:
+              - BankIdCollectComplete
