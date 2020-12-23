@@ -1,0 +1,86 @@
+service: pdf-ms
+
+plugins:
+  - serverless-webpack
+  - serverless-offline
+
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  resourcesStages:
+    prod: prod
+    dev: dev
+  resourcesStage: ${self:custom.resourcesStages.${self:custom.stage}, self:custom.resourcesStages.dev}
+  webpack:
+    webpackConfig: webpack.config.js
+    includeModules:
+      forceExclude:
+        - aws-sdk
+    packager: "yarn"
+
+package:
+  individually: true
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: eu-north-1
+  endpointType: regional
+  tracing:
+    apiGateway: false
+    lambda: true
+
+  environment:
+    stage: ${self:custom.stage}
+    resourcesStage: ${self:custom.resourcesStage}
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - SSM:GetParameter
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - dynamodb:ListStreams
+        - dynamodb:UpdateItem
+      # Restrict our IAM role permissions to the specific table for the stage
+      Resource:
+        - Fn::ImportValue: ${self:custom.resourcesStage}-CasesTableArn
+    - Effect: Allow
+      Action:
+        - s3:GetObject
+        - s3:*
+      Resource:
+        - Fn::ImportValue: ${self:custom.resourcesStage}-PdfTemplatesBucketArn
+        - Fn::Join:
+            - ""
+            - - Fn::ImportValue: ${self:custom.resourcesStage}-PdfTemplatesBucketArn
+              - "/*"
+
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+      Resource:
+        - Fn::ImportValue: ${self:custom.resourcesStage}-FormsTableArn
+
+functions:
+  addPdfToCase:
+    handler: lambdas/addPdfToCase.main
+    environment:
+      BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-PdfTemplatesBucketName
+
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - cases.database
+            detail-type:
+              - INSERT
+              - MODIFY
+            detail:
+              dynamodb:
+                NewImage:
+                  status:
+                    S: ["submitted"]
