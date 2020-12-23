@@ -38,6 +38,9 @@ const replaceTextInTextObject = (textObject: TextObject, jsonData: Record<string
 
   const newText = templateStrings.reduce((prev, currentRegexResult) => {
     const replacementValue = getPropertyFromDottedString(jsonData, currentRegexResult[1].trim());
+    if (replacementValue === undefined || replacementValue === 'undefined'){
+      return prev.replace(currentRegexResult[0], '');
+    }
     return prev.replace(currentRegexResult[0], replacementValue);
   }, textObject.text);
   newTextObject.text = newText;
