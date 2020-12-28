@@ -6,22 +6,21 @@ export interface TextObject {
   page?: number;
   x: number;
   y: number;
-  fontSize?: number;
+  size?: number;
   font?: Font;
   color?: Color;
   text: string;
 }
 
-export interface TemplateData {
+export interface Template {
   numberOfPages: number;
   defaultFontSize: number;
   defaultFont?: Font;
   date?: string;
-
-  textObjects: TextObject[];
+  texts: TextObject[];
 }
 
-export interface CaseData {
+export interface Case {
   id: string;
   formId: string;
   PK: string;

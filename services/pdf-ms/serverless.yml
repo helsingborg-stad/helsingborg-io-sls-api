@@ -41,15 +41,13 @@ provider:
       Resource: "*"
     - Effect: Allow
       Action:
-        - dynamodb:ListStreams
         - dynamodb:UpdateItem
-      # Restrict our IAM role permissions to the specific table for the stage
       Resource:
         - Fn::ImportValue: ${self:custom.resourcesStage}-CasesTableArn
     - Effect: Allow
       Action:
         - s3:GetObject
-        - s3:*
+        - s3:PutObject
       Resource:
         - Fn::ImportValue: ${self:custom.resourcesStage}-PdfTemplatesBucketArn
         - Fn::Join:
@@ -60,8 +58,6 @@ provider:
     - Effect: Allow
       Action:
         - dynamodb:Query
-        - dynamodb:Scan
-        - dynamodb:GetItem
       Resource:
         - Fn::ImportValue: ${self:custom.resourcesStage}-FormsTableArn
 
