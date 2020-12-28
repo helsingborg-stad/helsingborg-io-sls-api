@@ -1,11 +1,11 @@
 import { getPropertyFromDottedString } from './objects';
 import { PDFDocument, StandardFonts, rgb, PDFFont, PDFPage } from 'pdf-lib';
-import { TextObject, Font, TemplateData } from './types';
+import { TextObject, Font, Template } from './types';
 
-const loadFonts = async (pdfDoc: PDFDocument): Promise<Record<Font, PDFFont>> => {
-  const courierFont = await pdfDoc.embedFont(StandardFonts.Courier);
-  const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
-  const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+const loadFonts = async (document: PDFDocument): Promise<Record<Font, PDFFont>> => {
+  const courierFont = await document.embedFont(StandardFonts.Courier);
+  const timesRomanFont = await document.embedFont(StandardFonts.TimesRoman);
+  const helveticaFont = await document.embedFont(StandardFonts.Helvetica);
 
   const fonts = {
     courier: courierFont,
@@ -16,7 +16,7 @@ const loadFonts = async (pdfDoc: PDFDocument): Promise<Record<Font, PDFFont>> =>
 };
 
 /** Draws the text as specified in the textObject on top of the pdf page */
-const renderTextObject = (
+const renderTextOnPage = (
   textObject: TextObject,
   pdfPage: PDFPage,
   fonts: Record<Font, PDFFont>,
@@ -25,48 +25,49 @@ const renderTextObject = (
   pdfPage.drawText(textObject.text, {
     x: textObject.x,
     y: textObject.y,
-    size: textObject.fontSize || defaultFontSize,
+    size: textObject.size || defaultFontSize,
     font: fonts[textObject.font || 'helvetica'],
     color: textObject.color || rgb(0.05, 0.05, 0.05),
   });
 };
 
-const replaceTextInTextObject = (textObject: TextObject, jsonData: Record<string, any>) => {
+const replaceTextInTextObject = (textObject: TextObject, json: Record<string, any>) => {
   const regex = /{{(.*?)}}/g;
   const templateStrings = [...textObject.text.matchAll(regex)];
   const newTextObject: TextObject = { ...textObject };
 
   const newText = templateStrings.reduce((prev, currentRegexResult) => {
-    const replacementValue = getPropertyFromDottedString(jsonData, currentRegexResult[1].trim());
-    if (replacementValue === undefined || replacementValue === 'undefined'){
+    const replacement = getPropertyFromDottedString(json, currentRegexResult[1].trim());
+    if (replacement === undefined || replacement === 'undefined'){
       return prev.replace(currentRegexResult[0], '');
     }
-    return prev.replace(currentRegexResult[0], replacementValue);
+    return prev.replace(currentRegexResult[0], replacement);
   }, textObject.text);
   newTextObject.text = newText;
   return newTextObject;
 };
 
+
 /** Takes a base pdf, a templateData object that tells us where to put the texts,
  * and a jsonData object from which we import the values. */
 export const modifyPdf = async (
   pdfBuffer: Buffer,
-  templateData: TemplateData,
+  template: Template,
   jsonData: Record<string, any>
 ) => {
-  const pdfDoc = await PDFDocument.load(pdfBuffer);
-  const pages = pdfDoc.getPages();
-  const fonts = await loadFonts(pdfDoc);
+  const document = await PDFDocument.load(pdfBuffer);
+  const pages = document.getPages();
+  const fonts = await loadFonts(document);
 
-  const replacedTextObjects = templateData.textObjects.map(textObject =>
+  const replacedTextObjects = template.texts.map(textObject =>
     replaceTextInTextObject(textObject, jsonData)
   );
 
   replacedTextObjects.forEach(textObject => {
     const page = pages[textObject.page || 0];
-    renderTextObject(textObject, page, fonts, templateData.defaultFontSize);
+    renderTextOnPage(textObject, page, fonts, template.defaultFontSize);
   });
 
-  const pdfBytes = await pdfDoc.save();
+  const pdfBytes = await document.save();
   return Buffer.from(pdfBytes);
 };

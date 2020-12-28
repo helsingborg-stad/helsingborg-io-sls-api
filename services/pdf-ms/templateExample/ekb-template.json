@@ -1,26 +1,26 @@
 {
     "numberOfPages": 1,
     "defaultFontSize": 7,
-    "textObjects": [
+    "texts": [
         {
             "page": 0,
             "x": 400,
             "y": 610,
-            "fontSize": 7,
+            "size": 7,
             "text": "{{personalInfo.firstName}}"
         },
         {
             "page": 0,
             "x": 400,
             "y": 598,
-            "fontSize": 7,
+            "size": 7,
             "text": "{{personalInfo.phone}}"
         },
         {
             "page": 0,
             "x": 400,
             "y": 586,
-            "fontSize": 7,
+            "size": 7,
             "text": "{{personalInfo.email}}"
         }
     ]
