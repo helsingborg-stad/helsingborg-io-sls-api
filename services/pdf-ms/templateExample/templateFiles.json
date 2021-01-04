@@ -1,0 +1,4 @@
+{
+  "EKB-recurring": { "pdfBaseFilename": "EKB-löpande.pdf", "JSONTemplateFilename": "ekb-löpande.json" },
+  "default": { "pdfBaseFilename": "EKB-löpande.pdf", "JSONTemplateFilename": "ekb-löpande.json" }
+}

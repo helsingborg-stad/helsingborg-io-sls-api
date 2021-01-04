@@ -62,18 +62,18 @@ const replaceTextInTextObject = (textObject: TextObject, json: Record<string, an
 };
 
 /** Takes a base pdf, a templateData object that tells us where to put the texts,
- * and a jsonData object from which we import the values. */
+ * and a json from which we import the values. */
 export const modifyPdf = async (
   pdfBuffer: Buffer,
   template: Template,
-  jsonData: Record<string, any>
+  json: Record<string, any>
 ) => {
   const document = await PDFDocument.load(pdfBuffer);
   const pages = document.getPages();
   const fonts = await loadFonts(document);
 
   const replacedTextObjects = template.texts.map(textObject =>
-    replaceTextInTextObject(textObject, jsonData)
+    replaceTextInTextObject(textObject, json)
   );
 
   replacedTextObjects.forEach(textObject => {
