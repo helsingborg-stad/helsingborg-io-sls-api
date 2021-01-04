@@ -22,13 +22,27 @@ const renderTextOnPage = (
   fonts: Record<Font, PDFFont>,
   defaultFontSize: number
 ) => {
-  pdfPage.drawText(textObject.text, {
-    x: textObject.x,
-    y: textObject.y,
-    size: textObject.size || defaultFontSize,
-    font: fonts[textObject.font || 'helvetica'],
-    color: textObject.color || rgb(0.05, 0.05, 0.05),
-  });
+  const { x, y, text, size, font, color, maxWidthInChars } = textObject;
+  if (maxWidthInChars && text.length > maxWidthInChars) {
+    const numLines = Math.ceil(text.length / maxWidthInChars);
+    for (let line = 0; line < numLines; line++) {
+      pdfPage.drawText(text.substring(maxWidthInChars * line, maxWidthInChars * (line + 1)), {
+        x,
+        y: y - line * (size * 1.5),
+        size: size || defaultFontSize,
+        font: fonts[font || 'helvetica'],
+        color: color || rgb(0.05, 0.05, 0.05),
+      });
+    }
+  } else {
+    pdfPage.drawText(text, {
+      x,
+      y,
+      size: size || defaultFontSize,
+      font: fonts[font || 'helvetica'],
+      color: color || rgb(0.05, 0.05, 0.05),
+    });
+  }
 };
 
 const replaceTextInTextObject = (textObject: TextObject, json: Record<string, any>) => {
@@ -38,7 +52,7 @@ const replaceTextInTextObject = (textObject: TextObject, json: Record<string, an
 
   const newText = templateStrings.reduce((prev, currentRegexResult) => {
     const replacement = getPropertyFromDottedString(json, currentRegexResult[1].trim());
-    if (replacement === undefined || replacement === 'undefined'){
+    if (replacement === undefined || replacement === 'undefined') {
       return prev.replace(currentRegexResult[0], '');
     }
     return prev.replace(currentRegexResult[0], replacement);
@@ -46,7 +60,6 @@ const replaceTextInTextObject = (textObject: TextObject, json: Record<string, an
   newTextObject.text = newText;
   return newTextObject;
 };
-
 
 /** Takes a base pdf, a templateData object that tells us where to put the texts,
  * and a jsonData object from which we import the values. */
