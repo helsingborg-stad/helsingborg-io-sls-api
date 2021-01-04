@@ -8,7 +8,8 @@
       "x": 400,
       "y": 685,
       "size": 11,
-      "text": "ändrade uppgifter"
+      "text": "{{valuesChanged}}",
+      "valueId": "valuesChanged"
   },
   {
       "page": 0,
@@ -16,420 +17,464 @@
       "y": 648,
       "size": 11,
       "text": "{{otherMessage}}",
-      "maxWidthInChars": 50
+      "maxWidthInChars": 50,
+      "valueId": "otherMessage"
   },
   {
       "page": 0,
       "x": 400,
       "y": 458,
       "size": 11,
-      "text": "personnummer {{user.personalNumber}}"
+      "text": "{{user.personalNumber}}",
+      "valueId": "user.personalNumber"
   },
   {
       "page": 0,
       "x": 400,
       "y": 421,
       "size": 11,
-      "text": "förnamn {{user.firstName}}"
+      "text": "{{user.firstName}}",
+      "valueId": "user.firstName"
   },
   {
       "page": 0,
       "x": 400,
       "y": 384,
       "size": 11,
-      "text": "efternamn {{user.lastName}}"
+      "text": "{{user.lastName}}",
+      "valueId": "user.lastName"
   },
   {
       "page": 0,
       "x": 400,
       "y": 347,
       "size": 11,
-      "text": "{{personalInfo.telephone}}"
+      "text": "{{personalInfo.telephone}}",
+      "valueId": "personalInfo.telephone"
   },
   {
       "page": 0,
       "x": 400,
       "y": 310,
       "size": 11,
-      "text": "{{personalInfo.email}}"
+      "text": "{{personalInfo.email}}",
+      "valueId": "personalInfo.email"
   },
   {
       "page": 0,
       "x": 400,
       "y": 273,
       "size": 11,
-      "text": "{{personalInfo.occupation}}"
-  },
-  {
-      "page": 0,
-      "x": 400,
-      "y": 236,
-      "size": 11,
-      "text": "{{personalInfo.mmm}}"
+      "text": "{{personalInfo.occupation}}",
+      "valueId": "personalInfo.occupation"
   },
   {
       "page": 0,
       "x": 400,
       "y": 152,
       "size": 11,
-      "text": "{{housingInfo.streetAddress}}"
+      "text": "{{housingInfo.streetAddress}}",
+      "valueId": "housingInfo.streetAddress"
   },
   {
       "page": 0,
       "x": 400,
       "y": 115,
       "size": 11,
-      "text": "{{housingInfo.postalCode}}"
+      "text": "{{housingInfo.postalCode}}",
+      "valueId": "housingInfo.postalCode"
   },
   {
       "page": 0,
       "x": 400,
       "y": 78,
       "size": 11,
-      "text": "{{housingInfo.postalAdress}}"
+      "text": "{{housingInfo.postalAdress}}",
+      "valueId": "housingInfo.postalAdress"
   },
   {
       "page": 1,
       "x": 400,
       "y": 760,
       "size": 11,
-      "text": "{{housingInfo.contract}}"
+      "text": "{{housingInfo.contract}}",
+      "valueId": "housingInfo.contract"
   },
   {
       "page": 1,
       "x": 400,
       "y": 723,
       "size": 11,
-      "text": "{{housingInfo.numberpeopleLiving}}"
-  },
-  {
-      "page": 1,
-      "x": 400,
-      "y": 689,
-      "size": 11,
-      "text": "ändrad uppgift"
+      "text": "{{housingInfo.numberpeopleLiving}}",
+      "valueId": "housingInfo.numberpeopleLiving"
   },
   {
       "page": 1,
       "x": 400,
       "y": 492,
       "size": 11,
-      "text": "{{unemploymentAllowance}}"
+      "text": "{{unemploymentAllowance}}",
+      "valueId": "unemploymentAllowance"
   },
   {
       "page": 1,
       "x": 400,
       "y": 455,
       "size": 11,
-      "text": "{{forsakringskassanAllowance}}"
+      "text": "{{forsakringskassanAllowance}}",
+      "valueId": "forsakringskassanAllowance"
   },
   {
       "page": 1,
       "x": 400,
       "y": 418,
       "size": 11,
-      "text": "{{csnAllowance}}"
+      "text": "{{csnAllowance}}",
+      "valueId": "csnAllowance"
   },
   {
       "page": 1,
       "x": 400,
       "y": 381,
       "size": 11,
-      "text": "{{pensionAllowance}}"
+      "text": "{{pensionAllowance}}",
+      "valueId": "pensionAllowance"
   },
   {
       "page": 1,
       "x": 400,
       "y": 295,
       "size": 11,
-      "text": "{{salary.0.amount}}"
+      "text": "{{salary.0.amount}}",
+      "valueId": "salary.0.amount"
   },
   {
       "page": 1,
       "x": 400,
       "y": 258,
       "size": 11,
-      "text": "{{salary.1.amount}}"
+      "text": "{{salary.1.amount}}",
+      "valueId": "salary.1.amount"
   },
   {
       "page": 1,
       "x": 400,
       "y": 221,
       "size": 11,
-      "text": "{{salary.2.amount}}"
+      "text": "{{salary.2.amount}}",
+      "valueId": "salary.2.amount"
   },
   {
       "page": 1,
       "x": 400,
       "y": 184,
       "size": 11,
-      "text": "{{swish.0.amount}}"
+      "text": "{{swish.0.amount}}",
+      "valueId": "swish.0.amount"
   },
   {
       "page": 1,
       "x": 400,
       "y": 147,
       "size": 11,
-      "text": "{{swish.1.amount}}"
+      "text": "{{swish.1.amount}}",
+      "valueId": "swish.1.amount"
   },
   {
       "page": 1,
       "x": 400,
       "y": 110,
       "size": 11,
-      "text": "{{swish.2.amount}}"
+      "text": "{{swish.2.amount}}",
+      "valueId": "swish.2.amount"
   },
   {
       "page": 2,
       "x": 400,
       "y": 762,
       "size": 11,
-      "text": "{{loanIncome}}"
+      "text": "{{loanIncome}}",
+      "valueId": "loanIncome"
   },
   {
       "page": 2,
       "x": 400,
       "y": 725,
       "size": 11,
-      "text": "{{pensionForeign}}"
+      "text": "{{pensionForeign}}",
+      "valueId": "pensionForeign"
   },
   {
       "page": 2,
       "x": 400,
       "y": 691,
       "size": 11,
-      "text": "{{otherIncome.0.amount}}"
+      "text": "{{otherIncome.0.amount}}",
+      "valueId": "otherIncome.0.amount"
   },
   {
       "page": 2,
       "x": 400,
       "y": 654,
       "size": 11,
-      "text": "{{otherIncome.1.amount}}"
+      "text": "{{otherIncome.1.amount}}",
+      "valueId": "otherIncome.1.amount"
   },
   {
       "page": 2,
       "x": 400,
       "y": 617,
       "size": 11,
-      "text": "{{otherIncome.2.amount}}"
+      "text": "{{otherIncome.2.amount}}",
+      "valueId": "otherIncome.2.amount"
   },
   {
       "page": 2,
       "x": 400,
       "y": 543,
       "size": 11,
-      "text": "{{rentRoomate}}"
+      "text": "{{rentRoomate}}",
+      "valueId": "rentRoomate"
   },
   {
       "page": 2,
       "x": 400,
       "y": 506,
       "size": 11,
-      "text": "{{electricityRoomate}}"
+      "text": "{{electricityRoomate}}",
+      "valueId": "electricityRoomate"
   },
   {
       "page": 2,
       "x": 400,
       "y": 469,
       "size": 11,
-      "text": "{{internetRoomate}}"
+      "text": "{{internetRoomate}}",
+      "valueId": "internetRoomate"
   },
   {
       "page": 2,
       "x": 400,
       "y": 355,
       "size": 11,
-      "text": "inga tillgångar"
+      "text": "{{noAssets}}",
+      "valueId": "noAssets"
   },
   {
       "page": 2,
       "x": 400,
       "y": 297,
       "size": 11,
-      "text": "{{carSum}}"
+      "text": "{{carSum}}",
+      "valueId": "carSum"
   },
   {
       "page": 2,
       "x": 400,
       "y": 260,
       "size": 11,
-      "text": "{{bikeSum}}"
+      "text": "{{bikeSum}}",
+      "valueId": "bikeSum"
   },
   {
       "page": 2,
       "x": 400,
       "y": 223,
       "size": 11,
-      "text": "{{houseSum}}"
+      "text": "{{houseSum}}",
+      "valueId": "houseSum"
   },
   {
       "page": 2,
       "x": 400,
       "y": 186,
       "size": 11,
-      "text": "{{apartmentSum}}"
+      "text": "{{apartmentSum}}",
+      "valueId": "apartmentSum"
   },
   {
       "page": 2,
       "x": 400,
       "y": 149,
       "size": 11,
-      "text": "{{otherAsset.otherassetDescription}}, {{otherAsset.sum}}"
+      "text": "{{otherAsset.otherassetDescription}}, {{otherAsset.sum}}",
+      "valueId": "otherAsset.sum"
   },
   {
       "page": 3,
       "x": 400,
       "y": 680,
       "size": 11,
-      "text": "{{rent}}"
+      "text": "{{rent}}",
+      "valueId": "rent"
   },
   {
       "page": 3,
       "x": 400,
       "y": 643,
       "size": 11,
-      "text": "{{homeInsurance}}"
+      "text": "{{homeInsurance}}",
+      "valueId": "homeInsurance"
   },
   {
       "page": 3,
       "x": 400,
       "y": 606,
       "size": 11,
-      "text": "{{internet}}"
+      "text": "{{internet}}",
+      "valueId": "internet"
   },
   {
       "page": 3,
       "x": 400,
       "y": 569,
       "size": 11,
-      "text": "{{electricity}}"
+      "text": "{{electricity}}",
+      "valueId": "electricity"
   },
   {
       "page": 3,
       "x": 400,
       "y": 471,
       "size": 11,
-      "text": "{{buscard}}"
+      "text": "{{buscard}}",
+      "valueId": "buscard"
   },
   {
       "page": 3,
       "x": 400,
       "y": 437,
       "size": 11,
-      "text": "{{akassa}}"
+      "text": "{{akassa}}",
+      "valueId": "akassa"
   },
   {
       "page": 3,
       "x": 400,
       "y": 397,
       "size": 11,
-      "text": "{{fackavgift}}"
+      "text": "{{fackavgift}}",
+      "valueId": "fackavgift"
   },
   {
       "page": 3,
       "x": 400,
       "y": 360,
       "size": 11,
-      "text": "{{medicine.0.amount}}"
+      "text": "{{medicine.0.amount}}",
+      "valueId": "medicine.0.amount"
   },
   {
       "page": 3,
       "x": 400,
       "y": 323,
       "size": 11,
-      "text": "{{medicine.1.amount}}"
+      "text": "{{medicine.1.amount}}",
+      "valueId": "medicine.1.amount"
   },
   {
       "page": 3,
       "x": 400,
       "y": 286,
       "size": 11,
-      "text": "{{medicine.2.amount}}"
+      "text": "{{medicine.2.amount}}",
+      "valueId": "medicine.2.amount"
   },
   {
       "page": 3,
       "x": 400,
       "y": 249,
       "size": 11,
-      "text": "{{doctorsappointments.0.amount}}"
+      "text": "{{doctorsappointments.0.amount}}",
+      "valueId": "doctorsappointments.0.amount"
   },
   {
       "page": 3,
       "x": 400,
       "y": 212,
       "size": 11,
-      "text": "{{doctorsappointments.1.amount}}"
+      "text": "{{doctorsappointments.1.amount}}",
+      "valueId": "doctorsappointments.1.amount"
   },
   {
       "page": 3,
       "x": 400,
       "y": 175,
       "size": 11,
-      "text": "{{doctorsappointments.2.amount}}"
+      "text": "{{doctorsappointments.2.amount}}",
+      "valueId": "doctorsappointments.2.amount"
   },
   {
       "page": 3,
       "x": 400,
       "y": 138,
       "size": 11,
-      "text": "{{otherExpenses.0.amount}}"
+      "text": "{{otherExpenses.0.amount}}",
+      "valueId": "otherExpenses.0.amount"
   },
   {
       "page": 3,
       "x": 400,
       "y": 101,
       "size": 11,
-      "text": "{{otherExpenses.1.amount}}"
+      "text": "{{otherExpenses.1.amount}}",
+      "valueId": "otherExpenses.1.amount"
   },
   {
       "page": 4,
       "x": 400,
       "y": 762,
       "size": 11,
-      "text": "{{otherExpenses.2.amount}}"
+      "text": "{{otherExpenses.2.amount}}",
+      "valueId": "otherExpenses.2.amount"
   },
   {
       "page": 4,
       "x": 400,
       "y": 725,
       "size": 11,
-      "text": "{{emergencyDentalcare.0.amount}}"
+      "text": "{{emergencyDentalcare.0.amount}}",
+      "valueId": "emergencyDentalcare.0.amount"
   },
   {
       "page": 4,
       "x": 400,
       "y": 688,
       "size": 11,
-      "text": "{{emergencyDentalcare.1.amount}}"
+      "text": "{{emergencyDentalcare.1.amount}}",
+      "valueId": "emergencyDentalcare.1.amount"
   },
   {
       "page": 4,
       "x": 400,
       "y": 651,
       "size": 11,
-      "text": "{{plannedDentalcare.0.amount}}"
+      "text": "{{plannedDentalcare.0.amount}}",
+      "valueId": "plannedDentalcare.0.amount"
   },
   {
       "page": 4,
       "x": 400,
       "y": 614,
       "size": 11,
-      "text": "{{plannedDentalcare.1.amount}}"
+      "text": "{{plannedDentalcare.1.amount}}",
+      "valueId": "plannedDentalcare.1.amount"
   },
   {
       "page": 4,
       "x": 400,
       "y": 577,
       "size": 11,
-      "text": "{{otherDentalcare}}"
+      "text": "{{otherDentalcare}}",
+      "valueId": "otherDentalcare"
   },
   {
       "page": 4,
       "x": 400,
       "y": 503,
       "size": 11,
-      "text": "{{barnomsorg}}"
+      "text": "{{barnomsorg}}",
+      "valueId": "barnomsorg"
   }
 ]
 }

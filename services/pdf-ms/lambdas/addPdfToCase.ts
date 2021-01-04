@@ -4,21 +4,46 @@ import to from 'await-to-js';
 import { arrayToObject } from '../helpers/caseDataConverter';
 import config from '../../../config.js';
 import * as dynamoDb from '../../../libs/dynamoDb.js';
-import { Template, FormType, Case, formTypes } from '../helpers/types';
+import { Template, FormType, Case, formTypes, AnswerObject } from '../helpers/types';
 import { loadFileFromBucket, writeFileToBucket } from '../helpers/s3';
 import { modifyPdf } from '../helpers/pdf';
+import { getUser } from '../helpers/user';
+import { compareCases, getRelevantCases } from '../helpers/case';
 
 const dynamoDbConverter = AWS.DynamoDB.Converter;
 
 export const main = async (event: Record<string, any>) => {
-  const caseData: Case = parseCase(event.detail.dynamodb.NewImage);
+  const caseData: Case & { user?: Record<string, any>; answersArray: AnswerObject[] } = parseCase(
+    event.detail.dynamodb.NewImage
+  );
   if (caseData.pdfGenerated) {
     console.log('pdf already generated, aborting.');
     return;
   }
   const { formId, PK, SK } = caseData;
-  const formType = await getFormType(formId);
+  const personalNumber = PK.substring(5);
+  const user = await getUser(personalNumber);
+  if (user) caseData.answers.user = user;
 
+  // find changed and newly added values, compared to the last case with the same formId.
+  const relevantCases = await getRelevantCases(personalNumber, formId);
+  let changedValues: string[] = [];
+  let newValues: string[] = [];
+  if (relevantCases.length > 1) {
+    const sortedCases = relevantCases
+      .filter(c => c.status === 'submitted')
+      .filter(c => c.SK !== SK)
+      .sort((c1, c2) => c2.updatedAt - c1.updatedAt);
+    const newestRelevantCase = sortedCases[0];
+    const comparison = compareCases(caseData, newestRelevantCase);
+    changedValues = comparison.changedValues;
+    newValues = comparison.newValues;
+    caseData.answers.valuesChanged =
+      changedValues.length > 0 || newValues.length > 0 ? 'Ja' : 'Nej';
+  }
+
+  // get the correct template
+  const formType = await getFormType(formId);
   const templates = JSON.parse((await loadFileFromBucket('templateFiles.json')).toString());
   const templateFiles = templates[Object.keys(templates).includes(formType) ? formType : 'default'];
 
@@ -27,9 +52,15 @@ export const main = async (event: Record<string, any>) => {
   const jsonTemplate: Template = JSON.parse(templateFile.toString()) as Template;
   const pdfBaseFile: Buffer = (await loadFileFromBucket(templateFiles.pdfBaseFilename)) as Buffer;
 
-  // add the data according to the template
-  const newPdfBuffer = await modifyPdf(pdfBaseFile, jsonTemplate, caseData.answers);
-  // I save a copy of the generated pdf to the bucket.
+  // add the data to the pdf according to the template
+  const newPdfBuffer = await modifyPdf(
+    pdfBaseFile,
+    jsonTemplate,
+    caseData.answers,
+    changedValues,
+    newValues
+  );
+  // save a copy of the generated pdf to the bucket.
   // This is (probably) temporary, to make it easier for us to check the generated pdfs.
   writeFileToBucket(`cases/${caseData.id}.pdf`, newPdfBuffer);
 
@@ -99,5 +130,7 @@ const parseCase = (dynamoDbImage: any) => {
   if (Array.isArray(answers)) {
     answerObject = arrayToObject(answers);
   }
-  return { ...unMarshalledCase, answers: answerObject } as Case;
+  return { ...unMarshalledCase, answers: answerObject, answersArray: answers } as Case & {
+    answersArray: AnswerObject[];
+  };
 };
