@@ -1,0 +1,435 @@
+{
+  "numberOfpages": 5,
+  "defaultFontSize": 11,
+  "texts":
+  [
+  {
+      "page": 0,
+      "x": 400,
+      "y": 685,
+      "size": 11,
+      "text": "ändrade uppgifter"
+  },
+  {
+      "page": 0,
+      "x": 270,
+      "y": 648,
+      "size": 11,
+      "text": "{{otherMessage}}",
+      "maxWidthInChars": 50
+  },
+  {
+      "page": 0,
+      "x": 400,
+      "y": 458,
+      "size": 11,
+      "text": "personnummer {{user.personalNumber}}"
+  },
+  {
+      "page": 0,
+      "x": 400,
+      "y": 421,
+      "size": 11,
+      "text": "förnamn {{user.firstName}}"
+  },
+  {
+      "page": 0,
+      "x": 400,
+      "y": 384,
+      "size": 11,
+      "text": "efternamn {{user.lastName}}"
+  },
+  {
+      "page": 0,
+      "x": 400,
+      "y": 347,
+      "size": 11,
+      "text": "{{personalInfo.telephone}}"
+  },
+  {
+      "page": 0,
+      "x": 400,
+      "y": 310,
+      "size": 11,
+      "text": "{{personalInfo.email}}"
+  },
+  {
+      "page": 0,
+      "x": 400,
+      "y": 273,
+      "size": 11,
+      "text": "{{personalInfo.occupation}}"
+  },
+  {
+      "page": 0,
+      "x": 400,
+      "y": 236,
+      "size": 11,
+      "text": "{{personalInfo.mmm}}"
+  },
+  {
+      "page": 0,
+      "x": 400,
+      "y": 152,
+      "size": 11,
+      "text": "{{housingInfo.streetAddress}}"
+  },
+  {
+      "page": 0,
+      "x": 400,
+      "y": 115,
+      "size": 11,
+      "text": "{{housingInfo.postalCode}}"
+  },
+  {
+      "page": 0,
+      "x": 400,
+      "y": 78,
+      "size": 11,
+      "text": "{{housingInfo.postalAdress}}"
+  },
+  {
+      "page": 1,
+      "x": 400,
+      "y": 760,
+      "size": 11,
+      "text": "{{housingInfo.contract}}"
+  },
+  {
+      "page": 1,
+      "x": 400,
+      "y": 723,
+      "size": 11,
+      "text": "{{housingInfo.numberpeopleLiving}}"
+  },
+  {
+      "page": 1,
+      "x": 400,
+      "y": 689,
+      "size": 11,
+      "text": "ändrad uppgift"
+  },
+  {
+      "page": 1,
+      "x": 400,
+      "y": 492,
+      "size": 11,
+      "text": "{{unemploymentAllowance}}"
+  },
+  {
+      "page": 1,
+      "x": 400,
+      "y": 455,
+      "size": 11,
+      "text": "{{forsakringskassanAllowance}}"
+  },
+  {
+      "page": 1,
+      "x": 400,
+      "y": 418,
+      "size": 11,
+      "text": "{{csnAllowance}}"
+  },
+  {
+      "page": 1,
+      "x": 400,
+      "y": 381,
+      "size": 11,
+      "text": "{{pensionAllowance}}"
+  },
+  {
+      "page": 1,
+      "x": 400,
+      "y": 295,
+      "size": 11,
+      "text": "{{salary.0.amount}}"
+  },
+  {
+      "page": 1,
+      "x": 400,
+      "y": 258,
+      "size": 11,
+      "text": "{{salary.1.amount}}"
+  },
+  {
+      "page": 1,
+      "x": 400,
+      "y": 221,
+      "size": 11,
+      "text": "{{salary.2.amount}}"
+  },
+  {
+      "page": 1,
+      "x": 400,
+      "y": 184,
+      "size": 11,
+      "text": "{{swish.0.amount}}"
+  },
+  {
+      "page": 1,
+      "x": 400,
+      "y": 147,
+      "size": 11,
+      "text": "{{swish.1.amount}}"
+  },
+  {
+      "page": 1,
+      "x": 400,
+      "y": 110,
+      "size": 11,
+      "text": "{{swish.2.amount}}"
+  },
+  {
+      "page": 2,
+      "x": 400,
+      "y": 762,
+      "size": 11,
+      "text": "{{loanIncome}}"
+  },
+  {
+      "page": 2,
+      "x": 400,
+      "y": 725,
+      "size": 11,
+      "text": "{{pensionForeign}}"
+  },
+  {
+      "page": 2,
+      "x": 400,
+      "y": 691,
+      "size": 11,
+      "text": "{{otherIncome.0.amount}}"
+  },
+  {
+      "page": 2,
+      "x": 400,
+      "y": 654,
+      "size": 11,
+      "text": "{{otherIncome.1.amount}}"
+  },
+  {
+      "page": 2,
+      "x": 400,
+      "y": 617,
+      "size": 11,
+      "text": "{{otherIncome.2.amount}}"
+  },
+  {
+      "page": 2,
+      "x": 400,
+      "y": 543,
+      "size": 11,
+      "text": "{{rentRoomate}}"
+  },
+  {
+      "page": 2,
+      "x": 400,
+      "y": 506,
+      "size": 11,
+      "text": "{{electricityRoomate}}"
+  },
+  {
+      "page": 2,
+      "x": 400,
+      "y": 469,
+      "size": 11,
+      "text": "{{internetRoomate}}"
+  },
+  {
+      "page": 2,
+      "x": 400,
+      "y": 355,
+      "size": 11,
+      "text": "inga tillgångar"
+  },
+  {
+      "page": 2,
+      "x": 400,
+      "y": 297,
+      "size": 11,
+      "text": "{{carSum}}"
+  },
+  {
+      "page": 2,
+      "x": 400,
+      "y": 260,
+      "size": 11,
+      "text": "{{bikeSum}}"
+  },
+  {
+      "page": 2,
+      "x": 400,
+      "y": 223,
+      "size": 11,
+      "text": "{{houseSum}}"
+  },
+  {
+      "page": 2,
+      "x": 400,
+      "y": 186,
+      "size": 11,
+      "text": "{{apartmentSum}}"
+  },
+  {
+      "page": 2,
+      "x": 400,
+      "y": 149,
+      "size": 11,
+      "text": "{{otherAsset.otherassetDescription}}, {{otherAsset.sum}}"
+  },
+  {
+      "page": 3,
+      "x": 400,
+      "y": 680,
+      "size": 11,
+      "text": "{{rent}}"
+  },
+  {
+      "page": 3,
+      "x": 400,
+      "y": 643,
+      "size": 11,
+      "text": "{{homeInsurance}}"
+  },
+  {
+      "page": 3,
+      "x": 400,
+      "y": 606,
+      "size": 11,
+      "text": "{{internet}}"
+  },
+  {
+      "page": 3,
+      "x": 400,
+      "y": 569,
+      "size": 11,
+      "text": "{{electricity}}"
+  },
+  {
+      "page": 3,
+      "x": 400,
+      "y": 471,
+      "size": 11,
+      "text": "{{buscard}}"
+  },
+  {
+      "page": 3,
+      "x": 400,
+      "y": 437,
+      "size": 11,
+      "text": "{{akassa}}"
+  },
+  {
+      "page": 3,
+      "x": 400,
+      "y": 397,
+      "size": 11,
+      "text": "{{fackavgift}}"
+  },
+  {
+      "page": 3,
+      "x": 400,
+      "y": 360,
+      "size": 11,
+      "text": "{{medicine.0.amount}}"
+  },
+  {
+      "page": 3,
+      "x": 400,
+      "y": 323,
+      "size": 11,
+      "text": "{{medicine.1.amount}}"
+  },
+  {
+      "page": 3,
+      "x": 400,
+      "y": 286,
+      "size": 11,
+      "text": "{{medicine.2.amount}}"
+  },
+  {
+      "page": 3,
+      "x": 400,
+      "y": 249,
+      "size": 11,
+      "text": "{{doctorsappointments.0.amount}}"
+  },
+  {
+      "page": 3,
+      "x": 400,
+      "y": 212,
+      "size": 11,
+      "text": "{{doctorsappointments.1.amount}}"
+  },
+  {
+      "page": 3,
+      "x": 400,
+      "y": 175,
+      "size": 11,
+      "text": "{{doctorsappointments.2.amount}}"
+  },
+  {
+      "page": 3,
+      "x": 400,
+      "y": 138,
+      "size": 11,
+      "text": "{{otherExpenses.0.amount}}"
+  },
+  {
+      "page": 3,
+      "x": 400,
+      "y": 101,
+      "size": 11,
+      "text": "{{otherExpenses.1.amount}}"
+  },
+  {
+      "page": 4,
+      "x": 400,
+      "y": 762,
+      "size": 11,
+      "text": "{{otherExpenses.2.amount}}"
+  },
+  {
+      "page": 4,
+      "x": 400,
+      "y": 725,
+      "size": 11,
+      "text": "{{emergencyDentalcare.0.amount}}"
+  },
+  {
+      "page": 4,
+      "x": 400,
+      "y": 688,
+      "size": 11,
+      "text": "{{emergencyDentalcare.1.amount}}"
+  },
+  {
+      "page": 4,
+      "x": 400,
+      "y": 651,
+      "size": 11,
+      "text": "{{plannedDentalcare.0.amount}}"
+  },
+  {
+      "page": 4,
+      "x": 400,
+      "y": 614,
+      "size": 11,
+      "text": "{{plannedDentalcare.1.amount}}"
+  },
+  {
+      "page": 4,
+      "x": 400,
+      "y": 577,
+      "size": 11,
+      "text": "{{otherDentalcare}}"
+  },
+  {
+      "page": 4,
+      "x": 400,
+      "y": 503,
+      "size": 11,
+      "text": "{{barnomsorg}}"
+  }
+]
+}

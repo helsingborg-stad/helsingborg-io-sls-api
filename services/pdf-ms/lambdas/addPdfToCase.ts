@@ -19,7 +19,8 @@ export const main = async (event: Record<string, any>) => {
   const { formId, PK, SK } = caseData;
   const formType = await getFormType(formId);
 
-  let templateFiles = templates[formType || 'default'];
+  const templates = JSON.parse((await loadFileFromBucket('templateFiles.json')).toString());
+  const templateFiles = templates[Object.keys(templates).includes(formType) ? formType : 'default'];
 
   // load the template files from the s3 bucket
   const templateFile = await loadFileFromBucket(templateFiles.JSONTemplateFilename);
@@ -38,20 +39,6 @@ export const main = async (event: Record<string, any>) => {
   } else {
     console.error('something went wrong with adding pdf data to case');
   }
-};
-
-// Something that encodes which templates we have available in our bucket, and maps them to formTypes.
-// TODO: possibly move this to a file in the S3 that we load? Think about how we want to solve this.
-const templates: Record<
-  FormType | 'default',
-  { pdfBaseFilename: string; JSONTemplateFilename: string }
-> = {
-  'EKB-new': { pdfBaseFilename: 'ekb-template.pdf', JSONTemplateFilename: 'ekb-template.json' },
-  'EKB-recurring': {
-    pdfBaseFilename: 'ekb-template.pdf',
-    JSONTemplateFilename: 'ekb-template.json',
-  },
-  default: { pdfBaseFilename: 'ekb-template.pdf', JSONTemplateFilename: 'ekb-template.json' },
 };
 
 const getFormType = async (formId: string): Promise<FormType> => {
