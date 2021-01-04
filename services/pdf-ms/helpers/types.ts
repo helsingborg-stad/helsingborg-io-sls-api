@@ -11,6 +11,7 @@ export interface TextObject {
   size?: number;
   font?: Font;
   color?: Color;
+  valueId?: string;
 }
 
 export interface Template {
@@ -21,6 +22,13 @@ export interface Template {
   texts: TextObject[];
 }
 
+export interface AnswerObject {
+  field: {
+    id: string;
+    tags: string[];
+  };
+  value: string;
+}
 export interface Case {
   id: string;
   formId: string;
@@ -29,8 +37,8 @@ export interface Case {
   status: 'ongoing' | 'submitted';
   provider: string;
   expirationTime: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: number;
+  updatedAt: number;
   answers: Record<string, any>;
   details?: Record<string, any>;
   pdf?: string | Buffer;

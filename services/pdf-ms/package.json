@@ -10,6 +10,7 @@
     "@types/aws-lambda": "^8.10.42",
     "await-to-js": "^2.1.1",
     "aws-sdk": "^2.624.0",
+    "camelcase": "^6.2.0",
     "pdf-lib": "^1.14.0",
     "serverless": "1.64.0",
     "typescript": "^3.7.5"
