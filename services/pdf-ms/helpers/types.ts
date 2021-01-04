@@ -6,10 +6,11 @@ export interface TextObject {
   page?: number;
   x: number;
   y: number;
+  text: string;
+  maxWidthInChars?: number;
   size?: number;
   font?: Font;
   color?: Color;
-  text: string;
 }
 
 export interface Template {
