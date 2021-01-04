@@ -50,12 +50,12 @@ const replaceTextInTextObject = (textObject: TextObject, json: Record<string, an
   const templateStrings = [...textObject.text.matchAll(regex)];
   const newTextObject: TextObject = { ...textObject };
 
-  const newText = templateStrings.reduce((prev, currentRegexResult) => {
+  const newText = templateStrings.reduce((previous, currentRegexResult) => {
     const replacement = getPropertyFromDottedString(json, currentRegexResult[1].trim());
     if (replacement === undefined || replacement === 'undefined') {
-      return prev.replace(currentRegexResult[0], '');
+      return previous.replace(currentRegexResult[0], '');
     }
-    return prev.replace(currentRegexResult[0], replacement);
+    return previous.replace(currentRegexResult[0], replacement);
   }, textObject.text);
   newTextObject.text = newText;
   return newTextObject;
@@ -66,15 +66,24 @@ const replaceTextInTextObject = (textObject: TextObject, json: Record<string, an
 export const modifyPdf = async (
   pdfBuffer: Buffer,
   template: Template,
-  json: Record<string, any>
+  json: Record<string, any>,
+  changedValues?: string[],
+  newValues?: string[]
 ) => {
   const document = await PDFDocument.load(pdfBuffer);
   const pages = document.getPages();
   const fonts = await loadFonts(document);
 
-  const replacedTextObjects = template.texts.map(textObject =>
-    replaceTextInTextObject(textObject, json)
-  );
+  const replacedTextObjects = template.texts.map(textObject => {
+    const replacedText = replaceTextInTextObject(textObject, json);
+    if (
+      replacedText?.valueId &&
+      (newValues.includes(replacedText.valueId) || changedValues.includes(replacedText.valueId))
+    ) {
+      replacedText.color = rgb(174, 11, 5);
+    }
+    return replacedText;
+  });
 
   replacedTextObjects.forEach(textObject => {
     const page = pages[textObject.page || 0];
