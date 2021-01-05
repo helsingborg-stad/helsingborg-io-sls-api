@@ -38,6 +38,8 @@ export const main = async (event: Record<string, any>) => {
     const comparison = compareCases(caseData, newestRelevantCase);
     changedValues = comparison.changedValues;
     newValues = comparison.newValues;
+    caseData.answers.valuesChanged =
+      changedValues.length > 0 || newValues.length > 0 ? 'Ja' : 'Nej';
   }
 
   // get the correct template
@@ -50,7 +52,7 @@ export const main = async (event: Record<string, any>) => {
   const jsonTemplate: Template = JSON.parse(templateFile.toString()) as Template;
   const pdfBaseFile: Buffer = (await loadFileFromBucket(templateFiles.pdfBaseFilename)) as Buffer;
 
-  // add the data according to the template
+  // add the data to the pdf according to the template
   const newPdfBuffer = await modifyPdf(
     pdfBaseFile,
     jsonTemplate,

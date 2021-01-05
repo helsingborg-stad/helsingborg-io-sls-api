@@ -77,10 +77,10 @@ export const modifyPdf = async (
   const replacedTextObjects = template.texts.map(textObject => {
     const replacedText = replaceTextInTextObject(textObject, json);
     if (
-      replacedText?.valueId &&
+      replacedText.valueId &&
       (newValues.includes(replacedText.valueId) || changedValues.includes(replacedText.valueId))
     ) {
-      replacedText.color = rgb(174, 11, 5);
+      replacedText.color = rgb(174 / 255, 11 / 255, 5 / 255);
     }
     return replacedText;
   });
