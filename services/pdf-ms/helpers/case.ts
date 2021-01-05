@@ -4,10 +4,11 @@ import config from '../../../config';
 import * as dynamoDb from '../../../libs/dynamoDb';
 import { Case, AnswerObject } from './types';
 
+/** Get all cases for a given person and formId */
 export const getRelevantCases = async (personalNumber: string, formId: string) => {
   const params = {
     TableName: config.cases.tableName,
-    IndexName: 'PK-formId-index',
+    IndexName: 'PK-formId-gsi',
     KeyConditionExpression: 'PK = :pk and formId = :formId',
     ExpressionAttributeValues: { ':pk': `USER#${personalNumber}`, ':formId': formId },
   };
@@ -32,6 +33,7 @@ export const getRelevantCases = async (personalNumber: string, formId: string) =
   return casesResponse.Items;
 };
 
+/** compare two cases, returning lists of new and changed values */
 export const compareCases = (
   currentCase: Case & {
     answersArray: AnswerObject[];
