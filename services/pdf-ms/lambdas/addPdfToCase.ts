@@ -8,7 +8,7 @@ import { Template, FormType, Case, formTypes, AnswerObject } from '../helpers/ty
 import { loadFileFromBucket, writeFileToBucket } from '../helpers/s3';
 import { modifyPdf } from '../helpers/pdf';
 import { getUser } from '../helpers/user';
-import { compareCases, getRelevantCases } from '../helpers/case';
+import { getNewAndChangedValues, getCasesWithFormId } from '../helpers/case';
 
 const dynamoDbConverter = AWS.DynamoDB.Converter;
 
@@ -26,7 +26,7 @@ export const main = async (event: Record<string, any>) => {
   if (user) caseData.answers.user = user;
 
   // find changed and newly added values, compared to the last case with the same formId.
-  const relevantCases = await getRelevantCases(personalNumber, formId);
+  const relevantCases = await getCasesWithFormId(personalNumber, formId);
   let changedValues: string[] = [];
   let newValues: string[] = [];
   if (relevantCases.length > 1) {
@@ -35,7 +35,7 @@ export const main = async (event: Record<string, any>) => {
       .filter(c => c.SK !== SK)
       .sort((c1, c2) => c2.updatedAt - c1.updatedAt);
     const newestRelevantCase = sortedCases[0];
-    const comparison = compareCases(caseData, newestRelevantCase);
+    const comparison = getNewAndChangedValues(caseData, newestRelevantCase);
     changedValues = comparison.changedValues;
     newValues = comparison.newValues;
     caseData.answers.valuesChanged =

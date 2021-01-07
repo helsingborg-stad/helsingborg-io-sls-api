@@ -1,10 +1,10 @@
 /**
  * Extracts a value from json, specified by the dotted string specifying the name.
- * For example, from the json {info: {value: 2}}, with the string "info.value", this 
- * should return 2, whereas with the string "info", it should return {value: 2}. 
+ * For example, from the json {info: {value: 2}}, with the string "info.value", this
+ * should return 2, whereas with the string "info", it should return {value: 2}.
  * Any property that does not exist on the object returns undefined.
- * @param obj 
- * @param dottedString 
+ * @param obj
+ * @param dottedString
  */
 export function getPropertyFromDottedString(obj: Record<string, any>, dottedString: string): any {
   const path = dottedString.split('.');
