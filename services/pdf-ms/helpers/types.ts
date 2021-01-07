@@ -3,12 +3,12 @@ import { Color } from 'pdf-lib';
 export type Font = 'helvetica' | 'timesRoman' | 'courier';
 
 export interface TextObject {
-  page?: number;
+  pageIndex?: number;
   x: number;
   y: number;
   text: string;
   maxWidthInChars?: number;
-  size?: number;
+  fontSize?: number;
   font?: Font;
   color?: Color;
   valueId?: string;
