@@ -1,14 +1,14 @@
 const isNumeric = (str: string | number): boolean => {
-  if  (typeof str === 'number') return true;
+  if (typeof str === 'number') return true;
   if (typeof str !== 'string') return false;
   // eslint-disable-next-line no-restricted-globals
   return !isNaN(parseFloat(str));
 };
 
-/** 
+/**
  * Converts an array of objects with { field: {id}, value} to a nested json structure.
  * The ids are dotted strings, like "personal.name", and this is mapped to the
- * corresponding json { personal: {name}}, etc. 
+ * corresponding json { personal: {name}}, etc.
  */
 export const arrayToObject = (
   array: { field: { id: string; tags: string[] }; value: string }[]

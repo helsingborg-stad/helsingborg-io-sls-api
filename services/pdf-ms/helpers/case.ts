@@ -4,8 +4,7 @@ import config from '../../../config';
 import * as dynamoDb from '../../../libs/dynamoDb';
 import { Case, AnswerObject } from './types';
 
-/** Get all cases for a given person and formId */
-export const getRelevantCases = async (personalNumber: string, formId: string) => {
+export const getCasesWithFormId = async (personalNumber: string, formId: string) => {
   const params = {
     TableName: config.cases.tableName,
     IndexName: 'PK-formId-gsi',
@@ -34,7 +33,7 @@ export const getRelevantCases = async (personalNumber: string, formId: string) =
 };
 
 /** compare two cases, returning lists of new and changed values */
-export const compareCases = (
+export const getNewAndChangedValues = (
   currentCase: Case & {
     answersArray: AnswerObject[];
   },
