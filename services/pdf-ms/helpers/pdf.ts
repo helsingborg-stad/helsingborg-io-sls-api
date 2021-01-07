@@ -22,14 +22,14 @@ const renderTextOnPage = (
   fonts: Record<Font, PDFFont>,
   defaultFontSize: number
 ) => {
-  const { x, y, text, size, font, color, maxWidthInChars } = textObject;
+  const { x, y, text, fontSize, font, color, maxWidthInChars } = textObject;
   if (maxWidthInChars && text.length > maxWidthInChars) {
     const numLines = Math.ceil(text.length / maxWidthInChars);
     for (let line = 0; line < numLines; line++) {
       pdfPage.drawText(text.substring(maxWidthInChars * line, maxWidthInChars * (line + 1)), {
         x,
-        y: y - line * (size * 1.5),
-        size: size || defaultFontSize,
+        y: y - line * (fontSize * 1.5),
+        size: fontSize || defaultFontSize,
         font: fonts[font || 'helvetica'],
         color: color || rgb(0.05, 0.05, 0.05),
       });
@@ -38,7 +38,7 @@ const renderTextOnPage = (
     pdfPage.drawText(text, {
       x,
       y,
-      size: size || defaultFontSize,
+      size: fontSize || defaultFontSize,
       font: fonts[font || 'helvetica'],
       color: color || rgb(0.05, 0.05, 0.05),
     });
@@ -51,18 +51,22 @@ const replaceTextInTextObject = (textObject: TextObject, json: Record<string, an
   const newTextObject: TextObject = { ...textObject };
 
   const newText = templateStrings.reduce((previous, currentRegexResult) => {
-    const replacement = getPropertyFromDottedString(json, currentRegexResult[1].trim());
+    const [fullMatch, capturingGroup] = currentRegexResult;
+    const replacement = getPropertyFromDottedString(json, capturingGroup.trim());
     if (replacement === undefined || replacement === 'undefined') {
-      return previous.replace(currentRegexResult[0], '');
+      return previous.replace(fullMatch, '');
     }
-    return previous.replace(currentRegexResult[0], replacement);
+    return previous.replace(fullMatch, replacement);
   }, textObject.text);
   newTextObject.text = newText;
   return newTextObject;
 };
 
 /** Takes a base pdf, a templateData object that tells us where to put the texts,
- * and a json from which we import the values. */
+ * and a json from which we import the values. The changedValues and newValues
+ * tells us if some values have changed since the last case, and if so lets us
+ * mark those values in red.
+ */
 export const modifyPdf = async (
   pdfBuffer: Buffer,
   template: Template,
@@ -76,6 +80,8 @@ export const modifyPdf = async (
 
   const replacedTextObjects = template.texts.map(textObject => {
     const replacedText = replaceTextInTextObject(textObject, json);
+    // use the valueId property and the newValues/changedValues to see if the property has changed,
+    // and if so, set its color to red to mark the change.
     if (
       replacedText.valueId &&
       (newValues.includes(replacedText.valueId) || changedValues.includes(replacedText.valueId))
@@ -86,7 +92,7 @@ export const modifyPdf = async (
   });
 
   replacedTextObjects.forEach(textObject => {
-    const page = pages[textObject.page || 0];
+    const page = pages[textObject.pageIndex || 0];
     renderTextOnPage(textObject, page, fonts, template.defaultFontSize);
   });
 
