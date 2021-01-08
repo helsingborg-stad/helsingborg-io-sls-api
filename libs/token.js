@@ -1,8 +1,5 @@
 import jwt from 'jsonwebtoken';
-import to from 'await-to-js';
-import config from '../config';
-import { throwError } from '@helsingborg-stad/npm-api-error-handling';
-import secrets from './secrets';
+// import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
 /**
  * Takes an http event with an jwt authorization header, and returns the decoded info from it. Does not check if the token is valid, that should be handled by an authorizer.
@@ -22,17 +19,13 @@ export function decodeToken(httpEvent) {
 /**
  * Asynchronously sign a given payload into a JSON Web Token.
  * @param {obj} jsonToSign the payload of the json web token.
- * @param {string} secretKey
+ * @param {string} secret the secret key to sign the JSON Web Token.
+ * @param {number} expireTimeInSeconds the expire time for the token in seconds.
  */
-export async function signToken(jsonToSign) {
-  const [error, secret] = await to(
-    secrets.get(config.token.secret.name, config.token.secret.keyName)
-  );
-  if (error) throwError(error.code, error.message);
-
-  // Add expiration time to JWT token, 15 min.
+export async function signToken(jsonToSign, secret, expireTimeInSeconds) {
+  // Add expiration time to JWT token.
   // The format is in seconds since Jan 1, 1970, not milliseconds, to match the default iat format of JWT.
-  jsonToSign.exp = parseInt(Date.now() / 1000) + 15 * 60;
+  jsonToSign.exp = parseInt(Date.now() / 1000) + expireTimeInSeconds * 60;
 
   const token = jwt.sign(jsonToSign, secret);
   return token;
@@ -41,16 +34,12 @@ export async function signToken(jsonToSign) {
 /**
  * Asynchronously verify given token using a secret or a public key to get a decoded JSON Web Token
  * @param {string} token a json web token
+ * @param {string} secret the secret key to verify the signature in the JSON Web Token.
  */
-export async function verifyToken(token) {
-  const [error, secret] = await to(
-    secrets.get(config.token.secret.name, config.token.secret.keyName)
-  );
-  if (error) throwError(500);
-
+export async function verifyToken(token, secret) {
   return jwt.verify(token, secret, (error, decoded) => {
     if (error) {
-      throwError(401, error.message);
+      throw error;
     }
     return decoded;
   });
