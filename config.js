@@ -4,6 +4,12 @@ const resourcesStage = process.env.resourcesStage;
 
 const stageConfigs = {
   dev: {
+    authorization_code: {
+      secret: {
+        keyName: 'AuthorizationCodeGrantSecret',
+        name: 'dev/authorizationCodeGrant/secret',
+      },
+    },
     token: {
       secret: {
         keyName: 'TokenGeneratorSecret',
