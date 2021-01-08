@@ -1,69 +1,105 @@
 import to from 'await-to-js';
+import config from '../../../../config';
+import secrets from '../../../../libs/secrets';
 import * as response from '../../../../libs/response';
-import { signToken } from '../../../../libs/token';
-import { validateEventBody } from '../../../../libs/validateEventBody';
+import { signToken, verifyToken } from '../../../../libs/token';
+import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
 export const main = async event => {
-  const jsonBody = JSON.parse(event.body);
-
-  const [error, validatedEventBody] = await to(
-    validateEventBody(jsonBody, validateTokenRequestBody)
+  const [queryStringParamsError, queryStringParams] = await to(
+    validateAutorizationQueryStringParams(event.queryStringParameters)
   );
-  if (error) return response.failure(error);
+  if (queryStringParamsError) return response.failure(queryStringParamsError);
 
-  const [errorSignToken, token] = await to(signToken(validatedEventBody));
-  if (errorSignToken) return response.failure(errorSignToken);
+  let tokens = {};
+
+  if (queryStringParams.grant_type === 'authorization_code') {
+    const [authorizationCodeError, authorizationCodeData] = await to(
+      validateAuthorizationCode(queryStringParams.code)
+    );
+    if (authorizationCodeError) {
+      return response.failure(authorizationCodeError);
+    }
+
+    const payload = {
+      personalNumber: authorizationCodeData.personalNumber,
+    };
+
+    const [errorSignToken, authTokens] = await to(generateAuthTokens(payload));
+    if (errorSignToken) {
+      return response.failure(errorSignToken);
+    }
+
+    tokens = authTokens;
+  }
 
   const successResponsePayload = {
     type: 'authorizationToken',
     attributes: {
-      token,
+      ...tokens,
     },
   };
   return response.success(200, successResponsePayload);
 };
 
-/**
- * Function for running validation on the request body.
- * @param {obj} json
- */
-function validateTokenRequestBody(json) {
-  if (!validateKeys(json, ['personalNumber'])) {
-    return [false, 400, 'personalNumber is missing in the json body'];
+async function generateAuthTokens(payload) {
+  const [getSecretError, secret] = await to(
+    secrets.get(config.token.secret.name, config.token.secret.keyName)
+  );
+  if (getSecretError) {
+    throwError(getSecretError.code, getSecretError.message);
   }
 
-  if (!isSwedishSocialSecurityNumber(json.personalNumber)) {
-    return [
-      false,
+  const [signAccessTokenError, signedAccessToken] = await to(signToken(payload, secret, 20));
+  if (signAccessTokenError) throwError(401, signAccessTokenError.message);
+
+  const [signRefreshTokenError, signedRefreshToken] = await to(signToken({}, secret, 30));
+  if (signRefreshTokenError) throwError(401, signRefreshTokenError.message);
+
+  return {
+    accessToken: signedAccessToken,
+    refreshToken: signedRefreshToken,
+  };
+}
+
+/**
+ * Function for validating an authorization code that is issued.
+ * @param {string} code a json web token.
+ */
+async function validateAuthorizationCode(code) {
+  const [getSecretError, secret] = await to(
+    secrets.get(config.authorization_code.secret.name, config.authorization_code.secret.keyName)
+  );
+  if (getSecretError) {
+    throwError(getSecretError.code, getSecretError.message);
+  }
+
+  const [authorizationCodeError, authorizationCodeData] = await to(verifyToken(code, secret));
+  if (authorizationCodeError) {
+    throwError(authorizationCodeError.code, authorizationCodeError.message);
+  }
+  return authorizationCodeData;
+}
+
+/**
+ * Function for validating query paramaters for authorization
+ * @param {object} params an object consiting of key/value pairs for query string parameters.
+ */
+async function validateAutorizationQueryStringParams(params) {
+  const valid_grant_types = ['refresh_token', 'authorization_code'];
+
+  if (params === null || !params.grant_type) {
+    throwError(400, 'Missing request param grant_type');
+  }
+  if (!valid_grant_types.includes(params.grant_type)) {
+    throwError(400, 'Incorrect grant_type is passed in request params');
+  }
+  if (params.grant_type === 'authorization_code' && !params.code) {
+    throwError(
       400,
-      'The value of the key personalNumber should be a valid SSN(Swedish Social Security Number)',
-    ];
+      'The grant type authorization_code requires the param code to be passed in request params'
+    );
   }
 
-  return [true];
-}
-
-/**
- * Check if a string is a valid SSN(Swedish Social Security Number)
- * @param {string} ssn
- */
-function isSwedishSocialSecurityNumber(ssn) {
-  if (/^(19|20)?(\d{6}(-|\s|T)\d{4}|(?!19|20)\d{10})$/.test(ssn)) {
-    return true;
-  }
-  return false;
-}
-
-/**
- * Check if keys exsists in object
- * @param {object} obj
- * @param {array} keys
- */
-function validateKeys(obj, keys) {
-  for (const i in keys) {
-    if (!(keys[i] in obj)) {
-      return false;
-    }
-  }
-  return true;
+  return params;
 }
