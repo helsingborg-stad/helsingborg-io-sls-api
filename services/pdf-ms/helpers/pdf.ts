@@ -2,6 +2,9 @@ import { getPropertyFromDottedString } from './objects';
 import { PDFDocument, StandardFonts, rgb, PDFFont, PDFPage } from 'pdf-lib';
 import { TextObject, Font, Template } from './types';
 
+const defaultTextColor = rgb(0.05, 0.05, 0.05);
+const changedTextColor = rgb(174 / 255, 11 / 255, 5 / 255);
+
 const loadFonts = async (document: PDFDocument): Promise<Record<Font, PDFFont>> => {
   const courierFont = await document.embedFont(StandardFonts.Courier);
   const timesRomanFont = await document.embedFont(StandardFonts.TimesRoman);
@@ -31,7 +34,7 @@ const renderTextOnPage = (
         y: y - line * (fontSize * 1.5),
         size: fontSize || defaultFontSize,
         font: fonts[font || 'helvetica'],
-        color: color || rgb(0.05, 0.05, 0.05),
+        color: color || defaultTextColor,
       });
     }
   } else {
@@ -40,7 +43,7 @@ const renderTextOnPage = (
       y,
       size: fontSize || defaultFontSize,
       font: fonts[font || 'helvetica'],
-      color: color || rgb(0.05, 0.05, 0.05),
+      color: color || defaultTextColor,
     });
   }
 };
@@ -81,12 +84,12 @@ export const modifyPdf = async (
   const replacedTextObjects = template.texts.map(textObject => {
     const replacedText = replaceTextInTextObject(textObject, json);
     // use the valueId property and the newValues/changedValues to see if the property has changed,
-    // and if so, set its color to red to mark the change.
+    // and if so, change its color to mark the change.
     if (
       replacedText.valueId &&
       (newValues.includes(replacedText.valueId) || changedValues.includes(replacedText.valueId))
     ) {
-      replacedText.color = rgb(174 / 255, 11 / 255, 5 / 255);
+      replacedText.color = changedTextColor;
     }
     return replacedText;
   });

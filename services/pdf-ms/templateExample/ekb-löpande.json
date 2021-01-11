@@ -1,10 +1,10 @@
 {
-  "numberOfpages": 5,
+  "numberOfPages": 5,
   "defaultFontSize": 11,
   "texts":
   [
     {
-        "page": 0,
+        "pageIndex": 0,
         "x": 400,
         "y": 685,
         "fontSize": 11,
@@ -12,7 +12,7 @@
         "valueId": "valuesChanged"
     },
     {
-        "page": 0,
+        "pageIndex": 0,
         "x": 270,
         "y": 648,
         "fontSize": 11,
@@ -21,7 +21,7 @@
         "valueId": "otherMessage"
     },
     {
-        "page": 0,
+        "pageIndex": 0,
         "x": 400,
         "y": 458,
         "fontSize": 11,
@@ -29,7 +29,7 @@
         "valueId": "user.personalNumber"
     },
     {
-        "page": 0,
+        "pageIndex": 0,
         "x": 400,
         "y": 421,
         "fontSize": 11,
@@ -37,7 +37,7 @@
         "valueId": "user.firstName"
     },
     {
-        "page": 0,
+        "pageIndex": 0,
         "x": 400,
         "y": 384,
         "fontSize": 11,
@@ -45,7 +45,7 @@
         "valueId": "user.lastName"
     },
     {
-        "page": 0,
+        "pageIndex": 0,
         "x": 400,
         "y": 347,
         "fontSize": 11,
@@ -53,7 +53,7 @@
         "valueId": "personalInfo.telephone"
     },
     {
-        "page": 0,
+        "pageIndex": 0,
         "x": 400,
         "y": 310,
         "fontSize": 11,
@@ -61,7 +61,7 @@
         "valueId": "personalInfo.email"
     },
     {
-        "page": 0,
+        "pageIndex": 0,
         "x": 400,
         "y": 273,
         "fontSize": 11,
@@ -69,7 +69,7 @@
         "valueId": "personalInfo.occupation"
     },
     {
-        "page": 0,
+        "pageIndex": 0,
         "x": 400,
         "y": 152,
         "fontSize": 11,
@@ -77,7 +77,7 @@
         "valueId": "housingInfo.streetAddress"
     },
     {
-        "page": 0,
+        "pageIndex": 0,
         "x": 400,
         "y": 115,
         "fontSize": 11,
@@ -85,7 +85,7 @@
         "valueId": "housingInfo.postalCode"
     },
     {
-        "page": 0,
+        "pageIndex": 0,
         "x": 400,
         "y": 78,
         "fontSize": 11,
@@ -93,7 +93,7 @@
         "valueId": "housingInfo.postalAdress"
     },
     {
-        "page": 1,
+        "pageIndex": 1,
         "x": 400,
         "y": 760,
         "fontSize": 11,
@@ -101,7 +101,7 @@
         "valueId": "housingInfo.contract"
     },
     {
-        "page": 1,
+        "pageIndex": 1,
         "x": 400,
         "y": 723,
         "fontSize": 11,
@@ -109,7 +109,7 @@
         "valueId": "housingInfo.numberpeopleLiving"
     },
     {
-        "page": 1,
+        "pageIndex": 1,
         "x": 400,
         "y": 492,
         "fontSize": 11,
@@ -117,7 +117,7 @@
         "valueId": "unemploymentAllowance"
     },
     {
-        "page": 1,
+        "pageIndex": 1,
         "x": 400,
         "y": 455,
         "fontSize": 11,
@@ -125,7 +125,7 @@
         "valueId": "forsakringskassanAllowance"
     },
     {
-        "page": 1,
+        "pageIndex": 1,
         "x": 400,
         "y": 418,
         "fontSize": 11,
@@ -133,7 +133,7 @@
         "valueId": "csnAllowance"
     },
     {
-        "page": 1,
+        "pageIndex": 1,
         "x": 400,
         "y": 381,
         "fontSize": 11,
@@ -141,7 +141,7 @@
         "valueId": "pensionAllowance"
     },
     {
-        "page": 1,
+        "pageIndex": 1,
         "x": 400,
         "y": 295,
         "fontSize": 11,
@@ -149,7 +149,7 @@
         "valueId": "salary.0.amount"
     },
     {
-        "page": 1,
+        "pageIndex": 1,
         "x": 400,
         "y": 258,
         "fontSize": 11,
@@ -157,7 +157,7 @@
         "valueId": "salary.1.amount"
     },
     {
-        "page": 1,
+        "pageIndex": 1,
         "x": 400,
         "y": 221,
         "fontSize": 11,
@@ -165,7 +165,7 @@
         "valueId": "salary.2.amount"
     },
     {
-        "page": 1,
+        "pageIndex": 1,
         "x": 400,
         "y": 184,
         "fontSize": 11,
@@ -173,7 +173,7 @@
         "valueId": "swish.0.amount"
     },
     {
-        "page": 1,
+        "pageIndex": 1,
         "x": 400,
         "y": 147,
         "fontSize": 11,
@@ -181,7 +181,7 @@
         "valueId": "swish.1.amount"
     },
     {
-        "page": 1,
+        "pageIndex": 1,
         "x": 400,
         "y": 110,
         "fontSize": 11,
@@ -189,7 +189,7 @@
         "valueId": "swish.2.amount"
     },
     {
-        "page": 2,
+        "pageIndex": 2,
         "x": 400,
         "y": 762,
         "fontSize": 11,
@@ -197,7 +197,7 @@
         "valueId": "loanIncome"
     },
     {
-        "page": 2,
+        "pageIndex": 2,
         "x": 400,
         "y": 725,
         "fontSize": 11,
@@ -205,7 +205,7 @@
         "valueId": "pensionForeign"
     },
     {
-        "page": 2,
+        "pageIndex": 2,
         "x": 400,
         "y": 691,
         "fontSize": 11,
@@ -213,7 +213,7 @@
         "valueId": "otherIncome.0.amount"
     },
     {
-        "page": 2,
+        "pageIndex": 2,
         "x": 400,
         "y": 654,
         "fontSize": 11,
@@ -221,7 +221,7 @@
         "valueId": "otherIncome.1.amount"
     },
     {
-        "page": 2,
+        "pageIndex": 2,
         "x": 400,
         "y": 617,
         "fontSize": 11,
@@ -229,7 +229,7 @@
         "valueId": "otherIncome.2.amount"
     },
     {
-        "page": 2,
+        "pageIndex": 2,
         "x": 400,
         "y": 543,
         "fontSize": 11,
@@ -237,7 +237,7 @@
         "valueId": "rentRoomate"
     },
     {
-        "page": 2,
+        "pageIndex": 2,
         "x": 400,
         "y": 506,
         "fontSize": 11,
@@ -245,7 +245,7 @@
         "valueId": "electricityRoomate"
     },
     {
-        "page": 2,
+        "pageIndex": 2,
         "x": 400,
         "y": 469,
         "fontSize": 11,
@@ -253,7 +253,7 @@
         "valueId": "internetRoomate"
     },
     {
-        "page": 2,
+        "pageIndex": 2,
         "x": 400,
         "y": 355,
         "fontSize": 11,
@@ -261,7 +261,7 @@
         "valueId": "noAssets"
     },
     {
-        "page": 2,
+        "pageIndex": 2,
         "x": 400,
         "y": 297,
         "fontSize": 11,
@@ -269,7 +269,7 @@
         "valueId": "carSum"
     },
     {
-        "page": 2,
+        "pageIndex": 2,
         "x": 400,
         "y": 260,
         "fontSize": 11,
@@ -277,7 +277,7 @@
         "valueId": "bikeSum"
     },
     {
-        "page": 2,
+        "pageIndex": 2,
         "x": 400,
         "y": 223,
         "fontSize": 11,
@@ -285,7 +285,7 @@
         "valueId": "houseSum"
     },
     {
-        "page": 2,
+        "pageIndex": 2,
         "x": 400,
         "y": 186,
         "fontSize": 11,
@@ -293,7 +293,7 @@
         "valueId": "apartmentSum"
     },
     {
-        "page": 2,
+        "pageIndex": 2,
         "x": 400,
         "y": 149,
         "fontSize": 11,
@@ -301,7 +301,7 @@
         "valueId": "otherAsset.sum"
     },
     {
-        "page": 3,
+        "pageIndex": 3,
         "x": 400,
         "y": 680,
         "fontSize": 11,
@@ -309,7 +309,7 @@
         "valueId": "rent"
     },
     {
-        "page": 3,
+        "pageIndex": 3,
         "x": 400,
         "y": 643,
         "fontSize": 11,
@@ -317,7 +317,7 @@
         "valueId": "homeInsurance"
     },
     {
-        "page": 3,
+        "pageIndex": 3,
         "x": 400,
         "y": 606,
         "fontSize": 11,
@@ -325,7 +325,7 @@
         "valueId": "internet"
     },
     {
-        "page": 3,
+        "pageIndex": 3,
         "x": 400,
         "y": 569,
         "fontSize": 11,
@@ -333,7 +333,7 @@
         "valueId": "electricity"
     },
     {
-        "page": 3,
+        "pageIndex": 3,
         "x": 400,
         "y": 471,
         "fontSize": 11,
@@ -341,7 +341,7 @@
         "valueId": "buscard"
     },
     {
-        "page": 3,
+        "pageIndex": 3,
         "x": 400,
         "y": 437,
         "fontSize": 11,
@@ -349,7 +349,7 @@
         "valueId": "akassa"
     },
     {
-        "page": 3,
+        "pageIndex": 3,
         "x": 400,
         "y": 397,
         "fontSize": 11,
@@ -357,7 +357,7 @@
         "valueId": "fackavgift"
     },
     {
-        "page": 3,
+        "pageIndex": 3,
         "x": 400,
         "y": 360,
         "fontSize": 11,
@@ -365,7 +365,7 @@
         "valueId": "medicine.0.amount"
     },
     {
-        "page": 3,
+        "pageIndex": 3,
         "x": 400,
         "y": 323,
         "fontSize": 11,
@@ -373,7 +373,7 @@
         "valueId": "medicine.1.amount"
     },
     {
-        "page": 3,
+        "pageIndex": 3,
         "x": 400,
         "y": 286,
         "fontSize": 11,
@@ -381,7 +381,7 @@
         "valueId": "medicine.2.amount"
     },
     {
-        "page": 3,
+        "pageIndex": 3,
         "x": 400,
         "y": 249,
         "fontSize": 11,
@@ -389,7 +389,7 @@
         "valueId": "doctorsappointments.0.amount"
     },
     {
-        "page": 3,
+        "pageIndex": 3,
         "x": 400,
         "y": 212,
         "fontSize": 11,
@@ -397,7 +397,7 @@
         "valueId": "doctorsappointments.1.amount"
     },
     {
-        "page": 3,
+        "pageIndex": 3,
         "x": 400,
         "y": 175,
         "fontSize": 11,
@@ -405,7 +405,7 @@
         "valueId": "doctorsappointments.2.amount"
     },
     {
-        "page": 3,
+        "pageIndex": 3,
         "x": 400,
         "y": 138,
         "fontSize": 11,
@@ -413,7 +413,7 @@
         "valueId": "otherExpenses.0.amount"
     },
     {
-        "page": 3,
+        "pageIndex": 3,
         "x": 400,
         "y": 101,
         "fontSize": 11,
@@ -421,7 +421,7 @@
         "valueId": "otherExpenses.1.amount"
     },
     {
-        "page": 4,
+        "pageIndex": 4,
         "x": 400,
         "y": 762,
         "fontSize": 11,
@@ -429,7 +429,7 @@
         "valueId": "otherExpenses.2.amount"
     },
     {
-        "page": 4,
+        "pageIndex": 4,
         "x": 400,
         "y": 725,
         "fontSize": 11,
@@ -437,7 +437,7 @@
         "valueId": "emergencyDentalcare.0.amount"
     },
     {
-        "page": 4,
+        "pageIndex": 4,
         "x": 400,
         "y": 688,
         "fontSize": 11,
@@ -445,7 +445,7 @@
         "valueId": "emergencyDentalcare.1.amount"
     },
     {
-        "page": 4,
+        "pageIndex": 4,
         "x": 400,
         "y": 651,
         "fontSize": 11,
@@ -453,7 +453,7 @@
         "valueId": "plannedDentalcare.0.amount"
     },
     {
-        "page": 4,
+        "pageIndex": 4,
         "x": 400,
         "y": 614,
         "fontSize": 11,
@@ -461,7 +461,7 @@
         "valueId": "plannedDentalcare.1.amount"
     },
     {
-        "page": 4,
+        "pageIndex": 4,
         "x": 400,
         "y": 577,
         "fontSize": 11,
@@ -469,7 +469,7 @@
         "valueId": "otherDentalcare"
     },
     {
-        "page": 4,
+        "pageIndex": 4,
         "x": 400,
         "y": 503,
         "fontSize": 11,

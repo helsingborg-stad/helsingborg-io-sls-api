@@ -10,7 +10,7 @@ export const getUser = async (personalNumber: string) => {
       personalNumber,
     },
   };
-  const [error, userGetResponse] = await to<{ Item: Record<string, any> }>(
+  const [error, usersDbResponse] = await to<{ Item: Record<string, any> }>(
     dynamoDb.call('get', params)
   );
   if (error) {
@@ -18,5 +18,5 @@ export const getUser = async (personalNumber: string) => {
     return undefined;
   }
 
-  return userGetResponse.Item;
+  return usersDbResponse.Item;
 };
