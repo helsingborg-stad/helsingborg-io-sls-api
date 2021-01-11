@@ -54,8 +54,6 @@ provider:
             - "/index/*"
     - Effect: Allow
       Action:
-        - dynamodb:Query
-        - dynamodb:Scan
         - dynamodb:GetItem
       Resource:
         - "Fn::ImportValue": ${self:custom.resourcesStage}-UsersTableArn
