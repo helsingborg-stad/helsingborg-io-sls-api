@@ -4,7 +4,7 @@ import config from '../../../config';
 import * as dynamoDb from '../../../libs/dynamoDb';
 import { Case, AnswerObject } from './types';
 
-export const getCasesWithFormId = async (personalNumber: string, formId: string) => {
+export const getApplicantCasesByFormId = async (personalNumber: string, formId: string) => {
   const params = {
     TableName: config.cases.tableName,
     IndexName: 'PK-formId-gsi',
