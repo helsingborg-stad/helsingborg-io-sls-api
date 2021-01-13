@@ -91,10 +91,6 @@ async function validateToken(secretConfig, token) {
   return verifiedToken;
 }
 
-/**
- * Function for validating query paramaters for authorization
- * @param {object} params an object consiting of key/value pairs for query string parameters.
- */
 async function validateAuthorizationQueryStringParams(params) {
   const validGrantTypes = ['refresh_token', 'authorization_code'];
 
