@@ -5,7 +5,7 @@ import * as response from '../../../../libs/response';
 import { signToken, verifyToken } from '../../../../libs/token';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
-const authSecrets = config.auth.secrets;
+const CONFIG_AUTH_SECRETS = config.auth.secrets;
 
 export const main = async event => {
   const [queryStringParamsError, queryStringParams] = await to(
@@ -26,7 +26,7 @@ export const main = async event => {
 
   const accessTokenExpiresInMinutes = 20;
   const [getAccessTokenError, accessToken] = await to(
-    generateToken(authSecrets.accessToken, personalNumber, accessTokenExpiresInMinutes)
+    generateToken(CONFIG_AUTH_SECRETS.accessToken, personalNumber, accessTokenExpiresInMinutes)
   );
   if (getAccessTokenError) {
     return response.failure(getAccessTokenError);
@@ -34,7 +34,7 @@ export const main = async event => {
 
   const refreshTokenExpiresInMinutes = 30;
   const [getRefreshTokenError, refreshToken] = await to(
-    generateToken(authSecrets.refreshToken, personalNumber, refreshTokenExpiresInMinutes)
+    generateToken(CONFIG_AUTH_SECRETS.refreshToken, personalNumber, refreshTokenExpiresInMinutes)
   );
   if (getRefreshTokenError) {
     return response.failure(getRefreshTokenError);
@@ -53,14 +53,14 @@ export const main = async event => {
 function getGrantTypeDetails(queryStringParams) {
   if (queryStringParams.grant_type === 'authorization_code') {
     return {
-      secretsConfig: authSecrets.authorizationCode,
+      secretsConfig: CONFIG_AUTH_SECRETS.authorizationCode,
       token: queryStringParams.code,
     };
   }
 
   if (queryStringParams.grant_type === 'refresh_token') {
     return {
-      secretsConfig: authSecrets.refreshToken,
+      secretsConfig: CONFIG_AUTH_SECRETS.refreshToken,
       token: queryStringParams.refresh_token,
     };
   }
