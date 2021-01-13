@@ -66,13 +66,13 @@ function getGrantTypeDetails(queryStringParams) {
   }
 }
 
-async function generateToken(secretConfig, personalNumber, expiresInSeconds) {
+async function generateToken(secretConfig, personalNumber, expiresInMinutes) {
   const [getSecretError, secret] = await to(secrets.get(secretConfig.name, secretConfig.keyName));
   if (getSecretError) {
     throwError(getSecretError.code, getSecretError.message);
   }
 
-  const [signTokenError, token] = await to(signToken({ personalNumber }, secret, expiresInSeconds));
+  const [signTokenError, token] = await to(signToken({ personalNumber }, secret, expiresInMinutes));
   if (signTokenError) throwError(401, signTokenError.message);
 
   return token;
