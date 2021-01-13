@@ -9,7 +9,7 @@ const authSecrets = config.auth.secrets;
 
 export const main = async event => {
   const [queryStringParamsError, queryStringParams] = await to(
-    validateAuthorizationQueryStringParams(event.queryStringParameters)
+    validateQueryStringParams(event.queryStringParameters)
   );
   if (queryStringParamsError) return response.failure(queryStringParamsError);
 
@@ -91,7 +91,7 @@ async function validateToken(secretConfig, token) {
   return verifiedToken;
 }
 
-async function validateAuthorizationQueryStringParams(params) {
+async function validateQueryStringParams(params) {
   const validGrantTypes = ['refresh_token', 'authorization_code'];
 
   if (params === null || !params.grant_type) {
