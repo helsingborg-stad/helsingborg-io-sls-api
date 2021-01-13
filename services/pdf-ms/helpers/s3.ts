@@ -18,7 +18,7 @@ export const loadFileFromBucket = async (filename: string) => {
 };
 
 export const writeFileToBucket = async (Key: string, data: Buffer) => {
-  s3Client.putObject({ Bucket: BucketName, Key, Body: data }, err => {
+  s3Client.putObject({ Bucket: bucketName, Key, Body: data }, err => {
     console.log(err);
   });
 };
