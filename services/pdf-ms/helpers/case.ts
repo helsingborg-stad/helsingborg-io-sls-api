@@ -32,7 +32,6 @@ export const getApplicantCasesByFormId = async (personalNumber: string, formId: 
   return casesResponse.Items;
 };
 
-/** compare two cases, returning lists of new and changed values */
 export const getNewAndChangedValues = (
   currentCase: Case & {
     answersArray: AnswerObject[];

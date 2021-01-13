@@ -1,6 +1,6 @@
 import { getPropertyFromDottedString } from './objects';
 import { PDFDocument, StandardFonts, rgb, PDFFont, PDFPage } from 'pdf-lib';
-import { TextObject, Font, Template } from './types';
+import { TextNode, Font, Template } from './types';
 
 const defaultTextColor = rgb(0.05, 0.05, 0.05);
 const changedTextColor = rgb(174 / 255, 11 / 255, 5 / 255);
@@ -18,14 +18,14 @@ const loadFonts = async (document: PDFDocument): Promise<Record<Font, PDFFont>> 
   return fonts;
 };
 
-/** Draws the text as specified in the textObject on top of the pdf page */
+/** Draws the text as specified in the textNode on the pdf page */
 const renderTextOnPage = (
-  textObject: TextObject,
+  textNode: TextNode,
   pdfPage: PDFPage,
   fonts: Record<Font, PDFFont>,
   defaultFontSize: number
 ) => {
-  const { x, y, text, fontSize, font, color, maxWidthInChars } = textObject;
+  const { x, y, text, fontSize, font, color, maxWidthInChars } = textNode;
   if (maxWidthInChars && text.length > maxWidthInChars) {
     const numLines = Math.ceil(text.length / maxWidthInChars);
     for (let line = 0; line < numLines; line++) {
@@ -48,10 +48,12 @@ const renderTextOnPage = (
   }
 };
 
-const replaceTextInTextObject = (textObject: TextObject, json: Record<string, any>) => {
+const replaceTextInTextNode = (textNode: TextNode, json: Record<string, any>) => {
+  // This regex matches any string inside double braces, i.e. things like "{{hello}}" or "{{_x_  }}".
+  // Everything inside the braces becomes a capturing group.
   const regex = /{{(.*?)}}/g;
-  const templateStrings = [...textObject.text.matchAll(regex)];
-  const newTextObject: TextObject = { ...textObject };
+  const templateStrings = [...textNode.text.matchAll(regex)];
+  const newTextNode: TextNode = { ...textNode };
 
   const newText = templateStrings.reduce((previous, currentRegexResult) => {
     const [fullMatch, capturingGroup] = currentRegexResult;
@@ -60,9 +62,9 @@ const replaceTextInTextObject = (textObject: TextObject, json: Record<string, an
       return previous.replace(fullMatch, '');
     }
     return previous.replace(fullMatch, replacement);
-  }, textObject.text);
-  newTextObject.text = newText;
-  return newTextObject;
+  }, textNode.text);
+  newTextNode.text = newText;
+  return newTextNode;
 };
 
 /** Takes a base pdf, a templateData object that tells us where to put the texts,
@@ -81,8 +83,8 @@ export const modifyPdf = async (
   const pages = document.getPages();
   const fonts = await loadFonts(document);
 
-  const replacedTextObjects = template.texts.map(textObject => {
-    const replacedText = replaceTextInTextObject(textObject, json);
+  const replacedTextNodes = template.texts.map(textNode => {
+    const replacedText = replaceTextInTextNode(textNode, json);
     // use the valueId property and the newValues/changedValues to see if the property has changed,
     // and if so, change its color to mark the change.
     if (
@@ -94,9 +96,9 @@ export const modifyPdf = async (
     return replacedText;
   });
 
-  replacedTextObjects.forEach(textObject => {
-    const page = pages[textObject.pageIndex || 0];
-    renderTextOnPage(textObject, page, fonts, template.defaultFontSize);
+  replacedTextNodes.forEach(textNode => {
+    const page = pages[textNode.pageIndex || 0];
+    renderTextOnPage(textNode, page, fonts, template.defaultFontSize);
   });
 
   const pdfBytes = await document.save();

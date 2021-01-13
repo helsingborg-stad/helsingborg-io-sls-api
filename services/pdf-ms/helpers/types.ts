@@ -1,8 +1,7 @@
 import { Color } from 'pdf-lib';
 
 export type Font = 'helvetica' | 'timesRoman' | 'courier';
-
-export interface TextObject {
+export interface TextNode {
   pageIndex?: number;
   x: number;
   y: number;
@@ -19,7 +18,7 @@ export interface Template {
   defaultFontSize: number;
   defaultFont?: Font;
   date?: string;
-  texts: TextObject[];
+  texts: TextNode[];
 }
 
 export interface AnswerObject {

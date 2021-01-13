@@ -17,13 +17,14 @@ export const main = async (event: Record<string, any>) => {
     event.detail.dynamodb.NewImage
   );
   if (caseData.pdfGenerated) {
-    console.log('pdf already generated, aborting.');
     return;
   }
   const { formId, PK, SK } = caseData;
   const personalNumber = PK.substring(5);
   const user = await getUser(personalNumber);
-  if (user) caseData.answers.user = user;
+  if (user) {
+    caseData.answers.user = user;
+  }
 
   // find changed and newly added values, compared to the last case with the same formId.
   const relevantCases = await getApplicantCasesByFormId(personalNumber, formId);
@@ -35,9 +36,9 @@ export const main = async (event: Record<string, any>) => {
       .filter(c => c.SK !== SK)
       .sort((c1, c2) => c2.updatedAt - c1.updatedAt);
     const newestRelevantCase = sortedCases[0];
-    const comparison = getNewAndChangedValues(caseData, newestRelevantCase);
-    changedValues = comparison.changedValues;
-    newValues = comparison.newValues;
+    const newAndChangedValues = getNewAndChangedValues(caseData, newestRelevantCase);
+    changedValues = newAndChangedValues.changedValues;
+    newValues = newAndChangedValues.newValues;
     caseData.answers.valuesChanged =
       changedValues.length > 0 || newValues.length > 0 ? 'Ja' : 'Nej';
   }
@@ -50,11 +51,13 @@ export const main = async (event: Record<string, any>) => {
   // load the template files from the s3 bucket
   const templateFile = await loadFileFromBucket(templateFiles.JSONTemplateFilename);
   const jsonTemplate: Template = JSON.parse(templateFile.toString()) as Template;
-  const pdfBaseFile: Buffer = (await loadFileFromBucket(templateFiles.pdfBaseFilename)) as Buffer;
+  const pdfBaseFileBuffer: Buffer = (await loadFileFromBucket(
+    templateFiles.pdfBaseFilename
+  )) as Buffer;
 
   // add the data to the pdf according to the template
   const newPdfBuffer = await modifyPdf(
-    pdfBaseFile,
+    pdfBaseFileBuffer,
     jsonTemplate,
     caseData.answers,
     changedValues,
@@ -65,10 +68,8 @@ export const main = async (event: Record<string, any>) => {
   writeFileToBucket(`cases/${caseData.id}.pdf`, newPdfBuffer);
 
   const successfullyAddedData = await addPdfToCase(PK, SK, newPdfBuffer);
-  if (successfullyAddedData) {
-    console.log('successfully added pdf to case!');
-  } else {
-    console.error('something went wrong with adding pdf data to case');
+  if (!successfullyAddedData) {
+    console.error(`Something went wrong with adding pdf data to case, PK: ${PK}, SK: ${SK}`);
   }
 };
 
@@ -89,7 +90,7 @@ const getFormType = async (formId: string): Promise<FormType> => {
   }
   const dbResponse = queryResponse as { Items: { formType?: string }[]; Count: number };
   if (dbResponse.Count === 0) {
-    console.error('Form with that id not found in the database.');
+    console.error(`Form with that id (${formId}) not found in the database.`);
     return null;
   }
   if (formTypes.includes(dbResponse.Items[0].formType)) {
