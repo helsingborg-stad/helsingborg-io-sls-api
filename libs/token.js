@@ -1,5 +1,4 @@
 import jwt from 'jsonwebtoken';
-// import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
 /**
  * Takes an http event with an jwt authorization header, and returns the decoded info from it. Does not check if the token is valid, that should be handled by an authorizer.
@@ -22,10 +21,10 @@ export function decodeToken(httpEvent) {
  * @param {string} secret the secret key to sign the JSON Web Token.
  * @param {number} expireTimeInSeconds the expire time for the token in seconds.
  */
-export async function signToken(jsonToSign, secret, expireTimeInSeconds) {
+export async function signToken(jsonToSign, secret, expireTimeInMinutes) {
   // Add expiration time to JWT token.
   // The format is in seconds since Jan 1, 1970, not milliseconds, to match the default iat format of JWT.
-  jsonToSign.exp = parseInt(Date.now() / 1000) + expireTimeInSeconds * 60;
+  jsonToSign.exp = parseInt(Date.now() / 1000) + expireTimeInMinutes * 60;
 
   const token = jwt.sign(jsonToSign, secret);
   return token;
