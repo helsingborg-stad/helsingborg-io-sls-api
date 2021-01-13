@@ -9,7 +9,7 @@ const authSecrets = config.auth.secrets;
 
 export const main = async event => {
   const [queryStringParamsError, queryStringParams] = await to(
-    validateAutorizationQueryStringParams(event.queryStringParameters)
+    validateAuthorizationQueryStringParams(event.queryStringParameters)
   );
   if (queryStringParamsError) return response.failure(queryStringParamsError);
 
@@ -95,7 +95,7 @@ async function validateToken(secretConfig, token) {
  * Function for validating query paramaters for authorization
  * @param {object} params an object consiting of key/value pairs for query string parameters.
  */
-async function validateAutorizationQueryStringParams(params) {
+async function validateAuthorizationQueryStringParams(params) {
   const validGrantTypes = ['refresh_token', 'authorization_code'];
 
   if (params === null || !params.grant_type) {
