@@ -5,80 +5,90 @@ import * as response from '../../../../libs/response';
 import { signToken, verifyToken } from '../../../../libs/token';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
+const authSecrets = config.auth.secrets;
+
 export const main = async event => {
   const [queryStringParamsError, queryStringParams] = await to(
     validateAutorizationQueryStringParams(event.queryStringParameters)
   );
   if (queryStringParamsError) return response.failure(queryStringParamsError);
 
-  let tokens = {};
+  const grantTypeDetails = getGrantTypeDetails(queryStringParams);
 
-  if (queryStringParams.grant_type === 'authorization_code') {
-    const [authorizationCodeError, authorizationCodeData] = await to(
-      validateAuthorizationCode(queryStringParams.code)
-    );
-    if (authorizationCodeError) {
-      return response.failure(authorizationCodeError);
-    }
+  const [validateTokenError, decodedGrantToken] = await to(
+    validateToken(grantTypeDetails.secretsConfig, grantTypeDetails.token)
+  );
+  if (validateTokenError) {
+    return response.failure(validateTokenError);
+  }
 
-    const payload = {
-      personalNumber: authorizationCodeData.personalNumber,
-    };
+  const personalNumber = decodedGrantToken.personalNumber;
 
-    const [errorSignToken, authTokens] = await to(generateAuthTokens(payload));
-    if (errorSignToken) {
-      return response.failure(errorSignToken);
-    }
+  const accessTokenExpiresInMinutes = 20;
+  const [getAccessTokenError, accessToken] = await to(
+    generateToken(authSecrets.accessToken, personalNumber, accessTokenExpiresInMinutes)
+  );
+  if (getAccessTokenError) {
+    return response.failure(getAccessTokenError);
+  }
 
-    tokens = authTokens;
+  const refreshTokenExpiresInMinutes = 30;
+  const [getRefreshTokenError, refreshToken] = await to(
+    generateToken(authSecrets.refreshToken, personalNumber, refreshTokenExpiresInMinutes)
+  );
+  if (getRefreshTokenError) {
+    return response.failure(getRefreshTokenError);
   }
 
   const successResponsePayload = {
     type: 'authorizationToken',
     attributes: {
-      ...tokens,
+      accessToken,
+      refreshToken,
     },
   };
   return response.success(200, successResponsePayload);
 };
 
-async function generateAuthTokens(payload) {
-  const [getSecretError, secret] = await to(
-    secrets.get(config.token.secret.name, config.token.secret.keyName)
-  );
-  if (getSecretError) {
-    throwError(getSecretError.code, getSecretError.message);
+function getGrantTypeDetails(queryStringParams) {
+  if (queryStringParams.grant_type === 'authorization_code') {
+    return {
+      secretsConfig: authSecrets.authorizationCode,
+      token: queryStringParams.code,
+    };
   }
 
-  const [signAccessTokenError, signedAccessToken] = await to(signToken(payload, secret, 20));
-  if (signAccessTokenError) throwError(401, signAccessTokenError.message);
-
-  const [signRefreshTokenError, signedRefreshToken] = await to(signToken({}, secret, 30));
-  if (signRefreshTokenError) throwError(401, signRefreshTokenError.message);
-
-  return {
-    accessToken: signedAccessToken,
-    refreshToken: signedRefreshToken,
-  };
+  if (queryStringParams.grant_type === 'refresh_token') {
+    return {
+      secretsConfig: authSecrets.refreshToken,
+      token: queryStringParams.refresh_token,
+    };
+  }
 }
 
-/**
- * Function for validating an authorization code that is issued.
- * @param {string} code a json web token.
- */
-async function validateAuthorizationCode(code) {
-  const [getSecretError, secret] = await to(
-    secrets.get(config.authorization_code.secret.name, config.authorization_code.secret.keyName)
-  );
+async function generateToken(secretConfig, personalNumber, expiresInSeconds) {
+  const [getSecretError, secret] = await to(secrets.get(secretConfig.name, secretConfig.keyName));
   if (getSecretError) {
     throwError(getSecretError.code, getSecretError.message);
   }
 
-  const [authorizationCodeError, authorizationCodeData] = await to(verifyToken(code, secret));
-  if (authorizationCodeError) {
-    throwError(authorizationCodeError.code, authorizationCodeError.message);
+  const [signTokenError, token] = await to(signToken({ personalNumber }, secret, expiresInSeconds));
+  if (signTokenError) throwError(401, signTokenError.message);
+
+  return token;
+}
+
+async function validateToken(secretConfig, token) {
+  const [getSecretError, secret] = await to(secrets.get(secretConfig.name, secretConfig.keyName));
+  if (getSecretError) {
+    throwError(getSecretError.code, getSecretError.message);
   }
-  return authorizationCodeData;
+  const [verifyTokenError, verifiedToken] = await to(verifyToken(token, secret));
+  if (verifyTokenError) {
+    throwError(401, verifyTokenError.message);
+  }
+
+  return verifiedToken;
 }
 
 /**
