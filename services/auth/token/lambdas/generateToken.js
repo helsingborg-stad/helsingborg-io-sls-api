@@ -11,7 +11,9 @@ export const main = async event => {
   const [queryStringParamsError, queryStringParams] = await to(
     validateQueryStringParams(event.queryStringParameters)
   );
-  if (queryStringParamsError) return response.failure(queryStringParamsError);
+  if (queryStringParamsError) {
+    return response.failure(queryStringParamsError);
+  }
 
   const grantTypeDetails = getGrantTypeDetails(queryStringParams);
 
@@ -73,7 +75,9 @@ async function generateToken(secretConfig, personalNumber, expiresInMinutes) {
   }
 
   const [signTokenError, token] = await to(signToken({ personalNumber }, secret, expiresInMinutes));
-  if (signTokenError) throwError(401, signTokenError.message);
+  if (signTokenError) {
+    throwError(401, signTokenError.message);
+  }
 
   return token;
 }
