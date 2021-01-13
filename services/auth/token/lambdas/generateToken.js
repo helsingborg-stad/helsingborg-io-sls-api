@@ -96,12 +96,12 @@ async function validateToken(secretConfig, token) {
  * @param {object} params an object consiting of key/value pairs for query string parameters.
  */
 async function validateAutorizationQueryStringParams(params) {
-  const valid_grant_types = ['refresh_token', 'authorization_code'];
+  const validGrantTypes = ['refresh_token', 'authorization_code'];
 
   if (params === null || !params.grant_type) {
     throwError(400, 'Missing request param grant_type');
   }
-  if (!valid_grant_types.includes(params.grant_type)) {
+  if (!validGrantTypes.includes(params.grant_type)) {
     throwError(400, 'Incorrect grant_type is passed in request params');
   }
   if (params.grant_type === 'authorization_code' && !params.code) {
