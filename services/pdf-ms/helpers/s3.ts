@@ -1,13 +1,13 @@
 import S3 from 'aws-sdk/clients/s3';
 
 const s3Client = new S3();
-const BucketName = process.env.BUCKET_NAME;
+const bucketName = process.env.BUCKET_NAME;
 
 export const loadFileFromBucket = async (filename: string) => {
   try {
     const file = await s3Client
       .getObject({
-        Bucket: BucketName,
+        Bucket: bucketName,
         Key: filename,
       })
       .promise();

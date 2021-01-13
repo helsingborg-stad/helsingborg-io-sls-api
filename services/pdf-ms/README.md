@@ -11,9 +11,14 @@ This microservice generates pdfs from case data, and saves it (as a buffer) on t
 
 In the folder templateExample there is two template files that exemplifies how the template system works, and a file 'templateFiles.json' that contains metadata about the templates. These should be put into the S3 bucket created above, named "pdf-case-templates-s3-{some-id}", for the generator to work. 
 
+### DynamoDB global secondary index
+To make the check for finding changed values work, I add a global secondary index to the cases db, which is added in the resource repo under the case dynamodb. This lets me find relevant cases, and then I take the latest such which is submitted, and compare each value to see what is new and what's changed. Right now we treat those as the same thing and just mark them in red.
+
+A thing to note 
+
 ## The data flow
 
-This service listens for events from the Case DynamoDB, and triggers on events where the status of a case is set to submitted. When that happens, this service takes that data, finds out what kind of case it is, and maps that to a given template. Then, using the template we fill out the data and then save the resulting pdf on the case, as a binary buffer under the property pdf. We also set a status, pdfGenerated, so that we only generate a pdf once per case. 
+This service listens for events from the EventBridge, triggering on evens with the source cases.database, where the status of a case is set to submitted. When that happens, this service takes that data, finds out what kind of case it is, and maps that to a given template. Then, using the template we fill out the data and then save the resulting pdf on the case, as a binary buffer under the property pdf. We also set a status, pdfGenerated, so that we only generate a pdf once per case. 
 
 We also get all other cases for the user with the same formId, and compare the values to see what has changed. The changed values gets marked in red in the generated pdf. 
 
@@ -30,13 +35,13 @@ export interface Template {
   defaultFont?: Font;
   date?: string;
 
-  textObjects: TextObject[];
+  textNodes: TextNode[];
 }
 ```
-For each string that we want to render, we have to specify a TextObject, which has the following shape: 
+For each string that we want to render, we have to specify a TextNode, which has the following shape: 
 ```typescript
-interface TextObject {
-  page?: number;
+interface TextNode {
+  pageIndex?: number;
   x: number;
   y: number;
   fontSize?: number;
@@ -46,7 +51,8 @@ interface TextObject {
   valueId?:string
 }
 ```
-The x, y coordinates tells us where on the page to put the text, and has to be configured manually, depending on the base pdf. 
+The x, y coordinates tells us where on the page to put the text, and has to be configured manually, depending on the base pdf. x goes from left to right, and y goes from bottom to top, so (x,y) = (0,0) corresponds to the lower left corner. 
+
 The text is what we want to write, and if we want to replace it with a dynamic value, we write (for example) {{ personalInfo.firstName }}, if we have a property in our case answers with id personalInfo.firstName. Multiple replacements can be combined in the same text, for example "{{firstName}} {{lastName}}" will be correctly replaced. 
 
 We also have an optional valueId, which if given is used to check for changes: i.e. if this value has changed compared to last time, the text will be marked red. 
