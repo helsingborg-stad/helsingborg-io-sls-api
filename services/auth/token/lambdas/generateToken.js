@@ -6,6 +6,8 @@ import { signToken, verifyToken } from '../../../../libs/token';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
 const CONFIG_AUTH_SECRETS = config.auth.secrets;
+const ACCESS_TOKEN_EXPIRES_IN_MINUTES = 20;
+const REFRESH_TOKEN_EXPIRES_IN_MINUTES = 30;
 
 export const main = async event => {
   const [queryStringParamsError, queryStringParams] = await to(
@@ -26,17 +28,19 @@ export const main = async event => {
 
   const personalNumber = decodedGrantToken.personalNumber;
 
-  const accessTokenExpiresInMinutes = 20;
   const [getAccessTokenError, accessToken] = await to(
-    generateToken(CONFIG_AUTH_SECRETS.accessToken, personalNumber, accessTokenExpiresInMinutes)
+    generateToken(CONFIG_AUTH_SECRETS.accessToken, personalNumber, ACCESS_TOKEN_EXPIRES_IN_MINUTES)
   );
   if (getAccessTokenError) {
     return response.failure(getAccessTokenError);
   }
 
-  const refreshTokenExpiresInMinutes = 30;
   const [getRefreshTokenError, refreshToken] = await to(
-    generateToken(CONFIG_AUTH_SECRETS.refreshToken, personalNumber, refreshTokenExpiresInMinutes)
+    generateToken(
+      CONFIG_AUTH_SECRETS.refreshToken,
+      personalNumber,
+      REFRESH_TOKEN_EXPIRES_IN_MINUTES
+    )
   );
   if (getRefreshTokenError) {
     return response.failure(getRefreshTokenError);
