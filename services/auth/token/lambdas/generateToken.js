@@ -17,10 +17,10 @@ export const main = async event => {
     return response.failure(queryStringParamsError);
   }
 
-  const grantTypeDetails = getGrantTypeDetails(queryStringParams);
+  const grantTypeValues = getGrantTypeValues(queryStringParams);
 
   const [validateTokenError, decodedGrantToken] = await to(
-    validateToken(grantTypeDetails.secretsConfig, grantTypeDetails.token)
+    validateToken(grantTypeValues.secretsConfig, grantTypeValues.token)
   );
   if (validateTokenError) {
     return response.failure(validateTokenError);
@@ -56,7 +56,7 @@ export const main = async event => {
   return response.success(200, successResponsePayload);
 };
 
-function getGrantTypeDetails(queryStringParams) {
+function getGrantTypeValues(queryStringParams) {
   if (queryStringParams.grant_type === 'authorization_code') {
     return {
       secretsConfig: CONFIG_AUTH_SECRETS.authorizationCode,
