@@ -6,8 +6,11 @@ import params from '../../../libs/params';
 import * as request from '../../../libs/request';
 import * as response from '../../../libs/response';
 import * as bankId from '../helpers/bankId';
+import secrets from '../../../libs/secrets';
+import { signToken } from '../../../libs/token';
 
 const SSMParams = params.read(config.bankId.envsKeyName);
+const authorizationCodeSecretConfig = config.auth.secrets.authorizationCode;
 
 export const main = async event => {
   const { orderRef } = JSON.parse(event.body);
@@ -15,27 +18,68 @@ export const main = async event => {
 
   const payload = { orderRef };
 
-  const [error, bankIdCollectResponse] = await to(
+  const [bankIdCollectRequestError, bankIdCollectResponse] = await to(
     sendBankIdCollectRequest(bankidSSMParams, payload)
   );
 
-  if (!bankIdCollectResponse) return response.failure(error);
+  if (bankIdCollectRequestError) return response.failure(bankIdCollectRequestError);
 
-  if (bankIdCollectResponse.data.status === 'complete') {
+  let responseAttributes = {};
+
+  if (bankIdCollectResponse.data && bankIdCollectResponse.data.status !== 'complete') {
+    responseAttributes = bankIdCollectResponse.data;
+  }
+
+  if (bankIdCollectResponse.data && bankIdCollectResponse.data.status === 'complete') {
     await putEvent(
       bankIdCollectResponse.data.completionData,
       'BankIdCollectComplete',
       'bankId.collect'
     );
-  }
 
-  const attributes = bankIdCollectResponse.data ? bankIdCollectResponse.data : {};
+    const [generateAuthorizationCodeError, authorizationCode] = await to(
+      generateAuthorizationCode(bankIdCollectResponse.data.user.personalNumber)
+    );
+
+    if (generateAuthorizationCodeError) {
+      return response.failure(generateAuthorizationCodeError);
+    }
+
+    responseAttributes = {
+      authorizationCode,
+      ...bankIdCollectResponse.data,
+    };
+  }
 
   return response.success(200, {
     type: 'bankIdCollect',
-    attributes,
+    attributes: responseAttributes,
   });
 };
+
+/**
+ * Function for generating a authorization code, to be used for obtaining a access token.
+ * @param {object} payload a object with only one level of depth.
+ * @returns JWT (Json Web Token)
+ */
+async function generateAuthorizationCode(payload) {
+  const [authorizationCodeSecretError, auhtorizationCodeSecret] = await to(
+    secrets.get(authorizationCodeSecretConfig.name, authorizationCodeSecretConfig.name)
+  );
+  if (authorizationCodeSecretError) {
+    throwError(authorizationCodeSecretError.code, authorizationCodeSecretError.message);
+  }
+
+  const tokenExpireTimeInMinutes = 5;
+  const [signTokenError, signedToken] = await to(
+    signToken(payload, auhtorizationCodeSecret, tokenExpireTimeInMinutes)
+  );
+  if (signTokenError) {
+    throw signTokenError;
+  }
+
+  return signedToken;
+}
 
 async function sendBankIdCollectRequest(params, payload) {
   let error, bankIdClientResponse, bankIdCollectResponse;
