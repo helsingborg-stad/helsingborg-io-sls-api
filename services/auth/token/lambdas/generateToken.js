@@ -65,7 +65,9 @@ export const main = async event => {
 async function validateEventBody(eventBody, schema) {
   const { error, value } = schema.validate(eventBody, { abortEarly: false });
   if (error) {
-    throwError(400, error.message.replace(/"/g, "'"));
+    const matchDoubleQuote = /"/g;
+    const singleQuote = "'";
+    throwError(400, error.message.replace(matchDoubleQuote, singleQuote));
   }
 
   return value;
