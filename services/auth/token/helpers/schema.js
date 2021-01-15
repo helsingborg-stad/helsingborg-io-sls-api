@@ -1,6 +1,8 @@
 import Joi from 'joi';
 
-const jwt = Joi.string().regex(/^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_.+/=]*$/);
+// regex for matching a json web token string pattern (xxxx.xxxx.xxxx)
+const matchJsonWebToken = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_.+/=]*$/;
+const jwt = Joi.string().regex(matchJsonWebToken);
 
 const tokenValidationSchema = Joi.object({
   grant_type: Joi.string().valid('authorization_code', 'refresh_token').required(),
