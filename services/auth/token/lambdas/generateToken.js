@@ -11,13 +11,13 @@ const ACCESS_TOKEN_EXPIRES_IN_MINUTES = 20;
 const REFRESH_TOKEN_EXPIRES_IN_MINUTES = 30;
 
 export const main = async event => {
-  const [parseJsonError, parsedJsonData] = await to(parseJsonData(event.body));
+  const [parseJsonError, parsedJson] = await to(parseJson(event.body));
   if (parseJsonError) {
     return response.failure(parseJsonError);
   }
 
   const [validationError, validatedEventBody] = await to(
-    validateEventBody(parsedJsonData, tokenValidationSchema)
+    validateEventBody(parsedJson, tokenValidationSchema)
   );
   if (validationError) {
     return response.failure(validationError);
@@ -71,9 +71,9 @@ async function validateEventBody(eventBody, schema) {
   return value;
 }
 
-async function parseJsonData(data) {
+async function parseJson(eventBody) {
   try {
-    const parsedJsonData = JSON.parse(data);
+    const parsedJsonData = JSON.parse(eventBody);
     return parsedJsonData;
   } catch (error) {
     throwError(400, error.message);
