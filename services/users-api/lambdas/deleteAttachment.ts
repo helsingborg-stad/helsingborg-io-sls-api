@@ -1,7 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { s3Client } from '../../../libs/S3';
 import { buildResponse } from '../../../libs/response';
-import * as response from '../../../libs/response';
 import { decodeToken } from '../../../libs/token';
 
 const bucketName = process.env.BUCKET_NAME;
@@ -12,11 +11,12 @@ export const main = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxy
   const { personalNumber } = decodedToken as { personalNumber: string };
 
   if (!filename) {
-    return response.failure(
-      buildResponse(400, { message: 'Need a filename as part of the path.' })
-    );
+    return buildResponse(400, {
+      type: 'userAttachment',
+      attributes: { message: 'Need a filename as part of the path.' },
+    });
   }
-  // The path to where the file is in the s3 bucket
+
   const s3Key = `${personalNumber}/${filename}`;
 
   // Check if the specified file exists in the bucket
