@@ -4,20 +4,26 @@ import secrets from '../../../../libs/secrets';
 import * as response from '../../../../libs/response';
 import { signToken, verifyToken } from '../../../../libs/token';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
+import tokenValidationSchema from '../helpers/schema';
 
 const CONFIG_AUTH_SECRETS = config.auth.secrets;
 const ACCESS_TOKEN_EXPIRES_IN_MINUTES = 20;
 const REFRESH_TOKEN_EXPIRES_IN_MINUTES = 30;
 
 export const main = async event => {
-  const [queryStringParamsError, queryStringParams] = await to(
-    validateQueryStringParams(event.queryStringParameters)
-  );
-  if (queryStringParamsError) {
-    return response.failure(queryStringParamsError);
+  const [parseJsonError, parsedJsonData] = await to(parseJsonData(event.body));
+  if (parseJsonError) {
+    return response.failure(parseJsonError);
   }
 
-  const grantTypeValues = getGrantTypeValues(queryStringParams);
+  const [validationError, validatedEventBody] = await to(
+    validateEventBody(parsedJsonData, tokenValidationSchema)
+  );
+  if (validationError) {
+    return response.failure(validationError);
+  }
+
+  const grantTypeValues = getGrantTypeValues(validatedEventBody);
 
   const [validateTokenError, decodedGrantToken] = await to(
     validateToken(grantTypeValues.secretsConfig, grantTypeValues.token)
@@ -56,18 +62,36 @@ export const main = async event => {
   return response.success(200, successResponsePayload);
 };
 
-function getGrantTypeValues(queryStringParams) {
-  if (queryStringParams.grant_type === 'authorization_code') {
+async function validateEventBody(eventBody, schema) {
+  const { error, value } = schema.validate(eventBody, { abortEarly: false });
+  if (error) {
+    throwError(400, error.message.replace(/"/g, "'"));
+  }
+
+  return value;
+}
+
+async function parseJsonData(data) {
+  try {
+    const parsedJsonData = JSON.parse(data);
+    return parsedJsonData;
+  } catch (error) {
+    throwError(400, error.message);
+  }
+}
+
+function getGrantTypeValues(eventBody) {
+  if (eventBody.grant_type === 'authorization_code') {
     return {
       secretsConfig: CONFIG_AUTH_SECRETS.authorizationCode,
-      token: queryStringParams.code,
+      token: eventBody.code,
     };
   }
 
-  if (queryStringParams.grant_type === 'refresh_token') {
+  if (eventBody.grant_type === 'refresh_token') {
     return {
       secretsConfig: CONFIG_AUTH_SECRETS.refreshToken,
-      token: queryStringParams.refresh_token,
+      token: eventBody.refresh_token,
     };
   }
 }
@@ -97,23 +121,4 @@ async function validateToken(secretConfig, token) {
   }
 
   return verifiedToken;
-}
-
-async function validateQueryStringParams(params) {
-  const validGrantTypes = ['refresh_token', 'authorization_code'];
-
-  if (params === null || !params.grant_type) {
-    throwError(400, 'Missing request param grant_type');
-  }
-  if (!validGrantTypes.includes(params.grant_type)) {
-    throwError(400, 'Incorrect grant_type is passed in request params');
-  }
-  if (params.grant_type === 'authorization_code' && !params.code) {
-    throwError(
-      400,
-      'The grant type authorization_code requires the param code to be passed in request params'
-    );
-  }
-
-  return params;
 }
