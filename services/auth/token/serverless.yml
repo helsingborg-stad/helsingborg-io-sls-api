@@ -50,12 +50,6 @@ functions:
           method: post
           cors: true
           private: true
-          request:
-            parameters:
-              querystrings:
-                grant_type: true
-                refresh_token: true
-                code: true
 
 resources:
   Resources:
