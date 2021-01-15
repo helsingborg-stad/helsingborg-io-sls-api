@@ -1,6 +1,6 @@
 import S3 from 'aws-sdk/clients/s3';
 
-const s3Client = new S3();
+export const s3Client = new S3();
 
 /**
  * Use AWS SDK to create pre-signed upload url.
