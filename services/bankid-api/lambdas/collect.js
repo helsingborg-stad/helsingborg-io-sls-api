@@ -10,7 +10,7 @@ import secrets from '../../../libs/secrets';
 import { signToken } from '../../../libs/token';
 
 const SSMParams = params.read(config.bankId.envsKeyName);
-const authorizationCodeSecretConfig = config.auth.secrets.authorizationCode;
+const CONFIG_AUTH_SECRETS_AUTHORIZATION_CODE = config.auth.secrets.authorizationCode;
 
 export const main = async event => {
   const { orderRef } = JSON.parse(event.body);
@@ -64,7 +64,10 @@ export const main = async event => {
  */
 async function generateAuthorizationCode(payload) {
   const [authorizationCodeSecretError, auhtorizationCodeSecret] = await to(
-    secrets.get(authorizationCodeSecretConfig.name, authorizationCodeSecretConfig.name)
+    secrets.get(
+      CONFIG_AUTH_SECRETS_AUTHORIZATION_CODE.name,
+      CONFIG_AUTH_SECRETS_AUTHORIZATION_CODE.name
+    )
   );
   if (authorizationCodeSecretError) {
     throwError(authorizationCodeSecretError.code, authorizationCodeSecretError.message);
