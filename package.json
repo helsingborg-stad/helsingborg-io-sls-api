@@ -29,9 +29,9 @@
   "devDependencies": {
     "@commitlint/cli": "^11.0.0",
     "@commitlint/config-conventional": "^11.0.0",
-    "@typescript-eslint/parser": "^4.11.1",
     "@types/aws-lambda": "^8.10.70",
     "@types/node": "^14.14.21",
+    "@typescript-eslint/parser": "^4.13.0",
     "babel-eslint": "^10.1.0",
     "commitizen": "^4.2.2",
     "commitlint": "^11.0.0",
