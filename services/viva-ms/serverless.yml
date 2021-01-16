@@ -64,12 +64,32 @@ functions:
                   provider:
                     S: ["VIVA"]
 
-  syncStatus:
-    handler: lambdas/syncStatus.main
+  syncApplicationStatus:
+    handler: lambdas/syncApplicationStatus.main
     events:
       - eventBridge:
           pattern:
             source:
-              - bankId.collectMock
+              - bankId.collectMockApplicationStatus
             detail-type:
               - BankIdCollectComplete
+
+  syncPeriod:
+    handler: lambdas/syncPeriod.main
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - bankId.collectMockPeriod
+            detail-type:
+              - BankIdCollectComplete
+
+  # syncWorkflow:
+  #   handler: lambdas/syncWorkflow.main
+  #   events:
+  #     - eventBridge:
+  #         pattern:
+  #           source:
+  #             - bankId.collectMock
+  #           detail-type:
+  #             - BankIdCollectComplete
