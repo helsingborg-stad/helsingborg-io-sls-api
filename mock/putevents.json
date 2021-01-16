@@ -1,9 +1,18 @@
 [
   {
-    "Source": "bankId.collectMock",
+    "Source": "bankId.collectMockApplicationStatus",
     "Detail": "{ \"user\": { \"personalNumber\": \"195809262743\" } }",
     "Resources": [
-      "resourceMock"
+      "resourceMock1"
+    ],
+    "DetailType": "BankIdCollectComplete",
+    "EventBusName": "default"
+  },
+  {
+    "Source": "bankId.collectMockPeriod",
+    "Detail": "{ \"user\": { \"personalNumber\": \"195809262743\" } }",
+    "Resources": [
+      "resourceMock2"
     ],
     "DetailType": "BankIdCollectComplete",
     "EventBusName": "default"
