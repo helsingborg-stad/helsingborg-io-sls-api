@@ -82,6 +82,8 @@ functions:
 
   getAttachmentList:
     handler: lambdas/getAttachmentList.main
+    environment:
+      BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-AttachmentsBucketName
     events:
       - http:
           path: /users/me/attachments
