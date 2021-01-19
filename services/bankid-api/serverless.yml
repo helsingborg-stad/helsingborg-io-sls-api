@@ -44,6 +44,10 @@ provider:
       Action:
         - SSM:GetParameter
       Resource: "*"
+    - Effect: Allow
+      Action:
+        - secretsmanager:GetSecretValue
+      Resource: "*"
 
 functions:
   auth:

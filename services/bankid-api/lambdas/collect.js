@@ -38,7 +38,7 @@ export const main = async event => {
     );
 
     const [generateAuthorizationCodeError, authorizationCode] = await to(
-      generateAuthorizationCode(bankIdCollectResponse.data.user.personalNumber)
+      generateAuthorizationCode(bankIdCollectResponse.data.completionData.user.personalNumber)
     );
 
     if (generateAuthorizationCodeError) {
@@ -66,7 +66,7 @@ async function generateAuthorizationCode(payload) {
   const [authorizationCodeSecretError, auhtorizationCodeSecret] = await to(
     secrets.get(
       CONFIG_AUTH_SECRETS_AUTHORIZATION_CODE.name,
-      CONFIG_AUTH_SECRETS_AUTHORIZATION_CODE.name
+      CONFIG_AUTH_SECRETS_AUTHORIZATION_CODE.keyName
     )
   );
   if (authorizationCodeSecretError) {
@@ -75,10 +75,10 @@ async function generateAuthorizationCode(payload) {
 
   const tokenExpireTimeInMinutes = 5;
   const [signTokenError, signedToken] = await to(
-    signToken(payload, auhtorizationCodeSecret, tokenExpireTimeInMinutes)
+    signToken({ personalNumber: payload }, auhtorizationCodeSecret, tokenExpireTimeInMinutes)
   );
   if (signTokenError) {
-    throw signTokenError;
+    throwError(401, signTokenError.message);
   }
 
   return signedToken;
