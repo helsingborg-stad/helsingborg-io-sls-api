@@ -3,6 +3,7 @@ import S3 from 'aws-sdk/clients/s3';
 import to from 'await-to-js';
 import { buildResponse } from '../../../libs/response';
 import { decodeToken } from '../../../libs/token';
+import { AWSError } from 'aws-sdk/lib/error';
 
 const s3Client = new S3();
 const bucketName = process.env.BUCKET_NAME;
@@ -15,10 +16,12 @@ export const main = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxy
   if (!filename) {
     return buildResponse(400, {
       type: 'userAttachment',
-      attributes: { message: 'Need a filename as part of the path.' },
+      attributes: {
+        type: 'noFilenameError',
+        message: 'Need a filename as part of the path.',
+      },
     });
   }
-
   const s3Key = `${personalNumber}/${filename}`;
 
   // Check if the specified file exists in the bucket
@@ -36,9 +39,9 @@ export const main = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxy
     });
   }
 
-  const [deleteError] = await to(deleteFile(s3Key));
+  const [deleteError] = await to<boolean, AWSError>(deleteFile(s3Key));
   if (deleteError) {
-    return buildResponse(500, {
+    return buildResponse(deleteError.code, {
       type: 'userAttachment',
       attributes: {
         type: 'deleteError',
@@ -83,8 +86,7 @@ const deleteFile = async (s3Key: string) => {
     })
     .promise();
   if (deleteResponse.$response.error) {
-    console.error(deleteResponse.$response.error);
-    throw Error(deleteResponse.$response.error.message);
+    throw deleteResponse.$response.error;
   }
   return true;
 };
