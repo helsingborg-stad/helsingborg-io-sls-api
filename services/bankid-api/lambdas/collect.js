@@ -37,8 +37,10 @@ export const main = async event => {
       'bankId.collect'
     );
 
+    const personalNumber = bankIdCollectResponse.data.completionData.user.personalNumber;
+
     const [generateAuthorizationCodeError, authorizationCode] = await to(
-      generateAuthorizationCode(bankIdCollectResponse.data.completionData.user.personalNumber)
+      generateAuthorizationCode(personalNumber)
     );
 
     if (generateAuthorizationCodeError) {
@@ -62,7 +64,7 @@ export const main = async event => {
  * @param {object} payload a object with only one level of depth.
  * @returns JWT (Json Web Token)
  */
-async function generateAuthorizationCode(payload) {
+async function generateAuthorizationCode(personalNumber) {
   const [authorizationCodeSecretError, auhtorizationCodeSecret] = await to(
     secrets.get(
       CONFIG_AUTH_SECRETS_AUTHORIZATION_CODE.name,
@@ -73,12 +75,16 @@ async function generateAuthorizationCode(payload) {
     throwError(authorizationCodeSecretError.code, authorizationCodeSecretError.message);
   }
 
+  const signTokenPayload = {
+    personalNumber,
+  };
+
   const tokenExpireTimeInMinutes = 5;
   const [signTokenError, signedToken] = await to(
-    signToken({ personalNumber: payload }, auhtorizationCodeSecret, tokenExpireTimeInMinutes)
+    signToken(signTokenPayload, auhtorizationCodeSecret, tokenExpireTimeInMinutes)
   );
   if (signTokenError) {
-    throwError(401, signTokenError.message);
+    throwError(500, signTokenError.message);
   }
 
   return signedToken;
