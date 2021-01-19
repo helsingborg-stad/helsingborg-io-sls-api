@@ -36,7 +36,7 @@ export const main = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxy
       size: file.Size,
       lastModified: file.LastModified,
     }));
-
+  const totalFileSize = files.reduce((sum, currentFile) => sum + currentFile.size, 0);
   return buildResponse(200, {
     type: 'userAttachment',
     attributes: {
@@ -44,6 +44,7 @@ export const main = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxy
       bucket: bucketName,
       personalNumber,
       files,
+      totalFileSize,
     },
   });
 };
