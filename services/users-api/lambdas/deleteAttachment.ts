@@ -1,8 +1,10 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { s3Client } from '../../../libs/S3';
+import S3 from 'aws-sdk/clients/s3';
+import to from 'await-to-js';
 import { buildResponse } from '../../../libs/response';
 import { decodeToken } from '../../../libs/token';
 
+const s3Client = new S3();
 const bucketName = process.env.BUCKET_NAME;
 
 export const main = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -20,14 +22,8 @@ export const main = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxy
   const s3Key = `${personalNumber}/${filename}`;
 
   // Check if the specified file exists in the bucket
-  const listFilesResponse = await s3Client
-    .listObjectsV2({
-      Bucket: bucketName,
-      Prefix: `${personalNumber}/`,
-    })
-    .promise();
-  const fileInBucket = listFilesResponse.Contents.find(file => file?.Key === s3Key);
-  if (!fileInBucket) {
+  const [noFileError] = await to(findFileInS3(personalNumber, s3Key));
+  if (noFileError) {
     return buildResponse(404, {
       type: 'userAttachment',
       attributes: {
@@ -40,23 +36,16 @@ export const main = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxy
     });
   }
 
-  const deleteResponse = await s3Client
-    .deleteObject({
-      Bucket: bucketName,
-      Key: s3Key,
-    })
-    .promise();
-
-  if (deleteResponse.$response.error) {
-    console.error('Delete error: ', deleteResponse.$response.error.message);
-    return buildResponse(deleteResponse.$response.error.code, {
+  const [deleteError] = await to(deleteFile(s3Key));
+  if (deleteError) {
+    return buildResponse(500, {
       type: 'userAttachment',
       attributes: {
         type: 'deleteError',
         bucket: bucketName,
         filename,
         deletedFileKey: s3Key,
-        message: deleteResponse.$response.error.message,
+        message: deleteError.message,
       },
     });
   }
@@ -70,4 +59,32 @@ export const main = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxy
       deletedFileKey: s3Key,
     },
   });
+};
+
+const findFileInS3 = async (personalNumber: string, s3Key: string) => {
+  const listFilesResponse = await s3Client
+    .listObjectsV2({
+      Bucket: bucketName,
+      Prefix: `${personalNumber}/`,
+    })
+    .promise();
+  const fileInBucket = listFilesResponse.Contents.find(file => file?.Key === s3Key);
+  if (!fileInBucket) {
+    throw Error(`No file with key '${s3Key}' exists in storage. Nothing was deleted.`);
+  }
+  return true;
+};
+
+const deleteFile = async (s3Key: string) => {
+  const deleteResponse = await s3Client
+    .deleteObject({
+      Bucket: bucketName,
+      Key: s3Key,
+    })
+    .promise();
+  if (deleteResponse.$response.error) {
+    console.error(deleteResponse.$response.error);
+    throw Error(deleteResponse.$response.error.message);
+  }
+  return true;
 };
