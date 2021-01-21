@@ -11,7 +11,7 @@ export const client = async params => {
       passphrase: params.passphrase,
     };
 
-    return requestClient(options, 5000, 'text/xml;charset=UTF-8');
+    return requestClient(options, {}, 5000, 'text/xml;charset=UTF-8');
   } catch (error) {
     return error;
   }
