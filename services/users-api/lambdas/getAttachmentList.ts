@@ -13,7 +13,10 @@ export const main = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxy
   const decodedToken = decodeToken(event);
   const { personalNumber } = decodedToken as { personalNumber: string };
 
-  const [error, fileList] = await to<S3.ObjectList, AWSError>(getFileList(personalNumber));
+  const [error, files] = await to<
+    { key: string; filename: string; size: number; lastModified: Date }[],
+    AWSError
+  >(getFileList(personalNumber));
 
   if (error) {
     return buildResponse(error.code, {
@@ -28,14 +31,6 @@ export const main = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxy
     });
   }
 
-  const files = fileList
-    .filter(file => file.Key !== `${personalNumber}/`) // The 'folder' with the name of the personal number is returned as a pseudofile, so we filter that out.
-    .map(file => ({
-      key: file.Key,
-      filename: file.Key.substring(`${personalNumber}/`.length),
-      size: file.Size,
-      lastModified: file.LastModified,
-    }));
   const totalFileSize = files.reduce((sum, currentFile) => sum + currentFile.size, 0);
   return buildResponse(200, {
     type: 'userAttachment',
@@ -59,5 +54,13 @@ const getFileList = async (Prefix: string) => {
   if (listFilesResponse.$response.error) {
     throw listFilesResponse.$response.error;
   }
-  return listFilesResponse.Contents;
+  // The 'folder' with the name of the personal number is returned as a pseudofile, so we filter that out.
+  const files = listFilesResponse.Contents.filter(file => file.Key !== `${Prefix}/`).map(file => ({
+    key: file.Key,
+    filename: file.Key.substring(`${Prefix}/`.length),
+    size: file.Size,
+    lastModified: file.LastModified,
+  }));
+
+  return files;
 };
