@@ -34,7 +34,6 @@ export const main = async event => {
     );
   }
 
-  // Get and validate data from viva mypages
   const [myPagesError, myPagesResponse] = await to(sendMyPagesReguest(user.personalNumber));
 
   if (myPagesError) {
@@ -51,62 +50,79 @@ export const main = async event => {
     return console.error('(Viva-ms) Viva Application WorkflowId not present in response, aborting');
   }
 
-  // Check if Cases with application workflowId exsits
-  const params = {
-    TableName: config.cases.TableName,
-    KeyConditionExpression: 'PK = :pk',
-    FilterExpression: 'details.workflowId = :workflowId',
-    ExpressionAttributeValues: {
-      ':pk': `USER#${user.personalNumber}`,
-      ':workflowId': vivaApplication.workflowid,
-    },
-  };
-
-  const [dynamoQueryError, queryCasesResult] = await to(dynamoDB.call('query', params));
-  if (dynamoQueryError) {
-    return console.error('(Viva-ms) DynamoDb query on cases tabel failed', dynamoQueryError);
+  const casePrimaryKey = `USER#${user.personalNumber}`;
+  const [queryCasesError, queryCaseItems] = await to(
+    queryCasesWithWorkflowId(casePrimaryKey, vivaApplication.workflowid)
+  );
+  if (queryCasesError) {
+    return console.error('(Viva-ms) DynamoDb query on cases tabel failed', queryCasesError);
   }
 
-  if (queryCasesResult.Items.length > 0) {
-    return console.log('(Viva-ms) Case with workflowId already exsists');
+  if (queryCaseItems.length > 0) {
+    return console.log('(Viva-ms) Case with WorkflowId already exists');
   }
 
-  // Create viva case with period and workflowId in details
-  const id = uuid.v4();
-  const PK = `USER#${user.personalNumber}`;
-  const SK = `USER#${user.personalNumber}#CASE#${id}#PROVIDER#${CASE_PROVIDER_VIVA}#WORKFLOWID#${vivaApplication.workflowId}`;
-  const timestamp = Date.now();
-
-  const Item = {
-    id,
-    PK,
-    SK,
-    createdAt: timestamp,
-    updatedAt: timestamp,
-    expirationTime: 0,
-    status: CASE_STATUS_OPEN_TO_APPLY,
-    formId: VIVA_RECURRING_FORM_ID,
-    provider: 'VIVA',
-    details: {
-      workflowId: vivaApplication.workflowid,
-      period: vivaApplication.period,
-    },
-    answers: [],
-    currentPosition: 1,
-  };
-
-  const putItemParams = {
-    TableName: config.cases.tableName,
-    Item,
-  };
-
-  const [putItemError] = await to(putItem(putItemParams));
+  const [putItemError] = await to(
+    putRecurringVivaCase(casePrimaryKey, vivaApplication.workflowid, vivaApplication.period)
+  );
   if (putItemError) {
     return console.error('(viva-ms) syncApplicationStatus', putItemError);
   }
 
   return true;
 };
+
+async function queryCasesWithWorkflowId(PK, workflowId) {
+  const params = {
+    TableName: config.cases.tableName,
+    KeyConditionExpression: 'PK = :pk',
+    FilterExpression: 'details.workflowId = :workflowId',
+    ExpressionAttributeValues: {
+      ':pk': PK,
+      ':workflowId': workflowId,
+    },
+  };
+
+  const [dynamoQueryError, queryCasesResult] = await to(dynamoDB.call('query', params));
+  if (dynamoQueryError) {
+    throw dynamoQueryError;
+  }
+
+  return queryCasesResult.Items;
+}
+
+async function putRecurringVivaCase(PK, workflowId, period) {
+  const id = uuid.v4();
+  const timestamp = Date.now();
+
+  const putItemParams = {
+    TableName: config.cases.tableName,
+    Item: {
+      id,
+      PK,
+      SK: `${PK}#CASE#${id}`,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      expirationTime: 0,
+      status: CASE_STATUS_OPEN_TO_APPLY,
+      formId: VIVA_RECURRING_FORM_ID,
+      provider: CASE_PROVIDER_VIVA,
+      details: {
+        workflowId,
+        period,
+      },
+      answers: [],
+      currentPosition: 1,
+    },
+  };
+
+  const [putItemError, caseItem] = await to(putItem(putItemParams));
+  if (putItemError) {
+    throw putItemError;
+  }
+
+  return caseItem;
+}
 
 function isApplicationPeriodOpen(statusList) {
   /**
