@@ -2,13 +2,6 @@ import S3 from 'aws-sdk/clients/s3';
 
 export const s3Client = new S3();
 
-/**
- * Use AWS SDK to create pre-signed upload url.
- * @param bucketName
- * @param method
- * @param params
- * @returns {string}
- */
 async function getSignedUrl(bucketName, method, params) {
   return s3Client.getSignedUrl(method, {
     Bucket: bucketName,
@@ -16,6 +9,26 @@ async function getSignedUrl(bucketName, method, params) {
   });
 }
 
+async function getFiles(bucketName, prefix) {
+  return s3Client
+    .listObjectsV2({
+      Bucket: bucketName,
+      Prefix: prefix,
+    })
+    .promise();
+}
+
+async function deleteFile(bucketName, key) {
+  return s3Client
+    .deleteObject({
+      Bucket: bucketName,
+      Key: key,
+    })
+    .promise();
+}
+
 export default {
   getSignedUrl,
+  getFiles,
+  deleteFile,
 };
