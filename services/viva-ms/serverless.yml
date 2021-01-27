@@ -33,6 +33,8 @@ provider:
       Action:
         - dynamodb:ListStreams
         - dynamodb:UpdateItem
+        - dynamodb:PutItem
+        - dynamodb:Query
       # Restrict our IAM role permissions to the specific table for the stage
       Resource:
         - "Fn::ImportValue": ${self:custom.resourcesStage}-CasesTableArn
@@ -64,32 +66,12 @@ functions:
                   provider:
                     S: ["VIVA"]
 
-  syncApplicationStatus:
-    handler: lambdas/syncApplicationStatus.main
+  createVivaCase:
+    handler: lambdas/createVivaCase.main
     events:
       - eventBridge:
           pattern:
             source:
-              - bankId.collectMockApplicationStatus
+              - bankId.collect
             detail-type:
               - BankIdCollectComplete
-
-  syncPeriod:
-    handler: lambdas/syncPeriod.main
-    events:
-      - eventBridge:
-          pattern:
-            source:
-              - bankId.collectMockPeriod
-            detail-type:
-              - BankIdCollectComplete
-
-  # syncWorkflow:
-  #   handler: lambdas/syncWorkflow.main
-  #   events:
-  #     - eventBridge:
-  #         pattern:
-  #           source:
-  #             - bankId.collectMock
-  #           detail-type:
-  #             - BankIdCollectComplete
