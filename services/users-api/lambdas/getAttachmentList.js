@@ -16,7 +16,7 @@ export async function main(event) {
     return response.failure(getFilesError);
   }
 
-  const files = getUserFilesWithoutPrefix(s3Files, personalNumber);
+  const files = getUserFilesWithoutPersonalNumberPrefix(s3Files, personalNumber);
 
   const totalFileSizeSumInBytes = files.reduce(
     (fileSizeSum, file) => fileSizeSum + file.sizeInBytes,
@@ -41,8 +41,9 @@ async function getFilesFromUserS3Bucket(personalNumber) {
   return s3Files;
 }
 
-function getUserFilesWithoutPrefix(s3Files, prefix) {
-  return s3Files.Contents.filter(file => file.Key !== `${prefix}/`).map(file => ({
+function getUserFilesWithoutPersonalNumberPrefix(s3Files, prefix) {
+  const nonPrefixedFiles = s3Files.Contents.filter(file => file.Key !== `${prefix}/`);
+  return nonPrefixedFiles.map(file => ({
     s3key: file.Key,
     name: file.Key.substring(`${prefix}/`.length),
     sizeInBytes: file.Size,
