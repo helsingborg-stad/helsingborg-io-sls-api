@@ -13,8 +13,8 @@ import * as dynamoDB from '../../../libs/dynamoDb';
 
 const CASE_STATUS_OPEN_TO_APPLY = 'openToApply';
 const CASE_PROVIDER_VIVA = 'VIVA';
-const VIVA_RECURRING_FORM_ID = '0';
-const SSMParams = params.read(config.vada.envsKeyName);
+const VADA_SSM_PARAMS = params.read(config.vada.envsKeyName);
+const CASE_SSM_PARAMS = params.read(config.vada.envsKeyName);
 
 export const main = async event => {
   const { user } = event.detail;
@@ -92,6 +92,7 @@ async function queryCasesWithWorkflowId(PK, workflowId) {
 }
 
 async function putRecurringVivaCase(PK, workflowId, period) {
+  const ssmParams = await CASE_SSM_PARAMS;
   const id = uuid.v4();
   const timestamp = Date.now();
 
@@ -104,8 +105,8 @@ async function putRecurringVivaCase(PK, workflowId, period) {
       createdAt: timestamp,
       updatedAt: timestamp,
       expirationTime: 0,
+      formId: ssmParams.recurringFormId,
       status: CASE_STATUS_OPEN_TO_APPLY,
-      formId: VIVA_RECURRING_FORM_ID,
       provider: CASE_PROVIDER_VIVA,
       details: {
         workflowId,
@@ -144,7 +145,7 @@ function isApplicationPeriodOpen(statusList) {
 }
 
 async function sendApplicationStatusRequest(personalNumber) {
-  const ssmParams = await SSMParams;
+  const ssmParams = await VADA_SSM_PARAMS;
 
   const { hashSalt, hashSaltLength } = ssmParams;
   const hahsedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
@@ -177,7 +178,7 @@ async function sendApplicationStatusRequest(personalNumber) {
 }
 
 async function sendMyPagesReguest(personalNumber) {
-  const ssmParams = await SSMParams;
+  const ssmParams = await VADA_SSM_PARAMS;
 
   const { hashSalt, hashSaltLength } = ssmParams;
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
