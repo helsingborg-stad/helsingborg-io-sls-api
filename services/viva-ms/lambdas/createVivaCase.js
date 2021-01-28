@@ -50,9 +50,9 @@ export const main = async event => {
     return console.error('(Viva-ms) Viva Application WorkflowId not present in response, aborting');
   }
 
-  const casePrimaryKey = `USER#${user.personalNumber}`;
+  const casePartitionKey = `USER#${user.personalNumber}`;
   const [queryCasesError, queryCaseItems] = await to(
-    queryCasesWithWorkflowId(casePrimaryKey, vivaApplication.workflowid)
+    queryCasesWithWorkflowId(casePartitionKey, vivaApplication.workflowid)
   );
   if (queryCasesError) {
     return console.error('(Viva-ms) DynamoDb query on cases tabel failed', queryCasesError);
@@ -63,7 +63,7 @@ export const main = async event => {
   }
 
   const [putItemError] = await to(
-    putRecurringVivaCase(casePrimaryKey, vivaApplication.workflowid, vivaApplication.period)
+    putRecurringVivaCase(casePartitionKey, vivaApplication.workflowid, vivaApplication.period)
   );
   if (putItemError) {
     return console.error('(viva-ms) syncApplicationStatus', putItemError);
