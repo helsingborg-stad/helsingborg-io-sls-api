@@ -104,7 +104,6 @@ async function putRecurringVivaCase(PK, workflowId, period) {
       SK: `${PK}#CASE#${id}`,
       createdAt: timestamp,
       updatedAt: timestamp,
-      expirationTime: 0,
       formId: ssmParams.recurringFormId,
       status: CASE_STATUS_OPEN_TO_APPLY,
       provider: CASE_PROVIDER_VIVA,
