@@ -21,14 +21,14 @@ export async function main(event) {
     return response.failure(getFilesError);
   }
 
-  const fileToDelete = `${personalNumber}/${filename}`;
+  const fileKey = `${personalNumber}/${filename}`;
 
-  const [findFileError] = await to(findFile(userS3Files, fileToDelete));
+  const [findFileError] = await to(findFile(userS3Files, fileKey));
   if (findFileError) {
     return response.failure(findFileError);
   }
 
-  const [deleteFileError] = await to(deleteFile(fileToDelete));
+  const [deleteFileError] = await to(deleteFile(fileKey));
   if (deleteFileError) {
     return response.failure(deleteFileError);
   }
@@ -47,8 +47,8 @@ async function getFilesFromUserS3Bucket(personalNumber) {
   return s3Files;
 }
 
-async function deleteFile(key) {
-  const [deleteFileError] = await to(S3.deleteFile(BUCKET_NAME, key));
+async function deleteFile(fileKey) {
+  const [deleteFileError] = await to(S3.deleteFile(BUCKET_NAME, fileKey));
   if (deleteFileError) {
     throwError(deleteFileError.statusCode, deleteFileError.message);
   }
@@ -56,10 +56,10 @@ async function deleteFile(key) {
   return true;
 }
 
-async function findFile(s3Files, searchFileKey) {
-  const fileKeyExists = s3Files.Contents.find(file => file?.Key === searchFileKey);
+async function findFile(s3Files, fileKey) {
+  const fileKeyExists = s3Files.Contents.find(file => file?.Key === fileKey);
   if (!fileKeyExists) {
-    throwError(404, `No file with key '${searchFileKey}' found`);
+    throwError(404, `No file with key '${fileKey}' found`);
   }
 
   return true;
