@@ -94,7 +94,7 @@ async function queryCasesWithWorkflowId(PK, workflowId) {
 async function putRecurringVivaCase(PK, workflowId, period) {
   const ssmParams = await CASE_SSM_PARAMS;
   const id = uuid.v4();
-  const timestamp = Date.now();
+  const timestampNow = Date.now();
 
   const putItemParams = {
     TableName: config.cases.tableName,
@@ -102,8 +102,8 @@ async function putRecurringVivaCase(PK, workflowId, period) {
       id,
       PK,
       SK: `${PK}#CASE#${id}`,
-      createdAt: timestamp,
-      updatedAt: timestamp,
+      createdAt: timestampNow,
+      updatedAt: timestampNow,
       formId: ssmParams.recurringFormId,
       status: CASE_STATUS_OPEN_TO_APPLY,
       provider: CASE_PROVIDER_VIVA,
