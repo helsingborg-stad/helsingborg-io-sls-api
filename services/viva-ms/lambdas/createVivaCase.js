@@ -35,7 +35,6 @@ export const main = async event => {
   }
 
   const [myPagesError, myPagesResponse] = await to(sendMyPagesReguest(user.personalNumber));
-
   if (myPagesError) {
     return console.error('(Viva-ms) Viva My Pages Request Error', applicationStatusError);
   }
@@ -43,7 +42,7 @@ export const main = async event => {
   const vivaApplication = myPagesResponse.person.application.vivaapplication;
 
   if (!vivaApplication || !vivaApplication.period) {
-    return console.error('(Viva-ms) Viva Application Perid not present in response, aborting');
+    return console.error('(Viva-ms) Viva Application Period not present in response, aborting');
   }
 
   if (!vivaApplication || !vivaApplication.workflowid) {
