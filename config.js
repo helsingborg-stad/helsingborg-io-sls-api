@@ -31,6 +31,7 @@ const stageConfigs = {
     },
     cases: {
       tableName: 'cases',
+      envsKeyName: '/caseEnvs/dev',
     },
     vada: {
       envsKeyName: '/vadaEnvs/dev',
