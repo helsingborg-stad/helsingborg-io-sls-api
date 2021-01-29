@@ -1,5 +1,4 @@
 /* eslint-disable no-console */
-// import AWS from 'aws-sdk';
 import to from 'await-to-js';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import uuid from 'uuid';
