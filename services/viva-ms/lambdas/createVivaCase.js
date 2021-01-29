@@ -10,9 +10,8 @@ import hash from '../../../libs/helperHashEncode';
 import * as request from '../../../libs/request';
 import { putItem } from '../../../libs/queries';
 import * as dynamoDB from '../../../libs/dynamoDb';
+import { CASE_STATUS_NOT_STARTED, CASE_PROVIDER_VIVA } from '../../../libs/constants';
 
-const CASE_STATUS_OPEN_TO_APPLY = 'openToApply';
-const CASE_PROVIDER_VIVA = 'VIVA';
 const VADA_SSM_PARAMS = params.read(config.vada.envsKeyName);
 const CASE_SSM_PARAMS = params.read(config.vada.envsKeyName);
 
@@ -46,7 +45,9 @@ export const main = async event => {
   }
 
   if (!vivaApplication || !vivaApplication.workflowid) {
-    return console.error('(Viva-ms) Viva Application WorkflowId not present in response, aborting');
+    return console.error(
+      `(Viva-ms) Viva Application WorkflowId ${vivaApplication.workflowid} not present in response, aborting`
+    );
   }
 
   const casePartitionKey = `USER#${user.personalNumber}`;
@@ -104,7 +105,7 @@ async function putRecurringVivaCase(PK, workflowId, period) {
       createdAt: timestampNow,
       updatedAt: timestampNow,
       formId: ssmParams.recurringFormId,
-      status: CASE_STATUS_OPEN_TO_APPLY,
+      status: CASE_STATUS_NOT_STARTED,
       provider: CASE_PROVIDER_VIVA,
       details: {
         workflowId,
