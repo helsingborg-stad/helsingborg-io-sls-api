@@ -13,7 +13,7 @@ import * as dynamoDB from '../../../libs/dynamoDb';
 import { CASE_STATUS_NOT_STARTED, CASE_PROVIDER_VIVA } from '../../../libs/constants';
 
 const VADA_SSM_PARAMS = params.read(config.vada.envsKeyName);
-const CASE_SSM_PARAMS = params.read(config.vada.envsKeyName);
+const CASE_SSM_PARAMS = params.read(config.cases.envsKeyName);
 
 export async function main(event) {
   const { user } = event.detail;
