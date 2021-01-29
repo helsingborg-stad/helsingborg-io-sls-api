@@ -25,7 +25,7 @@ export async function main(event) {
   }
 
   if (!isApplicationPeriodOpen(applicationStatusResponse)) {
-    return console.error(
+    return console.info(
       '(Viva-ms) syncApplicationStatus',
       'Application period is not open',
       applicationStatusResponse
