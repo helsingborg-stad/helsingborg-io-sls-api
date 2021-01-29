@@ -15,7 +15,7 @@ import { CASE_STATUS_NOT_STARTED, CASE_PROVIDER_VIVA } from '../../../libs/const
 const VADA_SSM_PARAMS = params.read(config.vada.envsKeyName);
 const CASE_SSM_PARAMS = params.read(config.vada.envsKeyName);
 
-export const main = async event => {
+export async function main(event) {
   const { user } = event.detail;
 
   const [applicationStatusError, applicationStatusResponse] = await to(
@@ -70,7 +70,7 @@ export const main = async event => {
   }
 
   return true;
-};
+}
 
 async function queryCasesWithWorkflowId(PK, workflowId) {
   const params = {
