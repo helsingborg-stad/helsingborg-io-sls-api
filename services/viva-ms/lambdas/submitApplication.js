@@ -13,9 +13,6 @@ const SSMParams = params.read(config.vada.envsKeyName);
 
 const dynamoDbConverter = AWS.DynamoDB.Converter;
 
-/**
- * Handler reacting on event stream triggered by DynamoDB cases table
- */
 export const main = async event => {
   const [record] = event.Records;
 
@@ -23,7 +20,6 @@ export const main = async event => {
     return null;
   }
 
-  // Make DynamoDb data readable by the Viva API adapter
   const unmarshalledData = dynamoDbConverter.unmarshall(record.dynamodb.NewImage);
 
   if (!checkIsVivaCase(unmarshalledData)) {
@@ -40,11 +36,6 @@ export const main = async event => {
   return true;
 };
 
-/**
- * Helper to ensure we only handling cases of viva type
- * @param {object} data
- * @returns {boolean}
- */
 function checkIsVivaCase(data) {
   const isCaseProviderViva = data.provider === CASE_PROVIDER_VIVA;
   const isCaseStatusSubmitted = data.status.type.includes('submitted');
@@ -54,10 +45,6 @@ function checkIsVivaCase(data) {
   return true;
 }
 
-/**
- * Handler responsible for sending a POST call to Viva API adapter,
- * which in turn creates a case in Viva
- */
 async function sendVadaRequest(caseData) {
   const {
     PK,
