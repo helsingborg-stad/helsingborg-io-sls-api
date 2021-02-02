@@ -16,12 +16,16 @@ const CASE_WORKFLOWS_PATH = 'details.workflows';
 
 export const main = async event => {
   if (event.detail.dynamodb.NewImage === undefined) {
-    return null;
+    return false;
   }
 
   const { PK, SK, details } = dynamoDbConverter.unmarshall(event.detail.dynamodb.NewImage);
   const personalNumber = PK.substring(5);
-  const { workflows: caseWorkflows } = details;
+  const { workflowId, workflows: caseWorkflows } = details;
+
+  if (!workflowId) {
+    return false;
+  }
 
   const [vadaMyPagesError, vadaMyPagesResponse] = await to(sendVadaMyPagesRequest(personalNumber));
   if (vadaMyPagesError) {
@@ -32,7 +36,7 @@ export const main = async event => {
 
   // Check if workflow info is in sync.
   if (deepEqual(vadaWorkflows, caseWorkflows)) {
-    return null;
+    return false;
   }
 
   await addWorkflowsToCase(PK, SK, vadaWorkflows);
