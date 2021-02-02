@@ -75,3 +75,20 @@ functions:
               - bankId.collect
             detail-type:
               - BankIdCollectComplete
+
+  syncWorkflow:
+    handler: lambdas/syncWorkflow.main
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - cases.database
+            detail-type:
+              - INSERT
+              - MODIFY
+            detail:
+              dynamodb:
+                NewImage:
+                  status:
+                    S: ["ongoing", "submitted"]
+
