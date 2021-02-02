@@ -21,11 +21,9 @@ export const main = async event => {
 
   const { PK, SK, details } = dynamoDbConverter.unmarshall(event.detail.dynamodb.NewImage);
   const personalNumber = PK.substring(5);
-  const { workflowId, workflows: caseWorkflows } = details;
+  const { workflows: caseWorkflows } = details;
 
-  const [vadaMyPagesError, vadaMyPagesResponse] = await to(
-    sendVadaMyPagesRequest(personalNumber, workflowId)
-  );
+  const [vadaMyPagesError, vadaMyPagesResponse] = await to(sendVadaMyPagesRequest(personalNumber));
   if (vadaMyPagesError) {
     return console.error('(Viva-ms) syncWorkflow VADA request error', vadaMyPagesError);
   }
@@ -42,8 +40,7 @@ export const main = async event => {
   return true;
 };
 
-// eslint-disable-next-line no-unused-vars
-async function sendVadaMyPagesRequest(personalNumber, workflowId) {
+async function sendVadaMyPagesRequest(personalNumber) {
   const ssmParams = await SSMParams;
 
   const { hashSalt, hashSaltLength } = ssmParams;
@@ -52,7 +49,6 @@ async function sendVadaMyPagesRequest(personalNumber, workflowId) {
 
   const requestClient = request.requestClient({}, { 'x-api-key': xApiKeyToken });
 
-  // const vadaMyPagesUrl = `${vadaUrl}/mypages/${personalNumberEncoded}/workflows/${workflowId}`;
   const vadaMyPagesUrl = `${vadaUrl}/mypages/${personalNumberEncoded}/workflows`;
 
   const [error, vadaMyPagesResponse] = await to(
