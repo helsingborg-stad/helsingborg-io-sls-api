@@ -32,7 +32,6 @@ provider:
       Resource: "*"
     - Effect: Allow
       Action:
-        - dynamodb:ListStreams
         - dynamodb:UpdateItem
         - dynamodb:PutItem
         - dynamodb:Query
@@ -44,12 +43,22 @@ functions:
   submitApplication:
     handler: lambdas/submitApplication.main
     events:
-      - stream:
-          type: dynamodb
-          batchSize: 1
-          startingPosition: LATEST
-          arn:
-            Fn::ImportValue: ${self:custom.resourcesStage}-CasesTableStreamArn
+      - eventBridge:
+          pattern:
+            source:
+              - cases.database
+            detail-type:
+              - MODIFY
+              - INSERT
+            detail:
+              dynamodb:
+                NewImage:
+                  provider:
+                    S: ["VIVA"]
+                  status:
+                    S: ["submitted"]
+                  pdfGenerated:
+                    S: ["yes"]
 
   syncOfficers:
     handler: lambdas/syncOfficers.main
