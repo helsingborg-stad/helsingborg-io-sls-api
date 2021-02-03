@@ -84,7 +84,6 @@ functions:
             source:
               - cases.database
             detail-type:
-              - INSERT
               - MODIFY
             detail:
               dynamodb:
