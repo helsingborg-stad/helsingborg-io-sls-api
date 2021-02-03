@@ -28,12 +28,19 @@ export interface AnswerObject {
   };
   value: string;
 }
+
+export interface Status {
+  type: string;
+  name: string;
+  description: string;
+}
+
 export interface Case {
   id: string;
   formId: string;
   PK: string;
   SK: string;
-  status: 'ongoing' | 'submitted';
+  status: Status;
   provider: string;
   expirationTime: string;
   createdAt: number;

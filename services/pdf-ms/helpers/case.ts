@@ -2,7 +2,7 @@ import to from 'await-to-js';
 
 import config from '../../../config';
 import * as dynamoDb from '../../../libs/dynamoDb';
-import { Case, AnswerObject } from './types';
+import { Case, AnswerObject, Status } from './types';
 
 export const getApplicantCasesByFormId = async (personalNumber: string, formId: string) => {
   const params = {
@@ -20,7 +20,7 @@ export const getApplicantCasesByFormId = async (personalNumber: string, formId: 
       SK: string;
       provider: string;
       formId: string;
-      status: 'ongoing' | 'submitted';
+      status: Status;
       details: Record<string, any>;
     }[];
     ScannedCount: number;
