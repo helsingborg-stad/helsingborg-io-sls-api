@@ -1,7 +1,7 @@
+import AWS from 'aws-sdk';
 import to from 'await-to-js';
 import deepEqual from 'deep-equal';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
-import AWS from 'aws-sdk';
 const dynamoDbConverter = AWS.DynamoDB.Converter;
 
 import config from '../../../config';
@@ -14,7 +14,7 @@ const SSMParams = params.read(config.vada.envsKeyName);
 
 const CASE_WORKFLOWS_PATH = 'details.workflows';
 
-export const main = async event => {
+export async function main(event) {
   if (event.detail.dynamodb.NewImage === undefined) {
     return false;
   }
@@ -42,7 +42,7 @@ export const main = async event => {
   await addWorkflowsToCase(PK, SK, vadaWorkflows);
 
   return true;
-};
+}
 
 async function sendVadaMyPagesRequest(personalNumber) {
   const ssmParams = await SSMParams;
