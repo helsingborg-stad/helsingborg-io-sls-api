@@ -32,7 +32,7 @@ export const main = async (event: Record<string, any>) => {
   let newValues: string[] = [];
   if (relevantCases.length > 1) {
     const sortedCases = relevantCases
-      .filter(c => c.status === 'submitted')
+      .filter(c => c.status.type.includes('submitted'))
       .filter(c => c.SK !== SK)
       .sort((c1, c2) => c2.updatedAt - c1.updatedAt);
     const newestRelevantCase = sortedCases[0];
