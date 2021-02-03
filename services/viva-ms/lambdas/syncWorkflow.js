@@ -12,7 +12,7 @@ import hash from '../../../libs/helperHashEncode';
 
 const SSMParams = params.read(config.vada.envsKeyName);
 
-const CASE_WORKFLOWS_PATH = 'details.workflows';
+const CASE_WORKFLOW_PATH = 'details.workflow';
 
 export async function main(event) {
   if (event.detail.dynamodb.NewImage === undefined) {
@@ -21,29 +21,31 @@ export async function main(event) {
 
   const { PK, SK, details } = dynamoDbConverter.unmarshall(event.detail.dynamodb.NewImage);
   const personalNumber = PK.substring(5);
-  const { workflowId, workflows: caseWorkflows } = details;
+  const { workflowId, workflow: caseWorkflow } = details;
 
   if (!workflowId) {
     return false;
   }
 
-  const [vadaMyPagesError, vadaMyPagesResponse] = await to(sendVadaMyPagesRequest(personalNumber));
+  const [vadaMyPagesError, vadaMyPagesResponse] = await to(
+    sendVadaMyPagesRequest(personalNumber, workflowId)
+  );
   if (vadaMyPagesError) {
     return console.error('(Viva-ms) syncWorkflow VADA request error', vadaMyPagesError);
   }
 
-  const { workflows: vadaWorkflows } = vadaMyPagesResponse.attributes;
+  const vadaWorkflow = vadaMyPagesResponse.attributes;
 
-  if (deepEqual(vadaWorkflows, caseWorkflows)) {
+  if (deepEqual(vadaWorkflow, caseWorkflow)) {
     return false;
   }
 
-  await addWorkflowsToCase(PK, SK, vadaWorkflows);
+  await addWorkflowToCase(PK, SK, vadaWorkflow);
 
   return true;
 }
 
-async function sendVadaMyPagesRequest(personalNumber) {
+async function sendVadaMyPagesRequest(personalNumber, workflowId) {
   const ssmParams = await SSMParams;
 
   const { hashSalt, hashSaltLength } = ssmParams;
@@ -52,7 +54,7 @@ async function sendVadaMyPagesRequest(personalNumber) {
 
   const requestClient = request.requestClient({}, { 'x-api-key': xApiKeyToken });
 
-  const vadaMyPagesUrl = `${vadaUrl}/mypages/${personalNumberEncoded}/workflows`;
+  const vadaMyPagesUrl = `${vadaUrl}/mypages/${personalNumberEncoded}/workflows/${workflowId}`;
 
   const [error, vadaMyPagesResponse] = await to(
     request.call(requestClient, 'get', vadaMyPagesUrl, null)
@@ -76,10 +78,10 @@ async function sendVadaMyPagesRequest(personalNumber) {
   return vadaMyPagesResponse.data;
 }
 
-async function addWorkflowsToCase(PK, SK, workflows) {
+async function addWorkflowToCase(PK, SK, workflow) {
   const TableName = config.cases.tableName;
-  const UpdateExpression = `SET ${CASE_WORKFLOWS_PATH} = :newTestWorkflows`;
-  const ExpressionAttributeValues = { ':newTestWorkflows': workflows };
+  const UpdateExpression = `SET ${CASE_WORKFLOW_PATH} = :newWorkflow`;
+  const ExpressionAttributeValues = { ':newWorkflow': workflow };
 
   const params = {
     TableName,
