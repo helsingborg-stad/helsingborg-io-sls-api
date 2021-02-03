@@ -34,7 +34,6 @@ export async function main(event) {
 
   const { workflows: vadaWorkflows } = vadaMyPagesResponse.attributes;
 
-  // Check if workflow info is in sync.
   if (deepEqual(vadaWorkflows, caseWorkflows)) {
     return false;
   }
