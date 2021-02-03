@@ -49,7 +49,6 @@ functions:
               - cases.database
             detail-type:
               - MODIFY
-              - INSERT
             detail:
               dynamodb:
                 NewImage:
