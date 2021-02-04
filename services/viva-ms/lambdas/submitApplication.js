@@ -22,17 +22,17 @@ export async function main(event) {
 
   const caseObject = dynamoDbConverter.unmarshall(record.dynamodb.NewImage);
 
-  const [vadaError, vadaResponse] = await to(sendVadaRequest(caseObject));
-  if (vadaError) {
-    return console.error('(Viva-ms)', vadaError);
+  const [vivaError, sendApplicationsResponse] = await to(sendApplicationsToViva(caseObject));
+  if (vivaError) {
+    return console.error('(Viva-ms)', vivaError);
   }
 
-  console.info('(Viva-ms)', vadaResponse);
+  console.info('(Viva-ms)', sendApplicationsResponse);
 
   return true;
 }
 
-async function sendVadaRequest(caseObject) {
+async function sendApplicationsToViva(caseObject) {
   const { PK, answers, workflowId, pdf } = caseObject;
   const personalNumber = PK.substring(5);
   const ssmParams = await SSMParams;
