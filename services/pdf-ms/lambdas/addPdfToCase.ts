@@ -60,6 +60,7 @@ export const main = async (event: Record<string, any>) => {
     pdfBaseFileBuffer,
     jsonTemplate,
     caseData.answers,
+    caseData.answersArray,
     changedValues,
     newValues
   );

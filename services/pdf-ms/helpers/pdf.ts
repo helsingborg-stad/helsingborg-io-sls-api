@@ -1,6 +1,6 @@
 import { getPropertyFromDottedString } from './objects';
 import { PDFDocument, StandardFonts, rgb, PDFFont, PDFPage } from 'pdf-lib';
-import { TextNode, Font, Template } from './types';
+import { TextNode, Font, Template, AnswerObject } from './types';
 
 const defaultTextColor = rgb(0.05, 0.05, 0.05);
 const changedTextColor = rgb(174 / 255, 11 / 255, 5 / 255);
@@ -48,7 +48,11 @@ const renderTextOnPage = (
   }
 };
 
-const replaceTextInTextNode = (textNode: TextNode, json: Record<string, any>) => {
+const replaceTextInTextNode = (
+  textNode: TextNode,
+  json: Record<string, any>,
+  answerArray: AnswerObject[]
+) => {
   // This regex matches any string inside double braces, i.e. things like "{{hello}}" or "{{_x_  }}".
   // Everything inside the braces becomes a capturing group.
   const regex = /{{(.*?)}}/g;
@@ -57,10 +61,20 @@ const replaceTextInTextNode = (textNode: TextNode, json: Record<string, any>) =>
 
   const newText = templateStrings.reduce((previous, currentRegexResult) => {
     const [fullMatch, capturingGroup] = currentRegexResult;
-    const replacement = getPropertyFromDottedString(json, capturingGroup.trim());
+    const fieldId = capturingGroup.trim();
+    const replacement = getPropertyFromDottedString(json, fieldId);
     if (replacement === undefined || replacement === 'undefined') {
       return previous.replace(fullMatch, '');
     }
+    // Special logic for handling dates, based on the tags for the field including the keyword 'date'
+    const answerObject = answerArray.find(answer => answer.field.id === fieldId);
+    if (answerObject && answerObject.field.tags.includes('date')) {
+      const dateFormatOptions = { year: 'numeric', month: 'numeric', day: 'numeric' };
+      const date = new Date(answerObject.value);
+      const dateString = date.toLocaleDateString('sv-SE', dateFormatOptions);
+      return previous.replace(fullMatch, dateString);
+    }
+
     return previous.replace(fullMatch, replacement);
   }, textNode.text);
   newTextNode.text = newText;
@@ -76,6 +90,7 @@ export const modifyPdf = async (
   pdfBuffer: Buffer,
   template: Template,
   json: Record<string, any>,
+  answerArray: AnswerObject[],
   changedValues?: string[],
   newValues?: string[]
 ) => {
@@ -84,7 +99,7 @@ export const modifyPdf = async (
   const fonts = await loadFonts(document);
 
   const replacedTextNodes = template.texts.map(textNode => {
-    const replacedText = replaceTextInTextNode(textNode, json);
+    const replacedText = replaceTextInTextNode(textNode, json, answerArray);
     // use the valueId property and the newValues/changedValues to see if the property has changed,
     // and if so, change its color to mark the change.
     if (
