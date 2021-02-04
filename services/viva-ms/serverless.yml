@@ -89,5 +89,10 @@ functions:
               dynamodb:
                 NewImage:
                   status:
-                    S: ["ongoing", "submitted"]
-
+                    M:
+                      type:
+                        S:
+                          [
+                            { "prefix": "active:submitted" },
+                            { "prefix": "active:ongoing" },
+                          ]
