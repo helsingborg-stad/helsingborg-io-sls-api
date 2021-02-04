@@ -1,22 +1,24 @@
+/* eslint-disable no-console */
 import AWS from 'aws-sdk';
 import to from 'await-to-js';
 import deepEqual from 'deep-equal';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
-const dynamoDbConverter = AWS.DynamoDB.Converter;
 
 import config from '../../../config';
 import params from '../../../libs/params';
-import * as dynamoDb from '../../../libs/dynamoDb';
-import * as request from '../../../libs/request';
 import hash from '../../../libs/helperHashEncode';
+import * as request from '../../../libs/request';
+import * as dynamoDb from '../../../libs/dynamoDb';
 
 const SSMParams = params.read(config.vada.envsKeyName);
+
+const dynamoDbConverter = AWS.DynamoDB.Converter;
 
 const CASE_WORKFLOW_PATH = 'details.workflow';
 
 export async function main(event) {
   if (event.detail.dynamodb.NewImage === undefined) {
-    return false;
+    return null;
   }
 
   const { PK, SK, details } = dynamoDbConverter.unmarshall(event.detail.dynamodb.NewImage);
@@ -34,13 +36,13 @@ export async function main(event) {
     return console.error('(Viva-ms) syncWorkflow VADA request error', vadaMyPagesError);
   }
 
-  const vadaWorkflow = vadaMyPagesResponse.attributes;
+  const vivaWorkflow = vadaMyPagesResponse.attributes;
 
-  if (deepEqual(vadaWorkflow, caseWorkflow)) {
-    return false;
+  if (deepEqual(vivaWorkflow, caseWorkflow)) {
+    return null;
   }
 
-  await addWorkflowToCase(PK, SK, vadaWorkflow);
+  await addWorkflowToCase(PK, SK, vivaWorkflow);
 
   return true;
 }
