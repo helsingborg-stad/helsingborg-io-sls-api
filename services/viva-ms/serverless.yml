@@ -55,7 +55,9 @@ functions:
                   provider:
                     S: ["VIVA"]
                   status:
-                    S: ["submitted"]
+                    M:
+                      type:
+                        S: ["active:submitted:viva"]
                   pdfGenerated:
                     S: ["yes"]
 
