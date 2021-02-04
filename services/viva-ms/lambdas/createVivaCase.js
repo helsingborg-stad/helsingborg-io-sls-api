@@ -95,7 +95,7 @@ async function putRecurringVivaCase(PK, workflowId, period) {
   const ssmParams = await CASE_SSM_PARAMS;
   const id = uuid.v4();
   const timestampNow = Date.now();
-  const initialStatus = getStatusByType('notStarted.ekb');
+  const initialStatus = getStatusByType('notStarted:ekb');
 
   const putItemParams = {
     TableName: config.cases.tableName,

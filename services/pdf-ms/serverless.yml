@@ -93,5 +93,5 @@ functions:
                 NewImage:
                   status:
                     M:
-                      type: 
-                        S: [{"prefix": "active.submitted"}]
+                      type:
+                        S: [{"prefix": "active:submitted"}]
