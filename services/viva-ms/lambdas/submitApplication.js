@@ -6,7 +6,6 @@ import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import config from '../../../config';
 import params from '../../../libs/params';
 import hash from '../../../libs/helperHashEncode';
-import { CASE_PROVIDER_VIVA } from '../../../libs/constants';
 import * as request from '../../../libs/request';
 
 const SSMParams = params.read(config.vada.envsKeyName);
@@ -14,17 +13,18 @@ const SSMParams = params.read(config.vada.envsKeyName);
 const dynamoDbConverter = AWS.DynamoDB.Converter;
 
 export async function main(event) {
-  const [record] = event.Records;
-
-  if (record.dynamodb.NewImage === undefined) {
+  if (event.detail.dynamodb.NewImage === undefined) {
     return undefined;
   }
 
-  const caseObject = dynamoDbConverter.unmarshall(record.dynamodb.NewImage);
+  const application = dynamoDbConverter.unmarshall(event.detail.dynamodb.NewImage);
 
-  const [vivaError, sendApplicationsResponse] = await to(sendApplicationsToViva(caseObject));
-  if (vivaError) {
-    return console.error('(Viva-ms)', vivaError);
+  const [sendApplicationError, sendApplicationsResponse] = await to(
+    sendApplicationsToViva(application)
+  );
+  if (sendApplicationError) {
+    console.error('(Viva-ms)', sendApplicationError);
+    return false;
   }
 
   console.info('(Viva-ms)', sendApplicationsResponse);
@@ -32,29 +32,31 @@ export async function main(event) {
   return true;
 }
 
-async function sendApplicationsToViva(caseObject) {
-  const { PK, answers, workflowId, pdf } = caseObject;
+async function sendApplicationsToViva(application) {
+  const { PK, answers, workflowId, pdf: pdfBinaryBuffer } = application;
   const personalNumber = PK.substring(5);
   const ssmParams = await SSMParams;
 
   const { hashSalt, hashSaltLength } = ssmParams;
   const personalNumberHashEncoded = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
-  // Construct imperative Viva API adapter payload
   const vadaApiPayload = {
     applicationType: 'recurrent', // basic | recurrent
     hashid: personalNumberHashEncoded,
     workflowId,
     answers,
-    pdf,
+    rawData: pdfBinaryBuffer.toString(),
+    rawDataType: 'pdf',
   };
+
+  console.log(vadaApiPayload);
 
   const { vadaUrl, xApiKeyToken } = ssmParams;
   const requestClient = request.requestClient({}, { 'x-api-key': xApiKeyToken });
 
   const vadaApplicationsUrl = `${vadaUrl}/applications`;
 
-  const [error, vadaCreateRecurrentApplicationResponse] = await to(
+  const [error, vadaCreateRecurrentVivaApplicationResponse] = await to(
     request.call(requestClient, 'post', vadaApplicationsUrl, vadaApiPayload)
   );
 
@@ -73,5 +75,5 @@ async function sendApplicationsToViva(caseObject) {
     }
   }
 
-  return vadaCreateRecurrentApplicationResponse.data;
+  return vadaCreateRecurrentVivaApplicationResponse.data;
 }
