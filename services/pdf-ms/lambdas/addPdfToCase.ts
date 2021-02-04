@@ -104,7 +104,7 @@ const addPdfToCase = async (PK: string, SK: string, pdf?: string | Buffer) => {
   const ExpressionAttributeNames = { '#pdf': 'pdf', '#pdfGenerated': 'pdfGenerated' };
   const ExpressionAttributeValues = {
     ':pdf': pdf || 'No pdf to add',
-    ':pdfGenerated': pdf !== undefined,
+    ':pdfGenerated': pdf !== undefined ? 'yes' : 'no',
   };
 
   const params = {
