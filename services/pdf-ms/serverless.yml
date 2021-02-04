@@ -92,4 +92,4 @@ functions:
               dynamodb:
                 NewImage:
                   status:
-                    S: ["submitted"]
+                    type: ["active.submitted", "active.ekb.submitted"]
