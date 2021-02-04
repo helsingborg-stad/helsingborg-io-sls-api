@@ -9,7 +9,8 @@ import hash from '../../../libs/helperHashEncode';
 import * as request from '../../../libs/request';
 import { putItem } from '../../../libs/queries';
 import * as dynamoDB from '../../../libs/dynamoDb';
-import { CASE_STATUS_NOT_STARTED, CASE_PROVIDER_VIVA } from '../../../libs/constants';
+import { CASE_PROVIDER_VIVA } from '../../../libs/constants';
+import { getStatusByType } from '../../../libs/caseStatuses';
 
 const VADA_SSM_PARAMS = params.read(config.vada.envsKeyName);
 const CASE_SSM_PARAMS = params.read(config.cases.envsKeyName);
@@ -94,6 +95,7 @@ async function putRecurringVivaCase(PK, workflowId, period) {
   const ssmParams = await CASE_SSM_PARAMS;
   const id = uuid.v4();
   const timestampNow = Date.now();
+  const initialStatus = getStatusByType('notStarted.ekb');
 
   const putItemParams = {
     TableName: config.cases.tableName,
@@ -104,7 +106,7 @@ async function putRecurringVivaCase(PK, workflowId, period) {
       createdAt: timestampNow,
       updatedAt: timestampNow,
       formId: ssmParams.recurringFormId,
-      status: CASE_STATUS_NOT_STARTED,
+      status: initialStatus,
       provider: CASE_PROVIDER_VIVA,
       details: {
         workflowId,
