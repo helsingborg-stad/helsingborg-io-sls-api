@@ -13,58 +13,40 @@ const SSMParams = params.read(config.vada.envsKeyName);
 
 const dynamoDbConverter = AWS.DynamoDB.Converter;
 
-export const main = async event => {
+export async function main(event) {
   const [record] = event.Records;
 
   if (record.dynamodb.NewImage === undefined) {
-    return null;
+    return undefined;
   }
 
-  const unmarshalledData = dynamoDbConverter.unmarshall(record.dynamodb.NewImage);
+  const caseObject = dynamoDbConverter.unmarshall(record.dynamodb.NewImage);
 
-  if (!checkIsVivaCase(unmarshalledData)) {
-    return null;
+  const [vadaError, vadaResponse] = await to(sendVadaRequest(caseObject));
+  if (vadaError) {
+    return console.error('(Viva-ms)', vadaError);
   }
 
-  const [error, vadaResponse] = await to(sendVadaRequest(unmarshalledData));
-  if (error) {
-    return console.error('(Viva-ms)', error);
-  }
+  console.info('(Viva-ms)', vadaResponse);
 
-  console.info('(Viva-ms)', vadaResponse.data);
-
-  return true;
-};
-
-function checkIsVivaCase(data) {
-  const isCaseProviderViva = data.provider === CASE_PROVIDER_VIVA;
-  const isCaseStatusSubmitted = data.status.type.includes('submitted');
-  if (!isCaseProviderViva || !isCaseStatusSubmitted) {
-    return false;
-  }
   return true;
 }
 
-async function sendVadaRequest(caseData) {
-  const {
-    PK,
-    details: { period },
-    answers,
-  } = caseData;
+async function sendVadaRequest(caseObject) {
+  const { PK, answers, workflowId, pdf } = caseObject;
   const personalNumber = PK.substring(5);
   const ssmParams = await SSMParams;
 
   const { hashSalt, hashSaltLength } = ssmParams;
-  const personalNumberEncoded = hash.encode(personalNumber, hashSalt, hashSaltLength);
+  const personalNumberHashEncoded = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
   // Construct imperative Viva API adapter payload
-  const vadaPayload = {
+  const vadaApiPayload = {
     applicationType: 'recurrent', // basic | recurrent
-    personalNumber: personalNumberEncoded,
-    clientIp: '0.0.0.0',
-    workflowId: '',
-    period,
+    hashid: personalNumberHashEncoded,
+    workflowId,
     answers,
+    pdf,
   };
 
   const { vadaUrl, xApiKeyToken } = ssmParams;
@@ -73,7 +55,7 @@ async function sendVadaRequest(caseData) {
   const vadaApplicationsUrl = `${vadaUrl}/applications`;
 
   const [error, vadaCreateRecurrentApplicationResponse] = await to(
-    request.call(requestClient, 'post', vadaApplicationsUrl, vadaPayload)
+    request.call(requestClient, 'post', vadaApplicationsUrl, vadaApiPayload)
   );
 
   if (error) {
@@ -91,5 +73,5 @@ async function sendVadaRequest(caseData) {
     }
   }
 
-  return vadaCreateRecurrentApplicationResponse;
+  return vadaCreateRecurrentApplicationResponse.data;
 }
