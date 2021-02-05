@@ -62,8 +62,13 @@ export async function main(event) {
     return console.log('(Viva-ms) Case with WorkflowId already exists');
   }
 
+  const period = {
+    start: Date.parse(vivaApplication.period.start),
+    end: Date.parse(vivaApplication.period.end),
+  };
+
   const [putItemError] = await to(
-    putRecurringVivaCase(casePartitionKey, vivaApplication.workflowid, vivaApplication.period)
+    putRecurringVivaCase(casePartitionKey, vivaApplication.workflowid, period)
   );
   if (putItemError) {
     return console.error('(viva-ms) syncApplicationStatus', putItemError);
@@ -113,7 +118,12 @@ async function putRecurringVivaCase(PK, workflowId, period) {
         period,
       },
       answers: [],
-      currentPosition: 1,
+      currentPosition: {
+        currentMainStep: 1,
+        currentMainStepIndex: 0,
+        index: 0,
+        level: 0,
+      },
     },
   };
 
