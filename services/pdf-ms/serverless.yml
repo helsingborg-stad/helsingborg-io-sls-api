@@ -8,6 +8,7 @@ custom:
   stage: ${opt:stage, self:provider.stage}
   resourcesStages:
     prod: prod
+    stage: stage
     dev: dev
   resourcesStage: ${self:custom.resourcesStages.${self:custom.stage}, self:custom.resourcesStages.dev}
   webpack:
