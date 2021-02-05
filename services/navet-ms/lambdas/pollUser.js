@@ -2,6 +2,7 @@
 import to from 'await-to-js';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
+import config from '../../../config';
 import params from '../../../libs/params';
 import { parseXml, parseErrorMessageFromXML, parseJSON } from '../helpers/parser';
 import { client } from '../helpers/client';
@@ -9,7 +10,7 @@ import { putEvent } from '../../../libs/awsEventBridge';
 import * as request from '../../../libs/request';
 import * as response from '../../../libs/response';
 
-const SSMParams = params.read('/navetEnvs/dev');
+const SSMParams = params.read(config.navet.envsKeyName);
 
 export const main = async event => {
   const { user } = event.detail;
