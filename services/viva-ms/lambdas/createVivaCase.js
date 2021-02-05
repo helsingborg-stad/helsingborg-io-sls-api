@@ -63,8 +63,8 @@ export async function main(event) {
   }
 
   const period = {
-    start: Date.parse(vivaApplication.period.start),
-    end: Date.parse(vivaApplication.period.end),
+    startDate: Date.parse(vivaApplication.period.start),
+    endDate: Date.parse(vivaApplication.period.end),
   };
 
   const [putItemError] = await to(
