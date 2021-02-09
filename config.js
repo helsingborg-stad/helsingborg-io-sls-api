@@ -40,6 +40,43 @@ const stageConfigs = {
       envsKeyName: '/navetEnvs/dev',
     },
   },
+  test: {
+    auth: {
+      secrets: {
+        accessToken: {
+          keyName: 'AccessTokenSecret',
+          name: 'test/token/access/secret',
+        },
+        refreshToken: {
+          keyName: 'RefreshTokenSecret',
+          name: 'test/token/refresh/secret',
+        },
+        authorizationCode: {
+          keyName: 'AuthorizationCodeSecret',
+          name: 'test/token/authorization/code/secret',
+        },
+      },
+    },
+    bankId: {
+      envsKeyName: '/bankidEnvs/test',
+    },
+    users: {
+      tableName: 'users',
+    },
+    forms: {
+      tableName: 'forms',
+    },
+    cases: {
+      tableName: 'cases',
+      envsKeyName: '/caseEnvs/test',
+    },
+    vada: {
+      envsKeyName: '/vadaEnvs/test',
+    },
+    navet: {
+      envsKeyName: '/navetEnvs/test',
+    },
+  },
   stage: {
     auth: {
       secrets: {
