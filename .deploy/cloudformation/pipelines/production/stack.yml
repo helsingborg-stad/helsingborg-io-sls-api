@@ -332,7 +332,7 @@ Resources:
     DependsOn: IAMRolePipeline
     Type: AWS::KMS::Key
     Properties:
-      Description: Used by Assumed Roles in Dev/Stage/Prod accounts to Encrypt/Decrypt code
+      Description: Used by Assumed Roles in different accounts to Encrypt/Decrypt code
       EnableKeyRotation: true
       KeyPolicy:
         Version: 2012-10-17
