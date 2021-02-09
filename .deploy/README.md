@@ -1,7 +1,7 @@
-# Helsingborg IO SLS - Deploy
+# Helsingborg IO SLS API - Deploy
 
 ## Table of Contents
-- [Helsingborg IO SLS - Deploy](#helsingborg-io-sls---deploy)
+- [Helsingborg IO SLS API - Deploy](#helsingborg-io-sls-api---deploy)
   - [Table of Contents](#table-of-contents)
   - [Deploy script](#deploy-script)
   - [Buildspecs](#buildspecs)
