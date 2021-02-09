@@ -1,0 +1,327 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: Creates PreReqs for Cloudformation Projects with Pipelines (KMS, Buckets, Repos...)
+
+Parameters:
+  DevAccount:
+    Description: AWS AccountNumber for Dev
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: mitt-hbg-aws-account-id-dev
+  GitHubOwner:
+    Description: Owner of the repository.
+    Type: String
+    Default: helsingborg-stad
+  GitHubRepo:
+    Description: Repository Name.
+    Type: String
+    Default: helsingborg-io-sls-api
+  GitHubBranch:
+    Description: Branch name.
+    Type: String
+    Default: dev
+  GitHubNPMToken:
+    Description: Access token for github npm packages
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: github-npm-token
+
+Resources:
+  ##
+  # CodeBuild
+  ##
+  CodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Sub ${AWS::StackName}-CodeBuildProject
+      Description: !Sub ${AWS::StackName}-CodeBuildProject
+      EncryptionKey: !GetAtt KMSKey.Arn
+      ServiceRole: !GetAtt IAMRoleBuildProject.Arn
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:5.0
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: .deploy/cloudformation/pipelines/develop/buildspec.yml
+      Cache:
+        Location: !Sub "${S3BucketArtifact}/cache"
+        Type: S3
+
+
+
+  ##
+  # CodePipeline
+  ##
+  CodePipelinePipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      ArtifactStore:
+        Location: !Ref S3BucketArtifact
+        Type: "S3"
+        EncryptionKey:
+          Id: !GetAtt KMSKey.KeyId
+          Type: KMS
+      RoleArn: !GetAtt IAMRolePipeline.Arn
+      Name: !Sub ${AWS::StackName}-Pipeline
+      Stages:
+        - Name: GetSource
+          Actions:
+            - Name: SourceAction
+              ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Version: "1"
+                Provider: CodeStarSourceConnection
+              Configuration:
+                ConnectionArn: 
+                  Fn::ImportValue: github-connection-CodeStarConnection
+                FullRepositoryId: !Sub "${GitHubOwner}/${GitHubRepo}"
+                BranchName: !Ref GitHubBranch
+                OutputArtifactFormat: CODEBUILD_CLONE_REF
+              OutputArtifacts:
+                - Name: SourceOutput
+              RunOrder: 1
+        - Name: Test
+          Actions:
+            -
+              Name: DeployTest
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: "1"
+                Provider: CodeBuild
+              Configuration:
+                ProjectName: !Sub ${AWS::StackName}-CodeBuildProject
+                EnvironmentVariables: !Sub |
+                  [
+                    {
+                      "name": "AWS_ACCOUNT_NBR",
+                      "value": "${DevAccount}"
+                    },
+                    {
+                      "name": "NPM_TOKEN",
+                      "value": "${GitHubNPMToken}"
+                    },
+                    {
+                      "name": "ENV",
+                      "value": "dev"
+                    }
+                  ]
+              InputArtifacts: 
+                - 
+                  Name: SourceOutput
+              RunOrder: 1
+
+
+
+  ##
+  # IAM
+  ##
+  IAMRoleBuildProject:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-CodebuildRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codebuild.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+
+  IAMPolicyBuildProject:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ${AWS::StackName}-CodebuildPolicy
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Effect: Allow
+            Action:
+              - s3:*
+            Resource:
+              - !Sub arn:aws:s3:::${S3BucketArtifact}/*
+              - !Sub arn:aws:s3:::${S3BucketArtifact}
+          -
+            Effect: Allow
+            Action:
+              - kms:Decrypt
+            Resource: !GetAtt KMSKey.Arn
+          -
+            Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource: arn:aws:logs:*:*:*
+          -
+            Sid: cloudformation
+            Effect: Allow
+            Action:
+              - cloudformation:ValidateTemplate
+            Resource: !Sub 'arn:aws:cloudformation:${AWS::Region}:*'
+          - Sid: iam
+            Effect: Allow
+            Action:
+              - sts:AssumeRole
+            Resource:
+              - !Sub arn:aws:iam::${DevAccount}:role/ServerlessDeployRole
+          - Sid: codestarconnection
+            Effect: Allow
+            Action:
+              - codestar-connections:UseConnection
+            Resource:
+              - Fn::ImportValue: github-connection-CodeStarConnection
+      Roles:
+        - !Ref IAMRoleBuildProject
+
+  IAMRolePipeline:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-CodepipelineRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Effect: Allow
+            Principal:
+              Service:
+                - codepipeline.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+
+  IAMPolicyPipeline:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ${AWS::StackName}-CodepipelinePolicy
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: codebuild
+            Effect: Allow
+            Action:
+              - codebuild:StartBuild
+              - codebuild:BatchGetBuilds
+            Resource:
+              - !GetAtt CodeBuildProject.Arn
+          - Sid: general
+            Effect: Allow
+            Action:
+              - iam:ListRoles
+              - iam:PassRole
+            Resource:
+              - !Sub "arn:aws:iam::${AWS::AccountId}:*"
+          - Sid: kms
+            Effect: Allow
+            Action:
+              - kms:Decrypt
+            Resource: !GetAtt KMSKey.Arn
+          - Sid: s3
+            Effect: Allow
+            Action:
+              - s3:PutObject
+              - s3:PutObjectAcl
+              - s3:GetObject
+              - s3:GetObjectAcl
+            Resource:
+              - !Sub arn:aws:s3:::${S3BucketArtifact}/*
+              - !Sub arn:aws:s3:::${S3BucketArtifact}
+          - Sid: codestarconnection
+            Effect: Allow
+            Action:
+              - codestar-connections:UseConnection
+            Resource:
+              - Fn::ImportValue: github-connection-CodeStarConnection
+      Roles:
+        - !Ref IAMRolePipeline
+
+
+
+  ##
+  # KMS
+  ##
+  KMSKey:
+    DependsOn: IAMRolePipeline
+    Type: AWS::KMS::Key
+    Properties:
+      Description: Used by Assumed Roles in Dev/Stage/Prod accounts to Encrypt/Decrypt code
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: 2012-10-17
+        Id: Key
+        Statement:
+          -
+            Sid: Allows admin of the key
+            Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action:
+              - kms:Create*
+              - kms:Describe*
+              - kms:Enable*
+              - kms:List*
+              - kms:Put*
+              - kms:Update*
+              - kms:Revoke*
+              - kms:Disable*
+              - kms:Get*
+              - kms:Delete*
+              - kms:ScheduleKeyDeletion
+              - kms:CancelKeyDeletion
+            Resource: "*"
+          -
+            Sid: Allow use of the key for CryptoGraphy Lambda
+            Effect: Allow
+            Principal:
+              AWS:
+                - !Sub arn:aws:iam::${AWS::AccountId}:role/${AWS::StackName}-CodepipelineRole
+                - !Sub arn:aws:iam::${AWS::AccountId}:role/${AWS::StackName}-CodebuildRole
+            Action:
+              - kms:Encrypt
+              - kms:Decrypt
+              - kms:ReEncrypt*
+              - kms:GenerateDataKey*
+              - kms:DescribeKey
+            Resource: "*"
+
+  KMSAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub alias/${AWS::StackName}-xaccounts
+      TargetKeyId: !Ref KMSKey
+
+
+
+  ##
+  # S3
+  ##
+  S3BucketArtifact:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+    Properties:
+      VersioningConfiguration:
+        Status: Enabled
+
+  S3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3BucketArtifact
+      PolicyDocument:
+        Statement:
+          - Action:
+              - s3:GetObject
+              - s3:PutObject
+            Effect: Allow
+            Resource:
+              - !Sub arn:aws:s3:::${S3BucketArtifact}
+              - !Sub arn:aws:s3:::${S3BucketArtifact}/*
+            Principal:
+              AWS:
+                - !Sub arn:aws:iam::${AWS::AccountId}:role/${AWS::StackName}-CodepipelineRole
+                - !Sub arn:aws:iam::${AWS::AccountId}:role/${AWS::StackName}-CodebuildRole
