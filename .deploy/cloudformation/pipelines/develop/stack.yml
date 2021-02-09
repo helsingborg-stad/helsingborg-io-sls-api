@@ -82,10 +82,17 @@ Resources:
               OutputArtifacts:
                 - Name: SourceOutput
               RunOrder: 1
+<<<<<<< HEAD
         - Name: Develop
           Actions:
             -
               Name: DeployDevelop
+=======
+        - Name: Test
+          Actions:
+            -
+              Name: DeployTest
+>>>>>>> feat(deploy-pipelines) Added cfn templates for dev and test and fixed some config
               ActionTypeId:
                 Category: Build
                 Owner: AWS
