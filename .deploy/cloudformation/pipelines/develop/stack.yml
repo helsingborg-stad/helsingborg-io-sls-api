@@ -82,10 +82,10 @@ Resources:
               OutputArtifacts:
                 - Name: SourceOutput
               RunOrder: 1
-        - Name: Test
+        - Name: Develop
           Actions:
             -
-              Name: DeployTest
+              Name: DeployDevelop
               ActionTypeId:
                 Category: Build
                 Owner: AWS
