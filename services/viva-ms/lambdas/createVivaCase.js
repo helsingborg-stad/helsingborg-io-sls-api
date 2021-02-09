@@ -102,6 +102,17 @@ async function putRecurringVivaCase(PK, workflowId, period) {
   const timestampNow = Date.now();
   const initialStatus = getStatusByType('notStarted:viva');
 
+  const initialRecurringForm = {
+    id: ssmParams.recurringFormId,
+    currentPosition: {
+      currentMainStep: 1,
+      currentMainStepIndex: 0,
+      index: 0,
+      level: 0,
+    },
+    answers: [],
+  };
+
   const putItemParams = {
     TableName: config.cases.tableName,
     Item: {
@@ -110,20 +121,14 @@ async function putRecurringVivaCase(PK, workflowId, period) {
       SK: `${PK}#CASE#${id}`,
       createdAt: timestampNow,
       updatedAt: timestampNow,
-      formId: ssmParams.recurringFormId,
       status: initialStatus,
       provider: CASE_PROVIDER_VIVA,
       details: {
         workflowId,
         period,
       },
-      answers: [],
-      currentPosition: {
-        currentMainStep: 1,
-        currentMainStepIndex: 0,
-        index: 0,
-        level: 0,
-      },
+      activeFormId: initialRecurringForm.id,
+      forms: [initialRecurringForm],
     },
   };
 
