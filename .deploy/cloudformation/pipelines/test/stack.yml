@@ -3,14 +3,10 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: Creates PreReqs for Cloudformation Projects with Pipelines (KMS, Buckets, Repos...)
 
 Parameters:
-  StageAccount:
-    Description: AWS AccountNumber for Staging
+  TestAccount:
+    Description: AWS AccountNumber for Test
     Type: AWS::SSM::Parameter::Value<String>
-    Default: mitt-hbg-aws-account-id-stage
-  ProductionAccount:
-    Description: AWS AccountNumber for Production
-    Type: AWS::SSM::Parameter::Value<String>
-    Default: mitt-hbg-aws-account-id-production
+    Default: mitt-hbg-aws-account-id-test
   GitHubOwner:
     Description: Owner of the repository.
     Type: String
@@ -28,7 +24,6 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<String>
     Default: github-npm-token
     
-
 Resources:
   ##
   # CodeBuild
@@ -48,27 +43,7 @@ Resources:
         Image: aws/codebuild/standard:5.0
       Source:
         Type: CODEPIPELINE
-        BuildSpec: .deploy/cloudformation/pipeline/buildspec.yml
-      Cache:
-        Location: !Sub "${S3BucketArtifact}/cache"
-        Type: S3
-
-  CodeBuildProjectTest:
-    Type: AWS::CodeBuild::Project
-    Properties:
-      Name: !Sub ${AWS::StackName}-CodeBuildProjectTest
-      Description: !Sub ${AWS::StackName}-CodeBuildProjectTest
-      EncryptionKey: !GetAtt KMSKey.Arn
-      ServiceRole: !GetAtt IAMRoleBuildProject.Arn
-      Artifacts:
-        Type: CODEPIPELINE
-      Environment:
-        Type: LINUX_CONTAINER
-        ComputeType: BUILD_GENERAL1_SMALL
-        Image: aws/codebuild/amazonlinux2-x86_64-standard:3.0
-      Source:
-        Type: CODEPIPELINE
-        BuildSpec: .deploy/cloudformation/pipeline/buildspec-test.yml
+        BuildSpec: .deploy/cloudformation/pipelines/test/buildspec.yml
       Cache:
         Location: !Sub "${S3BucketArtifact}/cache"
         Type: S3
@@ -107,10 +82,10 @@ Resources:
               OutputArtifacts:
                 - Name: SourceOutput
               RunOrder: 1
-        - Name: Stage
+        - Name: Test
           Actions:
             -
-              Name: DeployStage
+              Name: DeployTest
               ActionTypeId:
                 Category: Build
                 Owner: AWS
@@ -122,7 +97,7 @@ Resources:
                   [
                     {
                       "name": "AWS_ACCOUNT_NBR",
-                      "value": "${StageAccount}"
+                      "value": "${TestAccount}"
                     },
                     {
                       "name": "NPM_TOKEN",
@@ -130,71 +105,13 @@ Resources:
                     },
                     {
                       "name": "ENV",
-                      "value": "stage"
+                      "value": "test"
                     }
                   ]
               InputArtifacts: 
                 - 
                   Name: SourceOutput
               RunOrder: 1
-            -
-              Name: TestStage
-              ActionTypeId:
-                Category: Build
-                Owner: AWS
-                Version: "1"
-                Provider: CodeBuild
-              Configuration:
-                ProjectName: !Sub ${AWS::StackName}-CodeBuildProjectTest
-                EnvironmentVariables: !Sub |
-                  [
-                    {
-                      "name": "NPM_TOKEN",
-                      "value": "${GitHubNPMToken}"
-                    }
-                  ]
-              InputArtifacts: 
-                - 
-                  Name: SourceOutput
-              RunOrder: 2
-        - Name: Production
-          Actions:
-            -
-              Name: Approval
-              ActionTypeId:
-                Category: Approval
-                Owner: AWS
-                Version: "1"
-                Provider: Manual
-              RunOrder: 1
-            -
-              Name: DeployProd
-              ActionTypeId:
-                Category: Build
-                Owner: AWS
-                Version: "1"
-                Provider: CodeBuild
-              Configuration:
-                ProjectName: !Sub ${AWS::StackName}-CodeBuildProject
-                EnvironmentVariables: !Sub |
-                  [
-                    {
-                      "name": "AWS_ACCOUNT_NBR",
-                      "value": "${ProductionAccount}"
-                    },
-                    {
-                      "name": "NPM_TOKEN",
-                      "value": "${GitHubNPMToken}"
-                    },
-                    {
-                      "name": "ENV",
-                      "value": "production"
-                    }
-                  ]
-              InputArtifacts: 
-                - 
-                  Name: SourceOutput
-              RunOrder: 2
 
 
 
@@ -253,8 +170,7 @@ Resources:
             Action:
               - sts:AssumeRole
             Resource:
-              - !Sub arn:aws:iam::${StageAccount}:role/ServerlessDeployRole
-              - !Sub arn:aws:iam::${ProductionAccount}:role/ServerlessDeployRole
+              - !Sub arn:aws:iam::${TestAccount}:role/ServerlessDeployRole
           - Sid: codestarconnection
             Effect: Allow
             Action:
@@ -294,7 +210,6 @@ Resources:
               - codebuild:BatchGetBuilds
             Resource:
               - !GetAtt CodeBuildProject.Arn
-              - !GetAtt CodeBuildProjectTest.Arn
           - Sid: general
             Effect: Allow
             Action:
