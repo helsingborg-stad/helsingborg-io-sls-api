@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import to from 'await-to-js';
 import { throwError, BadRequestError } from '@helsingborg-stad/npm-api-error-handling';
 
