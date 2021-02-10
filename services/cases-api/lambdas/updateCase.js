@@ -10,16 +10,12 @@ import { objectWithoutProperties } from '../../../libs/objects';
 import { getFutureTimestamp, millisecondsToSeconds } from '../helpers/timestampHelper';
 import { CASE_EXPIRATION_HOURS } from '../../../libs/constants';
 
-/**
- * Handler function for updating user case by id from dynamodb
- * Can update the data (i.e. the answers), and change the status of the case.
- */
 export async function main(event) {
   const decodedToken = decodeToken(event);
   const requestBody = JSON.parse(event.body);
   const { id } = event.pathParameters;
 
-  const { provider, formId, currentPosition, status, details, answers } = requestBody;
+  const { provider, status, details, currentFormId, answers } = requestBody;
 
   let UpdateExpression = 'SET #updated = :updated';
   const ExpressionAttributeNames = { '#updated': 'updatedAt' };
@@ -36,16 +32,10 @@ export async function main(event) {
     ExpressionAttributeValues[':newProvider'] = provider;
   }
 
-  if (formId) {
-    UpdateExpression += ', #formId = :newFormId';
-    ExpressionAttributeNames['#formId'] = 'formId';
-    ExpressionAttributeValues[':newFormId'] = formId;
-  }
-
-  if (currentPosition) {
-    UpdateExpression += ', #currentPosition = :newPosition';
-    ExpressionAttributeNames['#currentPosition'] = 'currentPosition';
-    ExpressionAttributeValues[':newPosition'] = currentPosition;
+  if (currentFormId) {
+    UpdateExpression += ', #currentFormId = :newCurrentFormId';
+    ExpressionAttributeNames['#currentFormId'] = 'currentFormId';
+    ExpressionAttributeValues[':newCurrentFormId'] = currentFormId;
   }
 
   if (status) {
