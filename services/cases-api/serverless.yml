@@ -3,6 +3,7 @@ service: cases-api
 plugins:
   - serverless-bundle
   - serverless-offline
+  - serverless-s3-remover
 
 custom: ${file(../../serverless.common.yml):custom}
 
@@ -10,6 +11,7 @@ package:
   individually: true
 
 provider:
+  lambdaHashingVersion: 20201221
   name: aws
   runtime: nodejs12.x
   stage: dev
