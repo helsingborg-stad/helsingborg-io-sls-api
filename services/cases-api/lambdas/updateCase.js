@@ -1,5 +1,6 @@
+/* eslint-disable no-console */
 import to from 'await-to-js';
-import { throwError } from '@helsingborg-stad/npm-api-error-handling';
+import { throwError, BadRequestError } from '@helsingborg-stad/npm-api-error-handling';
 
 import config from '../../../config';
 import * as response from '../../../libs/response';
@@ -15,7 +16,7 @@ export async function main(event) {
   const requestBody = JSON.parse(event.body);
   const { id } = event.pathParameters;
 
-  const { provider, status, details, currentFormId, answers } = requestBody;
+  const { provider, status, details, currentFormId, currentPosition, answers } = requestBody;
 
   let UpdateExpression = 'SET #updated = :updated';
   const ExpressionAttributeNames = { '#updated': 'updatedAt' };
@@ -32,12 +33,6 @@ export async function main(event) {
     ExpressionAttributeValues[':newProvider'] = provider;
   }
 
-  if (currentFormId) {
-    UpdateExpression += ', #currentFormId = :newCurrentFormId';
-    ExpressionAttributeNames['#currentFormId'] = 'currentFormId';
-    ExpressionAttributeValues[':newCurrentFormId'] = currentFormId;
-  }
-
   if (status) {
     UpdateExpression += ', #status = :newStatus';
     ExpressionAttributeNames['#status'] = 'status';
@@ -50,24 +45,39 @@ export async function main(event) {
     ExpressionAttributeValues[':newDetails'] = details;
   }
 
-  if (answers) {
-    UpdateExpression += ', #answers = :newAnswers';
-    ExpressionAttributeNames['#answers'] = 'answers';
-    ExpressionAttributeValues[':newAnswers'] = answers;
+  if (currentFormId) {
+    UpdateExpression += ', #currentFormId = :newCurrentFormId';
+    ExpressionAttributeNames['#currentFormId'] = 'currentFormId';
+    ExpressionAttributeValues[':newCurrentFormId'] = currentFormId;
+  }
+
+  if (currentPosition || answers) {
+    if (!currentFormId) {
+      return response.failure(
+        new BadRequestError(`currentFormId is needed when updating currentPosition and/or answers`)
+      );
+    }
+
+    ExpressionAttributeNames['#formId'] = currentFormId;
+
+    if (currentPosition) {
+      UpdateExpression += ', forms.#formId.currentPosition = :newCurrentPosition';
+      ExpressionAttributeValues[':newCurrentPosition'] = currentPosition;
+    }
+
+    if (answers) {
+      UpdateExpression += ', forms.#formId.answers = :newAnswers';
+      ExpressionAttributeValues[':newAnswers'] = answers;
+    }
   }
 
   const { personalNumber } = decodedToken;
 
-  const PK = `USER#${personalNumber}`;
-  const SK = `USER#${personalNumber}#CASE#${id}`;
-
-  const TableName = config.cases.tableName;
-
   const params = {
-    TableName,
+    TableName: config.cases.tableName,
     Key: {
-      PK,
-      SK,
+      PK: `USER#${personalNumber}`,
+      SK: `USER#${personalNumber}#CASE#${id}`,
     },
     UpdateExpression,
     ExpressionAttributeNames,
@@ -75,12 +85,12 @@ export async function main(event) {
     ReturnValues: 'ALL_NEW',
   };
 
-  const [error, queryResponse] = await to(sendUpdateCaseRequest(params));
-  if (error) {
-    return response.failure(error);
+  const [updateCaseError, updateCaseResponse] = await to(sendUpdateCaseRequest(params));
+  if (updateCaseError) {
+    return response.failure(updateCaseError);
   }
 
-  const attributes = objectWithoutProperties(queryResponse.Attributes, ['PK', 'SK']);
+  const attributes = objectWithoutProperties(updateCaseResponse.Attributes, ['PK', 'SK']);
   return response.success(200, {
     type: 'updateCase',
     attributes: {
@@ -90,10 +100,10 @@ export async function main(event) {
 }
 
 async function sendUpdateCaseRequest(params) {
-  const [error, result] = await to(dynamoDb.call('update', params));
-  if (error) {
-    throwError(error);
+  const [dynamoDbUpdateCallError, dynamoDbUpdateResult] = await to(dynamoDb.call('update', params));
+  if (dynamoDbUpdateCallError) {
+    throwError(dynamoDbUpdateCallError.statusCode, dynamoDbUpdateCallError.message);
   }
 
-  return result;
+  return dynamoDbUpdateResult;
 }
