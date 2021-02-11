@@ -1,5 +1,5 @@
 import to from 'await-to-js';
-import { throwError } from '@helsingborg-stad/npm-api-error-handling';
+import { throwError, ResourceNotFoundError } from '@helsingborg-stad/npm-api-error-handling';
 
 import config from '../../../config';
 import * as response from '../../../libs/response';
@@ -15,10 +15,8 @@ export async function main(event) {
   const PK = `USER#${personalNumber}`;
   const SK = PK;
 
-  const TableName = config.cases.tableName;
-
   const params = {
-    TableName,
+    TableName: config.cases.tableName,
     ExpressionAttributeValues: {
       ':pk': PK,
       ':sk': SK,
@@ -26,33 +24,30 @@ export async function main(event) {
     KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
   };
 
-  const [error, casesGetResponse] = await to(sendListCasesRequest(params));
-  if (error) return response.failure(error);
-
-  if (!casesGetResponse.Count) {
-    return response.success(404, {
-      type: 'getCasesList',
-      attributes: {
-        message: `Cases not found`,
-      },
-    });
+  const [casesDbError, casesDbResponse] = await to(sendCasesRequest(params));
+  if (casesDbError) {
+    return response.failure(casesDbError);
   }
 
-  const cases = casesGetResponse.Items.map(item => {
-    const attributes = objectWithoutProperties(item, ['PK', 'SK']);
-    return attributes;
-  });
+  if (!casesDbResponse.Count) {
+    return response.failure(new ResourceNotFoundError('No cases found'));
+  }
+
+  const cases = casesDbResponse.Items.map(item => objectWithoutProperties(item, ['PK', 'SK']));
 
   return response.success(200, {
-    type: 'getCasesList',
+    type: 'getCases',
     attributes: {
       cases,
     },
   });
 }
 
-async function sendListCasesRequest(params) {
-  const [error, result] = await to(dynamoDb.call('query', params));
-  if (error) throwError(error.statusCode);
-  return result;
+async function sendCasesRequest(params) {
+  const [dynamoDbCallError, dynamoDbQueryResult] = await to(dynamoDb.call('query', params));
+  if (dynamoDbCallError) {
+    throwError(dynamoDbCallError.statusCode, dynamoDbCallError.message);
+  }
+
+  return dynamoDbQueryResult;
 }
