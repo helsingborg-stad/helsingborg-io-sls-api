@@ -7,23 +7,21 @@
   "dependencies": {
     "@middy/core": "^1.0.0-beta.6",
     "@middy/do-not-wait-for-empty-event-loop": "^1.0.0-beta.6",
-    "@types/aws-lambda": "^8.10.42",
+    "@types/aws-lambda": "^8.10.71",
     "await-to-js": "^2.1.1",
-    "aws-sdk": "^2.624.0",
+    "aws-sdk": "^2.841.0",
     "camelcase": "^6.2.0",
-    "pdf-lib": "^1.14.0",
-    "serverless": "1.64.0",
-    "typescript": "^3.7.5"
+    "pdf-lib": "^1.16.0",
+    "typescript": "^4.1.5"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.66",
-    "@types/node": "^13.7.2",
-    "serverless-domain-manager": "^3.3.1",
-    "serverless-offline": "^6.0.0-alpha.67",
-    "serverless-webpack": "^5.3.1",
-    "ts-loader": "^6.2.1",
+    "@types/aws-lambda": "^8.10.71",
+    "@types/node": "^14.14.25",
+    "serverless-domain-manager": "^5.1.0",
+    "serverless-webpack": "^5.3.5",
+    "ts-loader": "^8.0.17",
     "typescript-eslint-parser": "^22.0.0",
-    "webpack": "^4.41.6",
-    "webpack-node-externals": "^1.7.2"
+    "webpack": "^5.21.2",
+    "webpack-node-externals": "^2.5.2"
   }
 }
