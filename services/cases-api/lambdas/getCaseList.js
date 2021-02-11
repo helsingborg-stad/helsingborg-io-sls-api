@@ -2,15 +2,11 @@ import to from 'await-to-js';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
 import config from '../../../config';
-
 import * as response from '../../../libs/response';
 import * as dynamoDb from '../../../libs/dynamoDb';
-import { objectWithoutProperties } from '../../../libs/objects';
 import { decodeToken } from '../../../libs/token';
+import { objectWithoutProperties } from '../../../libs/objects';
 
-/**
- * Handler function for retrieving user cases from dynamodb
- */
 export async function main(event) {
   const decodedToken = decodeToken(event);
 
