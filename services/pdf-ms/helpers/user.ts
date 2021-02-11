@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import to from 'await-to-js';
 
 import config from '../../../config';
@@ -10,13 +11,13 @@ export const getUser = async (personalNumber: string) => {
       personalNumber,
     },
   };
-  const [error, usersDbResponse] = await to<{ Item: Record<string, any> }>(
+
+  const [usersDbError, usersDbResult] = await to<{ Item: Record<string, any> }>(
     dynamoDb.call('get', params)
   );
-  if (error) {
-    console.error(error);
-    return undefined;
+  if (usersDbError) {
+    return console.error(usersDbError);
   }
 
-  return usersDbResponse.Item;
+  return usersDbResult.Item;
 };
