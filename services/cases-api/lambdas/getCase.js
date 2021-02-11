@@ -1,16 +1,12 @@
 import to from 'await-to-js';
-import { throwError } from '@helsingborg-stad/npm-api-error-handling';
+import { throwError, ResourceNotFoundError } from '@helsingborg-stad/npm-api-error-handling';
 
 import config from '../../../config';
-
 import * as response from '../../../libs/response';
 import * as dynamoDb from '../../../libs/dynamoDb';
-import { objectWithoutProperties } from '../../../libs/objects';
 import { decodeToken } from '../../../libs/token';
+import { objectWithoutProperties } from '../../../libs/objects';
 
-/**
- * Handler function for retrieving user case by id from dynamodb
- */
 export async function main(event) {
   const decodedToken = decodeToken(event);
   const { id } = event.pathParameters;
@@ -20,10 +16,8 @@ export async function main(event) {
   const PK = `USER#${personalNumber}`;
   const SK = `USER#${personalNumber}#CASE#${id}`;
 
-  const TableName = config.cases.tableName;
-
   const params = {
-    TableName,
+    TableName: config.cases.tableName,
     ExpressionAttributeValues: {
       ':pk': PK,
       ':sk': SK,
@@ -32,21 +26,16 @@ export async function main(event) {
     Limit: 1,
   };
 
-  const [error, caseGetResponse] = await to(sendGetCaseRequest(params));
-  if (error) {
-    return response.failure(error);
+  const [caseDbError, caseDbResponse] = await to(sendCaseRequest(params));
+  if (caseDbError) {
+    return response.failure(caseDbError);
   }
 
-  if (!caseGetResponse.Count) {
-    return response.success(404, {
-      type: 'getCase',
-      attributes: {
-        message: `Case with id: ${id} not found`,
-      },
-    });
+  if (!caseDbResponse.Count) {
+    return response.failure(new ResourceNotFoundError(`Case with id: ${id} not found`));
   }
 
-  const [item] = caseGetResponse.Items;
+  const [item] = caseDbResponse.Items;
   const attributes = objectWithoutProperties(item, ['PK', 'SK']);
 
   return response.success(200, {
@@ -57,10 +46,11 @@ export async function main(event) {
   });
 }
 
-async function sendGetCaseRequest(params) {
-  const [error, result] = await to(dynamoDb.call('query', params));
-  if (error) {
-    throwError(error);
+async function sendCaseRequest(params) {
+  const [dynamoDbCallError, dynamoDbCallResult] = await to(dynamoDb.call('query', params));
+  if (dynamoDbCallError) {
+    throwError(dynamoDbCallError.statusCode, dynamoDbCallError.message);
   }
-  return result;
+
+  return dynamoDbCallResult;
 }
