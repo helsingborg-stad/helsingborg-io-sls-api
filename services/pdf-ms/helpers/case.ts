@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import to from 'await-to-js';
 
 import config from '../../../config';
