@@ -1,6 +1,9 @@
 import { Color } from 'pdf-lib';
 
+// PDF
+
 export type Font = 'helvetica' | 'timesRoman' | 'courier';
+
 export interface TextNode {
   pageIndex?: number;
   x: number;
@@ -21,13 +24,7 @@ export interface Template {
   texts: TextNode[];
 }
 
-export interface AnswerObject {
-  field: {
-    id: string;
-    tags: string[];
-  };
-  value: string;
-}
+// CASE
 
 export interface Status {
   type: string;
@@ -35,9 +32,21 @@ export interface Status {
   description: string;
 }
 
+export interface Answer {
+  field: {
+    id: string;
+    tags: string[];
+  };
+  value: string;
+}
+
+export interface Form {
+  currentPosition: Record<string, any>;
+  answers: Answer[];
+}
+
 export interface Case {
   id: string;
-  formId: string;
   PK: string;
   SK: string;
   status: Status;
@@ -45,10 +54,12 @@ export interface Case {
   expirationTime: string;
   createdAt: number;
   updatedAt: number;
-  answers: Record<string, any>;
+  currentFormId: string;
+  forms: Record<string, Form>;
   details?: Record<string, any>;
   pdf?: string | Buffer;
   pdfGenerated?: boolean;
 }
+
 export const formTypes = ['EKB-new', 'EKB-recurring'];
 export type FormType = 'EKB-new' | 'EKB-recurring';
