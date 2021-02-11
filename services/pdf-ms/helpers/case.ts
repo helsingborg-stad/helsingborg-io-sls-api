@@ -3,19 +3,19 @@ import to from 'await-to-js';
 
 import config from '../../../config';
 import * as dynamoDb from '../../../libs/dynamoDb';
-import { Case, AnswerObject, Status } from './types';
 
-export const getApplicantCasesByFormId = async (personalNumber: string, formId: string) => {
+import { Case, Answer, Status } from './types';
+
+export async function getApplicantCasesByFormId(personalNumber: string, currentFormId: string) {
   const params = {
     TableName: config.cases.tableName,
     IndexName: 'PK-formId-gsi',
-    KeyConditionExpression: 'PK = :pk and formId = :formId',
-    ExpressionAttributeValues: { ':pk': `USER#${personalNumber}`, ':formId': formId },
+    KeyConditionExpression: 'PK = :pk and formId = :currentFormId',
+    ExpressionAttributeValues: { ':pk': `USER#${personalNumber}`, ':currentFormId': currentFormId },
   };
   const [error, casesResponse] = await to<{
     Count: number;
     Items: {
-      answers: AnswerObject[];
       updatedAt: number;
       PK: string;
       SK: string;
@@ -31,24 +31,24 @@ export const getApplicantCasesByFormId = async (personalNumber: string, formId: 
     return undefined;
   }
   return casesResponse.Items;
-};
+}
 
-export const getNewAndChangedValues = (
-  currentCase: Case & {
-    answersArray: AnswerObject[];
-  },
-  oldCase: { answers: AnswerObject[] }
-) => {
+// TODO: change to answers instead of case in args
+export function getNewAndChangedValues(currentCase: Case, oldCase: Case) {
   const changedValues: string[] = [];
   const newValues: string[] = [];
 
-  currentCase.answersArray.forEach(answer => {
-    const oldValue = oldCase.answers.find(oldAnswer => answer.field.id === oldAnswer.field.id);
+  currentCase.forms[currentCase.currentFormId].answers.forEach(answer => {
+    const oldValue = oldCase.forms[currentCase.currentFormId].answers.find(
+      oldAnswer => answer.field.id === oldAnswer.field.id
+    );
+
     if (oldValue && oldValue.value !== answer.value) {
       changedValues.push(oldValue.field.id);
     } else if (!oldValue) {
       newValues.push(answer.field.id);
     }
   });
+
   return { changedValues, newValues };
-};
+}
