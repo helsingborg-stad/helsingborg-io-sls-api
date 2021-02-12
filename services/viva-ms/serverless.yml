@@ -42,6 +42,7 @@ provider:
 functions:
   submitApplication:
     handler: lambdas/submitApplication.main
+    timeout: 15
     events:
       - eventBridge:
           pattern:
