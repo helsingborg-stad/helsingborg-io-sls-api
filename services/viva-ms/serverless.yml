@@ -79,6 +79,7 @@ functions:
 
   createVivaCase:
     handler: lambdas/createVivaCase.main
+    timeout: 15
     events:
       - eventBridge:
           pattern:
