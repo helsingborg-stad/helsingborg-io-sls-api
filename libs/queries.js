@@ -25,8 +25,10 @@ export async function getItem(TableName, PK, SK) {
  * @param {object} params The request params for the creation of a new item in a dynamodb table.
  */
 export async function putItem(params) {
-  const [error, dynamoDbResponse] = await to(dynamoDb.call('put', params));
-  if (error) throwError(error.statusCode);
+  const [dynamoDbError, dynamoDbResponse] = await to(dynamoDb.call('put', params));
+  if (dynamoDbError) {
+    throwError(dynamoDbError.statusCode, dynamoDbError.message);
+  }
 
   return dynamoDbResponse;
 }
