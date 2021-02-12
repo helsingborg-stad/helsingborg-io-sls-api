@@ -10,29 +10,24 @@ import { getItem, putItem } from '../../../libs/queries';
 
 import caseValidationSchema from '../helpers/schema';
 import { getFutureTimestamp, millisecondsToSeconds } from '../helpers/timestampHelper';
-import { CASE_STATUS_ONGOING, CASE_EXPIRATION_HOURS } from '../../../libs/constants';
+import { CASE_EXPIRATION_HOURS } from '../../../libs/constants';
 
-/**
- * Handler function for creating a case and store in dynamodb
- */
 export async function main(event) {
   const decodedToken = decodeToken(event);
 
-  const [parseJsonError, parsedJsonData] = await to(parseJsonData(event.body));
+  const [parseJsonError, parsedJson] = await to(parseJson(event.body));
   if (parseJsonError) {
     return response.failure(parseJsonError);
   }
 
   const [validationError, validatedEventBody] = await to(
-    validateEventBody(parsedJsonData, caseValidationSchema)
+    validateEventBody(parsedJson, caseValidationSchema)
   );
   if (validationError) {
     return response.failure(validationError);
   }
 
-  // TODO: check if the passed formId exsists in the form dynamo table.
-
-  const { formId, provider, details, answers, currentPosition } = validatedEventBody;
+  const { provider, details, status, forms } = validatedEventBody;
   const { personalNumber } = decodedToken;
   const id = uuid.v4();
   const PK = `USER#${personalNumber}`;
@@ -44,15 +39,13 @@ export async function main(event) {
     PK,
     SK,
     id,
-    createdAt: timestamp,
-    updatedAt: timestamp,
-    expirationTime,
-    status: CASE_STATUS_ONGOING,
-    formId,
     provider,
     details,
-    answers,
-    currentPosition,
+    status,
+    forms,
+    updatedAt: timestamp,
+    createdAt: timestamp,
+    expirationTime,
   };
 
   const putItemParams = {
@@ -70,47 +63,38 @@ export async function main(event) {
   // This can be found in the AWS docs https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_PutItem.html#DDB-PutItem-request-ReturnValues
   const [getItemError, caseItem] = await getItem(config.cases.tableName, PK, SK);
   if (getItemError) {
-    return response.failure(getItemError);
+    return response.failure(getItemError.statusCode, getItemError.message);
   }
 
   return response.success(201, {
     type: 'createCase',
     attributes: {
       id: caseItem.Item.id,
-      formId: caseItem.Item.formId,
-      answers: caseItem.Item.answers,
-      details: caseItem.Item.details,
       provider: caseItem.Item.provider,
+      details: caseItem.Item.details,
       status: caseItem.Item.status,
+      forms: caseItem.Item.forms,
       updatedAt: caseItem.Item.updatedAt,
       createdAt: caseItem.Item.createdAt,
+      expirationTime: caseItem.Item.expirationTime,
     },
   });
 }
 
-/**
- * Function for validating a json object towards a defined joi validation schema.
- * @param {object} body an json object to be validated.
- * @param {object} schema a joi validation schema
- */
 async function validateEventBody(eventBody, schema) {
-  const { error, value } = schema.validate(eventBody, { abortEarly: false });
-  if (error) {
-    throwError(400, error.message.replace(/"/g, "'"));
+  const { validateError, validatedEventBody } = schema.validate(eventBody, { abortEarly: false });
+  if (validateError) {
+    throwError(400, validateError.message.replace(/"/g, "'"));
   }
 
-  return value;
+  return validatedEventBody;
 }
 
-/**
- * @param {string} data a valid json string
- * @returns a promise object
- */
-async function parseJsonData(data) {
+async function parseJson(data) {
   try {
-    const parsedJsonData = JSON.parse(data);
-    return parsedJsonData;
-  } catch (error) {
-    throwError(400, error.message);
+    const parsedJson = JSON.parse(data);
+    return parsedJson;
+  } catch (JSONParseError) {
+    throwError(400, JSONParseError.message);
   }
 }
