@@ -23,8 +23,7 @@ export async function main(event) {
     sendApplicationsToViva(application)
   );
   if (sendApplicationError) {
-    console.error('(Viva-ms)', sendApplicationError);
-    return false;
+    return console.error('(Viva-ms)', sendApplicationError);
   }
 
   console.info('(Viva-ms)', sendApplicationsResponse);
@@ -48,8 +47,6 @@ async function sendApplicationsToViva(application) {
     rawData: pdfBinaryBuffer.toString(),
     rawDataType: 'pdf',
   };
-
-  console.log(vadaApiPayload);
 
   const { vadaUrl, xApiKeyToken } = ssmParams;
   const requestClient = request.requestClient({}, { 'x-api-key': xApiKeyToken });
