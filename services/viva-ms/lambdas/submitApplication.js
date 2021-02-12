@@ -32,7 +32,15 @@ export async function main(event) {
 }
 
 async function sendApplicationsToViva(application) {
-  const { PK, answers, workflowId, pdf: pdfBinaryBuffer } = application;
+  const {
+    PK,
+    forms: {
+      [application.currentFormId]: { answers },
+    },
+    details: { workflowId },
+    pdf: pdfBinaryBuffer,
+  } = application;
+
   const personalNumber = PK.substring(5);
   const ssmParams = await SSMParams;
 
