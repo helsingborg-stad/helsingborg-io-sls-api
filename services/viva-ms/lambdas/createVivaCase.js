@@ -22,7 +22,7 @@ export async function main(event) {
     sendApplicationStatusRequest(user.personalNumber)
   );
   if (applicationStatusError) {
-    return console.error('(Viva-ms) Viva Application Status Error', applicationStatusError);
+    return console.error('(Viva-ms) Viva Application Status', applicationStatusError);
   }
 
   if (!isApplicationPeriodOpen(applicationStatusResponse)) {
@@ -35,7 +35,7 @@ export async function main(event) {
 
   const [myPagesError, myPagesResponse] = await to(sendMyPagesReguest(user.personalNumber));
   if (myPagesError) {
-    return console.error('(Viva-ms) Viva My Pages Request Error', applicationStatusError);
+    return console.error('(Viva-ms) Viva My Pages Request', applicationStatusError);
   }
 
   const vivaApplication = myPagesResponse.person.application.vivaapplication;
@@ -98,19 +98,24 @@ async function queryCasesWithWorkflowId(PK, workflowId) {
 
 async function putRecurringVivaCase(PK, workflowId, period) {
   const ssmParams = await CASE_SSM_PARAMS;
+  const { recurringFormId, randomCheckFormId } = ssmParams;
   const id = uuid.v4();
   const timestampNow = Date.now();
   const initialStatus = getStatusByType('notStarted:viva');
 
-  const initialRecurringForm = {
-    id: ssmParams.recurringFormId,
+  const initialFormAttributes = {
+    answers: [],
     currentPosition: {
       currentMainStep: 1,
       currentMainStepIndex: 0,
       index: 0,
       level: 0,
     },
-    answers: [],
+  };
+
+  const initialForms = {
+    [recurringFormId]: initialFormAttributes,
+    [randomCheckFormId]: initialFormAttributes,
   };
 
   const putItemParams = {
@@ -127,8 +132,8 @@ async function putRecurringVivaCase(PK, workflowId, period) {
         workflowId,
         period,
       },
-      activeFormId: initialRecurringForm.id,
-      forms: [initialRecurringForm],
+      currentFormId: recurringFormId,
+      forms: initialForms,
     },
   };
 
