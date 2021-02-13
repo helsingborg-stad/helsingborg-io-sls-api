@@ -3,7 +3,6 @@ service: cases-api
 plugins:
   - serverless-bundle
   - serverless-offline
-  - serverless-s3-remover
 
 custom: ${file(../../serverless.common.yml):custom}
 
