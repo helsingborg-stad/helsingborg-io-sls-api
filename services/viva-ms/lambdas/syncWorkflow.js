@@ -1,5 +1,4 @@
 /* eslint-disable no-console */
-import AWS from 'aws-sdk';
 import to from 'await-to-js';
 import deepEqual from 'deep-equal';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
@@ -12,39 +11,60 @@ import * as dynamoDb from '../../../libs/dynamoDb';
 
 const SSMParams = params.read(config.vada.envsKeyName);
 
-const dynamoDbConverter = AWS.DynamoDB.Converter;
-
 const CASE_WORKFLOW_PATH = 'details.workflow';
 
 export async function main(event) {
-  if (event.detail.dynamodb.NewImage === undefined) {
-    return null;
-  }
+  const personalNumber = event.detail.user.personalNumber;
+  const PK = `USER#${personalNumber}`;
+  const allUserCases = await getAllUserCases(PK, PK);
 
-  const { PK, SK, details } = dynamoDbConverter.unmarshall(event.detail.dynamodb.NewImage);
-  const personalNumber = PK.substring(5);
-  const { workflowId, workflow: caseWorkflow } = details;
-
-  if (!workflowId) {
-    return false;
-  }
-
-  const [vadaMyPagesError, vadaMyPagesResponse] = await to(
-    sendVadaMyPagesRequest(personalNumber, workflowId)
-  );
-  if (vadaMyPagesError) {
-    return console.error('(Viva-ms) syncWorkflow VADA request error', vadaMyPagesError);
-  }
-
-  const vivaWorkflow = vadaMyPagesResponse.attributes;
-
-  if (deepEqual(vivaWorkflow, caseWorkflow)) {
-    return null;
-  }
-
-  await addWorkflowToCase(PK, SK, vivaWorkflow);
+  await syncCaseWorkflows(allUserCases, personalNumber);
 
   return true;
+}
+
+async function getAllUserCases(PK, SK) {
+  const TableName = config.cases.tableName;
+
+  const params = {
+    TableName,
+    ExpressionAttributeValues: {
+      ':pk': PK,
+      ':sk': SK,
+    },
+    KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
+  };
+
+  const [error, casesGetResponse] = await to(dynamoDb.call('query', params));
+  if (error) {
+    return console.error('(Viva-ms) syncWorkflow', error);
+  }
+
+  return casesGetResponse;
+}
+
+async function syncCaseWorkflows(cases, personalNumber) {
+  const caseItems = cases.Items;
+
+  for (const caseItem of caseItems) {
+    const { PK, SK, details: caseDetails } = caseItem;
+    const { workflow: caseWorkflow } = caseDetails;
+
+    if (caseItem.status.type === 'active:submitted:viva') {
+      const workflowId = caseDetails.workflowId;
+
+      const [vadaMyPagesError, vadaMyPagesResponse] = await to(
+        sendVadaMyPagesRequest(personalNumber, workflowId)
+      );
+      if (vadaMyPagesError) {
+        return console.error('(Viva-ms) syncWorkflow', vadaMyPagesError);
+      }
+
+      if (!deepEqual(vadaMyPagesResponse.attributes, caseWorkflow)) {
+        await addWorkflowToCase(PK, SK, vadaMyPagesResponse.attributes);
+      }
+    }
+  }
 }
 
 async function sendVadaMyPagesRequest(personalNumber, workflowId) {
@@ -95,8 +115,7 @@ async function addWorkflowToCase(PK, SK, workflow) {
 
   const [updateError] = await to(dynamoDb.call('update', params));
   if (updateError) {
-    console.log('(Viva-ms) syncWorkflow update error', updateError);
-    return false;
+    return console.error('(Viva-ms) syncWorkflow', updateError);
   }
 
   return true;
