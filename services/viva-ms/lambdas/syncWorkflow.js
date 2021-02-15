@@ -53,6 +53,10 @@ async function syncCaseWorkflows(cases, personalNumber) {
     if (caseItem.status.type === 'active:submitted:viva') {
       const workflowId = caseDetails.workflowId;
 
+      if (!workflowId) {
+        continue;
+      }
+
       const [vadaMyPagesError, vadaMyPagesResponse] = await to(
         sendVadaMyPagesRequest(personalNumber, workflowId)
       );
