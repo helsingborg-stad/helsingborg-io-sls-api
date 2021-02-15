@@ -95,17 +95,6 @@ functions:
       - eventBridge:
           pattern:
             source:
-              - cases.database
+              - bankId.collect
             detail-type:
-              - MODIFY
-            detail:
-              dynamodb:
-                NewImage:
-                  status:
-                    M:
-                      type:
-                        S:
-                          [
-                            { "prefix": "active:submitted" },
-                            { "prefix": "active:ongoing" },
-                          ]
+              - BankIdCollectComplete
