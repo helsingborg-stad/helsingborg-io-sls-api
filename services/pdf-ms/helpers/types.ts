@@ -41,21 +41,21 @@ export interface Answer {
 }
 
 export interface Form {
-  currentPosition: Record<string, any>;
+  currentPosition?: Record<string, any>;
   answers: Answer[];
 }
 
 export interface Case {
-  id: string;
-  PK: string;
-  SK: string;
-  status: Status;
-  provider: string;
-  expirationTime: string;
-  createdAt: number;
-  updatedAt: number;
+  id?: string;
+  PK?: string;
+  SK?: string;
+  status?: Status;
+  provider?: string;
+  expirationTime?: string;
+  createdAt?: number;
+  updatedAt?: number;
   currentFormId: string;
-  forms: Record<string, Form>;
+  forms?: Record<string, Form>;
   details?: Record<string, any>;
   pdf?: string | Buffer;
   pdfGenerated?: boolean;
