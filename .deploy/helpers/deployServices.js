@@ -13,7 +13,7 @@ const deployed = [];
  * @param {array} files - List of files to services that should be deployed.
  * @return {void}
  */
-export default files => {
+const deployServices = files => {
   for (const file of files) {
     const directory = path.parse(file).dir;
     process.chdir(directory);
@@ -23,9 +23,12 @@ export default files => {
         childProcess.execSync('yarn install', { stdio: 'inherit' });
       }
       childProcess.execSync(`${config.deployCommand}`, { stdio: 'inherit' });
-    } catch (_error) {
-      process.chdir(config.codeBuildPath);
+    } catch (ex) {
       console.log('Error deploying, starting rollback!');
+      console.log(ex);
+
+      process.chdir(config.codeBuildPath);
+
       // Rollback all already deployed services.
       rollback(deployed);
       break;
@@ -35,3 +38,5 @@ export default files => {
     process.chdir(config.codeBuildPath);
   }
 };
+
+export default deployServices;
