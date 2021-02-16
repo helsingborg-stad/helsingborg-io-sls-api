@@ -4,7 +4,7 @@ import to from 'await-to-js';
 import config from '../../../config';
 import * as dynamoDb from '../../../libs/dynamoDb';
 
-import { Case } from './types';
+import { Case, Answer } from './types';
 
 interface DynamoDbQueryCasesResult {
   Count: number;
@@ -12,13 +12,17 @@ interface DynamoDbQueryCasesResult {
   ScannedCount: number;
 }
 
-export async function getUserCases(personalNumber: string) {
+export async function getUserCases(
+  personalNumber: string
+): Promise<DynamoDbQueryCasesResult['Items']> {
   const dynamoDbQueryCasesParams = {
     TableName: config.cases.tableName,
-    KeyConditionExpression: 'PK = :pk and begins_with(SK, :sk)',
+    KeyConditionExpression:
+      'PK = :pk and begins_with(SK, :sk) and begins_with(status.type, :statusType)',
     ExpressionAttributeValues: {
       ':pk': `USER#${personalNumber}`,
       ':sk': `USER#${personalNumber}`,
+      ':statusType': 'active:submitted',
     },
   };
 
@@ -27,28 +31,34 @@ export async function getUserCases(personalNumber: string) {
   );
 
   if (dynamoDbQueryCasesError) {
-    return console.error(dynamoDbQueryCasesError);
+    throw new Error(dynamoDbQueryCasesError.message);
   }
 
   return dynamoDbQueryCasesResult.Items;
 }
 
-// TODO: change to answers instead of case in args
-export function getNewAndChangedValues(currentCase: Case, oldCase: Case) {
+export function getNewAndChangedValues(currentAnswerList: Answer[], previousAnswerList: Answer[]) {
   const changedValues: string[] = [];
   const newValues: string[] = [];
 
-  currentCase.forms[currentCase.currentFormId].answers.forEach(answer => {
-    const oldValue = oldCase.forms[currentCase.currentFormId].answers.find(
-      oldAnswer => answer.field.id === oldAnswer.field.id
-    );
+  return currentAnswerList.reduce(
+    (acc, currentAnswer) => {
+      const updatedAcc = { ...acc };
 
-    if (oldValue && oldValue.value !== answer.value) {
-      changedValues.push(oldValue.field.id);
-    } else if (!oldValue) {
-      newValues.push(answer.field.id);
-    }
-  });
+      const previousAnswer = previousAnswerList.find(
+        answer => answer.field.id === currentAnswer.field.id
+      );
 
-  return { changedValues, newValues };
+      if (previousAnswer && previousAnswer.value !== currentAnswer.value) {
+        updatedAcc.changedValues.push(previousAnswer.field.id);
+      }
+
+      if (!previousAnswer) {
+        updatedAcc.newValues.push(currentAnswer.field.id);
+      }
+
+      return updatedAcc;
+    },
+    { changedValues, newValues }
+  );
 }
