@@ -2,7 +2,7 @@ service: pdf-ms
 
 plugins:
   - serverless-webpack
-  - serverless-s3-remover
+  - serverless-offline
 
 custom:
   stage: ${opt:stage, self:provider.stage}
