@@ -47,11 +47,8 @@ async function syncCaseWorkflows(cases, personalNumber) {
   const caseItems = cases.Items;
 
   for (const caseItem of caseItems) {
-    const { PK, SK, details: caseDetails } = caseItem;
-    const { workflow: caseWorkflow } = caseDetails;
-
     if (caseItem.status.type === 'active:submitted:viva') {
-      const workflowId = caseDetails.workflowId;
+      const workflowId = caseItem.details.workflowId;
 
       if (!workflowId) {
         continue;
@@ -64,8 +61,8 @@ async function syncCaseWorkflows(cases, personalNumber) {
         return console.error('(Viva-ms) syncWorkflow', vadaMyPagesError);
       }
 
-      if (!deepEqual(vadaMyPagesResponse.attributes, caseWorkflow)) {
-        await addWorkflowToCase(PK, SK, vadaMyPagesResponse.attributes);
+      if (!deepEqual(vadaMyPagesResponse.attributes, caseItem.details.workflow)) {
+        await addWorkflowToCase(caseItem.PK, caseItem.SK, vadaMyPagesResponse.attributes);
       }
     }
   }
