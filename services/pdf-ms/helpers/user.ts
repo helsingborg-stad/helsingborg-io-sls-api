@@ -4,20 +4,28 @@ import to from 'await-to-js';
 import config from '../../../config';
 import * as dynamoDb from '../../../libs/dynamoDb';
 
-export const getUser = async (personalNumber: string) => {
-  const params = {
+import { Case } from './types';
+
+interface DynamoDbQueryUsersResult {
+  Count: number;
+  Item: Case;
+  ScannedCount: number;
+}
+
+export async function getUser(personalNumber: string) {
+  const dynamoDbGetUserParams = {
     TableName: config.users.tableName,
     Key: {
       personalNumber,
     },
   };
 
-  const [usersDbError, usersDbResult] = await to<{ Item: Record<string, any> }>(
-    dynamoDb.call('get', params)
+  const [dynamoDbGetUserError, dynamoDbGetUsersResult] = await to<DynamoDbQueryUsersResult>(
+    dynamoDb.call('get', dynamoDbGetUserParams)
   );
-  if (usersDbError) {
-    return console.error(usersDbError);
+  if (dynamoDbGetUserError) {
+    return console.error(dynamoDbGetUserError);
   }
 
-  return usersDbResult.Item;
-};
+  return dynamoDbGetUsersResult.Item;
+}
