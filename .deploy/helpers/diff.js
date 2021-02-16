@@ -11,29 +11,29 @@ import config from '../config.js';
  * @param {string} lastCommmitHashFile - File path to file that contains previous successful build commit SHA.
  * @return {array} - List of services path to deploy.
  */
-export default lastCommmitHashFile => {
+const diff = lastCommmitHashFile => {
   const servicesPath = `${config.codeBuildPath}/${config.servicesPath}`;
 
-  let diff;
-  // Check if any earlier deployed commit sha is stored or get all services if missing.
+  let gitDiff;
+  // Check if any earlier deployed commit sha is stored and get diff fies or return all services if missing.
   if (fs.existsSync(lastCommmitHashFile)) {
     const lastCommmitHash = fs.readFileSync(lastCommmitHashFile, 'utf8').trim();
     try {
-      diff = childProcess.execSync(
+      gitDiff = childProcess.execSync(
         `git diff ${lastCommmitHash} ${process.env.CODEBUILD_RESOLVED_SOURCE_VERSION} --name-only`
       );
-    } catch (_error) {
-      console.log(_error);
-      console.log('Something went wrong in git diff!');
-      process.exit(1);
+    } catch (_ex) {
+      // git commit SHA is missing, could be deleted! Deploy everything!
+      return glob.sync(`${servicesPath}/**/serverless.yml`);
     }
     // Convert git diff output to array.
-    diff = diff.toString().match(/.+/g);
+    gitDiff = gitDiff.toString().match(/.+/g);
   } else {
     return glob.sync(`${servicesPath}/**/serverless.yml`);
   }
+
   const servicesDiff = [];
-  for (const file of diff) {
+  for (const file of gitDiff) {
     // If something changed in libs folder we deploy all services.
     if (file.indexOf(config.libsPath) === 0) {
       return glob.sync(`${servicesPath}/**/serverless.yml`);
@@ -46,8 +46,8 @@ export default lastCommmitHashFile => {
 
   // Backtrack the path to find the serverless file to get the dirnames of services we want to deploy.
   const files = [];
-  servicesDiff.forEach(diff => {
-    let diffPath = diff;
+  servicesDiff.forEach(serviceDiff => {
+    let diffPath = serviceDiff;
     while (diffPath !== '.') {
       const serviceFile = `${config.codeBuildPath}/${diffPath}/serverless.yml`;
       if (fs.existsSync(serviceFile)) {
@@ -62,3 +62,5 @@ export default lastCommmitHashFile => {
 
   return files;
 };
+
+export default diff;

@@ -6,24 +6,55 @@ import jsonpath from 'jsonpath';
 import { CLOUDFORMATION_SCHEMA } from 'js-yaml-cloudformation-schema';
 
 /**
+ * Sorting callback function for import/export sorting.
+ * @param {array} firstService - First service compare data.
+ * @param {array} secondService - Second service compare data.
+ * @return {int} - Sort order int.
+ */
+const sortDeploys = (firstService, secondService) => {
+  if (firstService.imports.length === 0) {
+    return -1;
+  }
+
+  if (secondService.imports.length === 0) {
+    return 1;
+  }
+
+  for (const importIndex in firstService.imports) {
+    const fnImport = firstService.exports[importIndex];
+    if (secondService.imports.includes(fnImport)) {
+      return -1;
+    }
+  }
+
+  for (const importIndex in secondService.imports) {
+    const fnImport = secondService.exports[importIndex];
+    if (firstService.imports.includes(fnImport)) {
+      return 1;
+    }
+  }
+
+  return 0;
+};
+
+/**
  * Based on export and imports in serverless templates, sort the list to get exports before any import.
  * @param {array} files - List of paths to services files.
  * @return {array} - Sorted list with exports first.
  */
-export default files => {
-  const services = [];
+const sortFiles = files => {
   // Collect all import and exports in the serverless files.
-  files.forEach(file => {
+  const services = files.map(file => {
     try {
       const data = fs.readFileSync(file, 'utf8');
       const doc = yaml.load(data, { schema: CLOUDFORMATION_SCHEMA });
       const imports = jsonpath.query(doc, '$..["Fn::ImportValue"]');
       imports.concat(jsonpath.query(doc, '$..["!ImportValue"]'));
-      services.push({
+      return {
         file,
         imports: imports,
         exports: jsonpath.query(doc, '$.resources.Outputs.*.Export.Name'),
-      });
+      };
     } catch (e) {
       console.log(e);
     }
@@ -32,41 +63,8 @@ export default files => {
   // Sort services according to import and exports.
   services.sort(sortDeploys);
 
-  const sortedFiles = [];
-  services.forEach(service => {
-    sortedFiles.push(service.file);
-  });
-  return sortedFiles;
+  // Get the files and skip the sorting data for return.
+  return services.map(service => service.file);
 };
 
-/**
- * Sorting callback function for import/export sorting.
- * @param {string} first - First compare string
- * @param {string} second - Second compare string
- * @return {int} - Sort order int.
- */
-const sortDeploys = (first, second) => {
-  if (first.imports.length === 0) {
-    return -1;
-  }
-
-  if (second.imports.length === 0) {
-    return 1;
-  }
-
-  for (const importIndex in first.imports) {
-    const fnImport = first.exports[importIndex];
-    if (second.imports.includes(fnImport)) {
-      return -1;
-    }
-  }
-
-  for (const importIndex in second.imports) {
-    const fnImport = second.exports[importIndex];
-    if (first.imports.includes(fnImport)) {
-      return 1;
-    }
-  }
-
-  return 0;
-};
+export default sortFiles;

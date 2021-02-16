@@ -9,7 +9,7 @@ import config from '../config.js';
  * @param {array} deployedServices - List of deployed services to rollback.
  * @return {void}
  */
-export default deployedServices => {
+const rollback = deployedServices => {
   const regex = /Serverless: Timestamp: (\d+)/gs;
   if (deployedServices.length === 0) {
     console.log('Nothing to rollback!');
@@ -23,8 +23,11 @@ export default deployedServices => {
     console.log(`Started rollback in: ${deployedService}`);
     try {
       output = childProcess.execSync(`${config.listCommand}`).toString();
-    } catch (_error) {
+    } catch (error) {
+      console.log(error);
+      console.log(output);
       console.log('Error listing deployed releases!');
+      // Stop the build!
       process.exit(1);
     }
 
@@ -60,3 +63,5 @@ export default deployedServices => {
   // Stop the build!
   process.exit(1);
 };
+
+export default rollback;
