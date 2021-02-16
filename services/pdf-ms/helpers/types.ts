@@ -24,6 +24,18 @@ export interface Template {
   texts: TextNode[];
 }
 
+// USER
+
+export interface User {
+  uuid: string;
+  personalNumber: number;
+  adress: Record<string, any>;
+  civilStatus: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+}
+
 // CASE
 
 export interface Status {
