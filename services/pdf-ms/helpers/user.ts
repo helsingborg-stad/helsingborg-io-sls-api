@@ -4,15 +4,15 @@ import to from 'await-to-js';
 import config from '../../../config';
 import * as dynamoDb from '../../../libs/dynamoDb';
 
-import { Case } from './types';
+import { User } from './types';
 
 interface DynamoDbQueryUsersResult {
   Count: number;
-  Item: Case;
+  Item: User;
   ScannedCount: number;
 }
 
-export async function getUser(personalNumber: string) {
+export async function getUser(personalNumber: string): Promise<User> {
   const dynamoDbGetUserParams = {
     TableName: config.users.tableName,
     Key: {
@@ -24,7 +24,7 @@ export async function getUser(personalNumber: string) {
     dynamoDb.call('get', dynamoDbGetUserParams)
   );
   if (dynamoDbGetUserError) {
-    return console.error(dynamoDbGetUserError);
+    throw new Error(dynamoDbGetUserError.message);
   }
 
   return dynamoDbGetUsersResult.Item;
