@@ -47,6 +47,12 @@ provider:
       Resource:
         - "Fn::ImportValue": ${self:custom.resourcesStage}-CasesTableArn
 
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+      Resource:
+        - "Fn::ImportValue": ${self:custom.resourcesStage}-FormsTableArn
+
 functions:
   getCase:
     handler: lambdas/getCase.main
