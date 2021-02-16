@@ -17,22 +17,21 @@ export async function main(event) {
   const personalNumber = event.detail.user.personalNumber;
   const PK = `USER#${personalNumber}`;
 
-  const allUserCases = await getAllUserCases(PK, PK);
+  const allUserCases = await getAllUserCases(PK);
 
   await syncCaseWorkflows(allUserCases, personalNumber);
 
   return true;
 }
 
-async function getAllUserCases(PK, SK) {
+async function getAllUserCases(PK) {
   const TableName = config.cases.tableName;
 
   const params = {
     TableName,
-    KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
+    KeyConditionExpression: 'PK = :pk',
     ExpressionAttributeValues: {
       ':pk': PK,
-      ':sk': SK,
     },
   };
 
