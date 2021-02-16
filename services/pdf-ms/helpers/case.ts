@@ -4,33 +4,33 @@ import to from 'await-to-js';
 import config from '../../../config';
 import * as dynamoDb from '../../../libs/dynamoDb';
 
-import { Case, Answer, Status } from './types';
+import { Case } from './types';
 
-export async function getApplicantCasesByFormId(personalNumber: string, currentFormId: string) {
-  const params = {
+interface DynamoDbQueryCasesResult {
+  Count: number;
+  Items: Case[];
+  ScannedCount: number;
+}
+
+export async function getUserCases(personalNumber: string) {
+  const dynamoDbQueryCasesParams = {
     TableName: config.cases.tableName,
-    IndexName: 'PK-formId-gsi',
-    KeyConditionExpression: 'PK = :pk and formId = :currentFormId',
-    ExpressionAttributeValues: { ':pk': `USER#${personalNumber}`, ':currentFormId': currentFormId },
+    KeyConditionExpression: 'PK = :pk and begins_with(SK, :sk)',
+    ExpressionAttributeValues: {
+      ':pk': `USER#${personalNumber}`,
+      ':sk': `USER#${personalNumber}`,
+    },
   };
-  const [error, casesResponse] = await to<{
-    Count: number;
-    Items: {
-      updatedAt: number;
-      PK: string;
-      SK: string;
-      provider: string;
-      formId: string;
-      status: Status;
-      details: Record<string, any>;
-    }[];
-    ScannedCount: number;
-  }>(dynamoDb.call('query', params));
-  if (error) {
-    console.error(error);
-    return undefined;
+
+  const [dynamoDbQueryCasesError, dynamoDbQueryCasesResult] = await to<DynamoDbQueryCasesResult>(
+    dynamoDb.call('query', dynamoDbQueryCasesParams)
+  );
+
+  if (dynamoDbQueryCasesError) {
+    return console.error(dynamoDbQueryCasesError);
   }
-  return casesResponse.Items;
+
+  return dynamoDbQueryCasesResult.Items;
 }
 
 // TODO: change to answers instead of case in args
