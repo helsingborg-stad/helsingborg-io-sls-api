@@ -16,6 +16,7 @@ const CASE_WORKFLOW_PATH = 'details.workflow';
 export async function main(event) {
   const personalNumber = event.detail.user.personalNumber;
   const PK = `USER#${personalNumber}`;
+
   const allUserCases = await getAllUserCases(PK, PK);
 
   await syncCaseWorkflows(allUserCases, personalNumber);
@@ -28,11 +29,11 @@ async function getAllUserCases(PK, SK) {
 
   const params = {
     TableName,
+    KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
     ExpressionAttributeValues: {
       ':pk': PK,
       ':sk': SK,
     },
-    KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
   };
 
   const [error, casesGetResponse] = await to(dynamoDb.call('query', params));
