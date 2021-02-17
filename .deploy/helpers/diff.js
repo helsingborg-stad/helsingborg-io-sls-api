@@ -50,11 +50,9 @@ const diff = lastCommmitHashFile => {
     let diffPath = serviceDiff;
     while (diffPath !== '.') {
       const serviceFile = `${config.codeBuildPath}/${diffPath}/serverless.yml`;
-      if (fs.existsSync(serviceFile)) {
-        if (!files.includes(serviceFile)) {
-          files.push(serviceFile);
-          break;
-        }
+      if (fs.existsSync(serviceFile) && !files.includes(serviceFile)) {
+        files.push(serviceFile);
+        break;
       }
       diffPath = path.dirname(diffPath);
     }
