@@ -1,96 +1,113 @@
 import to from 'await-to-js';
-import { throwError } from '@helsingborg-stad/npm-api-error-handling';
+import { throwError, BadRequestError } from '@helsingborg-stad/npm-api-error-handling';
 
 import config from '../../../config';
 import * as response from '../../../libs/response';
 import * as dynamoDb from '../../../libs/dynamoDb';
 import { decodeToken } from '../../../libs/token';
 import { objectWithoutProperties } from '../../../libs/objects';
+import { getStatusByType } from '../../../libs/caseStatuses';
 
 import { getFutureTimestamp, millisecondsToSeconds } from '../helpers/timestampHelper';
 import { CASE_EXPIRATION_HOURS } from '../../../libs/constants';
 
-/**
- * Handler function for updating user case by id from dynamodb
- * Can update the data (i.e. the answers), and change the status of the case.
- */
 export async function main(event) {
-  const decodedToken = decodeToken(event);
-  const requestBody = JSON.parse(event.body);
+  const requestJsonBody = JSON.parse(event.body);
   const { id } = event.pathParameters;
 
-  const { provider, formId, currentPosition, status, details, answers } = requestBody;
+  if (!id) {
+    return response.failure(new BadRequestError('missing [id] in query path'));
+  }
 
-  let UpdateExpression = 'SET #updated = :updated';
-  const ExpressionAttributeNames = { '#updated': 'updatedAt' };
-  const ExpressionAttributeValues = { ':updated': Date.now() };
+  const {
+    provider,
+    statusType,
+    details,
+    currentFormId,
+    currentPosition,
+    answers,
+  } = requestJsonBody;
 
+  const UpdateExpression = ['SET updatedAt = :newUpdatedAt'];
+  const ExpressionAttributeNames = {};
+  const ExpressionAttributeValues = { ':newUpdatedAt': Date.now() };
+
+  // DynamoDb TTL uses seconds
   const newExpirationTime = millisecondsToSeconds(getFutureTimestamp(CASE_EXPIRATION_HOURS));
-  UpdateExpression += ', #expirationTime = :newExpirationTime';
-  ExpressionAttributeNames['#expirationTime'] = 'expirationTime';
+  UpdateExpression.push('expirationTime = :newExpirationTime');
   ExpressionAttributeValues[':newExpirationTime'] = newExpirationTime;
 
   if (provider) {
-    UpdateExpression += ', #provider = :newProvider';
-    ExpressionAttributeNames['#provider'] = 'provider';
+    UpdateExpression.push('provider = :newProvider');
     ExpressionAttributeValues[':newProvider'] = provider;
   }
 
-  if (formId) {
-    UpdateExpression += ', #formId = :newFormId';
-    ExpressionAttributeNames['#formId'] = 'formId';
-    ExpressionAttributeValues[':newFormId'] = formId;
-  }
+  if (statusType) {
+    const status = getStatusByType(statusType);
+    if (!status) {
+      return response.failure(new BadRequestError('invalid [statusType]'));
+    }
 
-  if (currentPosition) {
-    UpdateExpression += ', #currentPosition = :newPosition';
-    ExpressionAttributeNames['#currentPosition'] = 'currentPosition';
-    ExpressionAttributeValues[':newPosition'] = currentPosition;
-  }
-
-  if (status) {
-    UpdateExpression += ', #status = :newStatus';
+    UpdateExpression.push('#status = :newStatus');
     ExpressionAttributeNames['#status'] = 'status';
     ExpressionAttributeValues[':newStatus'] = status;
   }
 
   if (details) {
-    UpdateExpression += ', #details = :newDetails';
-    ExpressionAttributeNames['#details'] = 'details';
+    UpdateExpression.push('details = :newDetails');
     ExpressionAttributeValues[':newDetails'] = details;
   }
 
-  if (answers) {
-    UpdateExpression += ', #answers = :newAnswers';
-    ExpressionAttributeNames['#answers'] = 'answers';
-    ExpressionAttributeValues[':newAnswers'] = answers;
+  if (currentFormId) {
+    const [queryFormError] = await to(queryFormsIfExistsFormId(currentFormId));
+    if (queryFormError) {
+      return response.failure(queryFormError);
+    }
+
+    UpdateExpression.push('currentFormId = :newCurrentFormId');
+    ExpressionAttributeValues[':newCurrentFormId'] = currentFormId;
   }
 
-  const { personalNumber } = decodedToken;
+  if (currentPosition || answers) {
+    if (!currentFormId) {
+      return response.failure(
+        new BadRequestError(`currentFormId is needed when updating currentPosition and/or answers`)
+      );
+    }
 
-  const PK = `USER#${personalNumber}`;
-  const SK = `USER#${personalNumber}#CASE#${id}`;
+    ExpressionAttributeNames['#formId'] = currentFormId;
 
-  const TableName = config.cases.tableName;
+    if (currentPosition) {
+      UpdateExpression.push(`forms.#formId.currentPosition = :newCurrentPosition`);
+      ExpressionAttributeValues[':newCurrentPosition'] = currentPosition;
+    }
+
+    if (answers) {
+      UpdateExpression.push(`forms.#formId.answers = :newAnswers`);
+      ExpressionAttributeValues[':newAnswers'] = answers;
+    }
+  }
+
+  const { personalNumber } = decodeToken(event);
 
   const params = {
-    TableName,
+    TableName: config.cases.tableName,
     Key: {
-      PK,
-      SK,
+      PK: `USER#${personalNumber}`,
+      SK: `USER#${personalNumber}#CASE#${id}`,
     },
-    UpdateExpression,
+    UpdateExpression: UpdateExpression.join(', '),
     ExpressionAttributeNames,
     ExpressionAttributeValues,
     ReturnValues: 'ALL_NEW',
   };
 
-  const [error, queryResponse] = await to(sendUpdateCaseRequest(params));
-  if (error) {
-    return response.failure(error);
+  const [updateCaseError, updateCaseResponse] = await to(sendUpdateCaseRequest(params));
+  if (updateCaseError) {
+    return response.failure(updateCaseError);
   }
 
-  const attributes = objectWithoutProperties(queryResponse.Attributes, ['PK', 'SK']);
+  const attributes = objectWithoutProperties(updateCaseResponse.Attributes, ['PK', 'SK']);
   return response.success(200, {
     type: 'updateCase',
     attributes: {
@@ -100,10 +117,31 @@ export async function main(event) {
 }
 
 async function sendUpdateCaseRequest(params) {
-  const [error, result] = await to(dynamoDb.call('update', params));
-  if (error) {
-    throwError(error);
+  const [dynamoDbUpdateCallError, dynamoDbUpdateResult] = await to(dynamoDb.call('update', params));
+  if (dynamoDbUpdateCallError) {
+    throwError(dynamoDbUpdateCallError.statusCode, dynamoDbUpdateCallError.message);
   }
 
-  return result;
+  return dynamoDbUpdateResult;
+}
+
+async function queryFormsIfExistsFormId(formId) {
+  const dynamoDbQueryParams = {
+    TableName: config.forms.tableName,
+    KeyConditionExpression: 'PK = :pk',
+    ExpressionAttributeValues: { ':pk': `FORM#${formId}` },
+  };
+
+  const [dynamoDbQueryCallError, dynamoDbQueryCallResult] = await to(
+    dynamoDb.call('query', dynamoDbQueryParams)
+  );
+  if (dynamoDbQueryCallError) {
+    throwError(dynamoDbQueryCallError.statusCode, dynamoDbQueryCallError.message);
+  }
+
+  if (dynamoDbQueryCallResult.Items.length === 0) {
+    throwError(404, 'The requested form id does not exists');
+  }
+
+  return dynamoDbQueryCallResult;
 }

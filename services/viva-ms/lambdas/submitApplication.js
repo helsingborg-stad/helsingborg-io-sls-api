@@ -17,14 +17,13 @@ export async function main(event) {
     return undefined;
   }
 
-  const application = dynamoDbConverter.unmarshall(event.detail.dynamodb.NewImage);
+  const applicationRequestBody = getApplicationRequestBody(event.detail.dynamodb.NewImage);
 
   const [sendApplicationError, sendApplicationsResponse] = await to(
-    sendApplicationsToViva(application)
+    sendApplicationsToViva(applicationRequestBody)
   );
   if (sendApplicationError) {
-    console.error('(Viva-ms)', sendApplicationError);
-    return false;
+    return console.error('(Viva-ms)', sendApplicationError);
   }
 
   console.info('(Viva-ms)', sendApplicationsResponse);
@@ -32,32 +31,15 @@ export async function main(event) {
   return true;
 }
 
-async function sendApplicationsToViva(application) {
-  const { PK, answers, workflowId, pdf: pdfBinaryBuffer } = application;
-  const personalNumber = PK.substring(5);
+async function sendApplicationsToViva(applicationRequestBody) {
   const ssmParams = await SSMParams;
-
-  const { hashSalt, hashSaltLength } = ssmParams;
-  const personalNumberHashEncoded = hash.encode(personalNumber, hashSalt, hashSaltLength);
-
-  const vadaApiPayload = {
-    applicationType: 'recurrent', // basic | recurrent
-    hashid: personalNumberHashEncoded,
-    workflowId,
-    answers,
-    rawData: pdfBinaryBuffer.toString(),
-    rawDataType: 'pdf',
-  };
-
-  console.log(vadaApiPayload);
-
   const { vadaUrl, xApiKeyToken } = ssmParams;
   const requestClient = request.requestClient({}, { 'x-api-key': xApiKeyToken });
 
   const vadaApplicationsUrl = `${vadaUrl}/applications`;
 
   const [error, vadaCreateRecurrentVivaApplicationResponse] = await to(
-    request.call(requestClient, 'post', vadaApplicationsUrl, vadaApiPayload)
+    request.call(requestClient, 'post', vadaApplicationsUrl, applicationRequestBody)
   );
 
   if (error) {
@@ -76,4 +58,32 @@ async function sendApplicationsToViva(application) {
   }
 
   return vadaCreateRecurrentVivaApplicationResponse.data;
+}
+
+async function getApplicationRequestBody(myCase) {
+  const {
+    PK,
+    forms: {
+      [myCase.currentFormId]: { answers },
+    },
+    details: { workflowId },
+    pdf: pdfBinaryBuffer,
+  } = dynamoDbConverter.unmarshall(myCase);
+
+  const ssmParams = await SSMParams;
+  const { hashSalt, hashSaltLength } = ssmParams;
+
+  const personalNumber = PK.substring(5);
+  const personalNumberHashEncoded = hash.encode(personalNumber, hashSalt, hashSaltLength);
+
+  const requestBody = {
+    applicationType: 'recurrent', // basic | recurrent
+    hashid: personalNumberHashEncoded,
+    workflowId,
+    answers,
+    rawData: pdfBinaryBuffer.toString(),
+    rawDataType: 'pdf',
+  };
+
+  return requestBody;
 }
