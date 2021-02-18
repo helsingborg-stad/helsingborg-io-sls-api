@@ -6,7 +6,7 @@ import { BadRequestError } from '@helsingborg-stad/npm-api-error-handling';
 import { decodeToken } from '../../../libs/token';
 
 // File formats that we accept.
-const allowedMimes = ['image/jpeg', 'image/png', 'image/jpg'];
+const allowedMimes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
 
 /**
  * Get the user with the personal number specified in the path
