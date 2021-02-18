@@ -13,7 +13,7 @@ export const loadFileFromBucket = async (filename: string) => {
       .promise();
     return file.Body;
   } catch (error) {
-    throw `S3 - ${error.code}:${error.message}`;
+    throw `S3 bucket: ${bucketName} (filename: ${filename}) - ${error.code}:${error.message}`;
   }
 };
 
