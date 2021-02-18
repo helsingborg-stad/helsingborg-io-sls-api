@@ -39,6 +39,9 @@ const stageConfigs = {
     navet: {
       envsKeyName: '/navetEnvs/dev',
     },
+    pdf: {
+      envsKeyName: '/pdfEnvs/dev',
+    },
   },
   test: {
     auth: {
@@ -76,6 +79,9 @@ const stageConfigs = {
     navet: {
       envsKeyName: '/navetEnvs/test',
     },
+    pdf: {
+      envsKeyName: '/pdfEnvs/test',
+    },
   },
   stage: {
     auth: {
@@ -112,6 +118,9 @@ const stageConfigs = {
     navet: {
       envsKeyName: '/navetEnvs/stage',
     },
+    pdf: {
+      envsKeyName: '/pdfEnvs/stage',
+    },
   },
   prod: {
     auth: {
@@ -147,6 +156,9 @@ const stageConfigs = {
     },
     navet: {
       envsKeyName: '/navetEnvs/prod',
+    },
+    pdf: {
+      envsKeyName: '/pdfEnvs/prod',
     },
   },
 };
