@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import to from 'await-to-js';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import uuid from 'uuid';
@@ -10,12 +9,14 @@ import { getItem, putItem } from '../../../libs/queries';
 
 import caseValidationSchema from '../helpers/schema';
 import { getFutureTimestamp, millisecondsToSeconds } from '../helpers/timestampHelper';
+import { getStatusByType } from '../../../libs/caseStatuses';
+
 import { CASE_EXPIRATION_HOURS } from '../../../libs/constants';
 
 export async function main(event) {
   const decodedToken = decodeToken(event);
 
-  const [parseJsonError, parsedJson] = await to(parseJson(event.body));
+  const [parseJsonError, parsedJson] = await to(parseJsonD(event.body));
   if (parseJsonError) {
     return response.failure(parseJsonError);
   }
@@ -27,25 +28,29 @@ export async function main(event) {
     return response.failure(validationError);
   }
 
-  const { provider, details, status, forms } = validatedEventBody;
+  const { statusType, currentFormId, provider, details, forms } = validatedEventBody;
   const { personalNumber } = decodedToken;
+
   const id = uuid.v4();
+
   const PK = `USER#${personalNumber}`;
   const SK = `USER#${personalNumber}#CASE#${id}`;
-  const timestamp = Date.now();
+
+  const timestampNow = Date.now();
   const expirationTime = millisecondsToSeconds(getFutureTimestamp(CASE_EXPIRATION_HOURS));
 
   const Item = {
     PK,
     SK,
     id,
+    status: getStatusByType(statusType),
+    currentFormId,
     provider,
     details,
-    status,
     forms,
-    updatedAt: timestamp,
-    createdAt: timestamp,
     expirationTime,
+    createdAt: timestampNow,
+    updatedAt: timestampNow,
   };
 
   const putItemParams = {
@@ -70,31 +75,32 @@ export async function main(event) {
     type: 'createCase',
     attributes: {
       id: caseItem.Item.id,
+      status: caseItem.Item.status,
+      currentFormId: caseItem.Item.currentFormId,
       provider: caseItem.Item.provider,
       details: caseItem.Item.details,
-      status: caseItem.Item.status,
       forms: caseItem.Item.forms,
+      expirationTime: caseItem.Item.expirationTime,
       updatedAt: caseItem.Item.updatedAt,
       createdAt: caseItem.Item.createdAt,
-      expirationTime: caseItem.Item.expirationTime,
     },
   });
 }
 
 async function validateEventBody(eventBody, schema) {
-  const { validateError, validatedEventBody } = schema.validate(eventBody, { abortEarly: false });
-  if (validateError) {
-    throwError(400, validateError.message.replace(/"/g, "'"));
+  const { error, value } = schema.validate(eventBody, { abortEarly: false });
+  if (error) {
+    throwError(400, error.message.replace(/"/g, "'"));
   }
 
-  return validatedEventBody;
+  return value;
 }
 
-async function parseJson(data) {
+async function parseJsonD(data) {
   try {
     const parsedJson = JSON.parse(data);
     return parsedJson;
-  } catch (JSONParseError) {
-    throwError(400, JSONParseError.message);
+  } catch (error) {
+    throwError(400, error.message);
   }
 }

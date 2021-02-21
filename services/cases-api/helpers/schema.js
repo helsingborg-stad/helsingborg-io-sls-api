@@ -13,11 +13,11 @@ const caseAnswers = Joi.array().items(
       id: Joi.string().required(),
       tags: Joi.array().items(Joi.string()).required(),
     }).required(),
-    value: Joi.any(),
+    value: Joi.any().required(),
   })
 );
 
-const caseForm = Joi.object({
+const form = Joi.object({
   answers: caseAnswers.allow(),
   currentFromId: uuid.required(),
   currentPosition: Joi.object({
@@ -28,17 +28,12 @@ const caseForm = Joi.object({
   }).required(),
 });
 
-const status = Joi.object({
-  type: Joi.string().required(),
-  name: Joi.string().required(),
-  description: Joi.string().required(),
-});
-
 const caseValidationSchema = Joi.object({
+  statusType: Joi.string().valid('notStarted').required(),
+  currentFormId: uuid.required(),
   provider: caseProvider.required(),
   details: Joi.object().allow(),
-  status: status.required(),
-  forms: Joi.object().pattern(Joi.string(), Joi.object().concat(caseForm)),
+  forms: Joi.object().pattern(/^/, [uuid.required(), form.required()]),
 });
 
 export default caseValidationSchema;
