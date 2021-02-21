@@ -19,7 +19,6 @@ const caseAnswers = Joi.array().items(
 
 const form = Joi.object({
   answers: caseAnswers.allow(),
-  currentFromId: uuid.required(),
   currentPosition: Joi.object({
     index: Joi.number().required(),
     level: Joi.number().required(),
