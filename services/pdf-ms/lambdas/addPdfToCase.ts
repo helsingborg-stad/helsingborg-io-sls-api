@@ -24,11 +24,11 @@ export async function main(event: Record<string, any>) {
   );
 
   if (unMarshalledCase.pdfGenerated === 'yes') {
-    throw 'PDF allready generated';
+    return true;
   }
 
-  const { personalNumber } = unMarshalledCase;
-  const ssmParams = await PDF_SSM_PARAMS;
+  const { PK } = unMarshalledCase;
+  const personalNumber = PK.substring(5);
 
   const [getUserCasesError, userCases] = await to(getUserCases(personalNumber));
   if (getUserCasesError) {
@@ -42,6 +42,7 @@ export async function main(event: Record<string, any>) {
 
   const [currentCase, previousCase] = sortCasesByDate(userCases, 2);
 
+  const ssmParams = await PDF_SSM_PARAMS;
   const currentCaseAnswers = currentCase.forms[ssmParams.recurringFormId].answers;
   const previousCaseAnswers = previousCase.forms[ssmParams.recurringFormId].answers;
 
