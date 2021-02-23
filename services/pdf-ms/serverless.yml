@@ -42,24 +42,20 @@ provider:
       Action:
         - SSM:GetParameter
       Resource: "*"
-    - Effect: Allow
-      Action:
-        - dynamodb:UpdateItem
-      Resource:
-        - Fn::ImportValue: ${self:custom.resourcesStage}-CasesTableArn
+
     - Effect: Allow
       Action:
         - dynamodb:Query
+        - dynamodb:UpdateItem
       Resource:
-        - Fn::Join:
-          - ""
-          - - Fn::ImportValue: ${self:custom.resourcesStage}-CasesTableArn
-            - "/index/*"
+        - Fn::ImportValue: ${self:custom.resourcesStage}-CasesTableArn
+
     - Effect: Allow
       Action:
         - dynamodb:GetItem
       Resource:
         - "Fn::ImportValue": ${self:custom.resourcesStage}-UsersTableArn
+
     - Effect: Allow
       Action:
         - s3:GetObject
@@ -70,12 +66,6 @@ provider:
             - ""
             - - Fn::ImportValue: ${self:custom.resourcesStage}-PdfTemplatesBucketArn
               - "/*"
-
-    - Effect: Allow
-      Action:
-        - dynamodb:Query
-      Resource:
-        - Fn::ImportValue: ${self:custom.resourcesStage}-FormsTableArn
 
 functions:
   addPdfToCase:
