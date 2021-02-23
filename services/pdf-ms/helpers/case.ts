@@ -17,19 +17,16 @@ export async function getUserCases(
 ): Promise<DynamoDbQueryCasesResult['Items']> {
   const dynamoDbQueryCasesParams = {
     TableName: config.cases.tableName,
-    KeyConditionExpression:
-      'PK = :pk and begins_with(SK, :sk) and begins_with(status.type, :statusType)',
+    KeyConditionExpression: 'PK = :pk and begins_with(SK, :sk)',
     ExpressionAttributeValues: {
       ':pk': `USER#${personalNumber}`,
       ':sk': `USER#${personalNumber}`,
-      ':statusType': 'active:submitted',
     },
   };
 
   const [dynamoDbQueryCasesError, dynamoDbQueryCasesResult] = await to<DynamoDbQueryCasesResult>(
     dynamoDb.call('query', dynamoDbQueryCasesParams)
   );
-
   if (dynamoDbQueryCasesError) {
     throw new Error(dynamoDbQueryCasesError.message);
   }
