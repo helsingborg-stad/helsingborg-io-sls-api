@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import to from 'await-to-js';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import S3 from '../../../libs/S3';
@@ -16,7 +15,7 @@ export async function main(event) {
   if (getFileError) {
     return response.failure(getFileError);
   }
-  // make the byte array into a buffer, and then into a base64 encoded string
+
   const buffer = Buffer.from(file.Body);
   return {
     statusCode: 200,
