@@ -3,6 +3,8 @@ service: users-api
 plugins:
   - serverless-bundle
   - serverless-offline
+  - serverless-apigw-binary
+  - serverless-apigwy-binary
 
 custom: ${file(../../serverless.common.yml):custom}
 
@@ -119,3 +121,19 @@ functions:
           authorizer:
             type: CUSTOM
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
+
+  getAttachment:
+    handler: lambdas/getAttachment.main
+    environment:
+      BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-AttachmentsBucketName
+    events:
+      - http:
+          path: /users/me/attachments/{filename}
+          method: get
+          contentHandling: CONVERT_TO_BINARY
+          cors: true
+          authorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue ${self:custom.stage}-authorizerId
+
+           
