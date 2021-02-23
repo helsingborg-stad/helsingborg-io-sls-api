@@ -16,3 +16,10 @@ custom:
       deleteAtRemoval: false
       usagePlan:
         name: hbg-authorizer-${self:custom.stage}
+
+  apigwBinary:
+    types:           #list of mime-types 
+      - 'image/jpg'
+      - 'image/jpeg'
+      - 'image/png'
+      - 'application/pdf'

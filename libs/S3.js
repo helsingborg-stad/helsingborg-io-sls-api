@@ -18,6 +18,15 @@ async function getFiles(bucketName, prefix) {
     .promise();
 }
 
+async function getFile(bucketName, key) {
+  return s3Client
+    .getObject({
+      Bucket: bucketName,
+      Key: key,
+    })
+    .promise();
+}
+
 async function deleteFile(bucketName, key) {
   return s3Client
     .deleteObject({
@@ -30,5 +39,6 @@ async function deleteFile(bucketName, key) {
 export default {
   getSignedUrl,
   getFiles,
+  getFile,
   deleteFile,
 };
