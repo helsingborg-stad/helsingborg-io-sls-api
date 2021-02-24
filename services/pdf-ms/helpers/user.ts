@@ -12,7 +12,7 @@ interface DynamoDbQueryUsersResult {
   ScannedCount: number;
 }
 
-export async function getUser(personalNumber: string): Promise<User> {
+export async function getUser(personalNumber: string): Promise<DynamoDbQueryUsersResult['Item']> {
   const dynamoDbGetUserParams = {
     TableName: config.users.tableName,
     Key: {
