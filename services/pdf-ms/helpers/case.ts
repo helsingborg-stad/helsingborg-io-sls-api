@@ -31,10 +31,52 @@ export async function getUserCases(
     throw new Error(dynamoDbQueryCasesError.message);
   }
 
+  if (dynamoDbQueryCasesResult.Count === 0) {
+    throw 'No user cases found';
+  }
+
   return dynamoDbQueryCasesResult.Items;
 }
 
-export function getNewAndChangedValues(currentAnswerList: Answer[], previousAnswerList: Answer[]) {
+export async function addPdfToCase(currentCase: Case, pdf?: string | Buffer): Promise<Boolean> {
+  const UpdateExpression = 'SET #pdf = :pdf, #pdfGenerated = :pdfGenerated';
+  const ExpressionAttributeNames = { '#pdf': 'pdf', '#pdfGenerated': 'pdfGenerated' };
+  const ExpressionAttributeValues = {
+    ':pdf': pdf || undefined,
+    ':pdfGenerated': pdf !== undefined ? 'yes' : 'no',
+  };
+
+  const params = {
+    TableName: config.cases.tableName,
+    Key: {
+      PK: currentCase.PK,
+      SK: currentCase.SK,
+    },
+    UpdateExpression,
+    ExpressionAttributeNames,
+    ExpressionAttributeValues,
+    ReturnValue: 'NONE',
+  };
+
+  const [dynamoDbUpdateCaseError] = await to(dynamoDb.call('update', params));
+  if (dynamoDbUpdateCaseError) {
+    throw dynamoDbUpdateCaseError;
+  }
+
+  return true;
+}
+
+export function sortCasesByDate(cases: Case[], limit: number): Case[] {
+  const limitedSortedCasesByDate = cases
+    .sort((caseA: Case, caseB: Case) => caseB.updatedAt - caseA.updatedAt)
+    .slice(0, limit);
+  return limitedSortedCasesByDate;
+}
+
+export function getNewAndChangedCaseAnswerValues(
+  currentAnswerList: Answer[],
+  previousAnswerList: Answer[]
+): Record<string, any> {
   const changedValues: string[] = [];
   const newValues: string[] = [];
 
