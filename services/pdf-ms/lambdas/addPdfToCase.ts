@@ -4,20 +4,24 @@ import to from 'await-to-js';
 
 import config from '../../../config.js';
 import params from '../../../libs/params';
-import * as dynamoDb from '../../../libs/dynamoDb.js';
 
-import { Template, Case } from '../helpers/types';
+import { Template } from '../helpers/types';
 import { arrayToObject } from '../helpers/caseDataConverter';
 import { loadFileFromBucket, writeFileToBucket } from '../helpers/s3';
 import { modifyPdf } from '../helpers/pdf';
 import { getUser } from '../helpers/user';
-import { getNewAndChangedValues, getUserCases } from '../helpers/case';
+import {
+  getNewAndChangedCaseAnswerValues,
+  getUserCases,
+  sortCasesByDate,
+  addPdfToCase,
+} from '../helpers/case';
 
 const PDF_SSM_PARAMS = params.read(config.pdf.envsKeyName);
 
 const dynamoDbConverter = AWS.DynamoDB.Converter;
 
-export async function main(event: Record<string, any>) {
+export async function main(event: Record<string, any>): Promise<Boolean> {
   // Convert DynamoDB case data to plain object
   const unMarshalledCase: Record<string, any> = dynamoDbConverter.unmarshall(
     event.detail.dynamodb.NewImage
@@ -36,15 +40,16 @@ export async function main(event: Record<string, any>) {
     throw getUserCasesError;
   }
 
-  if (userCases.length === 0) {
-    throw 'User cases not found';
-  }
-
   const [currentCase, previousCase] = sortCasesByDate(userCases, 2);
 
   const ssmParams = await PDF_SSM_PARAMS;
   const currentCaseAnswers = currentCase.forms[ssmParams.recurringFormId].answers;
   const previousCaseAnswers = previousCase.forms[ssmParams.recurringFormId].answers;
+
+  const { changedValues, newValues } = getNewAndChangedCaseAnswerValues(
+    currentCaseAnswers,
+    previousCaseAnswers
+  );
 
   const [getUserError, user] = await to(getUser(personalNumber));
   if (getUserError) {
@@ -52,17 +57,10 @@ export async function main(event: Record<string, any>) {
     throw getUserError;
   }
 
-  const { changedValues, newValues } = getNewAndChangedValues(
-    currentCaseAnswers,
-    previousCaseAnswers
-  );
-
   const pdfJsonValues = {
-    answers: {
-      ...arrayToObject(currentCaseAnswers),
-      user,
-      valuesChanged: changedValues.length > 0 || newValues.length > 0 ? 'Ja' : 'Nej',
-    },
+    ...arrayToObject(currentCaseAnswers),
+    user,
+    valuesChanged: changedValues.length > 0 || newValues.length > 0 ? 'Ja' : 'Nej',
   };
 
   const templates = ssmParams.templatesFilenames;
@@ -75,7 +73,7 @@ export async function main(event: Record<string, any>) {
     ekbTemplateFiles.pdfBaseFilename
   )) as Buffer;
 
-  //add the data to the pdf according to the template
+  // add the data to the pdf according to the template
   const newPdfBuffer = await modifyPdf(
     pdfBaseFileBuffer,
     jsonTemplate,
@@ -85,49 +83,13 @@ export async function main(event: Record<string, any>) {
     newValues
   );
 
-  // save a copy of the generated pdf to the bucket.
   // This is (probably) temporary, to make it easier for us to check the generated pdfs.
   writeFileToBucket(`cases/${currentCase.id}.pdf`, newPdfBuffer);
 
-  const successfullyAddedData = await addPdfToCase(currentCase, newPdfBuffer);
-  if (!successfullyAddedData) {
-    console.error(
-      `Something went wrong with adding pdf data to case, PK: ${currentCase.PK}, SK: ${currentCase.SK}`
-    );
-  }
-}
-
-async function addPdfToCase(currentCase: Case, pdf?: string | Buffer) {
-  const UpdateExpression = 'SET #pdf = :pdf, #pdfGenerated = :pdfGenerated';
-  const ExpressionAttributeNames = { '#pdf': 'pdf', '#pdfGenerated': 'pdfGenerated' };
-  const ExpressionAttributeValues = {
-    ':pdf': pdf || undefined,
-    ':pdfGenerated': pdf !== undefined ? 'yes' : 'no',
-  };
-
-  const params = {
-    TableName: config.cases.tableName,
-    Key: {
-      PK: currentCase.PK,
-      SK: currentCase.SK,
-    },
-    UpdateExpression,
-    ExpressionAttributeNames,
-    ExpressionAttributeValues,
-    ReturnValue: 'ALL_NEW',
-  };
-
-  const [error] = await to(dynamoDb.call('update', params));
-  if (error) {
-    console.error(error);
-    return false;
+  const [addPdfToCaseError] = await to(addPdfToCase(currentCase, newPdfBuffer));
+  if (addPdfToCaseError) {
+    throw addPdfToCaseError;
   }
 
   return true;
-}
-
-function sortCasesByDate(cases: Case[], limit: number): Case[] {
-  return cases
-    .sort((caseA: Case, caseB: Case) => caseB.updatedAt - caseA.updatedAt)
-    .slice(0, limit);
 }
