@@ -7,6 +7,7 @@ import config from '../../../config';
 import params from '../../../libs/params';
 import hash from '../../../libs/helperHashEncode';
 import * as request from '../../../libs/request';
+import { putEvent } from '../../../libs/awsEventBridge';
 
 const SSMParams = params.read(config.vada.envsKeyName);
 
@@ -19,17 +20,23 @@ export async function main(event) {
 
   const applicationRequestBody = getApplicationRequestBody(event.detail.dynamodb.NewImage);
 
+  const ssmParams = await SSMParams;
+  const { hashSalt, hashSaltLength } = ssmParams;
+  const personalNumber = application.PK.substring(5);
+  const personalNumberHashEncoded = hash.encode(personalNumber, hashSalt, hashSaltLength);
+
   const [sendApplicationError, sendApplicationsResponse] = await to(
     sendApplicationsToViva(applicationRequestBody)
   );
   if (sendApplicationError) {
     return console.error('(Viva-ms)', sendApplicationError);
   }
-
   console.info('(Viva-ms)', sendApplicationsResponse);
 
-  return true;
-}
+  const caseKeys = {
+    SK: application.PK,
+    PK: application.SK,
+  };
 
 async function sendApplicationsToViva(applicationRequestBody) {
   const ssmParams = await SSMParams;
