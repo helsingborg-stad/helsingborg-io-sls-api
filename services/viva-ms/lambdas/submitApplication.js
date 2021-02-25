@@ -17,16 +17,16 @@ export async function main(event) {
   if (event.detail.dynamodb.NewImage === undefined) {
     return undefined;
   }
-
-  const applicationRequestBody = getApplicationRequestBody(event.detail.dynamodb.NewImage);
+  const caseItem = dynamoDbConverter.unmarshall(event.detail.dynamodb.NewImage);
+  const applicationRequestBody = getApplicationRequestBody(caseItem);
 
   const ssmParams = await SSMParams;
   const { hashSalt, hashSaltLength } = ssmParams;
-  const personalNumber = application.PK.substring(5);
+  const personalNumber = caseItem.PK.substring(5);
   const personalNumberHashEncoded = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
   const [sendApplicationError, sendApplicationsResponse] = await to(
-    sendApplicationsToViva(applicationRequestBody)
+    sendApplicationsToViva(applicationRequestBody, personalNumberHashEncoded)
   );
   if (sendApplicationError) {
     return console.error('(Viva-ms)', sendApplicationError);
@@ -34,9 +34,24 @@ export async function main(event) {
   console.info('(Viva-ms)', sendApplicationsResponse);
 
   const caseKeys = {
-    SK: application.PK,
-    PK: application.SK,
+    SK: caseItem.PK,
+    PK: caseItem.SK,
   };
+
+  const [putEventError] = await to(
+    putEvent(
+      {
+        personalNumberHashEncoded,
+        caseKeys,
+      },
+      'vivamsSubmitApplicationSuccess',
+      'vivams.submitApplication'
+    )
+  );
+  if (putEventError) {
+    throw putEventError;
+  }
+}
 
 async function sendApplicationsToViva(applicationRequestBody) {
   const ssmParams = await SSMParams;
@@ -67,21 +82,14 @@ async function sendApplicationsToViva(applicationRequestBody) {
   return vadaCreateRecurrentVivaApplicationResponse.data;
 }
 
-async function getApplicationRequestBody(myCase) {
+async function getApplicationRequestBody(caseItem, personalNumberHashEncoded) {
   const {
-    PK,
     forms: {
-      [myCase.currentFormId]: { answers },
+      [caseItem.currentFormId]: { answers },
     },
     details: { workflowId },
     pdf: pdfBinaryBuffer,
-  } = dynamoDbConverter.unmarshall(myCase);
-
-  const ssmParams = await SSMParams;
-  const { hashSalt, hashSaltLength } = ssmParams;
-
-  const personalNumber = PK.substring(5);
-  const personalNumberHashEncoded = hash.encode(personalNumber, hashSalt, hashSaltLength);
+  } = caseItem;
 
   const requestBody = {
     applicationType: 'recurrent', // basic | recurrent
