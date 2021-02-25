@@ -11,21 +11,37 @@ import { putItem } from '../../../libs/queries';
 import * as dynamoDB from '../../../libs/dynamoDb';
 import { CASE_PROVIDER_VIVA } from '../../../libs/constants';
 import { getStatusByType } from '../../../libs/caseStatuses';
+import { getApplicationStatus, isApplicationStatusCorrect } from '../helpers/applicationStatus';
 
 const VADA_SSM_PARAMS = params.read(config.vada.envsKeyName);
 const CASE_SSM_PARAMS = params.read(config.cases.envsKeyName);
 
 export async function main(event) {
   const { user } = event.detail;
+  const vadaSSMParams = await VADA_SSM_PARAMS;
 
+  const hahsedPersonalNumber = hash.encode(
+    user.personalNumber,
+    vadaSSMParams.hashSalt,
+    vadaSSMParams.hashSaltLength
+  );
   const [applicationStatusError, applicationStatusResponse] = await to(
-    sendApplicationStatusRequest(user.personalNumber)
+    getApplicationStatus(hahsedPersonalNumber, vadaSSMParams)
   );
   if (applicationStatusError) {
     return console.error('(Viva-ms) Viva Application Status', applicationStatusError);
   }
 
-  if (!isApplicationPeriodOpen(applicationStatusResponse)) {
+  /**
+   * The Combination of Status Codes 1, 128, 256, 512
+   * determines if a VIVA Application Workflow is open for applicant.
+   * 1 - Application is open for applicant,
+   * 128 - Case exsits in VIVA
+   * 256 - An active e-application is activated in VIVA
+   * 512 - Application allows e-application
+   */
+  const requiredStatusCodes = [1, 128, 256, 512];
+  if (!isApplicationStatusCorrect(applicationStatusResponse, requiredStatusCodes)) {
     return console.info(
       '(Viva-ms) syncApplicationStatus',
       'Application period is not open',
@@ -143,58 +159,6 @@ async function putRecurringVivaCase(PK, workflowId, period) {
   }
 
   return caseItem;
-}
-
-function isApplicationPeriodOpen(statusList) {
-  /**
-   * The Combination of Status Codes 1, 128, 256, 512 determines if a VIVA Application is open for recurring application
-   * 1 - Application is allowed,
-   * 128 - Case exsits in VIVA
-   * 256 - An active e-application is activated in VIVA
-   * 512 - Application allows e-application
-   */
-  const requiredStatusCodes = [1, 128, 256, 512];
-  const filteredStatusList = statusList.filter(status => requiredStatusCodes.includes(status.code));
-
-  const isPeriodOpenForApplicant = filteredStatusList.length === requiredStatusCodes.length;
-  if (isPeriodOpenForApplicant) {
-    return true;
-  }
-
-  return false;
-}
-
-async function sendApplicationStatusRequest(personalNumber) {
-  const ssmParams = await VADA_SSM_PARAMS;
-
-  const { hashSalt, hashSaltLength } = ssmParams;
-  const hahsedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
-
-  const { vadaUrl, xApiKeyToken } = ssmParams;
-  const authorizedRequestClient = request.requestClient({}, { 'x-api-key': xApiKeyToken });
-
-  const vadaApplicationStatusUrl = `${vadaUrl}/applications/${hahsedPersonalNumber}/status`;
-
-  const [requestError, vadaApplicationStatusResponse] = await to(
-    request.call(authorizedRequestClient, 'get', vadaApplicationStatusUrl)
-  );
-
-  if (requestError) {
-    if (requestError.response) {
-      // The request was made and the server responded with a
-      // status code that falls out of the range of 2xx
-      throwError(requestError.response.status, requestError.response.data.message);
-    } else if (requestError.request) {
-      // The request was made but no response was received
-      // `error.request` is an instance of http.ClientRequest in node.js
-      throwError(500, requestError.request.message);
-    } else {
-      // Something happened in setting up the request that triggered an Error
-      throwError(500, requestError.message);
-    }
-  }
-
-  return vadaApplicationStatusResponse.data;
 }
 
 async function sendMyPagesReguest(personalNumber) {
