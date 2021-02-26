@@ -1,5 +1,6 @@
 import to from 'await-to-js';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
+
 import S3 from '../../../libs/S3';
 import * as response from '../../../libs/response';
 import { decodeToken } from '../../../libs/token';
@@ -11,27 +12,30 @@ export async function main(event) {
   const { personalNumber } = decodedToken;
   const { filename } = event.pathParameters;
 
-  const [getFileError, file] = await to(getFileFromUserS3Bucket(`${personalNumber}/${filename}`));
+  const [getFileError, userS3File] = await to(
+    getFileFromUserS3Bucket(`${personalNumber}/${filename}`)
+  );
   if (getFileError) {
     return response.failure(getFileError);
   }
 
-  const buffer = Buffer.from(file.Body);
+  const buffer = Buffer.from(userS3File.Body);
+
   return {
     statusCode: 200,
     isBase64Encoded: true,
     headers: {
-      'Content-Type': file.ContentType,
+      'Content-Type': userS3File.ContentType,
     },
     body: buffer.toString('base64'),
   };
 }
 
-async function getFileFromUserS3Bucket(key) {
-  const [getFileError, file] = await to(S3.getFile(BUCKET_NAME, key));
-  if (getFileError) {
-    throwError(getFileError.statusCode, getFileError.message);
+async function getFileFromUserS3Bucket(s3Key) {
+  const [getS3FileError, s3File] = await to(S3.getFile(BUCKET_NAME, s3Key));
+  if (getS3FileError) {
+    throwError(getS3FileError.statusCode, getS3FileError.message);
   }
 
-  return file;
+  return s3File;
 }
