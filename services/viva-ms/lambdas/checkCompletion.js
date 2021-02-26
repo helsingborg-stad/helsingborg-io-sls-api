@@ -2,10 +2,10 @@
 import to from 'await-to-js';
 
 import config from '../../../config';
-import caseStatuses from '../../../libs/caseStatuses';
 import params from '../../../libs/params';
 import * as dynamoDb from '../../../libs/dynamoDb';
 import { getApplicationStatus, isApplicationStatusCorrect } from '../helpers/applicationStatus';
+import { getStatusByType } from '../../../libs/caseStatuses';
 
 const VADA_SSM_PARAMS = params.read(config.vada.envsKeyName);
 const CASE_SSM_PARAMS = params.read(config.cases.envsKeyName);
@@ -42,23 +42,25 @@ export async function main(event) {
     throw updateCaseError;
   }
 
-  console.log(caseItem);
+  console.log(
+    '(viva-ms: checkCompletion): updated case with completion data successfully',
+    caseItem
+  );
+  return true;
 }
 
-async function updateCaseCompletionAttributes(keys, formId) {
-  // TODO: use utility function for getting status
-  const completionStatus = caseStatuses.find(
-    status => status.type === 'active:completionRequired:viva'
-  );
+async function updateCaseCompletionAttributes(keys, currentFormId) {
+  const completionStatus = getStatusByType('active:completionRequired:viva');
+
   const params = {
     TableName: config.cases.tableName,
     Key: keys,
-    UpdateExpression: 'set currentFormId = :formId, #status=:completionStatus',
+    UpdateExpression: 'set currentFormId = :currentFormId, #status=:completionStatus',
     ExpressionAttributeNames: {
       '#status': 'status',
     },
     ExpressionAttributeValues: {
-      ':formId': formId,
+      ':currentFormId': currentFormId,
       ':completionStatus': completionStatus,
     },
     ReturnValues: 'UPDATED_NEW',
