@@ -44,8 +44,8 @@ export async function main(event) {
         personalNumberHashEncoded,
         caseKeys,
       },
-      'vivamsSubmitApplicationSuccess',
-      'vivams.submitApplication'
+      'vivaMsSubmitApplicationSuccess',
+      'vivaMs.submitApplication'
     )
   );
   if (putEventError) {
