@@ -109,4 +109,4 @@ functions:
       - eventBridge:
           pattern:
             source:
-              - vivams.submitApplication
+              - vivaMs.submitApplication
