@@ -8,7 +8,7 @@ import { getApplicationStatus, isApplicationStatusCorrect } from '../helpers/app
 import { getStatusByType } from '../../../libs/caseStatuses';
 
 const VADA_SSM_PARAMS = params.read(config.vada.envsKeyName);
-const CASE_SSM_PARAMS = params.read(config.cases.envsKeyName);
+const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
 
 export async function main(event) {
   const { hashedPersonalNumber, caseKeys } = event.detail;
@@ -34,9 +34,9 @@ export async function main(event) {
     throw 'no completion status found in viva adapter response';
   }
 
-  const caseSSMParams = await CASE_SSM_PARAMS;
+  const vivaCaseSSMParams = await VIVA_CASE_SSM_PARAMS;
   const [updateCaseError, caseItem] = await to(
-    updateCaseCompletionAttributes(caseKeys, caseSSMParams.recurringFormId)
+    updateCaseCompletionAttributes(caseKeys, vivaCaseSSMParams.completionFormId)
   );
   if (updateCaseError) {
     throw updateCaseError;
