@@ -13,7 +13,7 @@ import { CASE_PROVIDER_VIVA } from '../../../libs/constants';
 import { getStatusByType } from '../../../libs/caseStatuses';
 
 const VADA_SSM_PARAMS = params.read(config.vada.envsKeyName);
-const CASE_SSM_PARAMS = params.read(config.cases.envsKeyName);
+const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
 
 export async function main(event) {
   const { user } = event.detail;
@@ -97,7 +97,7 @@ async function queryCasesWithWorkflowId(PK, workflowId) {
 }
 
 async function putRecurringVivaCase(PK, workflowId, period) {
-  const ssmParams = await CASE_SSM_PARAMS;
+  const ssmParams = await VIVA_CASE_SSM_PARAMS;
   const { recurringFormId, randomCheckFormId } = ssmParams;
   const id = uuid.v4();
   const timestampNow = Date.now();
