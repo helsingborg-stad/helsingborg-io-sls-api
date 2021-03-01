@@ -133,6 +133,6 @@ export async function modifyPdf(
 
     return Buffer.from(pdfDocumentInBytes);
   } catch (PDFDocumentError) {
-    throw new Error(PDFDocumentError.message);
+    throw PDFDocumentError.message;
   }
 }
