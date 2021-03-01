@@ -1,11 +1,11 @@
 [
   {
-    "Source": "bankId.collect",
-    "Detail": "{ \"user\": { \"personalNumber\": \"197005012336\" } }",
+    "Source": "vivaMs.submitApplication",
+    "Detail": "{ \"hashedPersonalNumber\": \"Knb6eVz5g8y91dEBzqOA0qwGkAQBRplZ\", \"caseKeys\": { \"PK\": \"USER#196001198685\", \"SK\": \"USER#196001198685#CASE#0d01058f-164e-42ff-96f1-fb7d04b6e5fe\" } }",
     "Resources": [
       "resourceMock1"
     ],
-    "DetailType": "BankIdCollectComplete",
+    "DetailType": "vivaMsSubmitApplicationSuccess",
     "EventBusName": "default"
   }
 ]
