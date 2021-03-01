@@ -55,7 +55,7 @@ async function updateCaseCompletionAttributes(keys, currentFormId) {
   const params = {
     TableName: config.cases.tableName,
     Key: keys,
-    UpdateExpression: 'set currentFormId = :currentFormId, #status=:completionStatus',
+    UpdateExpression: 'set currentFormId = :currentFormId, #status = :completionStatus',
     ExpressionAttributeNames: {
       '#status': 'status',
     },
