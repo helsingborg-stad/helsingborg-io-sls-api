@@ -31,7 +31,11 @@ const stageConfigs = {
     },
     cases: {
       tableName: 'cases',
-      envsKeyName: '/caseEnvs/dev',
+      providers: {
+        viva: {
+          envsKeyName: '/vivaCaseEnvs/dev',
+        },
+      },
     },
     vada: {
       envsKeyName: '/vadaEnvs/dev',
@@ -71,7 +75,11 @@ const stageConfigs = {
     },
     cases: {
       tableName: 'cases',
-      envsKeyName: '/caseEnvs/test',
+      providers: {
+        viva: {
+          envsKeyName: '/vivaCaseEnvs/test',
+        },
+      },
     },
     vada: {
       envsKeyName: '/vadaEnvs/test',
@@ -111,6 +119,11 @@ const stageConfigs = {
     },
     cases: {
       tableName: 'cases',
+      providers: {
+        viva: {
+          envsKeyName: '/vivaCaseEnvs/stage',
+        },
+      },
     },
     vada: {
       envsKeyName: '/vadaEnvs/stage',
@@ -150,6 +163,11 @@ const stageConfigs = {
     },
     cases: {
       tableName: 'cases',
+      providers: {
+        viva: {
+          envsKeyName: '/vivaCaseEnvs/prod',
+        },
+      },
     },
     vada: {
       envsKeyName: '/vadaEnvs/prod',
