@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import to from 'await-to-js';
 
 import config from '../../../config';
@@ -7,9 +6,8 @@ import * as dynamoDb from '../../../libs/dynamoDb';
 import { User } from './types';
 
 interface DynamoDbQueryUsersResult {
-  Count: number;
+  ConsumedCapacity: Record<string, any>;
   Item: User;
-  ScannedCount: number;
 }
 
 export async function getUser(personalNumber: string): Promise<DynamoDbQueryUsersResult['Item']> {
@@ -24,8 +22,14 @@ export async function getUser(personalNumber: string): Promise<DynamoDbQueryUser
     dynamoDb.call('get', dynamoDbGetUserParams)
   );
   if (dynamoDbGetUserError) {
-    throw new Error(dynamoDbGetUserError.message);
+    throw dynamoDbGetUserError;
   }
 
-  return dynamoDbGetUsersResult.Item;
+  const user = dynamoDbGetUsersResult.Item;
+
+  if (!user) {
+    throw 'User not found';
+  }
+
+  return user;
 }
