@@ -58,7 +58,6 @@ export async function main(event: Record<string, any>): Promise<Boolean> {
   const templates = ssmParams.templatesFilenames;
   const ekbRecurringTemplateFiles = templates['EKB-recurring'];
 
-  // load the template files from the s3 bucket
   const templateFile = await loadFileFromBucket(ekbRecurringTemplateFiles.JSONTemplateFilename);
   const jsonTemplate: Template = JSON.parse(templateFile.toString()) as Template;
 
@@ -66,7 +65,6 @@ export async function main(event: Record<string, any>): Promise<Boolean> {
     ekbRecurringTemplateFiles.pdfBaseFilename
   )) as Buffer;
 
-  // add the data to the pdf according to the template
   const newPdfBuffer = await modifyPdf(
     pdfBaseFileBuffer,
     jsonTemplate,
@@ -76,8 +74,8 @@ export async function main(event: Record<string, any>): Promise<Boolean> {
     newValues
   );
 
-  // This is (probably) temporary, to make it easier for us to check the generated pdfs.
   writeFileToBucket(`cases/${currentCase.id}.pdf`, newPdfBuffer);
+  // Make it easier for developer to check the generated pdf
 
   const [addPdfToCaseError] = await to(addPdfToCase(currentCase, newPdfBuffer));
   if (addPdfToCaseError) {
