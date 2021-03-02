@@ -74,13 +74,13 @@ function replaceTextInTextNode(textNode: TextNode, json: Record<string, any>, an
 
     if (answerObject && answerObject.field.tags.includes('date')) {
       const date = new Date(answerObject.value);
-      const dateYearMonthDay = date.toLocaleDateString('sv-SE', {
+      const dateYearMonthDayLocaleSE = date.toLocaleDateString('sv-SE', {
         year: 'numeric',
         month: 'numeric',
         day: 'numeric',
       });
 
-      return previous.replace(fullMatch, dateYearMonthDay);
+      return previous.replace(fullMatch, dateYearMonthDayLocaleSE);
     }
 
     return previous.replace(fullMatch, replacement);
