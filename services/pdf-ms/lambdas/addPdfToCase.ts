@@ -36,24 +36,40 @@ export async function main(event: Record<string, any>): Promise<Boolean> {
     throw getUserError;
   }
 
-  const [currentCase, previousCase] = sortCasesByDate(userCases, 2);
-
-  const ssmParams = await PDF_SSM_PARAMS;
-  const currentCaseAnswers = currentCase.forms[ssmParams.recurringFormId].answers;
-  const previousCaseAnswers = previousCase.forms[ssmParams.recurringFormId].answers;
-
-  const { changedValues, newValues } = getNewAndChangedCaseAnswerValues(
-    currentCaseAnswers,
-    previousCaseAnswers
-  );
-
+  const [getCasesError, closedCases] = await to(getClosedUserCases(personalNumber));
+  if (getCasesError) {
+    throw getCasesError;
   }
 
+  const ssmParams = await PDF_SSM_PARAMS;
+  const submittedRecurringAnswers = submittedCase.forms[ssmParams.recurringFormId].answers;
+
   const pdfJsonValues = {
-    ...arrayToObject(currentCaseAnswers),
-    user,
-    valuesChanged: changedValues.length > 0 || newValues.length > 0 ? 'Ja' : 'Nej',
+    valuesChanged: 'Nej',
   };
+
+  let changedValues: string[], newValues: string[];
+
+  if (closedCases.length > 0) {
+    const latestClosedCase = getLatestCase(closedCases);
+    const latestClosedRecurringAnswers = latestClosedCase.forms[ssmParams.recurringFormId].answers;
+
+    ({ changedValues, newValues } = getNewAndChangedCaseAnswerValues(
+      submittedRecurringAnswers,
+      latestClosedRecurringAnswers
+    ));
+
+    pdfJsonValues['valuesChanged'] =
+      changedValues.length > 0 || newValues.length > 0 ? 'Ja' : 'Nej';
+
+    console.log('changedValues', changedValues);
+    console.log('newValues', newValues);
+  }
+
+  Object.assign(pdfJsonValues, {
+    ...arrayToObject(submittedRecurringAnswers),
+    user,
+  });
 
   const templates = ssmParams.templatesFilenames;
   const ekbRecurringTemplateFiles = templates['EKB-recurring'];
@@ -69,15 +85,15 @@ export async function main(event: Record<string, any>): Promise<Boolean> {
     pdfBaseFileBuffer,
     jsonTemplate,
     pdfJsonValues,
-    currentCaseAnswers,
+    submittedRecurringAnswers,
     changedValues,
     newValues
   );
 
-  writeFileToBucket(`cases/${currentCase.id}.pdf`, newPdfBuffer);
   // Make it easier for developer to check the generated pdf
+  writeFileToBucket(`cases/${submittedCase.id}.pdf`, newPdfBuffer);
 
-  const [addPdfToCaseError] = await to(addPdfToCase(currentCase, newPdfBuffer));
+  const [addPdfToCaseError] = await to(addPdfToCase(submittedCase, newPdfBuffer));
   if (addPdfToCaseError) {
     throw addPdfToCaseError;
   }
