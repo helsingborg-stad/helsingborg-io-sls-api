@@ -5,16 +5,16 @@ import to from 'await-to-js';
 import config from '../../../config.js';
 import params from '../../../libs/params';
 
-import { Template } from '../helpers/types';
+import { Case, Template } from '../helpers/types';
 import { arrayToObject } from '../helpers/caseDataConverter';
 import { loadFileFromBucket, writeFileToBucket } from '../helpers/s3';
 import { modifyPdf } from '../helpers/pdf';
 import { getUser } from '../helpers/user';
 import {
-  getNewAndChangedCaseAnswerValues,
-  getUserCases,
-  sortCasesByDate,
+  getClosedUserCases,
   addPdfToCase,
+  getLatestCase,
+  getNewAndChangedCaseAnswerValues,
 } from '../helpers/case';
 
 const PDF_SSM_PARAMS = params.read(config.pdf.envsKeyName);
