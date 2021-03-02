@@ -66,7 +66,7 @@ export interface Case {
   expirationTime?: string;
   createdAt?: number;
   updatedAt?: number;
-  currentFormId: string;
+  currentFormId?: string;
   forms?: Record<string, Form>;
   details?: Record<string, any>;
   pdf?: string | Buffer;
