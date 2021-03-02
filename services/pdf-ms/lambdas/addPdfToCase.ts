@@ -56,13 +56,14 @@ export async function main(event: Record<string, any>): Promise<Boolean> {
   };
 
   const templates = ssmParams.templatesFilenames;
-  const ekbTemplateFiles = templates['EKB-recurring'];
+  const ekbRecurringTemplateFiles = templates['EKB-recurring'];
 
   // load the template files from the s3 bucket
-  const templateFile = await loadFileFromBucket(ekbTemplateFiles.JSONTemplateFilename);
+  const templateFile = await loadFileFromBucket(ekbRecurringTemplateFiles.JSONTemplateFilename);
   const jsonTemplate: Template = JSON.parse(templateFile.toString()) as Template;
+
   const pdfBaseFileBuffer: Buffer = (await loadFileFromBucket(
-    ekbTemplateFiles.pdfBaseFilename
+    ekbRecurringTemplateFiles.pdfBaseFilename
   )) as Buffer;
 
   // add the data to the pdf according to the template
