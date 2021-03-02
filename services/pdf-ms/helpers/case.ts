@@ -68,11 +68,12 @@ export async function addPdfToCase(currentCase: Case, pdf?: string | Buffer): Pr
   return true;
 }
 
-export function sortCasesByDate(cases: Case[], limit: number): Case[] {
-  const limitedSortedCasesByDate = cases
-    .sort((caseA: Case, caseB: Case) => caseB.updatedAt - caseA.updatedAt)
-    .slice(0, limit);
-  return limitedSortedCasesByDate;
+export function getLatestCase(cases: Case[]): Case {
+  const casesSortedByUpdatedAt = cases.sort(
+    (caseA: Case, caseB: Case) => caseB.updatedAt - caseA.updatedAt
+  );
+
+  return casesSortedByUpdatedAt.shift();
 }
 
 export function getNewAndChangedCaseAnswerValues(
