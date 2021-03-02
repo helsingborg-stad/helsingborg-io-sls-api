@@ -34,11 +34,7 @@ export async function getClosedUserCases(
     dynamoDb.call('query', dynamoDbQueryCasesParams)
   );
   if (dynamoDbQueryCasesError) {
-    throw new Error(dynamoDbQueryCasesError.message);
-  }
-
-  if (dynamoDbQueryCasesResult.Count === 0) {
-    throw 'No user cases found';
+    throw dynamoDbQueryCasesError;
   }
 
   return dynamoDbQueryCasesResult.Items;
