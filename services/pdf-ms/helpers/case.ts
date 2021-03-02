@@ -12,15 +12,21 @@ interface DynamoDbQueryCasesResult {
   ScannedCount: number;
 }
 
-export async function getUserCases(
+export async function getClosedUserCases(
   personalNumber: string
 ): Promise<DynamoDbQueryCasesResult['Items']> {
   const dynamoDbQueryCasesParams = {
     TableName: config.cases.tableName,
     KeyConditionExpression: 'PK = :pk and begins_with(SK, :sk)',
+    FilterExpression: 'begins_with(#status.#type, :statusTypeClosed)',
+    ExpressionAttributeNames: {
+      '#status': 'status',
+      '#type': 'type',
+    },
     ExpressionAttributeValues: {
       ':pk': `USER#${personalNumber}`,
       ':sk': `USER#${personalNumber}`,
+      ':statusTypeClosed': 'closed',
     },
   };
 
