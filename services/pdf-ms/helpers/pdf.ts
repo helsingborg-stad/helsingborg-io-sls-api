@@ -20,7 +20,7 @@ async function loadPdfDocumentFonts(document: PDFDocument): Promise<Record<Font,
 
     return fonts;
   } catch (PDFDocumentError) {
-    throw new Error(PDFDocumentError.message);
+    throw PDFDocumentError.message;
   }
 }
 
