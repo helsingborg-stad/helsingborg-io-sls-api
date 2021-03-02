@@ -48,7 +48,8 @@ export async function main(event: Record<string, any>): Promise<Boolean> {
     valuesChanged: 'Nej',
   };
 
-  let changedValues: string[], newValues: string[];
+  let changedValues: string[] = [];
+  let newValues: string[] = [];
 
   if (closedCases.length > 0) {
     const latestClosedCase = getLatestCase(closedCases);
