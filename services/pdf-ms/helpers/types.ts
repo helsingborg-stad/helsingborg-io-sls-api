@@ -70,7 +70,7 @@ export interface Case {
   forms?: Record<string, Form>;
   details?: Record<string, any>;
   pdf?: string | Buffer;
-  pdfGenerated?: boolean;
+  pdfGenerated?: string;
 }
 
 export const formTypes = ['EKB-new', 'EKB-recurring'];
