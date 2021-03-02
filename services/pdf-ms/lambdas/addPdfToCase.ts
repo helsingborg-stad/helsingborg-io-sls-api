@@ -31,10 +31,9 @@ export async function main(event: Record<string, any>): Promise<Boolean> {
 
   const personalNumber = submittedCase.PK.substring(5);
 
-  const [getUserCasesError, userCases] = await to(getUserCases(personalNumber));
-  if (getUserCasesError) {
-    console.error(getUserCasesError);
-    throw getUserCasesError;
+  const [getUserError, user] = await to(getUser(personalNumber));
+  if (getUserError) {
+    throw getUserError;
   }
 
   const [currentCase, previousCase] = sortCasesByDate(userCases, 2);
@@ -48,10 +47,6 @@ export async function main(event: Record<string, any>): Promise<Boolean> {
     previousCaseAnswers
   );
 
-  const [getUserError, user] = await to(getUser(personalNumber));
-  if (getUserError) {
-    console.error(getUserError);
-    throw getUserError;
   }
 
   const pdfJsonValues = {
