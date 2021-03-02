@@ -19,20 +19,17 @@ import {
 
 const PDF_SSM_PARAMS = params.read(config.pdf.envsKeyName);
 
+// Convert DynamoDB item to plain object
 const dynamoDbConverter = AWS.DynamoDB.Converter;
 
 export async function main(event: Record<string, any>): Promise<Boolean> {
-  // Convert DynamoDB case data to plain object
-  const unMarshalledCase: Record<string, any> = dynamoDbConverter.unmarshall(
-    event.detail.dynamodb.NewImage
-  );
+  const submittedCase: Case = dynamoDbConverter.unmarshall(event.detail.dynamodb.NewImage);
 
-  if (unMarshalledCase.pdfGenerated === 'yes') {
+  if (submittedCase.pdfGenerated === 'yes') {
     return true;
   }
 
-  const { PK } = unMarshalledCase;
-  const personalNumber = PK.substring(5);
+  const personalNumber = submittedCase.PK.substring(5);
 
   const [getUserCasesError, userCases] = await to(getUserCases(personalNumber));
   if (getUserCasesError) {
