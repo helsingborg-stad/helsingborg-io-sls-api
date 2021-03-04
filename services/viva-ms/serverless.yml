@@ -114,12 +114,18 @@ functions:
 
   checkCompletion:
     handler: lambdas/checkCompletion.main
-    events:
-      - eventBridge:
-          pattern:
-            source:
-              - vivaMs.submitApplication
-
+              - MODIFY
+            detail:
+              dynamodb:
+                NewImage:
+                  status:
+                    M:
+                      type:
+                        S:
+                          [
+                            { "prefix": "active:submitted" },
+                            { "prefix": "active:ongoing" },
+                          ]
   submitCompletion:
     handler: lambdas/submitCompletion.main
     environment:
