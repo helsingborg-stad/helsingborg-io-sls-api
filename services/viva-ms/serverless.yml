@@ -32,6 +32,10 @@ provider:
       Resource: "*"
     - Effect: Allow
       Action:
+        - events:PutEvents
+      Resource: "*"
+    - Effect: Allow
+      Action:
         - dynamodb:UpdateItem
         - dynamodb:PutItem
         - dynamodb:Query
@@ -98,3 +102,11 @@ functions:
               - bankId.collect
             detail-type:
               - BankIdCollectComplete
+
+  checkCompletion:
+    handler: lambdas/checkCompletion.main
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - vivams.submitApplication
