@@ -105,8 +105,33 @@ functions:
 
   checkCompletion:
     handler: lambdas/checkCompletion.main
+              - MODIFY
+            detail:
+              dynamodb:
+                NewImage:
+                  status:
+                    M:
+                      type:
+                        S:
+                          [
+                            { "prefix": "active:submitted" },
+                            { "prefix": "active:ongoing" },
+                          ]
+  submitCompletion:
+    handler: lambdas/submitCompletion.main
+    environment:
+      BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-AttachmentsBucketName
     events:
       - eventBridge:
           pattern:
             source:
-              - vivaMs.submitApplication
+              - cases.database
+            detail-type:
+              - MODIFY
+            detail:
+              dynamodb:
+                NewImage:
+                  status:
+                    M:
+                      type:
+                        S: [{ "prefix": "active:completionSubmitted:viva" }]
