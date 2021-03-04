@@ -7,7 +7,7 @@
 
 <p>
   <a href="https://github.com/helsingborg-stad/helsingborg-io-sls-api">
-    <img src="images/logo.jpg" alt="Logo" width="300">
+    <img src="images/hbg-github-logo-combo.png" alt="Logo" width="300">
   </a>
 </p>
 <h3>Helsingborg IO SLS</h3>
