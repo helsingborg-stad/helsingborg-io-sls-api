@@ -8,6 +8,7 @@ import params from '../../../libs/params';
 import hash from '../../../libs/helperHashEncode';
 import * as request from '../../../libs/request';
 import * as dynamoDb from '../../../libs/dynamoDb';
+import { getStatusByType } from '../../../libs/caseStatuses';
 
 const SSMParams = params.read(config.vada.envsKeyName);
 
@@ -47,23 +48,21 @@ async function syncCaseWorkflows(cases, personalNumber) {
   const caseItems = cases.Items;
 
   for (const caseItem of caseItems) {
-    if (caseItem.status.type === 'active:submitted:viva') {
-      const workflowId = caseItem.details.workflowId;
+    const workflowId = caseItem.details.workflowId;
 
-      if (!workflowId) {
-        continue;
-      }
+    if (!workflowId) {
+      continue;
+    }
 
-      const [vadaMyPagesError, vadaMyPagesResponse] = await to(
-        sendVadaMyPagesRequest(personalNumber, workflowId)
-      );
-      if (vadaMyPagesError) {
-        return console.error('(Viva-ms) syncWorkflow', vadaMyPagesError);
-      }
+    const [vadaMyPagesError, vadaMyPagesResponse] = await to(
+      sendVadaMyPagesRequest(personalNumber, workflowId)
+    );
+    if (vadaMyPagesError) {
+      return console.error('(Viva-ms) syncWorkflow', vadaMyPagesError);
+    }
 
-      if (!deepEqual(vadaMyPagesResponse.attributes, caseItem.details.workflow)) {
-        await addWorkflowToCase(caseItem.PK, caseItem.SK, vadaMyPagesResponse.attributes);
-      }
+    if (!deepEqual(vadaMyPagesResponse.attributes, caseItem.details.workflow)) {
+      await syncWorkflowAndStatus(caseItem.PK, caseItem.SK, vadaMyPagesResponse.attributes);
     }
   }
 }
@@ -101,10 +100,21 @@ async function sendVadaMyPagesRequest(personalNumber, workflowId) {
   return vadaMyPagesResponse.data;
 }
 
-async function addWorkflowToCase(PK, SK, workflow) {
+async function syncWorkflowAndStatus(PK, SK, workflow) {
   const TableName = config.cases.tableName;
-  const UpdateExpression = `SET ${CASE_WORKFLOW_PATH} = :newWorkflow`;
+  let UpdateExpression = `SET ${CASE_WORKFLOW_PATH} = :newWorkflow`;
   const ExpressionAttributeValues = { ':newWorkflow': workflow };
+  const ExpressionAttributeNames = {};
+
+  if (workflow.decision?.decisions?.decision?.type === 'Beviljat') {
+    UpdateExpression += ', #status = :newStatus';
+    ExpressionAttributeNames['#status'] = 'status';
+    ExpressionAttributeValues[':newStatus'] = getStatusByType('closed:approved:viva');
+  } else if (workflow.calculations) {
+    UpdateExpression += ', #status = :newStatus';
+    ExpressionAttributeNames['#status'] = 'status';
+    ExpressionAttributeValues[':newStatus'] = getStatusByType('active:processing');
+  }
 
   const params = {
     TableName,
@@ -113,6 +123,10 @@ async function addWorkflowToCase(PK, SK, workflow) {
     ExpressionAttributeValues,
     ReturnValues: 'UPDATED_NEW',
   };
+
+  if (ExpressionAttributeNames && Object.keys(ExpressionAttributeNames).length > 0) {
+    params.ExpressionAttributeNames = ExpressionAttributeNames;
+  }
 
   const [updateError] = await to(dynamoDb.call('update', params));
   if (updateError) {
