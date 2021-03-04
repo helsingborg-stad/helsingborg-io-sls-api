@@ -89,8 +89,8 @@ functions:
             detail-type:
               - BankIdCollectComplete
 
-  syncWorkflow:
-    handler: lambdas/syncWorkflow.main
+  syncWorkflowAndSetStatus:
+    handler: lambdas/syncWorkflowAndSetStatus.main
     events:
       - eventBridge:
           pattern:
