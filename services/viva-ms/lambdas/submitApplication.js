@@ -9,7 +9,8 @@ import hash from '../../../libs/helperHashEncode';
 import * as request from '../../../libs/request';
 import { putEvent } from '../../../libs/awsEventBridge';
 
-const SSMParams = params.read(config.vada.envsKeyName);
+const VADA_SSM_PARAMS = params.read(config.vada.envsKeyName);
+const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
 
 const dynamoDbConverter = AWS.DynamoDB.Converter;
 
@@ -17,11 +18,19 @@ export async function main(event) {
   if (event.detail.dynamodb.NewImage === undefined) {
     return undefined;
   }
+
   const caseItem = dynamoDbConverter.unmarshall(event.detail.dynamodb.NewImage);
+
+  const vivaCaseSSMParams = await VIVA_CASE_SSM_PARAMS;
+  if (vivaCaseSSMParams.recurringFormId !== caseItem.currentFormId) {
+    console.info('(Viva-ms): currentFormId does not match recurringFormId');
+    return true;
+  }
+
   const applicationRequestBody = getApplicationRequestBody(caseItem);
 
-  const ssmParams = await SSMParams;
-  const { hashSalt, hashSaltLength } = ssmParams;
+  const vadaSSMParams = await VADA_SSM_PARAMS;
+  const { hashSalt, hashSaltLength } = vadaSSMParams;
   const personalNumber = caseItem.PK.substring(5);
   const personalNumberHashEncoded = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
@@ -54,8 +63,8 @@ export async function main(event) {
 }
 
 async function sendApplicationsToViva(applicationRequestBody) {
-  const ssmParams = await SSMParams;
-  const { vadaUrl, xApiKeyToken } = ssmParams;
+  const vadaSSMParams = await VADA_SSM_PARAMS;
+  const { vadaUrl, xApiKeyToken } = vadaSSMParams;
   const requestClient = request.requestClient({}, { 'x-api-key': xApiKeyToken });
 
   const vadaApplicationsUrl = `${vadaUrl}/applications`;
