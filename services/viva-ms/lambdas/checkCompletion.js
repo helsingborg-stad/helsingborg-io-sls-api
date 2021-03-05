@@ -11,11 +11,11 @@ const VADA_SSM_PARAMS = params.read(config.vada.envsKeyName);
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
 
 export async function main(event) {
-  const { hashedPersonalNumber, caseKeys } = event.detail;
+  const { personalNumberHashEncoded, caseKeys } = event.detail;
 
   const vadaSSMParams = await VADA_SSM_PARAMS;
   const [applicationStatusRequestError, applicationStatusList] = await to(
-    getApplicationStatus(hashedPersonalNumber, vadaSSMParams)
+    getApplicationStatus(personalNumberHashEncoded, vadaSSMParams)
   );
   if (applicationStatusRequestError) {
     throw applicationStatusRequestError;
