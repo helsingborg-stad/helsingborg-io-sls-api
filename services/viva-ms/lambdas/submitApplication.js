@@ -43,8 +43,8 @@ export async function main(event) {
   console.info('(Viva-ms)', sendApplicationsResponse);
 
   const caseKeys = {
-    SK: caseItem.PK,
-    PK: caseItem.SK,
+    PK: caseItem.PK,
+    SK: caseItem.SK,
   };
 
   const [putEventError] = await to(
