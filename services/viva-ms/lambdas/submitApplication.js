@@ -27,15 +27,15 @@ export async function main(event) {
     return true;
   }
 
-  const applicationRequestBody = getApplicationRequestBody(caseItem);
-
   const vadaSSMParams = await VADA_SSM_PARAMS;
   const { hashSalt, hashSaltLength } = vadaSSMParams;
   const personalNumber = caseItem.PK.substring(5);
   const personalNumberHashEncoded = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
+  const applicationRequestBody = getApplicationRequestBody(caseItem, personalNumberHashEncoded);
+
   const [sendApplicationError, sendApplicationsResponse] = await to(
-    sendApplicationsToViva(applicationRequestBody, personalNumberHashEncoded)
+    sendApplicationsToViva(applicationRequestBody)
   );
   if (sendApplicationError) {
     return console.error('(Viva-ms)', sendApplicationError);
@@ -91,7 +91,7 @@ async function sendApplicationsToViva(applicationRequestBody) {
   return vadaCreateRecurrentVivaApplicationResponse.data;
 }
 
-async function getApplicationRequestBody(caseItem, personalNumberHashEncoded) {
+function getApplicationRequestBody(caseItem, personalNumberHashEncoded) {
   const {
     forms: {
       [caseItem.currentFormId]: { answers },
