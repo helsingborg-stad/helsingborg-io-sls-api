@@ -114,7 +114,7 @@ async function queryCasesWithWorkflowId(PK, workflowId) {
 
 async function putRecurringVivaCase(PK, workflowId, period) {
   const ssmParams = await VIVA_CASE_SSM_PARAMS;
-  const { recurringFormId, randomCheckFormId } = ssmParams;
+  const { recurringFormId, completionFormId } = ssmParams;
   const id = uuid.v4();
   const timestampNow = Date.now();
   const initialStatus = getStatusByType('notStarted:viva');
@@ -131,7 +131,7 @@ async function putRecurringVivaCase(PK, workflowId, period) {
 
   const initialForms = {
     [recurringFormId]: initialFormAttributes,
-    [randomCheckFormId]: initialFormAttributes,
+    [completionFormId]: initialFormAttributes,
   };
 
   const putItemParams = {
