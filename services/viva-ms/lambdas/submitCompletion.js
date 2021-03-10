@@ -16,7 +16,9 @@ export async function main(event) {
   const caseItem = parseDynamoDBItemFromEvent(event);
 
   if (caseItem.currentFormId !== vivaCaseSsmParams.completionFormId) {
-    console.info('(viva-ms: submitApplication): currentFormId does not match completionFormId');
+    console.info(
+      '(viva-ms: submitApplication): currentFormId does not match completionFormId from ssm params'
+    );
     return false;
   }
 
@@ -30,8 +32,8 @@ export async function main(event) {
   if (attachmentListError) {
     throw attachmentListError;
   }
+  console.info('(viva-ms/submitCompletion): Answers converted to Attachment List', attachmentList);
 
-  // send attachments to viva.
   const { vadaUrl, xApiKeyToken, hashSalt, hashSaltLength } = await VADA_SSM_PARAMS;
 
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
@@ -51,7 +53,7 @@ export async function main(event) {
   if (sendVivaAdapterRequestError) {
     throw sendVivaAdapterRequestError;
   }
-  console.info(response);
+  console.info('(viva-ms/submitCompletion): Viva Adapter Post Request Response', response);
 
   return true;
 }
@@ -63,57 +65,6 @@ function parseDynamoDBItemFromEvent(event) {
   const dynamoDBItem = AWS.DynamoDB.Converter.unmarshall(event.detail.dynamodb.NewImage);
   return dynamoDBItem;
 }
-
-// const answers = [
-//   {
-//     field: {
-//       id: '1',
-//       tags: ['viva', 'attachment', 'category', 'expenses'],
-//     },
-//     value: [
-//       {
-//         fileame: 'test.jpg',
-//         uploadedFileName: '182c4d16-de4c-44df-9df5-3dbc98030280_somefile',
-//       },
-//       {
-//         fileame: 'test.jpg',
-//         uploadedFileName: 'does_not_exsits',
-//       },
-//     ],
-//   },
-//   {
-//     field: {
-//       id: '2',
-//       tags: ['viva', 'attachment', 'category', 'incomes'],
-//     },
-//     value: [
-//       {
-//         fileame: 'test.jpg',
-//         uploadedFileName: '182c4d16-de4c-44df-9df5-3dbc98030280_somefile',
-//       },
-//       {
-//         fileame: 'test.jpg',
-//         uploadedFileName: 'does_not_exsits',
-//       },
-//     ],
-//   },
-//   {
-//     field: {
-//       id: '3',
-//       tags: ['viva', 'attachment', 'category', 'completion'],
-//     },
-//     value: [
-//       {
-//         fileame: 'test.jpg',
-//         uploadedFileName: '182c4d16-de4c-44df-9df5-3dbc98030280_somefile',
-//       },
-//       {
-//         fileame: 'test.jpg',
-//         uploadedFileName: 'does_not_exsits',
-//       },
-//     ],
-//   },
-// ];
 
 function getAttachmentCategory(tags, attachmentCategories = ['expenses', 'incomes', 'completion']) {
   if (tags && tags.includes('viva') && tags.includes('attachment') && tags.includes('category')) {
@@ -143,10 +94,11 @@ async function answersToAttachmentList(personalNumber, answerList) {
     for (const valueItem of answer.value) {
       const s3FileKey = generateFileKey(personalNumber, valueItem.uploadedFileName);
 
-      // TODO: import bucketname from env
       const [getFileError, file] = await to(S3.getFile(process.env.BUCKET_NAME, s3FileKey));
       if (getFileError) {
-        console.info(s3FileKey, getFileError);
+        // Throwing the error for a single file would prevent all files from being retrived, since the loop would exit.
+        // So instead we log the error and continue the loop iteration.
+        console.error(s3FileKey, getFileError);
         continue;
       }
 
