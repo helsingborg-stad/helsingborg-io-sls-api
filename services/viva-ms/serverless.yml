@@ -143,4 +143,4 @@ functions:
                   status:
                     M:
                       type:
-                        S: [{ "prefix": "active:completionSubmitted:viva" }]
+                        S: [{ "prefix": "active:submitted:viva" }]
