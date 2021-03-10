@@ -32,6 +32,10 @@ provider:
       Resource: "*"
     - Effect: Allow
       Action:
+        - events:PutEvents
+      Resource: "*"
+    - Effect: Allow
+      Action:
         - s3:GetObject
       Resource:
         - Fn::ImportValue: ${self:custom.resourcesStage}-AttachmentsBucketArn
