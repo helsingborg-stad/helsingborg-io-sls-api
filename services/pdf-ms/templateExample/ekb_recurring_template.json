@@ -78,6 +78,14 @@
     {
       "pageIndex": 0,
       "x": 400,
+      "y": 233,
+      "fontSize": 11,
+      "text": "{{personalInfo.married}}",
+      "valueId": "personalInfo.married"
+    },
+    {
+      "pageIndex": 0,
+      "x": 400,
       "y": 152,
       "fontSize": 11,
       "text": "{{housingInfo.streetAddress}}",
@@ -118,7 +126,7 @@
     {
       "pageIndex": 1,
       "x": 400,
-      "y": 492,
+      "y": 509,
       "fontSize": 11,
       "text": "{{unemploymentAllowance}}",
       "valueId": "unemploymentAllowance"
@@ -126,7 +134,7 @@
     {
       "pageIndex": 1,
       "x": 400,
-      "y": 455,
+      "y": 472,
       "fontSize": 11,
       "text": "{{forsakringskassanAllowance}}",
       "valueId": "forsakringskassanAllowance"
@@ -134,7 +142,7 @@
     {
       "pageIndex": 1,
       "x": 400,
-      "y": 418,
+      "y": 434,
       "fontSize": 11,
       "text": "{{csnAllowance}}",
       "valueId": "csnAllowance"
@@ -142,7 +150,7 @@
     {
       "pageIndex": 1,
       "x": 400,
-      "y": 381,
+      "y": 396,
       "fontSize": 11,
       "text": "{{pensionAllowance}}",
       "valueId": "pensionAllowance"
@@ -150,7 +158,15 @@
     {
       "pageIndex": 1,
       "x": 400,
-      "y": 295,
+      "y": 358,
+      "fontSize": 11,
+      "text": "{{irs}}",
+      "valueId": "irs"
+    },
+    {
+      "pageIndex": 1,
+      "x": 400,
+      "y": 279,
       "fontSize": 11,
       "text": "{{salary.0.amount}}",
       "valueId": "salary.0.amount"
@@ -158,7 +174,7 @@
     {
       "pageIndex": 1,
       "x": 400,
-      "y": 258,
+      "y": 241,
       "fontSize": 11,
       "text": "{{salary.1.amount}}",
       "valueId": "salary.1.amount"
@@ -166,7 +182,7 @@
     {
       "pageIndex": 1,
       "x": 400,
-      "y": 221,
+      "y": 203,
       "fontSize": 11,
       "text": "{{salary.2.amount}}",
       "valueId": "salary.2.amount"
@@ -174,39 +190,23 @@
     {
       "pageIndex": 1,
       "x": 400,
-      "y": 184,
+      "y": 166,
       "fontSize": 11,
-      "text": "{{swish.0.amount}}",
-      "valueId": "swish.0.amount"
+      "text": "{{swish}}",
+      "valueId": "swish"
     },
     {
       "pageIndex": 1,
       "x": 400,
-      "y": 147,
-      "fontSize": 11,
-      "text": "{{swish.1.amount}}",
-      "valueId": "swish.1.amount"
-    },
-    {
-      "pageIndex": 1,
-      "x": 400,
-      "y": 110,
-      "fontSize": 11,
-      "text": "{{swish.2.amount}}",
-      "valueId": "swish.2.amount"
-    },
-    {
-      "pageIndex": 2,
-      "x": 400,
-      "y": 762,
+      "y": 128,
       "fontSize": 11,
       "text": "{{loanIncome}}",
       "valueId": "loanIncome"
     },
     {
-      "pageIndex": 2,
+      "pageIndex": 1,
       "x": 400,
-      "y": 725,
+      "y": 90,
       "fontSize": 11,
       "text": "{{pensionForeign}}",
       "valueId": "pensionForeign"
@@ -214,7 +214,7 @@
     {
       "pageIndex": 2,
       "x": 400,
-      "y": 691,
+      "y": 765,
       "fontSize": 11,
       "text": "{{otherIncome.0.amount}}",
       "valueId": "otherIncome.0.amount"
@@ -222,7 +222,7 @@
     {
       "pageIndex": 2,
       "x": 400,
-      "y": 654,
+      "y": 727,
       "fontSize": 11,
       "text": "{{otherIncome.1.amount}}",
       "valueId": "otherIncome.1.amount"
@@ -230,7 +230,7 @@
     {
       "pageIndex": 2,
       "x": 400,
-      "y": 617,
+      "y": 689,
       "fontSize": 11,
       "text": "{{otherIncome.2.amount}}",
       "valueId": "otherIncome.2.amount"
@@ -238,7 +238,7 @@
     {
       "pageIndex": 2,
       "x": 400,
-      "y": 543,
+      "y": 623,
       "fontSize": 11,
       "text": "{{rentRoomate}}",
       "valueId": "rentRoomate"
@@ -246,7 +246,7 @@
     {
       "pageIndex": 2,
       "x": 400,
-      "y": 506,
+      "y": 586,
       "fontSize": 11,
       "text": "{{electricityRoomate}}",
       "valueId": "electricityRoomate"
@@ -254,7 +254,7 @@
     {
       "pageIndex": 2,
       "x": 400,
-      "y": 469,
+      "y": 548,
       "fontSize": 11,
       "text": "{{internetRoomate}}",
       "valueId": "internetRoomate"
@@ -262,7 +262,7 @@
     {
       "pageIndex": 2,
       "x": 400,
-      "y": 355,
+      "y": 427,
       "fontSize": 11,
       "text": "{{noAssets}}",
       "valueId": "noAssets"
@@ -270,7 +270,7 @@
     {
       "pageIndex": 2,
       "x": 400,
-      "y": 297,
+      "y": 378,
       "fontSize": 11,
       "text": "{{carSum}}",
       "valueId": "carSum"
@@ -278,7 +278,7 @@
     {
       "pageIndex": 2,
       "x": 400,
-      "y": 260,
+      "y": 340,
       "fontSize": 11,
       "text": "{{bikeSum}}",
       "valueId": "bikeSum"
@@ -286,7 +286,15 @@
     {
       "pageIndex": 2,
       "x": 400,
-      "y": 223,
+      "y": 302,
+      "fontSize": 11,
+      "text": "{{othervehicleSum}}",
+      "valueId": "othervehicleSum"
+    },
+    {
+      "pageIndex": 2,
+      "x": 400,
+      "y": 264,
       "fontSize": 11,
       "text": "{{houseSum}}",
       "valueId": "houseSum"
@@ -294,7 +302,7 @@
     {
       "pageIndex": 2,
       "x": 400,
-      "y": 186,
+      "y": 226,
       "fontSize": 11,
       "text": "{{apartmentSum}}",
       "valueId": "apartmentSum"
@@ -302,7 +310,7 @@
     {
       "pageIndex": 2,
       "x": 400,
-      "y": 149,
+      "y": 189,
       "fontSize": 11,
       "text": "{{otherAsset.otherassetDescription}}, {{otherAsset.sum}}",
       "valueId": "otherAsset.sum"
@@ -342,7 +350,7 @@
     {
       "pageIndex": 3,
       "x": 400,
-      "y": 471,
+      "y": 475,
       "fontSize": 11,
       "text": "{{buscard}}",
       "valueId": "buscard"
@@ -350,7 +358,7 @@
     {
       "pageIndex": 3,
       "x": 400,
-      "y": 437,
+      "y": 435,
       "fontSize": 11,
       "text": "{{akassa}}",
       "valueId": "akassa"
@@ -358,15 +366,7 @@
     {
       "pageIndex": 3,
       "x": 400,
-      "y": 397,
-      "fontSize": 11,
-      "text": "{{fackavgift}}",
-      "valueId": "fackavgift"
-    },
-    {
-      "pageIndex": 3,
-      "x": 400,
-      "y": 360,
+      "y": 399,
       "fontSize": 11,
       "text": "{{medicine.0.amount}}",
       "valueId": "medicine.0.amount"
@@ -374,7 +374,7 @@
     {
       "pageIndex": 3,
       "x": 400,
-      "y": 323,
+      "y": 362,
       "fontSize": 11,
       "text": "{{medicine.1.amount}}",
       "valueId": "medicine.1.amount"
@@ -382,7 +382,7 @@
     {
       "pageIndex": 3,
       "x": 400,
-      "y": 286,
+      "y": 324,
       "fontSize": 11,
       "text": "{{medicine.2.amount}}",
       "valueId": "medicine.2.amount"
@@ -390,7 +390,7 @@
     {
       "pageIndex": 3,
       "x": 400,
-      "y": 249,
+      "y": 286,
       "fontSize": 11,
       "text": "{{doctorsappointments.0.amount}}",
       "valueId": "doctorsappointments.0.amount"
@@ -398,7 +398,7 @@
     {
       "pageIndex": 3,
       "x": 400,
-      "y": 212,
+      "y": 248,
       "fontSize": 11,
       "text": "{{doctorsappointments.1.amount}}",
       "valueId": "doctorsappointments.1.amount"
@@ -406,7 +406,7 @@
     {
       "pageIndex": 3,
       "x": 400,
-      "y": 175,
+      "y": 210,
       "fontSize": 11,
       "text": "{{doctorsappointments.2.amount}}",
       "valueId": "doctorsappointments.2.amount"
@@ -414,7 +414,7 @@
     {
       "pageIndex": 3,
       "x": 400,
-      "y": 138,
+      "y": 173,
       "fontSize": 11,
       "text": "{{otherExpenses.0.amount}}",
       "valueId": "otherExpenses.0.amount"
@@ -422,15 +422,15 @@
     {
       "pageIndex": 3,
       "x": 400,
-      "y": 101,
+      "y": 135,
       "fontSize": 11,
       "text": "{{otherExpenses.1.amount}}",
       "valueId": "otherExpenses.1.amount"
     },
     {
-      "pageIndex": 4,
+      "pageIndex": 3,
       "x": 400,
-      "y": 762,
+      "y": 97,
       "fontSize": 11,
       "text": "{{otherExpenses.2.amount}}",
       "valueId": "otherExpenses.2.amount"
@@ -438,7 +438,7 @@
     {
       "pageIndex": 4,
       "x": 400,
-      "y": 725,
+      "y": 764,
       "fontSize": 11,
       "text": "{{emergencyDentalcare.0.amount}}",
       "valueId": "emergencyDentalcare.0.amount"
@@ -446,7 +446,7 @@
     {
       "pageIndex": 4,
       "x": 400,
-      "y": 688,
+      "y": 726,
       "fontSize": 11,
       "text": "{{emergencyDentalcare.1.amount}}",
       "valueId": "emergencyDentalcare.1.amount"
@@ -454,7 +454,7 @@
     {
       "pageIndex": 4,
       "x": 400,
-      "y": 651,
+      "y": 688,
       "fontSize": 11,
       "text": "{{plannedDentalcare.0.amount}}",
       "valueId": "plannedDentalcare.0.amount"
@@ -462,7 +462,7 @@
     {
       "pageIndex": 4,
       "x": 400,
-      "y": 614,
+      "y": 650,
       "fontSize": 11,
       "text": "{{plannedDentalcare.1.amount}}",
       "valueId": "plannedDentalcare.1.amount"
@@ -470,7 +470,7 @@
     {
       "pageIndex": 4,
       "x": 400,
-      "y": 577,
+      "y": 612,
       "fontSize": 11,
       "text": "{{otherDentalcare}}",
       "valueId": "otherDentalcare"
@@ -478,7 +478,7 @@
     {
       "pageIndex": 4,
       "x": 400,
-      "y": 503,
+      "y": 546,
       "fontSize": 11,
       "text": "{{barnomsorg}}",
       "valueId": "barnomsorg"
