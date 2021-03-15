@@ -101,8 +101,32 @@ async function getOfficers(personalNumber) {
   return response.data.person.cases.vivacases.vivacase.officers;
 }
 
+async function postApplication(payload) {
+  const { hashid, applicationType, answers, rawData, rawDataType, workflowId } = payload;
+  const requestParams = {
+    endpoint: 'applications',
+    method: 'post',
+    body: {
+      applicationType,
+      hashid,
+      answers,
+      rawData,
+      rawDataType,
+      workflowId,
+    },
+  };
+
+  const [sendVivaAdapterRequestError, response] = await to(sendVivaAdapterRequest(requestParams));
+  if (sendVivaAdapterRequestError) {
+    throw sendVivaAdapterRequestError;
+  }
+
+  return response.data;
+}
+
 export default {
   completion: { post: postCompletion },
   workflow: { get: getWorkflow },
   officers: { get: getOfficers },
+  application: { post: postApplication },
 };
