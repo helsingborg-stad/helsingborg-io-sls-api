@@ -1,16 +1,11 @@
 /* eslint-disable no-console */
 import to from 'await-to-js';
 import deepEqual from 'deep-equal';
-import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
 import config from '../../../config';
-import params from '../../../libs/params';
-import hash from '../../../libs/helperHashEncode';
-import * as request from '../../../libs/request';
 import * as dynamoDb from '../../../libs/dynamoDb';
 import { getStatusByType } from '../../../libs/caseStatuses';
-
-const SSMParams = params.read(config.vada.envsKeyName);
+import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
 const CASE_WORKFLOW_PATH = 'details.workflow';
 
@@ -54,50 +49,20 @@ async function syncCaseWorkflows(cases, personalNumber) {
       continue;
     }
 
-    const [vadaMyPagesError, vadaMyPagesResponse] = await to(
-      sendVadaMyPagesRequest(personalNumber, workflowId)
+    const [getWorkflowError, workflow] = await to(
+      vivaAdapter.workflow.get({
+        personalNumber,
+        workflowId,
+      })
     );
-    if (vadaMyPagesError) {
-      return console.error('(Viva-ms) syncWorkflow', vadaMyPagesError);
+    if (getWorkflowError) {
+      return console.error('(Viva-ms) syncWorkflow', getWorkflowError);
     }
 
-    if (!deepEqual(vadaMyPagesResponse.attributes, caseItem.details.workflow)) {
-      await syncWorkflowAndStatus(caseItem.PK, caseItem.SK, vadaMyPagesResponse.attributes);
-    }
-  }
-}
-
-async function sendVadaMyPagesRequest(personalNumber, workflowId) {
-  const ssmParams = await SSMParams;
-
-  const { hashSalt, hashSaltLength } = ssmParams;
-  const personalNumberEncoded = hash.encode(personalNumber, hashSalt, hashSaltLength);
-  const { vadaUrl, xApiKeyToken } = ssmParams;
-
-  const requestClient = request.requestClient({}, { 'x-api-key': xApiKeyToken });
-
-  const vadaMyPagesUrl = `${vadaUrl}/mypages/${personalNumberEncoded}/workflows/${workflowId}`;
-
-  const [error, vadaMyPagesResponse] = await to(
-    request.call(requestClient, 'get', vadaMyPagesUrl, null)
-  );
-
-  if (error) {
-    if (error.response) {
-      // The request was made and the server responded with a
-      // status code that falls out of the range of 2xx
-      throwError(error.response.status, error.response.data.message);
-    } else if (error.request) {
-      // The request was made but no response was received
-      // `error.request` is an instance of http.ClientRequest in node.js
-      throwError(500, error.request.message);
-    } else {
-      // Something happened in setting up the request that triggered an Error
-      throwError(500, error.message);
+    if (!deepEqual(workflow.attributes, caseItem.details.workflow)) {
+      await syncWorkflowAndStatus(caseItem.PK, caseItem.SK, workflow.attributes);
     }
   }
-
-  return vadaMyPagesResponse.data;
 }
 
 async function syncWorkflowAndStatus(PK, SK, workflow) {
