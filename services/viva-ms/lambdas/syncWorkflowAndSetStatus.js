@@ -13,7 +13,10 @@ export async function main(event) {
   const personalNumber = event.detail.user.personalNumber;
   const PK = `USER#${personalNumber}`;
 
-  const allUserCases = await getAllUserCases(PK);
+  const [getAllUserCasesError, allUserCases] = await to(getAllUserCases(PK));
+  if (getAllUserCasesError) {
+    return console.error('(Viva-ms) DynamoDB query failed', getAllUserCasesError);
+  }
 
   await syncCaseWorkflows(allUserCases, personalNumber);
 
@@ -31,12 +34,7 @@ async function getAllUserCases(PK) {
     },
   };
 
-  const [error, casesGetResponse] = await to(dynamoDb.call('query', params));
-  if (error) {
-    return console.error('(Viva-ms) syncWorkflow', error);
-  }
-
-  return casesGetResponse;
+  return dynamoDb.call('query', params);
 }
 
 async function syncCaseWorkflows(cases, personalNumber) {
