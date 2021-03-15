@@ -124,9 +124,27 @@ async function postApplication(payload) {
   return response.data;
 }
 
+async function getApplication(personalNumber) {
+  const { hashSalt, hashSaltLength } = await VADA_SSM_PARAMS;
+
+  const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
+
+  const requestParams = {
+    endpoint: `mypages/${hashedPersonalNumber}`,
+    method: 'get',
+  };
+
+  const [sendVivaAdapterRequestError, response] = await to(sendVivaAdapterRequest(requestParams));
+  if (sendVivaAdapterRequestError) {
+    throw sendVivaAdapterRequestError;
+  }
+
+  return response.data.person.application.vivaapplication;
+}
+
 export default {
   completion: { post: postCompletion },
   workflow: { get: getWorkflow },
   officers: { get: getOfficers },
-  application: { post: postApplication },
+  application: { post: postApplication, get: getApplication },
 };
