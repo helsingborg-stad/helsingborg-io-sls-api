@@ -1,16 +1,11 @@
 /* eslint-disable no-console */
 import to from 'await-to-js';
 import deepEqual from 'deep-equal';
-import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
 import config from '../../../config';
-import params from '../../../libs/params';
-import hash from '../../../libs/helperHashEncode';
-import * as request from '../../../libs/request';
 import * as dynamoDb from '../../../libs/dynamoDb';
 import { getStatusByType } from '../../../libs/caseStatuses';
-
-const SSMParams = params.read(config.vada.envsKeyName);
+import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
 const CASE_WORKFLOW_PATH = 'details.workflow';
 
@@ -23,25 +18,7 @@ export async function main(event) {
     return console.error('(Viva-ms) DynamoDB query failed', getAllUserCasesError);
   }
 
-  const userCaseItems = allUserCases.Items;
-  if (userCaseItems === undefined || userCaseItems.length === 0) {
-    return console.error('(Viva-ms) DynamoDB query did not fetch any cases');
-  }
-
-  for (const userCase of userCaseItems) {
-    const workflowId = userCase.details.workflowId;
-
-    const [myPagesError, myPagesResponse] = await to(
-      sendVadaMyPagesRequest(personalNumber, workflowId)
-    );
-    if (myPagesError) {
-      return console.error('(Viva-ms) My pages request error', myPagesError);
-    }
-
-    if (!deepEqual(myPagesResponse.attributes, userCase.details?.workflow)) {
-      await syncWorkflowAndStatus(userCase.PK, userCase.SK, myPagesResponse.attributes);
-    }
-  }
+  await syncCaseWorkflows(allUserCases, personalNumber);
 
   return true;
 }
@@ -57,40 +34,33 @@ async function getAllUserCases(PK) {
     },
   };
 
-  return await dynamoDb.call('query', params);
+  return dynamoDb.call('query', params);
 }
 
-async function sendVadaMyPagesRequest(personalNumber, workflowId) {
-  const ssmParams = await SSMParams;
+async function syncCaseWorkflows(cases, personalNumber) {
+  const caseItems = cases.Items;
 
-  const { hashSalt, hashSaltLength } = ssmParams;
-  const personalNumberEncoded = hash.encode(personalNumber, hashSalt, hashSaltLength);
-  const { vadaUrl, xApiKeyToken } = ssmParams;
+  for (const caseItem of caseItems) {
+    const workflowId = caseItem.details.workflowId;
 
-  const requestClient = request.requestClient({}, { 'x-api-key': xApiKeyToken });
+    if (!workflowId) {
+      continue;
+    }
 
-  const vadaMyPagesUrl = `${vadaUrl}/mypages/${personalNumberEncoded}/workflows/${workflowId}`;
+    const [getWorkflowError, workflow] = await to(
+      vivaAdapter.workflow.get({
+        personalNumber,
+        workflowId,
+      })
+    );
+    if (getWorkflowError) {
+      return console.error('(Viva-ms) syncWorkflow', getWorkflowError);
+    }
 
-  const [error, vadaMyPagesResponse] = await to(
-    request.call(requestClient, 'get', vadaMyPagesUrl, null)
-  );
-
-  if (error) {
-    if (error.response) {
-      // The request was made and the server responded with a
-      // status code that falls out of the range of 2xx
-      throwError(error.response.status, error.response.data.message);
-    } else if (error.request) {
-      // The request was made but no response was received
-      // `error.request` is an instance of http.ClientRequest in node.js
-      throwError(500, error.request.message);
-    } else {
-      // Something happened in setting up the request that triggered an Error
-      throwError(500, error.message);
+    if (!deepEqual(workflow.attributes, caseItem.details.workflow)) {
+      await syncWorkflowAndStatus(caseItem.PK, caseItem.SK, workflow.attributes);
     }
   }
-
-  return vadaMyPagesResponse.data;
 }
 
 function getWorkflowIds(cases) {
