@@ -8,8 +8,7 @@ const VADA_SSM_PARAMS = params.read(config.vada.envsKeyName);
 
 const REQUEST_TIMEOUT_IN_MS = 15000;
 
-async function sendVivaAdapterRequest(requestParams) {
-  const { endpoint, method, body } = requestParams;
+async function sendVivaAdapterRequest({ endpoint, method, body = undefined }) {
   const { vadaUrl, xApiKeyToken } = await VADA_SSM_PARAMS;
 
   const requestClient = request.requestClient(
@@ -64,6 +63,27 @@ async function postCompletion(payload) {
   return response;
 }
 
+async function getWorkflow(payload) {
+  const { personalNumber, workflowId } = payload;
+
+  const { hashSalt, hashSaltLength } = await VADA_SSM_PARAMS;
+
+  const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
+
+  const requestParams = {
+    endpoint: `mypages/${hashedPersonalNumber}/workflows/${workflowId}`,
+    method: 'get',
+  };
+
+  const [sendVivaAdapterRequestError, response] = await to(sendVivaAdapterRequest(requestParams));
+  if (sendVivaAdapterRequestError) {
+    throw sendVivaAdapterRequestError;
+  }
+
+  return response.data;
+}
+
 export default {
   completion: { post: postCompletion },
+  workflow: { get: getWorkflow },
 };
