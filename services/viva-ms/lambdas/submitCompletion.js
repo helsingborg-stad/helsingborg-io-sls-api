@@ -4,12 +4,9 @@ import S3 from '../../../libs/S3';
 import { to } from 'await-to-js';
 import params from '../../../libs/params';
 import config from '../../../config';
-import * as request from '../../../libs/request';
-import { throwError } from '@helsingborg-stad/npm-api-error-handling';
-import hash from '../../../libs/helperHashEncode';
+import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
-const VADA_SSM_PARAMS = params.read(config.vada.envsKeyName);
 
 export async function main(event) {
   const vivaCaseSsmParams = await VIVA_CASE_SSM_PARAMS;
@@ -34,26 +31,21 @@ export async function main(event) {
   }
   console.info('(viva-ms/submitCompletion): Answers converted to Attachment List', attachmentList);
 
-  const { vadaUrl, xApiKeyToken, hashSalt, hashSaltLength } = await VADA_SSM_PARAMS;
-
-  const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
-  const requestParams = {
-    url: `${vadaUrl}/applications/${hashedPersonalNumber}/completions`,
-    method: 'post',
-    headers: {
-      'x-api-key': xApiKeyToken,
-    },
-    body: {
+  const [postCompletionError, postCompletionResponse] = await to(
+    vivaAdapter.completion.post({
+      personalNumber,
       workflowId: caseItem.details.workflowId,
       attachments: attachmentList,
-    },
-  };
-
-  const [sendVivaAdapterRequestError, response] = await to(sendVivaAdapterRequest(requestParams));
-  if (sendVivaAdapterRequestError) {
-    throw sendVivaAdapterRequestError;
+    })
+  );
+  if (postCompletionError) {
+    throw postCompletionError;
   }
-  console.info('(viva-ms/submitCompletion): Viva Adapter Post Request Response', response);
+
+  console.info(
+    '(viva-ms/submitCompletion): Viva Adapter Post Request Response',
+    postCompletionResponse
+  );
 
   return true;
 }
@@ -114,28 +106,4 @@ async function answersToAttachmentList(personalNumber, answerList) {
   }
 
   return attachmentList;
-}
-
-async function sendVivaAdapterRequest(requestParams) {
-  const { url, method, headers, body } = await requestParams;
-  const requestClient = request.requestClient({}, headers);
-
-  const [requestError, response] = await to(request.call(requestClient, method, url, body));
-
-  if (requestError) {
-    if (requestError.response) {
-      // The request was made and the server responded with a
-      // status code that falls out of the range of 2xx
-      throwError(requestError.response.status, requestError.response.data.message);
-    } else if (requestError.request) {
-      // The request was made but no response was received
-      // `error.request` is an instance of http.ClientRequest in node.js
-      throwError(500, requestError.request.message);
-    } else {
-      // Something happened in setting up the request that triggered an Error
-      throwError(500, requestError.message);
-    }
-  }
-
-  return response.data;
 }
