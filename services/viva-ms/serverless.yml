@@ -86,6 +86,7 @@ functions:
 
   syncOfficers:
     handler: lambdas/syncOfficers.main
+    timeout: 15
     events:
       - eventBridge:
           pattern:
@@ -113,6 +114,7 @@ functions:
 
   syncWorkflowAndSetStatus:
     handler: lambdas/syncWorkflowAndSetStatus.main
+    timeout: 15
     events:
       - eventBridge:
           pattern:
@@ -123,6 +125,7 @@ functions:
 
   checkCompletion:
     handler: lambdas/checkCompletion.main
+    timeout: 15
     events:
       - eventBridge:
           pattern:
@@ -131,6 +134,7 @@ functions:
 
   submitCompletion:
     handler: lambdas/submitCompletion.main
+    timeout: 15
     environment:
       BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-AttachmentsBucketName
     events:
