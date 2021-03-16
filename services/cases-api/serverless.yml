@@ -35,23 +35,25 @@ provider:
       cases:
         "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayResourceCases
 
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - dynamodb:Query
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:DeleteItem
-        - dynamodb:UpdateItem
-      # Restrict our IAM role permissions to the specific table for the stage
-      Resource:
-        - "Fn::ImportValue": ${self:custom.resourcesStage}-CasesTableArn
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:DeleteItem
+            - dynamodb:UpdateItem
+          # Restrict our IAM role permissions to the specific table for the stage
+          Resource:
+            - "Fn::ImportValue": ${self:custom.resourcesStage}-CasesTableArn
 
-    - Effect: Allow
-      Action:
-        - dynamodb:Query
-      Resource:
-        - "Fn::ImportValue": ${self:custom.resourcesStage}-FormsTableArn
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+          Resource:
+            - "Fn::ImportValue": ${self:custom.resourcesStage}-FormsTableArn
 
 functions:
   getCase:
