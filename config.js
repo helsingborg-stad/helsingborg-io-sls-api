@@ -183,7 +183,7 @@ const stageConfigs = {
 
 const config = stageConfigs[stage] || stageConfigs.dev;
 
-export default {
+module.exports.default = {
   stage,
   resourcesStage,
   ...config,

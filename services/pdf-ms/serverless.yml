@@ -41,7 +41,8 @@ provider:
     - Effect: Allow
       Action:
         - SSM:GetParameter
-      Resource: "*"
+      Resource: 
+        - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter:${file(../../config.js):default.pdf.envsKeyName}"
 
     - Effect: Allow
       Action:

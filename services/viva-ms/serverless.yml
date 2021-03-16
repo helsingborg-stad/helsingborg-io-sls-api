@@ -29,7 +29,9 @@ provider:
     - Effect: Allow
       Action:
         - SSM:GetParameter
-      Resource: "*"
+      Resource:
+        - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter:${file(../../config.js):default.vada.envsKeyName}"
+        - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter:${file(../../config.js):default.cases.providers.viva.envsKeyName}"
     - Effect: Allow
       Action:
         - events:PutEvents
