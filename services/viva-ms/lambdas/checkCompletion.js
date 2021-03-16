@@ -4,21 +4,21 @@ import to from 'await-to-js';
 import config from '../../../config';
 import params from '../../../libs/params';
 import * as dynamoDb from '../../../libs/dynamoDb';
-import { getApplicationStatus, isApplicationStatusCorrect } from '../helpers/applicationStatus';
+import validateApplicationStatus from '../helpers/validateApplicationStatus';
 import { getStatusByType } from '../../../libs/caseStatuses';
+import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
-const VADA_SSM_PARAMS = params.read(config.vada.envsKeyName);
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
 
 export async function main(event) {
-  const { personalNumberHashEncoded, caseKeys } = event.detail;
+  const { caseKeys } = event.detail;
 
-  const vadaSSMParams = await VADA_SSM_PARAMS;
-  const [applicationStatusRequestError, applicationStatusList] = await to(
-    getApplicationStatus(personalNumberHashEncoded, vadaSSMParams)
+  const personalNumber = caseKeys.PK.substring(5);
+  const [applicationStatusError, applicationStatusList] = await to(
+    vivaAdapter.application.status(personalNumber)
   );
-  if (applicationStatusRequestError) {
-    throw applicationStatusRequestError;
+  if (applicationStatusError) {
+    throw applicationStatusError;
   }
 
   /**
@@ -30,7 +30,7 @@ export async function main(event) {
    * 512 - Application allows e-application
    */
   const completionStatusCodes = [64, 128, 256, 512];
-  if (!isApplicationStatusCorrect(applicationStatusList, completionStatusCodes)) {
+  if (!validateApplicationStatus(applicationStatusList, completionStatusCodes)) {
     throw 'no completion status found in viva adapter response';
   }
 
