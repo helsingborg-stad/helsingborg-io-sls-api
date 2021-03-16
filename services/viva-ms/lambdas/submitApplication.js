@@ -4,11 +4,9 @@ import to from 'await-to-js';
 
 import config from '../../../config';
 import params from '../../../libs/params';
-import hash from '../../../libs/helperHashEncode';
 import { putEvent } from '../../../libs/awsEventBridge';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
-const VADA_SSM_PARAMS = params.read(config.vada.envsKeyName);
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
 
 const dynamoDbConverter = AWS.DynamoDB.Converter;
@@ -26,10 +24,7 @@ export async function main(event) {
     return true;
   }
 
-  const vadaSSMParams = await VADA_SSM_PARAMS;
-  const { hashSalt, hashSaltLength } = vadaSSMParams;
   const personalNumber = caseItem.PK.substring(5);
-  const personalNumberHashEncoded = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
   const {
     forms: {
@@ -42,7 +37,7 @@ export async function main(event) {
   const [applicationPostError, applicationResponse] = await to(
     vivaAdapter.application.post({
       applicationType: 'recurrent',
-      hashid: personalNumberHashEncoded,
+      personalNumber,
       workflowId,
       answers,
       rawData: pdfBinaryBuffer.toString(),
@@ -62,7 +57,6 @@ export async function main(event) {
   const [putEventError] = await to(
     putEvent(
       {
-        personalNumberHashEncoded,
         caseKeys,
       },
       'vivaMsSubmitApplicationSuccess',

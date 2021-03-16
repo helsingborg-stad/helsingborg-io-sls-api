@@ -4,29 +4,21 @@ import uuid from 'uuid';
 
 import config from '../../../config';
 import params from '../../../libs/params';
-import hash from '../../../libs/helperHashEncode';
 import { putItem } from '../../../libs/queries';
 import * as dynamoDB from '../../../libs/dynamoDb';
 import { CASE_PROVIDER_VIVA } from '../../../libs/constants';
 import { getStatusByType } from '../../../libs/caseStatuses';
-import { getApplicationStatus, isApplicationStatusCorrect } from '../helpers/applicationStatus';
+import validateApplicationStatus from '../helpers/validateApplicationStatus';
 
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
-const VADA_SSM_PARAMS = params.read(config.vada.envsKeyName);
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
 
 export async function main(event) {
   const { user } = event.detail;
-  const vadaSSMParams = await VADA_SSM_PARAMS;
 
-  const hahsedPersonalNumber = hash.encode(
-    user.personalNumber,
-    vadaSSMParams.hashSalt,
-    vadaSSMParams.hashSaltLength
-  );
-  const [applicationStatusError, applicationStatusResponse] = await to(
-    getApplicationStatus(hahsedPersonalNumber, vadaSSMParams)
+  const [applicationStatusError, applicationStatusList] = await to(
+    vivaAdapter.application.status(user.personalNumber)
   );
   if (applicationStatusError) {
     return console.error('(Viva-ms) Viva Application Status', applicationStatusError);
@@ -41,11 +33,11 @@ export async function main(event) {
    * 512 - Application allows e-application
    */
   const requiredStatusCodes = [1, 128, 256, 512];
-  if (!isApplicationStatusCorrect(applicationStatusResponse, requiredStatusCodes)) {
+  if (!validateApplicationStatus(applicationStatusList, requiredStatusCodes)) {
     return console.info(
       '(Viva-ms) syncApplicationStatus',
       'Application period is not open',
-      applicationStatusResponse
+      applicationStatusList
     );
   }
 
