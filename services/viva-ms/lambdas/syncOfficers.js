@@ -18,7 +18,7 @@ export async function main(event) {
 
   const unMarshalledCaseData = dynamoDbConverter.unmarshall(event.detail.dynamodb.NewImage);
 
-  const { details } = unMarshalledCaseData;
+  const { PK, SK, details } = unMarshalledCaseData;
   if (!('administrators' in details)) {
     details['administrators'] = [];
   }
@@ -40,7 +40,6 @@ export async function main(event) {
   }
 
   const TableName = config.cases.tableName;
-  const { PK, SK } = unMarshalledCaseData;
 
   const UpdateExpression = 'SET details.administrators = :newAdministrators';
   const ExpressionAttributeValues = { ':newAdministrators': vivaAdministrators };
