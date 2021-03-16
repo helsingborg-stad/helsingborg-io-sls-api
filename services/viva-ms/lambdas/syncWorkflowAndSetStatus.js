@@ -18,6 +18,9 @@ export async function main(event) {
     return console.error('(Viva-ms) DynamoDB query failed', getAllUserCasesError);
   }
 
+  const workflowIds = getWorkflowIds(allUserCases);
+  await syncCaseWorkflowsRew(workflowIds, personalNumber);
+
   await syncCaseWorkflows(allUserCases, personalNumber);
 
   return true;
@@ -36,6 +39,25 @@ async function getAllUserCases(PK) {
 
   return dynamoDb.call('query', params);
 }
+
+function getWorkflowIds(cases) {
+  const workflowIds = [];
+  const caseItems = cases.Items;
+
+  for (const caseItem of caseItems) {
+    const workflowId = caseItem.details.workflowId;
+    if (!workflowId) {
+      continue;
+    }
+
+    workflowIds.push(workflowId);
+  }
+
+  return workflowIds;
+}
+
+// eslint-disable-next-line no-unused-vars
+async function syncCaseWorkflowsRew(workflows, personalNumber) {}
 
 async function syncCaseWorkflows(cases, personalNumber) {
   const caseItems = cases.Items;
