@@ -312,8 +312,8 @@
       "x": 400,
       "y": 189,
       "fontSize": 11,
-      "text": "{{otherAsset.otherassetDescription}}, {{otherAsset.sum}}",
-      "valueId": "otherAsset.sum"
+      "text":  "{{otherAsset.0.amount}}",
+      "valueId": "otherAsset.0.amount"
     },
     {
       "pageIndex": 3,
