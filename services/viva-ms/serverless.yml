@@ -131,6 +131,8 @@ functions:
           pattern:
             source:
               - vivaMs.submitApplication
+            detail-type:
+              - vivaMsSubmitApplicationSuccess
 
   submitCompletion:
     handler: lambdas/submitCompletion.main
