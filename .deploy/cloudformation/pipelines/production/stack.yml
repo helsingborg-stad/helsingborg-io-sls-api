@@ -185,7 +185,7 @@ Resources:
                     },
                     {
                       "name": "ENV",
-                      "value": "production"
+                      "value": "prod"
                     }
                   ]
               InputArtifacts: 
