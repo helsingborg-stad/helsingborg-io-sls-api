@@ -36,7 +36,7 @@ async function sendVivaAdapterRequest({ endpoint, method, body = undefined }) {
     }
   }
 
-  return response.data;
+  return response;
 }
 
 async function postCompletion(payload) {
@@ -60,7 +60,7 @@ async function postCompletion(payload) {
     throw sendVivaAdapterRequestError;
   }
 
-  return response;
+  return response.data;
 }
 
 async function getWorkflow(payload) {
