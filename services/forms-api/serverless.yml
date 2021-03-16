@@ -11,6 +11,7 @@ package:
   individually: true
 
 provider:
+  lambdaHashingVersion: 20201221
   name: aws
   runtime: nodejs12.x
   stage: dev
@@ -34,18 +35,20 @@ provider:
       forms:
         "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayResourceForms
 
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - dynamodb:Query
-        - dynamodb:Scan
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:UpdateItem
-        - dynamodb:DeleteItem
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
 
-      Resource:
-        - "Fn::ImportValue": ${self:custom.resourcesStage}-FormsTableArn
+          Resource:
+            - "Fn::ImportValue": ${self:custom.resourcesStage}-FormsTableArn
 
 functions:
   getFormList:

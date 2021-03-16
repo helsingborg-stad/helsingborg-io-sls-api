@@ -10,6 +10,7 @@ package:
   individually: true
 
 provider:
+  lambdaHashingVersion: 20201221
   name: aws
   runtime: nodejs12.x
   stage: dev
@@ -23,23 +24,28 @@ provider:
     stage: ${self:custom.stage}
     resourcesStage: ${self:custom.resourcesStage}
 
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - s3:*
-      Resource: "*"
-    - Effect: Allow
-      Action:
-        - SSM:GetParameter
-      Resource: "*"
-    - Effect: Allow
-      Action:
-        - events:PutEvents
-      Resource: "*"
-    - Effect: Allow
-      Action:
-        - cloudwatch:*
-      Resource: "*"
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - s3:*
+          Resource: "*"
+
+        - Effect: Allow
+          Action:
+            - SSM:GetParameter
+          Resource: "*"
+
+        - Effect: Allow
+          Action:
+            - events:PutEvents
+          Resource: "*"
+
+        - Effect: Allow
+          Action:
+            - cloudwatch:*
+          Resource: "*"
 
 functions:
   poll:
