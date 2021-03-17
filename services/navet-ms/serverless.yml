@@ -36,7 +36,7 @@ provider:
       Action:
         - SSM:GetParameter
       Resource: 
-        - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter:${file(../../config.js):default.navet.envsKeyName}"
+        - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter:${file(../../config.json):${self:custom.stage}.navet.envsKeyName}"
     - Effect: Allow
       Action:
         - events:PutEvents
