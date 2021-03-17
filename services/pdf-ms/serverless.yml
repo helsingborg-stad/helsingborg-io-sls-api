@@ -37,35 +37,37 @@ provider:
     stage: ${self:custom.stage}
     resourcesStage: ${self:custom.resourcesStage}
 
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - SSM:GetParameter
-      Resource: "*"
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - SSM:GetParameter
+          Resource: "*"
 
-    - Effect: Allow
-      Action:
-        - dynamodb:Query
-        - dynamodb:UpdateItem
-      Resource:
-        - Fn::ImportValue: ${self:custom.resourcesStage}-CasesTableArn
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:UpdateItem
+          Resource:
+            - Fn::ImportValue: ${self:custom.resourcesStage}-CasesTableArn
 
-    - Effect: Allow
-      Action:
-        - dynamodb:GetItem
-      Resource:
-        - "Fn::ImportValue": ${self:custom.resourcesStage}-UsersTableArn
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+          Resource:
+            - "Fn::ImportValue": ${self:custom.resourcesStage}-UsersTableArn
 
-    - Effect: Allow
-      Action:
-        - s3:GetObject
-        - s3:PutObject
-      Resource:
-        - Fn::ImportValue: ${self:custom.resourcesStage}-PdfTemplatesBucketArn
-        - Fn::Join:
-            - ""
-            - - Fn::ImportValue: ${self:custom.resourcesStage}-PdfTemplatesBucketArn
-              - "/*"
+        - Effect: Allow
+          Action:
+            - s3:GetObject
+            - s3:PutObject
+          Resource:
+            - Fn::ImportValue: ${self:custom.resourcesStage}-PdfTemplatesBucketArn
+            - Fn::Join:
+                - ""
+                - - Fn::ImportValue: ${self:custom.resourcesStage}-PdfTemplatesBucketArn
+                  - "/*"
 
 functions:
   addPdfToCase:
