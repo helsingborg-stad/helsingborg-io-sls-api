@@ -107,14 +107,21 @@ async function syncWorkflowAndStatus(PK, SK, workflow) {
   const ExpressionAttributeValues = { ':newWorkflow': workflow };
   const ExpressionAttributeNames = {};
 
-  if (workflow.decision?.decisions?.decision?.type?.typecode === '01') {
-    UpdateExpression += ', #status = :newStatus';
-    ExpressionAttributeNames['#status'] = 'status';
+  const typeCode = workflow.decision?.decisions?.decision?.type?.typecode;
+
+  if (typeCode === '01') {
     ExpressionAttributeValues[':newStatus'] = getStatusByType('closed:approved:viva');
+  } else if (typeCode === '02') {
+    ExpressionAttributeValues[':newStatus'] = getStatusByType('closed:rejected:viva');
+  } else if (typeCode === '03') {
+    ExpressionAttributeValues[':newStatus'] = getStatusByType('closed:partiallyApproved:viva');
   } else if (workflow.calculations) {
+    ExpressionAttributeValues[':newStatus'] = getStatusByType('active:processing');
+  }
+
+  if (ExpressionAttributeValues[':newStatus']) {
     UpdateExpression += ', #status = :newStatus';
     ExpressionAttributeNames['#status'] = 'status';
-    ExpressionAttributeValues[':newStatus'] = getStatusByType('active:processing');
   }
 
   const params = {
