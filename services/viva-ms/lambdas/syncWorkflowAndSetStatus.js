@@ -23,10 +23,25 @@ export async function main(event) {
     return console.error('(Viva-ms) DynamoDB query failed', getAllUserCasesError);
   }
 
-  const workflowIds = getWorkflowIds(allUserCases);
-  await syncCaseWorkflowsRew(workflowIds, personalNumber);
+  const userCaseItems = allUserCases.Items;
+  if (userCaseItems === undefined || userCaseItems.length === 0) {
+    return console.error('(Viva-ms) DynamoDB query did not fetch any cases');
+  }
 
-  await syncCaseWorkflows(allUserCases, personalNumber);
+  for (const userCase of userCaseItems) {
+    const workflowId = userCase.details.workflowId;
+
+    const [myPagesError, myPagesResponse] = await to(
+      sendVadaMyPagesRequest(personalNumber, workflowId)
+    );
+    if (myPagesError) {
+      return console.error('(Viva-ms) My pages request error', myPagesError);
+    }
+
+    if (!deepEqual(myPagesResponse.attributes, userCase.details?.workflow)) {
+      await syncWorkflowAndStatus(userCase.PK, userCase.SK, myPagesResponse.attributes);
+    }
+  }
 
   return true;
 }
@@ -42,49 +57,7 @@ async function getAllUserCases(PK) {
     },
   };
 
-  return dynamoDb.call('query', params);
-}
-
-function getWorkflowIds(cases) {
-  const workflowIds = [];
-  const caseItems = cases.Items;
-
-  for (const caseItem of caseItems) {
-    const workflowId = caseItem.details.workflowId;
-    if (!workflowId) {
-      continue;
-    }
-
-    workflowIds.push(workflowId);
-  }
-
-  return workflowIds;
-}
-
-// eslint-disable-next-line no-unused-vars
-async function syncCaseWorkflowsRew(workflows, personalNumber) {}
-
-async function syncCaseWorkflows(cases, personalNumber) {
-  const caseItems = cases.Items;
-
-  for (const caseItem of caseItems) {
-    const workflowId = caseItem.details.workflowId;
-
-    if (!workflowId) {
-      continue;
-    }
-
-    const [vadaMyPagesError, vadaMyPagesResponse] = await to(
-      sendVadaMyPagesRequest(personalNumber, workflowId)
-    );
-    if (vadaMyPagesError) {
-      return console.error('(Viva-ms) syncWorkflow', vadaMyPagesError);
-    }
-
-    if (!deepEqual(vadaMyPagesResponse.attributes, caseItem.details.workflow)) {
-      await syncWorkflowAndStatus(caseItem.PK, caseItem.SK, vadaMyPagesResponse.attributes);
-    }
-  }
+  return await dynamoDb.call('query', params);
 }
 
 async function sendVadaMyPagesRequest(personalNumber, workflowId) {
