@@ -106,7 +106,7 @@ async function syncWorkflowAndStatus(PK, SK, workflow) {
   const ExpressionAttributeValues = { ':newWorkflow': workflow };
   const ExpressionAttributeNames = {};
 
-  if (workflow.decision?.decisions?.decision?.type === 'Beviljat') {
+  if (workflow.decision?.decisions?.decision?.type?.typecode === '01') {
     UpdateExpression += ', #status = :newStatus';
     ExpressionAttributeNames['#status'] = 'status';
     ExpressionAttributeValues[':newStatus'] = getStatusByType('closed:approved:viva');
