@@ -24,19 +24,19 @@ const diff = lastCommmitHashFile => {
       );
     } catch (_ex) {
       // git commit SHA is missing, could be deleted! Deploy everything!
-      return glob.sync(`${servicesPath}/**/serverless.yml`);
+      return glob.sync(`${servicesPath}/**/serverless.yml`, { ignore: '**/node_modules/**' });
     }
     // Convert git diff output to array.
     gitDiff = gitDiff.toString().match(/.+/g);
   } else {
-    return glob.sync(`${servicesPath}/**/serverless.yml`);
+    return glob.sync(`${servicesPath}/**/serverless.yml`, { ignore: '**/node_modules/**' });
   }
 
   const servicesDiff = [];
   for (const file of gitDiff) {
     // If something changed in libs folder we deploy all services.
     if (file.indexOf(config.libsPath) === 0) {
-      return glob.sync(`${servicesPath}/**/serverless.yml`);
+      return glob.sync(`${servicesPath}/**/serverless.yml`, { ignore: '**/node_modules/**' });
     }
     // If something changed in services folders, add the path to it to services path list.
     if (file.indexOf(config.servicesPath) === 0) {
