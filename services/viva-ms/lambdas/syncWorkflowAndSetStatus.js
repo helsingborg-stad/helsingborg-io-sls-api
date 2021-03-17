@@ -1,11 +1,16 @@
 /* eslint-disable no-console */
 import to from 'await-to-js';
 import deepEqual from 'deep-equal';
+import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
 import config from '../../../config';
+import params from '../../../libs/params';
+import hash from '../../../libs/helperHashEncode';
+import * as request from '../../../libs/request';
 import * as dynamoDb from '../../../libs/dynamoDb';
 import { getStatusByType } from '../../../libs/caseStatuses';
-import vivaAdapter from '../helpers/vivaAdapterRequestClient';
+
+const SSMParams = params.read(config.vada.envsKeyName);
 
 const CASE_WORKFLOW_PATH = 'details.workflow';
 
@@ -27,11 +32,10 @@ export async function main(event) {
     const workflowId = userCase.details.workflowId;
 
     const [myPagesError, myPagesResponse] = await to(
-      vivaAdapter.workflow.get({ personalNumber, workflowId })
+      sendVadaMyPagesRequest(personalNumber, workflowId)
     );
     if (myPagesError) {
-      console.error('(Viva-ms) My pages request error', myPagesError);
-      continue;
+      return console.error('(Viva-ms) My pages request error', myPagesError);
     }
 
     if (!deepEqual(myPagesResponse.attributes, userCase.details?.workflow)) {
@@ -53,7 +57,40 @@ async function getAllUserCases(PK) {
     },
   };
 
-  return dynamoDb.call('query', params);
+  return await dynamoDb.call('query', params);
+}
+
+async function sendVadaMyPagesRequest(personalNumber, workflowId) {
+  const ssmParams = await SSMParams;
+
+  const { hashSalt, hashSaltLength } = ssmParams;
+  const personalNumberEncoded = hash.encode(personalNumber, hashSalt, hashSaltLength);
+  const { vadaUrl, xApiKeyToken } = ssmParams;
+
+  const requestClient = request.requestClient({}, { 'x-api-key': xApiKeyToken });
+
+  const vadaMyPagesUrl = `${vadaUrl}/mypages/${personalNumberEncoded}/workflows/${workflowId}`;
+
+  const [error, vadaMyPagesResponse] = await to(
+    request.call(requestClient, 'get', vadaMyPagesUrl, null)
+  );
+
+  if (error) {
+    if (error.response) {
+      // The request was made and the server responded with a
+      // status code that falls out of the range of 2xx
+      throwError(error.response.status, error.response.data.message);
+    } else if (error.request) {
+      // The request was made but no response was received
+      // `error.request` is an instance of http.ClientRequest in node.js
+      throwError(500, error.request.message);
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      throwError(500, error.message);
+    }
+  }
+
+  return vadaMyPagesResponse.data;
 }
 
 function getWorkflowIds(cases) {
@@ -77,27 +114,15 @@ async function syncWorkflowAndStatus(PK, SK, workflow) {
   let UpdateExpression = `SET ${CASE_WORKFLOW_PATH} = :newWorkflow`;
   const ExpressionAttributeValues = { ':newWorkflow': workflow };
   const ExpressionAttributeNames = {};
-  let decisionStatus = 0;
 
-  const decisionList = workflow.decision?.decisions?.decision;
-  if (decisionList !== undefined) {
-    decisionList.forEach(decision => {
-      const decisionType = decision.typecode;
-      decisionStatus = decisionStatus | parseInt(decisionType, 10);
-    });
-
-    if (decisionStatus === 1) {
-      ExpressionAttributeValues[':newStatus'] = getStatusByType('closed:approved:viva');
-    } else if (decisionStatus === 2) {
-      ExpressionAttributeValues[':newStatus'] = getStatusByType('closed:rejected:viva');
-    } else if (decisionStatus === 3) {
-      ExpressionAttributeValues[':newStatus'] = getStatusByType('closed:partiallyApproved:viva');
-    }
-  }
-
-  if (ExpressionAttributeValues[':newStatus']) {
+  if (workflow.decision?.decisions?.decision?.type === 'Beviljat') {
     UpdateExpression += ', #status = :newStatus';
     ExpressionAttributeNames['#status'] = 'status';
+    ExpressionAttributeValues[':newStatus'] = getStatusByType('closed:approved:viva');
+  } else if (workflow.calculations) {
+    UpdateExpression += ', #status = :newStatus';
+    ExpressionAttributeNames['#status'] = 'status';
+    ExpressionAttributeValues[':newStatus'] = getStatusByType('active:processing');
   }
 
   const params = {
