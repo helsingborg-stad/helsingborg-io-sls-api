@@ -18,10 +18,26 @@ export async function main(event) {
     return console.error('(Viva-ms) DynamoDB query failed', getAllUserCasesError);
   }
 
-  const workflowIds = getWorkflowIds(allUserCases);
-  await syncCaseWorkflowsRew(workflowIds, personalNumber);
+  const userCaseItems = allUserCases.Items;
+  if (userCaseItems === undefined || userCaseItems.length === 0) {
+    return console.error('(Viva-ms) DynamoDB query did not fetch any cases');
+  }
 
-  await syncCaseWorkflows(allUserCases, personalNumber);
+  for (const userCase of userCaseItems) {
+    const workflowId = userCase.details.workflowId;
+
+    const [myPagesError, myPagesResponse] = await to(
+      vivaAdapter.workflow.get({ personalNumber, workflowId })
+    );
+    if (myPagesError) {
+      console.error('(Viva-ms) My pages request error', myPagesError);
+      continue;
+    }
+
+    if (!deepEqual(myPagesResponse.attributes, userCase.details?.workflow)) {
+      await syncWorkflowAndStatus(userCase.PK, userCase.SK, myPagesResponse.attributes);
+    }
+  }
 
   return true;
 }
@@ -40,67 +56,6 @@ async function getAllUserCases(PK) {
   return dynamoDb.call('query', params);
 }
 
-function getWorkflowIds(cases) {
-  const workflowIds = [];
-  const caseItems = cases.Items;
-
-  for (const caseItem of caseItems) {
-    const workflowId = caseItem.details.workflowId;
-    if (!workflowId) {
-      continue;
-    }
-
-    workflowIds.push(workflowId);
-  }
-
-  return workflowIds;
-}
-
-// eslint-disable-next-line no-unused-vars
-async function syncCaseWorkflowsRew(workflows, personalNumber) {}
-
-async function syncCaseWorkflows(cases, personalNumber) {
-  const caseItems = cases.Items;
-
-  for (const caseItem of caseItems) {
-    const workflowId = caseItem.details.workflowId;
-
-    if (!workflowId) {
-      continue;
-    }
-
-    const [getWorkflowError, workflow] = await to(
-      vivaAdapter.workflow.get({
-        personalNumber,
-        workflowId,
-      })
-    );
-    if (getWorkflowError) {
-      return console.error('(Viva-ms) syncWorkflow', getWorkflowError);
-    }
-
-    if (!deepEqual(workflow.attributes, caseItem.details.workflow)) {
-      await syncWorkflowAndStatus(caseItem.PK, caseItem.SK, workflow.attributes);
-    }
-  }
-}
-
-function getWorkflowIds(cases) {
-  const workflowIds = [];
-  const caseItems = cases.Items;
-
-  for (const caseItem of caseItems) {
-    const workflowId = caseItem.details.workflowId;
-    if (!workflowId) {
-      continue;
-    }
-
-    workflowIds.push(workflowId);
-  }
-
-  return workflowIds;
-}
-
 async function syncWorkflowAndStatus(PK, SK, workflow) {
   const TableName = config.cases.tableName;
   let UpdateExpression = `SET ${CASE_WORKFLOW_PATH} = :newWorkflow`;
@@ -109,11 +64,7 @@ async function syncWorkflowAndStatus(PK, SK, workflow) {
   let decisionStatus = 0;
 
   const decisionList = workflow.decision?.decisions?.decision;
-  if (decisionList === undefined) {
-    if (workflow?.application?.requestingcompletion === '1') {
-      ExpressionAttributeValues[':newStatus'] = getStatusByType('active:completionRequired:viva');
-    }
-  } else {
+  if (decisionList !== undefined) {
     decisionList.forEach(decision => {
       const decisionType = decision.typecode;
       decisionStatus = decisionStatus | parseInt(decisionType, 10);
