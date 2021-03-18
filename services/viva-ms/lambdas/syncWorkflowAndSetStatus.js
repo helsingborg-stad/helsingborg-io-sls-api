@@ -18,10 +18,25 @@ export async function main(event) {
     return console.error('(Viva-ms) DynamoDB query failed', getAllUserCasesError);
   }
 
-  const workflowIds = getWorkflowIds(allUserCases);
-  await syncCaseWorkflowsRew(workflowIds, personalNumber);
+  const userCaseItems = allUserCases.Items;
+  if (userCaseItems === undefined || userCaseItems.length === 0) {
+    return console.error('(Viva-ms) DynamoDB query did not fetch any cases');
+  }
 
-  await syncCaseWorkflows(allUserCases, personalNumber);
+  for (const userCase of userCaseItems) {
+    const workflowId = userCase.details.workflowId;
+
+    const [myPagesError, myPagesResponse] = await to(
+      sendVadaMyPagesRequest(personalNumber, workflowId)
+    );
+    if (myPagesError) {
+      return console.error('(Viva-ms) My pages request error', myPagesError);
+    }
+
+    if (!deepEqual(myPagesResponse.attributes, userCase.details?.workflow)) {
+      await syncWorkflowAndStatus(userCase.PK, userCase.SK, myPagesResponse.attributes);
+    }
+  }
 
   return true;
 }
