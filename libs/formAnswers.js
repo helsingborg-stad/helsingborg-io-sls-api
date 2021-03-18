@@ -107,23 +107,6 @@ const getLatestCase = {
   },
 };
 
-const getUser = {
-  195405272260: {
-    address: {
-      postalCode: '11863',
-      street: 'RINGVÄGEN 29',
-    },
-    civilStatus: 'S',
-    createdAt: 1615814772250,
-    email: null,
-    firstName: 'Hanna',
-    lastName: 'Hagströmer',
-    mobilePhone: null,
-    personalNumber: '195405272260',
-    uuid: '02bb97a0-8592-11eb-9927-69631b3e3f7b',
-  },
-};
-
 const getForm = {
   'bf0ce700-8633-11eb-aeb9-891ddc9690af': {
     connectivityMatrix: [['none']],
@@ -442,11 +425,12 @@ const populateAnswers = (dataMap, user, previousFormAnswers) => {
   return answers;
 };
 
-export const populateFormAnswers = (forms, personalNumber) =>
-  Object.keys(forms).map(formId => {
+export const populateFormAnswers = (forms, user, personalNumber) => {
+  const initialForms = { ...forms };
+
+  Object.keys(initialForms).forEach(formId => {
     // TODO: Replace fake methods
     const formObject = getForm[formId];
-    const user = getUser[personalNumber];
     const latestCase = getLatestCase[personalNumber];
     const previousFormAnswers = latestCase.forms[formId].answers || [];
     console.log('previousFormAnswers', previousFormAnswers);
@@ -455,5 +439,8 @@ export const populateFormAnswers = (forms, personalNumber) =>
     console.log('dataMap', dataMap);
 
     const answers = populateAnswers(dataMap, user, previousFormAnswers);
-    return { ...forms, answers };
+    initialForms[formId].answers = answers;
   });
+
+  return initialForms;
+};

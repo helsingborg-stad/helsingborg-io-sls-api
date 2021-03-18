@@ -5,6 +5,7 @@ import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import uuid from 'uuid';
 
 import config from '../../../config';
+import * as dynamoDb from '../../../libs/dynamoDb';
 import * as response from '../../../libs/response';
 import { decodeToken } from '../../../libs/token';
 import { getItem, putItem } from '../../../libs/queries';
@@ -39,7 +40,15 @@ export async function main(event) {
   const PK = `USER#${personalNumber}`;
   const SK = `USER#${personalNumber}#CASE#${id}`;
 
-  const initialForms = populateFormAnswers(forms, personalNumber);
+  const userParams = {
+    TableName: config.users.tableName,
+    Key: {
+      personalNumber,
+    },
+  };
+
+  const user = await getUser(userParams);
+  const initialForms = populateFormAnswers(forms, user, personalNumber);
   console.log(util.inspect(initialForms, { showHidden: false, depth: null }));
 
   const timestampNow = Date.now();
@@ -109,4 +118,10 @@ async function parseJsonD(data) {
   } catch (error) {
     throwError(400, error.message);
   }
+}
+
+async function getUser(params) {
+  const [error, dbResponse] = await to(dynamoDb.call('get', params));
+  if (!dbResponse) throwError(error);
+  return dbResponse;
 }
