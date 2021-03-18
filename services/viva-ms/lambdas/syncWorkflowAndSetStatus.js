@@ -30,7 +30,8 @@ export async function main(event) {
       vivaAdapter.workflow.get({ personalNumber, workflowId })
     );
     if (myPagesError) {
-      return console.error('(Viva-ms) My pages request error', myPagesError);
+      console.error('(Viva-ms) My pages request error', myPagesError);
+      continue;
     }
 
     if (!deepEqual(myPagesResponse.attributes, userCase.details?.workflow)) {
