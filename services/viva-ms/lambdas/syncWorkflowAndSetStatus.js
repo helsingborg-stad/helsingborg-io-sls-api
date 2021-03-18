@@ -110,24 +110,22 @@ async function syncWorkflowAndStatus(PK, SK, workflow) {
 
   const decisionList = workflow.decision?.decisions?.decision;
   if (decisionList === undefined) {
-    // TODO: Return error.
-  }
+    if (workflow?.application?.requestingcompletion === '1') {
+      ExpressionAttributeValues[':newStatus'] = getStatusByType('active:completionRequired:viva');
+    }
+  } else {
+    decisionList.forEach(decision => {
+      const decisionType = decision.typecode;
+      decisionStatus = decisionStatus | parseInt(decisionType, 10);
+    });
 
-  decisionList.forEach(decision => {
-    const decisionType = decision.typecode;
-    decisionStatus = decisionStatus | parseInt(decisionType, 10);
-  });
-
-  if (decisionStatus === 0) {
-    // TODO: Check if stickprov.
-  }
-
-  if (decisionStatus === 1) {
-    ExpressionAttributeValues[':newStatus'] = getStatusByType('closed:approved:viva');
-  } else if (decisionStatus === 2) {
-    ExpressionAttributeValues[':newStatus'] = getStatusByType('closed:rejected:viva');
-  } else if (decisionStatus === 3) {
-    ExpressionAttributeValues[':newStatus'] = getStatusByType('closed:partiallyApproved:viva');
+    if (decisionStatus === 1) {
+      ExpressionAttributeValues[':newStatus'] = getStatusByType('closed:approved:viva');
+    } else if (decisionStatus === 2) {
+      ExpressionAttributeValues[':newStatus'] = getStatusByType('closed:rejected:viva');
+    } else if (decisionStatus === 3) {
+      ExpressionAttributeValues[':newStatus'] = getStatusByType('closed:partiallyApproved:viva');
+    }
   }
 
   if (ExpressionAttributeValues[':newStatus']) {
