@@ -1,3 +1,5 @@
+const util = require('util');
+
 import to from 'await-to-js';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import uuid from 'uuid';
@@ -7,6 +9,7 @@ import * as response from '../../../libs/response';
 import { decodeToken } from '../../../libs/token';
 import { getItem, putItem } from '../../../libs/queries';
 
+import { populateFormAnswers } from '../../../libs/formAnswers';
 import caseValidationSchema from '../helpers/schema';
 import { getFutureTimestamp, millisecondsToSeconds } from '../helpers/timestampHelper';
 import { getStatusByType } from '../../../libs/caseStatuses';
@@ -36,6 +39,9 @@ export async function main(event) {
   const PK = `USER#${personalNumber}`;
   const SK = `USER#${personalNumber}#CASE#${id}`;
 
+  const initialForms = populateFormAnswers(forms, personalNumber);
+  console.log(util.inspect(initialForms, { showHidden: false, depth: null }));
+
   const timestampNow = Date.now();
   const expirationTime = millisecondsToSeconds(getFutureTimestamp(CASE_EXPIRATION_HOURS));
 
@@ -47,7 +53,7 @@ export async function main(event) {
     currentFormId,
     provider,
     details,
-    forms,
+    forms: initialForms,
     expirationTime,
     createdAt: timestampNow,
     updatedAt: timestampNow,
