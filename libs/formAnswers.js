@@ -1,110 +1,3 @@
-const getLatestCase = {
-  createdAt: 1615989505899,
-  currentFormId: 'bf0ce700-8633-11eb-aeb9-891ddc9690af',
-  details: {},
-  expirationTime: 1616248996,
-  forms: {
-    'bf0ce700-8633-11eb-aeb9-891ddc9690af': {
-      answers: [
-        {
-          field: {
-            id: 'name',
-            tags: ['nametag', 'someothertag'],
-          },
-          value: 'Hanna',
-        },
-        {
-          field: {
-            id: 'id1234',
-            tags: [],
-          },
-          value: 'Vanligt textfält',
-        },
-        {
-          field: {
-            id: 'addressid123',
-            tags: [],
-          },
-          value: 'RINGVÄGEN 29',
-        },
-        {
-          field: {
-            id: 'emailid123',
-            tags: [],
-          },
-          value: 'Email@test.se',
-        },
-        {
-          field: {
-            id: 'editablelistid123.editinput1',
-            tags: ['editabletag', 'moretag'],
-          },
-          value: 'Test input 1',
-        },
-        {
-          field: {
-            id: 'editablelistid123.editinput2',
-            tags: [],
-          },
-          value: 'Test input 2',
-        },
-        {
-          field: {
-            id: 'check1',
-            tags: [],
-          },
-          value: true,
-        },
-        {
-          field: {
-            id: 'repeid97646.0.id111',
-            tags: ['taghere'],
-          },
-          value: 'Text here',
-        },
-        {
-          field: {
-            id: 'repeid97646.0.id22',
-            tags: ['heheh'],
-          },
-          value: '99',
-        },
-        {
-          field: {
-            id: 'repeid97646.1.id111',
-            tags: ['taghere'],
-          },
-          value: 'More text',
-        },
-        {
-          field: {
-            id: 'repeid97646.1.id22',
-            tags: ['heheh'],
-          },
-          value: '1337',
-        },
-      ],
-      currentPosition: {
-        currentMainStep: 1,
-        currentMainStepIndex: 0,
-        index: 0,
-        level: 0,
-      },
-    },
-  },
-  id: '90ac096d-66b5-4aa3-9bd4-762763f52e9e',
-  PK: 'USER#195405272260',
-  provider: 'VIVA',
-  SK: 'USER#195405272260#CASE#90ac096d-66b5-4aa3-9bd4-762763f52e9e',
-  status: {
-    description:
-      'Du har påbörjat en ansökan. Du kan öppna din ansökan och fortsätta där du slutade.',
-    name: 'Pågående',
-    type: 'active:ongoing',
-  },
-  updatedAt: 1615989795048,
-};
-
 const generateDataMap = form => {
   const dataMap = [];
   if (!form.steps) {
@@ -186,14 +79,14 @@ const getCaseAnswer = (answers, matchString) => {
   return result?.value || undefined;
 };
 
-const getInitialRepeaterValues = (field, previousFormAnswers) => {
+const getInitialRepeaterValues = (field, previousAnswers) => {
   const repeaterAnswers = [];
   field.loadPrevious.forEach(matchString => {
     const repeaterRegex = new RegExp('.+.[*]..+');
     if (repeaterRegex.test(matchString)) {
       const strArray = matchString.split('.[*].');
       const repeaterIdRegex = new RegExp(`${strArray[0]}.[0-9]+.${strArray[1]}`);
-      const previousRepeaterAnswers = previousFormAnswers.filter(obj =>
+      const previousRepeaterAnswers = previousAnswers.filter(obj =>
         repeaterIdRegex.test(obj.field.id)
       );
       if (previousRepeaterAnswers.length > 0) {
@@ -206,7 +99,7 @@ const getInitialRepeaterValues = (field, previousFormAnswers) => {
   return repeaterAnswers;
 };
 
-const getInitialValue = (field, user, previousFormAnswers) => {
+const getInitialValue = (field, user, previousAnswers) => {
   let initialValue;
 
   field.loadPrevious.forEach(matchString => {
@@ -215,18 +108,18 @@ const getInitialValue = (field, user, previousFormAnswers) => {
       return initialValue;
     }
 
-    initialValue = getCaseAnswer(previousFormAnswers, matchString) || initialValue;
+    initialValue = getCaseAnswer(previousAnswers, matchString) || initialValue;
   });
 
   return initialValue ? formatAnswer(field.id, field.tags, initialValue) : undefined;
 };
 
-const populateAnswers = (dataMap, user, previousFormAnswers) => {
+const populateAnswers = (dataMap, user, previousAnswers) => {
   const answers = [];
 
   dataMap.forEach(field => {
     if (field.type === 'repeaterField') {
-      const repeaterAnswers = getInitialRepeaterValues(field, previousFormAnswers);
+      const repeaterAnswers = getInitialRepeaterValues(field, previousAnswers);
       if (repeaterAnswers.length > 0) {
         answers.push(...repeaterAnswers);
       }
@@ -234,7 +127,7 @@ const populateAnswers = (dataMap, user, previousFormAnswers) => {
       return;
     }
 
-    const initialFieldValue = getInitialValue(field, user, previousFormAnswers);
+    const initialFieldValue = getInitialValue(field, user, previousAnswers);
     if (initialFieldValue) {
       answers.push(initialFieldValue);
     }
@@ -243,17 +136,13 @@ const populateAnswers = (dataMap, user, previousFormAnswers) => {
   return answers;
 };
 
-export const populateFormAnswers = (forms, user, formTemplates) => {
+export const populateFormAnswers = (forms, user, formTemplates, previousCase) => {
   const initialForms = { ...forms };
   Object.keys(initialForms).forEach(formId => {
     const formTemplate = formTemplates[formId] || {};
-    // MOCK
-    const latestCase = getLatestCase;
-    const previousFormAnswers = latestCase.forms[formId].answers || [];
-
+    const previousAnswers = previousCase?.forms?.[formId]?.answers || [];
     const dataMap = generateDataMap(formTemplate);
-
-    const answers = populateAnswers(dataMap, user, previousFormAnswers);
+    const answers = populateAnswers(dataMap, user, previousAnswers);
     initialForms[formId].answers = answers;
   });
 

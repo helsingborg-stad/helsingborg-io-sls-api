@@ -42,7 +42,8 @@ export async function main(event) {
 
   const user = await getUser(personalNumber);
   const formTemplates = await getFormTemplates(forms);
-  const initialForms = populateFormAnswers(forms, user, formTemplates);
+  const previousCase = await getLastUpdatedCase(personalNumber, provider);
+  const initialForms = populateFormAnswers(forms, user, formTemplates, previousCase);
   console.log(util.inspect(initialForms, { showHidden: false, depth: null }));
 
   const timestampNow = Date.now();
@@ -150,4 +151,32 @@ async function getFormTemplates(forms) {
   }
 
   return formTemplates;
+}
+
+async function getLastUpdatedCase(personalNumber, provider) {
+  const params = {
+    TableName: config.cases.tableName,
+    KeyConditionExpression: 'PK = :pk',
+    FilterExpression: 'begins_with(#status.#type, :statusTypeClosed) and #provider = :provider',
+    ExpressionAttributeNames: {
+      '#status': 'status',
+      '#type': 'type',
+      '#provider': 'provider',
+    },
+    ExpressionAttributeValues: {
+      ':pk': `USER#${personalNumber}`,
+      ':statusTypeClosed': 'closed',
+      ':provider': provider,
+    },
+  };
+
+  const [error, dbResponse] = await to(dynamoDb.call('query', params));
+  if (!dbResponse) {
+    console.error('(cases-api) DynamoDb query on cases table failed', error);
+    return;
+  }
+
+  const sortedCases = dbResponse.Items.sort((a, b) => b.updatedAt - a.updatedAt);
+
+  return sortedCases?.[0] || undefined;
 }
