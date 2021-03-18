@@ -27,7 +27,7 @@ export async function main(event) {
     const workflowId = userCase.details.workflowId;
 
     const [myPagesError, myPagesResponse] = await to(
-      sendVadaMyPagesRequest(personalNumber, workflowId)
+      vivaAdapter.workflow.get({ personalNumber, workflowId })
     );
     if (myPagesError) {
       return console.error('(Viva-ms) My pages request error', myPagesError);
@@ -69,35 +69,6 @@ function getWorkflowIds(cases) {
   }
 
   return workflowIds;
-}
-
-// eslint-disable-next-line no-unused-vars
-async function syncCaseWorkflowsRew(workflows, personalNumber) {}
-
-async function syncCaseWorkflows(cases, personalNumber) {
-  const caseItems = cases.Items;
-
-  for (const caseItem of caseItems) {
-    const workflowId = caseItem.details.workflowId;
-
-    if (!workflowId) {
-      continue;
-    }
-
-    const [getWorkflowError, workflow] = await to(
-      vivaAdapter.workflow.get({
-        personalNumber,
-        workflowId,
-      })
-    );
-    if (getWorkflowError) {
-      return console.error('(Viva-ms) syncWorkflow', getWorkflowError);
-    }
-
-    if (!deepEqual(workflow.attributes, caseItem.details.workflow)) {
-      await syncWorkflowAndStatus(caseItem.PK, caseItem.SK, workflow.attributes);
-    }
-  }
 }
 
 async function syncWorkflowAndStatus(PK, SK, workflow) {
