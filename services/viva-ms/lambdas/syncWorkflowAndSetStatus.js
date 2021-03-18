@@ -80,11 +80,7 @@ async function syncWorkflowAndStatus(PK, SK, workflow) {
   let decisionStatus = 0;
 
   const decisionList = workflow.decision?.decisions?.decision;
-  if (decisionList === undefined) {
-    if (workflow?.application?.requestingcompletion === '1') {
-      ExpressionAttributeValues[':newStatus'] = getStatusByType('active:completionRequired:viva');
-    }
-  } else {
+  if (decisionList !== undefined) {
     decisionList.forEach(decision => {
       const decisionType = decision.typecode;
       decisionStatus = decisionStatus | parseInt(decisionType, 10);
