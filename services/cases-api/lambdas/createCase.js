@@ -40,15 +40,9 @@ export async function main(event) {
   const PK = `USER#${personalNumber}`;
   const SK = `USER#${personalNumber}#CASE#${id}`;
 
-  const userParams = {
-    TableName: config.users.tableName,
-    Key: {
-      personalNumber,
-    },
-  };
-
-  const user = await getUser(userParams);
-  const initialForms = populateFormAnswers(forms, user, personalNumber);
+  const user = await getUser(personalNumber);
+  const formTemplates = await getFormTemplates(forms);
+  const initialForms = populateFormAnswers(forms, user, formTemplates);
   console.log(util.inspect(initialForms, { showHidden: false, depth: null }));
 
   const timestampNow = Date.now();
@@ -120,8 +114,40 @@ async function parseJsonD(data) {
   }
 }
 
-async function getUser(params) {
+async function getUser(personalNumber) {
+  const params = {
+    TableName: config.users.tableName,
+    Key: {
+      personalNumber,
+    },
+  };
+
   const [error, dbResponse] = await to(dynamoDb.call('get', params));
-  if (!dbResponse) throwError(error);
-  return dbResponse;
+  if (!dbResponse) {
+    console.error('(cases-api) DynamoDb query on users table failed', error);
+    return;
+  }
+
+  return dbResponse.Item;
+}
+
+async function getFormTemplates(forms) {
+  const formTemplates = {};
+  for (const key of Object.keys(forms)) {
+    const params = {
+      TableName: config.forms.tableName,
+      Key: {
+        PK: `FORM#${key}`,
+      },
+    };
+    const [error, dbResponse] = await to(dynamoDb.call('get', params));
+
+    if (!dbResponse) {
+      console.error('(cases-api) DynamoDb query on forms table failed', error);
+      continue;
+    }
+    formTemplates[key] = dbResponse.Item;
+  }
+
+  return formTemplates;
 }

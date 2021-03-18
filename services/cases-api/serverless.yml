@@ -53,13 +53,13 @@ provider:
       Action:
         - dynamodb:Query
         - dynamodb:GetItem
-      # Restrict our IAM role permissions to the specific table for the stage
       Resource:
         - "Fn::ImportValue": ${self:custom.resourcesStage}-UsersTableArn
 
     - Effect: Allow
       Action:
         - dynamodb:Query
+        - dynamodb:GetItem
       Resource:
         - "Fn::ImportValue": ${self:custom.resourcesStage}-FormsTableArn
 
