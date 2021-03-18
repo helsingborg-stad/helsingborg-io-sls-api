@@ -1,297 +1,115 @@
 const getLatestCase = {
-  195405272260: {
-    createdAt: 1615989505899,
-    currentFormId: 'bf0ce700-8633-11eb-aeb9-891ddc9690af',
-    details: {},
-    expirationTime: 1616248996,
-    forms: {
-      'bf0ce700-8633-11eb-aeb9-891ddc9690af': {
-        answers: [
-          {
-            field: {
-              id: 'name',
-              tags: ['nametag', 'someothertag'],
-            },
-            value: 'Hanna',
-          },
-          {
-            field: {
-              id: 'id1234',
-              tags: [],
-            },
-            value: 'Vanligt textfält',
-          },
-          {
-            field: {
-              id: 'addressid123',
-              tags: [],
-            },
-            value: 'RINGVÄGEN 29',
-          },
-          {
-            field: {
-              id: 'emailid123',
-              tags: [],
-            },
-            value: 'Email@test.se',
-          },
-          {
-            field: {
-              id: 'editablelistid123.editinput1',
-              tags: ['editabletag', 'moretag'],
-            },
-            value: 'Test input 1',
-          },
-          {
-            field: {
-              id: 'editablelistid123.editinput2',
-              tags: [],
-            },
-            value: 'Test input 2',
-          },
-          {
-            field: {
-              id: 'check1',
-              tags: [],
-            },
-            value: true,
-          },
-          {
-            field: {
-              id: 'repeid97646.0.id111',
-              tags: ['taghere'],
-            },
-            value: 'Text here',
-          },
-          {
-            field: {
-              id: 'repeid97646.0.id22',
-              tags: ['heheh'],
-            },
-            value: '99',
-          },
-          {
-            field: {
-              id: 'repeid97646.1.id111',
-              tags: ['taghere'],
-            },
-            value: 'More text',
-          },
-          {
-            field: {
-              id: 'repeid97646.1.id22',
-              tags: ['heheh'],
-            },
-            value: '1337',
-          },
-        ],
-        currentPosition: {
-          currentMainStep: 1,
-          currentMainStepIndex: 0,
-          index: 0,
-          level: 0,
-        },
-      },
-    },
-    id: '90ac096d-66b5-4aa3-9bd4-762763f52e9e',
-    PK: 'USER#195405272260',
-    provider: 'VIVA',
-    SK: 'USER#195405272260#CASE#90ac096d-66b5-4aa3-9bd4-762763f52e9e',
-    status: {
-      description:
-        'Du har påbörjat en ansökan. Du kan öppna din ansökan och fortsätta där du slutade.',
-      name: 'Pågående',
-      type: 'active:ongoing',
-    },
-    updatedAt: 1615989795048,
-  },
-};
-
-const getForm = {
-  'bf0ce700-8633-11eb-aeb9-891ddc9690af': {
-    connectivityMatrix: [['none']],
-    createdAt: 1615884237168,
-    description: 'Initial answers test',
-    formType: 'EKB-recurring',
-    id: 'bf0ce700-8633-11eb-aeb9-891ddc9690af',
-    name: 'Initial answers',
-    PK: 'FORM#bf0ce700-8633-11eb-aeb9-891ddc9690af',
-    provider: 'VIVA',
-    steps: [
-      {
-        actions: [
-          {
-            color: 'blue',
-            hasCondition: false,
-            label: 'Submit',
-            type: 'sign',
-          },
-        ],
-        banner: {
-          backgroundColor: '',
-          iconSrc: '',
-          imageSrc: '',
-        },
-        colorSchema: 'blue',
-        description: '',
-        group: '',
-        id: '2d31d49c-d3ba-47a1-b791-bed0bfdeaf50',
-        questions: [
-          {
-            description: 'name',
-            hasCondition: false,
+  createdAt: 1615989505899,
+  currentFormId: 'bf0ce700-8633-11eb-aeb9-891ddc9690af',
+  details: {},
+  expirationTime: 1616248996,
+  forms: {
+    'bf0ce700-8633-11eb-aeb9-891ddc9690af': {
+      answers: [
+        {
+          field: {
             id: 'name',
-            inputSelectValue: 'text',
-            label: 'Name',
-            loadPrevious: ['name', 'user.firstName'],
-            showHelp: false,
             tags: ['nametag', 'someothertag'],
-            type: 'text',
-            validation: {
-              isRequired: false,
-              rules: [],
-            },
           },
-          {
-            description: 'other field',
+          value: 'Hanna',
+        },
+        {
+          field: {
             id: 'id1234',
-            inputSelectValue: 'text',
-            label: 'Textfield load previos from case',
-            loadPrevious: ['id1234'],
-            type: 'text',
-            validation: {
-              isRequired: false,
-              rules: [],
-            },
+            tags: [],
           },
-          {
-            description: 'Adress',
+          value: 'Vanligt textfält',
+        },
+        {
+          field: {
             id: 'addressid123',
-            inputSelectValue: 'text',
-            label: 'Adress',
-            loadPrevious: ['user.address.street'],
-            type: 'text',
-            validation: {
-              isRequired: false,
-              rules: [],
-            },
+            tags: [],
           },
-          {
-            description: 'email',
+          value: 'RINGVÄGEN 29',
+        },
+        {
+          field: {
             id: 'emailid123',
-            inputSelectValue: 'email',
-            label: 'Email',
-            loadPrevious: ['emailid123'],
-            type: 'text',
-            validation: {
-              isRequired: false,
-              rules: [
-                {
-                  message: 'Du måste ange en giltig emailadress',
-                  method: 'isEmail',
-                  validWhen: true,
-                },
-              ],
-            },
+            tags: [],
           },
-          {
-            description: '',
-            id: 'editablelistid123',
-            inputs: [
-              {
-                key: 'editinput1',
-                label: 'editable input 1',
-                loadPrevious: ['editinput1'],
-                tags: ['editabletag', 'moretag'],
-              },
-              {
-                key: 'editinput2',
-                label: 'editable input 2',
-                loadPrevious: ['editinput2'],
-              },
-            ],
-            inputSelectValue: 'editableList',
-            label: 'Editable list',
-            type: 'editableList',
+          value: 'Email@test.se',
+        },
+        {
+          field: {
+            id: 'editablelistid123.editinput1',
+            tags: ['editabletag', 'moretag'],
           },
-          {
-            description: '',
+          value: 'Test input 1',
+        },
+        {
+          field: {
+            id: 'editablelistid123.editinput2',
+            tags: [],
+          },
+          value: 'Test input 2',
+        },
+        {
+          field: {
             id: 'check1',
-            inputSelectValue: 'checkbox',
-            label: 'CHeckboc',
-            loadPrevious: ['check1'],
-            type: 'checkbox',
-            validation: {
-              isRequired: false,
-              rules: [],
-            },
+            tags: [],
           },
-          {
-            addButtonText: 'Add',
-            color: 'green',
-            description: '',
-            heading: 'repeater list heading',
-            id: 'repeid97646',
-            inputs: [
-              {
-                id: 'id111',
-                inputSelectValue: 'text',
-                tags: ['taghere'],
-                title: 'title 1',
-                type: 'text',
-                validation: {
-                  isRequired: false,
-                  rules: [],
-                },
-              },
-              {
-                id: 'id22',
-                inputSelectValue: 'number',
-                tags: ['heheh'],
-                title: 'title 2',
-                type: 'number',
-                validation: {
-                  isRequired: false,
-                  rules: [
-                    {
-                      args: {
-                        options: {
-                          no_symbols: true,
-                        },
-                      },
-                      message: 'Du måste ange en siffra',
-                      method: 'isNumeric',
-                      validWhen: true,
-                    },
-                  ],
-                },
-              },
-            ],
-            inputSelectValue: 'repeaterField',
-            label: 'Repeater',
-            loadPrevious: ['repeid97646'],
-            maxRows: 5,
-            type: 'repeaterField',
+          value: true,
+        },
+        {
+          field: {
+            id: 'repeid97646.0.id111',
+            tags: ['taghere'],
           },
-        ],
-        title: 'Step 1',
+          value: 'Text here',
+        },
+        {
+          field: {
+            id: 'repeid97646.0.id22',
+            tags: ['heheh'],
+          },
+          value: '99',
+        },
+        {
+          field: {
+            id: 'repeid97646.1.id111',
+            tags: ['taghere'],
+          },
+          value: 'More text',
+        },
+        {
+          field: {
+            id: 'repeid97646.1.id22',
+            tags: ['heheh'],
+          },
+          value: '1337',
+        },
+      ],
+      currentPosition: {
+        currentMainStep: 1,
+        currentMainStepIndex: 0,
+        index: 0,
+        level: 0,
       },
-    ],
-    stepStructure: [
-      {
-        children: [],
-        group: '9b613e38-423d-4e3f-8306-d085425827d6',
-        id: '2d31d49c-d3ba-47a1-b791-bed0bfdeaf50',
-        text: 'Step 1',
-      },
-    ],
-    subform: false,
-    updatedAt: 1615884237168,
+    },
   },
+  id: '90ac096d-66b5-4aa3-9bd4-762763f52e9e',
+  PK: 'USER#195405272260',
+  provider: 'VIVA',
+  SK: 'USER#195405272260#CASE#90ac096d-66b5-4aa3-9bd4-762763f52e9e',
+  status: {
+    description:
+      'Du har påbörjat en ansökan. Du kan öppna din ansökan och fortsätta där du slutade.',
+    name: 'Pågående',
+    type: 'active:ongoing',
+  },
+  updatedAt: 1615989795048,
 };
 
 const generateDataMap = form => {
   const dataMap = [];
+  if (!form.steps) {
+    return dataMap;
+  }
 
   form.steps.forEach(({ questions }) => {
     if (!questions) {
@@ -425,18 +243,15 @@ const populateAnswers = (dataMap, user, previousFormAnswers) => {
   return answers;
 };
 
-export const populateFormAnswers = (forms, user, personalNumber) => {
+export const populateFormAnswers = (forms, user, formTemplates) => {
   const initialForms = { ...forms };
-
   Object.keys(initialForms).forEach(formId => {
-    // TODO: Replace fake methods
-    const formObject = getForm[formId];
-    const latestCase = getLatestCase[personalNumber];
+    const formTemplate = formTemplates[formId] || {};
+    // MOCK
+    const latestCase = getLatestCase;
     const previousFormAnswers = latestCase.forms[formId].answers || [];
-    console.log('previousFormAnswers', previousFormAnswers);
 
-    const dataMap = generateDataMap(formObject);
-    console.log('dataMap', dataMap);
+    const dataMap = generateDataMap(formTemplate);
 
     const answers = populateAnswers(dataMap, user, previousFormAnswers);
     initialForms[formId].answers = answers;
