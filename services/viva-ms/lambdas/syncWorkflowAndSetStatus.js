@@ -105,17 +105,28 @@ async function syncWorkflowAndStatus(PK, SK, workflow) {
   let UpdateExpression = `SET ${CASE_WORKFLOW_PATH} = :newWorkflow`;
   const ExpressionAttributeValues = { ':newWorkflow': workflow };
   const ExpressionAttributeNames = {};
+  let decisionStatus = 0;
 
-  const typeCode = workflow.decision?.decisions?.decision?.type?.typecode;
+  const decisionList = workflow.decision?.decisions?.decision;
+  if (decisionList === undefined) {
+    // TODO: Return error.
+  }
 
-  if (typeCode === '01') {
+  decisionList.forEach(decision => {
+    const decisionType = decision.typecode;
+    decisionStatus = decisionStatus | parseInt(decisionType, 10);
+  });
+
+  if (decisionStatus === 0) {
+    // TODO: Check if stickprov.
+  }
+
+  if (decisionStatus === 1) {
     ExpressionAttributeValues[':newStatus'] = getStatusByType('closed:approved:viva');
-  } else if (typeCode === '02') {
+  } else if (decisionStatus === 2) {
     ExpressionAttributeValues[':newStatus'] = getStatusByType('closed:rejected:viva');
-  } else if (typeCode === '03') {
+  } else if (decisionStatus === 3) {
     ExpressionAttributeValues[':newStatus'] = getStatusByType('closed:partiallyApproved:viva');
-  } else if (workflow.calculations) {
-    ExpressionAttributeValues[':newStatus'] = getStatusByType('active:processing');
   }
 
   if (ExpressionAttributeValues[':newStatus']) {
