@@ -9,6 +9,7 @@ import * as dynamoDB from '../../../libs/dynamoDb';
 import { CASE_PROVIDER_VIVA } from '../../../libs/constants';
 import { getStatusByType } from '../../../libs/caseStatuses';
 import validateApplicationStatus from '../helpers/validateApplicationStatus';
+import { populateFormAnswers } from '../../../libs/formAnswers';
 
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
@@ -126,6 +127,11 @@ async function putRecurringVivaCase(PK, workflowId, period) {
     [completionFormId]: initialFormAttributes,
   };
 
+  const user = await getUser(PK);
+  const formTemplates = await getFormTemplates(initialForms);
+  const previousCase = await getLastUpdatedCase(PK, CASE_PROVIDER_VIVA);
+  const prePopulatedForms = populateFormAnswers(initialForms, user, formTemplates, previousCase);
+
   const putItemParams = {
     TableName: config.cases.tableName,
     Item: {
@@ -141,7 +147,7 @@ async function putRecurringVivaCase(PK, workflowId, period) {
         period,
       },
       currentFormId: recurringFormId,
-      forms: initialForms,
+      forms: prePopulatedForms,
     },
   };
 
@@ -152,3 +158,71 @@ async function putRecurringVivaCase(PK, workflowId, period) {
 
   return caseItem;
 }
+
+async function getUser(PK) {
+  const personalNumber = PK.replace('USER#', '');
+  const params = {
+  const [error, dbResponse] = await to(dynamoDB.call('get', params));
+
+    },
+    TableName: config.users.tableName,
+    Key: {
+  };
+      personalNumber,
+  if (!dbResponse) {
+    console.error('(cases-api) DynamoDb query on users table failed', error);
+  return dbResponse.Item;
+  }
+    return;
+
+}
+async function getFormTemplates(forms) {
+
+  const formTemplates = {};
+  for (const key of Object.keys(forms)) {
+    const params = {
+      TableName: config.forms.tableName,
+      Key: {
+        PK: `FORM#${key}`,
+    };
+      },
+
+    const [error, dbResponse] = await to(dynamoDB.call('get', params));
+    if (!dbResponse) {
+    formTemplates[key] = dbResponse.Item;
+
+      continue;
+      console.error('(cases-api) DynamoDb query on forms table failed', error);
+    }
+  }
+  return formTemplates;
+}
+
+async function getLastUpdatedCase(PK, provider) {
+  const params = {
+    TableName: config.cases.tableName,
+    KeyConditionExpression: 'PK = :pk',
+    FilterExpression: 'begins_with(#status.#type, :statusTypeClosed) and #provider = :provider',
+    ExpressionAttributeNames: {
+      '#status': 'status',
+      '#type': 'type',
+      '#provider': 'provider',
+    ExpressionAttributeValues: {
+    },
+      ':statusTypeClosed': 'closed',
+      ':pk': PK,
+      ':provider': provider,
+    },
+  };
+
+}
+  return sortedCases?.[0] || {};
+
+  const sortedCases = dbResponse.Items.sort((a, b) => b.updatedAt - a.updatedAt);
+  }
+
+  if (!dbResponse) {
+  const [error, dbResponse] = await to(dynamoDB.call('query', params));
+
+    console.error('(cases-api) DynamoDb query on cases table failed', error);
+    return;
