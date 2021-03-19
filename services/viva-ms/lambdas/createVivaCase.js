@@ -162,39 +162,39 @@ async function putRecurringVivaCase(PK, workflowId, period) {
 async function getUser(PK) {
   const personalNumber = PK.replace('USER#', '');
   const params = {
-  const [error, dbResponse] = await to(dynamoDB.call('get', params));
-
-    },
     TableName: config.users.tableName,
     Key: {
-  };
       personalNumber,
+    },
+  };
+
+  const [error, dbResponse] = await to(dynamoDB.call('get', params));
   if (!dbResponse) {
     console.error('(cases-api) DynamoDb query on users table failed', error);
-  return dbResponse.Item;
-  }
     return;
+  }
 
+  return dbResponse.Item;
 }
-async function getFormTemplates(forms) {
 
+async function getFormTemplates(forms) {
   const formTemplates = {};
   for (const key of Object.keys(forms)) {
     const params = {
       TableName: config.forms.tableName,
       Key: {
         PK: `FORM#${key}`,
-    };
       },
-
+    };
     const [error, dbResponse] = await to(dynamoDB.call('get', params));
-    if (!dbResponse) {
-    formTemplates[key] = dbResponse.Item;
 
-      continue;
+    if (!dbResponse) {
       console.error('(cases-api) DynamoDb query on forms table failed', error);
+      continue;
     }
+    formTemplates[key] = dbResponse.Item;
   }
+
   return formTemplates;
 }
 
@@ -207,22 +207,21 @@ async function getLastUpdatedCase(PK, provider) {
       '#status': 'status',
       '#type': 'type',
       '#provider': 'provider',
-    ExpressionAttributeValues: {
     },
-      ':statusTypeClosed': 'closed',
+    ExpressionAttributeValues: {
       ':pk': PK,
+      ':statusTypeClosed': 'closed',
       ':provider': provider,
     },
   };
 
-}
-  return sortedCases?.[0] || {};
-
-  const sortedCases = dbResponse.Items.sort((a, b) => b.updatedAt - a.updatedAt);
-  }
-
-  if (!dbResponse) {
   const [error, dbResponse] = await to(dynamoDB.call('query', params));
-
+  if (!dbResponse) {
     console.error('(cases-api) DynamoDb query on cases table failed', error);
     return;
+  }
+
+  const sortedCases = dbResponse.Items.sort((a, b) => b.updatedAt - a.updatedAt);
+
+  return sortedCases?.[0] || {};
+}
