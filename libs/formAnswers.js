@@ -146,7 +146,7 @@ const mergeAnswers = (previousAnswers, newAnswers) =>
     [...previousAnswers, ...newAnswers].reduce((result, current) => {
       result[current.field.id] = {
         ...(result[current.field.id] || {}),
-        current,
+        ...current,
       };
       return result;
     }, {})
