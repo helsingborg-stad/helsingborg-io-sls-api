@@ -1,5 +1,3 @@
-const util = require('util');
-
 import to from 'await-to-js';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import uuid from 'uuid';
@@ -32,7 +30,7 @@ export async function main(event) {
     return response.failure(validationError);
   }
 
-  const { statusType, currentFormId, provider, details, forms } = validatedEventBody;
+  const { statusType, currentFormId, provider, details, forms: initialForms } = validatedEventBody;
   const { personalNumber } = decodedToken;
 
   const id = uuid.v4();
@@ -41,10 +39,9 @@ export async function main(event) {
   const SK = `USER#${personalNumber}#CASE#${id}`;
 
   const user = await getUser(personalNumber);
-  const formTemplates = await getFormTemplates(forms);
-  const previousCase = await getLastUpdatedCase(personalNumber, provider);
-  const initialForms = populateFormAnswers(forms, user, formTemplates, previousCase);
-  console.log(util.inspect(initialForms, { showHidden: false, depth: null }));
+  const formTemplates = await getFormTemplates(initialForms);
+  const previousCase = await getLastUpdatedCase(PK, provider);
+  const preFilledForms = populateFormAnswers(initialForms, user, formTemplates, previousCase);
 
   const timestampNow = Date.now();
   const expirationTime = millisecondsToSeconds(getFutureTimestamp(CASE_EXPIRATION_HOURS));
@@ -57,7 +54,7 @@ export async function main(event) {
     currentFormId,
     provider,
     details,
-    forms: initialForms,
+    forms: preFilledForms,
     expirationTime,
     createdAt: timestampNow,
     updatedAt: timestampNow,
@@ -153,7 +150,7 @@ async function getFormTemplates(forms) {
   return formTemplates;
 }
 
-async function getLastUpdatedCase(personalNumber, provider) {
+async function getLastUpdatedCase(PK, provider) {
   const params = {
     TableName: config.cases.tableName,
     KeyConditionExpression: 'PK = :pk',
@@ -164,7 +161,7 @@ async function getLastUpdatedCase(personalNumber, provider) {
       '#provider': 'provider',
     },
     ExpressionAttributeValues: {
-      ':pk': `USER#${personalNumber}`,
+      ':pk': PK,
       ':statusTypeClosed': 'closed',
       ':provider': provider,
     },
@@ -178,5 +175,5 @@ async function getLastUpdatedCase(personalNumber, provider) {
 
   const sortedCases = dbResponse.Items.sort((a, b) => b.updatedAt - a.updatedAt);
 
-  return sortedCases?.[0] || undefined;
+  return sortedCases?.[0] || {};
 }
