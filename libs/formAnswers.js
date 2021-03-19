@@ -79,24 +79,25 @@ const getCaseAnswer = (answers, matchString) => {
   return result?.value || undefined;
 };
 
-const getInitialRepeaterValues = (field, previousAnswers) => {
-  const repeaterAnswers = [];
+const getMultipleFieldValues = (field, previousAnswers) => {
+  const answers = [];
+  if (!field.loadPrevious) {
+    return answers;
+  }
   field.loadPrevious.forEach(matchString => {
-    const repeaterRegex = new RegExp('.+.[*]..+');
-    if (repeaterRegex.test(matchString)) {
+    const multipleFieldRegex = new RegExp('.+.[*]..+');
+    if (multipleFieldRegex.test(matchString)) {
       const strArray = matchString.split('.[*].');
-      const repeaterIdRegex = new RegExp(`${strArray[0]}.[0-9]+.${strArray[1]}`);
-      const previousRepeaterAnswers = previousAnswers.filter(obj =>
-        repeaterIdRegex.test(obj.field.id)
-      );
-      if (previousRepeaterAnswers.length > 0) {
-        previousRepeaterAnswers.map(answer => formatAnswer(answer.id, field.tags, answer.value));
-        repeaterAnswers.push(...previousRepeaterAnswers);
+      const idRegex = new RegExp(`${strArray?.[0] || ''}.[0-9]+.${strArray?.[1] || ''}`);
+      const previousAnswersMatches = previousAnswers.filter(obj => idRegex.test(obj.field.id));
+      if (previousAnswersMatches.length > 0) {
+        previousAnswersMatches.map(answer => formatAnswer(answer.id, field.tags, answer.value));
+        answers.push(...previousAnswersMatches);
       }
     }
   });
 
-  return repeaterAnswers;
+  return answers;
 };
 
 const getInitialValue = (field, user, previousAnswers) => {
@@ -119,7 +120,7 @@ const populateAnswers = (dataMap, user, previousAnswers) => {
 
   dataMap.forEach(field => {
     if (field.type === 'repeaterField') {
-      const repeaterAnswers = getInitialRepeaterValues(field, previousAnswers);
+      const repeaterAnswers = getMultipleFieldValues(field, previousAnswers);
       if (repeaterAnswers.length > 0) {
         answers.push(...repeaterAnswers);
       }
@@ -136,15 +137,22 @@ const populateAnswers = (dataMap, user, previousAnswers) => {
   return answers;
 };
 
+/**
+ * Takes a form object and populate it with previous answers and user information
+ * @param {Object} forms
+ * @param {Object} user
+ * @param {Object} formTemplates
+ * @param {Object} previousCase
+ */
 export const populateFormAnswers = (forms, user, formTemplates, previousCase) => {
-  const initialForms = { ...forms };
-  Object.keys(initialForms).forEach(formId => {
+  const populatedForms = forms;
+  Object.keys(forms).forEach(formId => {
     const formTemplate = formTemplates[formId] || {};
     const previousAnswers = previousCase?.forms?.[formId]?.answers || [];
     const dataMap = generateDataMap(formTemplate);
     const answers = populateAnswers(dataMap, user, previousAnswers);
-    initialForms[formId].answers = answers;
+    populatedForms[formId].answers = answers;
   });
 
-  return initialForms;
+  return populatedForms;
 };
