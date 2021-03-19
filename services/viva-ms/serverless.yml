@@ -62,6 +62,20 @@ provider:
           Resource:
             - "Fn::ImportValue": ${self:custom.resourcesStage}-CasesTableArn
 
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:GetItem
+      Resource:
+        - "Fn::ImportValue": ${self:custom.resourcesStage}-UsersTableArn
+
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:GetItem
+      Resource:
+        - "Fn::ImportValue": ${self:custom.resourcesStage}-FormsTableArn
+
 functions:
   submitApplication:
     handler: lambdas/submitApplication.main
