@@ -137,6 +137,22 @@ const populateAnswers = (dataMap, user, previousAnswers) => {
 };
 
 /**
+ * Merges previous answers with new answers. New answers will override previous ones.
+ * @param {array} previousAnswers
+ * @param {array} newAnswers
+ */
+const mergeAnswers = (previousAnswers, newAnswers) =>
+  Object.values(
+    [...previousAnswers, ...newAnswers].reduce((result, current) => {
+      result[current.field.id] = {
+        ...(result[current.field.id] || {}),
+        current,
+      };
+      return result;
+    }, {})
+  );
+
+/**
  * Takes a form object and populate it with previous answers and user information
  * @param {Object} forms
  * @param {Object} user
@@ -150,7 +166,8 @@ export const populateFormAnswers = (forms, user, formTemplates, previousCase) =>
     const previousAnswers = previousCase?.forms?.[formId]?.answers || [];
     const dataMap = generateDataMap(formTemplate);
     const answers = populateAnswers(dataMap, user, previousAnswers);
-    populatedForms[formId].answers = answers;
+    const mergedAnswers = mergeAnswers(answers, forms[formId].answers);
+    populatedForms[formId].answers = mergedAnswers;
   });
 
   return populatedForms;
