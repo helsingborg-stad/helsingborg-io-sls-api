@@ -64,7 +64,7 @@ const generateDataMap = form => {
   return dataMap;
 };
 
-const formatAnswer = (id, tags, value) => ({ field: { id, tags }, value });
+const formatAnswer = (id, tags, value) => ({ field: { id, tags: tags || [] }, value });
 
 const getUserInfo = (user, strArray) =>
   strArray.reduce((prev, current) => {
