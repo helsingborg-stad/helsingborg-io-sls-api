@@ -79,7 +79,7 @@ const getCaseAnswer = (answers, matchString) => {
   return result?.value || undefined;
 };
 
-const getMultipleFieldValues = (field, previousAnswers) => {
+const getMultipleFieldAnswers = (field, previousAnswers) => {
   const answers = [];
   if (!field.loadPrevious) {
     return answers;
@@ -108,7 +108,6 @@ const getInitialValue = (field, user, previousAnswers) => {
     if (strArray[0] === 'user' && (initialValue = getUserInfo(user, strArray.slice(1)))) {
       return initialValue;
     }
-
     initialValue = getCaseAnswer(previousAnswers, matchString) || initialValue;
   });
 
@@ -120,7 +119,7 @@ const populateAnswers = (dataMap, user, previousAnswers) => {
 
   dataMap.forEach(field => {
     if (field.type === 'repeaterField') {
-      const repeaterAnswers = getMultipleFieldValues(field, previousAnswers);
+      const repeaterAnswers = getMultipleFieldAnswers(field, previousAnswers);
       if (repeaterAnswers.length > 0) {
         answers.push(...repeaterAnswers);
       }
@@ -147,7 +146,7 @@ const populateAnswers = (dataMap, user, previousAnswers) => {
 export const populateFormAnswers = (forms, user, formTemplates, previousCase) => {
   const populatedForms = forms;
   Object.keys(forms).forEach(formId => {
-    const formTemplate = formTemplates[formId] || {};
+    const formTemplate = formTemplates?.[formId] || {};
     const previousAnswers = previousCase?.forms?.[formId]?.answers || [];
     const dataMap = generateDataMap(formTemplate);
     const answers = populateAnswers(dataMap, user, previousAnswers);

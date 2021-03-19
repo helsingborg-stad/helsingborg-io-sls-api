@@ -41,7 +41,7 @@ export async function main(event) {
   const user = await getUser(personalNumber);
   const formTemplates = await getFormTemplates(initialForms);
   const previousCase = await getLastUpdatedCase(PK, provider);
-  const preFilledForms = populateFormAnswers(initialForms, user, formTemplates, previousCase);
+  const prePopulatedForms = populateFormAnswers(initialForms, user, formTemplates, previousCase);
 
   const timestampNow = Date.now();
   const expirationTime = millisecondsToSeconds(getFutureTimestamp(CASE_EXPIRATION_HOURS));
@@ -54,7 +54,7 @@ export async function main(event) {
     currentFormId,
     provider,
     details,
-    forms: preFilledForms,
+    forms: prePopulatedForms,
     expirationTime,
     createdAt: timestampNow,
     updatedAt: timestampNow,
