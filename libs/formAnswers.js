@@ -105,8 +105,11 @@ const getInitialValue = (field, user, previousAnswers) => {
 
   field.loadPrevious.forEach(matchString => {
     const strArray = matchString.split('.');
-    if (strArray[0] === 'user' && (initialValue = getUserInfo(user, strArray.slice(1)))) {
-      return initialValue;
+    if (strArray[0] === 'user') {
+      initialValue = getUserInfo(user, strArray.slice(1)) || initialValue;
+      if (initialValue) {
+        return formatAnswer(field.id, field.tags, initialValue);
+      }
     }
     initialValue = getCaseAnswer(previousAnswers, matchString) || initialValue;
   });
