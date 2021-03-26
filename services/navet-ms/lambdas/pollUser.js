@@ -32,7 +32,7 @@ function createNavetPollEventDetail(navetData) {
     address: {
       street: navetData.Adresser.Folkbokforingsadress.Utdelningsadress2,
       postalCode: navetData.Adresser.Folkbokforingsadress.PostNr,
-      city: navetData.Adresser.Folkbokforingsadress.PostOrt,
+      city: navetData.Adresser.Folkbokforingsadress.Postort,
     },
     civilStatus: navetData.Civilstand.CivilstandKod,
   };
