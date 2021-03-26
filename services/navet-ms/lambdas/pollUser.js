@@ -60,8 +60,18 @@ async function requestNavetUser(payload, params) {
   [err, parsedData] = await to(parseJSON(navetUser.data));
   if (err) throwError(500);
 
+  const { Folkbokforingspost } = parsedData;
+
+  // Abort if user data is confidential
+  if (
+    Folkbokforingspost.Sekretessmarkering === 'J' ||
+    Folkbokforingspost.SkyddadFolkbokforing === 'J'
+  ) {
+    throwError(404);
+  }
+
   // Collect the user data from response
-  const navetUserData = parsedData.Folkbokforingspost.Personpost;
+  const navetUserData = Folkbokforingspost.Personpost;
   if (navetUserData === undefined) throwError(500);
 
   return navetUserData;
