@@ -134,7 +134,7 @@ async function putRecurringVivaCase(PK, workflowId, period) {
     initialForms,
     user,
     formTemplates,
-    previousCase
+    previousCase?.forms || {}
   );
 
   const putItemParams = {
