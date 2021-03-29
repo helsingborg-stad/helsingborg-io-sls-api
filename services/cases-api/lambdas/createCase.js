@@ -8,7 +8,7 @@ import * as response from '../../../libs/response';
 import { decodeToken } from '../../../libs/token';
 import { getItem, putItem } from '../../../libs/queries';
 
-import { populateFormAnswers } from '../../../libs/formAnswers';
+import { populateFormWithPreviousCaseAnswers } from '../../../libs/formAnswers';
 import caseValidationSchema from '../helpers/schema';
 import { getFutureTimestamp, millisecondsToSeconds } from '../helpers/timestampHelper';
 import { getStatusByType } from '../../../libs/caseStatuses';
@@ -41,7 +41,12 @@ export async function main(event) {
   const user = await getUser(personalNumber);
   const formTemplates = await getFormTemplates(initialForms);
   const previousCase = await getLastUpdatedCase(PK, provider);
-  const prePopulatedForms = populateFormAnswers(initialForms, user, formTemplates, previousCase);
+  const prePopulatedForms = populateFormWithPreviousCaseAnswers(
+    initialForms,
+    user,
+    formTemplates,
+    previousCase
+  );
 
   const timestampNow = Date.now();
   const expirationTime = millisecondsToSeconds(getFutureTimestamp(CASE_EXPIRATION_HOURS));

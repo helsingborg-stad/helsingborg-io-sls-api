@@ -162,7 +162,7 @@ const mergeAnswers = (previousAnswers, newAnswers) =>
  * @param {Object} formTemplates
  * @param {Object} previousCase
  */
-export const populateFormAnswers = (forms, user, formTemplates, previousCase) => {
+export const populateFormWithPreviousCaseAnswers = (forms, user, formTemplates, previousCase) => {
   const populatedForms = forms;
   Object.keys(forms).forEach(formId => {
     const formTemplate = formTemplates?.[formId] || {};

@@ -9,7 +9,7 @@ import * as dynamoDB from '../../../libs/dynamoDb';
 import { CASE_PROVIDER_VIVA } from '../../../libs/constants';
 import { getStatusByType } from '../../../libs/caseStatuses';
 import validateApplicationStatus from '../helpers/validateApplicationStatus';
-import { populateFormAnswers } from '../../../libs/formAnswers';
+import { populateFormWithPreviousCaseAnswers } from '../../../libs/formAnswers';
 
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
@@ -130,7 +130,12 @@ async function putRecurringVivaCase(PK, workflowId, period) {
   const user = await getUser(PK);
   const formTemplates = await getFormTemplates(initialForms);
   const previousCase = await getLastUpdatedCase(PK, CASE_PROVIDER_VIVA);
-  const prePopulatedForms = populateFormAnswers(initialForms, user, formTemplates, previousCase);
+  const prePopulatedForms = populateFormWithPreviousCaseAnswers(
+    initialForms,
+    user,
+    formTemplates,
+    previousCase
+  );
 
   const putItemParams = {
     TableName: config.cases.tableName,
