@@ -38,7 +38,10 @@ export async function main(event) {
   const PK = `USER#${personalNumber}`;
   const SK = `USER#${personalNumber}#CASE#${id}`;
 
-  const user = await getUser(personalNumber);
+  const [userError, user] = await to(getUser(personalNumber));
+  if (userError) {
+    return response.failure(userError);
+  }
   const formTemplates = await getFormTemplates(initialForms);
   const previousCase = await getLastUpdatedCase(PK, provider);
   const prePopulatedForms = populateFormWithPreviousCaseAnswers(
@@ -127,8 +130,7 @@ async function getUser(personalNumber) {
 
   const [error, dbResponse] = await to(dynamoDb.call('get', params));
   if (!dbResponse) {
-    console.error('(cases-api) DynamoDb query on users table failed', error);
-    return;
+    throwError(error.statusCode, error.message);
   }
 
   return dbResponse.Item;
