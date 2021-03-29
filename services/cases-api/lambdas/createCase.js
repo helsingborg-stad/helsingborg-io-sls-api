@@ -40,10 +40,15 @@ export async function main(event) {
 
   const [userError, user] = await to(getUser(personalNumber));
   if (userError) {
+    console.error('(cases-api) DynamoDb query on users table failed', userError);
     return response.failure(userError);
   }
-  const formTemplates = await getFormTemplates(initialForms);
-  const previousCase = await getLastUpdatedCase(PK, provider);
+  const [, formTemplates] = await to(getFormTemplates(initialForms));
+  const [previousCaseError, previousCase] = await to(getLastUpdatedCase(PK, provider));
+  if (previousCaseError) {
+    console.error('(cases-api) DynamoDb query on cases table failed', previousCaseError);
+    return response.failure(previousCaseError);
+  }
   const prePopulatedForms = populateFormWithPreviousCaseAnswers(
     initialForms,
     user,
@@ -176,8 +181,7 @@ async function getLastUpdatedCase(PK, provider) {
 
   const [error, dbResponse] = await to(dynamoDb.call('query', params));
   if (!dbResponse) {
-    console.error('(cases-api) DynamoDb query on cases table failed', error);
-    return;
+    throwError(error.statusCode, error.message);
   }
 
   const sortedCases = dbResponse.Items.sort((a, b) => b.updatedAt - a.updatedAt);
