@@ -1,4 +1,4 @@
-const generateDataMap = form => {
+function generateDataMap(form) {
   const dataMap = [];
   if (!form.steps) {
     return dataMap;
@@ -62,24 +62,27 @@ const generateDataMap = form => {
   });
 
   return dataMap;
-};
+}
 
-const formatAnswer = (id, tags, value) => ({ field: { id, tags: tags || [] }, value });
+function formatAnswer(id, tags, value) {
+  return { field: { id, tags: tags || [] }, value };
+}
 
-const getUserInfo = (user, strArray) =>
-  strArray.reduce((prev, current) => {
+function getUserInfo(user, strArray) {
+  return strArray.reduce((prev, current) => {
     if (prev && prev[current]) {
       return prev[current];
     }
     return undefined;
   }, user);
+}
 
-const getCaseAnswer = (answers, matchString) => {
+function getCaseAnswer(answers, matchString) {
   const result = answers.find(obj => obj.field.id === matchString);
   return result?.value || undefined;
-};
+}
 
-const getMultipleFieldAnswers = (field, previousAnswers) => {
+function getMultipleFieldAnswers(field, previousAnswers) {
   const answers = [];
   if (!field.loadPrevious) {
     return answers;
@@ -98,9 +101,9 @@ const getMultipleFieldAnswers = (field, previousAnswers) => {
   });
 
   return answers;
-};
+}
 
-const getInitialValue = (field, user, previousAnswers) => {
+function getInitialValue(field, user, previousAnswers) {
   let initialValue;
 
   field.loadPrevious.forEach(matchString => {
@@ -115,9 +118,9 @@ const getInitialValue = (field, user, previousAnswers) => {
   });
 
   return initialValue ? formatAnswer(field.id, field.tags, initialValue) : undefined;
-};
+}
 
-const populateAnswers = (dataMap, user, previousAnswers) => {
+function populateAnswers(dataMap, user, previousAnswers) {
   const answers = [];
 
   dataMap.forEach(field => {
@@ -137,15 +140,15 @@ const populateAnswers = (dataMap, user, previousAnswers) => {
   });
 
   return answers;
-};
+}
 
 /**
  * Merges previous answers with new answers. New answers will override previous ones.
  * @param {array} previousAnswers
  * @param {array} newAnswers
  */
-const mergeAnswers = (previousAnswers, newAnswers) =>
-  Object.values(
+function mergeAnswers(previousAnswers, newAnswers) {
+  return Object.values(
     [...previousAnswers, ...newAnswers].reduce((result, current) => {
       result[current.field.id] = {
         ...(result[current.field.id] || {}),
@@ -154,6 +157,7 @@ const mergeAnswers = (previousAnswers, newAnswers) =>
       return result;
     }, {})
   );
+}
 
 /**
  * Takes a form object and populate it with previous answers and user information
@@ -162,7 +166,7 @@ const mergeAnswers = (previousAnswers, newAnswers) =>
  * @param {Object} formTemplates
  * @param {Object} previousForms
  */
-export const populateFormWithPreviousCaseAnswers = (forms, user, formTemplates, previousForms) => {
+export function populateFormWithPreviousCaseAnswers(forms, user, formTemplates, previousForms) {
   const populatedForms = forms;
   Object.keys(forms).forEach(formId => {
     const formTemplate = formTemplates?.[formId] || {};
@@ -174,4 +178,4 @@ export const populateFormWithPreviousCaseAnswers = (forms, user, formTemplates, 
   });
 
   return populatedForms;
-};
+}
