@@ -130,10 +130,15 @@ async function putRecurringVivaCase(PK, workflowId, period) {
 
   const [userError, user] = await to(getUser(PK));
   if (userError) {
+    console.error('(cases-api) DynamoDb query on users table failed', userError);
     throw userError;
   }
-  const formTemplates = await getFormTemplates(initialForms);
-  const previousCase = await getLastUpdatedCase(PK, CASE_PROVIDER_VIVA);
+  const [, formTemplates] = await to(getFormTemplates(initialForms));
+  const [previousCaseError, previousCase] = await to(getLastUpdatedCase(PK, CASE_PROVIDER_VIVA));
+  if (previousCaseError) {
+    console.error('(cases-api) DynamoDb query on cases table failed', previousCaseError);
+    throw previousCaseError;
+  }
   const prePopulatedForms = populateFormWithPreviousCaseAnswers(
     initialForms,
     user,
@@ -225,8 +230,7 @@ async function getLastUpdatedCase(PK, provider) {
 
   const [error, dbResponse] = await to(dynamoDB.call('query', params));
   if (!dbResponse) {
-    console.error('(cases-api) DynamoDb query on cases table failed', error);
-    return;
+    throwError(error.statusCode, error.message);
   }
 
   const sortedCases = dbResponse.Items.sort((a, b) => b.updatedAt - a.updatedAt);
