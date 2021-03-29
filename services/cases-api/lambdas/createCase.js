@@ -45,7 +45,7 @@ export async function main(event) {
     initialForms,
     user,
     formTemplates,
-    previousCase
+    previousCase?.forms || {}
   );
 
   const timestampNow = Date.now();

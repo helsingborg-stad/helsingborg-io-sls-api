@@ -160,13 +160,13 @@ const mergeAnswers = (previousAnswers, newAnswers) =>
  * @param {Object} forms
  * @param {Object} user
  * @param {Object} formTemplates
- * @param {Object} previousCase
+ * @param {Object} previousForms
  */
-export const populateFormWithPreviousCaseAnswers = (forms, user, formTemplates, previousCase) => {
+export const populateFormWithPreviousCaseAnswers = (forms, user, formTemplates, previousForms) => {
   const populatedForms = forms;
   Object.keys(forms).forEach(formId => {
     const formTemplate = formTemplates?.[formId] || {};
-    const previousAnswers = previousCase?.forms?.[formId]?.answers || [];
+    const previousAnswers = previousForms?.[formId]?.answers || [];
     const dataMap = generateDataMap(formTemplate);
     const answers = populateAnswers(dataMap, user, previousAnswers);
     const mergedAnswers = mergeAnswers(answers, forms[formId].answers);
