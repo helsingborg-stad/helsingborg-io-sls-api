@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import to from 'await-to-js';
 import uuid from 'uuid';
+import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
 import config from '../../../config';
 import params from '../../../libs/params';
@@ -127,7 +128,10 @@ async function putRecurringVivaCase(PK, workflowId, period) {
     [completionFormId]: initialFormAttributes,
   };
 
-  const user = await getUser(PK);
+  const [userError, user] = await to(getUser(PK));
+  if (userError) {
+    throw userError;
+  }
   const formTemplates = await getFormTemplates(initialForms);
   const previousCase = await getLastUpdatedCase(PK, CASE_PROVIDER_VIVA);
   const prePopulatedForms = populateFormWithPreviousCaseAnswers(
@@ -175,8 +179,7 @@ async function getUser(PK) {
 
   const [error, dbResponse] = await to(dynamoDB.call('get', params));
   if (!dbResponse) {
-    console.error('(cases-api) DynamoDb query on users table failed', error);
-    return;
+    throwError(error.statusCode, error.message);
   }
 
   return dbResponse.Item;
