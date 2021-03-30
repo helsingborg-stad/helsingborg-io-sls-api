@@ -68,10 +68,17 @@ async function syncWorkflowAndStatus(PK, SK, workflow) {
   let UpdateExpression = `SET ${CASE_WORKFLOW_PATH} = :newWorkflow`;
   const ExpressionAttributeValues = { ':newWorkflow': workflow };
   const ExpressionAttributeNames = {};
+  const vivaWorkflowDecision = workflow.decision?.decisions?.decision;
   let decisionStatus = 0;
+  let decisionList = [];
 
-  const decisionList = workflow.decision?.decisions?.decision;
-  if (decisionList !== undefined) {
+  if (Array.isArray(vivaWorkflowDecision)) {
+    decisionList = [...vivaWorkflowDecision];
+  } else {
+    decisionList.push(vivaWorkflowDecision);
+  }
+
+  if (decisionList !== undefined && decisionList.length > 0) {
     decisionList.forEach(decision => {
       const decisionType = decision.typecode;
       decisionStatus = decisionStatus | parseInt(decisionType, 10);
