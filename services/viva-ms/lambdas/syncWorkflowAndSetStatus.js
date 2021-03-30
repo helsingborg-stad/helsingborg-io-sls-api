@@ -49,8 +49,14 @@ async function getUserSubmittedCases(PK) {
   const params = {
     TableName,
     KeyConditionExpression: 'PK = :pk',
+    FilterExpression: 'begins_with(#status.#type, :statusTypeSubmitted)',
+    ExpressionAttributeNames: {
+      '#status': 'status',
+      '#type': 'type',
+    },
     ExpressionAttributeValues: {
       ':pk': PK,
+      ':statusTypeSubmitted': 'active:submitted:viva',
     },
   };
 
