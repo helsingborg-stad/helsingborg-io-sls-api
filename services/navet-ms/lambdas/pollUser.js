@@ -66,8 +66,9 @@ async function requestNavetUser(payload, params) {
   if (
     Folkbokforingspost.Sekretessmarkering === 'J' ||
     Folkbokforingspost.SkyddadFolkbokforing === 'J'
-  )
-    throw 'Forbidden';
+  ) {
+    throw new Error('User is not allowed to use the service.');
+  }
 
   // Collect the user data from response
   const navetUserData = Folkbokforingspost.Personpost;
