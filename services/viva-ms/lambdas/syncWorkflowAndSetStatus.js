@@ -13,36 +13,37 @@ export async function main(event) {
   const personalNumber = event.detail.user.personalNumber;
   const PK = `USER#${personalNumber}`;
 
-  const [getAllUserCasesError, allUserCases] = await to(getAllUserCases(PK));
-  if (getAllUserCasesError) {
-    return console.error('(Viva-ms) DynamoDB query failed', getAllUserCasesError);
+  const [getUserSubmittedCasesError, userSubmittedCases] = await to(getUserSubmittedCases(PK));
+  if (getUserSubmittedCasesError) {
+    return console.error('(Viva-ms) DynamoDB query failed', getUserSubmittedCasesError);
   }
 
-  const userCaseItems = allUserCases.Items;
-  if (userCaseItems === undefined || userCaseItems.length === 0) {
+  const userSubmittedCasesItems = userSubmittedCases.Items;
+  if (userSubmittedCasesItems === undefined || userSubmittedCasesItems.length === 0) {
     return console.error('(Viva-ms) DynamoDB query did not fetch any cases');
   }
 
-  for (const userCase of userCaseItems) {
+  for (const userCase of userSubmittedCasesItems) {
     const workflowId = userCase.details.workflowId;
+    console.log('workflowId', workflowId);
 
-    const [myPagesError, myPagesResponse] = await to(
+    const [adapterGetWorkflowError, vivaWorkflow] = await to(
       vivaAdapter.workflow.get({ personalNumber, workflowId })
     );
-    if (myPagesError) {
-      console.error('(Viva-ms) My pages request error', myPagesError);
+    if (adapterGetWorkflowError) {
+      console.error('(Viva-ms) Adapter get workflow', adapterGetWorkflowError);
       continue;
     }
 
-    if (!deepEqual(myPagesResponse.attributes, userCase.details?.workflow)) {
-      await syncWorkflowAndStatus(userCase.PK, userCase.SK, myPagesResponse.attributes);
+    if (!deepEqual(vivaWorkflow.attributes, userCase.details?.workflow)) {
+      await syncWorkflowAndStatus(userCase.PK, userCase.SK, vivaWorkflow.attributes);
     }
   }
 
   return true;
 }
 
-async function getAllUserCases(PK) {
+async function getUserSubmittedCases(PK) {
   const TableName = config.cases.tableName;
 
   const params = {
