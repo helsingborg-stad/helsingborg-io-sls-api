@@ -68,7 +68,11 @@ async function syncWorkflowAndStatus(PK, SK, workflow) {
   let UpdateExpression = `SET ${CASE_WORKFLOW_PATH} = :newWorkflow`;
   const ExpressionAttributeValues = { ':newWorkflow': workflow };
   const ExpressionAttributeNames = {};
+
   const vivaWorkflowDecision = workflow.decision?.decisions?.decision;
+  const vivaWorkflowCalculation = workflow.calculations?.calculation;
+  const vivaWorkflowApplicationIsLocked = workflow.application?.islocked;
+
   let decisionStatus = 0;
   let decisionList = [];
 
@@ -91,6 +95,11 @@ async function syncWorkflowAndStatus(PK, SK, workflow) {
     } else if (decisionStatus === 3) {
       ExpressionAttributeValues[':newStatus'] = getStatusByType('closed:partiallyApproved:viva');
     }
+  } else if (
+    vivaWorkflowCalculation !== undefined ||
+    vivaWorkflowApplicationIsLocked !== undefined
+  ) {
+    ExpressionAttributeValues[':newStatus'] = getStatusByType('active:processing');
   }
 
   if (ExpressionAttributeValues[':newStatus']) {
