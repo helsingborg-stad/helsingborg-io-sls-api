@@ -13,9 +13,9 @@
     - [Serverless Deploy Role](#serverless-deploy-role)
     - [Parameter stores](#parameter-stores)
     - [Create/Update/Delete stack](#createupdatedelete-stack)
-      - [Production/Staging](#productionstaging)
-      - [Test](#test)
+      - [Production/Staging/Test](#productionstagingtest)
       - [Develop](#develop)
+      - [Release](#release)
 
 
 ## Deploy script
@@ -61,52 +61,52 @@ In the parameters section in the CFN template, parameter store values are fetche
 ### Create/Update/Delete stack
 In project root folder, run these commands to create, update and delete pipelines.  
 
-#### Production/Staging
+#### Production/Staging/Test
 Production and staging is deployed in the same pipeline.  
 
 Create:
 ```
-aws cloudformation create-stack --stack-name helsingborg-io-sls-api-pipeline --template-body file://$PWD/.deploy/cloudformation/pipelines/production/stack.yml --capabilities CAPABILITY_NAMED_IAM --profile aws-pipelines-profile-name
+aws cloudformation create-stack --stack-name helsingborg-io-sls-api-pipeline --template-body file://$PWD/.deploy/cloudformation/pipelines/production/stack.yml --capabilities CAPABILITY_NAMED_IAM 
 ```
 
 Update:
 ```
-aws cloudformation update-stack --stack-name helsingborg-io-sls-api-pipeline --template-body file://$PWD/.deploy/cloudformation/pipelines/production/stack.yml --capabilities CAPABILITY_NAMED_IAM --profile aws-pipelines-profile-name
+aws cloudformation update-stack --stack-name helsingborg-io-sls-api-pipeline --template-body file://$PWD/.deploy/cloudformation/pipelines/production/stack.yml --capabilities CAPABILITY_NAMED_IAM 
 ```
 
 Delete:
 ```
-aws cloudformation delete-stack --stack-name helsingborg-io-sls-api-pipeline --profile aws-pipelines-profile-name
-```
-
-#### Test
-Create:
-```
-aws cloudformation create-stack --stack-name helsingborg-io-sls-api-test-pipeline --template-body file://$PWD/.deploy/cloudformation/pipelines/test/stack.yml --capabilities CAPABILITY_NAMED_IAM --profile aws-pipelines-profile-name
-```
-
-Update:
-```
-aws cloudformation update-stack --stack-name helsingborg-io-sls-api-test-pipeline --template-body file://$PWD/.deploy/cloudformation/pipelines/test/stack.yml --capabilities CAPABILITY_NAMED_IAM --profile aws-pipelines-profile-name
-```
-
-Delete:
-```
-aws cloudformation delete-stack --stack-name helsingborg-io-sls-api-test-pipeline --profile aws-pipelines-profile-name
+aws cloudformation delete-stack --stack-name helsingborg-io-sls-api-pipeline 
 ```
 
 #### Develop
 Create:
 ```
-aws cloudformation create-stack --stack-name helsingborg-io-sls-api-develop-pipeline --template-body file://$PWD/.deploy/cloudformation/pipelines/develop/stack.yml --capabilities CAPABILITY_NAMED_IAM --profile aws-pipelines-profile-name
+aws cloudformation create-stack --stack-name helsingborg-io-sls-api-develop-pipeline --template-body file://$PWD/.deploy/cloudformation/pipelines/develop/stack.yml --capabilities CAPABILITY_NAMED_IAM 
 ```
 
 Update:
 ```
-aws cloudformation update-stack --stack-name helsingborg-io-sls-api-develop-pipeline --template-body file://$PWD/.deploy/cloudformation/pipelines/develop/stack.yml --capabilities CAPABILITY_NAMED_IAM --profile aws-pipelines-profile-name
+aws cloudformation update-stack --stack-name helsingborg-io-sls-api-develop-pipeline --template-body file://$PWD/.deploy/cloudformation/pipelines/develop/stack.yml --capabilities CAPABILITY_NAMED_IAM 
 ```
 
 Delete:
 ```
-aws cloudformation delete-stack --stack-name helsingborg-io-sls-api-develop-pipeline --profile aws-pipelines-profile-name
+aws cloudformation delete-stack --stack-name helsingborg-io-sls-api-develop-pipeline 
+```
+
+#### Release
+Create:
+```
+aws cloudformation create-stack --stack-name helsingborg-io-sls-api-release-pipeline --template-body file://$PWD/.deploy/cloudformation/pipelines/release/stack.yml --capabilities CAPABILITY_NAMED_IAM 
+```
+
+Update:
+```
+aws cloudformation update-stack --stack-name helsingborg-io-sls-api-release-pipeline --template-body file://$PWD/.deploy/cloudformation/pipelines/release/stack.yml --capabilities CAPABILITY_NAMED_IAM 
+```
+
+Delete:
+```
+aws cloudformation delete-stack --stack-name helsingborg-io-sls-api-release-pipeline 
 ```

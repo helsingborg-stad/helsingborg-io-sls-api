@@ -179,6 +179,50 @@ const stageConfigs = {
       envsKeyName: '/pdfEnvs/prod',
     },
   },
+  release: {
+    auth: {
+      secrets: {
+        accessToken: {
+          keyName: 'AccessTokenSecret',
+          name: 'release/token/access/secret',
+        },
+        refreshToken: {
+          keyName: 'RefreshTokenSecret',
+          name: 'release/token/refresh/secret',
+        },
+        authorizationCode: {
+          keyName: 'AuthorizationCodeSecret',
+          name: 'release/token/authorization/code/secret',
+        },
+      },
+    },
+    bankId: {
+      envsKeyName: '/bankidEnvs/release',
+    },
+    users: {
+      tableName: 'users',
+    },
+    forms: {
+      tableName: 'forms',
+    },
+    cases: {
+      tableName: 'cases',
+      providers: {
+        viva: {
+          envsKeyName: '/vivaCaseEnvs/release',
+        },
+      },
+    },
+    vada: {
+      envsKeyName: '/vadaEnvs/release',
+    },
+    navet: {
+      envsKeyName: '/navetEnvs/release',
+    },
+    pdf: {
+      envsKeyName: '/pdfEnvs/release',
+    },
+  },
 };
 
 const config = stageConfigs[stage] || stageConfigs.dev;

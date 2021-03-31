@@ -3,10 +3,10 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: Creates PreReqs for Cloudformation Projects with Pipelines (KMS, Buckets, Repos...)
 
 Parameters:
-  TestAccount:
-    Description: AWS AccountNumber for Test
+  ReleaseAccount:
+    Description: AWS AccountNumber for Release
     Type: AWS::SSM::Parameter::Value<String>
-    Default: mitt-hbg-aws-account-id-test
+    Default: mitt-hbg-aws-account-id-release
   GitHubOwner:
     Description: Owner of the repository.
     Type: String
@@ -18,12 +18,12 @@ Parameters:
   GitHubBranch:
     Description: Branch name.
     Type: String
-    Default: master
+    Default: release/1.0.0
   GitHubNPMToken:
     Description: Access token for github npm packages
     Type: AWS::SSM::Parameter::Value<String>
     Default: github-npm-token
-    
+
 Resources:
   ##
   # CodeBuild
@@ -43,7 +43,7 @@ Resources:
         Image: aws/codebuild/standard:5.0
       Source:
         Type: CODEPIPELINE
-        BuildSpec: .deploy/cloudformation/pipelines/test/buildspec.yml
+        BuildSpec: .deploy/cloudformation/pipelines/release/buildspec.yml
       Cache:
         Location: !Sub "${S3BucketArtifact}/cache"
         Type: S3
@@ -63,7 +63,7 @@ Resources:
           Id: !GetAtt KMSKey.KeyId
           Type: KMS
       RoleArn: !GetAtt IAMRolePipeline.Arn
-      Name: !Sub ${AWS::StackName}-Pipeline
+      Name: !Sub ${AWS::StackName}
       Stages:
         - Name: GetSource
           Actions:
@@ -82,10 +82,10 @@ Resources:
               OutputArtifacts:
                 - Name: SourceOutput
               RunOrder: 1
-        - Name: Test
+        - Name: Release
           Actions:
             -
-              Name: DeployTest
+              Name: DeployRelease
               ActionTypeId:
                 Category: Build
                 Owner: AWS
@@ -97,7 +97,7 @@ Resources:
                   [
                     {
                       "name": "AWS_ACCOUNT_NBR",
-                      "value": "${TestAccount}"
+                      "value": "${ReleaseAccount}"
                     },
                     {
                       "name": "NPM_TOKEN",
@@ -105,7 +105,7 @@ Resources:
                     },
                     {
                       "name": "ENV",
-                      "value": "test"
+                      "value": "release"
                     }
                   ]
               InputArtifacts: 
@@ -170,7 +170,7 @@ Resources:
             Action:
               - sts:AssumeRole
             Resource:
-              - !Sub arn:aws:iam::${TestAccount}:role/ServerlessDeployRole
+              - !Sub arn:aws:iam::${ReleaseAccount}:role/ServerlessDeployRole
           - Sid: codestarconnection
             Effect: Allow
             Action:
