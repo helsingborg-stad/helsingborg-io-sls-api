@@ -14,29 +14,34 @@ import config from '../config.js';
 const diff = lastCommmitHashFile => {
   const servicesPath = `${config.codeBuildPath}/${config.servicesPath}`;
 
-  let gitDiff;
+  let gitDiff = [];
   // Check if any earlier deployed commit sha is stored and get diff fies or return all services if missing.
   if (fs.existsSync(lastCommmitHashFile)) {
     const lastCommmitHash = fs.readFileSync(lastCommmitHashFile, 'utf8').trim();
     try {
+      // Return empty file list if last deploy is on the same commit hash as the current one.
+      if (process.env.CODEBUILD_RESOLVED_SOURCE_VERSION === lastCommmitHash) {
+        return []; 
+      }
+
       gitDiff = childProcess.execSync(
         `git diff ${lastCommmitHash} ${process.env.CODEBUILD_RESOLVED_SOURCE_VERSION} --name-only`
       );
     } catch (_ex) {
       // git commit SHA is missing, could be deleted! Deploy everything!
-      return glob.sync(`${servicesPath}/**/serverless.yml`);
+      return glob.sync(`${servicesPath}/**/serverless.yml`, { ignore: '**/node_modules/**' });
     }
     // Convert git diff output to array.
     gitDiff = gitDiff.toString().match(/.+/g);
   } else {
-    return glob.sync(`${servicesPath}/**/serverless.yml`);
+    return glob.sync(`${servicesPath}/**/serverless.yml`, { ignore: '**/node_modules/**' });
   }
 
   const servicesDiff = [];
   for (const file of gitDiff) {
     // If something changed in libs folder we deploy all services.
     if (file.indexOf(config.libsPath) === 0) {
-      return glob.sync(`${servicesPath}/**/serverless.yml`);
+      return glob.sync(`${servicesPath}/**/serverless.yml`, { ignore: '**/node_modules/**' });
     }
     // If something changed in services folders, add the path to it to services path list.
     if (file.indexOf(config.servicesPath) === 0) {

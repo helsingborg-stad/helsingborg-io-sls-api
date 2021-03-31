@@ -63,7 +63,7 @@ Resources:
           Id: !GetAtt KMSKey.KeyId
           Type: KMS
       RoleArn: !GetAtt IAMRolePipeline.Arn
-      Name: !Sub ${AWS::StackName}-Pipeline
+      Name: !Sub ${AWS::StackName}
       Stages:
         - Name: GetSource
           Actions:

@@ -3,6 +3,10 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: Creates PreReqs for Cloudformation Projects with Pipelines (KMS, Buckets, Repos...)
 
 Parameters:
+  TestAccount:
+    Description: AWS AccountNumber for Test
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: mitt-hbg-aws-account-id-test
   StageAccount:
     Description: AWS AccountNumber for Staging
     Type: AWS::SSM::Parameter::Value<String>
@@ -22,7 +26,7 @@ Parameters:
   GitHubBranch:
     Description: Branch name.
     Type: String
-    Default: master
+    Default: release/test
   GitHubNPMToken:
     Description: Access token for github npm packages
     Type: AWS::SSM::Parameter::Value<String>
@@ -85,7 +89,7 @@ Resources:
           Id: !GetAtt KMSKey.KeyId
           Type: KMS
       RoleArn: !GetAtt IAMRolePipeline.Arn
-      Name: !Sub ${AWS::StackName}-Pipeline
+      Name: !Sub ${AWS::StackName}
       Stages:
         - Name: GetSource
           Actions:
@@ -185,14 +189,43 @@ Resources:
                     },
                     {
                       "name": "ENV",
-                      "value": "production"
+                      "value": "prod"
                     }
                   ]
               InputArtifacts: 
                 - 
                   Name: SourceOutput
               RunOrder: 2
-
+        - Name: Test
+          Actions:
+            -
+              Name: DeployTest
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: "1"
+                Provider: CodeBuild
+              Configuration:
+                ProjectName: !Sub ${AWS::StackName}-CodeBuildProject
+                EnvironmentVariables: !Sub |
+                  [
+                    {
+                      "name": "AWS_ACCOUNT_NBR",
+                      "value": "${TestAccount}"
+                    },
+                    {
+                      "name": "NPM_TOKEN",
+                      "value": "${GitHubNPMToken}"
+                    },
+                    {
+                      "name": "ENV",
+                      "value": "test"
+                    }
+                  ]
+              InputArtifacts: 
+                - 
+                  Name: SourceOutput
+              RunOrder: 2
 
 
   ##
@@ -250,6 +283,7 @@ Resources:
             Action:
               - sts:AssumeRole
             Resource:
+              - !Sub arn:aws:iam::${TestAccount}:role/ServerlessDeployRole
               - !Sub arn:aws:iam::${StageAccount}:role/ServerlessDeployRole
               - !Sub arn:aws:iam::${ProductionAccount}:role/ServerlessDeployRole
           - Sid: codestarconnection

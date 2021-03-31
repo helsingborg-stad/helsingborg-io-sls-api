@@ -10,6 +10,7 @@ custom:
     stage: stage
     dev: dev
     test: test
+    release: release
   resourcesStage: ${self:custom.resourcesStages.${self:custom.stage}, self:custom.resourcesStages.dev}
   webpack:
     webpackConfig: webpack.config.js

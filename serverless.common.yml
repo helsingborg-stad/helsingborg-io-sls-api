@@ -9,6 +9,7 @@ custom:
     stage: stage
     test: test
     dev: dev
+    release: release
   resourcesStage: ${self:custom.resourcesStages.${self:custom.stage}, self:custom.resourcesStages.dev}
 
   apiKeys:
