@@ -134,7 +134,7 @@ async function getUser(personalNumber) {
   };
 
   const [error, dbResponse] = await to(dynamoDb.call('get', params));
-  if (!dbResponse) {
+  if (error) {
     throwError(error.statusCode, error.message);
   }
 
@@ -152,7 +152,7 @@ async function getFormTemplates(forms) {
     };
     const [error, dbResponse] = await to(dynamoDb.call('get', params));
 
-    if (!dbResponse) {
+    if (error) {
       console.error('(cases-api) DynamoDb query on forms table failed', error);
       continue;
     }
@@ -180,7 +180,7 @@ async function getLastUpdatedCase(PK, provider) {
   };
 
   const [error, dbResponse] = await to(dynamoDb.call('query', params));
-  if (!dbResponse) {
+  if (error) {
     throwError(error.statusCode, error.message);
   }
 
