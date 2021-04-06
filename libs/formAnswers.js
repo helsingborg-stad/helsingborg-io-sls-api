@@ -155,14 +155,15 @@ function mergeAnswers(previousAnswers, newAnswers) {
 }
 
 export function populateFormWithPreviousCaseAnswers(forms, user, formTemplates, previousForms) {
-  const populatedForms = forms;
+  const populatedForms = {};
   Object.keys(forms).forEach(formId => {
+    const form = forms[formId];
     const formTemplate = formTemplates?.[formId] || {};
     const previousAnswers = previousForms?.[formId]?.answers || [];
     const dataMap = generateDataMap(formTemplate);
     const answers = populateAnswers(dataMap, user, previousAnswers);
     const mergedAnswers = mergeAnswers(answers, forms[formId].answers);
-    populatedForms[formId].answers = mergedAnswers;
+    populatedForms[formId] = { ...form, answers: mergedAnswers };
   });
 
   return populatedForms;
