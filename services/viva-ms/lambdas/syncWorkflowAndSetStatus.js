@@ -20,13 +20,11 @@ export async function main(event) {
 
   const userSubmittedCasesItems = userSubmittedCases.Items;
   if (userSubmittedCasesItems === undefined || userSubmittedCasesItems.length === 0) {
-    return console.error('(Viva-ms) DynamoDB query did not fetch any cases');
+    return console.info('(Viva-ms) DynamoDB query did not fetch any subbmitted cases');
   }
 
   for (const userCase of userSubmittedCasesItems) {
     const workflowId = userCase.details.workflowId;
-    console.log('workflowId', workflowId);
-
     const [adapterGetWorkflowError, vivaWorkflow] = await to(
       vivaAdapter.workflow.get({ personalNumber, workflowId })
     );
