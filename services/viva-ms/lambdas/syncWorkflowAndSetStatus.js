@@ -109,7 +109,7 @@ async function syncWorkflowAndStatus(caseItem, workflow) {
     },
     UpdateExpression,
     ExpressionAttributeValues,
-    ReturnValues: 'UPDATED_NEW',
+    ReturnValues: 'NONE',
   };
 
   if (ExpressionAttributeNames && Object.keys(ExpressionAttributeNames).length > 0) {
