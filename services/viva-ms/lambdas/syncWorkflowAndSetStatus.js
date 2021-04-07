@@ -34,7 +34,7 @@ export async function main(event) {
     }
 
     if (!deepEqual(vivaWorkflow.attributes, userCase.details?.workflow)) {
-      await syncWorkflowAndStatus(userCase.PK, userCase.SK, vivaWorkflow.attributes);
+      await syncWorkflowAndStatus(userCase, vivaWorkflow.attributes);
     }
   }
 
@@ -61,7 +61,7 @@ async function getUserSubmittedCases(PK) {
   return dynamoDb.call('query', params);
 }
 
-async function syncWorkflowAndStatus(PK, SK, workflow) {
+async function syncWorkflowAndStatus(caseItem, workflow) {
   const TableName = config.cases.tableName;
   let UpdateExpression = `SET ${CASE_WORKFLOW_PATH} = :newWorkflow`;
   const ExpressionAttributeValues = { ':newWorkflow': workflow };
@@ -103,7 +103,10 @@ async function syncWorkflowAndStatus(PK, SK, workflow) {
 
   const params = {
     TableName,
-    Key: { PK, SK },
+    Key: {
+      PK: caseItem.PK,
+      SK: caseItem.SK,
+    },
     UpdateExpression,
     ExpressionAttributeValues,
     ReturnValues: 'UPDATED_NEW',
