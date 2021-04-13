@@ -33,6 +33,10 @@ provider:
           # Restrict our IAM role permissions to the specific table for the stage
           Resource:
             - "Fn::ImportValue": ${self:custom.resourcesStage}-UsersTableArn
+        - Effect: Allow
+          Action:
+            - kms:decrypt
+          Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
 
 functions:
   create:

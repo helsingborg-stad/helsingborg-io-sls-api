@@ -69,6 +69,10 @@ provider:
                 - ""
                 - - Fn::ImportValue: ${self:custom.resourcesStage}-PdfTemplatesBucketArn
                   - "/*"
+        - Effect: Allow
+          Action:
+            - kms:decrypt
+          Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
 
 functions:
   addPdfToCase:
