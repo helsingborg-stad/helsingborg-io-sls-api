@@ -7,47 +7,64 @@ import * as dynamoDb from '../../../libs/dynamoDb';
 import { getStatusByType } from '../../../libs/caseStatuses';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
-const CASE_WORKFLOW_PATH = 'details.workflow';
-
 export async function main(event) {
   const personalNumber = event.detail.user.personalNumber;
-  const PK = `USER#${personalNumber}`;
 
-  const [getUserSubmittedCasesError, userSubmittedCases] = await to(getUserSubmittedCases(PK));
-  if (getUserSubmittedCasesError) {
-    return console.error('(Viva-ms) DynamoDB query failed', getUserSubmittedCasesError);
+  const [getUserCasesError, userCases] = await to(
+    getSubmittedAndOrProcessingUserCases(personalNumber)
+  );
+  if (getUserCasesError) {
+    throw ('(Viva-ms) DynamoDB query failed', getUserCasesError);
   }
 
-  const userSubmittedCasesItems = userSubmittedCases.Items;
-  if (userSubmittedCasesItems === undefined || userSubmittedCasesItems.length === 0) {
-    return console.info('(Viva-ms) DynamoDB query did not fetch any subbmitted cases');
+  const userCasesItems = userCases.Items;
+  if (userCasesItems === undefined || userCasesItems.length === 0) {
+    return console.info(
+      '(Viva-ms) DynamoDB query did not fetch any active:submitted or active:processing case(s)'
+    );
   }
 
-  for (const userCase of userSubmittedCasesItems) {
+  for (const userCase of userCasesItems) {
+    const userCasePrimaryKey = {
+      PK: userCase.PK,
+      SK: userCase.SK,
+    };
+
     const workflowId = userCase.details.workflowId;
     const [adapterGetWorkflowError, vivaWorkflow] = await to(
       vivaAdapter.workflow.get({ personalNumber, workflowId })
     );
+
     if (adapterGetWorkflowError) {
       console.error('(Viva-ms) Adapter get workflow', adapterGetWorkflowError);
       continue;
     }
 
+    const [syncCaseWorkflowDetailsError] = await to(
+      syncCaseWorkflowDetails(userCasePrimaryKey, vivaWorkflow.attributes)
+    );
+    if (syncCaseWorkflowDetailsError) {
+      console.error('(Viva-ms) syncCaseWorkflowDetailsError');
+      throw syncCaseWorkflowDetailsError;
+    }
+
     if (!deepEqual(vivaWorkflow.attributes, userCase.details?.workflow)) {
-      await syncWorkflowAndStatus(userCase, vivaWorkflow.attributes);
+      await setStatus(userCasePrimaryKey, vivaWorkflow.attributes);
     }
   }
 
   return true;
 }
 
-async function getUserSubmittedCases(PK) {
+async function getSubmittedAndOrProcessingUserCases(personalNumber) {
   const TableName = config.cases.tableName;
+  const PK = `USER#${personalNumber}`;
 
   const params = {
     TableName,
     KeyConditionExpression: 'PK = :pk',
-    FilterExpression: 'begins_with(#status.#type, :statusTypeSubmitted)',
+    FilterExpression:
+      'begins_with(#status.#type, :statusTypeSubmitted) or begins_with(#status.#type, :statusTypeProcessing)',
     ExpressionAttributeNames: {
       '#status': 'status',
       '#type': 'type',
@@ -55,66 +72,68 @@ async function getUserSubmittedCases(PK) {
     ExpressionAttributeValues: {
       ':pk': PK,
       ':statusTypeSubmitted': 'active:submitted:viva',
+      ':statusTypeProcessing': 'active:processing',
     },
   };
 
   return dynamoDb.call('query', params);
 }
 
-async function syncWorkflowAndStatus(caseItem, workflow) {
+async function syncCaseWorkflowDetails(casePrimaryKey, workflow) {
   const TableName = config.cases.tableName;
-  let UpdateExpression = `SET ${CASE_WORKFLOW_PATH} = :newWorkflow`;
-  const ExpressionAttributeValues = { ':newWorkflow': workflow };
-  const ExpressionAttributeNames = {};
 
-  const vivaWorkflowDecision = workflow.decision?.decisions?.decision;
+  const params = {
+    TableName,
+    Key: casePrimaryKey,
+    UpdateExpression: 'SET details.workflow = :newWorkflow',
+    ExpressionAttributeValues: { ':newWorkflow': workflow },
+    ReturnValues: 'NONE',
+  };
+
+  const [updateWorkflowDetailsError] = await to(dynamoDb.call('update', params));
+  if (updateWorkflowDetailsError) {
+    throw updateWorkflowDetailsError;
+  }
+
+  return true;
+}
+
+async function setStatus(casePrimaryKey, workflow) {
+  const TableName = config.cases.tableName;
+
+  const vivaWorkflowDecisionList = makeArray(workflow.decision?.decisions?.decision);
   const vivaWorkflowCalculation = workflow.calculations?.calculation;
 
   let decisionStatus = 0;
-  let decisionList = [];
+  let newStatusType = '';
 
-  if (Array.isArray(vivaWorkflowDecision)) {
-    decisionList = [...vivaWorkflowDecision];
-  } else {
-    decisionList.push(vivaWorkflowDecision);
-  }
-
-  if (decisionList !== undefined && decisionList.length > 0) {
-    decisionList.forEach(decision => {
-      const decisionType = decision.typecode;
-      decisionStatus = decisionStatus | parseInt(decisionType, 10);
+  if (vivaWorkflowDecisionList !== undefined && vivaWorkflowDecisionList.length > 0) {
+    vivaWorkflowDecisionList.forEach(decision => {
+      const decisionTypeCode = decision.typecode;
+      decisionStatus = decisionStatus | parseInt(decisionTypeCode, 10);
     });
 
     if (decisionStatus === 1) {
-      ExpressionAttributeValues[':newStatus'] = getStatusByType('closed:approved:viva');
+      newStatusType = 'closed:approved:viva';
     } else if (decisionStatus === 2) {
-      ExpressionAttributeValues[':newStatus'] = getStatusByType('closed:rejected:viva');
+      newStatusType = 'closed:rejected:viva';
     } else if (decisionStatus === 3) {
-      ExpressionAttributeValues[':newStatus'] = getStatusByType('closed:partiallyApproved:viva');
+      newStatusType = 'closed:partiallyApproved:viva';
     }
   } else if (vivaWorkflowCalculation !== undefined) {
-    ExpressionAttributeValues[':newStatus'] = getStatusByType('active:processing');
-  }
-
-  if (ExpressionAttributeValues[':newStatus']) {
-    UpdateExpression += ', #status = :newStatus';
-    ExpressionAttributeNames['#status'] = 'status';
+    newStatusType = 'active:processing';
+  } else {
+    return false;
   }
 
   const params = {
     TableName,
-    Key: {
-      PK: caseItem.PK,
-      SK: caseItem.SK,
-    },
-    UpdateExpression,
-    ExpressionAttributeValues,
+    Key: casePrimaryKey,
+    UpdateExpression: 'SET #status = :newStatusType',
+    ExpressionAttributeNames: { '#status': 'status' },
+    ExpressionAttributeValues: { ':newStatusType': getStatusByType(newStatusType) },
     ReturnValues: 'NONE',
   };
-
-  if (ExpressionAttributeNames && Object.keys(ExpressionAttributeNames).length > 0) {
-    params.ExpressionAttributeNames = ExpressionAttributeNames;
-  }
 
   const [updateError] = await to(dynamoDb.call('update', params));
   if (updateError) {
@@ -122,4 +141,16 @@ async function syncWorkflowAndStatus(caseItem, workflow) {
   }
 
   return true;
+}
+
+function makeArray(value) {
+  let list = [];
+
+  if (Array.isArray(value)) {
+    list = [...value];
+  } else if (value !== undefined) {
+    list.push(value);
+  }
+
+  return list;
 }
