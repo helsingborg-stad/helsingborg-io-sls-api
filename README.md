@@ -148,4 +148,3 @@ Distributed under the [MIT License][license-url].
 [issues-url]: https://github.com/helsingborg-stad/helsingborg-io-sls-api/issues
 [license-shield]: https://img.shields.io/github/license/helsingborg-stad/helsingborg-io-sls-api.svg?style=flat-square
 [license-url]: https://raw.githubusercontent.com/helsingborg-stad/helsingborg-io-sls-api/master/LICENSE
-[product-screenshot]: images/screenshot.png
