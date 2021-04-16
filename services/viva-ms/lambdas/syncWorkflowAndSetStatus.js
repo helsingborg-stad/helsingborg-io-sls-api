@@ -143,7 +143,9 @@ function makeArray(value) {
 
   if (Array.isArray(value)) {
     list = [...value];
-  } else if (value !== undefined) {
+  }
+
+  if (value !== undefined) {
     list.push(value);
   }
 
