@@ -17,14 +17,14 @@ export async function main(event) {
     throw ('(Viva-ms) getCasesWithStatusSumbittedOrProcessing', getCasesError);
   }
 
-  const userCasesItems = userCases.Items;
-  if (userCasesItems === undefined || userCasesItems.length === 0) {
+  const casesItems = userCases.Items;
+  if (casesItems === undefined || casesItems.length === 0) {
     return console.info(
       '(Viva-ms) DynamoDB query did not fetch any active:submitted or active:processing case(s)'
     );
   }
 
-  for (const userCase of userCasesItems) {
+  for (const userCase of casesItems) {
     const userCasePrimaryKey = {
       PK: userCase.PK,
       SK: userCase.SK,
