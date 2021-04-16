@@ -29,22 +29,22 @@ provider:
       statements:
         - Effect: Allow
           Action:
-            - s3:*
-          Resource: "*"
+            - s3:getObject
+          Resource:
+            - "Fn::Join": 
+              - ""
+              - - Fn::ImportValue: ${self:custom.stage}-CertificatesBucketArn
+                - "/*"
 
         - Effect: Allow
           Action:
             - SSM:GetParameter
-          Resource: "*"
+          Resource: 
+            - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${file(../../config.json):${self:custom.stage}.navet.envsKeyName}"
 
         - Effect: Allow
           Action:
             - events:PutEvents
-          Resource: "*"
-
-        - Effect: Allow
-          Action:
-            - cloudwatch:*
           Resource: "*"
 
 functions:

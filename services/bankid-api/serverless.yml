@@ -37,9 +37,12 @@ provider:
       statements:
         - Effect: Allow
           Action:
-            - s3:*
-          Resource: "*"
-
+            - s3:getObject
+          Resource: 
+            - "Fn::Join": 
+              - ""
+              - - Fn::ImportValue: ${self:custom.stage}-CertificatesBucketArn
+                - "/*"
         - Effect: Allow
           Action:
             - events:PutEvents
@@ -49,11 +52,14 @@ provider:
           Action:
             - SSM:GetParameter
           Resource: "*"
-
+            - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${file(../../config.json):${self:custom.stage}.bankId.envsKeyName}"
         - Effect: Allow
           Action:
             - secretsmanager:GetSecretValue
-          Resource: "*"
+          Resource:
+            - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret${file(../../config.json):${self:custom.stage}.auth.secrets.accessToken.name}"
+            - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret${file(../../config.json):${self:custom.stage}.auth.secrets.refreshToken.name}"
+            - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret${file(../../config.json):${self:custom.stage}.auth.secrets.authorizationCode.name}"
 
 functions:
   auth:

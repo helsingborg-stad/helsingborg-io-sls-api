@@ -39,8 +39,10 @@ provider:
         - Effect: Allow
           Action:
             - secretsmanager:GetSecretValue
-          Resource: "*"
-
+          Resource: 
+            - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret${file(../../../config.json):${self:custom.stage}.auth.secrets.accessToken.name}"
+            - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret${file(../../../config.json):${self:custom.stage}.auth.secrets.refreshToken.name}"
+            - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret${file(../../../config.json):${self:custom.stage}.auth.secrets.authorizationCode.name}"
 functions:
   authorizer:
     handler: lambdas/authorize.main
