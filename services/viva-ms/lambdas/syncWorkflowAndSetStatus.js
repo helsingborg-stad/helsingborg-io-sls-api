@@ -14,7 +14,7 @@ export async function main(event) {
     getCasesWithStatusSumbittedOrProcessing(personalNumber)
   );
   if (getCasesError) {
-    throw ('(Viva-ms) getCasesWithStatusSumbittedOrProcessing', getCasesError);
+    throw getCasesError;
   }
 
   const casesItems = userCases.Items;
