@@ -43,7 +43,8 @@ provider:
         - Effect: Allow
           Action:
             - SSM:GetParameter
-          Resource: "*"
+          Resource: 
+            - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${file(../../config.json):${self:custom.stage}.pdf.envsKeyName}"
 
         - Effect: Allow
           Action:
