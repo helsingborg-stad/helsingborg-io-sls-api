@@ -49,7 +49,9 @@ export async function main(event) {
 
     if (!deepEqual(vivaWorkflow.attributes, userCase.details?.workflow)) {
       const [setStatusException] = await to(setStatus(userCasePrimaryKey, vivaWorkflow.attributes));
-      console.log('(Viva-ms) setStatus exception', setStatusException);
+      if (setStatusException) {
+        console.log('(Viva-ms) setStatus exception', setStatusException);
+      }
     }
   }
 
