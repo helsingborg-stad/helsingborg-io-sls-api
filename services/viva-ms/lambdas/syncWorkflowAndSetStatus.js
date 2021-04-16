@@ -10,11 +10,11 @@ import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 export async function main(event) {
   const personalNumber = event.detail.user.personalNumber;
 
-  const [getUserCasesError, userCases] = await to(
-    getSubmittedAndOrProcessingUserCases(personalNumber)
+  const [getCasesError, userCases] = await to(
+    getCasesWithStatusSumbittedOrProcessing(personalNumber)
   );
-  if (getUserCasesError) {
-    throw ('(Viva-ms) DynamoDB query failed', getUserCasesError);
+  if (getCasesError) {
+    throw ('(Viva-ms) getCasesWithStatusSumbittedOrProcessing', getCasesError);
   }
 
   const userCasesItems = userCases.Items;
@@ -56,7 +56,7 @@ export async function main(event) {
   return true;
 }
 
-async function getSubmittedAndOrProcessingUserCases(personalNumber) {
+async function getCasesWithStatusSumbittedOrProcessing(personalNumber) {
   const TableName = config.cases.tableName;
   const PK = `USER#${personalNumber}`;
 
@@ -123,7 +123,7 @@ async function setStatus(casePrimaryKey, workflow) {
   } else if (vivaWorkflowCalculation !== undefined) {
     newStatusType = 'active:processing';
   } else {
-    return false;
+    throw 'Nothing to update';
   }
 
   const params = {
@@ -135,12 +135,7 @@ async function setStatus(casePrimaryKey, workflow) {
     ReturnValues: 'NONE',
   };
 
-  const [updateError] = await to(dynamoDb.call('update', params));
-  if (updateError) {
-    return console.error('(Viva-ms) syncWorkflow', updateError);
-  }
-
-  return true;
+  return dynamoDb.call('update', params);
 }
 
 function makeArray(value) {
