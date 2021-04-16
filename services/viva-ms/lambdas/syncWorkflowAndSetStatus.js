@@ -44,8 +44,7 @@ export async function main(event) {
       syncCaseWorkflowDetails(userCasePrimaryKey, vivaWorkflow.attributes)
     );
     if (syncCaseWorkflowDetailsError) {
-      console.error('(Viva-ms) syncCaseWorkflowDetailsError');
-      throw syncCaseWorkflowDetailsError;
+      throw ('(Viva-ms) syncCaseWorkflowDetailsError', syncCaseWorkflowDetailsError);
     }
 
     if (!deepEqual(vivaWorkflow.attributes, userCase.details?.workflow)) {
