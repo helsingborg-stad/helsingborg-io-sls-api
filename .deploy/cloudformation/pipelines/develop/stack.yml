@@ -6,7 +6,7 @@ Parameters:
   DevAccount:
     Description: AWS AccountNumber for Dev
     Type: AWS::SSM::Parameter::Value<String>
-    Default: mitt-hbg-aws-account-id-dev
+    Default: mitt-hbg-aws-account-id-develop
   GitHubOwner:
     Description: Owner of the repository.
     Type: String
