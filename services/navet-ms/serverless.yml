@@ -38,7 +38,7 @@ provider:
 
         - Effect: Allow
           Action:
-            - SSM:GetParameter
+            - SSM:GetParameter*
           Resource: 
             - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${file(../../config.json):${self:custom.stage}.navet.envsKeyName}"
 
