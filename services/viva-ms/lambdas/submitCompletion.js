@@ -96,7 +96,7 @@ async function answersToAttachmentList(personalNumber, answerList) {
 
       const attachment = {
         id: s3FileKey,
-        name: valueItem.filename,
+        name: valueItem.uploadedFileName,
         category: attachmentCategory,
         fileBase64: file.Body.toString('base64'),
       };
