@@ -12,6 +12,10 @@ import { getStatusByType } from '../../../libs/caseStatuses';
 import validateApplicationStatus from '../helpers/validateApplicationStatus';
 import { populateFormWithPreviousCaseAnswers } from '../../../libs/formAnswers';
 
+import { getFutureTimestamp, millisecondsToSeconds } from '../../../libs/timestampHelper';
+
+import { CASE_ONGOING_EXPIRATION_HOURS } from '../../../libs/constants';
+
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
@@ -155,6 +159,7 @@ async function putRecurringVivaCase(PK, workflowId, period) {
       createdAt: timestampNow,
       updatedAt: timestampNow,
       status: initialStatus,
+      expirationTime: millisecondsToSeconds(getFutureTimestamp(CASE_ONGOING_EXPIRATION_HOURS)),
       provider: CASE_PROVIDER_VIVA,
       details: {
         workflowId,
