@@ -8,7 +8,7 @@ import { decodeToken } from '../../../libs/token';
 import { objectWithoutProperties } from '../../../libs/objects';
 import { getStatusByType } from '../../../libs/caseStatuses';
 
-import { getFutureTimestamp, millisecondsToSeconds } from '../helpers/timestampHelper';
+import { getFutureTimestamp, millisecondsToSeconds } from '../../../libs/timestampHelper';
 import {
   CASE_SUBMITTED_EXPIRATION_HOURS,
   CASE_ONGOING_EXPIRATION_HOURS,
@@ -51,7 +51,7 @@ export async function main(event) {
       return response.failure(new BadRequestError('invalid [statusType]'));
     }
 
-    let expireHours;
+    let expireHours = undefined;
 
     /**
      * If the case is being updated to set the status to 'active:ongoing' or 'active:submitted:viva', set the expiration time in seconds.
@@ -67,7 +67,7 @@ export async function main(event) {
     }
     /* eslint-enable prettier/prettier */
 
-    if (expireHours) {
+    if (expireHours !== undefined) {
       const newExpirationTime = millisecondsToSeconds(getFutureTimestamp(expireHours));
       UpdateExpression.push('expirationTime = :newExpirationTime');
       ExpressionAttributeValues[':newExpirationTime'] = newExpirationTime;

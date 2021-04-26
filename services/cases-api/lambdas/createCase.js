@@ -10,7 +10,7 @@ import { getItem, putItem } from '../../../libs/queries';
 
 import { populateFormWithPreviousCaseAnswers } from '../../../libs/formAnswers';
 import caseValidationSchema from '../helpers/schema';
-import { getFutureTimestamp, millisecondsToSeconds } from '../helpers/timestampHelper';
+import { getFutureTimestamp, millisecondsToSeconds } from '../../../libs/timestampHelper';
 import { getStatusByType } from '../../../libs/caseStatuses';
 
 import { CASE_ONGOING_EXPIRATION_HOURS } from '../../../libs/constants';
