@@ -9,7 +9,10 @@ import { objectWithoutProperties } from '../../../libs/objects';
 import { getStatusByType } from '../../../libs/caseStatuses';
 
 import { getFutureTimestamp, millisecondsToSeconds } from '../helpers/timestampHelper';
-import { CASE_EXPIRATION_HOURS } from '../../../libs/constants';
+import {
+  CASE_SUBMITTED_EXPIRATION_HOURS,
+  CASE_ONGOING_EXPIRATION_HOURS,
+} from '../../../libs/constants';
 
 export async function main(event) {
   const requestJsonBody = JSON.parse(event.body);
@@ -32,10 +35,10 @@ export async function main(event) {
   const ExpressionAttributeNames = {};
   const ExpressionAttributeValues = { ':newUpdatedAt': Date.now() };
 
-  // DynamoDb TTL uses seconds
-  const newExpirationTime = millisecondsToSeconds(getFutureTimestamp(CASE_EXPIRATION_HOURS));
-  UpdateExpression.push('expirationTime = :newExpirationTime');
-  ExpressionAttributeValues[':newExpirationTime'] = newExpirationTime;
+  // // DynamoDb TTL uses seconds
+  // const newExpirationTime = millisecondsToSeconds(getFutureTimestamp(CASE_EXPIRATION_HOURS));
+  // UpdateExpression.push('expirationTime = :newExpirationTime');
+  // ExpressionAttributeValues[':newExpirationTime'] = newExpirationTime;
 
   if (provider) {
     UpdateExpression.push('provider = :newProvider');
@@ -46,6 +49,28 @@ export async function main(event) {
     const status = getStatusByType(statusType);
     if (!status) {
       return response.failure(new BadRequestError('invalid [statusType]'));
+    }
+
+    let expireHours;
+
+    /**
+     * If the case is being updated to set the status to 'active:ongoing' or 'active:submitted:viva', set the expiration time in seconds.
+     */
+    /* eslint-disable prettier/prettier */
+    switch (status.type) {
+    case 'active:ongoing':
+      expireHours = CASE_ONGOING_EXPIRATION_HOURS;
+      break;
+    case 'active:submitted:viva':
+      expireHours = CASE_SUBMITTED_EXPIRATION_HOURS;
+      break;
+    }
+    /* eslint-enable prettier/prettier */
+
+    if (expireHours) {
+      const newExpirationTime = millisecondsToSeconds(getFutureTimestamp(expireHours));
+      UpdateExpression.push('expirationTime = :newExpirationTime');
+      ExpressionAttributeValues[':newExpirationTime'] = newExpirationTime;
     }
 
     UpdateExpression.push('#status = :newStatus');
