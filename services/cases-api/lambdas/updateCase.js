@@ -35,11 +35,6 @@ export async function main(event) {
   const ExpressionAttributeNames = {};
   const ExpressionAttributeValues = { ':newUpdatedAt': Date.now() };
 
-  // // DynamoDb TTL uses seconds
-  // const newExpirationTime = millisecondsToSeconds(getFutureTimestamp(CASE_EXPIRATION_HOURS));
-  // UpdateExpression.push('expirationTime = :newExpirationTime');
-  // ExpressionAttributeValues[':newExpirationTime'] = newExpirationTime;
-
   if (provider) {
     UpdateExpression.push('provider = :newProvider');
     ExpressionAttributeValues[':newProvider'] = provider;
