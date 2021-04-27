@@ -35,7 +35,7 @@ provider:
             - "Fn::ImportValue": ${self:custom.resourcesStage}-UsersTableArn
         - Effect: Allow
           Action:
-            - kms:decrypt
+            - kms:Decrypt
           Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
 
 functions:
