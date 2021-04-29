@@ -127,7 +127,7 @@ async function setStatus(casePrimaryKey, workflow) {
     } else if (decisionStatus === 3) {
       newStatusType = 'closed:partiallyApproved:viva';
     }
-  } else if (vivaWorkflowCalculation !== undefined) {
+  } else if (vivaWorkflowCalculation != undefined) {
     newStatusType = 'active:processing';
   } else {
     throw 'Nothing to update';
@@ -152,7 +152,7 @@ function makeArray(value) {
     list = [...value];
   }
 
-  if (value !== undefined) {
+  if (value != undefined) {
     list.push(value);
   }
 
