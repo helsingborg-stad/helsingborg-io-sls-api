@@ -14,7 +14,7 @@ import { populateFormWithPreviousCaseAnswers } from '../../../libs/formAnswers';
 
 import { getFutureTimestamp, millisecondsToSeconds } from '../../../libs/timestampHelper';
 
-import { CASE_ONGOING_EXPIRATION_HOURS } from '../../../libs/constants';
+import { VIVA_CASE_ONGOING_EXPIRATION_HOURS } from '../../../libs/constants';
 
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
@@ -159,7 +159,7 @@ async function putRecurringVivaCase(PK, workflowId, period) {
       createdAt: timestampNow,
       updatedAt: timestampNow,
       status: initialStatus,
-      expirationTime: millisecondsToSeconds(getFutureTimestamp(CASE_ONGOING_EXPIRATION_HOURS)),
+      expirationTime: millisecondsToSeconds(getFutureTimestamp(VIVA_CASE_ONGOING_EXPIRATION_HOURS)),
       provider: CASE_PROVIDER_VIVA,
       details: {
         workflowId,
