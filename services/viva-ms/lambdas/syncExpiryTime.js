@@ -17,28 +17,6 @@ import * as response from '../../../libs/response';
 
 const dynamoDbConverter = AWS.DynamoDB.Converter;
 
-function getExpiryHoursByStatus(status) {
-  const hours = {
-    'active:ongoing': VIVA_CASE_ONGOING_EXPIRATION_HOURS,
-    'active:submitted:viva': VIVA_CASE_SUBMITTED_EXPIRATION_HOURS,
-  }[status];
-
-  if (!hours) {
-    throwError(422, 'Expiry time not set for status!');
-  }
-
-  return hours;
-}
-
-async function updateCase(params) {
-  const [dynamoDbUpdateCallError, dynamoDbUpdateResult] = await to(dynamoDb.call('update', params));
-  if (dynamoDbUpdateCallError) {
-    throwError(dynamoDbUpdateCallError.statusCode, dynamoDbUpdateCallError.message);
-  }
-
-  return dynamoDbUpdateResult;
-}
-
 export async function main(event) {
   if (event.detail.dynamodb.NewImage === undefined) {
     return null;
@@ -79,4 +57,26 @@ export async function main(event) {
       ...attributes,
     },
   });
+}
+
+function getExpiryHoursByStatus(status) {
+  const hours = {
+    'active:ongoing': VIVA_CASE_ONGOING_EXPIRATION_HOURS,
+    'active:submitted:viva': VIVA_CASE_SUBMITTED_EXPIRATION_HOURS,
+  }[status];
+
+  if (!hours) {
+    throwError(422, 'Expiry time not set for status!');
+  }
+
+  return hours;
+}
+
+async function updateCase(params) {
+  const [dynamoDbUpdateCallError, dynamoDbUpdateResult] = await to(dynamoDb.call('update', params));
+  if (dynamoDbUpdateCallError) {
+    throwError(dynamoDbUpdateCallError.statusCode, dynamoDbUpdateCallError.message);
+  }
+
+  return dynamoDbUpdateResult;
 }
