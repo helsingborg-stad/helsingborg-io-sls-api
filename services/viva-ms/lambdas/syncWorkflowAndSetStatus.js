@@ -34,7 +34,6 @@ export async function main(event) {
     const [adapterGetWorkflowError, vivaWorkflow] = await to(
       vivaAdapter.workflow.get({ personalNumber, workflowId })
     );
-
     if (adapterGetWorkflowError) {
       console.error('(Viva-ms) Adapter get workflow', adapterGetWorkflowError);
       continue;
@@ -105,11 +104,17 @@ async function setStatus(casePrimaryKey, workflow) {
 
   const vivaWorkflowDecisionList = makeArray(workflow.decision?.decisions?.decision);
   const vivaWorkflowCalculation = workflow.calculations?.calculation;
+  const vivaWorkflowJournalList = makeArray(workflow.journals?.journal);
 
   let decisionStatus = 0;
   let newStatusType = '';
 
-  if (vivaWorkflowDecisionList !== undefined && vivaWorkflowDecisionList.length > 0) {
+  if (
+    vivaWorkflowDecisionList != undefined &&
+    vivaWorkflowDecisionList.length > 0 &&
+    vivaWorkflowJournalList != undefined &&
+    vivaWorkflowJournalList.length > 0
+  ) {
     vivaWorkflowDecisionList.forEach(decision => {
       const decisionTypeCode = decision.typecode;
       decisionStatus = decisionStatus | parseInt(decisionTypeCode, 10);
