@@ -144,6 +144,26 @@ functions:
             detail-type:
               - BankIdCollectComplete
 
+  syncExpiryTime:
+    handler: lambdas/syncExpiryTime.main
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - cases.database
+            detail-type:
+              - MODIFY
+            detail:
+              dynamodb:
+                NewImage:
+                  provider:
+                    S: ["VIVA"]
+                  status:
+                    M:
+                      type:
+                        S: ['active:ongoing', 'active:submitted:viva']
+
+
   checkCompletion:
     handler: lambdas/checkCompletion.main
     timeout: 15

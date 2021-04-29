@@ -13,7 +13,7 @@ import caseValidationSchema from '../helpers/schema';
 import { getFutureTimestamp, millisecondsToSeconds } from '../../../libs/timestampHelper';
 import { getStatusByType } from '../../../libs/caseStatuses';
 
-import { CASE_ONGOING_EXPIRATION_HOURS } from '../../../libs/constants';
+import { VIVA_CASE_ONGOING_EXPIRATION_HOURS } from '../../../libs/constants';
 
 export async function main(event) {
   const decodedToken = decodeToken(event);
@@ -57,7 +57,9 @@ export async function main(event) {
   );
 
   const timestampNow = Date.now();
-  const expirationTime = millisecondsToSeconds(getFutureTimestamp(CASE_ONGOING_EXPIRATION_HOURS));
+  const expirationTime = millisecondsToSeconds(
+    getFutureTimestamp(VIVA_CASE_ONGOING_EXPIRATION_HOURS)
+  );
 
   const Item = {
     PK,

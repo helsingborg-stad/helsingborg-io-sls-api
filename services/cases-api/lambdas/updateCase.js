@@ -8,12 +8,6 @@ import { decodeToken } from '../../../libs/token';
 import { objectWithoutProperties } from '../../../libs/objects';
 import { getStatusByType } from '../../../libs/caseStatuses';
 
-import { getFutureTimestamp, millisecondsToSeconds } from '../../../libs/timestampHelper';
-import {
-  CASE_SUBMITTED_EXPIRATION_HOURS,
-  CASE_ONGOING_EXPIRATION_HOURS,
-} from '../../../libs/constants';
-
 export async function main(event) {
   const requestJsonBody = JSON.parse(event.body);
   const { id } = event.pathParameters;
@@ -44,28 +38,6 @@ export async function main(event) {
     const status = getStatusByType(statusType);
     if (!status) {
       return response.failure(new BadRequestError('invalid [statusType]'));
-    }
-
-    let expireHours = undefined;
-
-    /**
-     * If the case is being updated to set the status to 'active:ongoing' or 'active:submitted:viva', set the expiration time in seconds.
-     */
-    /* eslint-disable prettier/prettier */
-    switch (status.type) {
-    case 'active:ongoing':
-      expireHours = CASE_ONGOING_EXPIRATION_HOURS;
-      break;
-    case 'active:submitted:viva':
-      expireHours = CASE_SUBMITTED_EXPIRATION_HOURS;
-      break;
-    }
-    /* eslint-enable prettier/prettier */
-
-    if (expireHours !== undefined) {
-      const newExpirationTime = millisecondsToSeconds(getFutureTimestamp(expireHours));
-      UpdateExpression.push('expirationTime = :newExpirationTime');
-      ExpressionAttributeValues[':newExpirationTime'] = newExpirationTime;
     }
 
     UpdateExpression.push('#status = :newStatus');
