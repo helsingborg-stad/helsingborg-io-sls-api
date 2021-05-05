@@ -54,7 +54,6 @@ provider:
             - dynamodb:UpdateItem
             - dynamodb:PutItem
             - dynamodb:Query
-          # Restrict our IAM role permissions to the specific table for the stage
           Resource:
             - "Fn::ImportValue": ${self:custom.resourcesStage}-CasesTableArn
 
@@ -145,19 +144,9 @@ functions:
       - eventBridge:
           pattern:
             source:
-              - cases.database
+              - casesApi.updateCase
             detail-type:
-              - MODIFY
-            detail:
-              dynamodb:
-                NewImage:
-                  provider:
-                    S: ["VIVA"]
-                  status:
-                    M:
-                      type:
-                        S: ['active:ongoing', 'active:submitted:viva']
-
+              - casesApiUpdateCaseSuccess
 
   checkCompletion:
     handler: lambdas/checkCompletion.main
