@@ -2,6 +2,7 @@ import to from 'await-to-js';
 import { throwError, BadRequestError } from '@helsingborg-stad/npm-api-error-handling';
 
 import config from '../../../config';
+import { putEvent } from '../../../libs/awsEventBridge';
 import * as response from '../../../libs/response';
 import * as dynamoDb from '../../../libs/dynamoDb';
 import { decodeToken } from '../../../libs/token';
@@ -81,12 +82,16 @@ export async function main(event) {
   }
 
   const { personalNumber } = decodeToken(event);
+  const caseKeys = {
+    PK: `USER#${personalNumber}`,
+    SK: `USER#${personalNumber}#CASE#${id}`,
+  };
 
   const params = {
     TableName: config.cases.tableName,
     Key: {
-      PK: `USER#${personalNumber}`,
-      SK: `USER#${personalNumber}#CASE#${id}`,
+      PK: caseKeys.PK,
+      SK: caseKeys.SK,
     },
     UpdateExpression: UpdateExpression.join(', '),
     ExpressionAttributeNames,
@@ -97,6 +102,13 @@ export async function main(event) {
   const [updateCaseError, updateCaseResponse] = await to(sendUpdateCaseRequest(params));
   if (updateCaseError) {
     return response.failure(updateCaseError);
+  }
+
+  const [putEventError] = await to(
+    putEvent({ caseKeys }, 'casesApiUpdateCaseSuccess', 'casesApi.updateCase')
+  );
+  if (putEventError) {
+    throw putEventError;
   }
 
   const attributes = objectWithoutProperties(updateCaseResponse.Attributes, ['PK', 'SK']);

@@ -40,12 +40,16 @@ provider:
       statements:
         - Effect: Allow
           Action:
+            - events:PutEvents
+          Resource: "*"
+
+        - Effect: Allow
+          Action:
             - dynamodb:Query
             - dynamodb:GetItem
             - dynamodb:PutItem
             - dynamodb:DeleteItem
             - dynamodb:UpdateItem
-          # Restrict our IAM role permissions to the specific table for the stage
           Resource:
             - "Fn::ImportValue": ${self:custom.resourcesStage}-CasesTableArn
 
@@ -62,6 +66,7 @@ provider:
             - dynamodb:GetItem
           Resource:
             - "Fn::ImportValue": ${self:custom.resourcesStage}-FormsTableArn
+
         - Effect: Allow
           Action:
             - kms:Decrypt
