@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import to from 'await-to-js';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import uuid from 'uuid';
@@ -10,10 +11,7 @@ import { getItem, putItem } from '../../../libs/queries';
 
 import { populateFormWithPreviousCaseAnswers } from '../../../libs/formAnswers';
 import caseValidationSchema from '../helpers/schema';
-import { getFutureTimestamp, millisecondsToSeconds } from '../../../libs/timestampHelper';
 import { getStatusByType } from '../../../libs/caseStatuses';
-
-import { VIVA_CASE_ONGOING_EXPIRATION_HOURS } from '../../../libs/constants';
 
 export async function main(event) {
   const decodedToken = decodeToken(event);
@@ -57,9 +55,6 @@ export async function main(event) {
   );
 
   const timestampNow = Date.now();
-  const expirationTime = millisecondsToSeconds(
-    getFutureTimestamp(VIVA_CASE_ONGOING_EXPIRATION_HOURS)
-  );
 
   const Item = {
     PK,
@@ -70,7 +65,6 @@ export async function main(event) {
     provider,
     details,
     forms: prePopulatedForms,
-    expirationTime,
     createdAt: timestampNow,
     updatedAt: timestampNow,
   };
@@ -102,7 +96,6 @@ export async function main(event) {
       provider: caseItem.Item.provider,
       details: caseItem.Item.details,
       forms: caseItem.Item.forms,
-      expirationTime: caseItem.Item.expirationTime,
       updatedAt: caseItem.Item.updatedAt,
       createdAt: caseItem.Item.createdAt,
     },
