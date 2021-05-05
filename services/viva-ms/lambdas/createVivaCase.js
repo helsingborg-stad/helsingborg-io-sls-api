@@ -12,10 +12,6 @@ import { getStatusByType } from '../../../libs/caseStatuses';
 import validateApplicationStatus from '../helpers/validateApplicationStatus';
 import { populateFormWithPreviousCaseAnswers } from '../../../libs/formAnswers';
 
-import { getFutureTimestamp, millisecondsToSeconds } from '../../../libs/timestampHelper';
-
-import { VIVA_CASE_ONGOING_EXPIRATION_HOURS } from '../../../libs/constants';
-
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
@@ -138,11 +134,13 @@ async function putRecurringVivaCase(PK, workflowId, period) {
     throw userError;
   }
   const [, formTemplates] = await to(getFormTemplates(initialForms));
+
   const [previousCaseError, previousCase] = await to(getLastUpdatedCase(PK, CASE_PROVIDER_VIVA));
   if (previousCaseError) {
     console.error('(cases-api) DynamoDb query on cases table failed', previousCaseError);
     throw previousCaseError;
   }
+
   const prePopulatedForms = populateFormWithPreviousCaseAnswers(
     initialForms,
     user,
@@ -159,7 +157,6 @@ async function putRecurringVivaCase(PK, workflowId, period) {
       createdAt: timestampNow,
       updatedAt: timestampNow,
       status: initialStatus,
-      expirationTime: millisecondsToSeconds(getFutureTimestamp(VIVA_CASE_ONGOING_EXPIRATION_HOURS)),
       provider: CASE_PROVIDER_VIVA,
       details: {
         workflowId,
