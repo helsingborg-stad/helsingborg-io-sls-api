@@ -1,82 +1,93 @@
-import AWS from 'aws-sdk';
-import * as dynamoDb from '../../../libs/dynamoDb';
+/* eslint-disable no-console */
 import to from 'await-to-js';
+import * as dynamoDb from '../../../libs/dynamoDb';
 
-import { throwError } from '@helsingborg-stad/npm-api-error-handling';
-import { objectWithoutProperties } from '../../../libs/objects';
+import config from '../../../config';
+import params from '../../../libs/params';
 
+import { getFutureTimestamp, millisecondsToSeconds } from '../../../libs/timestampHelper';
 import {
   VIVA_CASE_SUBMITTED_EXPIRATION_HOURS,
   VIVA_CASE_ONGOING_EXPIRATION_HOURS,
 } from '../../../libs/constants';
 
-import { getFutureTimestamp, millisecondsToSeconds } from '../../../libs/timestampHelper';
-import config from '../../../config';
-
-import * as response from '../../../libs/response';
-
-const dynamoDbConverter = AWS.DynamoDB.Converter;
+const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
 
 export async function main(event) {
-  if (event.detail.dynamodb.NewImage === undefined) {
-    return null;
+  const { caseKeys } = event.detail;
+
+  const [getCaseError, getCaseResponse] = await to(getCase(caseKeys));
+  if (getCaseError) {
+    throw getCaseError;
   }
 
-  const unMarshalledCaseData = dynamoDbConverter.unmarshall(event.detail.dynamodb.NewImage);
-  const expireHours = getExpiryHoursByStatus(unMarshalledCaseData.status.type);
+  const caseItem = getCaseResponse.Items[0];
 
-  const UpdateExpression = ['SET updatedAt = :newUpdatedAt'];
-  const ExpressionAttributeValues = { ':newUpdatedAt': Date.now() };
+  const vivaCaseSSMParams = await VIVA_CASE_SSM_PARAMS;
+  if (vivaCaseSSMParams.recurringFormId !== caseItem.currentFormId) {
+    console.info('(Viva-ms: syncExpiryTime): case is not an recurring form. Nothing to update.');
+    return true;
+  }
 
+  const expireHours = getExpiryHoursByStatusType(caseItem.status.type);
   const newExpirationTime = millisecondsToSeconds(getFutureTimestamp(expireHours));
 
-  UpdateExpression.push('expirationTime = :newExpirationTime');
-  ExpressionAttributeValues[':newExpirationTime'] = newExpirationTime;
-
-  const params = {
-    TableName: config.cases.tableName,
-    Key: {
-      PK: unMarshalledCaseData.PK,
-      SK: unMarshalledCaseData.SK,
-    },
-    UpdateExpression: UpdateExpression.join(', '),
-    ExpressionAttributeValues,
-    ReturnValues: 'ALL_NEW',
-  };
-
-  const [updateCaseError, updateCaseResponse] = await to(updateCase(params));
+  const [updateCaseError, updatedCase] = await to(
+    updateCaseExpirationTimeAttribute(caseKeys, newExpirationTime)
+  );
   if (updateCaseError) {
-    return response.failure(updateCaseError);
+    throw updateCaseError;
   }
 
-  const attributes = objectWithoutProperties(updateCaseResponse.Attributes, ['PK', 'SK']);
+  console.info('(Viva-ms: syncExpiryTime): case updated successfully.', updatedCase);
 
-  return response.success(200, {
-    type: 'updateCase',
-    attributes: {
-      ...attributes,
-    },
-  });
+  return true;
 }
 
-function getExpiryHoursByStatus(status) {
+function getExpiryHoursByStatusType(statusType) {
   const hours = {
     'active:ongoing': VIVA_CASE_ONGOING_EXPIRATION_HOURS,
     'active:submitted:viva': VIVA_CASE_SUBMITTED_EXPIRATION_HOURS,
-  }[status];
+  }[statusType];
 
   if (!hours) {
-    throwError(422, 'Expiry time not set for status!');
+    console.log('(Viva-ms: syncExpiryTime):', statusType);
+    throw 'Expiry time not set for status!';
   }
 
   return hours;
 }
 
-async function updateCase(params) {
-  const [dynamoDbUpdateCallError, dynamoDbUpdateResult] = await to(dynamoDb.call('update', params));
-  if (dynamoDbUpdateCallError) {
-    throwError(dynamoDbUpdateCallError.statusCode, dynamoDbUpdateCallError.message);
-  }
+async function getCase(keys) {
+  const TableName = config.cases.tableName;
 
-  return dynamoDbUpdateResult;
+  const params = {
+    TableName,
+    KeyConditionExpression: 'PK = :pk AND SK = :sk',
+    ExpressionAttributeValues: {
+      ':pk': keys.PK,
+      ':sk': keys.SK,
+    },
+  };
+
+  return dynamoDb.call('query', params);
+}
+
+async function updateCaseExpirationTimeAttribute(keys, newExpirationTime) {
+  const TableName = config.cases.tableName;
+  const UpdateExpression = 'SET expirationTime = :newExpirationTime';
+  const ExpressionAttributeValues = { ':newExpirationTime': newExpirationTime };
+
+  const params = {
+    TableName,
+    Key: {
+      PK: keys.PK,
+      SK: keys.SK,
+    },
+    UpdateExpression,
+    ExpressionAttributeValues,
+    ReturnValues: 'UPDATED_NEW',
+  };
+
+  return dynamoDb.call('update', params);
 }
