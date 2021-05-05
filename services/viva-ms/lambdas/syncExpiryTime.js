@@ -7,8 +7,8 @@ import params from '../../../libs/params';
 
 import { getFutureTimestamp, millisecondsToSeconds } from '../../../libs/timestampHelper';
 import {
-  VIVA_CASE_SUBMITTED_EXPIRATION_HOURS,
-  VIVA_CASE_ONGOING_EXPIRATION_HOURS,
+  DELETE_VIVA_CASE_AFTER_45_DAYS,
+  DELETE_VIVA_CASE_AFTER_72_HOURS,
 } from '../../../libs/constants';
 
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
@@ -45,10 +45,12 @@ export async function main(event) {
 }
 
 function getExpiryHoursByStatusType(statusType) {
-  const hours = {
-    'active:ongoing': VIVA_CASE_ONGOING_EXPIRATION_HOURS,
-    'active:submitted:viva': VIVA_CASE_SUBMITTED_EXPIRATION_HOURS,
-  }[statusType];
+  const statusHourMap = {
+    'active:ongoing': DELETE_VIVA_CASE_AFTER_72_HOURS,
+    'active:submitted:viva': DELETE_VIVA_CASE_AFTER_45_DAYS,
+  };
+
+  const hours = statusHourMap[statusType];
 
   if (!hours) {
     console.log('(Viva-ms: syncExpiryTime):', statusType);
