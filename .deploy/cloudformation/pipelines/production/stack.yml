@@ -160,14 +160,14 @@ Resources:
               RunOrder: 2
         - Name: Production
           Actions:
-            -
-              Name: Approval
-              ActionTypeId:
-                Category: Approval
-                Owner: AWS
-                Version: "1"
-                Provider: Manual
-              RunOrder: 1
+            # -
+            #   Name: Approval
+            #   ActionTypeId:
+            #     Category: Approval
+            #     Owner: AWS
+            #     Version: "1"
+            #     Provider: Manual
+            #   RunOrder: 1
             -
               Name: DeployProd
               ActionTypeId:
@@ -195,7 +195,7 @@ Resources:
               InputArtifacts: 
                 - 
                   Name: SourceOutput
-              RunOrder: 2
+              RunOrder: 1
         - Name: Test
           Actions:
             -
