@@ -77,6 +77,7 @@ functions:
           path: /users/{personalNumber}
           method: get
           cors: true
+          private: true
           authorizer:
             type: CUSTOM
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
@@ -88,6 +89,7 @@ functions:
           path: /users/me
           method: get
           cors: true
+          private: true
           authorizer:
             type: CUSTOM
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
@@ -101,6 +103,7 @@ functions:
           path: /users/me/attachments
           method: get
           cors: true
+          private: true
           authorizer:
             type: CUSTOM
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
@@ -114,6 +117,7 @@ functions:
           path: /users/me/attachments
           method: post
           cors: true
+          private: true
           authorizer:
             type: CUSTOM
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
@@ -127,6 +131,7 @@ functions:
           path: /users/me/attachments/{filename}
           method: delete
           cors: true
+          private: true
           authorizer:
             type: CUSTOM
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
@@ -141,6 +146,7 @@ functions:
           method: get
           contentHandling: CONVERT_TO_BINARY
           cors: true
+          private: true
           authorizer:
             type: CUSTOM
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
