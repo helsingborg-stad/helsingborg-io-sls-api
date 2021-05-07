@@ -16,16 +16,17 @@ const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName
 export async function main(event) {
   const { caseKeys } = event.detail;
 
-  const [getCaseError, getCaseResponse] = await to(getCase(caseKeys));
+  const [getCaseError, caseItem] = await to(getCase(caseKeys));
   if (getCaseError) {
     throw getCaseError;
   }
 
-  const caseItem = getCaseResponse.Items[0];
-
   const vivaCaseSSMParams = await VIVA_CASE_SSM_PARAMS;
   if (vivaCaseSSMParams.recurringFormId !== caseItem.currentFormId) {
-    console.info('(Viva-ms: syncExpiryTime): case is not an recurring form. Nothing to update.');
+    console.info(
+      '(Viva-ms: syncExpiryTime): case attribute currentFormId (caseItem.currentFormId)',
+      'does not match the recurring form id (vivaCaseSSMParams.recurringFormId) from ssm params. Nothing to update.'
+    );
     return true;
   }
 
@@ -72,7 +73,17 @@ async function getCase(keys) {
     },
   };
 
-  return dynamoDb.call('query', params);
+  const [dynamoDbQueryError, dynamoDbResponse] = await to(dynamoDb.call('query', params));
+  if (dynamoDbQueryError) {
+    throw dynamoDbQueryError;
+  }
+
+  const caseItem = dynamoDbResponse.Items.find(item => item.PK === keys.PK);
+  if (!caseItem) {
+    throw 'Case not found';
+  }
+
+  return caseItem;
 }
 
 async function updateCaseExpirationTimeAttribute(keys, newExpirationTime) {
