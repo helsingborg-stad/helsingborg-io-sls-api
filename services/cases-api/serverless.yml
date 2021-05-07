@@ -80,6 +80,7 @@ functions:
           path: /cases/{id}
           method: get
           cors: true
+          private: true
           authorizer:
             type: CUSTOM
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
@@ -91,6 +92,7 @@ functions:
           path: /cases
           method: get
           cors: true
+          private: true
           authorizer:
             type: CUSTOM
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
@@ -102,6 +104,7 @@ functions:
           path: /cases
           method: post
           cors: true
+          private: true
           authorizer:
             type: CUSTOM
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
@@ -113,6 +116,7 @@ functions:
           path: /cases/{id}
           method: put
           cors: true
+          private: true
           authorizer:
             type: CUSTOM
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
@@ -124,6 +128,7 @@ functions:
           path: /cases/{id}
           method: delete
           cors: true
+          private: true
           authorizer:
             type: CUSTOM
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
