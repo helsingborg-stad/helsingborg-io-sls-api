@@ -7,6 +7,7 @@ import params from '../../../libs/params';
 
 import { getFutureTimestamp, millisecondsToSeconds } from '../../../libs/timestampHelper';
 import {
+  DELETE_VIVA_CASE_AFTER_6_MONTH,
   DELETE_VIVA_CASE_AFTER_45_DAYS,
   DELETE_VIVA_CASE_AFTER_72_HOURS,
 } from '../../../libs/constants';
@@ -49,6 +50,10 @@ function getExpiryHoursByStatusType(statusType) {
   const statusHourMap = {
     'active:ongoing': DELETE_VIVA_CASE_AFTER_72_HOURS,
     'active:submitted:viva': DELETE_VIVA_CASE_AFTER_45_DAYS,
+    'closed:approved:viva': DELETE_VIVA_CASE_AFTER_6_MONTH,
+    'closed:partiallyApproved:viva': DELETE_VIVA_CASE_AFTER_6_MONTH,
+    'closed:rejected:viva': DELETE_VIVA_CASE_AFTER_6_MONTH,
+    'closed:completionRejected:viva': DELETE_VIVA_CASE_AFTER_6_MONTH,
   };
 
   const hours = statusHourMap[statusType];
