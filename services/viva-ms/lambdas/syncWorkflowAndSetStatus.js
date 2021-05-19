@@ -25,31 +25,39 @@ export async function main(event) {
   }
 
   for (const userCase of casesItems) {
-    const userCasePrimaryKey = {
+    const casePrimaryKey = {
       PK: userCase.PK,
       SK: userCase.SK,
     };
 
     const workflowId = userCase.details.workflowId;
-    const [adapterGetWorkflowError, vivaWorkflow] = await to(
+    const [adapterWorkflowGetError, workflow] = await to(
       vivaAdapter.workflow.get({ personalNumber, workflowId })
     );
-    if (adapterGetWorkflowError) {
-      console.error('(Viva-ms) Adapter get workflow', adapterGetWorkflowError);
+    if (adapterWorkflowGetError) {
+      console.error('(Viva-ms) Adapter get workflow', adapterWorkflowGetError);
       continue;
     }
 
     const [syncCaseWorkflowDetailsError] = await to(
-      syncCaseWorkflowDetails(userCasePrimaryKey, vivaWorkflow.attributes)
+      updateDbWorkflow(casePrimaryKey, workflow.attributes)
     );
     if (syncCaseWorkflowDetailsError) {
       throw syncCaseWorkflowDetailsError;
     }
 
-    if (!deepEqual(vivaWorkflow.attributes, userCase.details?.workflow)) {
-      const [setStatusException] = await to(setStatus(userCasePrimaryKey, vivaWorkflow.attributes));
-      if (setStatusException) {
-        console.log('(Viva-ms) setStatus exception', setStatusException);
+    const newStatusType = decideNewStatusType(workflow.attributes);
+    if (newStatusType == undefined) {
+      console.info('(Viva-ms) no new status to update');
+      return true;
+    }
+
+    if (!deepEqual(workflow.attributes, userCase.details?.workflow)) {
+      const [setNewStatusException] = await to(
+        updateDbNewStatus(casePrimaryKey, getStatusByType(newStatusType))
+      );
+      if (setNewStatusException) {
+        console.error('(Viva-ms) updateDbNewStatus', setNewStatusException);
       }
     }
   }
@@ -80,7 +88,7 @@ async function getCasesWithStatusSumbittedOrProcessing(personalNumber) {
   return dynamoDb.call('query', params);
 }
 
-async function syncCaseWorkflowDetails(casePrimaryKey, workflow) {
+async function updateDbWorkflow(casePrimaryKey, workflow) {
   const TableName = config.cases.tableName;
 
   const params = {
@@ -91,58 +99,53 @@ async function syncCaseWorkflowDetails(casePrimaryKey, workflow) {
     ReturnValues: 'NONE',
   };
 
-  const [updateWorkflowDetailsError] = await to(dynamoDb.call('update', params));
-  if (updateWorkflowDetailsError) {
-    throw updateWorkflowDetailsError;
-  }
-
-  return true;
+  return dynamoDb.call('update', params);
 }
 
-async function setStatus(casePrimaryKey, workflow) {
+async function updateDbNewStatus(casePrimaryKey, newStatus) {
   const TableName = config.cases.tableName;
-
-  const vivaWorkflowDecisionList = makeArray(workflow.decision?.decisions?.decision);
-  const vivaWorkflowCalculation = workflow.calculations?.calculation;
-  const vivaWorkflowJournalList = makeArray(workflow.journals?.journal);
-
-  let decisionStatus = 0;
-  let newStatusType = '';
-
-  if (
-    vivaWorkflowDecisionList != undefined &&
-    vivaWorkflowDecisionList.length > 0 &&
-    vivaWorkflowJournalList != undefined &&
-    vivaWorkflowJournalList.length > 0
-  ) {
-    vivaWorkflowDecisionList.forEach(decision => {
-      const decisionTypeCode = decision.typecode;
-      decisionStatus = decisionStatus | parseInt(decisionTypeCode, 10);
-    });
-
-    if (decisionStatus === 1) {
-      newStatusType = 'closed:approved:viva';
-    } else if (decisionStatus === 2) {
-      newStatusType = 'closed:rejected:viva';
-    } else if (decisionStatus === 3) {
-      newStatusType = 'closed:partiallyApproved:viva';
-    }
-  } else if (vivaWorkflowCalculation != undefined) {
-    newStatusType = 'active:processing';
-  } else {
-    throw 'Nothing to update';
-  }
 
   const params = {
     TableName,
     Key: casePrimaryKey,
     UpdateExpression: 'SET #status = :newStatusType',
     ExpressionAttributeNames: { '#status': 'status' },
-    ExpressionAttributeValues: { ':newStatusType': getStatusByType(newStatusType) },
+    ExpressionAttributeValues: { ':newStatusType': newStatus },
     ReturnValues: 'NONE',
   };
 
   return dynamoDb.call('update', params);
+}
+
+function decideNewStatusType(workflowAttributes) {
+  const decisionList = makeArray(workflowAttributes.decision?.decisions?.decision);
+  const paymentList = makeArray(workflowAttributes.payments?.payment);
+  const calculation = workflowAttributes.calculations?.calculation;
+
+  let decisionStatus = 0;
+  let newStatusType = '';
+
+  if (decisionList != undefined && decisionList.length > 0) {
+    decisionList.forEach(decision => {
+      decisionStatus = decisionStatus | parseInt(decision.typecode, 10);
+    });
+
+    if (decisionStatus === 1 && paymentList != undefined && paymentList.length > 0) {
+      newStatusType = 'closed:approved:viva';
+    } else if (decisionStatus === 2) {
+      newStatusType = 'closed:rejected:viva';
+    } else if (decisionStatus === 3 && paymentList != undefined && paymentList.length > 0) {
+      newStatusType = 'closed:partiallyApproved:viva';
+    } else {
+      newStatusType = 'active:processing';
+    }
+  } else if (calculation != undefined) {
+    newStatusType = 'active:processing';
+  } else {
+    return undefined;
+  }
+
+  return newStatusType;
 }
 
 function makeArray(value) {
