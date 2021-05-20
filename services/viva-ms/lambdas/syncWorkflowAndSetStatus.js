@@ -39,25 +39,23 @@ export async function main(event) {
       continue;
     }
 
-    const [syncCaseWorkflowDetailsError] = await to(
-      updateDbWorkflow(casePrimaryKey, workflow.attributes)
-    );
-    if (syncCaseWorkflowDetailsError) {
-      throw syncCaseWorkflowDetailsError;
-    }
-
-    const newStatusType = decideNewStatusType(workflow.attributes);
-    if (newStatusType == undefined) {
-      console.info('(Viva-ms) no new status to update');
-      return true;
+    const [updateDbWorkflowError] = await to(updateDbWorkflow(casePrimaryKey, workflow.attributes));
+    if (updateDbWorkflowError) {
+      throw updateDbWorkflowError;
     }
 
     if (!deepEqual(workflow.attributes, userCase.details?.workflow)) {
-      const [setNewStatusException] = await to(
+      const newStatusType = decideNewStatusType(workflow.attributes);
+      if (newStatusType == undefined) {
+        console.info('(Viva-ms) no new status to update');
+        continue;
+      }
+
+      const [updateDbNewStatusError] = await to(
         updateDbNewStatus(casePrimaryKey, getStatusByType(newStatusType))
       );
-      if (setNewStatusException) {
-        console.error('(Viva-ms) updateDbNewStatus', setNewStatusException);
+      if (updateDbNewStatusError) {
+        console.error('(Viva-ms) updateDbNewStatusError', updateDbNewStatusError);
       }
     }
   }
