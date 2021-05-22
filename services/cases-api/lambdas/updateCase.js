@@ -17,14 +17,8 @@ export async function main(event) {
     return response.failure(new BadRequestError('missing [id] in query path'));
   }
 
-  const {
-    provider,
-    statusType,
-    details,
-    currentFormId,
-    currentPosition,
-    answers,
-  } = requestJsonBody;
+  const { provider, statusType, details, currentFormId, currentPosition, answers } =
+    requestJsonBody;
 
   const UpdateExpression = ['SET updatedAt = :newUpdatedAt'];
   const ExpressionAttributeNames = {};
