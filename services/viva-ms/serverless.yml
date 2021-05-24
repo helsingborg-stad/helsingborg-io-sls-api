@@ -126,8 +126,8 @@ functions:
             detail-type:
               - BankIdCollectComplete
 
-  syncWorkflowAndSetStatus:
-    handler: lambdas/syncWorkflowAndSetStatus.main
+  syncWorkflow:
+    handler: lambdas/syncWorkflow.main
     timeout: 15
     events:
       - eventBridge:
@@ -136,6 +136,16 @@ functions:
               - bankId.collect
             detail-type:
               - BankIdCollectComplete
+
+  decideCaseStatus:
+    handler: lambdas/decideCaseStatus.main
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - vivaMs.syncWorkflow
+            detail-type:
+              - vivaMsSyncWorkflowSuccess
 
   syncExpiryTime:
     handler: lambdas/syncExpiryTime.main
