@@ -112,7 +112,7 @@ export async function main(event: Record<string, any>): Promise<Boolean> {
   );
 
   // Make it easier for developer to check the generated pdf
-  writeFileToBucket(`cases/${submittedCase.id}.pdf`, newPdfBuffer);
+  writeFileToBucket(`cases/${Date.now()}-${submittedCase.id}.pdf`, newPdfBuffer);
 
   const [addPdfToCaseError] = await to(addPdfToCase(submittedCase, newPdfBuffer));
   if (addPdfToCaseError) {
