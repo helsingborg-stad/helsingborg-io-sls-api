@@ -182,7 +182,7 @@ async function putRecurringVivaCase(PK, workflowId, period) {
 }
 
 async function getUser(PK) {
-  const personalNumber = PK.replace('USER#', '');
+  const personalNumber = PK.substring(5);
   const params = {
     TableName: config.users.tableName,
     Key: {
