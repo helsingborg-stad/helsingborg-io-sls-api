@@ -85,9 +85,6 @@ export async function main(event: Record<string, any>): Promise<Boolean> {
 
     pdfJsonValues['valuesChanged'] =
       changedValues.length > 0 || newValues.length > 0 ? 'Ja' : 'Nej';
-
-    console.log('changedValues', changedValues);
-    console.log('newValues', newValues);
   }
 
   Object.assign(pdfJsonValues, {
