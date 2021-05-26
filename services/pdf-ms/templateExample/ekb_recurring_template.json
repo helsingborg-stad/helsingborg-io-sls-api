@@ -4,11 +4,11 @@
   "texts": [
     {
       "pageIndex": 0,
-      "x": 270,
-      "y": 700,
-      "fontSize": 100,
-      "text": "{{testDate}}",
-      "valueId": "testDate"
+      "x": 400,
+      "y": 755,
+      "fontSize": 11,
+      "text": "{{periodDate}}",
+      "valueId": "periodDate"
     },
     {
       "pageIndex": 0,
@@ -312,7 +312,7 @@
       "x": 400,
       "y": 189,
       "fontSize": 11,
-      "text":  "{{otherAsset}}",
+      "text": "{{otherAsset}}",
       "valueId": "otherAsset"
     },
     {
