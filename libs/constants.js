@@ -14,3 +14,4 @@ export const CASE_PROVIDER_VIVA = 'VIVA';
 export const DELETE_VIVA_CASE_AFTER_6_MONTH = 4382;
 export const DELETE_VIVA_CASE_AFTER_45_DAYS = 1080; // 45 days * 24 hours = 1080 hours
 export const DELETE_VIVA_CASE_AFTER_72_HOURS = 72;
+export const DELETE_VIVA_CASE_AFTER_12_HOURS = 12;
