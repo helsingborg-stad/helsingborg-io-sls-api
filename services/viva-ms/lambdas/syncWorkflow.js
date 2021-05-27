@@ -43,7 +43,7 @@ export async function main(event) {
       continue;
     }
 
-    const [updateDbWorkflowError] = await to(updateDbWorkflow(caseKeys, workflow.attributes));
+    const [updateDbWorkflowError] = await to(updateCaseWorkflow(caseKeys, workflow.attributes));
     if (updateDbWorkflowError) {
       throw updateDbWorkflowError;
     }
@@ -82,7 +82,7 @@ async function getCasesSumbittedOrProcessing(personalNumber) {
   return dynamoDb.call('query', params);
 }
 
-async function updateDbWorkflow(caseKeys, workflow) {
+async function updateCaseWorkflow(caseKeys, workflow) {
   const TableName = config.cases.tableName;
 
   const params = {

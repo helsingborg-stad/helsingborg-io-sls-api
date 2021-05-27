@@ -8,23 +8,23 @@ import { getStatusByType } from '../../../libs/caseStatuses';
 export async function main(event) {
   const { caseKeys, workflow } = event.detail;
 
-  const newStatusType = decideNewStatusType(workflow.attributes);
+  const newStatusType = decideNewCaseStatus(workflow.attributes);
   if (newStatusType == undefined) {
     console.info('(Viva-ms) no new status to update');
     return true;
   }
 
-  const [updateDbNewStatusError] = await to(
-    updateDbNewStatus(caseKeys, getStatusByType(newStatusType))
+  const [updateCaseStatusError] = await to(
+    updateCaseStatus(caseKeys, getStatusByType(newStatusType))
   );
-  if (updateDbNewStatusError) {
-    console.error('(Viva-ms) updateDbNewStatusError', updateDbNewStatusError);
+  if (updateCaseStatusError) {
+    console.error('(Viva-ms) updateCaseStatusError', updateCaseStatusError);
   }
 
   return true;
 }
 
-async function updateDbNewStatus(caseKeys, newStatus) {
+async function updateCaseStatus(caseKeys, newStatus) {
   const TableName = config.cases.tableName;
 
   const params = {
@@ -39,7 +39,7 @@ async function updateDbNewStatus(caseKeys, newStatus) {
   return dynamoDb.call('update', params);
 }
 
-function decideNewStatusType(workflowAttributes) {
+function decideNewCaseStatus(workflowAttributes) {
   const decisionList = makeArray(workflowAttributes.decision?.decisions?.decision);
   const paymentList = makeArray(workflowAttributes.payments?.payment);
   const calculation = workflowAttributes.calculations?.calculation;
