@@ -47,7 +47,7 @@ export async function main(event: Record<string, any>): Promise<Boolean> {
   const { period } = submittedCase.details;
   const dateOptions = { timeZone: 'Europe/Stockholm' };
 
-  const pdfPeriodDate = {
+  const pdfPeriodLocaleDate = {
     start: new Date(period.startDate).toLocaleDateString('sv-SE', dateOptions),
     end: new Date(period.endDate).toLocaleDateString('sv-SE', dateOptions),
   };
@@ -57,7 +57,7 @@ export async function main(event: Record<string, any>): Promise<Boolean> {
       id: 'periodDate',
       tags: [],
     },
-    value: `${pdfPeriodDate.start} – ${pdfPeriodDate.end}`,
+    value: `${pdfPeriodLocaleDate.start} – ${pdfPeriodLocaleDate.end}`,
   });
 
   const pdfJsonValues = {
