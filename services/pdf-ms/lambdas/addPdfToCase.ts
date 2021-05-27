@@ -46,14 +46,18 @@ export async function main(event: Record<string, any>): Promise<Boolean> {
 
   const { period } = submittedCase.details;
   const dateOptions = { timeZone: 'Europe/Stockholm' };
-  const startDatePeriod = new Date(period.startDate).toLocaleDateString('sv-SE', dateOptions);
-  const endDatePeriod = new Date(period.endDate).toLocaleDateString('sv-SE', dateOptions);
+
+  const pdfPeriodDate = {
+    start: new Date(period.startDate).toLocaleDateString('sv-SE', dateOptions),
+    end: new Date(period.endDate).toLocaleDateString('sv-SE', dateOptions),
+  };
+
   submittedRecurringAnswers.push({
     field: {
       id: 'periodDate',
       tags: [],
     },
-    value: `${startDatePeriod} – ${endDatePeriod}`,
+    value: `${pdfPeriodDate.start} – ${pdfPeriodDate.end}`,
   });
 
   const pdfJsonValues = {
