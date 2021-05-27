@@ -44,12 +44,6 @@ export async function main(event: Record<string, any>): Promise<Boolean> {
   const ssmParams = await PDF_SSM_PARAMS;
   const submittedRecurringAnswers = submittedCase.forms[ssmParams.recurringFormId].answers;
 
-  /**
-   * >>>WARNING Ugly shit ahead! WARNING<<<
-   *
-   * Injects the Viva application period date onto the PDF using template(PDF) variable {{periodDate}}
-   *
-   */
   const { period } = submittedCase.details;
   const dateOptions = { timeZone: 'Europe/Stockholm' };
   const startDatePeriod = new Date(period.startDate).toLocaleDateString('sv-SE', dateOptions);
@@ -61,11 +55,6 @@ export async function main(event: Record<string, any>): Promise<Boolean> {
     },
     value: `${startDatePeriod} – ${endDatePeriod}`,
   });
-  /**
-   * >>>END OF SHIT CODE<<<
-   *
-   * Eh, not realy... (:
-   */
 
   const pdfJsonValues = {
     valuesChanged: 'Nej',
@@ -111,7 +100,6 @@ export async function main(event: Record<string, any>): Promise<Boolean> {
     newValues
   );
 
-  // Make it easier for developer to check the generated pdf
   writeFileToBucket(`cases/${Date.now()}-${submittedCase.id}.pdf`, newPdfBuffer);
 
   const [addPdfToCaseError] = await to(addPdfToCase(submittedCase, newPdfBuffer));
