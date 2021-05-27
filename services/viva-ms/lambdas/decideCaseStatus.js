@@ -44,30 +44,48 @@ function decideNewCaseStatus(workflowAttributes) {
   const paymentList = makeArray(workflowAttributes.payments?.payment);
   const calculation = workflowAttributes.calculations?.calculation;
 
-  let decisionStatus = 0;
-  let newStatusType = '';
+  const decisionTypeCode = getDecisionTypeCode(decisionList);
 
-  if (decisionList != undefined && decisionList.length > 0) {
-    decisionList.forEach(decision => {
-      decisionStatus = decisionStatus | parseInt(decision.typecode, 10);
-    });
+  if (decisionTypeCode != undefined) {
+    const caseStatus = getCaseStatusType(decisionTypeCode, paymentList);
+    return caseStatus;
+  }
 
-    if (decisionStatus === 1 && paymentList != undefined && paymentList.length > 0) {
-      newStatusType = 'closed:approved:viva';
-    } else if (decisionStatus === 2) {
-      newStatusType = 'closed:rejected:viva';
-    } else if (decisionStatus === 3 && paymentList != undefined && paymentList.length > 0) {
-      newStatusType = 'closed:partiallyApproved:viva';
-    } else {
-      newStatusType = 'active:processing';
-    }
-  } else if (calculation != undefined) {
-    newStatusType = 'active:processing';
-  } else {
+  if (calculation != undefined) {
+    return 'active:processing';
+  }
+
+  return undefined;
+}
+
+function getCaseStatusType(decisionTypeCode, paymentList) {
+  if (decisionTypeCode === 1 && paymentList != undefined && paymentList.length > 0) {
+    return 'closed:approved:viva';
+  }
+
+  if (decisionTypeCode === 2) {
+    return 'closed:rejected:viva';
+  }
+
+  if (decisionTypeCode === 3 && paymentList != undefined && paymentList.length > 0) {
+    return 'closed:partiallyApproved:viva';
+  }
+
+  return 'active:processing';
+}
+
+function getDecisionTypeCode(decisionList) {
+  if (decisionList == undefined && decisionList.length == 0) {
     return undefined;
   }
 
-  return newStatusType;
+  let typeCode = 0;
+
+  decisionList.forEach(decision => {
+    typeCode = typeCode | parseInt(decision.typecode, 10);
+  });
+
+  return typeCode;
 }
 
 function makeArray(value) {
