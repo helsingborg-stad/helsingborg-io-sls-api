@@ -1,6 +1,7 @@
 import parser from 'xml2js';
 
-export const parseXml = params => `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v1="${params.personpostXmlEnvUrl}">
+export const parseXml =
+  params => `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v1="${params.personpostXmlEnvUrl}">
   <soapenv:Header/>
   <soapenv:Body>
     <v1:PersonpostRequest>
