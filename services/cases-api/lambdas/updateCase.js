@@ -1,5 +1,9 @@
 import to from 'await-to-js';
-import { throwError, BadRequestError } from '@helsingborg-stad/npm-api-error-handling';
+import {
+  throwError,
+  BadRequestError,
+  NotFoundError,
+} from '@helsingborg-stad/npm-api-error-handling';
 
 import config from '../../../config';
 import { putEvent } from '../../../libs/awsEventBridge';
@@ -8,18 +12,28 @@ import * as dynamoDb from '../../../libs/dynamoDb';
 import { decodeToken } from '../../../libs/token';
 import { objectWithoutProperties } from '../../../libs/objects';
 import { getStatusByType } from '../../../libs/caseStatuses';
+import dynamo from '../helpers';
 
 export async function main(event) {
   const requestJsonBody = JSON.parse(event.body);
   const { id } = event.pathParameters;
 
+  const { provider, details, currentFormId, currentPosition, answers, signature } = requestJsonBody;
+
   if (!id) {
-    return response.failure(new BadRequestError('missing [id] in query path'));
+    return response.failure(new BadRequestError('Missing [id] in path /cases/{id}'));
   }
 
-  const { provider, statusType, details, currentFormId, currentPosition, answers } =
-    requestJsonBody;
+  const [getCaseError] = await to(dynamo.getCaseWhereUserIsApplicant(id, personalNumber));
+  if (getCaseError) {
+    return response.failure(
+      new NotFoundError('The user does not have any case with the provided case id')
+    );
+  }
 
+  const newCaseStatus = getNewCaseStatus(answers, signature);
+
+  // Create update expression
   const UpdateExpression = ['SET updatedAt = :newUpdatedAt'];
   const ExpressionAttributeNames = {};
   const ExpressionAttributeValues = { ':newUpdatedAt': Date.now() };
@@ -29,15 +43,10 @@ export async function main(event) {
     ExpressionAttributeValues[':newProvider'] = provider;
   }
 
-  if (statusType) {
-    const status = getStatusByType(statusType);
-    if (!status) {
-      return response.failure(new BadRequestError('invalid [statusType]'));
-    }
-
+  if (newCaseStatus) {
     UpdateExpression.push('#status = :newStatus');
     ExpressionAttributeNames['#status'] = 'status';
-    ExpressionAttributeValues[':newStatus'] = status;
+    ExpressionAttributeValues[':newStatus'] = newCaseStatus;
   }
 
   if (details) {
@@ -142,4 +151,47 @@ async function queryFormsIfExistsFormId(formId) {
   }
 
   return dynamoDbQueryCallResult;
+}
+
+function getNewCaseStatus(answers, signature) {
+  const statusChecks = [
+    {
+      name: 'active:ongoing',
+      condition: isOngoing,
+    },
+    {
+      name: 'active:signature:completed',
+      condition: isSignatureCompleted,
+    },
+    {
+      name: 'active:submitted',
+      condition: isSubmitted,
+    },
+  ];
+
+  const statusType = statusChecks.reduce((acc, statusCheck) => {
+    if (statusCheck.condition(answers, signature)) {
+      return statusCheck.name;
+    }
+    return acc;
+  }, undefined);
+
+  return getStatusByType(statusType);
+}
+
+function isAnswersEncrypted(answers) {
+  const keys = Object.keys(answers);
+  return keys.length === 1 && keys.includes('encryptedAnswers');
+}
+
+function isOngoing(answers) {
+  return answers && isAnswersEncrypted(answers);
+}
+
+function isSignatureCompleted(answers, signature) {
+  return signature.successfull && isAnswersEncrypted(answers);
+}
+
+function isSubmitted(answers, signature) {
+  return signature.successfull && !isAnswersEncrypted(answers);
 }
