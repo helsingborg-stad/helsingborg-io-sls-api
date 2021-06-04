@@ -11,9 +11,9 @@ const statuses = [
       'Du har påbörjat en ansökan. Du kan öppna din ansökan och fortsätta där du slutade.',
   },
   {
-    type: 'active:signed:viva',
+    type: 'active:signature:completed',
     name: 'Signerad',
-    description: 'Ansökan är signerad, ladda upp filer & dokument för att skicka in ansökan.',
+    description: 'Ansökan är signerad',
   },
   {
     type: 'active:submitted',
