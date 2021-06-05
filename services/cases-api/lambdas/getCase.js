@@ -13,7 +13,6 @@ export async function main(event) {
   const { id } = event.pathParameters;
 
   const [getUserCaseError, userCase] = await to(getUserCase(decodedToken.personalNumber, id));
-  console.log('userCase', userCase);
   if (getUserCaseError) {
     return response.failure(getUserCaseError);
   }
