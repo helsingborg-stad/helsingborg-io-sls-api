@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import to from 'await-to-js';
 import { throwError, ResourceNotFoundError } from '@helsingborg-stad/npm-api-error-handling';
 
@@ -12,28 +13,17 @@ export async function main(event) {
 
   const { personalNumber } = decodedToken;
 
-  const PK = `USER#${personalNumber}`;
-  const SK = PK;
-
-  const params = {
-    TableName: config.cases.tableName,
-    ExpressionAttributeValues: {
-      ':pk': PK,
-      ':sk': SK,
-    },
-    KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
-  };
-
-  const [casesDbError, casesDbResponse] = await to(sendCasesRequest(params));
-  if (casesDbError) {
-    return response.failure(casesDbError);
+  const [getAllUserCasesError, userCases] = await to(getUserCases(personalNumber));
+  if (getAllUserCasesError) {
+    console.error('getAllUserCasesError', getAllUserCasesError);
+    return response.failure(getAllUserCasesError);
   }
 
-  if (!casesDbResponse.Count) {
-    return response.failure(new ResourceNotFoundError('No cases found'));
+  if (userCases.length === 0) {
+    return response.failure(new ResourceNotFoundError('No user cases found'));
   }
 
-  const cases = casesDbResponse.Items.map(item => objectWithoutProperties(item, ['PK', 'SK']));
+  const cases = userCases.map(item => objectWithoutProperties(item, ['PK', 'SK', 'GSI1']));
 
   return response.success(200, {
     type: 'getCases',
@@ -43,11 +33,54 @@ export async function main(event) {
   });
 }
 
-async function sendCasesRequest(params) {
-  const [dynamoDbCallError, dynamoDbQueryResult] = await to(dynamoDb.call('query', params));
-  if (dynamoDbCallError) {
-    throwError(dynamoDbCallError.statusCode, dynamoDbCallError.message);
+async function getUserCases(personalNumber) {
+  const [getApplicantCasesError, applicantCasesResult] = await to(
+    getApplicantCases(personalNumber)
+  );
+  if (getApplicantCasesError) {
+    console.error('getApplicantCasesError', getApplicantCasesError);
+    throwError(getApplicantCasesError.statusCode, getApplicantCasesError.message);
   }
 
-  return dynamoDbQueryResult;
+  const [getCoApplicantCasesError, coApplicantCasesResult] = await to(
+    getCoApplicantCases(personalNumber)
+  );
+  if (getCoApplicantCasesError) {
+    console.error('getCoApplicantCasesError', getCoApplicantCasesError);
+    throwError(getCoApplicantCasesError.statusCode, getCoApplicantCasesError.message);
+  }
+
+  const concatAndDeDuplicateCases = (...cases) => [...new Set([].concat(...cases))];
+  return concatAndDeDuplicateCases(applicantCasesResult.Items, coApplicantCasesResult.Items);
+}
+
+async function getApplicantCases(personalNumber) {
+  const PK = `USER#${personalNumber}`;
+  const SK = PK;
+
+  const params = {
+    TableName: config.cases.tableName,
+    KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
+    ExpressionAttributeValues: {
+      ':pk': PK,
+      ':sk': SK,
+    },
+  };
+
+  return dynamoDb.call('query', params);
+}
+
+async function getCoApplicantCases(personalNumber) {
+  const GSI1 = `USER#${personalNumber}`;
+
+  const params = {
+    TableName: config.cases.tableName,
+    IndexName: 'GSI1-SK-index',
+    KeyConditionExpression: 'GSI1 = :gsi1',
+    ExpressionAttributeValues: {
+      ':gsi1': GSI1,
+    },
+  };
+
+  return dynamoDb.call('query', params);
 }
