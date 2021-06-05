@@ -47,7 +47,8 @@ provider:
             - dynamodb:DeleteItem
             - dynamodb:UpdateItem
           Resource:
-            - "Fn::ImportValue": ${self:custom.resourcesStage}-CasesTableArn
+            - !ImportValue ${self:custom.resourcesStage}-CasesTableArn
+            - !ImportValue ${self:custom.resourcesStage}-CasesTableAllIndexArn
 
         - Effect: Allow
           Action:
