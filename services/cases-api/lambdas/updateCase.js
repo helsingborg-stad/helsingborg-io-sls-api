@@ -179,19 +179,19 @@ function getNewCaseStatus(answers, signature) {
   return getStatusByType(statusType);
 }
 
-function isAnswersEncrypted(answers) {
+function areAnswersEncrypted(answers) {
   const keys = Object.keys(answers);
   return keys.length === 1 && keys.includes('encryptedAnswers');
 }
 
 function isOngoing(answers) {
-  return answers && isAnswersEncrypted(answers);
+  return answers && areAnswersEncrypted(answers);
 }
 
 function isSignatureCompleted(answers, signature) {
-  return signature.successfull && isAnswersEncrypted(answers);
+  return signature.success && areAnswersEncrypted(answers);
 }
 
 function isSubmitted(answers, signature) {
-  return signature.successfull && !isAnswersEncrypted(answers);
+  return signature.success && !areAnswersEncrypted(answers);
 }
