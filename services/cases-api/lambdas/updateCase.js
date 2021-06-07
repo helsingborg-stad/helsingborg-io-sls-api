@@ -160,7 +160,7 @@ function getNewCaseStatus(answers, signature) {
       condition: isOngoing,
     },
     {
-      name: 'active:signature:completed',
+      name: 'active:signed',
       condition: isSignatureCompleted,
     },
     {
