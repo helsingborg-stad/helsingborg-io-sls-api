@@ -7,7 +7,7 @@ const uuid = Joi.string().guid({
 
 const caseProvider = Joi.string().valid(CASE_PROVIDER_VIVA);
 
-const caseAnswers = Joi.array().items(
+const answers = Joi.array().items(
   Joi.object({
     field: Joi.object({
       id: Joi.string().required(),
@@ -17,22 +17,39 @@ const caseAnswers = Joi.array().items(
   })
 );
 
+const encryptedAnswers = Joi.object({
+  encryptedAnswers: Joi.string(),
+});
+
+const formCurrentPosition = Joi.object({
+  index: Joi.number().required(),
+  level: Joi.number().required(),
+  currentMainStep: Joi.number().required(),
+  currentMainStepIndex: Joi.number().required(),
+});
+
+const signature = Joi.object({
+  success: Joi.bool().required(),
+});
+
 const form = Joi.object({
-  answers: caseAnswers.allow(),
-  currentPosition: Joi.object({
-    index: Joi.number().required(),
-    level: Joi.number().required(),
-    currentMainStep: Joi.number().required(),
-    currentMainStepIndex: Joi.number().required(),
-  }).required(),
+  answers: answers.allow(),
+  currentPosition: formCurrentPosition.required(),
 });
 
 const caseValidationSchema = Joi.object({
-  statusType: Joi.string().valid('notStarted').required(),
+  statusType: Joi.string().valid('notStarted'),
   currentFormId: uuid.required(),
   provider: caseProvider.required(),
   details: Joi.object().allow(),
   forms: Joi.object().pattern(/^/, [uuid.required(), form.required()]),
+});
+
+export const updateCaseValidationSchema = Joi.object({
+  currentFormId: uuid.required(),
+  answers: [answers.allow(), encryptedAnswers.allow()],
+  currentPosition: formCurrentPosition.required(),
+  signature: signature.optional(),
 });
 
 export default caseValidationSchema;

@@ -12,13 +12,33 @@ import * as dynamoDb from '../../../libs/dynamoDb';
 import { decodeToken } from '../../../libs/token';
 import { objectWithoutProperties } from '../../../libs/objects';
 import { getStatusByType } from '../../../libs/caseStatuses';
+
 import dynamo from '../helpers';
+import { caseValidationSchema } from '../helpers/schema';
 
 export async function main(event) {
   const requestJsonBody = JSON.parse(event.body);
   const { id } = event.pathParameters;
 
-  const { provider, details, currentFormId, currentPosition, answers, signature } = requestJsonBody;
+  if (!id) {
+    return response.failure(new BadRequestError('Missing required path parameter "id"'));
+  }
+
+  const { error, validatedEventBody } = caseValidationSchema.validate(requestJsonBody, {
+    abortEarly: false,
+  });
+  if (error) {
+    response.failure(new BadRequestError(error.message.replace(/"/g, "'")));
+  }
+
+  const {
+    provider,
+    details,
+    currentFormId,
+    currentPosition,
+    answers,
+    signature,
+  } = validatedEventBody;
 
   if (!id) {
     return response.failure(new BadRequestError('Missing [id] in path /cases/{id}'));
