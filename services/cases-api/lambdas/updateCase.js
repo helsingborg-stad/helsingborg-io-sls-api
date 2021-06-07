@@ -180,6 +180,11 @@ function getNewCaseStatus(answers, signature) {
 }
 
 function areAnswersEncrypted(answers) {
+  if (Array.isArray(answers)) {
+    // decrypted answers should allways be submitted as an flat array,
+    // if they are we assume the value to be decrypted and return false.
+    return false;
+  }
   const keys = Object.keys(answers);
   return keys.length === 1 && keys.includes('encryptedAnswers');
 }
