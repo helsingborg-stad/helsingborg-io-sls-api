@@ -11,7 +11,7 @@ const statuses = [
       'Du har påbörjat en ansökan. Du kan öppna din ansökan och fortsätta där du slutade.',
   },
   {
-    type: 'active:signature:completed',
+    type: 'active:signed',
     name: 'Signerad',
     description: 'Ansökan är signerad',
   },
