@@ -13,18 +13,19 @@ import { decodeToken } from '../../../libs/token';
 import { objectWithoutProperties } from '../../../libs/objects';
 import { getStatusByType } from '../../../libs/caseStatuses';
 
-import dynamo from '../helpers';
-import { caseValidationSchema } from '../helpers/schema';
+import { getCaseWhereUserIsApplicant } from '../helpers/dynamo';
+import { updateCaseValidationSchema } from '../helpers/schema';
 
 export async function main(event) {
   const requestJsonBody = JSON.parse(event.body);
   const { id } = event.pathParameters;
+  const { personalNumber } = decodeToken(event);
 
   if (!id) {
     return response.failure(new BadRequestError('Missing required path parameter "id"'));
   }
 
-  const { error, validatedEventBody } = caseValidationSchema.validate(requestJsonBody, {
+  const { error, validatedEventBody } = updateCaseValidationSchema.validate(requestJsonBody, {
     abortEarly: false,
   });
   if (error) {
@@ -40,7 +41,7 @@ export async function main(event) {
     signature,
   } = validatedEventBody;
 
-  const [getCaseError] = await to(dynamo.getCaseWhereUserIsApplicant(id, personalNumber));
+  const [getCaseError] = await to(getCaseWhereUserIsApplicant(id, personalNumber));
   if (getCaseError) {
     return response.failure(
       new ResourceNotFoundError('The user does not have any case with the provided case id')
@@ -100,7 +101,6 @@ export async function main(event) {
     }
   }
 
-  const { personalNumber } = decodeToken(event);
   const caseKeys = {
     PK: `USER#${personalNumber}`,
     SK: `USER#${personalNumber}#CASE#${id}`,
