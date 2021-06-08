@@ -13,50 +13,53 @@ export async function main(event) {
 
   const { personalNumber } = decodedToken;
 
-  const [getAllUserCasesError, userCases] = await to(getUserCases(personalNumber));
-  if (getAllUserCasesError) {
-    console.error('getAllUserCasesError', getAllUserCasesError);
-    return response.failure(getAllUserCasesError);
+  const [getUserCaseListError, userCaseList] = await to(getUserCaseList(personalNumber));
+  if (getUserCaseListError) {
+    console.error('getUserCaseListError', getUserCaseListError);
+    return response.failure(getUserCaseListError);
   }
 
-  if (userCases.length === 0) {
+  if (userCaseList.length === 0) {
     return response.failure(new ResourceNotFoundError('No user cases found'));
   }
 
-  const userCasesWithoutPK_SK_GSI1 = userCases.map(item =>
+  const userCaseListWithoutKeys = userCaseList.map(item =>
     objectWithoutProperties(item, ['PK', 'SK', 'GSI1'])
   );
 
   return response.success(200, {
     type: 'getCases',
     attributes: {
-      cases: userCasesWithoutPK_SK_GSI1,
+      cases: userCaseListWithoutKeys,
     },
   });
 }
 
-async function getUserCases(personalNumber) {
-  const [getApplicantCasesError, applicantCasesResult] = await to(
-    getApplicantCases(personalNumber)
+async function getUserCaseList(personalNumber) {
+  const [getUserApplicantCaseListError, applicantCaseListResult] = await to(
+    getUserApplicantCaseList(personalNumber)
   );
-  if (getApplicantCasesError) {
-    console.error('getApplicantCasesError', getApplicantCasesError);
-    throwError(getApplicantCasesError.statusCode, getApplicantCasesError.message);
+  if (getUserApplicantCaseListError) {
+    console.error('getUserApplicantCaseListError', getUserApplicantCaseListError);
+    throwError(getUserApplicantCaseListError.statusCode, getUserApplicantCaseListError.message);
   }
 
-  const [getCoApplicantCasesError, coApplicantCasesResult] = await to(
-    getCoApplicantCases(personalNumber)
+  const [getUserCoApplicantCaseListError, coApplicantCaseListResult] = await to(
+    getUserCoApplicantCaseList(personalNumber)
   );
-  if (getCoApplicantCasesError) {
-    console.error('getCoApplicantCasesError', getCoApplicantCasesError);
-    throwError(getCoApplicantCasesError.statusCode, getCoApplicantCasesError.message);
+  if (getUserCoApplicantCaseListError) {
+    console.error('getUserCoApplicantCaseListError', getUserCoApplicantCaseListError);
+    throwError(getUserCoApplicantCaseListError.statusCode, getUserCoApplicantCaseListError.message);
   }
 
-  const concatAndDeDuplicateCases = (...cases) => [...new Set([].concat(...cases))];
-  return concatAndDeDuplicateCases(applicantCasesResult.Items, coApplicantCasesResult.Items);
+  const concatAndDeDuplicateCaseList = (...cases) => [...new Set([].concat(...cases))];
+  return concatAndDeDuplicateCaseList(
+    applicantCaseListResult.Items,
+    coApplicantCaseListResult.Items
+  );
 }
 
-async function getApplicantCases(personalNumber) {
+async function getUserApplicantCaseList(personalNumber) {
   const PK = `USER#${personalNumber}`;
   const SK = 'CASE#';
 
@@ -72,7 +75,7 @@ async function getApplicantCases(personalNumber) {
   return dynamoDb.call('query', params);
 }
 
-async function getCoApplicantCases(personalNumber) {
+async function getUserCoApplicantCaseList(personalNumber) {
   const GSI1 = `USER#${personalNumber}`;
   const SK = 'CASE#';
 

@@ -17,48 +17,48 @@ export async function main(event) {
     return response.failure(getUserCaseError);
   }
 
-  if (userCase == undefined) {
+  if (!userCase) {
     return response.failure(new ResourceNotFoundError(`User case with id: ${id} not found`));
   }
 
-  const userCaseWithoutPK_SK_GSI1 = objectWithoutProperties(userCase, ['PK', 'SK', 'GSI1']);
+  const userCaseWithoutKeys = objectWithoutProperties(userCase, ['PK', 'SK', 'GSI1']);
 
   return response.success(200, {
     type: 'getCase',
     attributes: {
-      ...userCaseWithoutPK_SK_GSI1,
+      ...userCaseWithoutKeys,
     },
   });
 }
 
 async function getUserCase(personalNumber, id) {
-  const [getApplicantCaseError, applicantCaseResult] = await to(
-    getApplicantCase(personalNumber, id)
+  const [getUserApplicantCaseError, userApplicantCaseResult] = await to(
+    getUserApplicantCase(personalNumber, id)
   );
-  if (getApplicantCaseError) {
-    console.error('getApplicantCaseError', getApplicantCaseError);
-    throwError(getApplicantCaseError.statusCode, getApplicantCaseError.message);
+  if (getUserApplicantCaseError) {
+    console.error('getUserApplicantCaseError', getUserApplicantCaseError);
+    throwError(getUserApplicantCaseError.statusCode, getUserApplicantCaseError.message);
   }
 
-  const [getCoApplicantCaseError, coApplicantCaseResult] = await to(
-    getCoApplicantCase(personalNumber, id)
+  const [getCoApplicantCaseError, userCoApplicantCaseResult] = await to(
+    getUserCoApplicantCase(personalNumber, id)
   );
   if (getCoApplicantCaseError) {
     console.error('getCoApplicantCaseError', getCoApplicantCaseError);
     throwError(getCoApplicantCaseError.statusCode, getCoApplicantCaseError.message);
   }
 
-  const concatAndDeDuplicateCase = (...userCases) => [...new Set([].concat(...userCases))];
-  const userCases = concatAndDeDuplicateCase(
-    applicantCaseResult.Items,
-    coApplicantCaseResult.Items
+  const concatAndDeDuplicateCase = (...userCaseList) => [...new Set([].concat(...userCaseList))];
+  const userCaseList = concatAndDeDuplicateCase(
+    userApplicantCaseResult.Items,
+    userCoApplicantCaseResult.Items
   );
 
-  const [userCase] = userCases.filter(Boolean);
+  const [userCase] = userCaseList.filter(Boolean);
   return userCase;
 }
 
-async function getApplicantCase(personalNumber, id) {
+async function getUserApplicantCase(personalNumber, id) {
   const PK = `USER#${personalNumber}`;
   const SK = `CASE#${id}`;
 
@@ -75,7 +75,7 @@ async function getApplicantCase(personalNumber, id) {
   return dynamoDb.call('query', params);
 }
 
-async function getCoApplicantCase(personalNumber, id) {
+async function getUserCoApplicantCase(personalNumber, id) {
   const GSI1 = `USER#${personalNumber}`;
   const SK = `CASE#${id}`;
 
