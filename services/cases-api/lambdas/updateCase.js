@@ -2,7 +2,7 @@ import to from 'await-to-js';
 import {
   throwError,
   BadRequestError,
-  NotFoundError,
+  ResourceNotFoundError,
 } from '@helsingborg-stad/npm-api-error-handling';
 
 import config from '../../../config';
@@ -40,14 +40,10 @@ export async function main(event) {
     signature,
   } = validatedEventBody;
 
-  if (!id) {
-    return response.failure(new BadRequestError('Missing [id] in path /cases/{id}'));
-  }
-
   const [getCaseError] = await to(dynamo.getCaseWhereUserIsApplicant(id, personalNumber));
   if (getCaseError) {
     return response.failure(
-      new NotFoundError('The user does not have any case with the provided case id')
+      new ResourceNotFoundError('The user does not have any case with the provided case id')
     );
   }
 
@@ -199,7 +195,7 @@ function getNewCaseStatus(answers, signature) {
   return getStatusByType(statusType);
 }
 
-function areAnswersEncrypted(answers) {
+function isEncrypted(answers) {
   if (Array.isArray(answers)) {
     // decrypted answers should allways be submitted as an flat array,
     // if they are we assume the value to be decrypted and return false.
@@ -210,13 +206,13 @@ function areAnswersEncrypted(answers) {
 }
 
 function isOngoing(answers) {
-  return answers && areAnswersEncrypted(answers);
+  return answers && isEncrypted(answers);
 }
 
 function isSignatureCompleted(answers, signature) {
-  return signature.success && areAnswersEncrypted(answers);
+  return signature.success && isEncrypted(answers);
 }
 
 function isSubmitted(answers, signature) {
-  return signature.success && !areAnswersEncrypted(answers);
+  return signature.success && !isEncrypted(answers);
 }
