@@ -214,7 +214,7 @@ function getCasePersonList(vivaPerson) {
 
   const roleTranslateList = {
     client: 'applicant',
-    partner: 'coAppalicant',
+    partner: 'coApplicant',
     child: 'children',
   };
 
