@@ -97,9 +97,9 @@ async function queryCasesWithWorkflowId(PK, workflowId) {
     },
   };
 
-  const [dynamoQueryError, queryCasesResult] = await to(dynamoDB.call('query', params));
-  if (dynamoQueryError) {
-    throw dynamoQueryError;
+  const [queryCasesError, queryCasesResult] = await to(dynamoDB.call('query', params));
+  if (queryCasesError) {
+    throw queryCasesError;
   }
 
   return queryCasesResult.Items;
@@ -127,24 +127,25 @@ async function putRecurringVivaCase(PK, workflowId, period) {
     [completionFormId]: initialFormAttributes,
   };
 
-  const [userError, user] = await to(getUser(PK));
-  if (userError) {
-    console.error('(cases-api) DynamoDb query on users table failed', userError);
-    throw userError;
+  const [getUserError, user] = await to(getUser(PK));
+  if (getUserError) {
+    throw getUserError;
   }
+
   const [, formTemplates] = await to(getFormTemplates(initialForms));
 
-  const [previousCaseError, previousCase] = await to(getLastUpdatedCase(PK, CASE_PROVIDER_VIVA));
-  if (previousCaseError) {
-    console.error('(cases-api) DynamoDb query on cases table failed', previousCaseError);
-    throw previousCaseError;
+  const [getLastUpdatedCaseError, lastUpdatedCase] = await to(
+    getLastUpdatedCase(PK, CASE_PROVIDER_VIVA)
+  );
+  if (getLastUpdatedCaseError) {
+    throw getLastUpdatedCaseError;
   }
 
   const prePopulatedForms = populateFormWithPreviousCaseAnswers(
     initialForms,
     user,
     formTemplates,
-    previousCase?.forms || {}
+    lastUpdatedCase?.forms || {}
   );
 
   const expirationTime = millisecondsToSeconds(getFutureTimestamp(DELETE_VIVA_CASE_AFTER_12_HOURS));
@@ -196,20 +197,22 @@ async function getUser(PK) {
 
 async function getFormTemplates(forms) {
   const formTemplates = {};
-  for (const key of Object.keys(forms)) {
-    const params = {
+
+  for (const formId of Object.keys(forms)) {
+    const formGetParams = {
       TableName: config.forms.tableName,
       Key: {
-        PK: `FORM#${key}`,
+        PK: `FORM#${formId}`,
       },
     };
-    const [error, dbResponse] = await to(dynamoDB.call('get', params));
 
-    if (error) {
-      console.error('(cases-api) DynamoDb query on forms table failed', error);
+    const [getError, getResult] = await to(dynamoDB.call('get', formGetParams));
+    if (getError) {
+      console.error('(viva-ms) DynamoDb query on forms table failed', getError);
       continue;
     }
-    formTemplates[key] = dbResponse.Item;
+
+    formTemplates[formId] = getResult.Item;
   }
 
   return formTemplates;
