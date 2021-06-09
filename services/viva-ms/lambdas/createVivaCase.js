@@ -219,7 +219,9 @@ function getCasePersonList(vivaPerson) {
   };
 
   const casePersonList = vivaPersonList.map(person => {
-    const { pnumber: personalNumber, fname: firstName, lname: lastName, type } = person;
+    const { pnumber, fname: firstName, lname: lastName, type } = person;
+    const personalNumber = String(pnumber).replace(/\D/g, '');
+
     const role = Object.keys(roleTranslateList).includes(type) && roleTranslateList[type];
 
     return {
