@@ -103,24 +103,31 @@ function getMultipleFieldAnswers(field, previousAnswers) {
   return answers;
 }
 
-function getInitialValue(field, user, previousAnswers) {
+function getInitialValue(field, users, previousAnswers) {
   let initialValue;
 
   field.loadPrevious.forEach(matchString => {
+    let user;
     const strArray = matchString.split('.');
-    if (strArray[0] === 'user') {
-      initialValue = getUserInfo(user, strArray.slice(1)) || initialValue;
-      if (initialValue) {
-        return formatAnswer(field.id, field.tags, initialValue);
-      }
+    switch (strArray[0]) {
+      case 'user':
+        user = users.find(element => element.role === 'applicant');
+        initialValue = getUserInfo(user, strArray.slice(1)) || initialValue;
+        break;
+      case 'coApplicant':
+        user = users.find(element => element.role === 'coapplicant');
+        initialValue = getUserInfo(user, strArray.slice(1)) || initialValue;
+        break;
+      default:
+        initialValue = getCaseAnswer(previousAnswers, matchString) || initialValue;
+        break;
     }
-    initialValue = getCaseAnswer(previousAnswers, matchString) || initialValue;
   });
 
   return initialValue ? formatAnswer(field.id, field.tags, initialValue) : undefined;
 }
 
-function populateAnswers(dataMap, user, previousAnswers) {
+function populateAnswers(dataMap, users, previousAnswers) {
   const answers = [];
 
   dataMap.forEach(field => {
@@ -133,7 +140,7 @@ function populateAnswers(dataMap, user, previousAnswers) {
       return;
     }
 
-    const initialFieldValue = getInitialValue(field, user, previousAnswers);
+    const initialFieldValue = getInitialValue(field, users, previousAnswers);
     if (initialFieldValue) {
       answers.push(initialFieldValue);
     }
@@ -154,14 +161,14 @@ function mergeAnswers(previousAnswers, newAnswers) {
   );
 }
 
-export function populateFormWithPreviousCaseAnswers(forms, user, formTemplates, previousForms) {
+export function populateFormWithPreviousCaseAnswers(forms, users, formTemplates, previousForms) {
   const populatedForms = {};
   Object.keys(forms).forEach(formId => {
     const form = forms[formId];
     const formTemplate = formTemplates?.[formId] || {};
     const previousAnswers = previousForms?.[formId]?.answers || [];
     const dataMap = generateDataMap(formTemplate);
-    const answers = populateAnswers(dataMap, user, previousAnswers);
+    const answers = populateAnswers(dataMap, users, previousAnswers);
     const mergedAnswers = mergeAnswers(answers, forms[formId].answers);
     populatedForms[formId] = { ...form, answers: mergedAnswers };
   });
