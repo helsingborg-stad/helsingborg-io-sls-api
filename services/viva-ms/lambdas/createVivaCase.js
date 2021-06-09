@@ -59,15 +59,17 @@ export async function main(event) {
     return console.error('(Viva-ms) Viva Application WorkflowId not present in response, aborting');
   }
 
-  const PK = `USER#${user.personalNumber}`;
-  const [queryCasesError, queryCaseItems] = await to(
-    queryCasesWithWorkflowId(PK, vivaPerson.application.workflowid)
+  const [getUserCaseFilteredOnWorkflowIdError, caseItem] = await to(
+    getUserCaseFilteredOnWorkflowId(vivaPerson)
   );
-  if (queryCasesError) {
-    return console.error('(Viva-ms) DynamoDb query on cases table failed', queryCasesError);
+  if (getUserCaseFilteredOnWorkflowIdError) {
+    return console.error(
+      '(Viva-ms) DynamoDb query on cases table failed',
+      getUserCaseFilteredOnWorkflowIdError
+    );
   }
 
-  if (queryCaseItems.length > 0) {
+  if (caseItem.length > 0) {
     return console.log('(Viva-ms) Case with WorkflowId already exists');
   }
 
@@ -79,15 +81,16 @@ export async function main(event) {
   return true;
 }
 
-async function queryCasesWithWorkflowId(PK, workflowId) {
+async function getUserCaseFilteredOnWorkflowId(vivaPerson) {
   const params = {
     TableName: config.cases.tableName,
     KeyConditionExpression: 'PK = :pk',
     FilterExpression: 'details.workflowId = :workflowId',
     ExpressionAttributeValues: {
-      ':pk': PK,
-      ':workflowId': workflowId,
+      ':pk': `USER#${vivaPerson.case.client.pnumber}`,
+      ':workflowId': vivaPerson.application.workflowid,
     },
+    Limit: 1,
   };
 
   const [queryCasesError, queryCasesResult] = await to(dynamoDB.call('query', params));
