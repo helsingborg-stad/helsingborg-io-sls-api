@@ -70,12 +70,15 @@
         "singleQuote": true,
         "printWidth": 100,
         "arrowParens": "avoid",
-        "endOfLine":"auto"
+        "endOfLine": "auto"
       }
     ],
     "indent": [
       "error",
-      2
+      2,
+      {
+        "SwitchCase": 1
+      }
     ],
     "linebreak-style": 0,
     "quotes": [
@@ -91,11 +94,15 @@
       "always"
     ]
   },
-  "overrides": [{
-    "files": ["**/*.ts"],
-    "parser": "@typescript-eslint/parser",
-    "rules": {
-      "no-undef": "off"
+  "overrides": [
+    {
+      "files": [
+        "**/*.ts"
+      ],
+      "parser": "@typescript-eslint/parser",
+      "rules": {
+        "no-undef": "off"
+      }
     }
-  }]
+  ]
 }
