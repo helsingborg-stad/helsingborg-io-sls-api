@@ -1,5 +1,9 @@
 import to from 'await-to-js';
-import { throwError, BadRequestError } from '@helsingborg-stad/npm-api-error-handling';
+import {
+  throwError,
+  BadRequestError,
+  ResourceNotFoundError,
+} from '@helsingborg-stad/npm-api-error-handling';
 
 import config from '../../../config';
 import { putEvent } from '../../../libs/awsEventBridge';
@@ -9,17 +13,44 @@ import { decodeToken } from '../../../libs/token';
 import { objectWithoutProperties } from '../../../libs/objects';
 import { getStatusByType } from '../../../libs/caseStatuses';
 
+import { getCaseWhereUserIsApplicant } from '../helpers/dynamo';
+import { updateCaseValidationSchema } from '../helpers/schema';
+
 export async function main(event) {
   const requestJsonBody = JSON.parse(event.body);
   const { id } = event.pathParameters;
+  const { personalNumber } = decodeToken(event);
 
   if (!id) {
-    return response.failure(new BadRequestError('missing [id] in query path'));
+    return response.failure(new BadRequestError('Missing required path parameter "id"'));
   }
 
-  const { provider, statusType, details, currentFormId, currentPosition, answers } =
-    requestJsonBody;
+  const { error, validatedEventBody } = updateCaseValidationSchema.validate(requestJsonBody, {
+    abortEarly: false,
+  });
+  if (error) {
+    response.failure(new BadRequestError(error.message.replace(/"/g, "'")));
+  }
 
+  const {
+    provider,
+    details,
+    currentFormId,
+    currentPosition,
+    answers,
+    signature,
+  } = validatedEventBody;
+
+  const [getCaseError] = await to(getCaseWhereUserIsApplicant(id, personalNumber));
+  if (getCaseError) {
+    return response.failure(
+      new ResourceNotFoundError('The user does not have any case with the provided case id')
+    );
+  }
+
+  const newCaseStatus = getNewCaseStatus(answers, signature);
+
+  // Create update expression
   const UpdateExpression = ['SET updatedAt = :newUpdatedAt'];
   const ExpressionAttributeNames = {};
   const ExpressionAttributeValues = { ':newUpdatedAt': Date.now() };
@@ -29,15 +60,10 @@ export async function main(event) {
     ExpressionAttributeValues[':newProvider'] = provider;
   }
 
-  if (statusType) {
-    const status = getStatusByType(statusType);
-    if (!status) {
-      return response.failure(new BadRequestError('invalid [statusType]'));
-    }
-
+  if (newCaseStatus) {
     UpdateExpression.push('#status = :newStatus');
     ExpressionAttributeNames['#status'] = 'status';
-    ExpressionAttributeValues[':newStatus'] = status;
+    ExpressionAttributeValues[':newStatus'] = newCaseStatus;
   }
 
   if (details) {
@@ -75,7 +101,6 @@ export async function main(event) {
     }
   }
 
-  const { personalNumber } = decodeToken(event);
   const caseKeys = {
     PK: `USER#${personalNumber}`,
     SK: `CASE#${id}`,
@@ -142,4 +167,52 @@ async function queryFormsIfExistsFormId(formId) {
   }
 
   return dynamoDbQueryCallResult;
+}
+
+function getNewCaseStatus(answers, signature) {
+  const statusChecks = [
+    {
+      name: 'active:ongoing',
+      condition: isOngoing,
+    },
+    {
+      name: 'active:signed',
+      condition: isSignatureCompleted,
+    },
+    {
+      name: 'active:submitted',
+      condition: isSubmitted,
+    },
+  ];
+
+  const statusType = statusChecks.reduce((acc, statusCheck) => {
+    if (statusCheck.condition(answers, signature)) {
+      return statusCheck.name;
+    }
+    return acc;
+  }, undefined);
+
+  return getStatusByType(statusType);
+}
+
+function isEncrypted(answers) {
+  if (Array.isArray(answers)) {
+    // decrypted answers should allways be submitted as an flat array,
+    // if they are we assume the value to be decrypted and return false.
+    return false;
+  }
+  const keys = Object.keys(answers);
+  return keys.length === 1 && keys.includes('encryptedAnswers');
+}
+
+function isOngoing(answers) {
+  return answers && isEncrypted(answers);
+}
+
+function isSignatureCompleted(answers, signature) {
+  return signature.success && isEncrypted(answers);
+}
+
+function isSubmitted(answers, signature) {
+  return signature.success && !isEncrypted(answers);
 }
