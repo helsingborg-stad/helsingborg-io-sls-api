@@ -107,12 +107,13 @@ async function getUserCaseFilteredOnWorkflowId(vivaPerson) {
 async function putRecurringVivaCase(vivaPerson) {
   const ssmParams = await VIVA_CASE_SSM_PARAMS;
   const { recurringFormId, completionFormId } = ssmParams;
-  const PK = `USER#${vivaPerson.case.client.pnumber}`;
+  const applicantPersonalNumber = String(vivaPerson.case.client.pnumber).replace(/\D/g, '');
+  const PK = `USER#${applicantPersonalNumber}`;
 
   const id = uuid.v4();
   const timestampNow = Date.now();
   const initialStatus = getStatusByType('notStarted:viva');
-  const { workflowId } = vivaPerson.application.workflowid;
+  const workflowId = vivaPerson.application.workflowid;
   const period = {
     startDate: Date.parse(vivaPerson.application.period.start),
     endDate: Date.parse(vivaPerson.application.period.end),
