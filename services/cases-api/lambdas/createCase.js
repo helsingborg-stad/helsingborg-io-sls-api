@@ -47,9 +47,12 @@ export async function main(event) {
     console.error('(cases-api) DynamoDb query on cases table failed', previousCaseError);
     return response.failure(previousCaseError);
   }
+
+  const persons = [{ role: 'applicant', ...user }];
+
   const prePopulatedForms = populateFormWithPreviousCaseAnswers(
     initialForms,
-    user,
+    persons,
     formTemplates,
     previousCase?.forms || {}
   );
