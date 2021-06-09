@@ -34,7 +34,7 @@ export async function main(event) {
   const id = uuid.v4();
 
   const PK = `USER#${personalNumber}`;
-  const SK = `USER#${personalNumber}#CASE#${id}`;
+  const SK = `CASE#${id}`;
 
   const [userError, user] = await to(getUser(personalNumber));
   if (userError) {

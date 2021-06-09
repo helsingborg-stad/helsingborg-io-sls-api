@@ -59,9 +59,9 @@ export async function main(event) {
     return console.error('(Viva-ms) Viva Application WorkflowId not present in response, aborting');
   }
 
-  const casePartitionKey = `USER#${user.personalNumber}`;
+  const PK = `USER#${user.personalNumber}`;
   const [queryCasesError, queryCaseItems] = await to(
-    queryCasesWithWorkflowId(casePartitionKey, vivaPerson.application.workflowid)
+    queryCasesWithWorkflowId(PK, vivaPerson.application.workflowid)
   );
   if (queryCasesError) {
     return console.error('(Viva-ms) DynamoDb query on cases tabel failed', queryCasesError);
@@ -77,7 +77,7 @@ export async function main(event) {
   };
 
   const [putItemError] = await to(
-    putRecurringVivaCase(casePartitionKey, vivaPerson.application.workflowid, period)
+    putRecurringVivaCase(PK, vivaPerson.application.workflowid, period)
   );
   if (putItemError) {
     return console.error('(viva-ms) syncApplicationStatus', putItemError);
@@ -152,10 +152,10 @@ async function putRecurringVivaCase(PK, workflowId, period) {
   const putItemParams = {
     TableName: config.cases.tableName,
     Item: {
-      id,
       PK,
+      SK: `CASE#${id}`,
+      id,
       expirationTime,
-      SK: `${PK}#CASE#${id}`,
       createdAt: timestampNow,
       updatedAt: timestampNow,
       status: initialStatus,
