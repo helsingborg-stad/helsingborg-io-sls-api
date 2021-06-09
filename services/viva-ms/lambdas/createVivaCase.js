@@ -150,9 +150,14 @@ async function putRecurringVivaCase(vivaPerson) {
     throw getLastUpdatedCaseError;
   }
 
+  const persons = [
+    { role: 'applicant', ...user },
+    // TODO: add co-applicant
+  ];
+
   const prePopulatedForms = populateFormWithPreviousCaseAnswers(
     initialForms,
-    user,
+    persons,
     formTemplates,
     lastUpdatedCase?.forms || {}
   );
