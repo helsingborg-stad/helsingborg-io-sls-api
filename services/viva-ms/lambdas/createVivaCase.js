@@ -82,13 +82,16 @@ export async function main(event) {
 }
 
 async function getUserCaseFilteredOnWorkflowId(vivaPerson) {
+  const personalNumber = String(vivaPerson.case.client.pnumber).replace(/\D/g, '');
+  const workflowId = vivaPerson.application.workflowid;
+
   const params = {
     TableName: config.cases.tableName,
     KeyConditionExpression: 'PK = :pk',
     FilterExpression: 'details.workflowId = :workflowId',
     ExpressionAttributeValues: {
-      ':pk': `USER#${vivaPerson.case.client.pnumber}`,
-      ':workflowId': vivaPerson.application.workflowid,
+      ':pk': `USER#${personalNumber}`,
+      ':workflowId': workflowId,
     },
     Limit: 1,
   };
