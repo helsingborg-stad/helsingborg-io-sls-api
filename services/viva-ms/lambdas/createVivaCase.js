@@ -64,7 +64,7 @@ export async function main(event) {
     queryCasesWithWorkflowId(PK, vivaPerson.application.workflowid)
   );
   if (queryCasesError) {
-    return console.error('(Viva-ms) DynamoDb query on cases tabel failed', queryCasesError);
+    return console.error('(Viva-ms) DynamoDb query on cases table failed', queryCasesError);
   }
 
   if (queryCaseItems.length > 0) {
