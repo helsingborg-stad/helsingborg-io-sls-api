@@ -46,9 +46,9 @@ export async function main(event) {
     );
   }
 
-  const [getPersonError, vivaPerson] = await to(vivaAdapter.person.get(user.personalNumber));
-  if (getPersonError) {
-    return console.error('(Viva-ms) Viva Get Application Request', getPersonError);
+  const [getVivaPersonError, vivaPerson] = await to(vivaAdapter.person.get(user.personalNumber));
+  if (getVivaPersonError) {
+    return console.error('(Viva-ms) Viva Get Application Request', getVivaPersonError);
   }
 
   if (!vivaPerson.application || !vivaPerson.application.period) {
