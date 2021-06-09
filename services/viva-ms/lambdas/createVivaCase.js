@@ -178,11 +178,11 @@ async function putRecurringVivaCase(vivaPerson) {
   };
 
   const casePersonList = getCasePersonList(vivaPerson);
-  caseItemPutParams['persons'] = casePersonList;
+  caseItemPutParams.Item['persons'] = casePersonList;
 
   const casePersonCoApplicant = getUserByRole(casePersonList, 'coApplicant');
   if (casePersonCoApplicant) {
-    caseItemPutParams['GSI1'] = `USER#${casePersonCoApplicant}`;
+    caseItemPutParams.Item['GSI1'] = `USER#${casePersonCoApplicant}`;
   }
 
   const [putItemError, caseItem] = await to(putItem(caseItemPutParams));
