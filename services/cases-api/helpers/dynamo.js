@@ -1,4 +1,4 @@
-import dynamoDb from '../../../libs';
+import * as dynamoDb from '../../../libs/dynamoDb';
 import config from '../../../config';
 
 export async function getCaseWhereUserIsApplicant(caseId, userPersonalNumber) {
