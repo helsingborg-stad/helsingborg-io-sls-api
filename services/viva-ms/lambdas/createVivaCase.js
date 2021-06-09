@@ -173,12 +173,60 @@ async function putRecurringVivaCase(vivaPerson) {
     },
   };
 
+  const casePersonList = getCasePersonList(vivaPerson);
+  caseItemPutParams['persons'] = casePersonList;
+
+  const casePersonCoApplicant = getUserByRole(casePersonList, 'coApplicant');
+  if (casePersonCoApplicant) {
+    caseItemPutParams['GSI1'] = `USER#${casePersonCoApplicant}`;
+  }
+
   const [putItemError, caseItem] = await to(putItem(caseItemPutParams));
   if (putItemError) {
     throw putItemError;
   }
 
   return caseItem;
+}
+
+function getUserByRole(userList, role) {
+  const user = userList.find(user => user.role == role);
+  return user;
+}
+
+function getCasePersonList(vivaPerson) {
+  const { person } = vivaPerson.case.persons?.person;
+  const { client } = vivaPerson.case.client;
+  client['type'] = 'client';
+
+  const vivaPersonList = [];
+  vivaPersonList.push(client);
+
+  if (Array.isArray(person)) {
+    vivaPersonList.push(...person);
+  } else if (person != undefined) {
+    vivaPersonList.push(person);
+  }
+
+  const roleTranslateList = {
+    client: 'applicant',
+    partner: 'coAppalicant',
+    child: 'children',
+  };
+
+  const casePersonList = vivaPersonList.map(person => {
+    const { pnumber: personalNumber, fname: firstName, lname: lastName, type } = person;
+    const role = Object.keys(roleTranslateList).includes(type) && roleTranslateList[type];
+
+    return {
+      personalNumber,
+      firstName,
+      lastName,
+      role,
+    };
+  });
+
+  return casePersonList;
 }
 
 async function getUser(PK) {
