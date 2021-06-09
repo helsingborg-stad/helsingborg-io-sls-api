@@ -146,6 +146,27 @@ async function getApplication(personalNumber) {
   return response.data.person.application.vivaapplication;
 }
 
+async function getPerson(personalNumber) {
+  const { hashSalt, hashSaltLength } = await VADA_SSM_PARAMS;
+
+  const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
+
+  const requestParams = {
+    endpoint: `mypages/${hashedPersonalNumber}`,
+    method: 'get',
+  };
+
+  const [sendVivaAdapterRequestError, response] = await to(sendVivaAdapterRequest(requestParams));
+  if (sendVivaAdapterRequestError) {
+    throw sendVivaAdapterRequestError;
+  }
+
+  return {
+    case: response.data.person.cases.vivacases.vivacase,
+    application: response.data.person.application.vivaapplication,
+  };
+}
+
 async function getApplicationStatus(personalNumber) {
   const { hashSalt, hashSaltLength } = await VADA_SSM_PARAMS;
 
@@ -168,6 +189,7 @@ export default {
   completion: { post: postCompletion },
   workflow: { get: getWorkflow },
   officers: { get: getOfficers },
+  person: { get: getPerson },
   application: {
     post: postApplication,
     get: getApplication,
