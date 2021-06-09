@@ -23,12 +23,14 @@ export async function main(event) {
     return response.failure(new ResourceNotFoundError('No user cases found'));
   }
 
-  const cases = userCases.map(item => objectWithoutProperties(item, ['PK', 'SK', 'GSI1']));
+  const userCasesWithoutPK_SK_GSI1 = userCases.map(item =>
+    objectWithoutProperties(item, ['PK', 'SK', 'GSI1'])
+  );
 
   return response.success(200, {
     type: 'getCases',
     attributes: {
-      cases,
+      cases: userCasesWithoutPK_SK_GSI1,
     },
   });
 }
@@ -56,7 +58,7 @@ async function getUserCases(personalNumber) {
 
 async function getApplicantCases(personalNumber) {
   const PK = `USER#${personalNumber}`;
-  const SK = PK;
+  const SK = 'CASE#';
 
   const params = {
     TableName: config.cases.tableName,
@@ -72,13 +74,15 @@ async function getApplicantCases(personalNumber) {
 
 async function getCoApplicantCases(personalNumber) {
   const GSI1 = `USER#${personalNumber}`;
+  const SK = 'CASE#';
 
   const params = {
     TableName: config.cases.tableName,
     IndexName: 'GSI1-SK-index',
-    KeyConditionExpression: 'GSI1 = :gsi1',
+    KeyConditionExpression: 'GSI1 = :gsi1 AND begins_with(SK, :sk)',
     ExpressionAttributeValues: {
       ':gsi1': GSI1,
+      ':sk': SK,
     },
   };
 

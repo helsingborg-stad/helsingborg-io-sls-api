@@ -60,7 +60,7 @@ async function getUserCase(personalNumber, id) {
 
 async function getApplicantCase(personalNumber, id) {
   const PK = `USER#${personalNumber}`;
-  const SK = `USER#${personalNumber}#CASE#${id}`;
+  const SK = `CASE#${id}`;
 
   const params = {
     TableName: config.cases.tableName,
@@ -77,15 +77,15 @@ async function getApplicantCase(personalNumber, id) {
 
 async function getCoApplicantCase(personalNumber, id) {
   const GSI1 = `USER#${personalNumber}`;
+  const SK = `CASE#${id}`;
 
   const params = {
     TableName: config.cases.tableName,
     IndexName: 'GSI1-SK-index',
-    KeyConditionExpression: 'GSI1 = :gsi1',
-    FilterExpression: 'id = :id',
+    KeyConditionExpression: 'GSI1 = :gsi1 AND SK = :sk',
     ExpressionAttributeValues: {
       ':gsi1': GSI1,
-      ':id': id,
+      ':sk': SK,
     },
     Limit: 1,
   };

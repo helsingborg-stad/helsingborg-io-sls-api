@@ -25,7 +25,7 @@ export async function getClosedUserCases(
     },
     ExpressionAttributeValues: {
       ':pk': `USER#${personalNumber}`,
-      ':sk': `USER#${personalNumber}`,
+      ':sk': 'CASE#',
       ':statusTypeClosed': 'closed',
     },
   };
