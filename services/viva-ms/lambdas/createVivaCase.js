@@ -46,9 +46,9 @@ export async function main(event) {
     );
   }
 
-  const [getApplicationError, vivaPerson] = await to(vivaAdapter.person.get(user.personalNumber));
-  if (getApplicationError) {
-    return console.error('(Viva-ms) Viva Get Application Request', getApplicationError);
+  const [getPersonError, vivaPerson] = await to(vivaAdapter.person.get(user.personalNumber));
+  if (getPersonError) {
+    return console.error('(Viva-ms) Viva Get Application Request', getPersonError);
   }
 
   if (!vivaPerson.application || !vivaPerson.application.period) {
@@ -56,9 +56,7 @@ export async function main(event) {
   }
 
   if (!vivaPerson.application || !vivaPerson.application.workflowid) {
-    return console.error(
-      `(Viva-ms) Viva Application WorkflowId ${vivaPerson.application.workflowid} not present in response, aborting`
-    );
+    return console.error('(Viva-ms) Viva Application WorkflowId not present in response, aborting');
   }
 
   const casePartitionKey = `USER#${user.personalNumber}`;
