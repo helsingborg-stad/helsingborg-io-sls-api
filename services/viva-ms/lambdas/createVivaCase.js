@@ -199,8 +199,8 @@ function getUserByRole(userList, role) {
 }
 
 function getCasePersonList(vivaPerson) {
-  const { person } = vivaPerson.case.persons?.person;
-  const { client } = vivaPerson.case.client;
+  const person = vivaPerson.case.persons?.person;
+  const client = vivaPerson.case.client;
   client['type'] = 'client';
 
   const vivaPersonList = [];
