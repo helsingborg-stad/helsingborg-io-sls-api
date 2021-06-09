@@ -186,12 +186,12 @@ async function getUser(PK) {
     },
   };
 
-  const [error, dbResponse] = await to(dynamoDB.call('get', params));
-  if (error) {
-    throwError(error.statusCode, error.message);
+  const [getError, getResult] = await to(dynamoDB.call('get', params));
+  if (getError) {
+    throw getError;
   }
 
-  return dbResponse.Item;
+  return getResult.Item;
 }
 
 async function getFormTemplates(forms) {
