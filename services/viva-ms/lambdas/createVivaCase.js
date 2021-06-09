@@ -71,16 +71,9 @@ export async function main(event) {
     return console.log('(Viva-ms) Case with WorkflowId already exists');
   }
 
-  const period = {
-    startDate: Date.parse(vivaPerson.application.period.start),
-    endDate: Date.parse(vivaPerson.application.period.end),
-  };
-
-  const [putItemError] = await to(
-    putRecurringVivaCase(PK, vivaPerson.application.workflowid, period)
-  );
-  if (putItemError) {
-    return console.error('(viva-ms) syncApplicationStatus', putItemError);
+  const [putRecurringVivaCaseError] = await to(putRecurringVivaCase(vivaPerson));
+  if (putRecurringVivaCaseError) {
+    return console.error('(viva-ms) putRecurringVivaCaseError', putRecurringVivaCaseError);
   }
 
   return true;
@@ -105,12 +98,19 @@ async function queryCasesWithWorkflowId(PK, workflowId) {
   return queryCasesResult.Items;
 }
 
-async function putRecurringVivaCase(PK, workflowId, period) {
+async function putRecurringVivaCase(vivaPerson) {
   const ssmParams = await VIVA_CASE_SSM_PARAMS;
   const { recurringFormId, completionFormId } = ssmParams;
+  const PK = `USER#${vivaPerson.case.client.pnumber}`;
+
   const id = uuid.v4();
   const timestampNow = Date.now();
   const initialStatus = getStatusByType('notStarted:viva');
+  const { workflowId } = vivaPerson.application.workflowid;
+  const period = {
+    startDate: Date.parse(vivaPerson.application.period.start),
+    endDate: Date.parse(vivaPerson.application.period.end),
+  };
 
   const initialFormAttributes = {
     answers: [],
@@ -150,13 +150,13 @@ async function putRecurringVivaCase(PK, workflowId, period) {
 
   const expirationTime = millisecondsToSeconds(getFutureTimestamp(DELETE_VIVA_CASE_AFTER_12_HOURS));
 
-  const putItemParams = {
+  const caseItemPutParams = {
     TableName: config.cases.tableName,
     Item: {
-      id,
       PK,
+      SK: `CASE#${id}`,
+      id,
       expirationTime,
-      SK: `${PK}#CASE#${id}`,
       createdAt: timestampNow,
       updatedAt: timestampNow,
       status: initialStatus,
@@ -170,7 +170,7 @@ async function putRecurringVivaCase(PK, workflowId, period) {
     },
   };
 
-  const [putItemError, caseItem] = await to(putItem(putItemParams));
+  const [putItemError, caseItem] = await to(putItem(caseItemPutParams));
   if (putItemError) {
     throw putItemError;
   }
