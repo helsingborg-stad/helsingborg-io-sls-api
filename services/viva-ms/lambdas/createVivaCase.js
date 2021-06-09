@@ -46,26 +46,24 @@ export async function main(event) {
     );
   }
 
-  const [getApplicationError, application] = await to(
-    vivaAdapter.application.get(user.personalNumber)
-  );
+  const [getApplicationError, vivaPerson] = await to(vivaAdapter.person.get(user.personalNumber));
   if (getApplicationError) {
     return console.error('(Viva-ms) Viva Get Application Request', getApplicationError);
   }
 
-  if (!application || !application.period) {
+  if (!vivaPerson.application || !vivaPerson.application.period) {
     return console.error('(Viva-ms) Viva Application Period not present in response, aborting');
   }
 
-  if (!application || !application.workflowid) {
+  if (!vivaPerson.application || !vivaPerson.application.workflowid) {
     return console.error(
-      `(Viva-ms) Viva Application WorkflowId ${application.workflowid} not present in response, aborting`
+      `(Viva-ms) Viva Application WorkflowId ${vivaPerson.application.workflowid} not present in response, aborting`
     );
   }
 
   const casePartitionKey = `USER#${user.personalNumber}`;
   const [queryCasesError, queryCaseItems] = await to(
-    queryCasesWithWorkflowId(casePartitionKey, application.workflowid)
+    queryCasesWithWorkflowId(casePartitionKey, vivaPerson.application.workflowid)
   );
   if (queryCasesError) {
     return console.error('(Viva-ms) DynamoDb query on cases tabel failed', queryCasesError);
@@ -76,12 +74,12 @@ export async function main(event) {
   }
 
   const period = {
-    startDate: Date.parse(application.period.start),
-    endDate: Date.parse(application.period.end),
+    startDate: Date.parse(vivaPerson.application.period.start),
+    endDate: Date.parse(vivaPerson.application.period.end),
   };
 
   const [putItemError] = await to(
-    putRecurringVivaCase(casePartitionKey, application.workflowid, period)
+    putRecurringVivaCase(casePartitionKey, vivaPerson.application.workflowid, period)
   );
   if (putItemError) {
     return console.error('(viva-ms) syncApplicationStatus', putItemError);
