@@ -82,7 +82,7 @@ export async function main(event) {
 }
 
 async function getUserCaseFilteredOnWorkflowId(vivaPerson) {
-  const personalNumber = String(vivaPerson.case.client.pnumber).replace(/\D/g, '');
+  const personalNumber = stripNonNumericalCharacters(String(vivaPerson.case.client.pnumber));
   const workflowId = vivaPerson.application.workflowid;
 
   const params = {
@@ -107,7 +107,10 @@ async function getUserCaseFilteredOnWorkflowId(vivaPerson) {
 async function putRecurringVivaCase(vivaPerson) {
   const ssmParams = await VIVA_CASE_SSM_PARAMS;
   const { recurringFormId, completionFormId } = ssmParams;
-  const applicantPersonalNumber = String(vivaPerson.case.client.pnumber).replace(/\D/g, '');
+  const applicantPersonalNumber = stripNonNumericalCharacters(
+    String(vivaPerson.case.client.pnumber)
+  );
+
   const PK = `USER#${applicantPersonalNumber}`;
 
   const id = uuid.v4();
@@ -193,6 +196,11 @@ async function putRecurringVivaCase(vivaPerson) {
   return caseItem;
 }
 
+function stripNonNumericalCharacters(string) {
+  const matchNonNumericalCharactersRegex = /\D/g;
+  return string.replace(matchNonNumericalCharactersRegex, '');
+}
+
 function getUserByRole(userList, role) {
   const user = userList.find(user => user.role == role);
   return user;
@@ -220,9 +228,9 @@ function getCasePersonList(vivaPerson) {
 
   const casePersonList = vivaPersonList.map(person => {
     const { pnumber, fname: firstName, lname: lastName, type } = person;
-    const personalNumber = String(pnumber).replace(/\D/g, '');
 
     const role = Object.keys(roleTranslateList).includes(type) && roleTranslateList[type];
+    const personalNumber = stripNonNumericalCharacters(String(pnumber));
 
     return {
       personalNumber,
