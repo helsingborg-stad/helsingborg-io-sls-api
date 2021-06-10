@@ -220,24 +220,32 @@ function getCasePersonList(vivaPerson) {
     vivaPersonList.push(person);
   }
 
+  const APPLICANT = 'applicant';
+  const CO_APPLICANT = 'coapplicant';
+  const CHILDREN = 'children';
+
   const roleTranslateList = {
-    client: 'applicant',
-    partner: 'coApplicant',
-    child: 'children',
+    client: APPLICANT,
+    partner: CO_APPLICANT,
+    child: CHILDREN,
   };
 
-  const casePersonList = vivaPersonList.map(person => {
-    const { pnumber, fname: firstName, lname: lastName, type } = person;
-
-    const role = Object.keys(roleTranslateList).includes(type) && roleTranslateList[type];
+  const casePersonList = vivaPersonList.map(vivaPerson => {
+    const { pnumber, fname: firstName, lname: lastName, type } = vivaPerson;
     const personalNumber = stripNonNumericalCharacters(String(pnumber));
 
-    return {
+    const person = {
       personalNumber,
       firstName,
       lastName,
-      role,
+      role: roleTranslateList[type] || 'unknown',
     };
+
+    if ([APPLICANT, CO_APPLICANT].includes(person.role)) {
+      person['hasSigned'] = false;
+    }
+
+    return person;
   });
 
   return casePersonList;
