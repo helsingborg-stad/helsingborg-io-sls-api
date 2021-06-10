@@ -40,8 +40,7 @@ export async function main(event) {
   const requiredStatusCodes = [1, 128, 256, 512];
   if (!validateApplicationStatus(applicationStatusList, requiredStatusCodes)) {
     return console.info(
-      '(Viva-ms) syncApplicationStatus',
-      'Application period is not open',
+      '(Viva-ms) validateApplicationStatus. No application period open.',
       applicationStatusList
     );
   }
