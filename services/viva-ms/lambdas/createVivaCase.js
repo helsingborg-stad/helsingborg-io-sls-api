@@ -58,7 +58,7 @@ export async function main(event) {
     return console.error('(Viva-ms) Viva Application WorkflowId not present in response, aborting');
   }
 
-  const [getUserCaseFilteredOnWorkflowIdError, caseItem] = await to(
+  const [getUserCaseFilteredOnWorkflowIdError, caseItemExists] = await to(
     getUserCaseFilteredOnWorkflowId(vivaPerson)
   );
   if (getUserCaseFilteredOnWorkflowIdError) {
@@ -68,7 +68,7 @@ export async function main(event) {
     );
   }
 
-  if (caseItem.length > 0) {
+  if (caseItemExists) {
     return console.log('(Viva-ms) Case with WorkflowId already exists');
   }
 
@@ -100,7 +100,7 @@ async function getUserCaseFilteredOnWorkflowId(vivaPerson) {
     throw queryCasesError;
   }
 
-  return queryCasesResult.Items;
+  return queryCasesResult.Items[0] || null;
 }
 
 async function putRecurringVivaCase(vivaPerson) {
