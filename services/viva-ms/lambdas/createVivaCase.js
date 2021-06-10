@@ -148,18 +148,6 @@ async function putRecurringVivaCase(vivaPerson) {
     throw getLastUpdatedCaseError;
   }
 
-  const persons = [
-    { role: 'applicant', ...user },
-    // TODO: add co-applicant
-  ];
-
-  const prePopulatedForms = populateFormWithPreviousCaseAnswers(
-    initialForms,
-    persons,
-    formTemplates,
-    lastUpdatedCase?.forms || {}
-  );
-
   const expirationTime = millisecondsToSeconds(getFutureTimestamp(DELETE_VIVA_CASE_AFTER_12_HOURS));
 
   const caseItemPutParams = {
@@ -178,7 +166,6 @@ async function putRecurringVivaCase(vivaPerson) {
         period,
       },
       currentFormId: recurringFormId,
-      forms: prePopulatedForms,
     },
   };
 
@@ -189,6 +176,22 @@ async function putRecurringVivaCase(vivaPerson) {
   if (casePersonCoApplicant) {
     caseItemPutParams.Item['GSI1'] = `USER#${casePersonCoApplicant.personalNumber}`;
   }
+
+  casePersonList.map(person => {
+    if (person.type === 'applicant') {
+      return { ...person, ...user };
+    }
+    return person;
+  });
+
+  const prePopulatedForms = populateFormWithPreviousCaseAnswers(
+    initialForms,
+    casePersonList,
+    formTemplates,
+    lastUpdatedCase?.forms || {}
+  );
+
+  caseItemPutParams.Item.forms = prePopulatedForms;
 
   const [putItemError, caseItem] = await to(putItem(caseItemPutParams));
   if (putItemError) {
