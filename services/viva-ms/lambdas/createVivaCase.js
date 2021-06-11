@@ -58,7 +58,7 @@ export async function main(event) {
     return console.error('(Viva-ms) Viva Application WorkflowId not present in response, aborting');
   }
 
-  const [getUserCaseFilteredOnWorkflowIdError, caseItemExists] = await to(
+  const [getUserCaseFilteredOnWorkflowIdError, caseItem] = await to(
     getUserCaseFilteredOnWorkflowId(vivaPerson)
   );
   if (getUserCaseFilteredOnWorkflowIdError) {
@@ -68,7 +68,7 @@ export async function main(event) {
     );
   }
 
-  if (caseItemExists) {
+  if (caseItem) {
     return console.log('(Viva-ms) Case with WorkflowId already exists');
   }
 
