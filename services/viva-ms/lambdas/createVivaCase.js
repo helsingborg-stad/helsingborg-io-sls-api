@@ -171,7 +171,7 @@ async function putRecurringVivaCase(vivaPerson) {
     },
   };
 
-  const casePersonList = getCasePersonList(vivaPerson);
+  let casePersonList = getCasePersonList(vivaPerson);
   caseItemPutParams.Item['persons'] = casePersonList;
 
   const casePersonCoApplicant = getUserByRole(casePersonList, 'coapplicant');
@@ -179,7 +179,7 @@ async function putRecurringVivaCase(vivaPerson) {
     caseItemPutParams.Item['GSI1'] = `USER#${casePersonCoApplicant.personalNumber}`;
   }
 
-  casePersonList.map(person => {
+  casePersonList = casePersonList.map(person => {
     if (person.role === 'applicant') {
       return { ...person, ...user };
     }
