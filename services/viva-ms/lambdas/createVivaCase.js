@@ -180,7 +180,7 @@ async function putRecurringVivaCase(vivaPerson) {
   }
 
   casePersonList = casePersonList.map(person => {
-    if (person.role === 'applicant') {
+    if (person.role === 'applicant' && person.personalNumber === user.personalNumber) {
       return { ...person, ...user };
     }
     return person;
