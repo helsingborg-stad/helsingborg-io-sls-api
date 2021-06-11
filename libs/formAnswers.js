@@ -115,7 +115,7 @@ function getInitialValue(field, users, previousAnswers) {
         initialValue = getUserInfo(user, strArray.slice(1)) || initialValue;
         break;
       case 'coApplicant':
-        user = users.find(element => element.role === 'coApplicant');
+        user = users.find(element => element.role === 'coapplicant');
         initialValue = getUserInfo(user, strArray.slice(1)) || initialValue;
         break;
       default:
