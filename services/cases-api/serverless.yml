@@ -2,7 +2,6 @@ service: cases-api
 
 plugins:
   - serverless-bundle
-  - serverless-offline
 
 custom: ${file(../../serverless.common.yml):custom}
 
@@ -27,13 +26,10 @@ provider:
     resourcesStage: ${self:custom.resourcesStage}
 
   apiGateway:
-    restApiId:
-      "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayRestApiId
-    restApiRootResourceId:
-      "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
+    restApiId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiId
+    restApiRootResourceId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
     restApiResources:
-      cases:
-        "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayResourceCases
+      cases: !ImportValue ${self:custom.stage}-ExtApiGatewayResourceCases
 
   iam:
     role:
@@ -51,21 +47,22 @@ provider:
             - dynamodb:DeleteItem
             - dynamodb:UpdateItem
           Resource:
-            - "Fn::ImportValue": ${self:custom.resourcesStage}-CasesTableArn
+            - !ImportValue ${self:custom.resourcesStage}-CasesTableArn
+            - !ImportValue ${self:custom.resourcesStage}-CasesTableAllIndexArn
 
         - Effect: Allow
           Action:
             - dynamodb:Query
             - dynamodb:GetItem
           Resource:
-            - "Fn::ImportValue": ${self:custom.resourcesStage}-UsersTableArn
+            - !ImportValue ${self:custom.resourcesStage}-UsersTableArn
 
         - Effect: Allow
           Action:
             - dynamodb:Query
             - dynamodb:GetItem
           Resource:
-            - "Fn::ImportValue": ${self:custom.resourcesStage}-FormsTableArn
+            - !ImportValue ${self:custom.resourcesStage}-FormsTableArn
 
         - Effect: Allow
           Action:

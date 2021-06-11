@@ -6,9 +6,6 @@ import * as response from '../../../libs/response';
 import { decodeToken } from '../../../libs/token';
 import * as dynamoDb from '../../../libs/dynamoDb';
 
-/**
- * Lambda deleting case by id from DynamoDB table cases
- */
 export async function main(event) {
   const decodedToken = decodeToken(event);
   const { id } = event.pathParameters;
@@ -17,7 +14,7 @@ export async function main(event) {
     TableName: config.cases.tableName,
     Key: {
       PK: `USER#${decodedToken.personalNumber}`,
-      SK: `USER#${decodedToken.personalNumber}#CASE#${id}`,
+      SK: `CASE#${id}`,
     },
     ConditionExpression: 'id = :caseId',
     ExpressionAttributeValues: {

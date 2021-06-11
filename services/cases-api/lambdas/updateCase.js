@@ -78,7 +78,7 @@ export async function main(event) {
   const { personalNumber } = decodeToken(event);
   const caseKeys = {
     PK: `USER#${personalNumber}`,
-    SK: `USER#${personalNumber}#CASE#${id}`,
+    SK: `CASE#${id}`,
   };
 
   const params = {

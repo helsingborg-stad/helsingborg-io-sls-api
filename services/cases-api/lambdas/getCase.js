@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import to from 'await-to-js';
 import { throwError, ResourceNotFoundError } from '@helsingborg-stad/npm-api-error-handling';
 
@@ -11,46 +12,83 @@ export async function main(event) {
   const decodedToken = decodeToken(event);
   const { id } = event.pathParameters;
 
-  const { personalNumber } = decodedToken;
-
-  const PK = `USER#${personalNumber}`;
-  const SK = `USER#${personalNumber}#CASE#${id}`;
-
-  const params = {
-    TableName: config.cases.tableName,
-    ExpressionAttributeValues: {
-      ':pk': PK,
-      ':sk': SK,
-    },
-    KeyConditionExpression: 'PK = :pk AND SK = :sk',
-    Limit: 1,
-  };
-
-  const [caseDbError, caseDbResponse] = await to(sendCaseRequest(params));
-  if (caseDbError) {
-    return response.failure(caseDbError);
+  const [getUserCaseError, userCase] = await to(getUserCase(decodedToken.personalNumber, id));
+  if (getUserCaseError) {
+    return response.failure(getUserCaseError);
   }
 
-  if (!caseDbResponse.Count) {
-    return response.failure(new ResourceNotFoundError(`Case with id: ${id} not found`));
+  if (!userCase) {
+    return response.failure(new ResourceNotFoundError(`User case with id: ${id} not found`));
   }
 
-  const [item] = caseDbResponse.Items;
-  const attributes = objectWithoutProperties(item, ['PK', 'SK']);
+  const userCaseWithoutKeys = objectWithoutProperties(userCase, ['PK', 'SK', 'GSI1']);
 
   return response.success(200, {
     type: 'getCase',
     attributes: {
-      ...attributes,
+      ...userCaseWithoutKeys,
     },
   });
 }
 
-async function sendCaseRequest(params) {
-  const [dynamoDbCallError, dynamoDbCallResult] = await to(dynamoDb.call('query', params));
-  if (dynamoDbCallError) {
-    throwError(dynamoDbCallError.statusCode, dynamoDbCallError.message);
+async function getUserCase(personalNumber, id) {
+  const [getUserApplicantCaseError, userApplicantCaseResult] = await to(
+    getUserApplicantCase(personalNumber, id)
+  );
+  if (getUserApplicantCaseError) {
+    console.error('getUserApplicantCaseError', getUserApplicantCaseError);
+    throwError(getUserApplicantCaseError.statusCode, getUserApplicantCaseError.message);
   }
 
-  return dynamoDbCallResult;
+  const [getCoApplicantCaseError, userCoApplicantCaseResult] = await to(
+    getUserCoApplicantCase(personalNumber, id)
+  );
+  if (getCoApplicantCaseError) {
+    console.error('getCoApplicantCaseError', getCoApplicantCaseError);
+    throwError(getCoApplicantCaseError.statusCode, getCoApplicantCaseError.message);
+  }
+
+  const concatAndDeDuplicateCase = (...userCaseList) => [...new Set([].concat(...userCaseList))];
+  const userCaseList = concatAndDeDuplicateCase(
+    userApplicantCaseResult.Items,
+    userCoApplicantCaseResult.Items
+  );
+
+  const [userCase] = userCaseList.filter(Boolean);
+  return userCase;
+}
+
+async function getUserApplicantCase(personalNumber, id) {
+  const PK = `USER#${personalNumber}`;
+  const SK = `CASE#${id}`;
+
+  const params = {
+    TableName: config.cases.tableName,
+    KeyConditionExpression: 'PK = :pk AND SK = :sk',
+    ExpressionAttributeValues: {
+      ':pk': PK,
+      ':sk': SK,
+    },
+    Limit: 1,
+  };
+
+  return dynamoDb.call('query', params);
+}
+
+async function getUserCoApplicantCase(personalNumber, id) {
+  const GSI1 = `USER#${personalNumber}`;
+  const SK = `CASE#${id}`;
+
+  const params = {
+    TableName: config.cases.tableName,
+    IndexName: 'GSI1-SK-index',
+    KeyConditionExpression: 'GSI1 = :gsi1 AND SK = :sk',
+    ExpressionAttributeValues: {
+      ':gsi1': GSI1,
+      ':sk': SK,
+    },
+    Limit: 1,
+  };
+
+  return dynamoDb.call('query', params);
 }
