@@ -25,9 +25,12 @@ export async function main(event) {
     return response.failure(new BadRequestError('Missing required path parameter "id"'));
   }
 
-  const { error, validatedEventBody } = updateCaseValidationSchema.validate(requestJsonBody, {
-    abortEarly: false,
-  });
+  const { error, value: validatedEventBody } = updateCaseValidationSchema.validate(
+    requestJsonBody,
+    {
+      abortEarly: false,
+    }
+  );
   if (error) {
     return response.failure(new BadRequestError(error.message.replace(/"/g, "'")));
   }
