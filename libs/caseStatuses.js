@@ -11,9 +11,15 @@ const statuses = [
       'Du har påbörjat en ansökan. Du kan öppna din ansökan och fortsätta där du slutade.',
   },
   {
-    type: 'active:signed',
+    type: 'active:signature:completed',
     name: 'Signerad',
     description: 'Ansökan är signerad',
+  },
+  {
+    type: 'active:signature:pending',
+    name: 'Väntar på signering',
+    description:
+      'Väntar på signering. När båda har signerat med BankID skickas ansökan in för bedömning',
   },
   {
     type: 'active:submitted',
