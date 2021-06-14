@@ -32,14 +32,7 @@ export async function main(event) {
     return response.failure(new BadRequestError(error.message.replace(/"/g, "'")));
   }
 
-  const {
-    provider,
-    details,
-    currentFormId,
-    currentPosition,
-    answers,
-    signature,
-  } = validatedEventBody;
+  const { currentFormId, currentPosition, answers, signature } = validatedEventBody;
 
   const [getCaseError] = await to(getCaseWhereUserIsApplicant(id, personalNumber));
   if (getCaseError) {
@@ -55,20 +48,10 @@ export async function main(event) {
   const ExpressionAttributeNames = {};
   const ExpressionAttributeValues = { ':newUpdatedAt': Date.now() };
 
-  if (provider) {
-    UpdateExpression.push('provider = :newProvider');
-    ExpressionAttributeValues[':newProvider'] = provider;
-  }
-
   if (newCaseStatus) {
     UpdateExpression.push('#status = :newStatus');
     ExpressionAttributeNames['#status'] = 'status';
     ExpressionAttributeValues[':newStatus'] = newCaseStatus;
-  }
-
-  if (details) {
-    UpdateExpression.push('details = :newDetails');
-    ExpressionAttributeValues[':newDetails'] = details;
   }
 
   if (currentFormId) {
