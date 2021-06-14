@@ -29,7 +29,7 @@ export async function main(event) {
     abortEarly: false,
   });
   if (error) {
-    response.failure(new BadRequestError(error.message.replace(/"/g, "'")));
+    return response.failure(new BadRequestError(error.message.replace(/"/g, "'")));
   }
 
   const {
