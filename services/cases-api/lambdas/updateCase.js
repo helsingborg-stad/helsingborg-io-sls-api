@@ -49,16 +49,17 @@ export async function main(event) {
   const ExpressionAttributeNames = {};
   const ExpressionAttributeValues = { ':newUpdatedAt': Date.now() };
 
-  const updatedUserCasePeople = userCase.persons.map(person => {
+  const updatedUserCasePeople = userCase.persons?.map(person => {
     const newPerson = { ...person };
     if (newPerson.personalNumber === personalNumber) {
       newPerson.hasSigned = signature?.success || false;
     }
     return newPerson;
   });
-
-  UpdateExpression.push('persons = :newPersons');
-  ExpressionAttributeValues[':newPersons'] = updatedUserCasePeople;
+  if (updatedUserCasePeople) {
+    UpdateExpression.push('persons = :newPersons');
+    ExpressionAttributeValues[':newPersons'] = updatedUserCasePeople;
+  }
 
   const newCaseStatus = getNewCaseStatus({
     answers,
