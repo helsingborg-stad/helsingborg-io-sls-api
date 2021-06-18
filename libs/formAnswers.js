@@ -68,13 +68,13 @@ function formatAnswer(id, tags, value) {
   return { field: { id, tags: tags || [] }, value };
 }
 
-function getUserInfo(user, strArray) {
+function getPersonInfo(person, strArray) {
   return strArray.reduce((prev, current) => {
     if (prev && prev[current]) {
       return prev[current];
     }
     return undefined;
-  }, user);
+  }, person);
 }
 
 function getCaseAnswer(answers, matchString) {
@@ -103,31 +103,26 @@ function getMultipleFieldAnswers(field, previousAnswers) {
   return answers;
 }
 
-function getInitialValue(field, users, previousAnswers) {
+function getInitialValue(field, applicants, previousAnswers) {
+  const applicantRoles = ['applicant', 'coApplicant'];
   let initialValue;
 
-  field.loadPrevious.forEach(matchString => {
-    let user;
-    const strArray = matchString.split('.');
-    switch (strArray[0]) {
-      case 'user':
-        user = users.find(element => element.role === 'applicant');
-        initialValue = getUserInfo(user, strArray.slice(1)) || initialValue;
-        break;
-      case 'coApplicant':
-        user = users.find(element => element.role === 'coapplicant');
-        initialValue = getUserInfo(user, strArray.slice(1)) || initialValue;
-        break;
-      default:
-        initialValue = getCaseAnswer(previousAnswers, matchString) || initialValue;
-        break;
+  field.loadPrevious.forEach(matchPattern => {
+    const patternParts = matchPattern.split('.');
+    if (applicantRoles.includes(patternParts[0])) {
+      const applicantRole = patternParts[0];
+      const person = applicants.find(applicant => applicant.role === applicantRole);
+      initialValue = getPersonInfo(person, patternParts.slice(1)) || initialValue;
+      return;
     }
+
+    initialValue = getCaseAnswer(previousAnswers, matchPattern) || initialValue;
   });
 
   return initialValue ? formatAnswer(field.id, field.tags, initialValue) : undefined;
 }
 
-function populateAnswers(dataMap, users, previousAnswers) {
+function populateAnswers(dataMap, applicants, previousAnswers) {
   const answers = [];
 
   dataMap.forEach(field => {
@@ -140,7 +135,7 @@ function populateAnswers(dataMap, users, previousAnswers) {
       return;
     }
 
-    const initialFieldValue = getInitialValue(field, users, previousAnswers);
+    const initialFieldValue = getInitialValue(field, applicants, previousAnswers);
     if (initialFieldValue) {
       answers.push(initialFieldValue);
     }
@@ -161,14 +156,19 @@ function mergeAnswers(previousAnswers, newAnswers) {
   );
 }
 
-export function populateFormWithPreviousCaseAnswers(forms, users, formTemplates, previousForms) {
+export function populateFormWithPreviousCaseAnswers(
+  forms,
+  applicants,
+  formTemplates,
+  previousForms
+) {
   const populatedForms = {};
   Object.keys(forms).forEach(formId => {
     const form = forms[formId];
     const formTemplate = formTemplates?.[formId] || {};
     const previousAnswers = previousForms?.[formId]?.answers || [];
     const dataMap = generateDataMap(formTemplate);
-    const answers = populateAnswers(dataMap, users, previousAnswers);
+    const answers = populateAnswers(dataMap, applicants, previousAnswers);
     const mergedAnswers = mergeAnswers(answers, forms[formId].answers);
     populatedForms[formId] = { ...form, answers: mergedAnswers };
   });
