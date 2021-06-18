@@ -48,11 +48,11 @@ export async function main(event) {
     return response.failure(previousCaseError);
   }
 
-  const persons = [{ role: 'applicant', ...user }];
+  const applicants = [{ role: 'applicant', ...user }];
 
   const prePopulatedForms = populateFormWithPreviousCaseAnswers(
     initialForms,
-    persons,
+    applicants,
     formTemplates,
     previousCase?.forms || {}
   );
