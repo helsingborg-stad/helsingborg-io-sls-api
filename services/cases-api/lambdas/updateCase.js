@@ -196,9 +196,9 @@ function isOngoing(answers) {
 }
 
 function isSignatureCompleted(answers, signature) {
-  return signature.success && isEncrypted(answers);
+  return signature?.success && isEncrypted(answers);
 }
 
 function isSubmitted(answers, signature) {
-  return signature.success && !isEncrypted(answers);
+  return signature?.success && !isEncrypted(answers);
 }
