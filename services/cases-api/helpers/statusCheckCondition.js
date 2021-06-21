@@ -1,30 +1,30 @@
 function isOngoing({ answers, people }) {
-  return answers && isEncrypted(answers) && hasNoOneSigned(people);
+  return answers && isEncrypted(answers) && hasNotAllSigned(people);
 }
 
 function isSignaturePending({ answers, people }) {
-  return answers && isEncrypted(answers) && hasSomeOneSigned(people);
+  return answers && isEncrypted(answers) && hasAnySigned(people);
 }
 
 function isSignatureCompleted({ answers, people }) {
-  return answers && isEncrypted(answers) && hasEveryOneSigned(people);
+  return answers && isEncrypted(answers) && hasAllSigned(people);
 }
 
 function isSubmitted({ answers, people }) {
-  return answers && !isEncrypted(answers) && hasEveryOneSigned(people);
+  return answers && !isEncrypted(answers) && hasAllSigned(people);
 }
 
-function hasEveryOneSigned(people) {
+function hasAllSigned(people) {
   const peopleWhoMustSign = selectPeopleWhoMustSign(people);
   return peopleWhoMustSign.every(person => person.hasSigned === true);
 }
 
-function hasNoOneSigned(people) {
+function hasNotAllSigned(people) {
   const peopleWhoMustSign = selectPeopleWhoMustSign(people);
   return peopleWhoMustSign.every(person => person.hasSigned === false);
 }
 
-function hasSomeOneSigned(people) {
+function hasAnySigned(people) {
   const peopleWhoMustSign = selectPeopleWhoMustSign(people);
   return peopleWhoMustSign.some(person => person.hasSigned === true);
 }
