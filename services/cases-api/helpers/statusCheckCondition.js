@@ -30,7 +30,7 @@ function hasSomeOneSigned(people) {
 }
 
 function selectPeopleWhoMustSign(people) {
-  return people.filter(person => person?.hasSigned);
+  return people.filter(person => Object.prototype.hasOwnProperty.call(person, 'hasSigned'));
 }
 
 function isEncrypted(answers) {
