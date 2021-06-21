@@ -3,6 +3,7 @@ import {
   throwError,
   BadRequestError,
   ResourceNotFoundError,
+  InternalServerError,
 } from '@helsingborg-stad/npm-api-error-handling';
 
 import config from '../../../config';
@@ -13,7 +14,8 @@ import { decodeToken } from '../../../libs/token';
 import { objectWithoutProperties } from '../../../libs/objects';
 import { getStatusByType } from '../../../libs/caseStatuses';
 
-import { getCaseWhereUserIsApplicant } from '../helpers/dynamo';
+import statusCheck from '../helpers/statusCheckCondition';
+import { getUserCase } from '../helpers/dynamoDb';
 import { updateCaseValidationSchema } from '../helpers/schema';
 
 export async function main(event) {
@@ -25,32 +27,43 @@ export async function main(event) {
     return response.failure(new BadRequestError('Missing required path parameter "id"'));
   }
 
-  const { error, value: validatedEventBody } = updateCaseValidationSchema.validate(
-    requestJsonBody,
-    {
-      abortEarly: false,
-    }
-  );
+  const { error, value: validatedJsonBody } = updateCaseValidationSchema.validate(requestJsonBody, {
+    abortEarly: false,
+  });
   if (error) {
     return response.failure(new BadRequestError(error.message.replace(/"/g, "'")));
   }
 
-  const { currentFormId, currentPosition, answers, signature } = validatedEventBody;
-
-  const [getCaseError] = await to(getCaseWhereUserIsApplicant(id, personalNumber));
-  if (getCaseError) {
-    return response.failure(
-      new ResourceNotFoundError('The user does not have any case with the provided case id')
-    );
+  const [getUserCaseError, userCase] = await to(getUserCase(personalNumber, id));
+  if (getUserCaseError) {
+    return response.failure(new InternalServerError(getUserCaseError));
   }
 
-  const newCaseStatus = getNewCaseStatus(answers, signature);
+  if (!userCase) {
+    return response.failure(new ResourceNotFoundError('Case not found'));
+  }
 
-  // Create update expression
-  const UpdateExpression = ['SET updatedAt = :newUpdatedAt'];
+  const { currentFormId, currentPosition, answers, signature } = validatedJsonBody;
+
+  const UpdateExpression = ['updatedAt = :newUpdatedAt'];
   const ExpressionAttributeNames = {};
   const ExpressionAttributeValues = { ':newUpdatedAt': Date.now() };
 
+  const updatedUserCasePeople = userCase.persons.map(person => {
+    const newPerson = { ...person };
+    if (newPerson.personalNumber === personalNumber) {
+      newPerson.hasSigned = signature?.success || false;
+    }
+    return newPerson;
+  });
+
+  UpdateExpression.push('persons = :newPersons');
+  ExpressionAttributeValues[':newPersons'] = updatedUserCasePeople;
+
+  const newCaseStatus = getNewCaseStatus({
+    answers,
+    people: updatedUserCasePeople,
+  });
   if (newCaseStatus) {
     UpdateExpression.push('#status = :newStatus');
     ExpressionAttributeNames['#status'] = 'status';
@@ -88,25 +101,22 @@ export async function main(event) {
   }
 
   const caseKeys = {
-    PK: `USER#${personalNumber}`,
-    SK: `CASE#${id}`,
+    PK: userCase.PK,
+    SK: userCase.SK,
   };
 
-  const params = {
+  const updateCaseParams = {
     TableName: config.cases.tableName,
-    Key: {
-      PK: caseKeys.PK,
-      SK: caseKeys.SK,
-    },
-    UpdateExpression: UpdateExpression.join(', '),
+    Key: caseKeys,
+    UpdateExpression: `SET ${UpdateExpression.join(', ')}`,
     ExpressionAttributeNames,
     ExpressionAttributeValues,
     ReturnValues: 'ALL_NEW',
   };
 
-  const [updateCaseError, updateCaseResponse] = await to(sendUpdateCaseRequest(params));
+  const [updateCaseError, updateCaseResponse] = await to(sendUpdateCaseRequest(updateCaseParams));
   if (updateCaseError) {
-    return response.failure(updateCaseError);
+    return response.failure(new InternalServerError(updateCaseError));
   }
 
   const [putEventError] = await to(
@@ -116,19 +126,17 @@ export async function main(event) {
     throw putEventError;
   }
 
-  const attributes = objectWithoutProperties(updateCaseResponse.Attributes, ['PK', 'SK']);
+  const attributes = objectWithoutProperties(updateCaseResponse.Attributes, ['PK', 'SK', 'GSI1']);
   return response.success(200, {
     type: 'updateCase',
-    attributes: {
-      ...attributes,
-    },
+    attributes,
   });
 }
 
 async function sendUpdateCaseRequest(params) {
   const [dynamoDbUpdateCallError, dynamoDbUpdateResult] = await to(dynamoDb.call('update', params));
   if (dynamoDbUpdateCallError) {
-    throwError(dynamoDbUpdateCallError.statusCode, dynamoDbUpdateCallError.message);
+    throw dynamoDbUpdateCallError;
   }
 
   return dynamoDbUpdateResult;
@@ -155,50 +163,32 @@ async function queryFormsIfExistsFormId(formId) {
   return dynamoDbQueryCallResult;
 }
 
-function getNewCaseStatus(answers, signature) {
-  const statusChecks = [
+function getNewCaseStatus(conditionOption) {
+  const statusCheckList = [
     {
-      name: 'active:ongoing',
-      condition: isOngoing,
+      type: 'active:ongoing',
+      conditionFunction: statusCheck.condition.isOngoing,
     },
     {
-      name: 'active:signed',
-      condition: isSignatureCompleted,
+      type: 'active:signature:pending',
+      conditionFunction: statusCheck.condition.isSignaturePending,
     },
     {
-      name: 'active:submitted',
-      condition: isSubmitted,
+      type: 'active:signature:completed',
+      conditionFunction: statusCheck.condition.isSignatureCompleted,
+    },
+    {
+      type: 'active:submitted',
+      conditionFunction: statusCheck.condition.isSubmitted,
     },
   ];
 
-  const statusType = statusChecks.reduce((acc, statusCheck) => {
-    if (statusCheck.condition(answers, signature)) {
-      return statusCheck.name;
+  const statusType = statusCheckList.reduce((type, statusCheckItem) => {
+    if (statusCheckItem.conditionFunction(conditionOption)) {
+      return statusCheckItem.type;
     }
-    return acc;
+    return type;
   }, undefined);
 
   return getStatusByType(statusType);
-}
-
-function isEncrypted(answers) {
-  if (Array.isArray(answers)) {
-    // decrypted answers should allways be submitted as an flat array,
-    // if they are we assume the value to be decrypted and return false.
-    return false;
-  }
-  const keys = Object.keys(answers);
-  return keys.length === 1 && keys.includes('encryptedAnswers');
-}
-
-function isOngoing(answers) {
-  return answers && isEncrypted(answers);
-}
-
-function isSignatureCompleted(answers, signature) {
-  return signature?.success && isEncrypted(answers);
-}
-
-function isSubmitted(answers, signature) {
-  return signature?.success && !isEncrypted(answers);
 }
