@@ -49,21 +49,10 @@ export async function main(event) {
   const ExpressionAttributeNames = {};
   const ExpressionAttributeValues = { ':newUpdatedAt': Date.now() };
 
-  const updatedUserCasePeople = userCase.persons?.map(person => {
-    const newPerson = { ...person };
-    if (newPerson.personalNumber === personalNumber) {
-      newPerson.hasSigned = signature?.success || false;
-    }
-    return newPerson;
-  });
-  if (updatedUserCasePeople) {
-    UpdateExpression.push('persons = :newPersons');
-    ExpressionAttributeValues[':newPersons'] = updatedUserCasePeople;
-  }
-
+  const updatedPeopleSignature = updatePeopleSignature(userCase, signature);
   const newCaseStatus = getNewCaseStatus({
     answers,
-    people: updatedUserCasePeople,
+    people: updatedPeopleSignature,
   });
   if (newCaseStatus) {
     UpdateExpression.push('#status = :newStatus');
@@ -192,4 +181,20 @@ function getNewCaseStatus(conditionOption) {
   }, undefined);
 
   return getStatusByType(statusType);
+}
+
+function updatePeopleSignature(userCase, signature) {
+  return userCase.persons?.map(person => {
+    const newPerson = { ...person };
+
+    const userCaseApplicantPersonalNumber = userCase.PK.substring(5);
+
+    if (newPerson.personalNumber === userCaseApplicantPersonalNumber && signature) {
+      newPerson.hasSigned = signature.success;
+    } else {
+      newPerson.hasSigned = false;
+    }
+
+    return newPerson;
+  });
 }
