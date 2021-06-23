@@ -43,6 +43,14 @@ export async function main(event) {
     return response.failure(new ResourceNotFoundError('Case not found'));
   }
 
+  if (!Object.prototype.hasOwnProperty.call(userCase, 'persons')) {
+    return response.failure(
+      new InternalServerError(
+        'Case attribute "persons" not found. The attribute "persons" is mandatory!'
+      )
+    );
+  }
+
   const { currentFormId, currentPosition, answers, signature } = validatedJsonBody;
 
   const UpdateExpression = ['updatedAt = :newUpdatedAt'];
