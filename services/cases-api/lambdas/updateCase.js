@@ -58,7 +58,6 @@ export async function main(event) {
   const ExpressionAttributeValues = { ':newUpdatedAt': Date.now() };
 
   const updatedPeopleSignature = updatePeopleSignature(personalNumber, userCase.persons, signature);
-
   const newCaseStatus = getNewCaseStatus({
     answers,
     people: updatedPeopleSignature,
@@ -98,6 +97,13 @@ export async function main(event) {
       ExpressionAttributeValues[':newAnswers'] = answers;
     }
   }
+
+  UpdateExpression.push('persons = :newPersons');
+  ExpressionAttributeValues[':newPersons'] = Object.assign(
+    [],
+    userCase.persons,
+    updatedPeopleSignature
+  );
 
   const caseKeys = {
     PK: userCase.PK,
