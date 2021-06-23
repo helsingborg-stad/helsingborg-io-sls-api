@@ -49,11 +49,8 @@ export async function main(event) {
   const ExpressionAttributeNames = {};
   const ExpressionAttributeValues = { ':newUpdatedAt': Date.now() };
 
-  const updatedPeopleSignature = updatePeopleSignature(
-    personalNumber,
-    userCase?.persons,
-    signature
-  );
+  const updatedPeopleSignature = updatePeopleSignature(personalNumber, userCase.persons, signature);
+
   const newCaseStatus = getNewCaseStatus({
     answers,
     people: updatedPeopleSignature,
@@ -188,13 +185,15 @@ function getNewCaseStatus(conditionOption) {
 }
 
 function updatePeopleSignature(matchPersonalNumber, people, signature) {
+  if (!people) {
+    return [];
+  }
+
   return people.map(person => {
     const newPerson = { ...person };
 
     if (newPerson.personalNumber === matchPersonalNumber && signature) {
       newPerson.hasSigned = signature.success;
-    } else {
-      newPerson.hasSigned = false;
     }
 
     return newPerson;
