@@ -94,7 +94,7 @@ functions:
                   status:
                     M:
                       type:
-                        S: ["active:submitted:viva"]
+                        S: [{ "prefix": "active:submitted" }]
                   pdfGenerated:
                     S: ["yes"]
 
@@ -183,7 +183,9 @@ functions:
             detail:
               dynamodb:
                 NewImage:
+                  provider:
+                    S: ["VIVA"]
                   status:
                     M:
                       type:
-                        S: [{ "prefix": "active:submitted:viva" }]
+                        S: [{ "prefix": "active:submitted" }]
