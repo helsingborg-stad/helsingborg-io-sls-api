@@ -21,6 +21,8 @@ const encryptedAnswers = Joi.object({
   encryptedAnswers: Joi.string(),
 });
 
+const encryption = Joi.string();
+
 const formCurrentPosition = Joi.object({
   index: Joi.number().required(),
   level: Joi.number().required(),
@@ -35,6 +37,7 @@ const signature = Joi.object({
 const form = Joi.object({
   answers: answers.allow(),
   currentPosition: formCurrentPosition.required(),
+  encryption: encryption.allow(),
 });
 
 const caseValidationSchema = Joi.object({
@@ -50,6 +53,7 @@ export const updateCaseValidationSchema = Joi.object({
   answers: [answers.allow(), encryptedAnswers.allow()],
   currentPosition: formCurrentPosition.required(),
   signature: signature.optional(),
+  encryption: encryption.allow(),
 });
 
 export default caseValidationSchema;
