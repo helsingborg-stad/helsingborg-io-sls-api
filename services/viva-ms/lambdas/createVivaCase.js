@@ -123,6 +123,7 @@ async function putRecurringVivaCase(vivaPerson) {
 
   const initialFormAttributes = {
     answers: [],
+    encryption: { type: 'decrypted' },
     currentPosition: {
       currentMainStep: 1,
       currentMainStepIndex: 0,
