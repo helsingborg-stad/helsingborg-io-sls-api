@@ -51,7 +51,7 @@ export async function main(event) {
     );
   }
 
-  const { currentFormId, currentPosition, answers, signature } = validatedJsonBody;
+  const { currentFormId, currentPosition, answers, signature, encryption } = validatedJsonBody;
 
   const UpdateExpression = ['updatedAt = :newUpdatedAt'];
   const ExpressionAttributeNames = {};
@@ -96,6 +96,11 @@ export async function main(event) {
       UpdateExpression.push(`forms.#formId.answers = :newAnswers`);
       ExpressionAttributeValues[':newAnswers'] = answers;
     }
+  }
+
+  if (encryption) {
+    UpdateExpression.push(`forms.#formId.encryption = :newEncryption`);
+    ExpressionAttributeValues[':newEncryption'] = encryption;
   }
 
   UpdateExpression.push('persons = :newPersons');
