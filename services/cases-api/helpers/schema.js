@@ -21,7 +21,7 @@ const encryptedAnswers = Joi.object({
   encryptedAnswers: Joi.string(),
 });
 
-const encryption = Joi.string();
+const encryption = Joi.object({ type: Joi.string() });
 
 const formCurrentPosition = Joi.object({
   index: Joi.number().required(),
