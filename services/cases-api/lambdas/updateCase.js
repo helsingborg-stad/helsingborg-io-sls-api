@@ -78,14 +78,14 @@ export async function main(event) {
     ExpressionAttributeValues[':newCurrentFormId'] = currentFormId;
   }
 
+  ExpressionAttributeNames['#formId'] = currentFormId;
+
   if (currentPosition || answers) {
     if (!currentFormId) {
       return response.failure(
         new BadRequestError(`currentFormId is needed when updating currentPosition and/or answers`)
       );
     }
-
-    ExpressionAttributeNames['#formId'] = currentFormId;
 
     if (currentPosition) {
       UpdateExpression.push(`forms.#formId.currentPosition = :newCurrentPosition`);
