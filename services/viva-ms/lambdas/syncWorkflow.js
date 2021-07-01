@@ -67,15 +67,16 @@ async function getCasesSumbittedOrProcessing(personalNumber) {
     TableName,
     KeyConditionExpression: 'PK = :pk',
     FilterExpression:
-      'begins_with(#status.#type, :statusTypeSubmitted) or begins_with(#status.#type, :statusTypeProcessing)',
+      '(begins_with(#status.#type, :statusTypeSubmitted) or begins_with(#status.#type, :statusTypeProcessing)) and provider = :provider',
     ExpressionAttributeNames: {
       '#status': 'status',
       '#type': 'type',
     },
     ExpressionAttributeValues: {
       ':pk': PK,
-      ':statusTypeSubmitted': 'active:submitted:viva',
+      ':statusTypeSubmitted': 'active:submitted',
       ':statusTypeProcessing': 'active:processing',
+      ':provider': 'VIVA',
     },
   };
 
