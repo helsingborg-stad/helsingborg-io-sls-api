@@ -178,6 +178,13 @@ async function putRecurringVivaCase(vivaPerson) {
   const casePersonCoApplicant = getUserByRole(casePersonList, 'coApplicant');
   if (casePersonCoApplicant) {
     caseItemPutParams.Item['GSI1'] = `USER#${casePersonCoApplicant.personalNumber}`;
+
+    const mainApplicantPno = stripNonNumericalCharacters(String(vivaPerson.case.client.pnumber));
+    appendEncryptionAttributes(
+      initialFormAttributes,
+      mainApplicantPno,
+      casePersonCoApplicant.personalNumber
+    );
   }
 
   casePersonList = casePersonList.map(person => {
@@ -324,4 +331,13 @@ async function getLastUpdatedCase(PK, provider) {
   const sortedCases = dbResponse.Items.sort((a, b) => b.updatedAt - a.updatedAt);
 
   return sortedCases?.[0] || {};
+}
+
+function appendEncryptionAttributes(formAttributes, mainApplicantPno, coApplicantPno) {
+  formAttributes.encryption.symmetricKeyName = `${mainApplicantPno}:${coApplicantPno}`;
+  formAttributes.encryption.primes = { P: 43, G: 10 };
+  formAttributes.encryption.publicKeys = {
+    [mainApplicantPno]: '',
+    [coApplicantPno]: '',
+  };
 }
