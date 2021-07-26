@@ -121,28 +121,14 @@ async function putRecurringVivaCase(vivaPerson) {
     endDate: Date.parse(vivaPerson.application.period.end),
   };
 
-  const initialFormAttributes = {
-    answers: [],
-    encryption: { type: 'decrypted' },
-    currentPosition: {
-      currentMainStep: 1,
-      currentMainStepIndex: 0,
-      index: 0,
-      level: 0,
-    },
-  };
-
-  const initialForms = {
-    [recurringFormId]: initialFormAttributes,
-    [completionFormId]: initialFormAttributes,
-  };
+  const formIds = [recurringFormId, completionFormId];
 
   const [getUserError, user] = await to(getUser(PK));
   if (getUserError) {
     throw getUserError;
   }
 
-  const [, formTemplates] = await to(getFormTemplates(initialForms));
+  const [, formTemplates] = await to(getFormTemplates(formIds));
 
   const [getLastUpdatedCaseError, lastUpdatedCase] = await to(
     getLastUpdatedCase(PK, CASE_PROVIDER_VIVA)
@@ -178,14 +164,9 @@ async function putRecurringVivaCase(vivaPerson) {
   const casePersonCoApplicant = getUserByRole(casePersonList, 'coApplicant');
   if (casePersonCoApplicant) {
     caseItemPutParams.Item['GSI1'] = `USER#${casePersonCoApplicant.personalNumber}`;
-
-    const mainApplicantPno = stripNonNumericalCharacters(String(vivaPerson.case.client.pnumber));
-    appendEncryptionAttributes(
-      initialFormAttributes,
-      mainApplicantPno,
-      casePersonCoApplicant.personalNumber
-    );
   }
+
+  const encryption = getEncryptionAttributes(vivaPerson, casePersonCoApplicant);
 
   casePersonList = casePersonList.map(person => {
     if (person.role === 'applicant' && person.personalNumber === user.personalNumber) {
@@ -193,6 +174,22 @@ async function putRecurringVivaCase(vivaPerson) {
     }
     return person;
   });
+
+  const initialFormAttributes = {
+    answers: [],
+    encryption,
+    currentPosition: {
+      currentMainStep: 1,
+      currentMainStepIndex: 0,
+      index: 0,
+      level: 0,
+    },
+  };
+
+  const initialForms = {
+    [recurringFormId]: initialFormAttributes,
+    [completionFormId]: initialFormAttributes,
+  };
 
   const prePopulatedForms = populateFormWithPreviousCaseAnswers(
     initialForms,
@@ -209,6 +206,25 @@ async function putRecurringVivaCase(vivaPerson) {
   }
 
   return caseItem;
+}
+
+function getEncryptionAttributes(vivaPerson, casePersonCoApplicant) {
+  if (casePersonCoApplicant) {
+    const mainApplicantPersonalNumber = stripNonNumericalCharacters(
+      String(vivaPerson.case.client.pnumber)
+    );
+    return {
+      type: 'decrypted',
+      symmetricKeyName: `${mainApplicantPersonalNumber}:${casePersonCoApplicant.personalNumber}`,
+      primes: { P: 43, G: 10 },
+      publicKeys: {
+        [mainApplicantPersonalNumber]: null,
+        [casePersonCoApplicant.personalNumber]: null,
+      },
+    };
+  } else {
+    return { type: 'decrypted' };
+  }
 }
 
 function stripNonNumericalCharacters(string) {
@@ -283,27 +299,33 @@ async function getUser(PK) {
   return getResult.Item;
 }
 
-async function getFormTemplates(forms) {
-  const formTemplates = {};
+async function getFormTemplates(formIds) {
+  const [getError, forms] = await to(
+    Promise.all(
+      formIds.map(formId => {
+        const formGetParams = {
+          TableName: config.forms.tableName,
+          Key: {
+            PK: `FORM#${formId}`,
+          },
+        };
+        return dynamoDB.call('get', formGetParams);
+      })
+    )
+  );
 
-  for (const formId of Object.keys(forms)) {
-    const formGetParams = {
-      TableName: config.forms.tableName,
-      Key: {
-        PK: `FORM#${formId}`,
-      },
-    };
-
-    const [getError, getResult] = await to(dynamoDB.call('get', formGetParams));
-    if (getError) {
-      console.error('(viva-ms) DynamoDb query on forms table failed', getError);
-      continue;
-    }
-
-    formTemplates[formId] = getResult.Item;
+  if (getError) {
+    console.error('(viva-ms) DynamoDb query on forms table failed', getError);
+    throw getError;
   }
 
-  return formTemplates;
+  return forms.reduce(
+    (templates, form) => ({
+      ...templates,
+      [form.Item.id]: form.Item,
+    }),
+    {}
+  );
 }
 
 async function getLastUpdatedCase(PK, provider) {
@@ -331,13 +353,4 @@ async function getLastUpdatedCase(PK, provider) {
   const sortedCases = dbResponse.Items.sort((a, b) => b.updatedAt - a.updatedAt);
 
   return sortedCases?.[0] || {};
-}
-
-function appendEncryptionAttributes(formAttributes, mainApplicantPno, coApplicantPno) {
-  formAttributes.encryption.symmetricKeyName = `${mainApplicantPno}:${coApplicantPno}`;
-  formAttributes.encryption.primes = { P: 43, G: 10 };
-  formAttributes.encryption.publicKeys = {
-    [mainApplicantPno]: '',
-    [coApplicantPno]: '',
-  };
 }
