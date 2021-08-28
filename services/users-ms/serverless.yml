@@ -44,4 +44,7 @@ functions:
       - eventBridge:
           pattern:
             source:
-              - navet.poll
+              - userMs.findUser
+            detail-type:
+              - userMsFindUserUnsucceeded
+
