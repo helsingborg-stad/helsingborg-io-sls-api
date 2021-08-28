@@ -1,36 +1,9 @@
 [
   {
-    "Source": "OFFbankId.collect",
+    "Source": "bankId.collect",
     "Detail": "{ \"user\": { \"personalNumber\": \"195809262743\" } }",
     "Resources": [
       "resourceMockYlvaJansson"
-    ],
-    "DetailType": "BankIdCollectComplete",
-    "EventBusName": "default"
-  },
-  {
-    "Source": "OFFbankId.collect",
-    "Detail": "{ \"user\": { \"personalNumber\": \"196001198685\" } }",
-    "Resources": [
-      "resourceMockVeraToth"
-    ],
-    "DetailType": "BankIdCollectComplete",
-    "EventBusName": "default"
-  },
-  {
-    "Source": "OFFbankId.collect",
-    "Detail": "{ \"user\": { \"personalNumber\": \"198010139395\" } }",
-    "Resources": [
-      "resourceMockAli"
-    ],
-    "DetailType": "BankIdCollectComplete",
-    "EventBusName": "default"
-  },
-  {
-    "Source": "bankId.collect",
-    "Detail": "{ \"user\": { \"personalNumber\": \"198210023126\" } }",
-    "Resources": [
-      "resourceMockPernilla"
     ],
     "DetailType": "BankIdCollectComplete",
     "EventBusName": "default"
