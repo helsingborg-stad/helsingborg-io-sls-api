@@ -38,6 +38,16 @@ provider:
           Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
 
 functions:
+  find:
+    handler: lambdas/findUser.main
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - navetMs.pollUser
+            detail-type:
+              - navetMsPollUserSuccess
+
   create:
     handler: lambdas/createUser.main
     events:
@@ -47,4 +57,3 @@ functions:
               - userMs.findUser
             detail-type:
               - userMsFindUserUnsucceeded
-
