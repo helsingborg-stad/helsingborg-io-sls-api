@@ -16,13 +16,13 @@ export async function main(event) {
   }
 
   if (userItem == undefined) {
-    console.log(
-      `User with personal number: ${personalNumber}, could not be found in the users table.`
-    );
     const [emitError] = await to(emitEventUserNotFound(userDetail));
     if (emitError) {
       throw new InternalServerError(emitError);
     }
+    return console.log(
+      `User with personal number: ${personalNumber}, could not be found in the users table.`
+    );
   }
 
   console.info('User exists. All good to go!', userItem);
