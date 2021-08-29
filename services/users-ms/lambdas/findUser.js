@@ -11,13 +11,13 @@ export async function main(event) {
 
   const [getUserError, userItem] = await to(getUser(personalNumber));
   if (getUserError) {
-    return console.error('(users-ms) getUserError', getUserError);
+    return console.error('(users-ms: findUser) getUserError', getUserError);
   }
 
   if (userItem == undefined) {
     const [emitEventError] = await to(emitEventUserNotFound(userDetail));
     if (emitEventError) {
-      return console.error('(users-ms) emitEventError', emitEventError);
+      return console.error('(users-ms: findUser) emitEventError', emitEventError);
     }
     return console.log(
       `User with personal number: ${personalNumber}, could not be found in the users table.`
