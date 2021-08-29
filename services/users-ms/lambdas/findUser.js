@@ -11,7 +11,7 @@ export async function main(event) {
 
   const [getUserError, userItem] = await to(getUser(personalNumber));
   if (getUserError) {
-    return console.error('(users-ms)', getUserError);
+    return console.error('(users-ms) getUserError', getUserError);
   }
 
   if (userItem == undefined) {
