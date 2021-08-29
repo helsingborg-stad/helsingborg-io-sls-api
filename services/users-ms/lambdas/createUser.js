@@ -15,7 +15,7 @@ export async function main(event) {
   }
 
   console.info('(users-ms) userDetail', userDetail);
-  const [emitEventError] = await to(emitEventUserCreatedSuccess);
+  const [emitEventError] = await to(emitEventUserCreatedSuccess(userDetail));
   if (emitEventError) {
     return console.error('(users-ms) create: emitEventError', emitEventError);
   }
