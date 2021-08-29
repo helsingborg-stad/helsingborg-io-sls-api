@@ -2,7 +2,7 @@
 import to from 'await-to-js';
 
 import config from '../../../config';
-import * as dynamoDB from '../../../libs/dynamoDb';
+import * as dynamoDb from '../../../libs/dynamoDb';
 import { putEvent } from '../../../libs/awsEventBridge';
 
 export async function main(event) {
@@ -36,7 +36,7 @@ async function getUser(personalNumber) {
     },
   };
 
-  const [getError, getResult] = await to(dynamoDB.call('get', params));
+  const [getError, getResult] = await to(dynamoDb.call('get', params));
   if (getError) {
     throw getError;
   }
