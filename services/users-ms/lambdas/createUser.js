@@ -11,15 +11,14 @@ export async function main(event) {
 
   const [putUserRequestError] = await to(putUserRequest(userDetail));
   if (putUserRequestError) {
-    return console.error('(users-ms) putUserRequestError', putUserRequestError);
+    return console.error('(users-ms: createUser) putUserRequestError', putUserRequestError);
   }
 
-  console.info('(users-ms) userDetail', userDetail);
   const [emitEventError] = await to(emitEventUserCreatedSuccess(userDetail));
   if (emitEventError) {
-    return console.error('(users-ms) create: emitEventError', emitEventError);
+    return console.error('(users-ms: createUser) emitEventError', emitEventError);
   }
-
+  console.info('(users-ms: createUser) User successfully created in the users table.', userDetail);
   return true;
 }
 
