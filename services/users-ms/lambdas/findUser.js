@@ -24,7 +24,11 @@ export async function main(event) {
     );
   }
 
-  console.info('User exists. All good to go!', userItem);
+  const [emitEventError] = await to(emitEventUserExists(userItem));
+  if (emitEventError) {
+    return console.error('(users-ms: findUser) emitEventError', emitEventError);
+  }
+  console.info(`User with personal number: ${personalNumber}, was found in the users table. (:`);
   return true;
 }
 
@@ -46,4 +50,8 @@ async function getUser(personalNumber) {
 
 async function emitEventUserNotFound(user) {
   return putEvent(user, 'usersMsFindUserUnsucceeded', 'usersMs.findUser');
+}
+
+async function emitEventUserExists(user) {
+  return putEvent(user, 'usersMsFindUserSuccess', 'usersMs.findUser');
 }
