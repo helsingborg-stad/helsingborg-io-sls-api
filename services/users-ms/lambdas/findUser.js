@@ -6,11 +6,9 @@ import config from '../../../config';
 import * as dynamoDB from '../../../libs/dynamoDb';
 
 export async function main(event) {
-  const { user } = event.detail;
+  const { personalNumber } = event.detail;
 
-  const usersTablePartitionKey = `USER#${user}`;
-
-  const [getUserError, userItem] = await to(getUser(usersTablePartitionKey));
+  const [getUserError, userItem] = await to(getUser(personalNumber));
   if (getUserError) {
     return console.error('(users-ms)', getUserError);
   }
@@ -20,8 +18,7 @@ export async function main(event) {
   return true;
 }
 
-async function getUser(PK) {
-  const personalNumber = PK.substring(5);
+async function getUser(personalNumber) {
   const params = {
     TableName: config.users.tableName,
     Key: {
