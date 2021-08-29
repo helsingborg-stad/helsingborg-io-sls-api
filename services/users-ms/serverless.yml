@@ -53,6 +53,12 @@ functions:
               - navetMs.pollUser
             detail-type:
               - navetMsPollUserSuccess
+      - eventBridge:
+          pattern:
+            source:
+              - usersMs.createUser
+            detail-type:
+              - usersMsCreateUserSuccess
 
   create:
     handler: lambdas/createUser.main
