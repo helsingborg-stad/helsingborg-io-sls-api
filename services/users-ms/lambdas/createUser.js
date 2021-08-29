@@ -8,12 +8,12 @@ import * as dynamoDb from '../../../libs/dynamoDb';
 export async function main(event) {
   const userDetail = event.detail;
 
-  const [putUserRequestError, putUserResponse] = await to(putUserRequest(userDetail));
+  const [putUserRequestError] = await to(putUserRequest(userDetail));
   if (putUserRequestError) {
     return console.error('(users-ms) putUserRequestError', putUserRequestError);
   }
 
-  console.info('(users-ms) putUserResponse', putUserResponse);
+  console.info('(users-ms) userDetail', userDetail);
   return true;
 }
 
