@@ -122,9 +122,9 @@ functions:
       - eventBridge:
           pattern:
             source:
-              - bankId.collect
+              - usersMs.findUser
             detail-type:
-              - BankIdCollectComplete
+              - usersMsFindUserSuccess
 
   syncWorkflow:
     handler: lambdas/syncWorkflow.main
