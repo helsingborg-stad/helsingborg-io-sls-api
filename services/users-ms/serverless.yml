@@ -54,6 +54,6 @@ functions:
       - eventBridge:
           pattern:
             source:
-              - userMs.findUser
+              - usersMs.findUser
             detail-type:
-              - userMsFindUserUnsucceeded
+              - usersMsFindUserUnsucceeded
