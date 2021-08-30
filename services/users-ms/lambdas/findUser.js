@@ -19,16 +19,14 @@ export async function main(event) {
     if (emitEventError) {
       return console.error('(users-ms: findUser) emitEventError', emitEventError);
     }
-    return console.log(
-      `User with personal number: ${personalNumber}, could not be found in the users table.`
-    );
+    return console.log('User could not be found in the users table');
   }
 
   const [emitEventError] = await to(emitEventUserExists(userItem));
   if (emitEventError) {
     return console.error('(users-ms: findUser) emitEventError', emitEventError);
   }
-  console.info(`User with personal number: ${personalNumber}, was found in the users table. (:`);
+  console.info('User was found in the users table.');
   return true;
 }
 
