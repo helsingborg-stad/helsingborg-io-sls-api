@@ -18,7 +18,7 @@ export async function main(event) {
   if (emitEventError) {
     return console.error('(users-ms: createUser) emitEventError', emitEventError);
   }
-  console.info('(users-ms: createUser) User successfully created in the users table.', userDetail);
+  console.info('(users-ms: createUser) User was successfully created in the users table.');
   return true;
 }
 
