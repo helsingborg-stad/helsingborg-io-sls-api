@@ -20,10 +20,10 @@ import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
 
 export async function main(event) {
-  const { user } = event.detail;
+  const userDetail = event.detail;
 
   const [applicationStatusError, applicationStatusList] = await to(
-    vivaAdapter.application.status(user.personalNumber)
+    vivaAdapter.application.status(userDetail.personalNumber)
   );
   if (applicationStatusError) {
     return console.error('(Viva-ms) Viva Application Status', applicationStatusError);
@@ -45,7 +45,9 @@ export async function main(event) {
     );
   }
 
-  const [getVivaPersonError, vivaPerson] = await to(vivaAdapter.person.get(user.personalNumber));
+  const [getVivaPersonError, vivaPerson] = await to(
+    vivaAdapter.person.get(userDetail.personalNumber)
+  );
   if (getVivaPersonError) {
     return console.error('(Viva-ms) Viva Get Application Request', getVivaPersonError);
   }
@@ -72,7 +74,7 @@ export async function main(event) {
     return console.log('(Viva-ms) Case with WorkflowId already exists');
   }
 
-  const [putRecurringVivaCaseError] = await to(putRecurringVivaCase(vivaPerson));
+  const [putRecurringVivaCaseError] = await to(putRecurringVivaCase(vivaPerson, userDetail));
   if (putRecurringVivaCaseError) {
     return console.error('(viva-ms) putRecurringVivaCaseError', putRecurringVivaCaseError);
   }
@@ -103,7 +105,7 @@ async function getUserCaseFilteredOnWorkflowId(vivaPerson) {
   return queryCasesResult.Items[0] || null;
 }
 
-async function putRecurringVivaCase(vivaPerson) {
+async function putRecurringVivaCase(vivaPerson, user) {
   const ssmParams = await VIVA_CASE_SSM_PARAMS;
   const { recurringFormId, completionFormId } = ssmParams;
   const applicantPersonalNumber = stripNonNumericalCharacters(
@@ -123,10 +125,10 @@ async function putRecurringVivaCase(vivaPerson) {
 
   const formIds = [recurringFormId, completionFormId];
 
-  const [getUserError, user] = await to(getUser(PK));
-  if (getUserError) {
-    throw getUserError;
-  }
+  // const [getUserError, user] = await to(getUser(PK));
+  // if (getUserError) {
+  //   throw getUserError;
+  // }
 
   const [, formTemplates] = await to(getFormTemplates(formIds));
 
@@ -282,22 +284,22 @@ function getCasePersonList(vivaPerson) {
   return casePersonList;
 }
 
-async function getUser(PK) {
-  const personalNumber = PK.substring(5);
-  const params = {
-    TableName: config.users.tableName,
-    Key: {
-      personalNumber,
-    },
-  };
+// async function getUser(PK) {
+//   const personalNumber = PK.substring(5);
+//   const params = {
+//     TableName: config.users.tableName,
+//     Key: {
+//       personalNumber,
+//     },
+//   };
 
-  const [getError, getResult] = await to(dynamoDB.call('get', params));
-  if (getError) {
-    throw getError;
-  }
+//   const [getError, getResult] = await to(dynamoDB.call('get', params));
+//   if (getError) {
+//     throw getError;
+//   }
 
-  return getResult.Item;
-}
+//   return getResult.Item;
+// }
 
 async function getFormTemplates(formIds) {
   const [getError, rawForms] = await to(
