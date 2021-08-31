@@ -1,5 +1,12 @@
 import winston from 'winston';
 
+const logger = winston.createLogger({
+  level: process.env.LOG_LEVEL || 'info',
+  format: winston.format.json(),
+  transports: [new winston.transports.Console()],
+  exitOnError: false,
+});
+
 /**
  * Log function that outputs console logs in json format.
  *
@@ -10,13 +17,6 @@ import winston from 'winston';
  * @param {object} data      Custom data related to log.
  * @returns {void}
  */
-export const logger = (level, message, requestId, errorCode, data = {}) => {
-  const logger = winston.createLogger({
-    level: process.env.LOG_LEVEL || 'info',
-    format: winston.format.json(),
-    transports: [new winston.transports.Console()],
-    exitOnError: false,
-  });
-
-  logger.log(level, message, { errorCode: errorCode, requestId: requestId, data: data });
+export const log = (level, message, requestId, errorCode, customData = {}) => {
+  logger.log(level, message, { errorCode: errorCode, requestId: requestId, customData: customData });
 };
