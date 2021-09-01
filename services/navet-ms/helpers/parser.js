@@ -5,8 +5,8 @@ export const getPersonPostSoapRequest = ({
   orderNumber,
   organisationNumber,
   personalNumber,
-  xmlEvnUrl,
-}) => `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v1="${xmlEvnUrl}">
+  xmlEnvUrl,
+}) => `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v1="${xmlEnvUrl}">
   <soapenv:Header/>
   <soapenv:Body>
     <v1:PersonpostRequest>
@@ -24,7 +24,6 @@ export const getPersonPostCollection = xml =>
     try {
       const xmlPersonPostArray = xml.split('Folkbokforingsposter>');
 
-      // If result has any posts the length of posts will more than 2
       if (xmlPersonPostArray.length < 2) {
         throw new ResourceNotFoundError();
       }
