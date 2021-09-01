@@ -7,10 +7,11 @@ import * as dynamoDb from '../../../libs/dynamoDb';
 import validateApplicationStatus from '../helpers/validateApplicationStatus';
 import { getStatusByType } from '../../../libs/caseStatuses';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
+import { logError, logInfo } from '../../../libs/logs';
 
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
 
-export async function main(event) {
+export async function main(event, context) {
   const { caseKeys } = event.detail;
 
   const personalNumber = caseKeys.PK.substring(5);
@@ -18,6 +19,13 @@ export async function main(event) {
     vivaAdapter.application.status(personalNumber)
   );
   if (applicationStatusError) {
+    logError(
+      'Application status error',
+      context.awsRequestId,
+      'service-viva-ms-checkCompletion-001',
+      applicationStatusError
+    );
+
     throw applicationStatusError;
   }
 
@@ -31,21 +39,35 @@ export async function main(event) {
    */
   const completionStatusCodes = [64, 128, 256, 512];
   if (!validateApplicationStatus(applicationStatusList, completionStatusCodes)) {
-    throw 'no completion status found in viva adapter response';
+    const errorMessage = 'no completion status found in viva adapter response';
+    logError(errorMessage, context.awsRequestId, 'service-viva-ms-checkCompletion-002');
+
+    throw errorMessage;
   }
 
   const vivaCaseSSMParams = await VIVA_CASE_SSM_PARAMS;
   const [updateCaseError, caseItem] = await to(
     updateCaseCompletionAttributes(caseKeys, vivaCaseSSMParams.completionFormId)
   );
+
   if (updateCaseError) {
+    logError(
+      'Update case error',
+      context.awsRequestId,
+      'service-viva-ms-checkCompletion-003',
+      updateCaseError
+    );
+
     throw updateCaseError;
   }
 
-  console.log(
-    '(viva-ms: checkCompletion): updated case with completion data successfully',
+  logInfo(
+    'Updated case with completion data successfully',
+    context.awsRequestId,
+    'service-viva-ms-checkCompletion-004',
     caseItem
   );
+
   return true;
 }
 

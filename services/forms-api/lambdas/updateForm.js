@@ -4,6 +4,7 @@ import { objectWithoutProperties } from '../../../libs/objects';
 import config from '../../../config';
 import { validateFormData } from '../helpers/formValidation';
 import * as dynamoDb from '../../../libs/dynamoDb';
+import { logError } from '../../../libs/logs';
 
 const forbiddenKeys = ['id', 'PK', 'createdAt'];
 
@@ -11,7 +12,7 @@ const forbiddenKeys = ['id', 'PK', 'createdAt'];
  * Handler function for updating a form in dynamoDB
  * The body should contain a JSON object corresponding to the updated form.
  */
-export async function main(event) {
+export async function main(event, context) {
   const { formId } = event.pathParameters;
   const PK = `FORM#${formId}`;
   //remove forbidden keys so that they are not updated
@@ -28,10 +29,24 @@ export async function main(event) {
   );
 
   if (updateErrors) {
+    logError(
+      'Update expression error',
+      context.awsRequestId,
+      'service-forms-api-updateForm-001',
+      updateErrors
+    );
+
     return buildResponse(400, { errorMessage: 'Invalid update.', updateErrors });
   }
   const validationErrors = validateFormData(requestBody, true);
   if (validationErrors) {
+    logError(
+      'Validation error',
+      context.awsRequestId,
+      'service-forms-api-updateForm-002',
+      validationErrors
+    );
+
     return buildResponse(400, {
       errorType: 'Validation error',
       errorDescriptions: validationErrors,
@@ -48,8 +63,15 @@ export async function main(event) {
   };
 
   const [error, dynamoDbResponse] = await to(dynamoDb.call('update', params));
-  if (error) return buildResponse(error.status, error);
-
+  if (error) {
+    logError(
+      'Form update error',
+      context.awsRequestId,
+      'service-forms-api-updateForm-003',
+      error
+    );
+    return buildResponse(error.status, error);
+  }
   return buildResponse(200, dynamoDbResponse);
 }
 

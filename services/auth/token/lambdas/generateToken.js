@@ -5,21 +5,39 @@ import * as response from '../../../../libs/response';
 import { signToken, verifyToken } from '../../../../libs/token';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import tokenValidationSchema from '../helpers/schema';
+import { logWarn } from '../../../../libs/logs';
 
 const CONFIG_AUTH_SECRETS = config.auth.secrets;
 const ACCESS_TOKEN_EXPIRES_IN_MINUTES = 20;
 const REFRESH_TOKEN_EXPIRES_IN_MINUTES = 30;
 
-export const main = async event => {
+export const main = async (event, context) => {
+  console.log(event);
   const [parseJsonError, parsedJson] = await to(parseJson(event.body));
+
   if (parseJsonError) {
+    logWarn(
+      'JSON Parse error',
+      context.awsRequestId,
+      'service-auth-token-generateToken-001',
+      parseJsonError
+    );
+
     return response.failure(parseJsonError);
   }
 
   const [validationError, validatedEventBody] = await to(
     validateEventBody(parsedJson, tokenValidationSchema)
   );
+
   if (validationError) {
+    logWarn(
+      'Validation error',
+      context.awsRequestId,
+      'service-auth-token-generateToken-002',
+      validationError
+    );
+
     return response.failure(validationError);
   }
 
@@ -28,7 +46,15 @@ export const main = async event => {
   const [validateTokenError, decodedGrantToken] = await to(
     validateToken(grantTypeValues.secretsConfig, grantTypeValues.token)
   );
+
   if (validateTokenError) {
+    logWarn(
+      'Validate token error',
+      context.awsRequestId,
+      'service-auth-token-generateToken-003',
+      validateTokenError
+    );
+
     return response.failure(validateTokenError);
   }
 
@@ -37,7 +63,15 @@ export const main = async event => {
   const [getAccessTokenError, accessToken] = await to(
     generateToken(CONFIG_AUTH_SECRETS.accessToken, personalNumber, ACCESS_TOKEN_EXPIRES_IN_MINUTES)
   );
+
   if (getAccessTokenError) {
+    logWarn(
+      'Get access token error',
+      context.awsRequestId,
+      'service-auth-token-generateToken-004',
+      getAccessTokenError
+    );
+
     return response.failure(getAccessTokenError);
   }
 
@@ -49,6 +83,13 @@ export const main = async event => {
     )
   );
   if (getRefreshTokenError) {
+    logWarn(
+      'Get refresh token error',
+      context.awsRequestId,
+      'service-auth-token-generateToken-004',
+      getRefreshTokenError
+    );
+
     return response.failure(getRefreshTokenError);
   }
 

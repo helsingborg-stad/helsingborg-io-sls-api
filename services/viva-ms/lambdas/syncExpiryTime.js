@@ -12,9 +12,11 @@ import {
   DELETE_VIVA_CASE_AFTER_72_HOURS,
 } from '../../../libs/constants';
 
+import { logError, logInfo } from '../../../libs/logs';
+
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
 
-export async function main(event) {
+export async function main(event, context) {
   const { caseKeys } = event.detail;
 
   const [getCaseError, caseItem] = await to(getCase(caseKeys));
@@ -24,10 +26,12 @@ export async function main(event) {
 
   const vivaCaseSSMParams = await VIVA_CASE_SSM_PARAMS;
   if (vivaCaseSSMParams.recurringFormId !== caseItem.currentFormId) {
-    console.info(
-      '(Viva-ms: syncExpiryTime): case attribute currentFormId (caseItem.currentFormId)',
-      'does not match the recurring form id (vivaCaseSSMParams.recurringFormId) from ssm params. Nothing to update.'
+    logInfo(
+      'case attribute currentFormId (caseItem.currentFormId) does not match the recurring form id (vivaCaseSSMParams.recurringFormId) from ssm params. Nothing to update.',
+      context.awsRequestId,
+      'service-viva-ms-syncExpiryTime-001'
     );
+
     return true;
   }
 
@@ -38,10 +42,22 @@ export async function main(event) {
     updateCaseExpirationTimeAttribute(caseKeys, newExpirationTime)
   );
   if (updateCaseError) {
+    logError(
+      'Update case error.',
+      context.awsRequestId,
+      'service-viva-ms-syncExpiryTime-001',
+      updateCaseError
+    );
+
     throw updateCaseError;
   }
 
-  console.info('(Viva-ms: syncExpiryTime): case updated successfully.', updatedCase);
+  logInfo(
+    'Case updated successfully',
+    context.awsRequestId,
+    'service-viva-ms-syncExpiryTime-001',
+    updatedCase
+  );
 
   return true;
 }

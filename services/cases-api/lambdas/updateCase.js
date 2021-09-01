@@ -17,38 +17,54 @@ import { getStatusByType } from '../../../libs/caseStatuses';
 import statusCheck from '../helpers/statusCheckCondition';
 import { getUserCase } from '../helpers/dynamoDb';
 import { updateCaseValidationSchema } from '../helpers/schema';
+import { logError } from '../../../libs/logs';
 
-export async function main(event) {
+export async function main(event, context) {
   const requestJsonBody = JSON.parse(event.body);
   const { id } = event.pathParameters;
   const { personalNumber } = decodeToken(event);
 
   if (!id) {
-    return response.failure(new BadRequestError('Missing required path parameter "id"'));
+    const errorMessage = 'Missing required path parameter "id"';
+    logError(errorMessage, context.awsRequestId, 'service-cases-api-updateCase-001');
+
+    return response.failure(new BadRequestError(errorMessage));
   }
 
   const { error, value: validatedJsonBody } = updateCaseValidationSchema.validate(requestJsonBody, {
     abortEarly: false,
   });
   if (error) {
+    logError(error.message, context.awsRequestId, 'service-cases-api-updateCase-002', error);
+
     return response.failure(new BadRequestError(error.message.replace(/"/g, "'")));
   }
 
   const [getUserCaseError, userCase] = await to(getUserCase(personalNumber, id));
   if (getUserCaseError) {
+    logError(
+      'Get User case error',
+      context.awsRequestId,
+      'service-cases-api-updateCase-003',
+      getUserCaseError
+    );
+
     return response.failure(new InternalServerError(getUserCaseError));
   }
 
   if (!userCase) {
-    return response.failure(new ResourceNotFoundError('Case not found'));
+    const errorMessage = 'Case not found';
+    logError(errorMessage, context.awsRequestId, 'service-cases-api-updateCase-004');
+
+    return response.failure(new ResourceNotFoundError(errorMessage));
   }
 
   if (!Object.prototype.hasOwnProperty.call(userCase, 'persons')) {
-    return response.failure(
-      new InternalServerError(
-        'Case attribute "persons" not found. The attribute "persons" is mandatory!'
-      )
-    );
+    const errorMessage =
+      'Case attribute "persons" not found. The attribute "persons" is mandatory!';
+      logError(errorMessage, context.awsRequestId, 'service-cases-api-updateCase-005');
+
+    return response.failure(new InternalServerError(errorMessage));
   }
 
   const { currentFormId, currentPosition, answers, signature, encryption } = validatedJsonBody;
@@ -71,6 +87,13 @@ export async function main(event) {
   if (currentFormId) {
     const [queryFormError] = await to(queryFormsIfExistsFormId(currentFormId));
     if (queryFormError) {
+      logError(
+        'Query form error',
+        context.awsRequestId,
+        'service-cases-api-updateCase-006',
+        queryFormError
+      );
+
       return response.failure(queryFormError);
     }
 
@@ -82,9 +105,10 @@ export async function main(event) {
 
   if (currentPosition || answers) {
     if (!currentFormId) {
-      return response.failure(
-        new BadRequestError(`currentFormId is needed when updating currentPosition and/or answers`)
-      );
+      const errorMessage = 'currentFormId is needed when updating currentPosition and/or answers';
+      logError(errorMessage, context.awsRequestId, 'service-cases-api-updateCase-007');
+
+      return response.failure(new BadRequestError(errorMessage));
     }
 
     if (currentPosition) {
@@ -126,6 +150,13 @@ export async function main(event) {
 
   const [updateCaseError, updateCaseResponse] = await to(sendUpdateCaseRequest(updateCaseParams));
   if (updateCaseError) {
+    logError(
+      'Update case error',
+      context.awsRequestId,
+      'service-cases-api-updateCase-008',
+      updateCaseError
+    );
+
     return response.failure(new InternalServerError(updateCaseError));
   }
 

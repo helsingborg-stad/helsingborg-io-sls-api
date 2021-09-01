@@ -6,7 +6,9 @@ import config from '../../../config';
 import * as dynamoDb from '../../../libs/dynamoDb';
 import putUserEvent from '../helpers/putUserEvent';
 
-export async function main(event) {
+import { logError } from '../../../libs/logs';
+
+export async function main(event, context) {
   const userDetail = event.detail;
 
   const [putUserRequestError] = await to(putUserRequest(userDetail));

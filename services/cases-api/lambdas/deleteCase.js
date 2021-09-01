@@ -5,8 +5,9 @@ import config from '../../../config';
 import * as response from '../../../libs/response';
 import { decodeToken } from '../../../libs/token';
 import * as dynamoDb from '../../../libs/dynamoDb';
+import { logError } from '../../../libs/logs';
 
-export async function main(event) {
+export async function main(event, context) {
   const decodedToken = decodeToken(event);
   const { id } = event.pathParameters;
 
@@ -25,6 +26,13 @@ export async function main(event) {
 
   const [error, deleteCaseResponse] = await to(sendDeleteCaseRequest(deleteCaseParams));
   if (error) {
+    logError(
+      'Delete case Request error',
+      context.awsRequestId,
+      'service-cases-api-deleteCase-001',
+      error
+    );
+
     return response.failure(error);
   }
 

@@ -2,19 +2,28 @@ import to from 'await-to-js';
 import config from '../../../config';
 import { buildResponse } from '../../../libs/response';
 import * as dynamoDb from '../../../libs/dynamoDb';
+import { logError } from '../../../libs/logs';
 
 /**
  * Handler function for all forms from the database.
  */
-export async function main(_event) {
+export async function main(_event, context) {
   const params = {
     TableName: config.forms.tableName,
     ProjectionExpression: '#n, description, id, createdAt, updatedAt, subform, formType',
     ExpressionAttributeNames: { '#n': 'name' },
   };
   const [error, queryResponse] = await to(makeScanQuery(params));
-  if (error) return buildResponse(400, error);
+  if (error) {
+    logError(
+      'Get form list request error',
+      context.awsRequestId,
+      'service-forms-api-getFormList-001',
+      error
+    );
 
+    return buildResponse(400, error);
+  }
   return buildResponse(200, { count: queryResponse[1].Count, forms: queryResponse[1].Items });
 }
 
