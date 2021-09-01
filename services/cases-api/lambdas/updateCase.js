@@ -62,7 +62,7 @@ export async function main(event, context) {
   if (!Object.prototype.hasOwnProperty.call(userCase, 'persons')) {
     const errorMessage =
       'Case attribute "persons" not found. The attribute "persons" is mandatory!';
-      logError(errorMessage, context.awsRequestId, 'service-cases-api-updateCase-005');
+    logError(errorMessage, context.awsRequestId, 'service-cases-api-updateCase-005');
 
     return response.failure(new InternalServerError(errorMessage));
   }
