@@ -64,12 +64,8 @@ export async function main(event, context) {
 
   const [error, dynamoDbResponse] = await to(dynamoDb.call('update', params));
   if (error) {
-    logError(
-      'Form update error',
-      context.awsRequestId,
-      'service-forms-api-updateForm-003',
-      error
-    );
+    logError('Form update error', context.awsRequestId, 'service-forms-api-updateForm-003', error);
+
     return buildResponse(error.status, error);
   }
   return buildResponse(200, dynamoDbResponse);

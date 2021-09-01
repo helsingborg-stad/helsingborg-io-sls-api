@@ -8,7 +8,7 @@ import config from '../../../config';
 import * as dynamoDb from '../../../libs/dynamoDb';
 
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
-import { logError, logInfo } from '../../../libs/logs';
+import { logError } from '../../../libs/logs';
 
 const dynamoDbConverter = AWS.DynamoDB.Converter;
 
