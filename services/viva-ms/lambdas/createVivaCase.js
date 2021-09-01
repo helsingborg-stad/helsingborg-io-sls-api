@@ -300,7 +300,7 @@ async function getUser(PK) {
 }
 
 async function getFormTemplates(formIds) {
-  const [getError, forms] = await to(
+  const [getError, rawForms] = await to(
     Promise.all(
       formIds.map(formId => {
         const formGetParams = {
@@ -319,13 +319,17 @@ async function getFormTemplates(formIds) {
     throw getError;
   }
 
-  return forms.reduce(
-    (templates, form) => ({
-      ...templates,
-      [form.Item.id]: form.Item,
+  const forms = rawForms.map(rawForm => rawForm.Item);
+
+  const formsMap = forms.reduce(
+    (formsMap, form) => ({
+      ...formsMap,
+      [form.id]: form,
     }),
     {}
   );
+
+  return formsMap;
 }
 
 async function getLastUpdatedCase(PK, provider) {
