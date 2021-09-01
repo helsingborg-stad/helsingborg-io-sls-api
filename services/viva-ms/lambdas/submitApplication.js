@@ -6,12 +6,13 @@ import config from '../../../config';
 import params from '../../../libs/params';
 import { putEvent } from '../../../libs/awsEventBridge';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
+import { logError, logInfo } from '../../../libs/logs';
 
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
 
 const dynamoDbConverter = AWS.DynamoDB.Converter;
 
-export async function main(event) {
+export async function main(event, context) {
   if (event.detail.dynamodb.NewImage === undefined) {
     return undefined;
   }
@@ -20,7 +21,12 @@ export async function main(event) {
 
   const vivaCaseSSMParams = await VIVA_CASE_SSM_PARAMS;
   if (vivaCaseSSMParams.recurringFormId !== caseItem.currentFormId) {
-    console.info('(Viva-ms): currentFormId does not match recurringFormId');
+    logInfo(
+      'currentFormId does not match recurringFormId',
+      context.awsRequestId,
+      'service-viva-ms-submitApplication-001'
+    );
+
     return true;
   }
 
@@ -45,9 +51,22 @@ export async function main(event) {
     })
   );
   if (applicationPostError) {
-    return console.error('(Viva-ms)', applicationPostError);
+    logError(
+      'Application post error',
+      context.awsRequestId,
+      'service-viva-ms-submitApplication-002',
+      applicationPostError
+    );
+
+    return;
   }
-  console.info('(Viva-ms)', applicationResponse);
+
+  logInfo(
+    'Application response',
+    context.awsRequestId,
+    'service-viva-ms-submitApplication-003',
+    applicationResponse
+  );
 
   const caseKeys = {
     PK: caseItem.PK,

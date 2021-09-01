@@ -8,10 +8,11 @@ import config from '../../../config';
 import * as dynamoDb from '../../../libs/dynamoDb';
 
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
+import { logError, logInfo } from '../../../libs/logs';
 
 const dynamoDbConverter = AWS.DynamoDB.Converter;
 
-export async function main(event) {
+export async function main(event, context) {
   if (event.detail.dynamodb.NewImage === undefined) {
     return null;
   }
@@ -29,7 +30,14 @@ export async function main(event) {
     vivaAdapter.officers.get(personalNumber)
   );
   if (vadaMyPagesError) {
-    return console.error('(Viva-ms) syncOfficers', vadaMyPagesError);
+    logError(
+      'vada mypages error',
+      context.awsRequestId,
+      'service-viva-ms-syncOfficers-001',
+      vadaMyPagesError
+    );
+
+    return null;
   }
 
   const { officer } = vadaMyPagesResponse;
@@ -57,7 +65,14 @@ export async function main(event) {
 
   const [updateError] = await to(sendUpdateRequest(dynamoDbParams));
   if (updateError) {
-    return console.error('(Viva-ms) syncOfficers', updateError);
+    logError(
+      'Update request error',
+      context.awsRequestId,
+      'service-viva-ms-syncOfficers-002',
+      updateError
+    );
+
+    return null;
   }
 
   return true;

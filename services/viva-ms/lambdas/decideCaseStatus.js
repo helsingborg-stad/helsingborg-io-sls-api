@@ -4,21 +4,33 @@ import to from 'await-to-js';
 import config from '../../../config';
 import * as dynamoDb from '../../../libs/dynamoDb';
 import { getStatusByType } from '../../../libs/caseStatuses';
+import { logError, logInfo } from '../../../libs/logs';
 
-export async function main(event) {
+export async function main(event, context) {
   const { caseKeys, workflow } = event.detail;
 
   const newStatusType = decideNewCaseStatus(workflow.attributes);
   if (newStatusType == undefined) {
-    console.info('(Viva-ms) no new status to update');
+    logInfo(
+      'no new status to update',
+      context.awsRequestId,
+      'service-viva-ms-decideCaseStatus-001'
+    );
+
     return true;
   }
 
   const [updateCaseStatusError] = await to(
     updateCaseStatus(caseKeys, getStatusByType(newStatusType))
   );
+
   if (updateCaseStatusError) {
-    console.error('(Viva-ms) updateCaseStatusError', updateCaseStatusError);
+    logError(
+      'updateCaseStatusError',
+      context.awsRequestId,
+      'service-viva-ms-decideCaseStatus-002',
+      updateCaseStatusError
+    );
   }
 
   return true;

@@ -7,17 +7,27 @@ import { failure, success } from '../../../libs/response';
 import { validateEventBody } from '../../../libs/validateEventBody';
 import { validateKeys } from '../../../libs/validateKeys';
 import * as bankId from '../helpers/bankId';
+import { logError } from '../../../libs/logs';
 
 const SSMParams = params.read(config.bankId.envsKeyName);
 let valid = true;
 
-export const main = async event => {
+export const main = async (event, context) => {
   const bankidSSMParams = await SSMParams;
   const { endUserIp, personalNumber, userVisibleData } = JSON.parse(event.body);
 
   const [validationError] = await to(validateEventBody(event.body, validateTokenEventBody));
 
-  if (validationError && !valid) return failure(validationError);
+  if (validationError && !valid) {
+    logError(
+      'Validation error',
+      context.awsRequestId,
+      'service-bankid-api-sign-001',
+      validationError
+    );
+
+    return failure(validationError);
+  }
 
   const payload = {
     endUserIp,
@@ -30,6 +40,13 @@ export const main = async event => {
   const [error, bankIdSignResponse] = await to(sendBankIdSignRequest(bankidSSMParams, payload));
 
   if (!bankIdSignResponse) {
+    logError(
+      'Bank Id Sign response error',
+      context.awsRequestId,
+      'service-bankid-api-sign-002',
+      error
+    );
+
     return failure(error);
   }
 

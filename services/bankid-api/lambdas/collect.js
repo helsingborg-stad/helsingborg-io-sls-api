@@ -9,13 +9,15 @@ import * as response from '../../../libs/response';
 import * as bankId from '../helpers/bankId';
 import secrets from '../../../libs/secrets';
 import { signToken } from '../../../libs/token';
+import { logError } from '../../../libs/logs';
 
 const SSMParams = params.read(config.bankId.envsKeyName);
 const CONFIG_AUTH_SECRETS_AUTHORIZATION_CODE = config.auth.secrets.authorizationCode;
 
-export const main = async event => {
+export const main = async (event, context) => {
   const { body, headers } = event;
   const { orderRef } = JSON.parse(body);
+
   const bankidSSMParams = await SSMParams;
 
   console.info('🚀 ~ file: collect.js ~ line 21 ~ headers -> User-Agent', headers['User-Agent']);
@@ -26,7 +28,16 @@ export const main = async event => {
     sendBankIdCollectRequest(bankidSSMParams, payload)
   );
 
-  if (bankIdCollectRequestError) return response.failure(bankIdCollectRequestError);
+  if (bankIdCollectRequestError) {
+    logError(
+      'Bank Id Collect request error',
+      context.awsRequestId,
+      'service-bankid-api-collect-001',
+      bankIdCollectRequestError
+    );
+
+    return response.failure(bankIdCollectRequestError);
+  }
 
   let responseAttributes = {};
 
@@ -57,6 +68,13 @@ export const main = async event => {
     );
 
     if (generateAuthorizationCodeError) {
+      logError(
+        'Bank Id Authorization code error',
+        context.awsRequestId,
+        'service-bankid-api-collect-002',
+        bankIdCollectRequestError
+      );
+
       return response.failure(generateAuthorizationCodeError);
     }
 
