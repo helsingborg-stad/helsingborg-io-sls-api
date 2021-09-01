@@ -6,11 +6,12 @@ import config from '../../../config';
 import * as response from '../../../libs/response';
 import * as dynamoDb from '../../../libs/dynamoDb';
 import { decodeToken } from '../../../libs/token';
+import { logError, logWarn } from '../../../libs/logs';
 
 /**
  * Get the user with the personal number specified in the path
  */
-export const main = async event => {
+export const main = async (event, context) => {
   const decodedToken = decodeToken(event);
 
   const params = {
@@ -21,7 +22,16 @@ export const main = async event => {
   };
 
   const [error, userGetResponse] = await to(sendUserGetRequest(params));
-  if (error) return response.failure(error);
+  if (error) {
+    logError(
+      'Get user request error',
+      context.awsRequestId,
+      'service-users-api-getUser-001',
+      error
+    );
+
+    return response.failure(error);
+  }
 
   //convert to camelCase
   const attributes = {};
@@ -32,9 +42,12 @@ export const main = async event => {
   //Returning no results from the db is not an error, so we need to check for this separately,
   //and return a 404 if no results were found
   if (Object.keys(attributes).length === 0) {
+    const errorMessage = 'No user with that personal number found in the database.';
+    logWarn(errorMessage, context.awsRequestId, 'service-users-api-getUser-001', error);
+
     return response.buildResponse(404, {
       type: 'userGet',
-      errorMessage: 'No user with that personal number found in the database.',
+      errorMessage: errorMessage,
     });
   }
 

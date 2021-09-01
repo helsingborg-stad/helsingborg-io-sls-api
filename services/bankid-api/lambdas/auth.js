@@ -6,10 +6,11 @@ import params from '../../../libs/params';
 import * as request from '../../../libs/request';
 import * as response from '../../../libs/response';
 import * as bankId from '../helpers/bankId';
+import { logError } from '../../../libs/logs';
 
 const SSMParams = params.read(config.bankId.envsKeyName);
 
-export const main = async event => {
+export const main = async (event, context) => {
   const { endUserIp, personalNumber } = JSON.parse(event.body);
   const bankIdSSMparams = await SSMParams;
 
@@ -19,7 +20,16 @@ export const main = async event => {
   };
 
   const [error, bankIdAuthResponse] = await to(sendBankIdAuthRequest(bankIdSSMparams, payload));
-  if (!bankIdAuthResponse) return response.failure(error);
+  if (!bankIdAuthResponse) {
+    logError(
+      'Bank Id Auth response error',
+      context.awsRequestId,
+      'service-bankid-api-auth-001',
+      error
+    );
+
+    return response.failure(error);
+  }
 
   const attributes = bankIdAuthResponse.data ? bankIdAuthResponse.data : {};
 

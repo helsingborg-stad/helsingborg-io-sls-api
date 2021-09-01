@@ -7,18 +7,29 @@ import * as response from '../../../libs/response';
 import * as dynamoDb from '../../../libs/dynamoDb';
 import { decodeToken } from '../../../libs/token';
 import { objectWithoutProperties } from '../../../libs/objects';
+import { logError } from '../../../libs/logs';
 
-export async function main(event) {
+export async function main(event, context) {
   const decodedToken = decodeToken(event);
   const { id } = event.pathParameters;
 
   const [getUserCaseError, userCase] = await to(getUserCase(decodedToken.personalNumber, id));
   if (getUserCaseError) {
+    logError(
+      'Get user case error',
+      context.awsRequestId,
+      'service-cases-api-getCase-001',
+      getUserCaseError
+    );
+
     return response.failure(getUserCaseError);
   }
 
   if (!userCase) {
-    return response.failure(new ResourceNotFoundError(`User case with id: ${id} not found`));
+    const errorMessage = `User case with id: ${id} not found`;
+    logError(errorMessage, context.awsRequestId, 'service-cases-api-getCase-002');
+
+    return response.failure(new ResourceNotFoundError(errorMessage));
   }
 
   const userCaseWithoutKeys = objectWithoutProperties(userCase, ['PK', 'SK', 'GSI1']);

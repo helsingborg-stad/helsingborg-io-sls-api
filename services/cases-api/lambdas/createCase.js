@@ -12,8 +12,9 @@ import { getItem, putItem } from '../../../libs/queries';
 import { populateFormWithPreviousCaseAnswers } from '../../../libs/formAnswers';
 import caseValidationSchema from '../helpers/schema';
 import { getStatusByType } from '../../../libs/caseStatuses';
+import { logError, logWarn } from '../../../libs/logs';
 
-export async function main(event) {
+export async function main(event, context) {
   const decodedToken = decodeToken(event);
 
   const [parseJsonError, parsedJson] = await to(parseJsonD(event.body));
@@ -24,7 +25,15 @@ export async function main(event) {
   const [validationError, validatedEventBody] = await to(
     validateEventBody(parsedJson, caseValidationSchema)
   );
+
   if (validationError) {
+    logError(
+      'Validation error',
+      context.awsRequestId,
+      'service-cases-api-createCase-001',
+      validationError
+    );
+
     return response.failure(validationError);
   }
 
@@ -38,13 +47,25 @@ export async function main(event) {
 
   const [userError, user] = await to(getUser(personalNumber));
   if (userError) {
-    console.error('(cases-api) DynamoDb query on users table failed', userError);
+    logError(
+      'DynamoDb query on users table failed',
+      context.awsRequestId,
+      'service-cases-api-createCase-002',
+      userError
+    );
+
     return response.failure(userError);
   }
-  const [, formTemplates] = await to(getFormTemplates(initialForms));
+  const [, formTemplates] = await to(getFormTemplates(initialForms, context));
   const [previousCaseError, previousCase] = await to(getLastUpdatedCase(PK, provider));
   if (previousCaseError) {
-    console.error('(cases-api) DynamoDb query on cases table failed', previousCaseError);
+    logError(
+      'DynamoDb query on cases table failed',
+      context.awsRequestId,
+      'service-cases-api-createCase-003',
+      userError
+    );
+
     return response.failure(previousCaseError);
   }
 
@@ -79,6 +100,13 @@ export async function main(event) {
 
   const [putItemError] = await to(putItem(putItemParams));
   if (putItemError) {
+    logError(
+      'Put item error',
+      context.awsRequestId,
+      'service-cases-api-createCase-004',
+      putItemError
+    );
+
     return response.failure(putItemError);
   }
 
@@ -87,6 +115,13 @@ export async function main(event) {
   // This can be found in the AWS docs https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_PutItem.html#DDB-PutItem-request-ReturnValues
   const [getItemError, caseItem] = await getItem(config.cases.tableName, PK, SK);
   if (getItemError) {
+    logError(
+      'Get item error',
+      context.awsRequestId,
+      'service-cases-api-createCase-004',
+      getItemError
+    );
+
     return response.failure(getItemError.statusCode, getItemError.message);
   }
 
@@ -139,7 +174,7 @@ async function getUser(personalNumber) {
   return dbResponse.Item;
 }
 
-async function getFormTemplates(forms) {
+async function getFormTemplates(forms, context) {
   const formTemplates = {};
   for (const key of Object.keys(forms)) {
     const params = {
@@ -151,9 +186,16 @@ async function getFormTemplates(forms) {
     const [error, dbResponse] = await to(dynamoDb.call('get', params));
 
     if (error) {
-      console.error('(cases-api) DynamoDb query on forms table failed', error);
+      logWarn(
+        'DynamoDb query on forms table failed',
+        context.awsRequestId,
+        'service-cases-api-createCase-004',
+        error
+      );
+
       continue;
     }
+
     formTemplates[key] = dbResponse.Item;
   }
 

@@ -16,17 +16,24 @@ import { getFutureTimestamp, millisecondsToSeconds } from '../../../libs/timesta
 import { DELETE_VIVA_CASE_AFTER_12_HOURS } from '../../../libs/constants';
 
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
+import { logError, logWarn, logInfo } from '../../../libs/logs';
 
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
 
-export async function main(event) {
+export async function main(event, context) {
   const userDetail = event.detail;
 
   const [applicationStatusError, applicationStatusList] = await to(
     vivaAdapter.application.status(userDetail.personalNumber)
   );
   if (applicationStatusError) {
-    return console.error('(Viva-ms) Viva Application Status', applicationStatusError);
+    logError(
+      'Viva Application Status error',
+      context.awsRequestId,
+      'service-viva-ms-createVivaCase-001',
+      applicationStatusError
+    );
+    return;
   }
 
   /**
@@ -39,44 +46,79 @@ export async function main(event) {
    */
   const requiredStatusCodes = [1, 128, 256, 512];
   if (!validateApplicationStatus(applicationStatusList, requiredStatusCodes)) {
-    return console.info(
-      '(Viva-ms) validateApplicationStatus. No application period open.',
+    logInfo(
+      'validateApplicationStatus. No application period open.',
+      context.awsRequestId,
+      'service-viva-ms-createVivaCase-002',
       applicationStatusList
     );
+    return;
   }
 
   const [getVivaPersonError, vivaPerson] = await to(
     vivaAdapter.person.get(userDetail.personalNumber)
   );
   if (getVivaPersonError) {
-    return console.error('(Viva-ms) Viva Get Application Request', getVivaPersonError);
+    logError(
+      'Viva Get Application Request',
+      context.awsRequestId,
+      'service-viva-ms-createVivaCase-003',
+      getVivaPersonError
+    );
+    return;
   }
 
   if (!vivaPerson.application || !vivaPerson.application.period) {
-    return console.error('(Viva-ms) Viva Application Period not present in response, aborting');
+    logError(
+      'Viva Application Period not present in response, aborting',
+      context.awsRequestId,
+      'service-viva-ms-createVivaCase-004'
+    );
+    return;
   }
 
   if (!vivaPerson.application || !vivaPerson.application.workflowid) {
-    return console.error('(Viva-ms) Viva Application WorkflowId not present in response, aborting');
+    logError(
+      'Viva Application WorkflowId not present in response, aborting',
+      context.awsRequestId,
+      'service-viva-ms-createVivaCase-005'
+    );
+    return;
   }
 
   const [getUserCaseFilteredOnWorkflowIdError, caseItem] = await to(
     getUserCaseFilteredOnWorkflowId(vivaPerson)
   );
   if (getUserCaseFilteredOnWorkflowIdError) {
-    return console.error(
-      '(Viva-ms) DynamoDb query on cases table failed',
+    logError(
+      'DynamoDb query on cases table failed',
+      context.awsRequestId,
+      'service-viva-ms-createVivaCase-006',
       getUserCaseFilteredOnWorkflowIdError
     );
+
+    return;
   }
 
   if (caseItem) {
-    return console.log('(Viva-ms) Case with WorkflowId already exists');
+    logWarn(
+      'Case with WorkflowId already exists',
+      context.awsRequestId,
+      'service-viva-ms-createVivaCase-007'
+    );
+
+    return;
   }
 
   const [putRecurringVivaCaseError] = await to(putRecurringVivaCase(vivaPerson, userDetail));
   if (putRecurringVivaCaseError) {
-    return console.error('(viva-ms) putRecurringVivaCaseError', putRecurringVivaCaseError);
+    logWarn(
+      'putRecurringVivaCaseError',
+      context.awsRequestId,
+      'service-viva-ms-createVivaCase-008',
+      putRecurringVivaCaseError
+    );
+    return;
   }
 
   return true;

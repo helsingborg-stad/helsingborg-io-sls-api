@@ -5,10 +5,11 @@ import params from '../../../libs/params';
 import * as request from '../../../libs/request';
 import * as response from '../../../libs/response';
 import * as bankId from '../helpers/bankId';
+import { logError } from '../../../libs/logs';
 
 const SSMParams = params.read(config.bankId.envsKeyName);
 
-export const main = async event => {
+export const main = async (event, context) => {
   const { orderRef } = JSON.parse(event.body);
   const bankIdSSMparams = await SSMParams;
 
@@ -16,7 +17,16 @@ export const main = async event => {
 
   const [error, bankIdCancelResponse] = await to(sendBankIdCancelRequest(bankIdSSMparams, payload));
 
-  if (!bankIdCancelResponse) return response.failure(error);
+  if (!bankIdCancelResponse) {
+    logError(
+      'Bank Id Cancel response error',
+      context.awsRequestId,
+      'service-bankid-api-cancel-001',
+      error
+    );
+
+    return response.failure(error);
+  }
 
   const attributes = bankIdCancelResponse.data ? bankIdCancelResponse.data : {};
 

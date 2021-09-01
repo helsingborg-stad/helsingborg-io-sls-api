@@ -7,20 +7,30 @@ import * as response from '../../../libs/response';
 import * as dynamoDb from '../../../libs/dynamoDb';
 import { decodeToken } from '../../../libs/token';
 import { objectWithoutProperties } from '../../../libs/objects';
+import { logError } from '../../../libs/logs';
 
-export async function main(event) {
+export async function main(event, context) {
   const decodedToken = decodeToken(event);
 
   const { personalNumber } = decodedToken;
 
   const [getUserCaseListError, userCaseList] = await to(getUserCaseList(personalNumber));
   if (getUserCaseListError) {
-    console.error('getUserCaseListError', getUserCaseListError);
+    logError(
+      'Get User Case list error',
+      context.awsRequestId,
+      'service-cases-api-getCaseList-001',
+      getUserCaseListError
+    );
+
     return response.failure(getUserCaseListError);
   }
 
   if (userCaseList.length === 0) {
-    return response.failure(new ResourceNotFoundError('No user cases found'));
+    const errorMessage = 'No user cases found';
+    logError(errorMessage, context.awsRequestId, 'service-cases-api-getCaseList-002');
+
+    return response.failure(new ResourceNotFoundError(errorMessage));
   }
 
   const userCaseListWithoutKeys = userCaseList.map(item =>

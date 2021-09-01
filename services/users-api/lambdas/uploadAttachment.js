@@ -4,6 +4,7 @@ import S3 from '../../../libs/S3';
 import * as response from '../../../libs/response';
 import { BadRequestError } from '@helsingborg-stad/npm-api-error-handling';
 import { decodeToken } from '../../../libs/token';
+import { logError } from '../../../libs/logs';
 
 // File formats that we accept.
 const allowedMimes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
@@ -11,24 +12,33 @@ const allowedMimes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf']
 /**
  * Get the user with the personal number specified in the path
  */
-export async function main(event) {
+export async function main(event, context) {
   const decodedToken = decodeToken(event);
 
   const { fileName, mime } = JSON.parse(event.body);
 
   if (!fileName) {
     // Check if fileName exsits in event body
-    return response.failure(new BadRequestError('Could not find key "fileName" in request body'));
+    const errorMessage = 'Could not find key "fileName" in request body';
+    logError(errorMessage, context.awsRequestId, 'service-users-api-uploadAttachment-001');
+
+    return response.failure(new BadRequestError(errorMessage));
   }
 
   if (!mime) {
     // Check if mimeType exists in event body.
-    return response.failure(new BadRequestError('Could not find key "mime" in request body'));
+    const errorMessage = 'Could not find key "mime" in request body';
+    logError(errorMessage, context.awsRequestId, 'service-users-api-uploadAttachment-002');
+
+    return response.failure(new BadRequestError());
   }
 
   if (!allowedMimes.includes(mime)) {
     // Check if passed mimeType is a fileformat that we allow.
-    return response.failure(new BadRequestError(`The mimeType ${mime} is not allowed`));
+    const errorMessage = `The mimeType ${mime} is not allowed`;
+    logError(errorMessage, context.awsRequestId, 'service-users-api-uploadAttachment-003');
+
+    return response.failure(new BadRequestError(errorMessage));
   }
 
   // The path to where we want to upload a file in the s3 bucket.
@@ -47,7 +57,16 @@ export async function main(event) {
   const [error, uploadUrl] = await to(
     S3.getSignedUrl(process.env.BUCKET_NAME, 'putObject', params)
   );
-  if (error) return response.failure(error);
+
+  if (error) {
+    logError(
+      'Get signed url error',
+      context.awsRequestId,
+      'service-users-api-uploadAttachment-003'
+    );
+
+    return response.failure(error);
+  }
 
   return response.success(200, {
     type: 'userAttachment',

@@ -6,20 +6,32 @@ import * as dynamoDb from '../../../libs/dynamoDb';
 import config from '../../../config';
 import { putEvent } from '../../../libs/awsEventBridge';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
+import { logError, logInfo } from '../../../libs/logs';
 
-export async function main(event) {
+export async function main(event, context) {
   const { personalNumber } = event.detail.user;
 
   const [getCasesError, userCases] = await to(getCasesSumbittedOrProcessing(personalNumber));
   if (getCasesError) {
+    logError(
+      'Get cases error error',
+      context.awsRequestId,
+      'service-viva-ms-syncWorkflow-001',
+      getCasesError
+    );
+
     throw getCasesError;
   }
 
   const caseList = userCases.Items;
   if (caseList === undefined || caseList.length === 0) {
-    return console.info(
-      '(Viva-ms) DynamoDB query did not fetch any active:submitted or active:processing case(s)'
+    logInfo(
+      'DynamoDB query did not fetch any active:submitted or active:processing case(s)',
+      context.awsRequestId,
+      'service-viva-ms-syncWorkflow-002'
     );
+
+    return null;
   }
 
   for (const caseItem of caseList) {
@@ -34,17 +46,35 @@ export async function main(event) {
       vivaAdapter.workflow.get({ personalNumber, workflowId })
     );
     if (adapterWorkflowGetError) {
-      console.error('(Viva-ms) adapterWorkflowGetError:', adapterWorkflowGetError);
+      logError(
+        'adapterWorkflowGetError',
+        context.awsRequestId,
+        'service-viva-ms-syncWorkflow-003',
+        adapterWorkflowGetError
+      );
+
       continue;
     }
 
     if (deepEqual(workflow.attributes, caseItem.details?.workflow)) {
-      console.info('(Viva-ms) case workflow is in sync with Viva');
+      logInfo(
+        'case workflow is in sync with Viva',
+        context.awsRequestId,
+        'service-viva-ms-syncWorkflow-004'
+      );
+
       continue;
     }
 
     const [updateDbWorkflowError] = await to(updateCaseWorkflow(caseKeys, workflow.attributes));
     if (updateDbWorkflowError) {
+      logError(
+        'Update db workflow error',
+        context.awsRequestId,
+        'service-viva-ms-syncWorkflow-005',
+        updateDbWorkflowError
+      );
+
       throw updateDbWorkflowError;
     }
 
@@ -52,6 +82,13 @@ export async function main(event) {
       putEvent({ caseKeys, workflow }, 'vivaMsSyncWorkflowSuccess', 'vivaMs.syncWorkflow')
     );
     if (putEventError) {
+      logError(
+        'Put event error',
+        context.awsRequestId,
+        'service-viva-ms-syncWorkflow-006',
+        putEventError
+      );
+
       throw putEventError;
     }
   }

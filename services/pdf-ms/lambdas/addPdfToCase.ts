@@ -17,12 +17,14 @@ import {
   getNewAndChangedCaseAnswerValues,
 } from '../helpers/case';
 
+import { logError } from '../../../libs/logs';
+
 const PDF_SSM_PARAMS = params.read(config.pdf.envsKeyName);
 
 // Convert DynamoDB item to plain object
 const dynamoDbConverter = AWS.DynamoDB.Converter;
 
-export async function main(event: Record<string, any>): Promise<Boolean> {
+export async function main(event: Record<string, any>, context): Promise<Boolean> {
   const submittedCase: Case = dynamoDbConverter.unmarshall(event.detail.dynamodb.NewImage);
 
   if (submittedCase.pdfGenerated === 'yes') {
@@ -33,11 +35,25 @@ export async function main(event: Record<string, any>): Promise<Boolean> {
 
   const [getUserError, user] = await to(getUser(personalNumber));
   if (getUserError) {
+    logError(
+      'Get user error',
+      context.awsRequestId,
+      'service-pdf-ms-addPdfToCase-001',
+      getUserError
+    );
+
     throw getUserError;
   }
 
   const [getCasesError, closedCases] = await to(getClosedUserCases(personalNumber));
   if (getCasesError) {
+    logError(
+      'Get cases error',
+      context.awsRequestId,
+      'service-pdf-ms-addPdfToCase-002',
+      getUserError
+    );
+
     throw getCasesError;
   }
 
@@ -108,6 +124,13 @@ export async function main(event: Record<string, any>): Promise<Boolean> {
 
   const [addPdfToCaseError] = await to(addPdfToCase(submittedCase, newPdfBuffer));
   if (addPdfToCaseError) {
+    logError(
+      'Add pdf to case error',
+      context.awsRequestId,
+      'service-pdf-ms-addPdfToCase-003',
+      addPdfToCaseError
+    );
+
     throw addPdfToCaseError;
   }
 

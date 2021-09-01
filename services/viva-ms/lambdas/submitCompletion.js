@@ -5,17 +5,21 @@ import { to } from 'await-to-js';
 import params from '../../../libs/params';
 import config from '../../../config';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
+import { logError, logWarn, logInfo } from '../../../libs/logs';
 
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
 
-export async function main(event) {
+export async function main(event, context) {
   const vivaCaseSsmParams = await VIVA_CASE_SSM_PARAMS;
   const caseItem = parseDynamoDBItemFromEvent(event);
 
   if (caseItem.currentFormId !== vivaCaseSsmParams.completionFormId) {
-    console.info(
-      '(viva-ms: submitApplication): currentFormId does not match completionFormId from ssm params'
+    logWarn(
+      'currentFormId does not match completionFormId from ssm params',
+      context.awsRequestId,
+      'service-viva-ms-submitCompletition-001'
     );
+
     return false;
   }
 
@@ -27,9 +31,22 @@ export async function main(event) {
     answersToAttachmentList(personalNumber, caseAnswers)
   );
   if (attachmentListError) {
+    logError(
+      'Attachment list error',
+      context.awsRequestId,
+      'service-viva-ms-submitCompletition-002',
+      attachmentListError
+    );
+
     throw attachmentListError;
   }
-  console.info('(viva-ms/submitCompletion): Answers converted to Attachment List', attachmentList);
+
+  logInfo(
+    'Answers converted to Attachment List',
+    context.awsRequestId,
+    'service-viva-ms-submitCompletition-003',
+    attachmentList
+  );
 
   const [postCompletionError, postCompletionResponse] = await to(
     vivaAdapter.completion.post({
@@ -38,12 +55,22 @@ export async function main(event) {
       attachments: attachmentList,
     })
   );
+
   if (postCompletionError) {
+    logError(
+      'post completion error',
+      context.awsRequestId,
+      'service-viva-ms-submitCompletition-004',
+      postCompletionError
+    );
+
     throw postCompletionError;
   }
 
-  console.info(
-    '(viva-ms/submitCompletion): Viva Adapter Post Request Response',
+  logInfo(
+    'Viva Adapter Post Request Response',
+    context.awsRequestId,
+    'service-viva-ms-submitCompletition-004',
     postCompletionResponse
   );
 

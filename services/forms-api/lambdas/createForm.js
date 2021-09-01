@@ -5,16 +5,24 @@ import { buildResponse } from '../../../libs/response';
 import config from '../../../config';
 import { validateFormData } from '../helpers/formValidation';
 import { putItem } from '../../../libs/queries';
+import { logError } from '../../../libs/logs';
 
 /**
  * Handler function for creating a form and saving it to a dynamodb.
  */
-export async function main(event) {
+export async function main(event, context) {
   const requestBody = JSON.parse(event.body);
 
   //validates the incoming data
   const validationErrors = validateFormData(requestBody);
   if (validationErrors) {
+    logError(
+      'Validation error',
+      context.awsRequestId,
+      'service-forms-api-createForm-001',
+      validationErrors
+    );
+
     return buildResponse(400, {
       errorType: 'Validation error',
       errorDescriptions: validationErrors,
@@ -37,11 +45,19 @@ export async function main(event) {
   };
 
   const [dynamodbError] = await to(putItem(params));
-  if (dynamodbError)
+  if (dynamodbError) {
+    logError(
+      'DynamoDB error',
+      context.awsRequestId,
+      'service-cases-api-createForm-002',
+      dynamodbError
+    );
+
     return buildResponse(dynamodbError.status, {
       errorType: 'DynamoDB error',
       errorObject: dynamodbError,
     });
+  }
 
   return buildResponse(201, {
     Item,

@@ -13,14 +13,23 @@ import getNavetRequestClient from '../helpers/client';
 import { putEvent } from '../../../libs/awsEventBridge';
 import * as request from '../../../libs/request';
 
+import { logError } from '../../../libs/logs';
+
 const NAVET_PARAMS = params.read(config.navet.envsKeyName);
 
-export async function main(event) {
+export async function main(event, context) {
   const { user } = event.detail;
 
   const [requestNavetUserError, navetUser] = await to(requestNavetUser(user.personalNumber));
   if (requestNavetUserError) {
-    return console.error('(Navet-ms) requestNavetUserError', requestNavetUserError);
+    logError(
+      'Navet request error',
+      context.awsRequestId,
+      'service-navet-ms-pollUser-001',
+      requestNavetUserError
+    );
+
+    return;
   }
 
   const eventDetail = getNavetPollEventDetail(navetUser);
