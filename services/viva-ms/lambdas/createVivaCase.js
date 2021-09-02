@@ -94,7 +94,6 @@ async function getUserCaseFilteredOnWorkflowId(vivaPerson) {
       ':pk': `USER#${personalNumber}`,
       ':workflowId': workflowId,
     },
-    Limit: 1,
   };
 
   const [queryCasesError, queryCasesResult] = await to(dynamoDB.call('query', params));
