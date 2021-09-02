@@ -4,7 +4,7 @@ import to from 'await-to-js';
 import uuid from 'uuid';
 import config from '../../../config';
 import * as dynamoDb from '../../../libs/dynamoDb';
-import { putEvent } from '../../../libs/awsEventBridge';
+import putUserEvent from '../helpers/putUserEvent';
 
 export async function main(event) {
   const userDetail = event.detail;
@@ -14,9 +14,9 @@ export async function main(event) {
     return console.error('(users-ms: createUser) putUserRequestError', putUserRequestError);
   }
 
-  const [emitEventError] = await to(emitEventUserCreatedSuccess(userDetail));
-  if (emitEventError) {
-    return console.error('(users-ms: createUser) emitEventError', emitEventError);
+  const [putEventError] = await to(putUserEvent.createSuccess(userDetail));
+  if (putEventError) {
+    return console.error('(users-ms: createUser) putEventError', putEventError);
   }
   console.info('(users-ms: createUser) User was successfully created in the users table.');
   return true;
@@ -35,8 +35,4 @@ async function putUserRequest(userDetail) {
   };
 
   return dynamoDb.call('put', params);
-}
-
-async function emitEventUserCreatedSuccess(user) {
-  return putEvent(user, 'usersMsCreateUserSuccess', 'usersMs.createUser');
 }

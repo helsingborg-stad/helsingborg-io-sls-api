@@ -3,29 +3,29 @@ import to from 'await-to-js';
 
 import config from '../../../config';
 import * as dynamoDb from '../../../libs/dynamoDb';
-import { putEvent } from '../../../libs/awsEventBridge';
+import putUserEvent from '../helpers/putUserEvent';
 
 export async function main(event) {
   const userDetail = event.detail;
-  const { personalNumber } = userDetail;
 
-  const [getUserError, userItem] = await to(getUser(personalNumber));
+  const [getUserError, userItem] = await to(getUser(userDetail.personalNumber));
   if (getUserError) {
     return console.error('(users-ms: findUser) getUserError', getUserError);
   }
 
   if (userItem == undefined) {
-    const [emitEventError] = await to(emitEventUserNotFound(userDetail));
-    if (emitEventError) {
-      return console.error('(users-ms: findUser) emitEventError', emitEventError);
+    const [putEventError] = await to(putUserEvent.notFound(userDetail));
+    if (putEventError) {
+      return console.error('(users-ms: findUser) putEventError', putEventError);
     }
     return console.log('User could not be found in the users table');
   }
 
-  const [emitEventError] = await to(emitEventUserExists(userItem));
-  if (emitEventError) {
-    return console.error('(users-ms: findUser) emitEventError', emitEventError);
+  const [putEventError] = await to(putUserEvent.exists(userDetail));
+  if (putEventError) {
+    return console.error('(users-ms: findUser) putEventError', putEventError);
   }
+
   console.info('User was found in the users table.');
   return true;
 }
@@ -44,12 +44,4 @@ async function getUser(personalNumber) {
   }
 
   return getResult.Item;
-}
-
-async function emitEventUserNotFound(user) {
-  return putEvent(user, 'usersMsFindUserUnsucceeded', 'usersMs.findUser');
-}
-
-async function emitEventUserExists(user) {
-  return putEvent(user, 'usersMsFindUserSuccess', 'usersMs.findUser');
 }
