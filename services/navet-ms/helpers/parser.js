@@ -11,8 +11,8 @@ export const getPersonPostSoapRequestPayload = ({
   <soapenv:Body>
     <v1:PersonpostRequest>
       <v1:Bestallning>
-        <v1:OrgNr>${orderNumber}</v1:OrgNr>
-        <v1:BestallningsId>${organisationNumber}</v1:BestallningsId>
+        <v1:OrgNr>${organisationNumber}</v1:OrgNr>
+        <v1:BestallningsId>${orderNumber}</v1:BestallningsId>
       </v1:Bestallning>
       <v1:PersonId>${personalNumber}</v1:PersonId>
     </v1:PersonpostRequest>
