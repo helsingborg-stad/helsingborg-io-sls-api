@@ -1,7 +1,7 @@
 import parser from 'xml2js';
 import { ResourceNotFoundError } from '@helsingborg-stad/npm-api-error-handling';
 
-export const getPersonPostSoapRequest = ({
+export const getPersonPostSoapRequestPayload = ({
   personalNumber,
   orderNumber,
   organisationNumber,
