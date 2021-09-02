@@ -125,11 +125,6 @@ async function putRecurringVivaCase(vivaPerson, user) {
 
   const formIds = [recurringFormId, completionFormId];
 
-  // const [getUserError, user] = await to(getUser(PK));
-  // if (getUserError) {
-  //   throw getUserError;
-  // }
-
   const [, formTemplates] = await to(getFormTemplates(formIds));
 
   const [getLastUpdatedCaseError, lastUpdatedCase] = await to(
@@ -283,23 +278,6 @@ function getCasePersonList(vivaPerson) {
 
   return casePersonList;
 }
-
-// async function getUser(PK) {
-//   const personalNumber = PK.substring(5);
-//   const params = {
-//     TableName: config.users.tableName,
-//     Key: {
-//       personalNumber,
-//     },
-//   };
-
-//   const [getError, getResult] = await to(dynamoDB.call('get', params));
-//   if (getError) {
-//     throw getError;
-//   }
-
-//   return getResult.Item;
-// }
 
 async function getFormTemplates(formIds) {
   const [getError, rawForms] = await to(
