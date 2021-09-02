@@ -2,9 +2,9 @@ import parser from 'xml2js';
 import { ResourceNotFoundError } from '@helsingborg-stad/npm-api-error-handling';
 
 export const getPersonPostSoapRequest = ({
+  personalNumber,
   orderNumber,
   organisationNumber,
-  personalNumber,
   xmlEnvUrl,
 }) => `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v1="${xmlEnvUrl}">
   <soapenv:Header/>

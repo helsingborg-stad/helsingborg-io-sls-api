@@ -5,7 +5,7 @@ import { InternalServerError, UnauthorizedError } from '@helsingborg-stad/npm-ap
 import config from '../../../config';
 import params from '../../../libs/params';
 import {
-  getPersonPostSoapRequest,
+  getPersonPostSoapRequestPayload,
   getErrorMessageFromXML,
   getPersonPostCollection,
 } from '../helpers/parser';
@@ -20,11 +20,11 @@ export async function main(event) {
 
   const [requestNavetUserError, navetUser] = await to(requestNavetUser(user.personalNumber));
   if (requestNavetUserError) {
-    return console.error('(Navet-ms)', requestNavetUserError);
+    return console.error('(Navet-ms) requestNavetUserError', requestNavetUserError);
   }
 
   const eventDetail = getNavetPollEventDetail(navetUser);
-  await putEvent(eventDetail, 'NavetPoll', 'navet.poll');
+  await putEvent(eventDetail, 'navetMsPollUserSuccess', 'navetMs.pollUser');
 
   return true;
 }
@@ -47,16 +47,15 @@ function getNavetPollEventDetail(navetUser) {
 
 async function requestNavetUser(personalNumber) {
   const ssmParams = await NAVET_PARAMS;
-  ssmParams.personalNumber = personalNumber;
 
   const [getNavetClientError, navetRequestClient] = await to(getNavetRequestClient(ssmParams));
   if (getNavetClientError) {
     throw getNavetClientError;
   }
 
-  const navetPersonPostRequestXmlPayload = getPersonPostSoapRequest({
+  const personPostSoapRequestPayload = getPersonPostSoapRequestPayload({
+    personalNumber,
     orderNumber: ssmParams.orderNr,
-    personalNumber: ssmParams.personalNumber,
     organisationNumber: ssmParams.orgNr,
     xmlEnvUrl: ssmParams.personpostXmlEnvUrl,
   });
@@ -66,7 +65,7 @@ async function requestNavetUser(personalNumber) {
       navetRequestClient,
       'post',
       ssmParams.personpostXmlEndpoint,
-      navetPersonPostRequestXmlPayload
+      personPostSoapRequestPayload
     )
   );
   if (postNavetClientError) {
@@ -85,9 +84,9 @@ async function requestNavetUser(personalNumber) {
 }
 
 async function getNavetPersonPost(navetUser) {
-  const [parseJsonError, navetPerson] = await to(getPersonPostCollection(navetUser.data));
-  if (parseJsonError) {
-    throw parseJsonError;
+  const [getPersonPostError, navetPerson] = await to(getPersonPostCollection(navetUser.data));
+  if (getPersonPostError) {
+    throw getPersonPostError;
   }
 
   const { Folkbokforingspost } = navetPerson;
