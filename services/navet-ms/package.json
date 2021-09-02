@@ -1,11 +1,10 @@
 {
-  "name": "hbg-navet",
-  "version": "0.0.1",
+  "name": "navet-ms",
+  "version": "1.0.0",
   "description": "",
   "main": "poll.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "poll-user": "sls invoke --function poll --path mock/data.json"
   },
   "keywords": [],
   "author": "Helsingborg Stad",
@@ -13,5 +12,4 @@
   "dependencies": {
     "xml2js": "^0.4.23"
   },
-  "devDependencies": {}
 }
