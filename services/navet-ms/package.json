@@ -4,12 +4,12 @@
   "description": "",
   "main": "poll.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "Helsingborg Stad",
   "license": "MIT",
   "dependencies": {
     "xml2js": "^0.4.23"
-  },
+  }
 }
