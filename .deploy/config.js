@@ -1,7 +1,7 @@
 import process from 'process';
 
 export default {
-  deployCommand: `sls deploy -v --conceal --stage ${process.env.ENV}`,
+  deployCommand: `sls deploy --verbose --conceal --stage ${process.env.ENV}`,
   listCommand: `sls deploy list --stage ${process.env.ENV}`,
   rollbackCommand: `sls rollback --stage ${process.env.ENV} -t`,
   servicesPath: 'services',
