@@ -5,6 +5,8 @@ plugins:
   - serverless-offline
   - serverless-add-api-key
 
+projectDir: ../../../
+
 custom: ${file(../../serverless.common.yml):custom}
 
 package:

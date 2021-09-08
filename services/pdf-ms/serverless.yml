@@ -3,6 +3,8 @@ service: pdf-ms
 plugins:
   - serverless-webpack
 
+projectDir: ../../../
+
 custom:
   stage: ${opt:stage, self:provider.stage}
   resourcesStages:

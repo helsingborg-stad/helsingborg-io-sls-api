@@ -6,6 +6,8 @@ plugins:
   - serverless-apigw-binary
   - serverless-apigwy-binary
 
+projectDir: ../../../
+
 custom: ${file(../../serverless.common.yml):custom}
 
 package:
