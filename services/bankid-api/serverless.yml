@@ -2,7 +2,8 @@ service: bankid-api
 
 plugins:
   - serverless-bundle
-  - serverless-offline
+
+projectDir: ../../
 
 projectDir: ../../../
 
@@ -19,7 +20,6 @@ provider:
   region: eu-north-1
   endpointType: regional
   tracing:
-    apiGateway: true
     lambda: true
   apiGateway:
     restApiId:
