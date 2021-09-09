@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import to from 'await-to-js';
 import config from '../../../config';
@@ -17,7 +18,6 @@ export const main = async event => {
   const { orderRef } = JSON.parse(body);
   const bankidSSMParams = await SSMParams;
 
-  // eslint-disable-next-line no-console
   console.info('🚀 ~ file: collect.js ~ line 21 ~ headers -> User-Agent', headers['User-Agent']);
 
   const payload = { orderRef };
@@ -66,7 +66,6 @@ export const main = async event => {
     };
   }
 
-  // eslint-disable-next-line no-console
   console.info('🚀 ~ file: collect.js ~ line 70 ~ responseAttributes', responseAttributes);
 
   return response.success(200, {
@@ -85,11 +84,6 @@ function isUserAgentMittHelsingborgApp(headers) {
   return userAgent.includes(searchElement);
 }
 
-/**
- * Function for generating a authorization code, to be used for obtaining a access token.
- * @param {object} payload a object with only one level of depth.
- * @returns JWT (Json Web Token)
- */
 async function generateAuthorizationCode(personalNumber) {
   const [authorizationCodeSecretError, auhtorizationCodeSecret] = await to(
     secrets.get(
