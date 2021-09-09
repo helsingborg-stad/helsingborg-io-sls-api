@@ -13,7 +13,8 @@ const SSMParams = params.read(config.bankId.envsKeyName);
 const CONFIG_AUTH_SECRETS_AUTHORIZATION_CODE = config.auth.secrets.authorizationCode;
 
 export const main = async event => {
-  const { orderRef } = JSON.parse(event.body);
+  const { body, headers } = event;
+  const { orderRef } = JSON.parse(body);
   const bankidSSMParams = await SSMParams;
 
   const payload = { orderRef };
@@ -26,11 +27,20 @@ export const main = async event => {
 
   let responseAttributes = {};
 
-  if (bankIdCollectResponse.data && bankIdCollectResponse.data.status !== 'complete') {
+  if (!isBankidCollectStatusComplete(bankIdCollectResponse.data)) {
     responseAttributes = bankIdCollectResponse.data;
   }
 
-  if (bankIdCollectResponse.data && bankIdCollectResponse.data.status === 'complete') {
+  if (isBankidCollectStatusComplete(bankIdCollectResponse.data)) {
+    responseAttributes = {
+      ...bankIdCollectResponse.data,
+    };
+  }
+
+  if (
+    isUserAgentMittHelsingborgApp(headers) &&
+    isBankidCollectStatusComplete(bankIdCollectResponse.data)
+  ) {
     await putEvent(
       bankIdCollectResponse.data.completionData,
       'BankIdCollectComplete',
@@ -49,7 +59,7 @@ export const main = async event => {
 
     responseAttributes = {
       authorizationCode,
-      ...bankIdCollectResponse.data,
+      ...responseAttributes,
     };
   }
 
@@ -58,6 +68,16 @@ export const main = async event => {
     attributes: responseAttributes,
   });
 };
+
+function isBankidCollectStatusComplete(responseData) {
+  return responseData && responseData.status === 'complete';
+}
+
+function isUserAgentMittHelsingborgApp(headers) {
+  const { ['User-Agent']: userAgent } = headers;
+  const searchElement = 'MittHelsingborg';
+  return userAgent.includes(searchElement);
+}
 
 /**
  * Function for generating a authorization code, to be used for obtaining a access token.
