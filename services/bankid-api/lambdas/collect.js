@@ -17,6 +17,9 @@ export const main = async event => {
   const { orderRef } = JSON.parse(body);
   const bankidSSMParams = await SSMParams;
 
+  // eslint-disable-next-line no-console
+  console.info('🚀 ~ file: collect.js ~ line 21 ~ headers -> User-Agent', headers['User-Agent']);
+
   const payload = { orderRef };
 
   const [bankIdCollectRequestError, bankIdCollectResponse] = await to(
@@ -62,6 +65,9 @@ export const main = async event => {
       ...responseAttributes,
     };
   }
+
+  // eslint-disable-next-line no-console
+  console.info('🚀 ~ file: collect.js ~ line 70 ~ responseAttributes', responseAttributes);
 
   return response.success(200, {
     type: 'bankIdCollect',
