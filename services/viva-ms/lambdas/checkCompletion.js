@@ -7,6 +7,7 @@ import * as dynamoDb from '../../../libs/dynamoDb';
 import validateApplicationStatus from '../helpers/validateApplicationStatus';
 import { getStatusByType } from '../../../libs/caseStatuses';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
+import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
 
@@ -51,17 +52,24 @@ export async function main(event) {
 
 async function updateCaseCompletionAttributes(keys, currentFormId) {
   const completionStatus = getStatusByType('active:completionRequired:viva');
+  const [getCaseError, { persons }] = await to(getCase(keys));
+  if (getCaseError) {
+    throw getCaseError;
+  }
+  const newPersons = persons ? resetApplicantSignature(persons) : [];
 
   const params = {
     TableName: config.cases.tableName,
     Key: keys,
-    UpdateExpression: 'set currentFormId = :currentFormId, #status = :completionStatus',
+    UpdateExpression:
+      'set currentFormId = :currentFormId, #status = :completionStatus, persons = :persons',
     ExpressionAttributeNames: {
       '#status': 'status',
     },
     ExpressionAttributeValues: {
       ':currentFormId': currentFormId,
       ':completionStatus': completionStatus,
+      ':persons': newPersons,
     },
     ReturnValues: 'UPDATED_NEW',
   };
@@ -72,4 +80,36 @@ async function updateCaseCompletionAttributes(keys, currentFormId) {
   }
 
   return caseItem;
+}
+
+async function getCase(keys) {
+  const params = {
+    TableName: config.cases.tableName,
+    KeyConditionExpression: 'PK = :pk AND SK = :sk',
+    ExpressionAttributeValues: {
+      ':pk': keys.PK,
+      ':sk': keys.SK,
+    },
+  };
+
+  const [error, dbResponse] = await to(dynamoDb.call('query', params));
+  if (error) {
+    throwError(error.statusCode, error.message);
+  }
+
+  const caseItem = dbResponse.Items.find(item => item.PK === keys.PK);
+  if (!caseItem) {
+    throw 'Case not found';
+  }
+
+  return caseItem;
+}
+
+function resetApplicantSignature(persons) {
+  return persons.map(person => {
+    if (person.role === 'applicant' && person.hasSigned) {
+      person.hasSigned = false;
+    }
+    return person;
+  });
 }
