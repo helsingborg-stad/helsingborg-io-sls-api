@@ -3,7 +3,7 @@ service: cases-api
 plugins:
   - serverless-bundle
 
-projectDir: ../../../
+projectDir: ../../
 
 custom: ${file(../../serverless.common.yml):custom}
 

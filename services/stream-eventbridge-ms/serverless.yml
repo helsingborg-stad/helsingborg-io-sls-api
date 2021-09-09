@@ -4,7 +4,7 @@ plugins:
   - serverless-bundle
   - serverless-offline
 
-projectDir: ../../../
+projectDir: ../../
 
 custom: ${file(../../serverless.common.yml):custom}
 

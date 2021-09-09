@@ -3,7 +3,7 @@ service: users-ms
 plugins:
   - serverless-bundle
 
-projectDir: ../../../
+projectDir: ../../
 
 custom: ${file(../../serverless.common.yml):custom}
 
