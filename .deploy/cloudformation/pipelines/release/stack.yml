@@ -18,7 +18,7 @@ Parameters:
   GitHubBranch:
     Description: Branch name.
     Type: String
-    Default: release/1.0.1
+    Default: release/1.0.2
   GitHubNPMToken:
     Description: Access token for github npm packages
     Type: AWS::SSM::Parameter::Value<String>
