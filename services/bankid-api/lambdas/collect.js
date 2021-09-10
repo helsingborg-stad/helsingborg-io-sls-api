@@ -80,7 +80,7 @@ function isBankidCollectStatusComplete(responseData) {
 
 function isUserAgentMittHelsingborgApp(headers) {
   const { ['User-Agent']: userAgent } = headers;
-  const searchElementRegex = /^Mitt\s?Helsingborg$/;
+  const searchElementRegex = /^Mitt\s?Helsingborg.*$/;
   return searchElementRegex.test(userAgent);
 }
 
