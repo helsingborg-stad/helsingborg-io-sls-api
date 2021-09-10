@@ -7,7 +7,6 @@ import * as dynamoDb from '../../../libs/dynamoDb';
 import validateApplicationStatus from '../helpers/validateApplicationStatus';
 import { getStatusByType } from '../../../libs/caseStatuses';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
-import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
 
@@ -94,7 +93,7 @@ async function getCase(keys) {
 
   const [error, dbResponse] = await to(dynamoDb.call('query', params));
   if (error) {
-    throwError(error.statusCode, error.message);
+    throw error;
   }
 
   const caseItem = dbResponse.Items.find(item => item.PK === keys.PK);
