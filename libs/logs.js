@@ -7,30 +7,32 @@ const logger = winston.createLogger({
   exitOnError: false,
 });
 
-export const log = (level, message, requestId, errorCode, customData = {}) => {
-  logger.log(level, message, {
-    errorCode: errorCode,
-    requestId: requestId,
-    customData: customData,
-  });
-};
+export const log = {
+  log: (level, message, requestId, errorCode, customData = {}) => {
+    logger.log(level, message, {
+      errorCode: errorCode,
+      requestId: requestId,
+      customData: customData,
+    });
+  },
 
-export const logError = (message, requestId, errorCode, customData = {}) => {
-  log('error', message, requestId, errorCode, customData);
-};
+  error: (message, requestId, errorCode, customData = {}) => {
+    this.log('error', message, requestId, errorCode, customData);
+  },
 
-export const logWarn = (message, requestId, errorCode, customData = {}) => {
-  log('warn', message, requestId, errorCode, customData);
-};
+  warn: (message, requestId, errorCode, customData = {}) => {
+    this.log('warn', message, requestId, errorCode, customData);
+  },
 
-export const logInfo = (message, requestId, errorCode, customData = {}) => {
-  log('info', message, requestId, errorCode, customData);
-};
+  info: (message, requestId, errorCode, customData = {}) => {
+    this.log('info', message, requestId, errorCode, customData);
+  },
 
-export const logVerbose = (message, requestId, errorCode, customData = {}) => {
-  log('verbose', message, requestId, errorCode, customData);
-};
+  verbose: (message, requestId, errorCode, customData = {}) => {
+    this.log('verbose', message, requestId, errorCode, customData);
+  },
 
-export const logDebug = (message, requestId, errorCode, customData = {}) => {
-  log('debug', message, requestId, errorCode, customData);
+  debug: (message, requestId, errorCode, customData = {}) => {
+    this.log('debug', message, requestId, errorCode, customData);
+  },
 };

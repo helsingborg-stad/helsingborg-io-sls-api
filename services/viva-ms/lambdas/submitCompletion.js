@@ -5,7 +5,7 @@ import { to } from 'await-to-js';
 import params from '../../../libs/params';
 import config from '../../../config';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
-import { logError, logWarn, logInfo } from '../../../libs/logs';
+import log from '../../../libs/logs';
 
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
 
@@ -14,7 +14,7 @@ export async function main(event, context) {
   const caseItem = parseDynamoDBItemFromEvent(event);
 
   if (caseItem.currentFormId !== vivaCaseSsmParams.completionFormId) {
-    logWarn(
+    log.warn(
       'currentFormId does not match completionFormId from ssm params',
       context.awsRequestId,
       'service-viva-ms-submitCompletition-001'
@@ -31,7 +31,7 @@ export async function main(event, context) {
     answersToAttachmentList(personalNumber, caseAnswers)
   );
   if (attachmentListError) {
-    logError(
+    log.error(
       'Attachment list error',
       context.awsRequestId,
       'service-viva-ms-submitCompletition-002',
@@ -41,7 +41,7 @@ export async function main(event, context) {
     throw attachmentListError;
   }
 
-  logInfo(
+  log.info(
     'Answers converted to Attachment List',
     context.awsRequestId,
     'service-viva-ms-submitCompletition-003',
@@ -57,7 +57,7 @@ export async function main(event, context) {
   );
 
   if (postCompletionError) {
-    logError(
+    log.error(
       'post completion error',
       context.awsRequestId,
       'service-viva-ms-submitCompletition-004',
@@ -67,7 +67,7 @@ export async function main(event, context) {
     throw postCompletionError;
   }
 
-  logInfo(
+  log.info(
     'Viva Adapter Post Request Response',
     context.awsRequestId,
     'service-viva-ms-submitCompletition-004',

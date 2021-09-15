@@ -8,7 +8,7 @@ import config from '../../../config';
 import * as dynamoDb from '../../../libs/dynamoDb';
 
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
-import { logError } from '../../../libs/logs';
+import log from '../../../libs/logs';
 
 const dynamoDbConverter = AWS.DynamoDB.Converter;
 
@@ -30,7 +30,7 @@ export async function main(event, context) {
     vivaAdapter.officers.get(personalNumber)
   );
   if (vadaMyPagesError) {
-    logError(
+    log.error(
       'vada mypages error',
       context.awsRequestId,
       'service-viva-ms-syncOfficers-001',
@@ -65,7 +65,7 @@ export async function main(event, context) {
 
   const [updateError] = await to(sendUpdateRequest(dynamoDbParams));
   if (updateError) {
-    logError(
+    log.error(
       'Update request error',
       context.awsRequestId,
       'service-viva-ms-syncOfficers-002',

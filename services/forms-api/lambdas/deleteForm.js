@@ -2,7 +2,7 @@ import to from 'await-to-js';
 import config from '../../../config';
 import * as dynamoDb from '../../../libs/dynamoDb';
 import { buildResponse } from '../../../libs/response';
-import { logError } from '../../../libs/logs';
+import log from '../../../libs/logs';
 
 /**
  * Function for deleting form by id in dynamodb
@@ -20,7 +20,7 @@ export const main = async (event, context) => {
 
   const [error, dbResponse] = await to(sendFormDeleteRequest(params));
   if (error) {
-    logError(
+    log.error(
       'Form delete request error',
       context.awsRequestId,
       'service-forms-api-deleteForm-001',

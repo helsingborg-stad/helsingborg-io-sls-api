@@ -2,7 +2,7 @@ import to from 'await-to-js';
 import config from '../../../config';
 import { buildResponse } from '../../../libs/response';
 import * as dynamoDb from '../../../libs/dynamoDb';
-import { logError } from '../../../libs/logs';
+import log from '../../../libs/logs';
 
 /**
  * Handler function for all forms from the database.
@@ -15,7 +15,7 @@ export async function main(_event, context) {
   };
   const [error, queryResponse] = await to(makeScanQuery(params));
   if (error) {
-    logError(
+    log.error(
       'Get form list request error',
       context.awsRequestId,
       'service-forms-api-getFormList-001',

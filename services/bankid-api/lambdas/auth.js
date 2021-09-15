@@ -6,7 +6,7 @@ import params from '../../../libs/params';
 import * as request from '../../../libs/request';
 import * as response from '../../../libs/response';
 import * as bankId from '../helpers/bankId';
-import { logError } from '../../../libs/logs';
+import log from '../../../libs/logs';
 
 const SSMParams = params.read(config.bankId.envsKeyName);
 
@@ -21,7 +21,7 @@ export const main = async (event, context) => {
 
   const [error, bankIdAuthResponse] = await to(sendBankIdAuthRequest(bankIdSSMparams, payload));
   if (!bankIdAuthResponse) {
-    logError(
+    log.error(
       'Bank Id Auth response error',
       context.awsRequestId,
       'service-bankid-api-auth-001',
