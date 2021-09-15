@@ -7,7 +7,7 @@ import * as dynamoDb from '../../../libs/dynamoDb';
 import validateApplicationStatus from '../helpers/validateApplicationStatus';
 import { getStatusByType } from '../../../libs/caseStatuses';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
-import { logError, logInfo } from '../../../libs/logs';
+import log from '../../../libs/logs';
 
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
 
@@ -19,7 +19,7 @@ export async function main(event, context) {
     vivaAdapter.application.status(personalNumber)
   );
   if (applicationStatusError) {
-    logError(
+    log.error(
       'Application status error',
       context.awsRequestId,
       'service-viva-ms-checkCompletion-001',
@@ -40,7 +40,7 @@ export async function main(event, context) {
   const completionStatusCodes = [64, 128, 256, 512];
   if (!validateApplicationStatus(applicationStatusList, completionStatusCodes)) {
     const errorMessage = 'no completion status found in viva adapter response';
-    logError(errorMessage, context.awsRequestId, 'service-viva-ms-checkCompletion-002');
+    log.error(errorMessage, context.awsRequestId, 'service-viva-ms-checkCompletion-002');
 
     throw errorMessage;
   }
@@ -51,7 +51,7 @@ export async function main(event, context) {
   );
 
   if (updateCaseError) {
-    logError(
+    log.error(
       'Update case error',
       context.awsRequestId,
       'service-viva-ms-checkCompletion-003',
@@ -61,7 +61,7 @@ export async function main(event, context) {
     throw updateCaseError;
   }
 
-  logInfo(
+  log.info(
     'Updated case with completion data successfully',
     context.awsRequestId,
     'service-viva-ms-checkCompletion-004',

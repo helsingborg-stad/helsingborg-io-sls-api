@@ -7,7 +7,7 @@ import * as response from '../../../libs/response';
 import * as dynamoDb from '../../../libs/dynamoDb';
 import { decodeToken } from '../../../libs/token';
 import { objectWithoutProperties } from '../../../libs/objects';
-import { logError } from '../../../libs/logs';
+import log from '../../../libs/logs';
 
 export async function main(event, context) {
   const decodedToken = decodeToken(event);
@@ -16,7 +16,7 @@ export async function main(event, context) {
 
   const [getUserCaseListError, userCaseList] = await to(getUserCaseList(personalNumber));
   if (getUserCaseListError) {
-    logError(
+    log.error(
       'Get User Case list error',
       context.awsRequestId,
       'service-cases-api-getCaseList-001',
@@ -28,7 +28,7 @@ export async function main(event, context) {
 
   if (userCaseList.length === 0) {
     const errorMessage = 'No user cases found';
-    logError(errorMessage, context.awsRequestId, 'service-cases-api-getCaseList-002');
+    log.error(errorMessage, context.awsRequestId, 'service-cases-api-getCaseList-002');
 
     return response.failure(new ResourceNotFoundError(errorMessage));
   }

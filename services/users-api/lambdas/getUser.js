@@ -6,7 +6,7 @@ import config from '../../../config';
 import * as response from '../../../libs/response';
 import * as dynamoDb from '../../../libs/dynamoDb';
 import { decodeToken } from '../../../libs/token';
-import { logError, logWarn } from '../../../libs/logs';
+import log from '../../../libs/logs';
 
 /**
  * Get the user with the personal number specified in the path
@@ -23,7 +23,7 @@ export const main = async (event, context) => {
 
   const [error, userGetResponse] = await to(sendUserGetRequest(params));
   if (error) {
-    logError(
+    log.error(
       'Get user request error',
       context.awsRequestId,
       'service-users-api-getUser-001',
@@ -43,7 +43,7 @@ export const main = async (event, context) => {
   //and return a 404 if no results were found
   if (Object.keys(attributes).length === 0) {
     const errorMessage = 'No user with that personal number found in the database.';
-    logWarn(errorMessage, context.awsRequestId, 'service-users-api-getUser-001', error);
+    log.warn(errorMessage, context.awsRequestId, 'service-users-api-getUser-001', error);
 
     return response.buildResponse(404, {
       type: 'userGet',

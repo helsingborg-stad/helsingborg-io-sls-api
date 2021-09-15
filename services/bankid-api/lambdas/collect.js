@@ -9,7 +9,7 @@ import * as response from '../../../libs/response';
 import * as bankId from '../helpers/bankId';
 import secrets from '../../../libs/secrets';
 import { signToken } from '../../../libs/token';
-import { logError } from '../../../libs/logs';
+import log from '../../../libs/logs';
 
 const SSMParams = params.read(config.bankId.envsKeyName);
 const CONFIG_AUTH_SECRETS_AUTHORIZATION_CODE = config.auth.secrets.authorizationCode;
@@ -29,7 +29,7 @@ export const main = async (event, context) => {
   );
 
   if (bankIdCollectRequestError) {
-    logError(
+    log.error(
       'Bank Id Collect request error',
       context.awsRequestId,
       'service-bankid-api-collect-001',
@@ -68,7 +68,7 @@ export const main = async (event, context) => {
     );
 
     if (generateAuthorizationCodeError) {
-      logError(
+      log.error(
         'Bank Id Authorization code error',
         context.awsRequestId,
         'service-bankid-api-collect-002',

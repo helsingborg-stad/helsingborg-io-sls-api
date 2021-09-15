@@ -17,7 +17,7 @@ import {
   getNewAndChangedCaseAnswerValues,
 } from '../helpers/case';
 
-import { logError } from '../../../libs/logs';
+import log from '../../../libs/logs';
 
 const PDF_SSM_PARAMS = params.read(config.pdf.envsKeyName);
 
@@ -35,7 +35,7 @@ export async function main(event: Record<string, any>, context): Promise<Boolean
 
   const [getUserError, user] = await to(getUser(personalNumber));
   if (getUserError) {
-    logError(
+    log.error(
       'Get user error',
       context.awsRequestId,
       'service-pdf-ms-addPdfToCase-001',
@@ -47,7 +47,7 @@ export async function main(event: Record<string, any>, context): Promise<Boolean
 
   const [getCasesError, closedCases] = await to(getClosedUserCases(personalNumber));
   if (getCasesError) {
-    logError(
+    log.error(
       'Get cases error',
       context.awsRequestId,
       'service-pdf-ms-addPdfToCase-002',
@@ -124,7 +124,7 @@ export async function main(event: Record<string, any>, context): Promise<Boolean
 
   const [addPdfToCaseError] = await to(addPdfToCase(submittedCase, newPdfBuffer));
   if (addPdfToCaseError) {
-    logError(
+    log.error(
       'Add pdf to case error',
       context.awsRequestId,
       'service-pdf-ms-addPdfToCase-003',

@@ -6,7 +6,7 @@ import config from '../../../config';
 import params from '../../../libs/params';
 import { putEvent } from '../../../libs/awsEventBridge';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
-import { logError, logInfo } from '../../../libs/logs';
+import log from '../../../libs/logs';
 
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
 
@@ -21,7 +21,7 @@ export async function main(event, context) {
 
   const vivaCaseSSMParams = await VIVA_CASE_SSM_PARAMS;
   if (vivaCaseSSMParams.recurringFormId !== caseItem.currentFormId) {
-    logInfo(
+    log.info(
       'currentFormId does not match recurringFormId',
       context.awsRequestId,
       'service-viva-ms-submitApplication-001'
@@ -51,7 +51,7 @@ export async function main(event, context) {
     })
   );
   if (applicationPostError) {
-    logError(
+    log.error(
       'Application post error',
       context.awsRequestId,
       'service-viva-ms-submitApplication-002',
@@ -61,7 +61,7 @@ export async function main(event, context) {
     return;
   }
 
-  logInfo(
+  log.info(
     'Application response',
     context.awsRequestId,
     'service-viva-ms-submitApplication-003',

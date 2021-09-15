@@ -2,7 +2,7 @@ import to from 'await-to-js';
 import config from '../../../config';
 import { buildResponse } from '../../../libs/response';
 import * as dynamoDb from '../../../libs/dynamoDb';
-import { logError } from '../../../libs/logs';
+import log from '../../../libs/logs';
 
 // get form by id
 export async function main(event, context) {
@@ -18,7 +18,7 @@ export async function main(event, context) {
 
   const [error, queryResponse] = await to(getFormRequest(params));
   if (error) {
-    logError(
+    log.error(
       'Get form request error',
       context.awsRequestId,
       'service-forms-api-getForm-001',
@@ -29,7 +29,7 @@ export async function main(event, context) {
 
   if (queryResponse[1].Count === 0) {
     const errorMessage = 'Form with that id not found in the database.';
-    logError(errorMessage, context.awsRequestId, 'service-cases-api-getForm-002');
+    log.error(errorMessage, context.awsRequestId, 'service-cases-api-getForm-002');
     return buildResponse(404, { error: errorMessage });
   }
   return buildResponse(200, queryResponse[1].Items[0]);

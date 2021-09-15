@@ -4,7 +4,7 @@ import { objectWithoutProperties } from '../../../libs/objects';
 import config from '../../../config';
 import { validateFormData } from '../helpers/formValidation';
 import * as dynamoDb from '../../../libs/dynamoDb';
-import { logError } from '../../../libs/logs';
+import log from '../../../libs/logs';
 
 const forbiddenKeys = ['id', 'PK', 'createdAt'];
 
@@ -29,7 +29,7 @@ export async function main(event, context) {
   );
 
   if (updateErrors) {
-    logError(
+    log.error(
       'Update expression error',
       context.awsRequestId,
       'service-forms-api-updateForm-001',
@@ -40,7 +40,7 @@ export async function main(event, context) {
   }
   const validationErrors = validateFormData(requestBody, true);
   if (validationErrors) {
-    logError(
+    log.error(
       'Validation error',
       context.awsRequestId,
       'service-forms-api-updateForm-002',
@@ -64,7 +64,7 @@ export async function main(event, context) {
 
   const [error, dynamoDbResponse] = await to(dynamoDb.call('update', params));
   if (error) {
-    logError('Form update error', context.awsRequestId, 'service-forms-api-updateForm-003', error);
+    log.error('Form update error', context.awsRequestId, 'service-forms-api-updateForm-003', error);
 
     return buildResponse(error.status, error);
   }

@@ -5,7 +5,7 @@ import * as response from '../../../../libs/response';
 import { signToken, verifyToken } from '../../../../libs/token';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import tokenValidationSchema from '../helpers/schema';
-import { logWarn } from '../../../../libs/logs';
+import log from '../../../../libs/logs';
 
 const CONFIG_AUTH_SECRETS = config.auth.secrets;
 const ACCESS_TOKEN_EXPIRES_IN_MINUTES = 20;
@@ -15,7 +15,7 @@ export const main = async (event, context) => {
   const [parseJsonError, parsedJson] = await to(parseJson(event.body));
 
   if (parseJsonError) {
-    logWarn(
+    log.warn(
       'JSON Parse error',
       context.awsRequestId,
       'service-auth-token-generateToken-001',
@@ -30,7 +30,7 @@ export const main = async (event, context) => {
   );
 
   if (validationError) {
-    logWarn(
+    log.warn(
       'Validation error',
       context.awsRequestId,
       'service-auth-token-generateToken-002',
@@ -47,7 +47,7 @@ export const main = async (event, context) => {
   );
 
   if (validateTokenError) {
-    logWarn(
+    log.warn(
       'Validate token error',
       context.awsRequestId,
       'service-auth-token-generateToken-003',
@@ -64,7 +64,7 @@ export const main = async (event, context) => {
   );
 
   if (getAccessTokenError) {
-    logWarn(
+    log.warn(
       'Get access token error',
       context.awsRequestId,
       'service-auth-token-generateToken-004',
@@ -82,7 +82,7 @@ export const main = async (event, context) => {
     )
   );
   if (getRefreshTokenError) {
-    logWarn(
+    log.warn(
       'Get refresh token error',
       context.awsRequestId,
       'service-auth-token-generateToken-004',
