@@ -12,7 +12,6 @@ const ACCESS_TOKEN_EXPIRES_IN_MINUTES = 20;
 const REFRESH_TOKEN_EXPIRES_IN_MINUTES = 30;
 
 export const main = async (event, context) => {
-  console.log(event);
   const [parseJsonError, parsedJson] = await to(parseJson(event.body));
 
   if (parseJsonError) {
