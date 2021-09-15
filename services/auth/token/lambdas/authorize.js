@@ -4,7 +4,6 @@ import generateIAMPolicy from '../helpers/generateIAMPolicy';
 import { verifyToken } from '../../../../libs/token';
 import config from '../../../../config';
 import secrets from '../../../../libs/secrets';
-import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import { logWarn } from '../../../../libs/logs';
 
 const CONFIG_AUTH_SECRETS_ACCESS_TOKEN = config.auth.secrets.accessToken;
@@ -15,7 +14,7 @@ export async function main(event, context) {
   if (!authorizationToken) {
     logWarn('Unauthorized!', context.awsRequestId, 'service-auth-token-authorize-001');
 
-    throwError(401, 'Unauthorized');
+    throw Error('Unauthorized');
   }
 
   const token = authorizationToken.includes('Bearer')
@@ -28,14 +27,14 @@ export async function main(event, context) {
   if (getSecretError) {
     logWarn('Unauthorized!', context.awsRequestId, 'service-auth-token-authorize-002');
 
-    throwError(401, 'Unauthorized');
+    throw Error('Unauthorized');
   }
 
   const [error, decodedToken] = await to(verifyToken(token, secret));
   if (error) {
     logWarn('Unauthorized!', context.awsRequestId, 'service-auth-token-authorize-003');
-    // By throwing this error AWS returns a 401 response with the message unauthorized
-    throwError(401, 'Unauthorized');
+
+    throw Error('Unauthorized');
   }
 
   const IAMPolicy = generateIAMPolicy(decodedToken.personalNumber, 'Allow', '*');
