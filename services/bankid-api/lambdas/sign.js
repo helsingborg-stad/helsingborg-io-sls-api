@@ -7,7 +7,7 @@ import { failure, success } from '../../../libs/response';
 import { validateEventBody } from '../../../libs/validateEventBody';
 import { validateKeys } from '../../../libs/validateKeys';
 import * as bankId from '../helpers/bankId';
-import { logError } from '../../../libs/logs';
+import log from '../../../libs/logs';
 
 const SSMParams = params.read(config.bankId.envsKeyName);
 let valid = true;
@@ -19,7 +19,7 @@ export const main = async (event, context) => {
   const [validationError] = await to(validateEventBody(event.body, validateTokenEventBody));
 
   if (validationError && !valid) {
-    logError(
+    log.error(
       'Validation error',
       context.awsRequestId,
       'service-bankid-api-sign-001',
@@ -40,7 +40,7 @@ export const main = async (event, context) => {
   const [error, bankIdSignResponse] = await to(sendBankIdSignRequest(bankidSSMParams, payload));
 
   if (!bankIdSignResponse) {
-    logError(
+    log.error(
       'Bank Id Sign response error',
       context.awsRequestId,
       'service-bankid-api-sign-002',

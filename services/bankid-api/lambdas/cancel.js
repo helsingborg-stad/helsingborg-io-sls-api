@@ -5,7 +5,7 @@ import params from '../../../libs/params';
 import * as request from '../../../libs/request';
 import * as response from '../../../libs/response';
 import * as bankId from '../helpers/bankId';
-import { logError } from '../../../libs/logs';
+import log from '../../../libs/logs';
 
 const SSMParams = params.read(config.bankId.envsKeyName);
 
@@ -18,7 +18,7 @@ export const main = async (event, context) => {
   const [error, bankIdCancelResponse] = await to(sendBankIdCancelRequest(bankIdSSMparams, payload));
 
   if (!bankIdCancelResponse) {
-    logError(
+    log.error(
       'Bank Id Cancel response error',
       context.awsRequestId,
       'service-bankid-api-cancel-001',

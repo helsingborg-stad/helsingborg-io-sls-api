@@ -5,7 +5,7 @@ import { buildResponse } from '../../../libs/response';
 import config from '../../../config';
 import { validateFormData } from '../helpers/formValidation';
 import { putItem } from '../../../libs/queries';
-import { logError } from '../../../libs/logs';
+import log from '../../../libs/logs';
 
 /**
  * Handler function for creating a form and saving it to a dynamodb.
@@ -16,7 +16,7 @@ export async function main(event, context) {
   //validates the incoming data
   const validationErrors = validateFormData(requestBody);
   if (validationErrors) {
-    logError(
+    log.error(
       'Validation error',
       context.awsRequestId,
       'service-forms-api-createForm-001',
@@ -46,7 +46,7 @@ export async function main(event, context) {
 
   const [dynamodbError] = await to(putItem(params));
   if (dynamodbError) {
-    logError(
+    log.error(
       'DynamoDB error',
       context.awsRequestId,
       'service-cases-api-createForm-002',

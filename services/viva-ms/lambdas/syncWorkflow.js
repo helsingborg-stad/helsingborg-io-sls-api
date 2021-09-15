@@ -6,14 +6,14 @@ import * as dynamoDb from '../../../libs/dynamoDb';
 import config from '../../../config';
 import { putEvent } from '../../../libs/awsEventBridge';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
-import { logError, logInfo } from '../../../libs/logs';
+import log from '../../../libs/logs';
 
 export async function main(event, context) {
   const { personalNumber } = event.detail.user;
 
   const [getCasesError, userCases] = await to(getCasesSumbittedOrProcessing(personalNumber));
   if (getCasesError) {
-    logError(
+    log.error(
       'Get cases error error',
       context.awsRequestId,
       'service-viva-ms-syncWorkflow-001',
@@ -25,7 +25,7 @@ export async function main(event, context) {
 
   const caseList = userCases.Items;
   if (caseList === undefined || caseList.length === 0) {
-    logInfo(
+    log.info(
       'DynamoDB query did not fetch any active:submitted or active:processing case(s)',
       context.awsRequestId,
       'service-viva-ms-syncWorkflow-002'
@@ -46,7 +46,7 @@ export async function main(event, context) {
       vivaAdapter.workflow.get({ personalNumber, workflowId })
     );
     if (adapterWorkflowGetError) {
-      logError(
+      log.error(
         'adapterWorkflowGetError',
         context.awsRequestId,
         'service-viva-ms-syncWorkflow-003',
@@ -57,7 +57,7 @@ export async function main(event, context) {
     }
 
     if (deepEqual(workflow.attributes, caseItem.details?.workflow)) {
-      logInfo(
+      log.info(
         'case workflow is in sync with Viva',
         context.awsRequestId,
         'service-viva-ms-syncWorkflow-004'
@@ -68,7 +68,7 @@ export async function main(event, context) {
 
     const [updateDbWorkflowError] = await to(updateCaseWorkflow(caseKeys, workflow.attributes));
     if (updateDbWorkflowError) {
-      logError(
+      log.error(
         'Update db workflow error',
         context.awsRequestId,
         'service-viva-ms-syncWorkflow-005',
@@ -82,7 +82,7 @@ export async function main(event, context) {
       putEvent({ caseKeys, workflow }, 'vivaMsSyncWorkflowSuccess', 'vivaMs.syncWorkflow')
     );
     if (putEventError) {
-      logError(
+      log.error(
         'Put event error',
         context.awsRequestId,
         'service-viva-ms-syncWorkflow-006',

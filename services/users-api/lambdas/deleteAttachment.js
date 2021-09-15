@@ -4,7 +4,7 @@ import { throwError, BadRequestError } from '@helsingborg-stad/npm-api-error-han
 import S3 from '../../../libs/S3';
 import * as response from '../../../libs/response';
 import { decodeToken } from '../../../libs/token';
-import { logError } from '../../../libs/logs';
+import log from '../../../libs/logs';
 
 const BUCKET_NAME = process.env.BUCKET_NAME;
 
@@ -19,7 +19,7 @@ export async function main(event, context) {
 
   const [getFilesError, userS3Files] = await to(getFilesFromUserS3Bucket(personalNumber));
   if (getFilesError) {
-    logError(
+    log.error(
       'Get files error',
       context.awsRequestId,
       'service-users-api-deleteAttachment-001',
@@ -33,7 +33,7 @@ export async function main(event, context) {
 
   const [findFileError] = await to(findFile(userS3Files, fileKey));
   if (findFileError) {
-    logError(
+    log.error(
       'Find file error',
       context.awsRequestId,
       'service-users-api-deleteAttachment-002',
@@ -45,7 +45,7 @@ export async function main(event, context) {
 
   const [deleteFileError] = await to(deleteFile(fileKey));
   if (deleteFileError) {
-    logError(
+    log.error(
       'Delete file error',
       context.awsRequestId,
       'service-users-api-deleteAttachment-003',

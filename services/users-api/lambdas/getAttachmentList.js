@@ -4,7 +4,7 @@ import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import S3 from '../../../libs/S3';
 import * as response from '../../../libs/response';
 import { decodeToken } from '../../../libs/token';
-import { logError } from '../../../libs/logs';
+import log from '../../../libs/logs';
 
 const BUCKET_NAME = process.env.BUCKET_NAME;
 
@@ -14,7 +14,7 @@ export async function main(event, context) {
 
   const [getFilesError, s3Files] = await to(getFilesFromUserS3Bucket(personalNumber));
   if (getFilesError) {
-    logError(
+    log.error(
       'Get file error',
       context.awsRequestId,
       'service-users-api-getAttachmentList-001',

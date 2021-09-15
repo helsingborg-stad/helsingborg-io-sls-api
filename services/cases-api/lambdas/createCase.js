@@ -12,7 +12,7 @@ import { getItem, putItem } from '../../../libs/queries';
 import { populateFormWithPreviousCaseAnswers } from '../../../libs/formAnswers';
 import caseValidationSchema from '../helpers/schema';
 import { getStatusByType } from '../../../libs/caseStatuses';
-import { logError, logWarn } from '../../../libs/logs';
+import log from '../../../libs/logs';
 
 export async function main(event, context) {
   const decodedToken = decodeToken(event);
@@ -27,7 +27,7 @@ export async function main(event, context) {
   );
 
   if (validationError) {
-    logError(
+    log.error(
       'Validation error',
       context.awsRequestId,
       'service-cases-api-createCase-001',
@@ -47,7 +47,7 @@ export async function main(event, context) {
 
   const [userError, user] = await to(getUser(personalNumber));
   if (userError) {
-    logError(
+    log.error(
       'DynamoDb query on users table failed',
       context.awsRequestId,
       'service-cases-api-createCase-002',
@@ -59,7 +59,7 @@ export async function main(event, context) {
   const [, formTemplates] = await to(getFormTemplates(initialForms, context));
   const [previousCaseError, previousCase] = await to(getLastUpdatedCase(PK, provider));
   if (previousCaseError) {
-    logError(
+    log.error(
       'DynamoDb query on cases table failed',
       context.awsRequestId,
       'service-cases-api-createCase-003',
@@ -100,7 +100,7 @@ export async function main(event, context) {
 
   const [putItemError] = await to(putItem(putItemParams));
   if (putItemError) {
-    logError(
+    log.error(
       'Put item error',
       context.awsRequestId,
       'service-cases-api-createCase-004',
@@ -115,7 +115,7 @@ export async function main(event, context) {
   // This can be found in the AWS docs https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_PutItem.html#DDB-PutItem-request-ReturnValues
   const [getItemError, caseItem] = await getItem(config.cases.tableName, PK, SK);
   if (getItemError) {
-    logError(
+    log.error(
       'Get item error',
       context.awsRequestId,
       'service-cases-api-createCase-004',
@@ -186,7 +186,7 @@ async function getFormTemplates(forms, context) {
     const [error, dbResponse] = await to(dynamoDb.call('get', params));
 
     if (error) {
-      logWarn(
+      log.warn(
         'DynamoDb query on forms table failed',
         context.awsRequestId,
         'service-cases-api-createCase-004',

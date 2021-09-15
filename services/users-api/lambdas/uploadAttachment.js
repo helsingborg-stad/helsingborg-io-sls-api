@@ -4,7 +4,7 @@ import S3 from '../../../libs/S3';
 import * as response from '../../../libs/response';
 import { BadRequestError } from '@helsingborg-stad/npm-api-error-handling';
 import { decodeToken } from '../../../libs/token';
-import { logError } from '../../../libs/logs';
+import log from '../../../libs/logs';
 
 // File formats that we accept.
 const allowedMimes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
@@ -20,7 +20,7 @@ export async function main(event, context) {
   if (!fileName) {
     // Check if fileName exsits in event body
     const errorMessage = 'Could not find key "fileName" in request body';
-    logError(errorMessage, context.awsRequestId, 'service-users-api-uploadAttachment-001');
+    log.error(errorMessage, context.awsRequestId, 'service-users-api-uploadAttachment-001');
 
     return response.failure(new BadRequestError(errorMessage));
   }
@@ -28,7 +28,7 @@ export async function main(event, context) {
   if (!mime) {
     // Check if mimeType exists in event body.
     const errorMessage = 'Could not find key "mime" in request body';
-    logError(errorMessage, context.awsRequestId, 'service-users-api-uploadAttachment-002');
+    log.error(errorMessage, context.awsRequestId, 'service-users-api-uploadAttachment-002');
 
     return response.failure(new BadRequestError());
   }
@@ -36,7 +36,7 @@ export async function main(event, context) {
   if (!allowedMimes.includes(mime)) {
     // Check if passed mimeType is a fileformat that we allow.
     const errorMessage = `The mimeType ${mime} is not allowed`;
-    logError(errorMessage, context.awsRequestId, 'service-users-api-uploadAttachment-003');
+    log.error(errorMessage, context.awsRequestId, 'service-users-api-uploadAttachment-003');
 
     return response.failure(new BadRequestError(errorMessage));
   }
@@ -59,7 +59,7 @@ export async function main(event, context) {
   );
 
   if (error) {
-    logError(
+    log.error(
       'Get signed url error',
       context.awsRequestId,
       'service-users-api-uploadAttachment-003'

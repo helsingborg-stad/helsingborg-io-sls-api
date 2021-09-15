@@ -4,7 +4,7 @@ import generateIAMPolicy from '../helpers/generateIAMPolicy';
 import { verifyToken } from '../../../../libs/token';
 import config from '../../../../config';
 import secrets from '../../../../libs/secrets';
-import { logWarn } from '../../../../libs/logs';
+import log from '../../../../libs/logs';
 
 const CONFIG_AUTH_SECRETS_ACCESS_TOKEN = config.auth.secrets.accessToken;
 
@@ -12,7 +12,7 @@ export async function main(event, context) {
   const { authorizationToken } = event;
 
   if (!authorizationToken) {
-    logWarn('Unauthorized!', context.awsRequestId, 'service-auth-token-authorize-001');
+    log.warn('Unauthorized!', context.awsRequestId, 'service-auth-token-authorize-001');
 
     throw Error('Unauthorized');
   }
@@ -25,14 +25,14 @@ export async function main(event, context) {
     secrets.get(CONFIG_AUTH_SECRETS_ACCESS_TOKEN.name, CONFIG_AUTH_SECRETS_ACCESS_TOKEN.keyName)
   );
   if (getSecretError) {
-    logWarn('Unauthorized!', context.awsRequestId, 'service-auth-token-authorize-002');
+    log.warn('Unauthorized!', context.awsRequestId, 'service-auth-token-authorize-002');
 
     throw Error('Unauthorized');
   }
 
   const [error, decodedToken] = await to(verifyToken(token, secret));
   if (error) {
-    logWarn('Unauthorized!', context.awsRequestId, 'service-auth-token-authorize-003');
+    log.warn('Unauthorized!', context.awsRequestId, 'service-auth-token-authorize-003');
 
     throw Error('Unauthorized');
   }

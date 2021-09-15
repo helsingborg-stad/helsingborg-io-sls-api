@@ -16,7 +16,7 @@ import { getFutureTimestamp, millisecondsToSeconds } from '../../../libs/timesta
 import { DELETE_VIVA_CASE_AFTER_12_HOURS } from '../../../libs/constants';
 
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
-import { logError, logWarn, logInfo } from '../../../libs/logs';
+import log from '../../../libs/logs';
 
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
 
@@ -27,7 +27,7 @@ export async function main(event, context) {
     vivaAdapter.application.status(userDetail.personalNumber)
   );
   if (applicationStatusError) {
-    logError(
+    log.error(
       'Viva Application Status error',
       context.awsRequestId,
       'service-viva-ms-createVivaCase-001',
@@ -46,7 +46,7 @@ export async function main(event, context) {
    */
   const requiredStatusCodes = [1, 128, 256, 512];
   if (!validateApplicationStatus(applicationStatusList, requiredStatusCodes)) {
-    logInfo(
+    log.info(
       'validateApplicationStatus. No application period open.',
       context.awsRequestId,
       'service-viva-ms-createVivaCase-002',
@@ -59,7 +59,7 @@ export async function main(event, context) {
     vivaAdapter.person.get(userDetail.personalNumber)
   );
   if (getVivaPersonError) {
-    logError(
+    log.error(
       'Viva Get Application Request',
       context.awsRequestId,
       'service-viva-ms-createVivaCase-003',
@@ -69,7 +69,7 @@ export async function main(event, context) {
   }
 
   if (!vivaPerson.application || !vivaPerson.application.period) {
-    logError(
+    log.error(
       'Viva Application Period not present in response, aborting',
       context.awsRequestId,
       'service-viva-ms-createVivaCase-004'
@@ -78,7 +78,7 @@ export async function main(event, context) {
   }
 
   if (!vivaPerson.application || !vivaPerson.application.workflowid) {
-    logError(
+    log.error(
       'Viva Application WorkflowId not present in response, aborting',
       context.awsRequestId,
       'service-viva-ms-createVivaCase-005'
@@ -90,7 +90,7 @@ export async function main(event, context) {
     getUserCaseFilteredOnWorkflowId(vivaPerson)
   );
   if (getUserCaseFilteredOnWorkflowIdError) {
-    logError(
+    log.error(
       'DynamoDb query on cases table failed',
       context.awsRequestId,
       'service-viva-ms-createVivaCase-006',
@@ -101,7 +101,7 @@ export async function main(event, context) {
   }
 
   if (caseItem) {
-    logWarn(
+    log.warn(
       'Case with WorkflowId already exists',
       context.awsRequestId,
       'service-viva-ms-createVivaCase-007'
@@ -112,7 +112,7 @@ export async function main(event, context) {
 
   const [putRecurringVivaCaseError] = await to(putRecurringVivaCase(vivaPerson, userDetail));
   if (putRecurringVivaCaseError) {
-    logWarn(
+    log.warn(
       'putRecurringVivaCaseError',
       context.awsRequestId,
       'service-viva-ms-createVivaCase-008',
