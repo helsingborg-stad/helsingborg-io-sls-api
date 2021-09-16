@@ -10,9 +10,9 @@ const logger = winston.createLogger({
 export const log = {
   log: (level, message, requestId, errorCode, customData = {}) => {
     logger.log(level, message, {
-      errorCode: errorCode,
-      requestId: requestId,
-      customData: customData,
+      errorCode,
+      requestId,
+      customData,
     });
   },
 
