@@ -24,7 +24,10 @@ const PDF_SSM_PARAMS = params.read(config.pdf.envsKeyName);
 // Convert DynamoDB item to plain object
 const dynamoDbConverter = AWS.DynamoDB.Converter;
 
-export async function main(event: Record<string, any>, context): Promise<Boolean> {
+export async function main(
+  event: Record<string, any>,
+  context: Record<string, any>
+): Promise<Boolean> {
   const submittedCase: Case = dynamoDbConverter.unmarshall(event.detail.dynamodb.NewImage);
 
   if (submittedCase.pdfGenerated === 'yes') {
