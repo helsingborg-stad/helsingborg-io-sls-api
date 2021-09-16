@@ -13,14 +13,34 @@ export async function main(event, context) {
 
   const [putUserRequestError] = await to(putUserRequest(userDetail));
   if (putUserRequestError) {
-    return console.error('(users-ms: createUser) putUserRequestError', putUserRequestError);
+    log.error(
+      'putUserRequestError',
+      context.awsRequestId,
+      'service-viva-ms-createUser-001',
+      putUserRequestError
+    );
+
+    return;
   }
 
   const [putEventError] = await to(putUserEvent.createSuccess(userDetail));
   if (putEventError) {
-    return console.error('(users-ms: createUser) putEventError', putEventError);
+    log.error(
+      'putEventError',
+      context.awsRequestId,
+      'service-viva-ms-createUser-002',
+      putEventError
+    );
+
+    return;
   }
-  console.info('(users-ms: createUser) User was successfully created in the users table.');
+
+  log.info(
+    'User was successfully created in the users table.',
+    context.awsRequestId,
+    'service-viva-ms-createUser-003'
+  );
+
   return true;
 }
 
