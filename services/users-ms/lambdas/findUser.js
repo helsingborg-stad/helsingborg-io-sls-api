@@ -4,21 +4,37 @@ import to from 'await-to-js';
 import config from '../../../config';
 import * as dynamoDb from '../../../libs/dynamoDb';
 import putUserEvent from '../helpers/putUserEvent';
+import log from '../../../libs/logs';
 
-export async function main(event) {
+export async function main(event, context) {
   const userDetail = event.detail;
 
   const [getUserError, userItem] = await to(getUser(userDetail.personalNumber));
   if (getUserError) {
-    return console.error('(users-ms: findUser) getUserError', getUserError);
+    return log.error(
+      'getUserError',
+      context.awsRequestId,
+      'service-users-ms-findUser-001',
+      getUserError
+    );
   }
 
   if (userItem == undefined) {
     const [putEventError] = await to(putUserEvent.notFound(userDetail));
     if (putEventError) {
-      return console.error('(users-ms: findUser) putEventError', putEventError);
+      return log.error(
+        'putEventError',
+        context.awsRequestId,
+        'service-users-ms-findUser-002',
+        putEventError
+      );
     }
-    return console.log('User could not be found in the users table');
+
+    return log.info(
+      'User could not be found in the users table',
+      context.awsRequestId,
+      'service-users-ms-findUser-003'
+    );
   }
 
   const [putEventError] = await to(putUserEvent.exists(userDetail));
