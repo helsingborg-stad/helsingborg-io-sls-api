@@ -22,7 +22,12 @@ export async function main(event, context) {
 
   const [requestNavetUserError, navetUser] = await to(requestNavetUser(user.personalNumber));
   if (requestNavetUserError) {
-    log.error('Navet request error', context.awsRequestId, 'service-navet-ms-pollUser-001', err);
+    log.error(
+      'Navet request user error',
+      context.awsRequestId,
+      'service-navet-ms-pollUser-001',
+      requestNavetUserError
+    );
     return;
   }
 
