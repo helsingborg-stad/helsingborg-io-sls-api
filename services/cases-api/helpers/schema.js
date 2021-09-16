@@ -28,7 +28,7 @@ const encryption = Joi.object({
     P: Joi.number(),
     G: Joi.number(),
   }),
-  publicKeys: Joi.object().pattern(/^/, [Joi.string()]),
+  publicKeys: Joi.object().pattern(/^/, [Joi.string(), null]),
 });
 
 const formCurrentPosition = Joi.object({
