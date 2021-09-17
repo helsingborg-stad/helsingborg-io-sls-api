@@ -23,6 +23,9 @@ const stageConfigs = {
     bankId: {
       envsKeyName: '/bankidEnvs/dev',
     },
+    booking: {
+      envsKeyName: '/bookingEnvs/dev',
+    },
     users: {
       tableName: 'users',
     },
@@ -66,6 +69,9 @@ const stageConfigs = {
     },
     bankId: {
       envsKeyName: '/bankidEnvs/test',
+    },
+    booking: {
+      envsKeyName: '/bookingEnvs/test',
     },
     users: {
       tableName: 'users',
@@ -111,6 +117,9 @@ const stageConfigs = {
     bankId: {
       envsKeyName: '/bankidEnvs/stage',
     },
+    booking: {
+      envsKeyName: '/bookingEnvs/stage',
+    },
     users: {
       tableName: 'users',
     },
@@ -155,6 +164,9 @@ const stageConfigs = {
     bankId: {
       envsKeyName: '/bankidEnvs/prod',
     },
+    booking: {
+      envsKeyName: '/bookingEnvs/prod',
+    },
     users: {
       tableName: 'users',
     },
@@ -198,6 +210,9 @@ const stageConfigs = {
     },
     bankId: {
       envsKeyName: '/bankidEnvs/release',
+    },
+    booking: {
+      envsKeyName: '/bookingEnvs/release',
     },
     users: {
       tableName: 'users',
