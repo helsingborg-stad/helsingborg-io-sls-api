@@ -9,7 +9,7 @@ import { sendBookingPostRequest } from '../helpers/sendBookingPostRequest';
 export const main = async event => {
   const bookingId = event.pathParameters.id;
 
-  const [error, ssmParameters = {}] = await to(getSsmParameters());
+  const [error, ssmParameters] = await to(getSsmParameters());
   if (error) throwError(error.statusCode, error.message);
 
   const { outlookBookingEndpoint, apiKey } = ssmParameters;
