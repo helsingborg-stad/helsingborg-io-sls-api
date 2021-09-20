@@ -34,7 +34,7 @@ it('cancels a booking successfully', async () => {
   const expectedUrl = `${mockUrl}/cancel`;
 
   getSsmParameters.mockResolvedValueOnce({ outlookBookingEndpoint: mockUrl, apiKey: mockApiKey });
-  sendBookingPostRequest.mockResolvedValueOnce([null]);
+  sendBookingPostRequest.mockResolvedValueOnce();
 
   const result = await main(mockEvent);
 
