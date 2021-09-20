@@ -17,7 +17,10 @@ const mockEvent = {
 };
 
 const expectedResult = {
-  body: JSON.stringify({ jsonapi: { version: '1.0' } }),
+  body: JSON.stringify({
+    jsonapi: { version: '1.0' },
+    data: { bookingId: mockBookingId },
+  }),
   headers: {
     'Access-Control-Allow-Credentials': true,
     'Access-Control-Allow-Origin': '*',

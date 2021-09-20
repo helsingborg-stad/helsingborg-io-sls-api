@@ -19,5 +19,5 @@ export const main = async event => {
   const [requestError] = await to(makeBookingRequest(url, apiKey, body));
   if (requestError) throwError(requestError.status, requestError.errorMessage);
 
-  return response.success();
+  return response.success(200, body);
 };
