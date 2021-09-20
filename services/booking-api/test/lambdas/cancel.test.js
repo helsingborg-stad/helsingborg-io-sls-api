@@ -1,8 +1,8 @@
 import messages from '@helsingborg-stad/npm-api-error-handling/assets/errorMessages';
 
 import { main } from '../../lambdas/cancel';
-import getSsmParameters from '../../helpers/getSsmParameters';
-import makeBookingRequest from '../../helpers/makeBookingRequest';
+import { getSsmParameters } from '../../helpers/getSsmParameters';
+import { makeBookingRequest } from '../../helpers/makeBookingRequest';
 
 jest.mock('../../helpers/getSsmParameters');
 jest.mock('../../helpers/makeBookingRequest');
@@ -34,7 +34,7 @@ it('cancels a booking successfully', async () => {
   const expectedUrl = `${mockUrl}/cancel`;
 
   getSsmParameters.mockResolvedValueOnce({ outlookBookingEndpoint: mockUrl, apiKey: mockApiKey });
-  makeBookingRequest.mockResolvedValueOnce();
+  makeBookingRequest.mockResolvedValueOnce([null]);
 
   const result = await main(mockEvent);
 
