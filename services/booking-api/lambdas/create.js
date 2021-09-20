@@ -6,7 +6,7 @@ import * as response from '../../../libs/response';
 import { getSsmParameters } from '../helpers/getSsmParameters';
 import { sendBookingPostRequest } from '../helpers/sendBookingPostRequest';
 
-export const main = async event => {
+export async function main(event) {
   const [error, ssmParameters] = await to(getSsmParameters());
   if (error) throwError(error.statusCode, error.message);
 
@@ -19,4 +19,4 @@ export const main = async event => {
 
   const { data } = createBookingResponse.data;
   return response.success(200, data);
-};
+}
