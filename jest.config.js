@@ -2,7 +2,6 @@ module.exports = {
   transform: {
     '^.+\\.[t|j]sx?$': 'babel-jest',
   },
-  testEnvironment: 'jest-environment-jsdom-sixteen',
   collectCoverageFrom: ['lambdas/*.js', 'helpers/*.js'],
   coverageThreshold: {
     global: {
