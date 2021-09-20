@@ -19,7 +19,7 @@ A running instance of an API GATEWAY on AWS that includes a gateway resource nam
 
 ### AWS PARAMETERSTORE (OPTIONAL)
 
-A setup of AWS paramterstore on aws. This can be created from the resource api. You can find and deploy this in our [resource](https://github.com/helsingborg-stad/helsingborg-io-sls-resources/tree/dev/services/parameterStore) repository.
+A setup of booking AWS paramterstore on aws. This can be created from the resource api. You can find and deploy this in our [resource](https://github.com/helsingborg-stad/helsingborg-io-sls-resources/tree/dev/services/parameterStore) repository.
 
 ### Installation
 
@@ -45,45 +45,57 @@ $ sls deploy -v
 
 When you deploy the service, serverless will output the generated url in the terminal that the service can be accessed from.
 
+### Tear down service
+
+Teardown command:
+
+```bash
+$ sls remove
+```
+
+When you tear down the service, serverless will remove all resources created in the AWS console, including emptying the `deploymentBucket`.
+
 ## API
 
-### BANKID AUTH
+### GET BOOKING
 
 #### Request Type
 
-`POST`
+`GET`
 
 #### Endpoint
 
-`/bankid/auth`
+`/booking/{bookingId}`
 
 #### JSON PAYLOAD
 
-```
-  {
-    "personalNumber": "203010101010",
-    "endUserIp": "0.0.0.0"
-  }
-```
+`N/A`
 
 #### Excpected Response
 
 ```
 {
-  "jsonapi": {
-    "version": "1.0"
-  },
-  "data": {
-    "type": "bankIdAuth",
-    "attributes": {
-      "orderRef": "a-order-ref-id",
-      "autoStartToken": "a-auto-start-token"
+    "jsonapi": {
+        "version": "1.0"
+    },
+    "data": {
+        "type": "booking",
+        "id": "booking_id",
+        "attributes": {
+            "attendee": "attendee_email_address",
+            "subject": "subject",
+            "location": "location",
+            "status": "status",
+            "startTime": "utc_time_format",
+            "endTime": "utc_time_format",
+            "referenceCode": "reference_code",
+            "responseType": "Unknown"
+        }
     }
-  }
 }
 ```
 
-### BANKID COLLECT
+### CREATE BOOKING
 
 #### Request Type
 
@@ -91,78 +103,19 @@ When you deploy the service, serverless will output the generated url in the ter
 
 #### Endpoint
 
-`/bankid/collect`
+`/booking`
 
 #### JSON Payload
 
 ```
 {
-	"orderRef": "a-order-ref-id"
-}
-```
-
-#### Expected JSON Response
-While pending:
-```
-{
-  "jsonapi": {
-    "version": "1.0"
-  },
-  "data": {
-    "type": "bankIdCollect",
-    "attributes": {
-      "orderRef": "a-order-ref-id",
-      "status": "pending",
-      "hintCode": "noClient"
-    }
-  }
-}
-```
-After completed login:
-```
-{
-  "jsonapi": {
-    "version": "1.0"
-  },
-  "data": {
-    "orderRef":"131daac9-16c6-4618-beb0-365768f37288",
-    "status":"complete",
-    "completionData":{
-      "user":{
-        "personalNumber":"190000000000",
-        "name":"Karl Karlsson",
-        "givenName":"Karl",
-        "surname":"Karlsson"
-      },
-      "device":{
-        "ipAddress":"192.168.0.1"
-      },
-      "cert":{
-        "notBefore":"1502983274000",
-        "notAfter":"1563549674000"
-      },
-      "signature":"<base64-encoded data>",
-      "ocspResponse":"<base64-encoded data>"
-    }
-  }
-}
-```
-
-### BANKID CANCEL
-
-#### Request Type
-
-`POST`
-
-#### Endpoint
-
-`/bankid/cancel`
-
-#### JSON Payload
-
-```
-{
-	"orderRef": "a-order-ref-id"
+  "attendee": "attendee_email_address",
+  "startTime": "utc_time_format",
+  "endTime": "utc_time_format",
+  "subject": "subject",
+  "body": "htmltext",
+  "location": "location",
+  "referenceCode": "reference_code"
 }
 ```
 
@@ -170,36 +123,63 @@ After completed login:
 
 ```
 {
+    "jsonapi": {
+        "version": "1.0"
+    },
+    "data": {
+        "type": "booking",
+        "id": "booking_id"
+    }
+}
+```
+### CANCEL BOOKING
+
+#### Request Type
+
+`DELETE`
+
+#### Endpoint
+
+`/booking/{bookingId}`
+
+#### JSON Payload
+
+`N/A`
+
+#### Expected JSON Response
+
+```
+{
   "jsonapi": {
-    "version": "1.0"
+      "version": "1.0"
   },
   "data": {
-    "type": "bankidCancel",
-    "id": "a-order-ref-id",
-    "attributes": {
-      "message": "cancelled",
-    }
+      "bookingId": "booking_id"
   }
 }
 ```
 
-### BANKID SIGN
+### UPDATE BOOKING
 
 #### Request Type
 
-`POST`
+`PATCH`
 
 #### Endpoint
 
-`/bankid/sign`
+`/booking/{bookingId}`
 
 #### JSON Payload
 
 ```
 {
-	"personalNumber": "190101010101",
-	"endUserIp": "0.0.0.0",
-	"userVisibleData": "example-message"
+  "attendee": "attendee_email_address",
+  "startTime": "utc_time_format",
+  "endTime": "utc_time_format",
+  "subject": "subject",
+  "body": "htmltext",
+  "location": "location",
+  "referenceCode": "reference_code"
 }
 ```
 
@@ -208,14 +188,11 @@ After completed login:
 ```
 {
   "jsonapi": {
-    "version": "1.0"
+      "version": "1.0"
   },
   "data": {
-    "type": "bankIdSign",
-    "attributes": {
-      "orderRef": "a-order-ref-id",
-      "autoStartToken": "an-auto-start-token"
-    }
+      "type": "booking",
+      "id": "booking_id"
   }
 }
 ```
