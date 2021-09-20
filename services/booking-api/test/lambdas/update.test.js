@@ -90,7 +90,7 @@ it('throws when creating a booking fails', async () => {
   const errorMessage = messages[status];
 
   getSsmParameters.mockResolvedValueOnce({ outlookBookingEndpoint: mockUrl, apiKey: mockApiKey });
-  makeBookingRequest.mockResolvedValueOnce().mockRejectedValueOnce({ errorMessage, status });
+  makeBookingRequest.mockRejectedValueOnce({ errorMessage, status });
 
   await expect(main(mockEvent)).rejects.toThrow(errorMessage);
 });
