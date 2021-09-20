@@ -80,7 +80,7 @@ Authorization: {user id}
       "provider": "VIVA",
       "currentFormId": "123",
       "status": {
-        "type": "active:submitted:viva",
+        "type": "active:submitted",
         "name": "Inskickat",
         "description": "Ansökan är inskickad. Du kommer att få besked om ansökan när din handläggare har granskat och bedömt den."
       },

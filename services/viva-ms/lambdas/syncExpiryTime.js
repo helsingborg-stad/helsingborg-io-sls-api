@@ -1,45 +1,48 @@
 /* eslint-disable no-console */
 import to from 'await-to-js';
-import * as dynamoDb from '../../../libs/dynamoDb';
 
 import config from '../../../config';
 import params from '../../../libs/params';
 
+import * as dynamoDb from '../../../libs/dynamoDb';
+import log from '../../../libs/logs';
+import { getItem as getStoredUserCase } from '../../../libs/queries';
+import { statusTypes } from '../../../libs/caseStatuses';
 import { getFutureTimestamp, millisecondsToSeconds } from '../../../libs/timestampHelper';
 import {
-  DELETE_VIVA_CASE_AFTER_6_MONTH,
-  DELETE_VIVA_CASE_AFTER_45_DAYS,
-  DELETE_VIVA_CASE_AFTER_72_HOURS,
+  DELETE_VIVA_CASE_AFTER_6_MONTH as AFTER_6_MONTH,
+  DELETE_VIVA_CASE_AFTER_45_DAYS as AFTER_45_DAYS,
+  DELETE_VIVA_CASE_AFTER_72_HOURS as AFTER_3_DAYS,
 } from '../../../libs/constants';
-
-import log from '../../../libs/logs';
 
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
 
 export async function main(event, context) {
   const { caseKeys } = event.detail;
+  const { PK, SK } = caseKeys;
 
-  const [getCaseError, caseItem] = await to(getCase(caseKeys));
-  if (getCaseError) {
-    throw getCaseError;
+  const [getStoredUserCaseError, storedUserCase] = await getStoredUserCase(
+    config.cases.tableName,
+    PK,
+    SK
+  );
+  if (getStoredUserCaseError) {
+    return console.error(getStoredUserCaseError);
   }
 
   const vivaCaseSSMParams = await VIVA_CASE_SSM_PARAMS;
-  if (vivaCaseSSMParams.recurringFormId !== caseItem.currentFormId) {
-    log.info(
-      'case attribute currentFormId (caseItem.currentFormId) does not match the recurring form id (vivaCaseSSMParams.recurringFormId) from ssm params. Nothing to update.',
-      context.awsRequestId,
-      'service-viva-ms-syncExpiryTime-001'
-    );
-
+  if (vivaCaseSSMParams.recurringFormId !== storedUserCase.currentFormId) {
     return true;
   }
 
-  const expireHours = getExpiryHoursByStatusType(caseItem.status.type);
+  const expireHours = getExpiryHoursOnStatusType(storedUserCase.Item.status.type);
   const newExpirationTime = millisecondsToSeconds(getFutureTimestamp(expireHours));
 
   const [updateCaseError, updatedCase] = await to(
-    updateCaseExpirationTimeAttribute(caseKeys, newExpirationTime)
+    updateCaseExpirationTime({
+      keys: caseKeys,
+      newExpirationTime,
+    })
   );
   if (updateCaseError) {
     log.error(
@@ -48,8 +51,7 @@ export async function main(event, context) {
       'service-viva-ms-syncExpiryTime-001',
       updateCaseError
     );
-
-    throw updateCaseError;
+    return console.error(updateCaseError);
   }
 
   log.info(
@@ -58,66 +60,47 @@ export async function main(event, context) {
     'service-viva-ms-syncExpiryTime-001',
     updatedCase
   );
-
   return true;
 }
 
-function getExpiryHoursByStatusType(statusType) {
+function getExpiryHoursOnStatusType(statusType) {
   const statusHourMap = {
-    'active:ongoing': DELETE_VIVA_CASE_AFTER_72_HOURS,
-    'active:submitted:viva': DELETE_VIVA_CASE_AFTER_45_DAYS,
-    'closed:approved:viva': DELETE_VIVA_CASE_AFTER_6_MONTH,
-    'closed:partiallyApproved:viva': DELETE_VIVA_CASE_AFTER_6_MONTH,
-    'closed:rejected:viva': DELETE_VIVA_CASE_AFTER_6_MONTH,
-    'closed:completionRejected:viva': DELETE_VIVA_CASE_AFTER_6_MONTH,
+    [statusTypes.ACTIVE_ONGOING]: AFTER_3_DAYS,
+
+    [statusTypes.ACTIVE_SIGNATURE_PENDING]: AFTER_45_DAYS,
+    [statusTypes.ACTIVE_SIGNATURE_COMPLETED]: AFTER_45_DAYS,
+
+    [statusTypes.ACTIVE_SUBMITTED]: AFTER_45_DAYS,
+    [statusTypes.ACTIVE_PROCESSING]: AFTER_45_DAYS,
+    [statusTypes.ACTIVE_COMPLETION_REQUIRED_VIVA]: AFTER_45_DAYS,
+
+    [statusTypes.CLOSED_APPROVED_VIVA]: AFTER_6_MONTH,
+    [statusTypes.CLOSED_PARTIALLY_APPROVED_VIVA]: AFTER_6_MONTH,
+    [statusTypes.CLOSED_REJECTED_VIVA]: AFTER_6_MONTH,
+    [statusTypes.CLOSED_COMPLETION_REJECTED_VIVA]: AFTER_6_MONTH,
   };
 
   const hours = statusHourMap[statusType];
 
   if (!hours) {
-    console.log('(Viva-ms: syncExpiryTime):', statusType);
+    console.log('(Viva-ms: syncExpiryTime) getExpiryHoursOnStatusType', statusType);
     throw 'Expiry time not set for status!';
   }
 
   return hours;
 }
 
-async function getCase(keys) {
+function updateCaseExpirationTime(caseAttributes) {
   const TableName = config.cases.tableName;
-
-  const params = {
-    TableName,
-    KeyConditionExpression: 'PK = :pk AND SK = :sk',
-    ExpressionAttributeValues: {
-      ':pk': keys.PK,
-      ':sk': keys.SK,
-    },
+  const Key = caseAttributes.keys;
+  const UpdateExpression = 'SET expirationTime = :newExpirationTime';
+  const ExpressionAttributeValues = {
+    ':newExpirationTime': caseAttributes.newExpirationTime,
   };
 
-  const [dynamoDbQueryError, dynamoDbResponse] = await to(dynamoDb.call('query', params));
-  if (dynamoDbQueryError) {
-    throw dynamoDbQueryError;
-  }
-
-  const caseItem = dynamoDbResponse.Items.find(item => item.PK === keys.PK);
-  if (!caseItem) {
-    throw 'Case not found';
-  }
-
-  return caseItem;
-}
-
-async function updateCaseExpirationTimeAttribute(keys, newExpirationTime) {
-  const TableName = config.cases.tableName;
-  const UpdateExpression = 'SET expirationTime = :newExpirationTime';
-  const ExpressionAttributeValues = { ':newExpirationTime': newExpirationTime };
-
   const params = {
     TableName,
-    Key: {
-      PK: keys.PK,
-      SK: keys.SK,
-    },
+    Key,
     UpdateExpression,
     ExpressionAttributeValues,
     ReturnValues: 'UPDATED_NEW',
