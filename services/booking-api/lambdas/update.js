@@ -10,7 +10,7 @@ export const main = async event => {
   const bookingId = event.pathParameters.id;
 
   const [error, ssmParameters = {}] = await to(getSsmParameters());
-  if (error) throwError(error.status, error.errorMessage);
+  if (error) throwError(error.statusCode, error.message);
 
   const { outlookBookingEndpoint, apiKey } = ssmParameters;
   let url = `${outlookBookingEndpoint}/cancel`;
