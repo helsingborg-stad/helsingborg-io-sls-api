@@ -4,7 +4,7 @@ import to from 'await-to-js';
 import * as response from '../../../libs/response';
 
 import { getSsmParameters } from '../helpers/getSsmParameters';
-import { makeBookingRequest } from '../helpers/makeBookingRequest';
+import { sendBookingPostRequest } from '../helpers/sendBookingPostRequest';
 
 export const main = async event => {
   const bookingId = event.pathParameters.id;
@@ -16,14 +16,14 @@ export const main = async event => {
   let url = `${outlookBookingEndpoint}/cancel`;
   let body = { bookingId };
 
-  const [cancelRequestError] = await to(makeBookingRequest(url, apiKey, body));
+  const [cancelRequestError] = await to(sendBookingPostRequest(url, apiKey, body));
   if (cancelRequestError) throwError(cancelRequestError.status, cancelRequestError.errorMessage);
 
   url = `${outlookBookingEndpoint}/create`;
   body = { ...JSON.parse(event.body) };
 
   const [createRequestError, createBookingResponse = {}] = await to(
-    makeBookingRequest(url, apiKey, body)
+    sendBookingPostRequest(url, apiKey, body)
   );
   if (createRequestError) throwError(createRequestError.status, createRequestError.errorMessage);
 
