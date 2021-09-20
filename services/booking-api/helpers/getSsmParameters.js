@@ -1,16 +1,18 @@
+import to from 'await-to-js';
+
 import params from '../../../libs/params';
 import config from '../../../config';
 
 let bookingSsmParameters;
 
-export default async () => {
-  try {
-    if (!bookingSsmParameters) {
-      bookingSsmParameters = await params.read(config.booking.envsKeyName);
-    }
+export async function getSsmParameters() {
+  if (!bookingSsmParameters) {
+    const [error, result] = await to(params.read(config.booking.envsKeyName));
 
-    return bookingSsmParameters;
-  } catch (error) {
-    throw new Error(error);
+    if (error) throw error;
+
+    bookingSsmParameters = result;
   }
-};
+
+  return bookingSsmParameters;
+}

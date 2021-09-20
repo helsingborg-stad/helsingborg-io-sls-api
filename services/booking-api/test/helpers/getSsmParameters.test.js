@@ -1,4 +1,4 @@
-import getSsmParameters from '../../helpers/getSsmParameters';
+import { getSsmParameters } from '../../helpers/getSsmParameters';
 import params from '../../../../libs/params';
 import config from '../../../../config';
 
