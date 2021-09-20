@@ -2,10 +2,10 @@ import messages from '@helsingborg-stad/npm-api-error-handling/assets/errorMessa
 
 import { main } from '../../lambdas/create';
 import { getSsmParameters } from '../../helpers/getSsmParameters';
-import { makeBookingRequest } from '../../helpers/makeBookingRequest';
+import { sendBookingPostRequest } from '../../helpers/sendBookingPostRequest';
 
 jest.mock('../../helpers/getSsmParameters');
-jest.mock('../../helpers/makeBookingRequest');
+jest.mock('../../helpers/sendBookingPostRequest');
 
 const mockUrl = 'www.datatorgetMock.se';
 const mockApiKey = '123';
@@ -42,14 +42,14 @@ it('creates a booking successfully', async () => {
   };
 
   getSsmParameters.mockResolvedValueOnce({ outlookBookingEndpoint: mockUrl, apiKey: mockApiKey });
-  makeBookingRequest.mockResolvedValueOnce({
+  sendBookingPostRequest.mockResolvedValueOnce({
     data: calendarBookingResponse,
   });
 
   const result = await main(mockEvent);
 
   expect(result).toEqual(expectedResult);
-  expect(makeBookingRequest).toHaveBeenCalledWith(expectedUrl, mockApiKey, mockBody);
+  expect(sendBookingPostRequest).toHaveBeenCalledWith(expectedUrl, mockApiKey, mockBody);
 });
 
 it('throws when fetching from SSM parameterstore fails', async () => {
@@ -70,7 +70,7 @@ it('throws when creating a booking fails', async () => {
   const errorMessage = messages[status];
 
   getSsmParameters.mockResolvedValueOnce({ outlookBookingEndpoint: mockUrl, apiKey: mockApiKey });
-  makeBookingRequest.mockRejectedValueOnce({ errorMessage, status });
+  sendBookingPostRequest.mockRejectedValueOnce({ errorMessage, status });
 
   await expect(main(mockEvent)).rejects.toThrow(errorMessage);
 });

@@ -2,7 +2,7 @@ import to from 'await-to-js';
 
 import * as request from '../../../libs/request';
 
-export async function makeBookingRequest(url, apikey, body) {
+export async function sendBookingPostRequest(url, apikey, body) {
   const requestClient = request.requestClient(
     { rejectUnauthorized: false },
     { 'X-ApiKey': apikey }
