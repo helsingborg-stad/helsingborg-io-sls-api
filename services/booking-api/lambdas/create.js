@@ -8,7 +8,7 @@ import makeBookingRequest from '../helpers/makeBookingRequest';
 
 export const main = async event => {
   const [error, ssmParameters = {}] = await to(getSsmParameters());
-  if (error) throwError(error.status, error.errorMessage);
+  if (error) throwError(error.statusCode, error.message);
 
   const { outlookBookingEndpoint, apiKey } = ssmParameters;
   const url = `${outlookBookingEndpoint}/create`;
