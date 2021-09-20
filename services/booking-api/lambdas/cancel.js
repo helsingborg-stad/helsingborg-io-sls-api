@@ -3,8 +3,8 @@ import to from 'await-to-js';
 
 import * as response from '../../../libs/response';
 
-import getSsmParameters from '../helpers/getSsmParameters';
-import makeBookingRequest from '../helpers/makeBookingRequest';
+import { getSsmParameters } from '../helpers/getSsmParameters';
+import { makeBookingRequest } from '../helpers/makeBookingRequest';
 
 export const main = async event => {
   const bookingId = event.pathParameters.id;
