@@ -55,6 +55,20 @@ $ sls remove
 
 When you tear down the service, serverless will remove all resources created in the AWS console, including emptying the `deploymentBucket`.
 
+### Testing (Jest)
+
+Run test command:
+
+```bash
+$ npm run test
+```
+
+Run test command with [options](https://jestjs.io/docs/cli#options):
+
+```bash
+$ npm run test -- --[option_1] --[option_2]
+```
+
 ## API
 
 ### GET BOOKING
