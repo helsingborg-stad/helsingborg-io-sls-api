@@ -1,20 +1,10 @@
-/**
- * @param {number} hours into the future
- * @returns {number} future date in milliseconds
- */
 export function getFutureTimestamp(hours) {
-  const days = Math.ceil(hours / 24);
-
-  const date = new Date();
-  const futureTimestamp = date.setDate(date.getDate() + days);
-
+  const milliseconds = hours * 60 * 60 * 1000;
+  const futureTimestamp = Date.now() + milliseconds;
   return futureTimestamp;
 }
 
-/**
- * @param {number} ms
- */
-export function millisecondsToSeconds(ms) {
-  const seconds = Math.ceil(ms / 1000);
+export function millisecondsToSeconds(milliseconds) {
+  const seconds = Math.ceil(milliseconds / 1000);
   return seconds;
 }

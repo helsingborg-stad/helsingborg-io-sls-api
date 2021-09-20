@@ -2,23 +2,36 @@
 import to from 'await-to-js';
 
 import config from '../../../config';
+import { putEvent } from '../../../libs/awsEventBridge';
 import * as dynamoDb from '../../../libs/dynamoDb';
-import { getStatusByType } from '../../../libs/caseStatuses';
+import { getStatusByType, statusTypes } from '../../../libs/caseStatuses';
 
 export async function main(event) {
   const { caseKeys, workflow } = event.detail;
 
   const newStatusType = decideNewCaseStatus(workflow.attributes);
   if (newStatusType == undefined) {
-    console.info('(Viva-ms) no new status to update');
-    return true;
+    return console.info('(Viva-ms: decideCaseStatus) Status unchanged. Will not update.');
   }
 
-  const [updateCaseStatusError] = await to(
+  const [updateCaseStatusError, newCaseStatus] = await to(
     updateCaseStatus(caseKeys, getStatusByType(newStatusType))
   );
   if (updateCaseStatusError) {
-    console.error('(Viva-ms) updateCaseStatusError', updateCaseStatusError);
+    console.error('(Viva-ms: decideCaseStatus) updateCaseStatusError.', updateCaseStatusError);
+  }
+
+  console.log('(viva-ms: decideCaseStatus) New status updated successfully.', newCaseStatus);
+
+  return await putDecideCaseStatusEvent(caseKeys);
+}
+
+async function putDecideCaseStatusEvent(caseKeys) {
+  const [putEventError] = await to(
+    putEvent({ caseKeys }, 'vivaMsDecideCaseStatusSuccess', 'vivaMs.decideCaseStatus')
+  );
+  if (putEventError) {
+    return console.error('(Viva-ms: decideCaseStatus) putEventError.', putEventError);
   }
 
   return true;
@@ -33,7 +46,7 @@ async function updateCaseStatus(caseKeys, newStatus) {
     UpdateExpression: 'SET #status = :newStatusType',
     ExpressionAttributeNames: { '#status': 'status' },
     ExpressionAttributeValues: { ':newStatusType': newStatus },
-    ReturnValues: 'NONE',
+    ReturnValues: 'UPDATED_NEW',
   };
 
   return dynamoDb.call('update', params);
@@ -52,7 +65,7 @@ function decideNewCaseStatus(workflowAttributes) {
   }
 
   if (calculation != undefined) {
-    return 'active:processing';
+    return statusTypes.ACTIVE_PROCESSING;
   }
 
   return undefined;
@@ -60,18 +73,18 @@ function decideNewCaseStatus(workflowAttributes) {
 
 function getCaseStatusType(decisionTypeCode, paymentList) {
   if (decisionTypeCode === 1 && paymentList != undefined && paymentList.length > 0) {
-    return 'closed:approved:viva';
+    return statusTypes.CLOSED_APPROVED_VIVA;
   }
 
   if (decisionTypeCode === 2) {
-    return 'closed:rejected:viva';
+    return statusTypes.CLOSED_REJECTED_VIVA;
   }
 
   if (decisionTypeCode === 3 && paymentList != undefined && paymentList.length > 0) {
-    return 'closed:partiallyApproved:viva';
+    return statusTypes.CLOSED_PARTIALLY_APPROVED_VIVA;
   }
 
-  return 'active:processing';
+  return statusTypes.ACTIVE_PROCESSING;
 }
 
 function getDecisionTypeCode(decisionList) {

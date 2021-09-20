@@ -2,10 +2,11 @@
 import to from 'await-to-js';
 
 import config from '../../../config';
+import { putEvent } from '../../../libs/awsEventBridge';
 import params from '../../../libs/params';
 import * as dynamoDb from '../../../libs/dynamoDb';
 import validateApplicationStatus from '../helpers/validateApplicationStatus';
-import { getStatusByType } from '../../../libs/caseStatuses';
+import { getStatusByType, statusTypes } from '../../../libs/caseStatuses';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
@@ -18,7 +19,10 @@ export async function main(event) {
     vivaAdapter.application.status(personalNumber)
   );
   if (applicationStatusError) {
-    throw applicationStatusError;
+    return console.error(
+      '(Viva-ms; checkCompletion) applicationStatusError.',
+      applicationStatusError
+    );
   }
 
   /**
@@ -31,7 +35,11 @@ export async function main(event) {
    */
   const completionStatusCodes = [64, 128, 256, 512];
   if (!validateApplicationStatus(applicationStatusList, completionStatusCodes)) {
-    throw 'no completion status found in viva adapter response';
+    console.info(
+      '(Viva-ms: checkCompletion) No completion status(64) found in viva adapter response.',
+      applicationStatusList
+    );
+    return await putCheckCompletionEvent(caseKeys);
   }
 
   const vivaCaseSSMParams = await VIVA_CASE_SSM_PARAMS;
@@ -39,18 +47,30 @@ export async function main(event) {
     updateCaseCompletionAttributes(caseKeys, vivaCaseSSMParams.completionFormId)
   );
   if (updateCaseError) {
-    throw updateCaseError;
+    return console.error('(Viva-ms: checkCompletion) updateCaseError.', updateCaseError);
   }
 
   console.log(
-    '(viva-ms: checkCompletion): updated case with completion data successfully',
+    '(viva-ms: checkCompletion) Updated case with completion data successfully.',
     caseItem
   );
+
+  return await putCheckCompletionEvent(caseKeys);
+}
+
+async function putCheckCompletionEvent(caseKeys) {
+  const [putEventError] = await to(
+    putEvent({ caseKeys }, 'vivaMsCheckCompletionSuccess', 'vivaMs.checkCompletion')
+  );
+  if (putEventError) {
+    return console.error('(Viva-ms: checkCompletion) putEventError.', putEventError);
+  }
+
   return true;
 }
 
 async function updateCaseCompletionAttributes(keys, currentFormId) {
-  const completionStatus = getStatusByType('active:completionRequired:viva');
+  const completionStatus = getStatusByType(statusTypes.ACTIVE_COMPLETION_REQUIRED_VIVA);
 
   const params = {
     TableName: config.cases.tableName,

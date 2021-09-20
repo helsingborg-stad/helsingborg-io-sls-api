@@ -8,7 +8,7 @@ import params from '../../../libs/params';
 import { putItem } from '../../../libs/queries';
 import * as dynamoDB from '../../../libs/dynamoDb';
 import { CASE_PROVIDER_VIVA } from '../../../libs/constants';
-import { getStatusByType } from '../../../libs/caseStatuses';
+import { getStatusByType, statusTypes } from '../../../libs/caseStatuses';
 import validateApplicationStatus from '../helpers/validateApplicationStatus';
 import { populateFormWithPreviousCaseAnswers } from '../../../libs/formAnswers';
 
@@ -115,7 +115,7 @@ async function putRecurringVivaCase(vivaPerson, user) {
 
   const id = uuid.v4();
   const timestampNow = Date.now();
-  const initialStatus = getStatusByType('notStarted:viva');
+  const initialStatus = getStatusByType(statusTypes.NOT_STARTED_VIVA);
   const workflowId = vivaPerson.application.workflowid;
   const period = {
     startDate: Date.parse(vivaPerson.application.period.start),
