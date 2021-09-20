@@ -40,7 +40,7 @@ When you deploy the service, serverless will output the generated url in the ter
 Deploy command:
 
 ```bash
-$ sls deploy -v
+$ sls deploy --verbose
 ```
 
 When you deploy the service, serverless will output the generated url in the terminal that the service can be accessed from.
@@ -80,10 +80,6 @@ $ npm run test -- --[option_1] --[option_2]
 #### Endpoint
 
 `/booking/{bookingId}`
-
-#### JSON PAYLOAD
-
-`N/A`
 
 #### Expected Response
 
@@ -155,10 +151,6 @@ $ npm run test -- --[option_1] --[option_2]
 #### Endpoint
 
 `/booking/{bookingId}`
-
-#### JSON Payload
-
-`N/A`
 
 #### Expected JSON Response
 
