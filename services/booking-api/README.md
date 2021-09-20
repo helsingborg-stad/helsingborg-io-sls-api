@@ -11,7 +11,7 @@ done to Datatorget API.
 
 ## Getting started
 
-1. Read the global requierments for this repo, can be found [here](https://github.com/helsingborg-stad/helsingborg-io-sls-api/blob/dev/README.md)
+1. Read the global requirements for this repo, can be found [here](https://github.com/helsingborg-stad/helsingborg-io-sls-api/blob/dev/README.md)
 
 ### AWS API GATEWAY
 
@@ -19,7 +19,7 @@ A running instance of an API GATEWAY on AWS that includes a gateway resource nam
 
 ### AWS PARAMETERSTORE (OPTIONAL)
 
-A setup of booking AWS paramterstore on aws. This can be created from the resource api. You can find and deploy this in our [resource](https://github.com/helsingborg-stad/helsingborg-io-sls-resources/tree/dev/services/parameterStore) repository.
+A setup of booking AWS parameterstore on aws. This can be created from the resource api. You can find and deploy this in our [resource](https://github.com/helsingborg-stad/helsingborg-io-sls-resources/tree/dev/services/parameterStore) repository.
 
 ### Installation
 
@@ -85,7 +85,7 @@ $ npm run test -- --[option_1] --[option_2]
 
 `N/A`
 
-#### Excpected Response
+#### Expected Response
 
 ```
 {
