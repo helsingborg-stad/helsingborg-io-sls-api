@@ -12,7 +12,7 @@ import * as response from '../../../libs/response';
 import * as dynamoDb from '../../../libs/dynamoDb';
 import { decodeToken } from '../../../libs/token';
 import { objectWithoutProperties } from '../../../libs/objects';
-import { getStatusByType } from '../../../libs/caseStatuses';
+import { getStatusByType, statusTypes } from '../../../libs/caseStatuses';
 
 import statusCheck from '../helpers/statusCheckCondition';
 import { getUserCase } from '../helpers/dynamoDb';
@@ -212,19 +212,19 @@ async function queryFormsIfExistsFormId(formId) {
 function getNewCaseStatus(conditionOption) {
   const statusCheckList = [
     {
-      type: 'active:ongoing',
+      type: statusTypes.ACTIVE_ONGOING,
       conditionFunction: statusCheck.condition.isOngoing,
     },
     {
-      type: 'active:signature:pending',
+      type: statusTypes.ACTIVE_SIGNATURE_PENDING,
       conditionFunction: statusCheck.condition.isSignaturePending,
     },
     {
-      type: 'active:signature:completed',
+      type: statusTypes.ACTIVE_SIGNATURE_COMPLETED,
       conditionFunction: statusCheck.condition.isSignatureCompleted,
     },
     {
-      type: 'active:submitted',
+      type: statusTypes.ACTIVE_SUBMITTED,
       conditionFunction: statusCheck.condition.isSubmitted,
     },
   ];

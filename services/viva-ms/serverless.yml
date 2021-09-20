@@ -61,6 +61,7 @@ provider:
             - dynamodb:UpdateItem
             - dynamodb:PutItem
             - dynamodb:Query
+            - dynamodb:GetItem
           Resource:
             - "Fn::ImportValue": ${self:custom.resourcesStage}-CasesTableArn
 
@@ -164,6 +165,18 @@ functions:
               - casesApi.updateCase
             detail-type:
               - casesApiUpdateCaseSuccess
+      - eventBridge:
+          pattern:
+            source:
+              - vivaMs.decideCaseStatus
+            detail-type:
+              - vivaMsDecideCaseStatusSuccess
+      - eventBridge:
+          pattern:
+            source:
+              - vivaMs.checkCompletion
+            detail-type:
+              - vivaMsCheckCompletionSuccess
 
   checkCompletion:
     handler: lambdas/checkCompletion.main
