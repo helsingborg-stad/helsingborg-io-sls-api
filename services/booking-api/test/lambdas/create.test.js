@@ -1,8 +1,8 @@
 import messages from '@helsingborg-stad/npm-api-error-handling/assets/errorMessages';
 
 import { main } from '../../lambdas/create';
-import getSsmParameters from '../../helpers/getSsmParameters';
-import makeBookingRequest from '../../helpers/makeBookingRequest';
+import { getSsmParameters } from '../../helpers/getSsmParameters';
+import { makeBookingRequest } from '../../helpers/makeBookingRequest';
 
 jest.mock('../../helpers/getSsmParameters');
 jest.mock('../../helpers/makeBookingRequest');
