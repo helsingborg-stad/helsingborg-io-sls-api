@@ -22,7 +22,7 @@ export const main = async event => {
   url = `${outlookBookingEndpoint}/create`;
   body = { ...JSON.parse(event.body) };
 
-  const [createRequestError, createBookingResponse = {}] = await to(
+  const [createRequestError, createBookingResponse] = await to(
     sendBookingPostRequest(url, apiKey, body)
   );
   if (createRequestError) throwError(createRequestError.status, createRequestError.errorMessage);
