@@ -3,11 +3,11 @@ import to from 'await-to-js';
 
 const ssm = new SSM({ apiVersion: '2014-11-06' });
 
-const cachedParameters = {};
+const parameterCacheCollection = {};
 
 async function read(name) {
-  if (cachedParameters[name]) {
-    return cachedParameters[name];
+  if (parameterCacheCollection[name]) {
+    return parameterCacheCollection[name];
   }
 
   const requestParameters = {
@@ -21,9 +21,9 @@ async function read(name) {
   }
 
   const parameter = JSON.parse(ssmParameters.Parameter.Value);
-  cachedParameters[name] = parameter;
+  parameterCacheCollection[name] = parameter;
 
-  return cachedParameters[name];
+  return parameterCacheCollection[name];
 }
 
 export default { read };
