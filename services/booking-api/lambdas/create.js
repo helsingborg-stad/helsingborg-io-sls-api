@@ -3,19 +3,15 @@ import to from 'await-to-js';
 
 import * as response from '../../../libs/response';
 
-import { getSsmParameters } from '../helpers/getSsmParameters';
-import { sendBookingPostRequest } from '../helpers/sendBookingPostRequest';
+import booking from '../helpers/booking';
 
 export async function main(event) {
-  const [error, ssmParameters] = await to(getSsmParameters());
-  if (error) throwError(error.statusCode, error.message);
-
-  const { outlookBookingEndpoint, apiKey } = ssmParameters;
-  const url = `${outlookBookingEndpoint}/create`;
   const body = { ...JSON.parse(event.body) };
 
-  const [requestError, createBookingResponse] = await to(sendBookingPostRequest(url, apiKey, body));
-  if (requestError) throwError(requestError.status, requestError.errorMessage);
+  const [error, createBookingResponse] = await to(booking.create(body));
+  if (error) {
+    throwError(error);
+  }
 
   const { data } = createBookingResponse.data;
   return response.success(200, data);
