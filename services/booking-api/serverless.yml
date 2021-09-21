@@ -51,6 +51,7 @@ functions:
           method: post
           private: true
           cors: true
+
   cancelBooking:
     handler: lambdas/cancel.main
     events:
@@ -59,6 +60,7 @@ functions:
           method: delete
           private: true
           cors: true
+
   getBooking:
     handler: lambdas/get.main
     events:
@@ -67,6 +69,7 @@ functions:
           method: get
           private: true
           cors: true
+
   updateBooking:
     handler: lambdas/update.main
     events:
