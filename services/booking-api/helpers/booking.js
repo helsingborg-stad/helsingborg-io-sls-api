@@ -12,9 +12,6 @@ const METHOD = {
   POST: 'post',
 };
 
-let outlookBookingEndpoint;
-let apiKey;
-
 function create(body) {
   return sendBookingPostRequest(PATH.CREATE, body);
 }
@@ -28,9 +25,7 @@ function get(body) {
 }
 
 async function sendBookingPostRequest(path, body) {
-  if (!outlookBookingEndpoint || !apiKey) {
-    await getSsmParameters();
-  }
+  const { outlookBookingEndpoint, apiKey } = await params.read(config.booking.envsKeyName);
 
   const requestClient = request.requestClient(
     { rejectUnauthorized: false },
@@ -41,13 +36,6 @@ async function sendBookingPostRequest(path, body) {
   const response = request.call(requestClient, METHOD.POST, url, body);
 
   return response;
-}
-
-async function getSsmParameters() {
-  const ssmParameters = await params.read(config.booking.envsKeyName);
-
-  outlookBookingEndpoint = ssmParameters.outlookBookingEndpoint;
-  apiKey = ssmParameters.apiKey;
 }
 
 export default { create, cancel, get };
