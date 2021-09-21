@@ -1,13 +1,12 @@
-# HELSINGBORG IO SLS BOOKING SERVICE
+# HELSINGBORG IO SLS SEARCH SERVICE
 
 ## Purpose
 
-The Booking Service purpose is to manage Outlook calendar bookings against Datatorget service.
+The Search Service's purpose is to search through data related to an attendee's bookings and return information related to available time slots in the attendee's calendar.
 
 ## Description
 
-The Booking Service is a RESTful API that allows users to create, delete, update or get an Outlook calendar booking with requests
-done to Datatorget API.
+The Search Service is an API that includes functions for searching through the calendar of an attendee and finding bookings and appropriate time slots for bookings of a specified length.
 
 ## Getting started
 
@@ -15,11 +14,11 @@ done to Datatorget API.
 
 ### AWS API GATEWAY
 
-A running instance of an API GATEWAY on AWS that includes a gateway resource named /booking. You can find and deploy this in our [resource](https://github.com/helsingborg-stad/helsingborg-io-sls-resources/tree/dev/services/gateway/resources/booking) repository.
+A running instance of an API GATEWAY on AWS that includes a gateway resource named /search. You can find and deploy this in our [resource](https://github.com/helsingborg-stad/helsingborg-io-sls-resources/tree/dev/services/gateway/resources/search) repository.
 
 ### AWS PARAMETERSTORE (OPTIONAL)
 
-A setup of booking AWS paramterstore on aws. This can be created from the resource api. You can find and deploy this in our [resource](https://github.com/helsingborg-stad/helsingborg-io-sls-resources/tree/dev/services/parameterStore) repository.
+A setup of search AWS paramterstore on aws. This can be created from the resource api. You can find and deploy this in our [resource](https://github.com/helsingborg-stad/helsingborg-io-sls-resources/tree/dev/services/parameterStore) repository.
 
 ### Installation
 
@@ -71,45 +70,7 @@ $ npm run test -- --[option_1] --[option_2]
 
 ## API
 
-### GET BOOKING
-
-#### Request Type
-
-`GET`
-
-#### Endpoint
-
-`/booking/{bookingId}`
-
-#### JSON PAYLOAD
-
-`N/A`
-
-#### Excpected Response
-
-```
-{
-    "jsonapi": {
-        "version": "1.0"
-    },
-    "data": {
-        "type": "booking",
-        "id": "booking_id",
-        "attributes": {
-            "attendee": "attendee_email_address",
-            "subject": "subject",
-            "location": "location",
-            "status": "status",
-            "startTime": "utc_time_format",
-            "endTime": "utc_time_format",
-            "referenceCode": "reference_code",
-            "responseType": "Unknown"
-        }
-    }
-}
-```
-
-### CREATE BOOKING
+### SEARCH BOOKINGS
 
 #### Request Type
 
@@ -117,96 +78,42 @@ $ npm run test -- --[option_1] --[option_2]
 
 #### Endpoint
 
-`/booking`
+`/search/searchBookings`
 
 #### JSON Payload
 
-```
+```json
 {
   "attendee": "attendee_email_address",
   "startTime": "utc_time_format",
   "endTime": "utc_time_format",
-  "subject": "subject",
-  "body": "htmltext",
-  "location": "location",
-  "referenceCode": "reference_code"
 }
 ```
 
 #### Expected JSON Response
 
-```
+```json
 {
     "jsonapi": {
         "version": "1.0"
     },
     "data": {
-        "type": "booking",
-        "id": "booking_id"
+        "type": "outlookcalendarevents",
+        "id": "attendee_email_address",
+        "attributes": {
+            "participant": "attendee_email_address"
+        },
+        "intervals": [
+            {
+                "eventId": "uid",
+                "startTime": "utc_time_format",
+                "endTime": "utc_time_format",
+                "busyType": "Busy" | "Tentative",
+                "isMeeting": "boolean",
+                "subject": "string"
+            },
+            ...
+        ]
     }
-}
-```
-### CANCEL BOOKING
-
-#### Request Type
-
-`DELETE`
-
-#### Endpoint
-
-`/booking/{bookingId}`
-
-#### JSON Payload
-
-`N/A`
-
-#### Expected JSON Response
-
-```
-{
-  "jsonapi": {
-      "version": "1.0"
-  },
-  "data": {
-      "bookingId": "booking_id"
-  }
-}
-```
-
-### UPDATE BOOKING
-
-#### Request Type
-
-`PATCH`
-
-#### Endpoint
-
-`/booking/{bookingId}`
-
-#### JSON Payload
-
-```
-{
-  "attendee": "attendee_email_address",
-  "startTime": "utc_time_format",
-  "endTime": "utc_time_format",
-  "subject": "subject",
-  "body": "htmltext",
-  "location": "location",
-  "referenceCode": "reference_code"
-}
-```
-
-#### Expected JSON Response
-
-```
-{
-  "jsonapi": {
-      "version": "1.0"
-  },
-  "data": {
-      "type": "booking",
-      "id": "booking_id"
-  }
 }
 ```
