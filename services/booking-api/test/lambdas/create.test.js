@@ -1,14 +1,10 @@
 import messages from '@helsingborg-stad/npm-api-error-handling/assets/errorMessages';
 
 import { main } from '../../lambdas/create';
-import { getSsmParameters } from '../../helpers/getSsmParameters';
-import { sendBookingPostRequest } from '../../helpers/sendBookingPostRequest';
+import booking from '../../helpers/booking';
 
-jest.mock('../../helpers/getSsmParameters');
-jest.mock('../../helpers/sendBookingPostRequest');
+jest.mock('../../helpers/booking');
 
-const mockUrl = 'www.datatorgetMock.se';
-const mockApiKey = '123';
 const mockBody = {
   attendee: 'outlook.user@helsingborg.se',
   startTime: '2021-05-30T10:00:00',
@@ -25,15 +21,16 @@ const mockEvent = {
 it('creates a booking successfully', async () => {
   expect.assertions(2);
 
-  const expectedUrl = `${mockUrl}/create`;
   const calendarBookingResponse = {
     data: {
-      type: 'booking',
-      id: '123456789',
+      data: {
+        type: 'booking',
+        id: '123456789',
+      },
     },
   };
   const expectedResult = {
-    body: JSON.stringify({ jsonapi: { version: '1.0' }, ...calendarBookingResponse }),
+    body: JSON.stringify({ jsonapi: { version: '1.0' }, ...calendarBookingResponse.data }),
     headers: {
       'Access-Control-Allow-Credentials': true,
       'Access-Control-Allow-Origin': '*',
@@ -41,36 +38,21 @@ it('creates a booking successfully', async () => {
     statusCode: 200,
   };
 
-  getSsmParameters.mockResolvedValueOnce({ outlookBookingEndpoint: mockUrl, apiKey: mockApiKey });
-  sendBookingPostRequest.mockResolvedValueOnce({
-    data: calendarBookingResponse,
-  });
+  booking.create.mockResolvedValueOnce(calendarBookingResponse);
 
   const result = await main(mockEvent);
 
   expect(result).toEqual(expectedResult);
-  expect(sendBookingPostRequest).toHaveBeenCalledWith(expectedUrl, mockApiKey, mockBody);
+  expect(booking.create).toHaveBeenCalledWith(mockBody);
 });
 
-it('throws when fetching from SSM parameterstore fails', async () => {
+it('throws when booking.create fails', async () => {
   expect.assertions(1);
 
   const statusCode = 500;
   const message = messages[statusCode];
 
-  getSsmParameters.mockRejectedValueOnce({ statusCode, message });
+  booking.create.mockRejectedValueOnce({ statusCode, message });
 
   await expect(main(mockEvent)).rejects.toThrow(message);
-});
-
-it('throws when creating a booking fails', async () => {
-  expect.assertions(1);
-
-  const status = 500;
-  const errorMessage = messages[status];
-
-  getSsmParameters.mockResolvedValueOnce({ outlookBookingEndpoint: mockUrl, apiKey: mockApiKey });
-  sendBookingPostRequest.mockRejectedValueOnce({ errorMessage, status });
-
-  await expect(main(mockEvent)).rejects.toThrow(errorMessage);
 });
