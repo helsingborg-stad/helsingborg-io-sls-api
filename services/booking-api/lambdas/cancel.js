@@ -10,7 +10,6 @@ export async function main(event) {
   const body = { bookingId };
 
   const [error] = await to(booking.cancel(body));
-
   if (error) {
     throwError(error);
   }
