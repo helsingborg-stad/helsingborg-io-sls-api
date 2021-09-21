@@ -1,27 +1,29 @@
-import AWS from 'aws-sdk';
+import SSM from 'aws-sdk/clients/ssm';
+import to from 'await-to-js';
 
-const ssm = new AWS.SSM();
+const ssm = new SSM({ apiVersion: '2014-11-06' });
 
-const read = name =>
-  new Promise((resolve, reject) => {
-    ssm.getParameter(
-      {
-        Name: name,
-        WithDecryption: true,
-      },
-      (err, data) => {
-        if (err) {
-          reject(err);
-        } else {
-          const param = JSON.parse(data.Parameter.Value);
-          resolve(param);
-        }
-      }
-    );
-  });
+const cachedParameters = {};
 
-const params = {
-  read,
-};
+async function read(name) {
+  if (cachedParameters[name]) {
+    return cachedParameters[name];
+  }
 
-export default params;
+  const requestParameters = {
+    Name: name,
+    WithDecryption: true,
+  };
+
+  const [ssmError, ssmParameters] = await to(ssm.getParameter(requestParameters).promise());
+  if (ssmError) {
+    throw ssmError;
+  }
+
+  const parameter = JSON.parse(ssmParameters.Parameter.Value);
+  cachedParameters[name] = parameter;
+
+  return cachedParameters[name];
+}
+
+export default { read };
