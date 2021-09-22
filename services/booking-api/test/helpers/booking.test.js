@@ -51,7 +51,8 @@ test.each(['create', 'cancel', 'get'])(
     expect.assertions(1);
 
     const endpoint = `${mockEndpoint}/${requestName}`;
-    const body = { id: requestName };
+    const requestParameter = requestName === 'create' ? { bookingId: requestName } : requestName;
+    const body = { bookingId: requestName };
     const requestClient = request.requestClient(
       { rejectUnauthorized: false },
       { 'X-ApiKey': mockApiKey }
@@ -60,7 +61,7 @@ test.each(['create', 'cancel', 'get'])(
     params.read.mockResolvedValueOnce({ outlookBookingEndpoint: mockEndpoint, apiKey: mockApiKey });
     request.call.mockResolvedValueOnce();
 
-    await booking[requestName](body);
+    await booking[requestName](requestParameter);
 
     expect(request.call).toHaveBeenCalledWith(requestClient, 'post', endpoint, body);
   }

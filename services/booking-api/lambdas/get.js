@@ -6,9 +6,8 @@ import booking from '../helpers/booking';
 
 export async function main(event) {
   const bookingId = event.pathParameters.id;
-  const body = { bookingId };
 
-  const [error, getBookingResponse] = await to(booking.get(body));
+  const [error, getBookingResponse] = await to(booking.get(bookingId));
   if (error) {
     return response.failure(error);
   }

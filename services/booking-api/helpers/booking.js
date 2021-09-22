@@ -19,12 +19,12 @@ function create(body) {
   return sendBookingPostRequest(PATH.CREATE, body);
 }
 
-function cancel(body) {
-  return sendBookingPostRequest(PATH.CANCEL, body);
+function cancel(bookingId) {
+  return sendBookingPostRequest(PATH.CANCEL, { bookingId });
 }
 
-function get(body) {
-  return sendBookingPostRequest(PATH.GET, body);
+function get(bookingId) {
+  return sendBookingPostRequest(PATH.GET, { bookingId });
 }
 
 async function sendBookingPostRequest(path, body) {

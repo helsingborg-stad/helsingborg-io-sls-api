@@ -6,12 +6,11 @@ import booking from '../helpers/booking';
 
 export async function main(event) {
   const bookingId = event.pathParameters.id;
-  const body = { bookingId };
 
-  const [error] = await to(booking.cancel(body));
+  const [error] = await to(booking.cancel(bookingId));
   if (error) {
     return response.failure(error);
   }
 
-  return response.success(200, body);
+  return response.success(200, { bookingId });
 }

@@ -54,7 +54,7 @@ it('gets a booking successfully', async () => {
   const result = await main(mockEvent);
 
   expect(result).toEqual(expectedResult);
-  expect(booking.get).toHaveBeenCalledWith({ bookingId: mockBookingId });
+  expect(booking.get).toHaveBeenCalledWith(mockBookingId);
 });
 
 it('throws when fetching a booking fails', async () => {
