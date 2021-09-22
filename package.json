@@ -57,7 +57,7 @@
     "@helsingborg-stad/npm-api-error-handling": "^0.15.0",
     "await-to-js": "^2.1.1",
     "aws-sdk": "^2.843.0",
-    "axios": "^0.21.1",
+    "axios": "^0.21.2",
     "camelcase": "^6.2.0",
     "deep-equal": "^2.0.5",
     "hashids": "^2.2.8",
