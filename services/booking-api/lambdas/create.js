@@ -5,7 +5,7 @@ import * as response from '../../../libs/response';
 import booking from '../helpers/booking';
 
 export async function main(event) {
-  const body = { ...JSON.parse(event.body) };
+  const body = JSON.parse(event.body);
 
   const [error, createBookingResponse] = await to(booking.create(body));
   if (error) {
