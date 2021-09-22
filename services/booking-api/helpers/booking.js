@@ -5,7 +5,7 @@ import * as request from '../../../libs/request';
 import params from '../../../libs/params';
 import config from '../../../config';
 
-const PATH = {
+const URI_RESOURCE = {
   CREATE: 'create',
   CANCEL: 'cancel',
   GET: 'get',
@@ -16,15 +16,15 @@ const METHOD = {
 };
 
 function create(body) {
-  return sendBookingPostRequest(PATH.CREATE, body);
+  return sendBookingPostRequest(URI_RESOURCE.CREATE, body);
 }
 
 function cancel(bookingId) {
-  return sendBookingPostRequest(PATH.CANCEL, { bookingId });
+  return sendBookingPostRequest(URI_RESOURCE.CANCEL, { bookingId });
 }
 
 function get(bookingId) {
-  return sendBookingPostRequest(PATH.GET, { bookingId });
+  return sendBookingPostRequest(URI_RESOURCE.GET, { bookingId });
 }
 
 async function sendBookingPostRequest(path, body) {
