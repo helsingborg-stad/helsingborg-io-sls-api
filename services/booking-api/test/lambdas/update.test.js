@@ -21,6 +21,10 @@ const mockEvent = {
   },
   body: JSON.stringify(mockBody),
 };
+const mockHeaders = {
+  'Access-Control-Allow-Credentials': true,
+  'Access-Control-Allow-Origin': '*',
+};
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -61,22 +65,51 @@ it('throws when booking.cancel fails', async () => {
 
   const statusCode = 500;
   const message = messages[statusCode];
+  const expectedResult = {
+    body: JSON.stringify({
+      jsonapi: { version: '1.0' },
+      data: {
+        status: '500',
+        code: '500',
+        message,
+      },
+    }),
+    headers: mockHeaders,
+    statusCode,
+  };
 
-  booking.cancel.mockRejectedValueOnce({ statusCode, message });
+  booking.cancel.mockRejectedValueOnce({ status: statusCode, message });
 
-  await expect(main(mockEvent)).rejects.toThrow(message);
+  const result = await main(mockEvent);
+
+  expect(result).toEqual(expectedResult);
   expect(booking.create).toHaveBeenCalledTimes(0);
 });
 
 it('throws when booking.create fails', async () => {
-  expect.assertions(2);
+  expect.assertions(3);
 
-  const status = 500;
-  const errorMessage = messages[status];
+  const statusCode = 500;
+  const message = messages[statusCode];
+  const expectedResult = {
+    body: JSON.stringify({
+      jsonapi: { version: '1.0' },
+      data: {
+        status: '500',
+        code: '500',
+        message,
+      },
+    }),
+    headers: mockHeaders,
+    statusCode,
+  };
 
   booking.cancel.mockResolvedValueOnce();
-  booking.create.mockRejectedValueOnce({ status, errorMessage });
+  booking.create.mockRejectedValueOnce({ status: statusCode, message });
 
-  await expect(main(mockEvent)).rejects.toThrow(errorMessage);
+  const result = await main(mockEvent);
+
+  expect(result).toEqual(expectedResult);
+  expect(booking.cancel).toHaveBeenCalledTimes(1);
   expect(booking.create).toHaveBeenCalledTimes(1);
 });

@@ -1,4 +1,3 @@
-import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import to from 'await-to-js';
 
 import * as response from '../../../libs/response';
@@ -10,7 +9,7 @@ export async function main(event) {
 
   const [error, createBookingResponse] = await to(booking.create(body));
   if (error) {
-    throwError(error);
+    return response.failure(error);
   }
 
   const { data } = createBookingResponse.data;
