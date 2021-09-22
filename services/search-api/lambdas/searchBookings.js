@@ -8,9 +8,9 @@ import { searchBookings } from '../helpers/search';
 export async function main(event) {
   const body = { ...JSON.parse(event.body) };
 
-  const [requestError, getTimeSlotsResponse] = await to(searchBookings(body));
+  const [requestError, getSearchResponse] = await to(searchBookings(body));
   if (requestError) throwError(requestError.status, requestError.errorMessage);
 
-  const { data } = getTimeSlotsResponse.data;
+  const { data } = getSearchResponse.data;
   return response.success(200, data);
 }
