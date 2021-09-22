@@ -17,6 +17,10 @@ const mockBody = {
 const mockEvent = {
   body: JSON.stringify(mockBody),
 };
+const mockHeaders = {
+  'Access-Control-Allow-Credentials': true,
+  'Access-Control-Allow-Origin': '*',
+};
 
 it('creates a booking successfully', async () => {
   expect.assertions(2);
@@ -31,10 +35,7 @@ it('creates a booking successfully', async () => {
   };
   const expectedResult = {
     body: JSON.stringify({ jsonapi: { version: '1.0' }, ...calendarBookingResponse.data }),
-    headers: {
-      'Access-Control-Allow-Credentials': true,
-      'Access-Control-Allow-Origin': '*',
-    },
+    headers: mockHeaders,
     statusCode: 200,
   };
 
@@ -51,8 +52,22 @@ it('throws when booking.create fails', async () => {
 
   const statusCode = 500;
   const message = messages[statusCode];
+  const expectedResult = {
+    body: JSON.stringify({
+      jsonapi: { version: '1.0' },
+      data: {
+        status: '500',
+        code: '500',
+        message,
+      },
+    }),
+    headers: mockHeaders,
+    statusCode,
+  };
 
-  booking.create.mockRejectedValueOnce({ statusCode, message });
+  booking.create.mockRejectedValueOnce({ status: statusCode, message });
 
-  await expect(main(mockEvent)).rejects.toThrow(message);
+  const result = await main(mockEvent);
+
+  expect(result).toEqual(expectedResult);
 });

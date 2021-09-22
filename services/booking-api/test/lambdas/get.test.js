@@ -11,6 +11,10 @@ const mockEvent = {
     id: mockBookingId,
   },
 };
+const mockHeaders = {
+  'Access-Control-Allow-Credentials': true,
+  'Access-Control-Allow-Origin': '*',
+};
 
 const mockCalendarBooking = {
   type: 'booking',
@@ -37,10 +41,7 @@ it('gets a booking successfully', async () => {
 
   const expectedResult = {
     body: JSON.stringify(getBookingMockData),
-    headers: {
-      'Access-Control-Allow-Credentials': true,
-      'Access-Control-Allow-Origin': '*',
-    },
+    headers: mockHeaders,
     statusCode: 200,
   };
 
@@ -56,13 +57,27 @@ it('gets a booking successfully', async () => {
   expect(booking.get).toHaveBeenCalledWith({ bookingId: mockBookingId });
 });
 
-it('throws when cancel a booking fails', async () => {
+it('throws when fetching a booking fails', async () => {
   expect.assertions(1);
 
-  const status = 500;
-  const errorMessage = messages[status];
+  const statusCode = 500;
+  const message = messages[statusCode];
+  const expectedResult = {
+    body: JSON.stringify({
+      jsonapi: { version: '1.0' },
+      data: {
+        status: '500',
+        code: '500',
+        message,
+      },
+    }),
+    headers: mockHeaders,
+    statusCode,
+  };
 
-  booking.get.mockRejectedValueOnce({ status, errorMessage });
+  booking.get.mockRejectedValueOnce({ status: statusCode, message });
 
-  await expect(main(mockEvent)).rejects.toThrow(errorMessage);
+  const result = await main(mockEvent);
+
+  expect(result).toEqual(expectedResult);
 });

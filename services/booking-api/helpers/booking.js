@@ -1,3 +1,6 @@
+import { throwError } from '@helsingborg-stad/npm-api-error-handling';
+import to from 'await-to-js';
+
 import * as request from '../../../libs/request';
 import params from '../../../libs/params';
 import config from '../../../config';
@@ -25,7 +28,7 @@ function get(body) {
 }
 
 async function sendBookingPostRequest(path, body) {
-  const { outlookBookingEndpoint, apiKey } = await params.read(config.booking.envsKeyName);
+  const { outlookBookingEndpoint, apiKey } = await getSsmParameters();
 
   const requestClient = request.requestClient(
     { rejectUnauthorized: false },
@@ -33,7 +36,20 @@ async function sendBookingPostRequest(path, body) {
   );
 
   const url = `${outlookBookingEndpoint}/${path}`;
-  const response = request.call(requestClient, METHOD.POST, url, body);
+  const [error, response] = await to(request.call(requestClient, METHOD.POST, url, body));
+  if (error) {
+    const { status, statusText } = error.response;
+    throw { status, message: statusText };
+  }
+
+  return response;
+}
+
+async function getSsmParameters() {
+  const [error, response] = await to(params.read(config.booking.envsKeyName));
+  if (error) {
+    throwError(500);
+  }
 
   return response;
 }
