@@ -1,4 +1,4 @@
-import messages from '@helsingborg-stad/npm-api-error-handling/assets/errorMessages';
+import { InternalServerError } from '@helsingborg-stad/npm-api-error-handling/src/errors';
 
 import { searchBookings } from '../../helpers/search';
 import params from '../../../../libs/params';
@@ -24,15 +24,12 @@ beforeEach(() => {
 it('throws if failing to fetch SSM parameters', async () => {
   expect.assertions(1);
 
-  const statusCode = 500;
-  const message = messages[statusCode];
-
-  params.read.mockRejectedValueOnce({ statusCode, message });
+  params.read.mockRejectedValueOnce({});
 
   try {
     await searchBookings(mockBody);
   } catch (error) {
-    expect(error).toEqual({ statusCode, message });
+    expect(error).toBeInstanceOf(InternalServerError);
   }
 });
 
@@ -42,7 +39,7 @@ it('throws if it receives an error when making request against an API', async ()
   const statusCode = 500;
   const message = 'Error from API';
 
-  params.read.mockResolvedValueOnce({ outlookBookingEndpoint: mockEndpoint, apiKey: mockApiKey });
+  params.read.mockResolvedValueOnce({ outlookSearchEndpoint: mockEndpoint, apiKey: mockApiKey });
   request.call.mockRejectedValueOnce({ statusCode, message });
 
   try {
@@ -58,7 +55,7 @@ it('returns a successful response when receiving a successful response from an A
   const statusCode = 200;
   const data = { message: 'ok' };
 
-  params.read.mockResolvedValueOnce({ outlookBookingEndpoint: mockEndpoint, apiKey: mockApiKey });
+  params.read.mockResolvedValueOnce({ outlookSearchEndpoint: mockEndpoint, apiKey: mockApiKey });
   request.call.mockResolvedValueOnce({ statusCode, data });
 
   const response = await searchBookings(mockBody);

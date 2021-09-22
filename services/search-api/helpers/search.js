@@ -1,13 +1,13 @@
+import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import to from 'await-to-js';
 
 import * as request from '../../../libs/request';
 import params from '../../../libs/params';
 import config from '../../../config';
 
-let outlookSearchEndpoint;
-let apiKey;
-
 async function searchBookings(body) {
+  const { outlookSearchEndpoint, apiKey } = await getSsmParameters();
+
   if (!outlookSearchEndpoint || !apiKey) {
     await getSsmParameters();
   }
@@ -27,14 +27,12 @@ async function searchBookings(body) {
 }
 
 async function getSsmParameters() {
-  const [error, ssmParameters] = await to(params.read(config.search.envsKeyName));
-
+  const [error, response] = await to(params.read(config.search.envsKeyName));
   if (error) {
-    throw error;
+    throwError(500);
   }
 
-  outlookSearchEndpoint = ssmParameters.outlookSearchEndpoint;
-  apiKey = ssmParameters.apiKey;
+  return response;
 }
 
 export { searchBookings };
