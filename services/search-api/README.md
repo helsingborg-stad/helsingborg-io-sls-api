@@ -108,11 +108,10 @@ $ npm run test -- --[option_1] --[option_2]
                 "eventId": "uid",
                 "startTime": "utc_time_format",
                 "endTime": "utc_time_format",
-                "busyType": "Busy" | "Tentative",
+                "busyType": "Busy | Tentative",
                 "isMeeting": "boolean",
                 "subject": "string"
-            },
-            ...
+            }
         ]
     }
 }
