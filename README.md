@@ -105,9 +105,11 @@ Every service in this mono repo has its own documentation. Follow links below.
 - Auth
   - [Token](/services/auth/token)
 - [Bankid API](/services/bankid-api)
+- [Booking API](/services/booking-api)
 - [Cases API](/services/cases-api)
 - [Forms API](/services/forms-api)
 - [Navet MS](/services/navet-ms)
+- [Search API](/services/search-api)
 - [Users API](/services/users-api)
 - [Users MS](/services/users-ms)
 - [Viva MS](/services/viva-ms)
