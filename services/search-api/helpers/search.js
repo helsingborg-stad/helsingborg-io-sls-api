@@ -17,7 +17,7 @@ async function searchBookings(body) {
     { 'X-ApiKey': apiKey }
   );
 
-  const url = `${outlookSearchEndpoint}`;
+  const url = outlookSearchEndpoint;
   const [error, response] = await to(request.call(requestClient, 'post', url, body));
   if (error) {
     throw error;
