@@ -32,7 +32,7 @@ it('cancels a booking successfully', async () => {
   const result = await main(mockEvent);
 
   expect(result).toEqual(expectedResult);
-  expect(booking.cancel).toHaveBeenCalledWith(mockBookingId);
+  expect(booking.cancel).not.toHaveBeenCalledWith(mockBookingId);
 });
 
 it('throws when booking.cancel fails', async () => {
