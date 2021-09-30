@@ -34,6 +34,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-dev-
 
+      # inject npmrc
+      - name: Inject access token in .npmrc
+        run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
+
       # install yarn (will use cache if possible)
       - name: yarn install
         run: yarn install
