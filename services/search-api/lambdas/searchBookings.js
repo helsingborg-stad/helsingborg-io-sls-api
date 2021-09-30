@@ -1,4 +1,3 @@
-import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import to from 'await-to-js';
 
 import * as response from '../../../libs/response';
@@ -10,7 +9,7 @@ export async function main(event) {
 
   const [requestError, getSearchResponse] = await to(searchBookings(body));
   if (requestError) {
-    throwError(requestError.status, requestError.errorMessage);
+    return response.failure(requestError);
   }
 
   const { data } = getSearchResponse.data;

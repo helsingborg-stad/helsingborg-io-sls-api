@@ -10,11 +10,9 @@ const mockBody = {
   startTime: '2021-05-30T9:00:00',
   endTime: '2021-05-30T12:00:00',
 };
-
 const mockEvent = {
   body: JSON.stringify(mockBody),
 };
-
 const mockSearchResponse = {
   data: {
     type: 'outlookcalendarevents',
@@ -33,6 +31,10 @@ const mockSearchResponse = {
       },
     ],
   },
+};
+const mockHeaders = {
+  'Access-Control-Allow-Credentials': true,
+  'Access-Control-Allow-Origin': '*',
 };
 
 it('returns a correctly formatted success response when receiving a successful response from searchBookings', async () => {
@@ -60,8 +62,22 @@ it('throws an error when receiving an error response from searchBookings', async
 
   const statusCode = 500;
   const message = messages[statusCode];
+  const expectedResult = {
+    body: JSON.stringify({
+      jsonapi: { version: '1.0' },
+      data: {
+        status: '500',
+        code: '500',
+        message,
+      },
+    }),
+    headers: mockHeaders,
+    statusCode,
+  };
 
-  searchBookings.mockRejectedValueOnce({ statusCode, message });
+  searchBookings.mockRejectedValueOnce({ status: statusCode, message });
 
-  await expect(main(mockEvent)).rejects.toThrow(message);
+  const result = await main(mockEvent);
+
+  await expect(result).toEqual(expectedResult);
 });
