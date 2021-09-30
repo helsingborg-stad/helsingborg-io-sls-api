@@ -43,7 +43,7 @@ provider:
             - !Sub arn:aws:ssm:${self:provider.region}:${AWS::AccountId}:parameter/searchEnvs/${self:provider.stage}
 
 functions:
-  getTimeSlots:
+  searchBookings:
     handler: lambdas/searchBookings.main
     events:
       - http:
