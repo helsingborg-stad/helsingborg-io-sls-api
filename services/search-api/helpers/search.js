@@ -8,10 +8,6 @@ import config from '../../../config';
 async function searchBookings(body) {
   const { outlookSearchEndpoint, apiKey } = await getSsmParameters();
 
-  if (!outlookSearchEndpoint || !apiKey) {
-    await getSsmParameters();
-  }
-
   const requestClient = request.requestClient(
     { rejectUnauthorized: false },
     { 'X-ApiKey': apiKey }
