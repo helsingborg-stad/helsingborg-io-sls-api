@@ -31,19 +31,20 @@ export async function main(event, context) {
    * 128 - Case exsits in Viva
    * 256 - An active e-application is activated in Viva
    * 512 - Application allows e-application
+   *
    */
-  const requiredStatusCodes = [1, 128, 256, 512];
-  if (!validateApplicationStatus(applicationStatusList, requiredStatusCodes)) {
+  const periodOpenStatusCodes = [1, 128, 256, 512];
+  if (!validateApplicationStatus(applicationStatusList, periodOpenStatusCodes)) {
     log.info(
-      'validateApplicationStatus. No application period open.',
+      'validateApplicationStatus. No open application period.',
       context.awsRequestId,
-      'service-viva-ms-personApplicationStatus-003',
+      null,
       applicationStatusList
     );
     return false;
   }
 
-  const [putEventError] = await to(putVivaMsEvent.statusApplySuccess(applicationStatusList));
+  const [putEventError] = await to(putVivaMsEvent.checkOpenPeriodSuccess({ user: clientUser }));
   if (putEventError) {
     log.error(
       'putEventError: statusApplySuccess',
