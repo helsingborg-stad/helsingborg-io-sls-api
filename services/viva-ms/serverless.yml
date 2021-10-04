@@ -98,6 +98,17 @@ functions:
               - usersMsFindUserSuccess
               - vivaMsSubmitApplicationReceivedSuccess
 
+  personApplication:
+    handler: lambdas/personApplication.main
+    timeout: 15
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - vivaMs.personApplicationStatus
+            detail-type:
+              - applicationStatusApplySuccess
+
   submitApplication:
     handler: lambdas/submitApplication.main
     timeout: 15
