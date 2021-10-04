@@ -85,6 +85,19 @@ provider:
           Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
 
 functions:
+  personApplicationStatus:
+    handler: lambdas/personApplicationStatus.main
+    timeout: 15
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - usersMs.findUser
+              - vivaMs.submitApplication
+            detail-type:
+              - usersMsFindUserSuccess
+              - vivaMsSubmitApplicationReceivedSuccess
+
   submitApplication:
     handler: lambdas/submitApplication.main
     timeout: 15
@@ -155,7 +168,6 @@ functions:
               - vivaMs.syncWorkflow
             detail-type:
               - vivaMsSyncWorkflowSuccess
-
   syncExpiryTime:
     handler: lambdas/syncExpiryTime.main
     events:
