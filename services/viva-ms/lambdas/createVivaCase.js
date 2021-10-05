@@ -1,191 +1,120 @@
 /* eslint-disable no-console */
 import to from 'await-to-js';
 import uuid from 'uuid';
-import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
 import config from '../../../config';
-import params from '../../../libs/params';
-import { putItem } from '../../../libs/queries';
+
 import * as dynamoDB from '../../../libs/dynamoDb';
-import { CASE_PROVIDER_VIVA } from '../../../libs/constants';
-import { getStatusByType, statusTypes } from '../../../libs/caseStatuses';
-import validateApplicationStatus from '../helpers/validateApplicationStatus';
-import { populateFormWithPreviousCaseAnswers } from '../../../libs/formAnswers';
-
-import { getFutureTimestamp, millisecondsToSeconds } from '../../../libs/timestampHelper';
-import { DELETE_VIVA_CASE_AFTER_12_HOURS } from '../../../libs/constants';
-
-import vivaAdapter from '../helpers/vivaAdapterRequestClient';
+import params from '../../../libs/params';
 import log from '../../../libs/logs';
+import { putItem } from '../../../libs/queries';
+import { getStatusByType, statusTypes } from '../../../libs/caseStatuses';
+import { populateFormWithPreviousCaseAnswers } from '../../../libs/formAnswers';
+import { getFutureTimestamp, millisecondsToSeconds } from '../../../libs/timestampHelper';
+import {
+  CASE_PROVIDER_VIVA,
+  DELETE_VIVA_CASE_AFTER_12_HOURS,
+  STATE,
+} from '../../../libs/constants';
 
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
 
 export async function main(event, context) {
-  const userDetail = event.detail;
+  const { clientUser, vivaPersonDetail } = event.detail;
 
-  const [applicationStatusError, applicationStatusList] = await to(
-    vivaAdapter.application.status(userDetail.personalNumber)
-  );
-  if (applicationStatusError) {
+  if (!vivaPersonDetail?.application?.period) {
     log.error(
-      'Viva Application Status error',
+      'Viva application period not found in person details.',
       context.awsRequestId,
-      'service-viva-ms-createVivaCase-001',
-      applicationStatusError
+      'service-viva-ms-createVivaCase-001'
     );
-    return;
+    return false;
   }
 
-  /**
-   * The Combination of Status Codes 1, 128, 256, 512
-   * determines if a VIVA Application Workflow is open for applicant.
-   * 1 - Application is open for applicant,
-   * 128 - Case exsits in VIVA
-   * 256 - An active e-application is activated in VIVA
-   * 512 - Application allows e-application
-   */
-  const requiredStatusCodes = [1, 128, 256, 512];
-  if (!validateApplicationStatus(applicationStatusList, requiredStatusCodes)) {
-    log.info(
-      'validateApplicationStatus. No application period open.',
+  const [getCaseListOnPeriodError, caseList] = await to(getCaseListOnPeriod(vivaPersonDetail));
+  if (getCaseListOnPeriodError) {
+    log.error(
+      'Query cases table failed!',
       context.awsRequestId,
       'service-viva-ms-createVivaCase-002',
-      applicationStatusList
+      getCaseListOnPeriodError
     );
-    return;
+    return false;
   }
 
-  const [getVivaPersonError, vivaPerson] = await to(
-    vivaAdapter.person.get(userDetail.personalNumber)
+  if (caseList.Items[0]) {
+    log.info(
+      'Case with specified period already exists. Will not create new case.',
+      context.awsRequestId,
+      null
+    );
+    return false;
+  }
+
+  const [createRecurringVivaCaseError, createdVivaCase] = await to(
+    createRecurringVivaCase(vivaPersonDetail, clientUser)
   );
-  if (getVivaPersonError) {
+  if (createRecurringVivaCaseError) {
     log.error(
-      'Viva Get Application Request',
+      'createRecurringVivaCaseError',
       context.awsRequestId,
-      'service-viva-ms-createVivaCase-003',
-      getVivaPersonError
+      'service-viva-ms-createVivaCase-004',
+      createRecurringVivaCaseError
     );
-    return;
+    return false;
   }
 
-  if (!vivaPerson.application || !vivaPerson.application.period) {
-    log.error(
-      'Viva Application Period not present in response, aborting',
-      context.awsRequestId,
-      'service-viva-ms-createVivaCase-004'
-    );
-    return;
-  }
-
-  if (!vivaPerson.application || !vivaPerson.application.workflowid) {
-    log.error(
-      'Viva Application WorkflowId not present in response, aborting',
-      context.awsRequestId,
-      'service-viva-ms-createVivaCase-005'
-    );
-    return;
-  }
-
-  const [getUserCaseFilteredOnWorkflowIdError, caseItem] = await to(
-    getUserCaseFilteredOnWorkflowId(vivaPerson)
-  );
-  if (getUserCaseFilteredOnWorkflowIdError) {
-    log.error(
-      'DynamoDb query on cases table failed',
-      context.awsRequestId,
-      'service-viva-ms-createVivaCase-006',
-      getUserCaseFilteredOnWorkflowIdError
-    );
-
-    return;
-  }
-
-  if (caseItem) {
-    log.warn(
-      'Case with WorkflowId already exists',
-      context.awsRequestId,
-      'service-viva-ms-createVivaCase-007'
-    );
-
-    return;
-  }
-
-  const [putRecurringVivaCaseError] = await to(putRecurringVivaCase(vivaPerson, userDetail));
-  if (putRecurringVivaCaseError) {
-    log.warn(
-      'putRecurringVivaCaseError',
-      context.awsRequestId,
-      'service-viva-ms-createVivaCase-008',
-      putRecurringVivaCaseError
-    );
-    return;
-  }
-
+  log.info('New Viva case created successfully.', context.awsRequestId, null, createdVivaCase);
   return true;
 }
 
-async function getUserCaseFilteredOnWorkflowId(vivaPerson) {
+function getCaseListOnPeriod(vivaPerson) {
   const personalNumber = stripNonNumericalCharacters(String(vivaPerson.case.client.pnumber));
-  const workflowId = vivaPerson.application.workflowid;
+  const { startDate, endDate } = getPeriodInMilliseconds(vivaPerson);
 
-  const params = {
+  const casesQueryParams = {
     TableName: config.cases.tableName,
     KeyConditionExpression: 'PK = :pk',
-    FilterExpression: 'details.workflowId = :workflowId',
+    FilterExpression:
+      'details.period.startDate = :periodStartDate AND details.period.endDate = :periodEndDate',
     ExpressionAttributeValues: {
       ':pk': `USER#${personalNumber}`,
-      ':workflowId': workflowId,
+      ':periodStartDate': startDate,
+      ':periodEndDate': endDate,
     },
   };
 
-  const [queryCasesError, queryCasesResult] = await to(dynamoDB.call('query', params));
-  if (queryCasesError) {
-    throw queryCasesError;
-  }
-
-  return queryCasesResult.Items[0] || null;
+  return dynamoDB.call('query', casesQueryParams);
 }
 
-async function putRecurringVivaCase(vivaPerson, user) {
+async function createRecurringVivaCase(vivaPerson, user) {
   const ssmParams = await VIVA_CASE_SSM_PARAMS;
   const { recurringFormId, completionFormId } = ssmParams;
+
   const applicantPersonalNumber = stripNonNumericalCharacters(
     String(vivaPerson.case.client.pnumber)
   );
 
-  const PK = `USER#${applicantPersonalNumber}`;
-
   const id = uuid.v4();
+  const PK = `USER#${applicantPersonalNumber}`;
+  const SK = `CASE#${id}`;
   const timestampNow = Date.now();
   const initialStatus = getStatusByType(statusTypes.NOT_STARTED_VIVA);
-  const workflowId = vivaPerson.application.workflowid;
-  const period = {
-    startDate: Date.parse(vivaPerson.application.period.start),
-    endDate: Date.parse(vivaPerson.application.period.end),
-  };
-
-  const formIds = [recurringFormId, completionFormId];
-
-  const [, formTemplates] = await to(getFormTemplates(formIds));
-
-  const [getLastUpdatedCaseError, lastUpdatedCase] = await to(
-    getLastUpdatedCase(PK, CASE_PROVIDER_VIVA)
-  );
-  if (getLastUpdatedCaseError) {
-    throw getLastUpdatedCaseError;
-  }
+  const workflowId = vivaPerson.application?.workflowid || null;
+  const period = getPeriodInMilliseconds(vivaPerson);
 
   const expirationTime = millisecondsToSeconds(getFutureTimestamp(DELETE_VIVA_CASE_AFTER_12_HOURS));
 
   const caseItemPutParams = {
     TableName: config.cases.tableName,
     Item: {
-      PK,
-      SK: `CASE#${id}`,
       id,
+      PK,
+      SK,
+      state: STATE.CREATED,
       expirationTime,
       createdAt: timestampNow,
-      updatedAt: timestampNow,
+      updatedAt: null,
       status: initialStatus,
       provider: CASE_PROVIDER_VIVA,
       details: {
@@ -199,12 +128,13 @@ async function putRecurringVivaCase(vivaPerson, user) {
   let casePersonList = getCasePersonList(vivaPerson);
   caseItemPutParams.Item['persons'] = casePersonList;
 
-  const casePersonCoApplicant = getUserByRole(casePersonList, 'coApplicant');
+  const casePersonCoApplicant = getUserOnRole(casePersonList, 'coApplicant');
   if (casePersonCoApplicant) {
     caseItemPutParams.Item['GSI1'] = `USER#${casePersonCoApplicant.personalNumber}`;
   }
 
-  const encryption = getEncryptionAttributes(vivaPerson, casePersonCoApplicant);
+  const formIdList = [recurringFormId, completionFormId];
+  const initialFormList = getInitialFormAttributes(formIdList, vivaPerson);
 
   casePersonList = casePersonList.map(person => {
     if (person.role === 'applicant' && person.personalNumber === user.personalNumber) {
@@ -213,6 +143,33 @@ async function putRecurringVivaCase(vivaPerson, user) {
     return person;
   });
 
+  const [, formTemplates] = await to(getFormTemplates(formIdList));
+
+  const [getLastUpdatedCaseError, lastUpdatedCase] = await to(
+    getLastUpdatedCase(PK, CASE_PROVIDER_VIVA)
+  );
+  if (getLastUpdatedCaseError) {
+    throw getLastUpdatedCaseError;
+  }
+
+  const prePopulatedForms = populateFormWithPreviousCaseAnswers(
+    initialFormList,
+    casePersonList,
+    formTemplates,
+    lastUpdatedCase?.forms || {}
+  );
+  caseItemPutParams.Item['forms'] = prePopulatedForms;
+
+  const [putItemError, createdCaseItem] = await to(putItem(caseItemPutParams));
+  if (putItemError) {
+    throw putItemError;
+  }
+
+  return createdCaseItem;
+}
+
+function getInitialFormAttributes(formIdList, vivaPerson) {
+  const encryption = getEncryptionAttributes(vivaPerson);
   const initialFormAttributes = {
     answers: [],
     encryption,
@@ -224,53 +181,46 @@ async function putRecurringVivaCase(vivaPerson, user) {
     },
   };
 
-  const initialForms = {
+  const [recurringFormId, completionFormId] = formIdList;
+
+  const initialFormList = {
     [recurringFormId]: initialFormAttributes,
     [completionFormId]: initialFormAttributes,
   };
 
-  const prePopulatedForms = populateFormWithPreviousCaseAnswers(
-    initialForms,
-    casePersonList,
-    formTemplates,
-    lastUpdatedCase?.forms || {}
+  return initialFormList;
+}
+
+function getEncryptionAttributes(vivaPerson) {
+  const casePersonList = getCasePersonList(vivaPerson);
+  const casePersonCoApplicant = getUserOnRole(casePersonList, 'coApplicant');
+
+  if (!casePersonCoApplicant) {
+    const applicantEncryptionAttributes = { type: 'decrypted' };
+    return applicantEncryptionAttributes;
+  }
+
+  const mainApplicantPersonalNumber = stripNonNumericalCharacters(
+    String(vivaPerson.case.client.pnumber)
   );
 
-  caseItemPutParams.Item.forms = prePopulatedForms;
+  const encryptionAttributes = {
+    type: 'decrypted',
+    symmetricKeyName: `${mainApplicantPersonalNumber}:${casePersonCoApplicant.personalNumber}`,
+    primes: {
+      P: 43,
+      G: 10,
+    },
+    publicKeys: {
+      [mainApplicantPersonalNumber]: null,
+      [casePersonCoApplicant.personalNumber]: null,
+    },
+  };
 
-  const [putItemError, caseItem] = await to(putItem(caseItemPutParams));
-  if (putItemError) {
-    throw putItemError;
-  }
-
-  return caseItem;
+  return encryptionAttributes;
 }
 
-function getEncryptionAttributes(vivaPerson, casePersonCoApplicant) {
-  if (casePersonCoApplicant) {
-    const mainApplicantPersonalNumber = stripNonNumericalCharacters(
-      String(vivaPerson.case.client.pnumber)
-    );
-    return {
-      type: 'decrypted',
-      symmetricKeyName: `${mainApplicantPersonalNumber}:${casePersonCoApplicant.personalNumber}`,
-      primes: { P: 43, G: 10 },
-      publicKeys: {
-        [mainApplicantPersonalNumber]: null,
-        [casePersonCoApplicant.personalNumber]: null,
-      },
-    };
-  } else {
-    return { type: 'decrypted' };
-  }
-}
-
-function stripNonNumericalCharacters(string) {
-  const matchNonNumericalCharactersRegex = /\D/g;
-  return string.replace(matchNonNumericalCharactersRegex, '');
-}
-
-function getUserByRole(userList, role) {
+function getUserOnRole(userList, role) {
   const user = userList.find(user => user.role == role);
   return user;
 }
@@ -293,7 +243,7 @@ function getCasePersonList(vivaPerson) {
   const CO_APPLICANT = 'coApplicant';
   const CHILDREN = 'children';
 
-  const roleTranslateList = {
+  const roleType = {
     client: APPLICANT,
     partner: CO_APPLICANT,
     child: CHILDREN,
@@ -307,7 +257,7 @@ function getCasePersonList(vivaPerson) {
       personalNumber,
       firstName,
       lastName,
-      role: roleTranslateList[type] || 'unknown',
+      role: roleType[type] || 'unknown',
     };
 
     if ([APPLICANT, CO_APPLICANT].includes(person.role)) {
@@ -320,10 +270,10 @@ function getCasePersonList(vivaPerson) {
   return casePersonList;
 }
 
-async function getFormTemplates(formIds) {
+async function getFormTemplates(formIdList) {
   const [getError, rawForms] = await to(
     Promise.all(
-      formIds.map(formId => {
+      formIdList.map(formId => {
         const formGetParams = {
           TableName: config.forms.tableName,
           Key: {
@@ -334,9 +284,8 @@ async function getFormTemplates(formIds) {
       })
     )
   );
-
   if (getError) {
-    console.error('(viva-ms) DynamoDb query on forms table failed', getError);
+    console.error('(viva-ms) DynamoDb query on forms table failed!', getError);
     throw getError;
   }
 
@@ -354,7 +303,7 @@ async function getFormTemplates(formIds) {
 }
 
 async function getLastUpdatedCase(PK, provider) {
-  const params = {
+  const lastUpdatedCaseQueryParams = {
     TableName: config.cases.tableName,
     KeyConditionExpression: 'PK = :pk',
     FilterExpression: 'begins_with(#status.#type, :statusTypeClosed) and #provider = :provider',
@@ -370,12 +319,25 @@ async function getLastUpdatedCase(PK, provider) {
     },
   };
 
-  const [error, dbResponse] = await to(dynamoDB.call('query', params));
-  if (error) {
-    throwError(error.statusCode, error.message);
+  const [queryError, queryResponse] = await to(dynamoDB.call('query', lastUpdatedCaseQueryParams));
+  if (queryError) {
+    throw queryError;
   }
 
-  const sortedCases = dbResponse.Items.sort((a, b) => b.updatedAt - a.updatedAt);
-
+  const sortedCases = queryResponse.Items.sort((a, b) => b.updatedAt - a.updatedAt);
   return sortedCases?.[0] || {};
+}
+
+function stripNonNumericalCharacters(string) {
+  const matchNonNumericalCharactersRegex = /\D/g;
+  return string.replace(matchNonNumericalCharactersRegex, '');
+}
+
+function getPeriodInMilliseconds(vivaPerson) {
+  const period = {
+    startDate: Date.parse(vivaPerson.application.period.start),
+    endDate: Date.parse(vivaPerson.application.period.end),
+  };
+
+  return period;
 }
