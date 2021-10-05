@@ -1,5 +1,23 @@
 export const CASE_PROVIDER_VIVA = 'VIVA';
 
+export const STATE = {
+  CREATED: 'CREATED',
+  APPLY: {
+    ALLOWED: 'APPLY_ALLOWED',
+    DENIED: 'APPLY_DENIED',
+  },
+  SUBMIT: {
+    RECEIVED: 'SUBMIT_RECEIVED',
+    ERROR: 'SUBMIT_ERROR',
+    COMPLETION: {
+      RECEIVED: 'SUBMIT_COMPLETION_RECEIVED',
+      ERROR: 'SUBMIT_COMPLETION_ERROR',
+      REQUIRED: 'COMPLETION_REQUIRED',
+    },
+  },
+  PDF_GENERATED: 'PDF_GENERATED',
+};
+
 /**
  * A month is 1/12th of a year. In the Gregorian calendar, an average month has exactly 30.436875 days.
  * It was originally based on the time it takes for the moon to rotate the Earth.
