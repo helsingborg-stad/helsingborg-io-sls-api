@@ -96,7 +96,7 @@ functions:
               - vivaMs.submitApplication
             detail-type:
               - usersMsFindUserSuccess
-              - vivaMsSubmitApplicationReceivedSuccess
+              - vivaAdapterApplicationReceivedSuccess
 
   personApplication:
     handler: lambdas/personApplication.main
@@ -150,9 +150,9 @@ functions:
           enabled: false
           pattern:
             source:
-              - vivaMs.submitApplication
+              - vivaMs.personApplicationStatus
             detail-type:
-              - vivaMsSubmitApplicationSuccess
+              - applicationStatusCompletionRequired
 
   submitCompletion:
     handler: lambdas/submitCompletion.main
