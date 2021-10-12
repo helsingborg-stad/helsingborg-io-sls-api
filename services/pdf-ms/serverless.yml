@@ -1,23 +1,11 @@
 service: pdf-ms
 
 plugins:
-  - serverless-webpack
+  - serverless-bundle
 
-custom:
-  stage: ${opt:stage, self:provider.stage}
-  resourcesStages:
-    prod: prod
-    stage: stage
-    dev: dev
-    test: test
-    release: release
-  resourcesStage: ${self:custom.resourcesStages.${self:custom.stage}, self:custom.resourcesStages.dev}
-  webpack:
-    webpackConfig: webpack.config.js
-    includeModules:
-      forceExclude:
-        - aws-sdk
-    packager: "yarn"
+projectDir: ../../
+
+custom: ${file(../../serverless.common.yml):custom}
 
 package:
   individually: true
@@ -30,7 +18,6 @@ provider:
   region: eu-north-1
   endpointType: regional
   tracing:
-    apiGateway: false
     lambda: true
 
   environment:
@@ -64,34 +51,26 @@ provider:
             - s3:GetObject
             - s3:PutObject
           Resource:
-            - Fn::ImportValue: ${self:custom.resourcesStage}-PdfTemplatesBucketArn
+            - Fn::ImportValue: ${self:custom.resourcesStage}-PdfStorageBucketArn
             - Fn::Join:
                 - ""
-                - - Fn::ImportValue: ${self:custom.resourcesStage}-PdfTemplatesBucketArn
+                - - Fn::ImportValue: ${self:custom.resourcesStage}-PdfStorageBucketArn
                   - "/*"
         - Effect: Allow
           Action:
             - kms:Decrypt
           Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
 
-functions:
-  addPdfToCase:
-    handler: lambdas/addPdfToCase.main
-    environment:
-      BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-PdfTemplatesBucketName
 
+functions:
+  generate:
+    handler: lambdas/generate.main
+    layers: 
+      - Fn::ImportValue: ChromeAwsLambdaLayer-${self:provider.stage}
+    environment:
+      PDF_STORAGE_BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-PdfStorageBucketName
     events:
       - eventBridge:
           pattern:
             source:
-              - cases.database
-            detail-type:
-              - INSERT
-              - MODIFY
-            detail:
-              dynamodb:
-                NewImage:
-                  status:
-                    M:
-                      type:
-                        S: [{"prefix": "active:submitted"}]
+              - testing
