@@ -5,7 +5,7 @@ import { s3Client } from '../../../libs/S3';
 import { putEvent } from '../../../libs/awsEventBridge';
 
 export async function main(event) {
-  const { pdfStorageBucketKey, id } = event.detail;
+  const { pdfStorageBucketKey, resourceId } = event.detail;
 
   const executablePath = event.isOffline
     ? './node_modules/puppeteer/.local-chromium/mac-674921/chrome-mac/Chromium.app/Contents/MacOS/Chromium'
@@ -69,7 +69,7 @@ export async function main(event) {
 
   if (pdfOutputObject) {
     const [putEventError] = await to(
-      putEvent({ id, pdfOutputObject }, 'pdfMsGenerateSuccess', 'pdfMs.generatedPdf')
+      putEvent({ resourceId, pdfOutputObject }, 'pdfMsGenerateSuccess', 'pdfMs.generatedPdf')
     );
     if (putEventError) {
       throw putEventError;
