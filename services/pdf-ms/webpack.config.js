@@ -12,7 +12,7 @@ module.exports = {
   optimization: {
     minimize: false,
   },
-  externals: [nodeExternals()],
+  externals: [nodeExternals({ allowlist: ['pdf-lib'] })],
   module: {
     rules: [
       {
