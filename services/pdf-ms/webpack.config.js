@@ -1,7 +1,6 @@
 const webpack = require('webpack');
 const path = require('path');
 const slsw = require('serverless-webpack');
-const nodeExternals = require('webpack-node-externals');
 module.exports = {
   entry: slsw.lib.entries,
   target: 'node',
@@ -12,7 +11,6 @@ module.exports = {
   optimization: {
     minimize: false,
   },
-  externals: [nodeExternals({ allowlist: ['pdf-lib'] })],
   module: {
     rules: [
       {
