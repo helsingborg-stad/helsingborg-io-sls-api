@@ -14,9 +14,6 @@ custom:
   resourcesStage: ${self:custom.resourcesStages.${self:custom.stage}, self:custom.resourcesStages.dev}
   webpack:
     webpackConfig: webpack.config.js
-    includeModules:
-      forceExclude:
-        - aws-sdk
     packager: "yarn"
 
 package:
