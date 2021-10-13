@@ -69,7 +69,7 @@ export async function main(event) {
 
   if (pdfOutputObject) {
     const [putEventError] = await to(
-      putEvent({ resourceId, pdfOutputObject }, 'pdfMsGenerateSuccess', 'pdfMs.generatedPdf')
+      putEvent({ resourceId, pdfOutputObject }, 'pdfMsGenerateSuccess', 'pdfMs.generate')
     );
     if (putEventError) {
       throw putEventError;
