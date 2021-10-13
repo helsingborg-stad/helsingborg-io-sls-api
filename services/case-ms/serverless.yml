@@ -1,0 +1,66 @@
+service: cases-ms
+
+plugins:
+  - serverless-bundle
+
+projectDir: ../../
+
+custom: ${file(../../serverless.common.yml):custom}
+
+package:
+  individually: true
+
+provider:
+  lambdaHashingVersion: 20201221
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: eu-north-1
+  endpointType: regional
+  tracing:
+    lambda: true
+
+  environment:
+    stage: ${self:custom.stage}
+    resourcesStage: ${self:custom.resourcesStage}
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Scan
+            - dynamodb:UpdateItem
+          Resource:
+            - !ImportValue ${self:custom.resourcesStage}-CasesTableArn
+            - !ImportValue ${self:custom.resourcesStage}-CasesTableAllIndexArn
+
+        - Effect: Allow
+          Action:
+            - kms:Decrypt
+          Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
+        
+        - Effect: Allow
+          Action:
+            - s3:GetObject
+          Resource:
+            - Fn::ImportValue: ${self:custom.resourcesStage}-PdfStorageBucketArn
+            - Fn::Join:
+                - ""
+                - - Fn::ImportValue: ${self:custom.resourcesStage}-PdfStorageBucketArn
+                  - "/*"
+          
+
+functions:
+  updatePdf:
+    handler: lambdas/updatePdf.main
+    enivironment:
+      PDF_STORAGE_BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-PdfStorageBucketName
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - pdfMs.generate
+            detail-type:
+              - pdfMsGenerateSuccess
+
