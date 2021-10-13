@@ -135,12 +135,8 @@ functions:
                 NewImage:
                   provider:
                     S: ["VIVA"]
-                  status:
-                    M:
-                      type:
-                        S: [{ "prefix": "active:submitted" }]
-                  pdfGenerated:
-                    S: ["yes"]
+                  state:
+                    S: ["PDF_GENERATED"]
 
   checkCompletion:
     handler: lambdas/checkCompletion.main
@@ -172,12 +168,15 @@ functions:
                 NewImage:
                   provider:
                     S: ["VIVA"]
+                  state:
+                    S: ["COMPLETION_FORM_ANSWERS_RECEIVED"]
 
   syncOfficers:
     handler: lambdas/syncOfficers.main
     timeout: 15
     events:
       - eventBridge:
+          enabled: false
           pattern:
             source:
               - cases.database
@@ -195,6 +194,7 @@ functions:
     timeout: 15
     events:
       - eventBridge:
+          enabled: false
           pattern:
             source:
               - bankId.collect
@@ -205,6 +205,7 @@ functions:
     handler: lambdas/decideCaseStatus.main
     events:
       - eventBridge:
+          enabled: false
           pattern:
             source:
               - vivaMs.syncWorkflow

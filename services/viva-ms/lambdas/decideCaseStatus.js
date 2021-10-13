@@ -4,10 +4,10 @@ import to from 'await-to-js';
 import config from '../../../config';
 import { putEvent } from '../../../libs/awsEventBridge';
 import * as dynamoDb from '../../../libs/dynamoDb';
-import log from '../../../libs/logs';
+// import log from '../../../libs/logs';
 import { getStatusByType, statusTypes } from '../../../libs/caseStatuses';
 
-export async function main(event, context) {
+export async function main(event) {
   const { caseKeys, workflow } = event.detail;
 
   const newStatusType = decideNewCaseStatus(workflow.attributes);

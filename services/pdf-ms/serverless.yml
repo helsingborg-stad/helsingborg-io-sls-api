@@ -3,6 +3,8 @@ service: pdf-ms
 plugins:
   - serverless-webpack
 
+projectDir: ../../
+
 custom:
   stage: ${opt:stage, self:provider.stage}
   resourcesStages:
@@ -92,3 +94,5 @@ functions:
                     M:
                       type:
                         S: [{"prefix": "active:submitted"}]
+                  state:
+                    S: [{"anything-but": {"prefix": "PDF_"}}]

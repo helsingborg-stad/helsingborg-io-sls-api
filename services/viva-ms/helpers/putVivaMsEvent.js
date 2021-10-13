@@ -15,7 +15,7 @@ export const eventTypeCollection = {
   },
   applicationReceivedSuccess: {
     source: 'vivaMs.submitApplication',
-    detailType: 'vivaMsSubmitApplicationReceivedSuccess',
+    detailType: 'vivaAdapterApplicationReceivedSuccess',
   },
   syncWorkflowSuccess: {
     source: 'vivaMs.syncWorkflow',

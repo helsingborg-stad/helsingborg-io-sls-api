@@ -1,20 +1,29 @@
 [
   {
     "Source": "bankId.collect",
-    "Detail": "{ \"user\": { \"personalNumber\": \"195809262743\" } }",
+    "Detail": "{ \"user\": { \"personalNumber\": \"199803312397\" } }",
     "Resources": [
-      "resourceMockYlvaJansson"
+      "resourceMock"
     ],
     "DetailType": "BankIdCollectComplete",
     "EventBusName": "default"
   },
   {
-    "Source": "OFFvivaMs.submitApplication",
-    "Detail": "{ \"hashedPersonalNumber\": \"Knb6eVz5g8y91dEBzqOA0qwGkAQBRplZ\", \"caseKeys\": { \"PK\": \"USER#196001198685\", \"SK\": \"CASE#0d01058f-164e-42ff-96f1-fb7d04b6e5fe\" } }",
+    "Source": "OFFusersMs.findUser",
+    "Detail": "{ \"user\": { \"personalNumber\": \"199803312397\" } }",
     "Resources": [
-      "resourceMockVeraToth"
+      "resourceMock"
     ],
-    "DetailType": "vivaMsSubmitApplicationSuccess",
+    "DetailType": "usersMsFindUserSuccess",
+    "EventBusName": "default"
+  },
+  {
+    "Source": "OFFvivaMs.personApplicationStatus",
+    "Detail": "{ \"user\": { \"personalNumber\": \"199803312397\" } }",
+    "Resources": [
+      "resourceMock"
+    ],
+    "DetailType": "applicationStatusApplyAllowed",
     "EventBusName": "default"
   }
 ]
