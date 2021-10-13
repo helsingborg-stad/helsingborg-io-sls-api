@@ -41,11 +41,11 @@ export async function getClosedUserCases(
 }
 
 export async function addPdfToCase(currentCase: Case, pdf?: string | Buffer): Promise<Boolean> {
-  const UpdateExpression = 'SET #pdf = :pdf, #pdfGenerated = :pdfGenerated';
-  const ExpressionAttributeNames = { '#pdf': 'pdf', '#pdfGenerated': 'pdfGenerated' };
+  const UpdateExpression = 'SET #pdf = :newPdf, #state = :newState';
+  const ExpressionAttributeNames = { '#pdf': 'pdf', '#state': 'state' };
   const ExpressionAttributeValues = {
-    ':pdf': pdf || undefined,
-    ':pdfGenerated': pdf !== undefined ? 'yes' : 'no',
+    ':newPdf': pdf || undefined,
+    ':newState': pdf != undefined ? 'PDF_GENERATED' : 'PDF_GENERATE_FAILED',
   };
 
   const params = {

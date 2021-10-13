@@ -21,16 +21,18 @@ import log from '../../../libs/logs';
 
 const PDF_SSM_PARAMS = params.read(config.pdf.envsKeyName);
 
-// Convert DynamoDB item to plain object
-const dynamoDbConverter = AWS.DynamoDB.Converter;
+const dynamoDbItemToObjectConverter = AWS.DynamoDB.Converter;
 
 export async function main(
   event: Record<string, any>,
   context: Record<string, any>
 ): Promise<Boolean> {
-  const submittedCase: Case = dynamoDbConverter.unmarshall(event.detail.dynamodb.NewImage);
+  const submittedCase: Case = dynamoDbItemToObjectConverter.unmarshall(
+    event.detail.dynamodb.NewImage
+  );
 
-  if (submittedCase.pdfGenerated === 'yes') {
+  if (submittedCase.state === 'PDF_GENERATED') {
+    console.log('TRIGGERED', submittedCase.state);
     return true;
   }
 

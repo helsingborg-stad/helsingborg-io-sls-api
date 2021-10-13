@@ -4,7 +4,7 @@ import to from 'await-to-js';
 import config from '../../../config';
 import { putEvent } from '../../../libs/awsEventBridge';
 import params from '../../../libs/params';
-import log from '../../../libs/logs';
+// import log from '../../../libs/logs';
 import * as dynamoDb from '../../../libs/dynamoDb';
 import validateApplicationStatus from '../helpers/validateApplicationStatus';
 import { getStatusByType, statusTypes } from '../../../libs/caseStatuses';
@@ -12,7 +12,7 @@ import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
 
-export async function main(event, context) {
+export async function main(event) {
   const { caseKeys } = event.detail;
 
   const personalNumber = caseKeys.PK.substring(5);
