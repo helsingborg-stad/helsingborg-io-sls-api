@@ -53,7 +53,7 @@ export async function main(event, context) {
   }
   console.log('vivaApplicationResponse', vivaApplicationResponse);
 
-  if (!isApplicationReceived(vivaApplicationResponse)) {
+  if (notApplicationReceived(vivaApplicationResponse)) {
     log.error(
       'Viva application receive failed',
       context.awsRequestId,
@@ -63,50 +63,56 @@ export async function main(event, context) {
     return false;
   }
 
-  const [putEventError] = await to(
-    putVivaMsEvent.applicationReceivedSuccess({
-      user: personalNumber,
-      vivaApplicationResponse: vivaApplicationResponse,
-    })
-  );
-  if (putEventError) {
-    return console.error('(Viva-ms: submitApplication) putEventError.', putEventError);
-  }
-
-  const updateVivaCaseAttribute = {
-    caseKeys: {
-      PK,
-      SK,
-    },
-    state: STATE.SUBMIT.RECEIVED,
-    workflowId: undefined,
-  };
-  const [databaseUpdateError, newVivaCase] = to(databaseUpdateVivaCase(updateVivaCaseAttribute));
-  if (databaseUpdateError) {
+  if (!vivaApplicationResponse?.id) {
     log.error(
-      'Database update viva case failed',
+      'Viva application response does not contain workflow id',
       context.awsRequestId,
       'service-viva-ms-submitApplication-003',
-      databaseUpdateError
+      vivaApplicationResponse
     );
     return false;
   }
 
-  log.info('Updated viva case successyfully', context.awsRequestId, null, newVivaCase);
-  return true;
-}
-
-function isApplicationReceived(response) {
-  if (response?.status !== 'OK') {
+  const caseKeys = { PK, SK };
+  const newCaseValues = {
+    state: VIVA_APPLICATION_RECEIVED,
+    workflowId: vivaApplicationResponse.id,
+  };
+  const [updateError, newVivaCase] = to(updateVivaCase(caseKeys, newCaseValues));
+  if (updateError) {
+    log.error(
+      'Database update viva case failed',
+      context.awsRequestId,
+      'service-viva-ms-submitApplication-004',
+      updateError
+    );
     return false;
   }
 
+  const [putEventError] = await to(putVivaMsEvent.applicationReceivedSuccess({ caseKeys }));
+  if (putEventError) {
+    log.error(
+      'Put event: applicationReceivedSuccess failed',
+      context.awsRequestId,
+      'service-viva-ms-submitApplication-005',
+      putEventError
+    );
+    return false;
+  }
+
+  log.info('Updated viva case successfully', context.awsRequestId, null, newVivaCase);
   return true;
 }
 
-function databaseUpdateVivaCase(attribute) {
-  const { caseKeys, workflowId, state } = attribute;
+function notApplicationReceived(response) {
+  if (response?.status !== 'OK') {
+    return true;
+  }
 
+  return false;
+}
+
+function updateVivaCase(caseKeys, newValues) {
   const params = {
     TableName: config.cases.tableName,
     Key: caseKeys,
@@ -117,8 +123,8 @@ function databaseUpdateVivaCase(attribute) {
       '#workflowId': 'workflowId',
     },
     ExpressionAttributeValues: {
-      ':newWorkflowId': workflowId || '123',
-      ':newState': state,
+      ':newWorkflowId': newValues.workflowId,
+      ':newState': newValues.state,
     },
     ReturnValues: 'UPDATED_NEW',
   };
