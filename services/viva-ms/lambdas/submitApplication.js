@@ -37,7 +37,7 @@ export async function main(event, context) {
       applicationType: 'recurrent',
       personalNumber,
       workflowId: caseItem.details?.workflowId || '',
-      answers: caseItem[recurringFormId].answers,
+      answers: caseItem.forms[recurringFormId].answers,
       rawData: pdfBinaryBuffer.toString(),
       rawDataType: 'pdf',
     })
