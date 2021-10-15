@@ -145,7 +145,6 @@ functions:
     timeout: 15
     events:
       - eventBridge:
-          enabled: false
           pattern:
             source:
               - vivaMs.submitApplication
@@ -159,7 +158,6 @@ functions:
       BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-AttachmentsBucketName
     events:
       - eventBridge:
-          enabled: false
           pattern:
             source:
               - cases.database
@@ -182,7 +180,6 @@ functions:
     timeout: 15
     events:
       - eventBridge:
-          enabled: false
           pattern:
             source:
               - cases.database
@@ -200,7 +197,6 @@ functions:
     timeout: 15
     events:
       - eventBridge:
-          enabled: false
           pattern:
             source:
               - bankId.collect
@@ -211,7 +207,6 @@ functions:
     handler: lambdas/decideCaseStatus.main
     events:
       - eventBridge:
-          enabled: false
           pattern:
             source:
               - vivaMs.syncWorkflow
