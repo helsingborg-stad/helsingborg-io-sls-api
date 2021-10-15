@@ -78,7 +78,7 @@ export async function main(event, context) {
     state: VIVA_APPLICATION_RECEIVED,
     workflowId: vivaApplicationResponse.id,
   };
-  const [updateError, newVivaCase] = to(updateVivaCase(caseKeys, newCaseValues));
+  const [updateError, newVivaCase] = await to(updateVivaCase(caseKeys, newCaseValues));
   if (updateError) {
     log.error(
       'Database update viva case failed',
