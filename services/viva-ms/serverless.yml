@@ -93,10 +93,8 @@ functions:
           pattern:
             source:
               - usersMs.findUser
-              - vivaMs.submitApplication
             detail-type:
-              - usersMsFindUserSuccess
-              - vivaAdapterApplicationReceivedSuccess
+              - findUserSuccess
 
   personApplication:
     handler: lambdas/personApplication.main
@@ -107,7 +105,7 @@ functions:
             source:
               - vivaMs.personApplicationStatus
             detail-type:
-              - applicationStatusApplySuccess
+              - checkOpenPeriodSuccess
 
   createVivaCase:
     handler: lambdas/createVivaCase.main
@@ -118,7 +116,7 @@ functions:
             source:
               - vivaMs.personApplication
             detail-type:
-              - getVivaPersonApplicationDetailSuccess
+              - personDetailSuccess
 
   submitApplication:
     handler: lambdas/submitApplication.main
@@ -135,8 +133,12 @@ functions:
                 NewImage:
                   provider:
                     S: ["VIVA"]
-                  state:
-                    S: ["PDF_GENERATED"]
+                  status:
+                    M:
+                      type:
+                        S: [{"prefix": "active:submitted"}]
+                  pdf_generated:
+                    S: ["yes"]
 
   checkCompletion:
     handler: lambdas/checkCompletion.main
@@ -146,9 +148,9 @@ functions:
           enabled: false
           pattern:
             source:
-              - vivaMs.personApplicationStatus
+              - vivaMs.submitApplication
             detail-type:
-              - applicationStatusCompletionRequired
+              - applicationReceivedSuccess
 
   submitCompletion:
     handler: lambdas/submitCompletion.main
@@ -168,8 +170,12 @@ functions:
                 NewImage:
                   provider:
                     S: ["VIVA"]
+                  status:
+                    M:
+                      type:
+                        S: [{"prefix": "active:submitted"}]
                   state:
-                    S: ["COMPLETION_FORM_ANSWERS_RECEIVED"]
+                    S: ["VIVA_COMPLETION_REQUIRED"]
 
   syncOfficers:
     handler: lambdas/syncOfficers.main

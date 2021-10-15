@@ -94,5 +94,3 @@ functions:
                     M:
                       type:
                         S: [{"prefix": "active:submitted"}]
-                  state:
-                    S: [{"anything-but": {"prefix": "PDF_"}}]

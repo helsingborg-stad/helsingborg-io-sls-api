@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import to from 'await-to-js';
 
-import { putEvent } from '../../../libs/awsEventBridge';
+import putVivaMsEvent from '../helpers/putVivaMsEvent';
 
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
@@ -12,21 +12,19 @@ export async function main(event) {
     vivaAdapter.person.get(clientUser.personalNumber)
   );
   if (getVivaPersonError) {
-    return console.error('(Viva-ms: personApplication) getVivaPersonError', getVivaPersonError);
+    console.error('(Viva-ms: personApplication) getVivaPersonError', getVivaPersonError);
+    return false;
   }
 
   const [putEventError] = await to(
-    putEvent(
-      {
-        clientUser,
-        vivaPersonDetail,
-      },
-      'getVivaPersonApplicationDetailSuccess',
-      'vivaMs.personApplication'
-    )
+    putVivaMsEvent.personDetailSuccess({
+      clientUser,
+      vivaPersonDetail,
+    })
   );
   if (putEventError) {
-    return console.error('(Viva-ms: personApplication) putEventError.', putEventError);
+    console.error('(Viva-ms: personApplication) putEventError.', putEventError);
+    return false;
   }
 
   return true;
