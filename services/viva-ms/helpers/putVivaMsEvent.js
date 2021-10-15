@@ -1,29 +1,17 @@
 import { putEvent } from '../../../libs/awsEventBridge';
 
 export const eventTypeCollection = {
-  statusApplySuccess: {
+  checkOpenPeriodSuccess: {
     source: 'vivaMs.personApplicationStatus',
-    detailType: 'applicationStatusApplySuccess',
-  },
-  statusCompletion: {
-    source: 'vivaMs.personApplicationStatus',
-    detailType: 'applicationStatusCompletionRequired',
+    detailType: 'checkOpenPeriodSuccess',
   },
   personDetailSuccess: {
     source: 'vivaMs.personApplication',
-    detailType: 'getVivaPersonApplicationDetailSuccess',
+    detailType: 'personDetailSuccess',
   },
   applicationReceivedSuccess: {
     source: 'vivaMs.submitApplication',
-    detailType: 'vivaAdapterApplicationReceivedSuccess',
-  },
-  syncWorkflowSuccess: {
-    source: 'vivaMs.syncWorkflow',
-    detailType: 'vivaMsSyncWorkflowSuccess',
-  },
-  decideCaseStatusSuccess: {
-    source: 'vivaMs.decideCaseStatus',
-    detailType: 'vivaMsDecideCaseStatusSuccess',
+    detailType: 'applicationReceivedSuccess',
   },
 };
 
@@ -33,8 +21,8 @@ function putUserEvent(user, type, typeCollection = eventTypeCollection) {
 }
 
 export default {
-  statusApplySuccess: userDetail => putUserEvent(userDetail, 'statusApplySuccess'),
-  statusCompletion: userDetail => putUserEvent(userDetail, 'statusCompletion'),
+  checkOpenPeriodSuccess: userDetail => putUserEvent(userDetail, 'checkOpenPeriodSuccess'),
+  completionRequired: userDetail => putUserEvent(userDetail, 'completionRequired'),
   personDetailSuccess: userDetail => putUserEvent(userDetail, 'personDetailSuccess'),
   applicationReceivedSuccess: userDetail => putUserEvent(userDetail, 'applicationReceivedSuccess'),
   syncWorkflowSuccess: userDetail => putUserEvent(userDetail, 'syncWorkflowSuccess'),
