@@ -94,7 +94,7 @@ functions:
             source:
               - usersMs.findUser
             detail-type:
-              - findUserSuccess
+              - usersMsFindUserSuccess
 
   personApplication:
     handler: lambdas/personApplication.main
