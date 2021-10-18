@@ -137,7 +137,7 @@ functions:
                     M:
                       type:
                         S: [{"prefix": "active:submitted"}]
-                  pdf_generated:
+                  pdfGenerated:
                     S: ["yes"]
 
   checkCompletion:
