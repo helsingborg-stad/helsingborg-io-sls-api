@@ -11,6 +11,7 @@ import { getStatusByType, statusTypes } from '../../../libs/caseStatuses';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
+const VIVA_COMPLETION_REQUIRED = 'VIVA_COMPLETION_REQUIRED';
 
 export async function main(event) {
   const { caseKeys } = event.detail;
@@ -83,14 +84,18 @@ async function updateCaseCompletionAttributes(keys, currentFormId) {
     TableName: config.cases.tableName,
     Key: keys,
     UpdateExpression:
-      'set currentFormId = :currentFormId, #status = :completionStatus, persons = :persons',
+      'SET #currentFormId = :newCurrentFormId, #status = :newCompletionStatus, #persons = :newPersons, #state = :newState',
     ExpressionAttributeNames: {
+      '#currentFormId': 'currentFormId',
       '#status': 'status',
+      '#persons': 'persons',
+      '#state': 'state',
     },
     ExpressionAttributeValues: {
-      ':currentFormId': currentFormId,
-      ':completionStatus': completionStatus,
-      ':persons': newPersons,
+      ':newCurrentFormId': currentFormId,
+      ':newCompletionStatus': completionStatus,
+      ':newPersons': newPersons,
+      ':newState': VIVA_COMPLETION_REQUIRED,
     },
     ReturnValues: 'UPDATED_NEW',
   };
