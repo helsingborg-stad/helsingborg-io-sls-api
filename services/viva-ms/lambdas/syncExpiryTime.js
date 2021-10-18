@@ -46,16 +46,16 @@ export async function main(event, context) {
     log.error(
       'Update case error.',
       context.awsRequestId,
-      'service-viva-ms-syncExpiryTime-001',
+      'service-viva-ms-syncExpiryTime-002',
       updateCaseError
     );
-    return console.error(updateCaseError);
+    return false;
   }
 
   log.info(
-    'Case updated successfully',
+    'Case attribute: expirationTime, updated successfully',
     context.awsRequestId,
-    'service-viva-ms-syncExpiryTime-001',
+    null,
     updatedCase
   );
   return true;
