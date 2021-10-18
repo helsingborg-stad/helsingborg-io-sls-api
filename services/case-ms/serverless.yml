@@ -54,7 +54,7 @@ provider:
 functions:
   updatePdf:
     handler: lambdas/updatePdf.main
-    enivironment:
+    environment:
       PDF_STORAGE_BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-PdfStorageBucketName
     events:
       - eventBridge:
