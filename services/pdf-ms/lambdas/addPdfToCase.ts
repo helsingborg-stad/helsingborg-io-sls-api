@@ -31,8 +31,8 @@ export async function main(
     event.detail.dynamodb.NewImage
   );
 
-  if (submittedCase.state === 'PDF_GENERATED') {
-    console.log('TRIGGERED', submittedCase.state);
+  if (submittedCase.pdfGenerated === 'yes') {
+    console.log('PDF allready exists.', submittedCase.pdfGenerated);
     return true;
   }
 
@@ -136,7 +136,7 @@ export async function main(
       addPdfToCaseError
     );
 
-    throw addPdfToCaseError;
+    return false;
   }
 
   return true;
