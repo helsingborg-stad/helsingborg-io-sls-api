@@ -17,7 +17,6 @@ const VIVA_APPLICATION_RECEIVED = 'VIVA_APPLICATION_RECEIVED';
 const dynamoDbConverter = AWS.DynamoDB.Converter;
 
 export async function main(event, context) {
-  console.log('event', event);
   if (event.detail.dynamodb.NewImage == undefined) {
     return undefined;
   }
@@ -26,6 +25,12 @@ export async function main(event, context) {
 
   const { recurringFormId } = await VIVA_CASE_SSM_PARAMS;
   if (caseItem.currentFormId !== recurringFormId) {
+    log.info(
+      'Current form is not an recurring form. Will not continue.',
+      context.awsRequestId,
+      null,
+      vivaApplicationResponse
+    );
     return true;
   }
 
