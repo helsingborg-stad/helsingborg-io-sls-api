@@ -139,6 +139,8 @@ functions:
                         S: [{"prefix": "active:submitted"}]
                   pdfGenerated:
                     S: ["yes"]
+                  state:
+                    S: ["PDF_GENERATED"]
 
   checkCompletion:
     handler: lambdas/checkCompletion.main
