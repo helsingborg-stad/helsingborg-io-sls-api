@@ -2,7 +2,6 @@
 import to from 'await-to-js';
 
 import config from '../../../config';
-import params from '../../../libs/params';
 
 import * as dynamoDb from '../../../libs/dynamoDb';
 import log from '../../../libs/logs';
@@ -15,8 +14,6 @@ import {
   DELETE_VIVA_CASE_AFTER_72_HOURS as AFTER_3_DAYS,
 } from '../../../libs/constants';
 
-const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
-
 export async function main(event, context) {
   const { caseKeys } = event.detail;
   const { PK, SK } = caseKeys;
@@ -27,12 +24,13 @@ export async function main(event, context) {
     SK
   );
   if (getStoredUserCaseError) {
-    return console.error(getStoredUserCaseError);
-  }
-
-  const vivaCaseSSMParams = await VIVA_CASE_SSM_PARAMS;
-  if (vivaCaseSSMParams.recurringFormId !== storedUserCase.currentFormId) {
-    return true;
+    log.error(
+      'Error getting stored case from the cases table.',
+      context.awsRequestId,
+      'service-viva-ms-syncExpiryTime-001',
+      getStoredUserCaseError
+    );
+    return false;
   }
 
   const expireHours = getExpiryHoursOnStatusType(storedUserCase.Item.status.type);
