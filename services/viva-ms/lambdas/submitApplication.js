@@ -28,8 +28,7 @@ export async function main(event, context) {
     log.info(
       'Current form is not an recurring form. Will not continue.',
       context.awsRequestId,
-      null,
-      vivaApplicationResponse
+      null
     );
     return true;
   }
