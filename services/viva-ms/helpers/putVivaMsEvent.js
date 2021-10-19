@@ -22,9 +22,6 @@ function putUserEvent(user, type, typeCollection = eventTypeCollection) {
 
 export default {
   checkOpenPeriodSuccess: userDetail => putUserEvent(userDetail, 'checkOpenPeriodSuccess'),
-  completionRequired: userDetail => putUserEvent(userDetail, 'completionRequired'),
   personDetailSuccess: userDetail => putUserEvent(userDetail, 'personDetailSuccess'),
   applicationReceivedSuccess: userDetail => putUserEvent(userDetail, 'applicationReceivedSuccess'),
-  syncWorkflowSuccess: userDetail => putUserEvent(userDetail, 'syncWorkflowSuccess'),
-  decideCaseStatusSuccess: userDetail => putUserEvent(userDetail, 'decideCaseStatusSuccess'),
 };
