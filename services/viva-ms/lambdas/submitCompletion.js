@@ -1,30 +1,29 @@
 /* eslint-disable no-console */
 import AWS from 'aws-sdk';
-import S3 from '../../../libs/S3';
-import { to } from 'await-to-js';
-import params from '../../../libs/params';
+import to from 'await-to-js';
+
 import config from '../../../config';
-import vivaAdapter from '../helpers/vivaAdapterRequestClient';
+
+import * as dynamoDb from '../../../libs/dynamoDb';
 import log from '../../../libs/logs';
+import params from '../../../libs/params';
+import S3 from '../../../libs/S3';
+
+import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
+const VIVA_COMPLETION_RECEIVED = 'VIVA_COMPLETION_RECEIVED';
 
 export async function main(event, context) {
-  const vivaCaseSsmParams = await VIVA_CASE_SSM_PARAMS;
   const caseItem = parseDynamoDBItemFromEvent(event);
 
-  if (caseItem.currentFormId !== vivaCaseSsmParams.completionFormId) {
-    log.warn(
-      'currentFormId does not match completionFormId from ssm params',
-      context.awsRequestId,
-      'service-viva-ms-submitCompletition-001'
-    );
-
-    return false;
+  const { completionFormId } = await VIVA_CASE_SSM_PARAMS;
+  if (caseItem.currentFormId !== completionFormId) {
+    log.info('Current form is not an completion form.', context.awsRequestId, null);
+    return true;
   }
 
   const personalNumber = caseItem.PK.substr(5);
-
   const caseAnswers = caseItem.forms[caseItem.currentFormId].answers;
 
   const [attachmentListError, attachmentList] = await to(
@@ -34,19 +33,11 @@ export async function main(event, context) {
     log.error(
       'Attachment list error',
       context.awsRequestId,
-      'service-viva-ms-submitCompletition-002',
+      'service-viva-ms-submitCompletition-001',
       attachmentListError
     );
-
-    throw attachmentListError;
+    return false;
   }
-
-  log.info(
-    'Answers converted to Attachment List',
-    context.awsRequestId,
-    'service-viva-ms-submitCompletition-003',
-    attachmentList
-  );
 
   const [postCompletionError, postCompletionResponse] = await to(
     vivaAdapter.completion.post({
@@ -55,25 +46,42 @@ export async function main(event, context) {
       attachments: attachmentList,
     })
   );
-
   if (postCompletionError) {
     log.error(
       'post completion error',
       context.awsRequestId,
-      'service-viva-ms-submitCompletition-004',
+      'service-viva-ms-submitCompletition-002',
       postCompletionError
     );
-
-    throw postCompletionError;
+    return false;
   }
 
-  log.info(
-    'Viva Adapter Post Request Response',
-    context.awsRequestId,
-    'service-viva-ms-submitCompletition-004',
-    postCompletionResponse
-  );
+  if (notCompletionReceived(postCompletionResponse)) {
+    log.error(
+      'Viva completion receive failed',
+      context.awsRequestId,
+      'service-viva-ms-submitCompletition-003',
+      postCompletionResponse
+    );
+    return false;
+  }
 
+  const caseKeys = {
+    PK: caseItem.PK,
+    SK: caseItem.SK,
+  };
+  const [updateError, newVivaCase] = await to(updateVivaCase(caseKeys, VIVA_COMPLETION_RECEIVED));
+  if (updateError) {
+    log.error(
+      'Database update viva case failed',
+      context.awsRequestId,
+      'service-viva-ms-submitCompletition-004',
+      updateError
+    );
+    return false;
+  }
+
+  log.info('Updated viva case successfully', context.awsRequestId, null, newVivaCase);
   return true;
 }
 
@@ -133,4 +141,29 @@ async function answersToAttachmentList(personalNumber, answerList) {
   }
 
   return attachmentList;
+}
+
+function notCompletionReceived(response) {
+  if (response?.status !== 'OK') {
+    return true;
+  }
+
+  return false;
+}
+
+function updateVivaCase(caseKeys, newState) {
+  const params = {
+    TableName: config.cases.tableName,
+    Key: caseKeys,
+    UpdateExpression: 'SET #state = :newState',
+    ExpressionAttributeNames: {
+      '#state': 'state',
+    },
+    ExpressionAttributeValues: {
+      ':newState': newState,
+    },
+    ReturnValues: 'UPDATED_NEW',
+  };
+
+  return dynamoDb.call('update', params);
 }
