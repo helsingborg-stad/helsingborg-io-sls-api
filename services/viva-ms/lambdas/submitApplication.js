@@ -25,11 +25,7 @@ export async function main(event, context) {
 
   const { recurringFormId } = await VIVA_CASE_SSM_PARAMS;
   if (caseItem.currentFormId !== recurringFormId) {
-    log.info(
-      'Current form is not an recurring form. Will not continue.',
-      context.awsRequestId,
-      null
-    );
+    log.info('Current form is not an recurring form.', context.awsRequestId, null);
     return true;
   }
 
@@ -55,7 +51,6 @@ export async function main(event, context) {
     );
     return false;
   }
-  console.log('vivaApplicationResponse', vivaApplicationResponse);
 
   if (notApplicationReceived(vivaApplicationResponse)) {
     log.error(
