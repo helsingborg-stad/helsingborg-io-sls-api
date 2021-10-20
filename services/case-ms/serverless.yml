@@ -50,7 +50,6 @@ provider:
                 - - Fn::ImportValue: ${self:custom.resourcesStage}-PdfStorageBucketArn
                   - "/*"
           
-
 functions:
   updatePdf:
     handler: lambdas/updatePdf.main
