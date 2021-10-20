@@ -19,11 +19,6 @@ provider:
   endpointType: regional
   tracing:
     lambda: true
-
-  environment:
-    stage: ${self:custom.stage}
-    resourcesStage: ${self:custom.resourcesStage}
-
   iam:
     role:
       statements:
