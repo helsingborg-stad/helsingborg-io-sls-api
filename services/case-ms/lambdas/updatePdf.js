@@ -25,7 +25,7 @@ export async function main(event) {
     return false;
   }
 
-  const currentCase = scanCasesResult[1].Items;
+  const [currentCase] = scanCasesResult.Items;
 
   const [updateCasePdfAttributesError] = await to(
     updateCasePdfAttributes(currentCase, pdfObject.Body)
