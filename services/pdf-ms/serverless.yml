@@ -78,7 +78,7 @@ functions:
       - eventBridge:
           pattern:
             source:
-              - vivaMs.caseToHtml
+              - vivaMs.formAnswersToHtml
             detail:
-              - vivaMsCaseToHtmlSuccess
+              - VivaMsFormAnswersToHtmlSuccess
 
