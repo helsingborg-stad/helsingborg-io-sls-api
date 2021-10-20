@@ -39,7 +39,7 @@ export async function main(event) {
   if (newPageError) {
     throw newPageError;
   }
-  const htmlString = `${htmlFile.Body}`;
+  const htmlString = htmlFile.Body;
   page.setContent(htmlString);
 
   const [generatePdfError, pdfBuffer] = await to(
