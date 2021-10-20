@@ -9,7 +9,7 @@ export async function main(event) {
 
   const [executablePathError, executablePath] = await to(chromium.executablePath);
   if (executablePathError) {
-    console.log(executablePathError);
+    console.error(executablePathError);
     return false;
   }
 
@@ -34,12 +34,14 @@ export async function main(event) {
     })
   );
   if (puppeteerLaunchError) {
-    throw puppeteerLaunchError;
+    console.error(puppeteerLaunchError);
+    return false;
   }
 
   const [newPageError, page] = await to(puppeteerBrowser.newPage());
   if (newPageError) {
-    throw newPageError;
+    console.error(newPageError);
+    return false;
   }
   const htmlString = htmlFile.Body;
   page.setContent(htmlString);
@@ -52,7 +54,8 @@ export async function main(event) {
     })
   );
   if (generatePdfError) {
-    throw generatePdfError;
+    console.error(generatePdfError);
+    return false;
   }
 
   const pdfBucketKey = `pdf/${Date.now()}.pdf`;
@@ -66,7 +69,8 @@ export async function main(event) {
       .promise()
   );
   if (putPdfError) {
-    throw putPdfError;
+    console.error(putPdfError);
+    return false;
   }
 
   if (pdfOutputObject) {
@@ -74,7 +78,8 @@ export async function main(event) {
       putEvent({ resourceId, pdfOutputObject }, 'pdfMsGenerateSuccess', 'pdfMs.generate')
     );
     if (putEventError) {
-      throw putEventError;
+      console.error(putEventError);
+      return false;
     }
   }
 
