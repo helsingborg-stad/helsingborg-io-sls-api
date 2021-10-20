@@ -7,7 +7,6 @@ import { putEvent } from '../../../libs/awsEventBridge';
 const PDF_OPTIONS = {
   format: 'A4',
   printBackground: true,
-  margin: { top: '1cm', right: '1cm', bottom: '1cm', left: '1cm' },
 };
 
 export async function main(event) {
