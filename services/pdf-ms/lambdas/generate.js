@@ -7,9 +7,11 @@ import { putEvent } from '../../../libs/awsEventBridge';
 export async function main(event) {
   const { pdfStorageBucketKey, resourceId } = event.detail;
 
-  const executablePath = event.isOffline
-    ? './node_modules/puppeteer/.local-chromium/mac-674921/chrome-mac/Chromium.app/Contents/MacOS/Chromium'
-    : await chromium.executablePath;
+  const [executablePathError, executablePath] = await to(chromium.executablePath);
+  if (executablePathError) {
+    console.log(executablePathError);
+    return false;
+  }
 
   const [getHtmlFileError, htmlFile] = await to(
     s3Client
