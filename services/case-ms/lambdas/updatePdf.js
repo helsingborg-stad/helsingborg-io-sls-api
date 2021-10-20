@@ -4,7 +4,7 @@ import config from '../../../config';
 import { to } from 'await-to-js';
 
 export async function main(event) {
-  const { resourceId, pdfStorageBucketKey } = event.details;
+  const { resourceId, pdfStorageBucketKey } = event.detail;
 
   const [s3GetObjectError, pdfObject] = await to(
     s3Client
