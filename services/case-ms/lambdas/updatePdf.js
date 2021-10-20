@@ -52,11 +52,11 @@ async function scanCasesById(caseId) {
 }
 
 async function updateCasePdfAttributes(currentCase, pdf) {
-  const UpdateExpression = 'SET #pdf = :pdf, #pdfGenerated = :pdfGenerated';
+  const UpdateExpression = 'SET #pdf = :newPdf, #pdfGenerated = :newPdfGenerated';
   const ExpressionAttributeNames = { '#pdf': 'pdf', '#pdfGenerated': 'pdfGenerated' };
   const ExpressionAttributeValues = {
-    ':pdf': pdf || undefined,
-    ':pdfGenerated': pdf !== undefined ? 'yes' : 'no',
+    ':newPdf': pdf || undefined,
+    ':newPdfGenerated': pdf !== undefined ? 'yes' : 'no',
   };
 
   const params = {
