@@ -50,8 +50,10 @@ export async function main(event) {
     console.error(newPageError);
     return false;
   }
-  const htmlString = htmlFile.Body;
+
+  const htmlString = htmlFile.Body.toString();
   page.setContent(htmlString);
+
   const [generatePdfError, pdfBuffer] = await to(page.pdf(PDF_OPTIONS));
   if (generatePdfError) {
     console.error(generatePdfError);
