@@ -48,12 +48,7 @@ async function scanCasesById(caseId) {
     },
   };
 
-  const [scanError, scanResult] = await to(dynamoDb.call('scan', scanParams));
-  if (scanError) {
-    throw scanError;
-  }
-
-  return scanResult;
+  return dynamoDb.call('scan', scanParams);
 }
 
 async function updateCasePdfAttributes(currentCase, pdf) {
@@ -76,10 +71,5 @@ async function updateCasePdfAttributes(currentCase, pdf) {
     ReturnValue: 'NONE',
   };
 
-  const [dynamoDbUpdateCaseError] = await to(dynamoDb.call('update', params));
-  if (dynamoDbUpdateCaseError) {
-    throw dynamoDbUpdateCaseError;
-  }
-
-  return true;
+  return dynamoDb.call('update', params);
 }
