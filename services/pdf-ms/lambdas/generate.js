@@ -28,7 +28,8 @@ export async function main(event) {
       .promise()
   );
   if (getHtmlFileError) {
-    throw getHtmlFileError;
+    console.error(getHtmlFileError);
+    return false;
   }
 
   const [puppeteerLaunchError, puppeteerBrowser] = await to(
