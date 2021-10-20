@@ -56,11 +56,16 @@ provider:
                 - ""
                 - - Fn::ImportValue: ${self:custom.resourcesStage}-PdfStorageBucketArn
                   - "/*"
+        
         - Effect: Allow
           Action:
             - kms:Decrypt
           Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
-
+        
+        - Effect: Allow
+          Action:
+            - events:PutEvents
+          Resource: "*"
 
 functions:
   generate:
