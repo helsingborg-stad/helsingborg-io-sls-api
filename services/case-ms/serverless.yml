@@ -56,5 +56,5 @@ functions:
             source:
               - pdfMs.generate
             detail-type:
-              - pdfMsGenerateSuccess
+              - PdfMsGenerateSuccess
 
