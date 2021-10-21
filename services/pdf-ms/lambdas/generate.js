@@ -12,7 +12,7 @@ const PDF_OPTIONS = {
 export async function main(event) {
   const { pdfStorageBucketKey, resourceId } = event.detail;
 
-  const [getHtmlFileError, htmlFile] = await to(
+  const [getS3ObjectError, s3Object] = await to(
     s3Client
       .getObject({
         Bucket: process.env.PDF_STORAGE_BUCKET_NAME,
@@ -20,12 +20,17 @@ export async function main(event) {
       })
       .promise()
   );
-  if (getHtmlFileError) {
-    console.error(getHtmlFileError);
+  if (getS3ObjectError) {
+    console.error(getS3ObjectError);
     return false;
   }
 
-  const htmlString = htmlFile.Body.toString();
+  if (s3Object.ContentType !== 'text/html') {
+    console.error('The retrived file from s3 does not have content-type set to "text/html"');
+    return false;
+  }
+
+  const htmlString = s3Object.Body.toString();
 
   const [htmlToPdfError, pdfBuffer] = await to(htmlToPdf(htmlString));
   if (htmlToPdfError) {
