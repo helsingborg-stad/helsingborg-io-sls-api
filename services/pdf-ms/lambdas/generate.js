@@ -12,12 +12,6 @@ const PDF_OPTIONS = {
 export async function main(event) {
   const { pdfStorageBucketKey, resourceId } = event.detail;
 
-  const [executablePathError, executablePath] = await to(chromium.executablePath);
-  if (executablePathError) {
-    console.error(executablePathError);
-    return false;
-  }
-
   const [getHtmlFileError, htmlFile] = await to(
     s3Client
       .getObject({
@@ -31,31 +25,10 @@ export async function main(event) {
     return false;
   }
 
-  const [puppeteerLaunchError, puppeteerBrowser] = await to(
-    chromium.puppeteer.launch({
-      args: chromium.args,
-      defaultViewport: chromium.defaultViewport,
-      executablePath,
-      headless: chromium.headless,
-    })
-  );
-  if (puppeteerLaunchError) {
-    console.error(puppeteerLaunchError);
-    return false;
-  }
-
-  const [newPageError, page] = await to(puppeteerBrowser.newPage());
-  if (newPageError) {
-    console.error(newPageError);
-    return false;
-  }
-
   const htmlString = htmlFile.Body.toString();
-  page.setContent(htmlString);
 
-  const [generatePdfError, pdfBuffer] = await to(page.pdf(PDF_OPTIONS));
-  if (generatePdfError) {
-    console.error(generatePdfError);
+  const [htmlToPdfError, pdfBuffer] = await to(htmlToPdf(htmlString));
+  if (htmlToPdfError) {
     return false;
   }
 
@@ -83,8 +56,28 @@ export async function main(event) {
       return false;
     }
   }
+}
 
-  if (puppeteerBrowser !== null) {
-    await puppeteerBrowser.close();
+async function htmlToPdf(html) {
+  let browser;
+  try {
+    const executablePath = await chromium.executablePath;
+
+    browser = await chromium.puppeteer.launch({
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath,
+      headless: chromium.headless,
+    });
+
+    const page = await browser.newPage();
+    page.setContent(html);
+    const pdf = page.pdf(PDF_OPTIONS);
+
+    return pdf;
+  } finally {
+    if (browser !== undefined) {
+      browser.close();
+    }
   }
 }
