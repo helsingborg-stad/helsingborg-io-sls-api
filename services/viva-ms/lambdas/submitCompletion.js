@@ -70,7 +70,9 @@ export async function main(event, context) {
     PK: caseItem.PK,
     SK: caseItem.SK,
   };
-  const [updateError, newVivaCase] = await to(updateVivaCase(caseKeys, VIVA_COMPLETION_RECEIVED));
+  const [updateError, newVivaCase] = await to(
+    updateVivaCaseState(caseKeys, VIVA_COMPLETION_RECEIVED)
+  );
   if (updateError) {
     log.error(
       'Database update viva case failed',
@@ -151,7 +153,7 @@ function notCompletionReceived(response) {
   return false;
 }
 
-function updateVivaCase(caseKeys, newState) {
+function updateVivaCaseState(caseKeys, newState) {
   const params = {
     TableName: config.cases.tableName,
     Key: caseKeys,
