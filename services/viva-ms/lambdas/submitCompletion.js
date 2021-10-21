@@ -66,6 +66,8 @@ export async function main(event, context) {
     return false;
   }
 
+  log.info('Viva post completion response', context.awsRequestId, null, postCompletionResponse);
+
   const caseKeys = {
     PK: caseItem.PK,
     SK: caseItem.SK,
