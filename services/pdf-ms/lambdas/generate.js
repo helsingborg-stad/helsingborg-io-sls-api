@@ -69,7 +69,7 @@ export async function main(event) {
 }
 
 async function htmlToPdf(html) {
-  let browser;
+  let browser = null;
   try {
     const executablePath = await chromium.executablePath;
 
@@ -86,7 +86,7 @@ async function htmlToPdf(html) {
 
     return pdf;
   } finally {
-    if (browser !== undefined) {
+    if (browser !== null) {
       browser.close();
     }
   }
