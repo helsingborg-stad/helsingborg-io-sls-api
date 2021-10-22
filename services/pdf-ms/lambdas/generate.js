@@ -26,7 +26,7 @@ export async function main(event) {
   }
 
   if (s3Object.ContentType !== 'text/html') {
-    console.error('The retrived file from s3 does not have content-type set to "text/html"');
+    console.error('The retrieved file from s3 does not have content-type set to "text/html"');
     return false;
   }
 
