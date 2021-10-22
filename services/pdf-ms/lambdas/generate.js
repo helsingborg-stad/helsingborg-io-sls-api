@@ -34,6 +34,7 @@ export async function main(event) {
 
   const [htmlToPdfError, pdfBuffer] = await to(htmlToPdf(htmlString));
   if (htmlToPdfError) {
+    console.error(htmlToPdfError);
     return false;
   }
 
