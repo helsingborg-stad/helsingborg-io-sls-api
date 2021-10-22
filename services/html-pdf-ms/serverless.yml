@@ -1,4 +1,4 @@
-service: pdf-ms
+service: html-pdf-ms
 
 plugins:
   - serverless-bundle
