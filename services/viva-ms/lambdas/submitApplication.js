@@ -44,10 +44,12 @@ export async function main(event, context) {
   );
   if (vivaPostError) {
     log.error(
-      'Viva adapter sumbit application failed',
+      'Viva adapter submit application failed',
       context.awsRequestId,
       'service-viva-ms-submitApplication-001',
-      vivaPostError
+      {
+        axios: { ...vivaPostError },
+      }
     );
     return false;
   }
@@ -57,7 +59,7 @@ export async function main(event, context) {
       'Viva application receive failed',
       context.awsRequestId,
       'service-viva-ms-submitApplication-002',
-      vivaApplicationResponse
+      { vivaResponse: { ...vivaApplicationResponse } }
     );
     return false;
   }

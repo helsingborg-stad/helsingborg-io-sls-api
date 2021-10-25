@@ -25,7 +25,11 @@ async function sendVivaAdapterRequest({ endpoint, method, body = undefined }) {
     if (requestError.response) {
       // The request was made and the server responded with a
       // status code that falls out of the range of 2xx
-      throw requestError.response;
+      throw {
+        vadaResponse: requestError.response.data,
+        status: requestError.response.status,
+        headers: requestError.response.headers,
+      };
     } else if (requestError.request) {
       // The request was made but no response was received
       // `error.request` is an instance of http.ClientRequest in node.js
