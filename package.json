@@ -60,6 +60,7 @@
     "aws-sdk": "^2.843.0",
     "axios": "^0.21.2",
     "camelcase": "^6.2.0",
+    "chrome-aws-lambda": "^10.1.0",
     "deep-equal": "^2.0.5",
     "hashids": "^2.2.8",
     "joi": "^17.4.0",
