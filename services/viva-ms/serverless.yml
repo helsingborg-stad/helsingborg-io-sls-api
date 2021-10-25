@@ -191,3 +191,26 @@ functions:
                     M:
                       type:
                         S: [{ "prefix": "active:submitted" }]
+    
+  generateRecurringCaseHtml:
+    handler: lambdas/generateRecurringCaseHtml.main
+    timeout: 15
+    environment:
+      PDF_STORAGE_BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-PdfStorageBucketName
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - cases.database
+            detail-type:
+              - MODIFY
+            detail:
+              dynamodb:
+                NewImage:
+                  provider:
+                    S: ["VIVA"]
+                  status:
+                    M:
+                      type:
+                        S: [{ "prefix": "active:submitted" }]
+    
