@@ -1,0 +1,84 @@
+service: html-pdf-ms
+
+plugins:
+  - serverless-bundle
+
+projectDir: ../../
+
+custom: ${file(../../serverless.common.yml):custom}
+
+package:
+  individually: true
+
+provider:
+  lambdaHashingVersion: 20201221
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: eu-north-1
+  endpointType: regional
+  tracing:
+    lambda: true
+
+  environment:
+    stage: ${self:custom.stage}
+    resourcesStage: ${self:custom.resourcesStage}
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - SSM:GetParameter*
+          Resource: 
+            - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${file(../../config.json):${self:custom.stage}.pdf.envsKeyName}"
+
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:UpdateItem
+          Resource:
+            - Fn::ImportValue: ${self:custom.resourcesStage}-CasesTableArn
+
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+          Resource:
+            - "Fn::ImportValue": ${self:custom.resourcesStage}-UsersTableArn
+
+        - Effect: Allow
+          Action:
+            - s3:GetObject
+            - s3:PutObject
+          Resource:
+            - Fn::ImportValue: ${self:custom.resourcesStage}-PdfStorageBucketArn
+            - Fn::Join:
+                - ""
+                - - Fn::ImportValue: ${self:custom.resourcesStage}-PdfStorageBucketArn
+                  - "/*"
+        
+        - Effect: Allow
+          Action:
+            - kms:Decrypt
+          Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
+        
+        - Effect: Allow
+          Action:
+            - events:PutEvents
+          Resource: "*"
+
+functions:
+  generate:
+    handler: lambdas/generate.main
+    layers: 
+      - Fn::ImportValue: ChromeAwsLambdaLayer-${self:provider.stage}
+    environment:
+      PDF_STORAGE_BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-PdfStorageBucketName
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - vivaMs.formAnswersToHtml
+            detail:
+              - VivaMsFormAnswersToHtmlSuccess
+
