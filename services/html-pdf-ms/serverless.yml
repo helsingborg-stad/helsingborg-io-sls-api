@@ -58,6 +58,6 @@ functions:
           pattern:
             source:
               - vivaMs.formAnswersToHtml
-            detail:
+            detail-type:
               - VivaMsFormAnswersToHtmlSuccess
 
