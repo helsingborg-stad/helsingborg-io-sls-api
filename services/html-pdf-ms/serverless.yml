@@ -57,7 +57,7 @@ functions:
       - eventBridge:
           pattern:
             source:
-              - vivaMs.formAnswersToHtml
+              - vivaMs.generateRecurringCaseHtml
             detail-type:
-              - VivaMsFormAnswersToHtmlSuccess
+              - htmlGeneratedSuccess
 
