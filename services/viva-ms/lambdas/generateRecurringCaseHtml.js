@@ -8,6 +8,8 @@ import { putEvent } from '../../../libs/awsEventBridge';
 import createRecurringCaseTemplateData from '../helpers/createCaseTemplateData';
 
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
+const PUT_EVENT_DETAIL_TYPE = 'htmlGeneratedSuccess';
+const PUT_EVENT_SOURCE = 'vivaMs.generateRecurringCaseHtml';
 
 export async function main(event) {
   const { dynamodb } = event.detail;
@@ -56,8 +58,8 @@ export async function main(event) {
   const [putEventError] = await to(
     putEvent(
       { pdfStorageBucketKey: caseHtmlKey, resourceId: caseItem.id },
-      'htmlGeneratedSuccess',
-      'vivaMs.generateCaseHtml'
+      PUT_EVENT_DETAIL_TYPE,
+      PUT_EVENT_SOURCE
     )
   );
   if (putEventError) {
