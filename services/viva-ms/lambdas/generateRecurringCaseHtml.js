@@ -1,7 +1,7 @@
-import { AWS } from 'aws-sdk';
+import AWS from 'aws-sdk';
 import config from '../../../config';
 import params from '../../../libs/params';
-import { to } from 'await-to-js';
+import to from 'await-to-js';
 import handlebars from 'handlebars';
 import { s3Client } from '../../../libs/S3';
 import { putEvent } from '../../../libs/awsEventBridge';
@@ -27,11 +27,6 @@ export async function main(event) {
   );
   if (s3GetObjectError) {
     console.error(s3GetObjectError);
-    return false;
-  }
-
-  if (!s3Object.Key.includes('.hbs')) {
-    console.error('The s3Object tempalate file extension is not of type .hbs');
     return false;
   }
 
