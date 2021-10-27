@@ -8,9 +8,9 @@ const personMapFunctions = {
 };
 
 function mapApplicant(person, answers) {
-  const personalInfoAnswers = formHelpers.filterFieldIdIncludes(answers, 'personalInfo');
+  const personalInfoAnswers = formHelpers.filterByFieldIdIncludes(answers, 'personalInfo');
   const personalInfo = personalInfoAnswers.reduce((acc, curr) => {
-    const attribute = formHelpers.getAttributeNameFromAnswerFieldId(curr.field.id);
+    const attribute = formHelpers.getAttributeFromAnswerFieldId(curr.field.id);
     return { ...acc, [attribute]: curr.value };
   }, {});
 
@@ -26,9 +26,9 @@ function mapApplicant(person, answers) {
 }
 
 function mapCoApplicant(person, answers) {
-  const partnerInfoAnswers = formHelpers.filterFieldIdIncludes(answers, 'personalInfo');
+  const partnerInfoAnswers = formHelpers.filterByFieldIdIncludes(answers, 'personalInfo');
   const partnerInfo = partnerInfoAnswers.reduce((acc, curr) => {
-    const attribute = formHelpers.getAttributeNameFromAnswerFieldId(curr.field.id);
+    const attribute = formHelpers.getAttributeFromAnswerFieldId(curr.field.id);
     return { ...acc, [attribute]: curr.value };
   }, {});
 
