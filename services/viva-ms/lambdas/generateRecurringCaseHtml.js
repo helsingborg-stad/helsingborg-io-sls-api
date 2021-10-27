@@ -40,11 +40,13 @@ export async function main(event) {
 
   const caseHtmlKey = `html/case-${caseItem.id}.html`;
   const [s3PutObjectError] = await to(
-    s3Client.putObject({
-      Bucket: process.env.PDF_STORAGE_BUCKET_NAME,
-      key: caseHtmlKey,
-      Body: html,
-    })
+    s3Client
+      .putObject({
+        Bucket: process.env.PDF_STORAGE_BUCKET_NAME,
+        Key: caseHtmlKey,
+        Body: html,
+      })
+      .promise()
   );
   if (s3PutObjectError) {
     console.error(s3PutObjectError);
