@@ -5,7 +5,7 @@ import to from 'await-to-js';
 import handlebars from 'handlebars';
 import { s3Client } from '../../../libs/S3';
 import { putEvent } from '../../../libs/awsEventBridge';
-import createRecurringCaseTemplateData from '../helpers/createCaseTemplateData';
+import createRecurringCaseTemplateData from '../helpers/createRecurringCaseTemplateData';
 
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
 const PUT_EVENT_DETAIL_TYPE = 'htmlGeneratedSuccess';
