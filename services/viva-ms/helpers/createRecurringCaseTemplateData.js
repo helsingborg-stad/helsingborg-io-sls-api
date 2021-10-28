@@ -146,12 +146,12 @@ export default function createRecurringCaseTemplateData(caseItem, recurringFormI
   const period = formatPeriodDates(caseItem.details.period);
   const persons = createPersonsObject(caseItem.persons, recurringform.answers);
   const housing = createHousingInfoObject(recurringform.answers);
-  const economis = createEconomicsObject(recurringform.answers);
+  const economics = createEconomicsObject(recurringform.answers);
 
   return {
     period,
     persons,
     housing,
-    economis,
+    economics,
   };
 }
