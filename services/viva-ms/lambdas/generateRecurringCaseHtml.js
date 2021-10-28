@@ -1,4 +1,4 @@
-import AWS from 'aws-sdk';
+import DynamoDB from 'aws-sdk/clients/dynamodb';
 import config from '../../../config';
 import params from '../../../libs/params';
 import to from 'await-to-js';
@@ -17,7 +17,7 @@ export async function main(event) {
     return false;
   }
   const vivaCaseSsmParams = await VIVA_CASE_SSM_PARAMS;
-  const caseItem = AWS.DynamoDB.Converter.unmarshall(dynamodb.NewImage);
+  const caseItem = DynamoDB.Converter.unmarshall(dynamodb.NewImage);
 
   const [s3GetObjectError, s3Object] = await to(
     s3Client
