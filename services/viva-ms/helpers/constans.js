@@ -25,7 +25,7 @@ export const VIVA_POST_TYPE_COLLECTION = {
   annat: 'Övrig utgift',
 };
 
-export const TAG_NAMES = {
+export const TAG_NAME = {
   appliesto: 'appliesto',
   amount: 'amount',
   description: 'description',
