@@ -1,4 +1,4 @@
-import { TAG_NAMES, VIVA_POST_TYPE_COLLECTION, PERSON_ROLES } from './constans';
+import { TAG_NAME, VIVA_POST_TYPE_COLLECTION, PERSON_ROLES } from './constans';
 import formatPeriodDates from './formatPeriodDates';
 import formHelpers from './formHelpers';
 
@@ -72,7 +72,7 @@ export function createEconomicsObject(answers) {
     const categorySummaryList = categoryAnswers.reduce((summaryList, answer) => {
       const { tags } = answer.field;
 
-      const groupTag = formHelpers.getTagIfIncludes(tags, TAG_NAMES.group);
+      const groupTag = formHelpers.getTagIfIncludes(tags, TAG_NAME.group);
 
       let summaryItem = {
         type: category,
@@ -90,19 +90,19 @@ export function createEconomicsObject(answers) {
         summaryItem = summaryList[summaryItemIndex];
       }
 
-      if (tags.includes(TAG_NAMES.appliesto)) {
+      if (tags.includes(TAG_NAME.appliesto)) {
         summaryItem.belongsTo = answer.value;
       }
 
-      if (tags.includes(TAG_NAMES.amount)) {
+      if (tags.includes(TAG_NAME.amount)) {
         summaryItem.value = answer.value;
       }
 
-      if (tags.includes(TAG_NAMES.description)) {
+      if (tags.includes(TAG_NAME.description)) {
         summaryItem.description = answer.value;
       }
 
-      if (tags.includes(TAG_NAMES.date)) {
+      if (tags.includes(TAG_NAME.date)) {
         summaryItem.date = answer.value;
       }
 
