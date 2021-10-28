@@ -88,6 +88,7 @@ export function createEconomicsObject(answers) {
         description: '',
         date: '',
         value: '',
+        currency: 'kr',
       };
 
       const summaryItemIndex = summaryList.findIndex(summaryItem => summaryItem.id === groupTag);
