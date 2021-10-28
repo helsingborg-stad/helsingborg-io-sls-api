@@ -1,0 +1,53 @@
+service: bookables-api
+
+plugins:
+  - serverless-bundle
+  - serverless-add-api-key
+
+projectDir: ../../
+
+custom: ${file(../../serverless.common.yml):custom}
+
+package:
+  individually: true
+
+provider:
+  lambdaHashingVersion: 20201221
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: eu-north-1
+  endpointType: regional
+  tracing:
+    lambda: true
+  apiGateway:
+    restApiId:
+      !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiId
+    restApiRootResourceId:
+      !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
+    restApiResources:
+      bookables:
+        !ImportValue ${self:custom.stage}-ExtApiGatewayResourceBookables
+
+  environment:
+    stage: ${self:custom.stage}
+    resourcesStage: ${self:custom.resourcesStage}
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - ssm:GetParameter
+          Resource:
+            - !Sub arn:aws:ssm:${self:provider.region}:${AWS::AccountId}:parameter/bookablesEnvs/${self:provider.stage}
+
+functions:
+  getBookables:
+    handler: lambdas/getBookables.main
+    events:
+      - http:
+          path: bookables
+          method: get
+          private: true
+          cors: true
