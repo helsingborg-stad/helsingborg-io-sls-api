@@ -4,9 +4,9 @@ import formHelpers from './formHelpers';
 
 function mapApplicant(person, answers) {
   const personalInfoAnswers = formHelpers.filterByFieldIdIncludes(answers, 'personalInfo');
-  const personalInfo = personalInfoAnswers.reduce((acc, curr) => {
-    const attribute = formHelpers.getAttributeFromAnswerFieldId(curr.field.id);
-    return { ...acc, [attribute]: curr.value };
+  const personalInfo = personalInfoAnswers.reduce((accumulatedAnswer, answer) => {
+    const attribute = formHelpers.getAttributeFromAnswerFieldId(answer.field.id);
+    return { ...accumulatedAnswer, [attribute]: answer.value };
   }, {});
 
   return {
@@ -22,9 +22,9 @@ function mapApplicant(person, answers) {
 
 function mapCoApplicant(person, answers) {
   const partnerInfoAnswers = formHelpers.filterByFieldIdIncludes(answers, 'personalInfo');
-  const partnerInfo = partnerInfoAnswers.reduce((object, answer) => {
+  const partnerInfo = partnerInfoAnswers.reduce((accumulatedAnswer, answer) => {
     const attribute = formHelpers.getAttributeFromAnswerFieldId(answer.field.id);
-    return { ...object, [attribute]: answer.value };
+    return { ...accumulatedAnswer, [attribute]: answer.value };
   }, {});
 
   return {
@@ -57,9 +57,9 @@ export function createPersonsObject(persons, answers) {
 export function createHousingInfoObject(answers) {
   const filteredAnswers = formHelpers.filterByFieldIdIncludes(answers, 'housingId');
 
-  const housingInfo = filteredAnswers.reduce((acc, curr) => {
-    const strings = curr.field.id.split('.');
-    return { ...acc, [strings[1]]: curr.value };
+  const housingInfo = filteredAnswers.reduce((accumulatedAnswer, answer) => {
+    const strings = answer.field.id.split('.');
+    return { ...accumulatedAnswer, [strings[1]]: answer.value };
   }, {});
 
   return housingInfo;
