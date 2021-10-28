@@ -1,11 +1,6 @@
-import { VIVA_POST_TYPE_COLLECTION } from './constans';
+import { TAG_NAMES, VIVA_POST_TYPE_COLLECTION, PERSON_ROLES } from './constans';
 import formatPeriodDates from './formatPeriodDates';
 import formHelpers from './formHelpers';
-
-const personMapFunctions = {
-  applicant: (person, answers) => mapApplicant(person, answers),
-  coApplicant: (person, answers) => mapCoApplicant(person, answers),
-};
 
 function mapApplicant(person, answers) {
   const personalInfoAnswers = formHelpers.filterByFieldIdIncludes(answers, 'personalInfo');
@@ -27,9 +22,9 @@ function mapApplicant(person, answers) {
 
 function mapCoApplicant(person, answers) {
   const partnerInfoAnswers = formHelpers.filterByFieldIdIncludes(answers, 'personalInfo');
-  const partnerInfo = partnerInfoAnswers.reduce((acc, curr) => {
-    const attribute = formHelpers.getAttributeFromAnswerFieldId(curr.field.id);
-    return { ...acc, [attribute]: curr.value };
+  const partnerInfo = partnerInfoAnswers.reduce((object, answer) => {
+    const attribute = formHelpers.getAttributeFromAnswerFieldId(answer.field.id);
+    return { ...object, [attribute]: answer.value };
   }, {});
 
   return {
@@ -45,10 +40,14 @@ function mapCoApplicant(person, answers) {
 
 export function createPersonsObject(persons, answers) {
   const applicantPersons = persons.map(person => {
-    const personMapFunction = personMapFunctions[person.role];
-    if (personMapFunction) {
-      return personMapFunction(person, answers);
+    if (person.role === PERSON_ROLES.applicant) {
+      return mapApplicant(person, answers);
     }
+
+    if (person.role === PERSON_ROLES.coApplicant) {
+      return mapCoApplicant(person, answers);
+    }
+
     return person;
   });
 
@@ -56,14 +55,14 @@ export function createPersonsObject(persons, answers) {
 }
 
 export function createHousingInfoObject(answers) {
-  const filteredAnswers = answers.filter(answer => answer.field.id.includes('housingInfo'));
+  const filteredAnswers = formHelpers.filterByFieldIdIncludes(answers, 'housingId');
 
-  const coApplicant = filteredAnswers.reduce((acc, curr) => {
+  const housingInfo = filteredAnswers.reduce((acc, curr) => {
     const strings = curr.field.id.split('.');
     return { ...acc, [strings[1]]: curr.value };
   }, {});
 
-  return coApplicant;
+  return housingInfo;
 }
 
 export function createEconomicsObject(answers) {
@@ -71,7 +70,9 @@ export function createEconomicsObject(answers) {
   const [expenses, incomes] = categories.map(category => {
     const categoryAnswers = formHelpers.filterByTags(answers, category);
     const categorySummaryList = categoryAnswers.reduce((summaryList, answer) => {
-      const groupTag = formHelpers.getTagIfIncludes(answer.field.tags, 'group');
+      const { tags } = answer.field;
+
+      const groupTag = formHelpers.getTagIfIncludes(tags, TAG_NAMES.group);
 
       let summaryItem = {
         type: category,
@@ -89,24 +90,25 @@ export function createEconomicsObject(answers) {
         summaryItem = summaryList[summaryItemIndex];
       }
 
-      if (answer.field.tags.includes('appliesto')) {
+      if (tags.includes(TAG_NAMES.appliesto)) {
         summaryItem.belongsTo = answer.value;
       }
 
-      if (answer.field.tags.includes('amount')) {
+      if (tags.includes(TAG_NAMES.amount)) {
         summaryItem.value = answer.value;
       }
 
-      if (answer.field.tags.includes('description')) {
+      if (tags.includes(TAG_NAMES.description)) {
         summaryItem.description = answer.value;
       }
 
-      if (answer.field.tags.includes('date')) {
+      if (tags.includes(TAG_NAMES.date)) {
         summaryItem.date = answer.value;
       }
 
-      const vivaPostType = answer.field.tags.reduce((type, tag) => {
-        if (VIVA_POST_TYPE_COLLECTION[tag] !== undefined) {
+      const vivaPostType = tags.reduce((type, tag) => {
+        const isTagVivaPostType = VIVA_POST_TYPE_COLLECTION[tag] !== undefined;
+        if (isTagVivaPostType) {
           return tag;
         }
         return type;
