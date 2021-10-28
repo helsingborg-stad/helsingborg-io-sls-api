@@ -1,4 +1,4 @@
-import { TAG_NAME, VIVA_POST_TYPE_COLLECTION, PERSON_ROLES } from './constans';
+import { TAG_NAME, VIVA_POST_TYPE_COLLECTION, PERSON_ROLE } from './constans';
 import formatPeriodDates from './formatPeriodDates';
 import formHelpers from './formHelpers';
 
@@ -45,11 +45,11 @@ function getSecondStringFromDotNotatedString(sourceString) {
 
 export function createPersonsObject(persons, answers) {
   const applicantPersons = persons.map(person => {
-    if (person.role === PERSON_ROLES.applicant) {
+    if (person.role === PERSON_ROLE.applicant) {
       return mapApplicant(person, answers);
     }
 
-    if (person.role === PERSON_ROLES.coApplicant) {
+    if (person.role === PERSON_ROLE.coApplicant) {
       return mapCoApplicant(person, answers);
     }
 

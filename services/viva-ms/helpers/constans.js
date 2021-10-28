@@ -33,7 +33,7 @@ export const TAG_NAME = {
   group: 'group',
 };
 
-export const PERSON_ROLES = {
+export const PERSON_ROLE = {
   applicant: 'applicant',
   coApplicant: 'coApplicant',
 };
