@@ -109,6 +109,17 @@ functions:
             detail-type:
               - applicationStatusApplySuccess
 
+  createVivaCase:
+    handler: lambdas/createVivaCase.main
+    timeout: 15
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - vivaMs.personApplication
+            detail-type:
+              - getVivaPersonApplicationDetailSuccess
+
   submitApplication:
     handler: lambdas/submitApplication.main
     timeout: 15
@@ -131,6 +142,37 @@ functions:
                   pdfGenerated:
                     S: ["yes"]
 
+  checkCompletion:
+    handler: lambdas/checkCompletion.main
+    timeout: 15
+    events:
+      - eventBridge:
+          enabled: false
+          pattern:
+            source:
+              - vivaMs.submitApplication
+            detail-type:
+              - vivaMsSubmitApplicationSuccess
+
+  submitCompletion:
+    handler: lambdas/submitCompletion.main
+    timeout: 15
+    environment:
+      BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-AttachmentsBucketName
+    events:
+      - eventBridge:
+          enabled: false
+          pattern:
+            source:
+              - cases.database
+            detail-type:
+              - MODIFY
+            detail:
+              dynamodb:
+                NewImage:
+                  provider:
+                    S: ["VIVA"]
+
   syncOfficers:
     handler: lambdas/syncOfficers.main
     timeout: 15
@@ -147,17 +189,6 @@ functions:
                 NewImage:
                   provider:
                     S: ["VIVA"]
-
-  createVivaCase:
-    handler: lambdas/createVivaCase.main
-    timeout: 15
-    events:
-      - eventBridge:
-          pattern:
-            source:
-              - usersMs.findUser
-            detail-type:
-              - usersMsFindUserSuccess
 
   syncWorkflow:
     handler: lambdas/syncWorkflow.main
@@ -179,6 +210,7 @@ functions:
               - vivaMs.syncWorkflow
             detail-type:
               - vivaMsSyncWorkflowSuccess
+
   syncExpiryTime:
     handler: lambdas/syncExpiryTime.main
     events:
@@ -201,39 +233,6 @@ functions:
             detail-type:
               - vivaMsCheckCompletionSuccess
 
-  checkCompletion:
-    handler: lambdas/checkCompletion.main
-    timeout: 15
-    events:
-      - eventBridge:
-          pattern:
-            source:
-              - vivaMs.submitApplication
-            detail-type:
-              - vivaMsSubmitApplicationSuccess
-
-  submitCompletion:
-    handler: lambdas/submitCompletion.main
-    timeout: 15
-    environment:
-      BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-AttachmentsBucketName
-    events:
-      - eventBridge:
-          pattern:
-            source:
-              - cases.database
-            detail-type:
-              - MODIFY
-            detail:
-              dynamodb:
-                NewImage:
-                  provider:
-                    S: ["VIVA"]
-                  status:
-                    M:
-                      type:
-                        S: [{ "prefix": "active:submitted" }]
-    
   generateRecurringCaseHtml:
     handler: lambdas/generateRecurringCaseHtml.main
     environment:
