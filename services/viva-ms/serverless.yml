@@ -257,4 +257,3 @@ functions:
                     M:
                       type:
                         S: [{ "prefix": "active:submitted" }]
-    
