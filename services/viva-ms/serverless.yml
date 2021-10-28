@@ -200,7 +200,6 @@ functions:
     
   generateRecurringCaseHtml:
     handler: lambdas/generateRecurringCaseHtml.main
-    timeout: 15
     environment:
       PDF_STORAGE_BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-PdfStorageBucketName
     events:
