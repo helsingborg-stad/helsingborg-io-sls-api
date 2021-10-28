@@ -1,5 +1,6 @@
 import SSM from 'aws-sdk/clients/ssm';
 import to from 'await-to-js';
+import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
 const ssm = new SSM({ apiVersion: '2014-11-06' });
 
@@ -17,7 +18,8 @@ async function read(name) {
 
   const [ssmError, ssmParameters] = await to(ssm.getParameter(requestParameters).promise());
   if (ssmError) {
-    throw ssmError;
+    console.error(`Could not get SSM parameters: `, ssmError);
+    throw throwError(500);
   }
 
   const parameter = JSON.parse(ssmParameters.Parameter.Value);

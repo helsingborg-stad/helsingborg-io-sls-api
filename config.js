@@ -46,6 +46,9 @@ const stageConfigs = {
     bookables: {
       envsKeyName: '/bookablesEnvs/dev',
     },
+    timeSlots: {
+      envsKeyName: 'timeSlotsEnvs/dev',
+    },
     vada: {
       envsKeyName: '/vadaEnvs/dev',
     },
@@ -98,6 +101,9 @@ const stageConfigs = {
     },
     bookables: {
       envsKeyName: '/bookablesEnvs/test',
+    },
+    timeSlots: {
+      envsKeyName: 'timeSlotsEnvs/test',
     },
     vada: {
       envsKeyName: '/vadaEnvs/test',
@@ -152,6 +158,9 @@ const stageConfigs = {
     bookables: {
       envsKeyName: '/bookablesEnvs/stage',
     },
+    timeSlots: {
+      envsKeyName: 'timeSlotsEnvs/stage',
+    },
     vada: {
       envsKeyName: '/vadaEnvs/stage',
     },
@@ -205,6 +214,9 @@ const stageConfigs = {
     bookables: {
       envsKeyName: '/bookablesEnvs/prod',
     },
+    timeSlots: {
+      envsKeyName: 'timeSlotsEnvs/prod',
+    },
     vada: {
       envsKeyName: '/vadaEnvs/prod',
     },
@@ -257,6 +269,9 @@ const stageConfigs = {
     },
     bookables: {
       envsKeyName: '/bookablesEnvs/release',
+    },
+    timeSlots: {
+      envsKeyName: 'timeSlotsEnvs/release',
     },
     vada: {
       envsKeyName: '/vadaEnvs/release',

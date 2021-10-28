@@ -1,0 +1,15 @@
+{
+  "name": "timeslots-api",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node ../../node_modules/.bin/jest"
+  },
+  "keywords": [],
+  "author": "Helsingborg Stad",
+  "license": "MIT",
+  "dependencies": {
+    "dayjs": "^1.10.7"
+  }
+}

@@ -1,4 +1,4 @@
-service: search-api
+service: timeslots-api
 
 plugins:
   - serverless-bundle
@@ -26,8 +26,8 @@ provider:
     restApiRootResourceId:
       !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
     restApiResources:
-      search:
-        !ImportValue ${self:custom.stage}-ExtApiGatewayResourceSearch
+      timeslots:
+        !ImportValue ${self:custom.stage}-ExtApiGatewayResourceTimeSlots
 
   environment:
     stage: ${self:custom.stage}
@@ -43,10 +43,12 @@ provider:
             - !Sub arn:aws:ssm:${self:provider.region}:${AWS::AccountId}:parameter/searchEnvs/${self:provider.stage}
 
 functions:
-  searchBookings:
-    handler: lambdas/searchBookings.main
+  getTimeSlots:
+    handler: lambdas/getTimeSlots.main
     events:
       - http:
-          path: search/searchBookings
+          path: timeslots/getTimeSlots
           method: post
           private: true
+          cors: true
+
