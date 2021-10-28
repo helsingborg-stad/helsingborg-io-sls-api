@@ -43,6 +43,9 @@ const stageConfigs = {
     search: {
       envsKeyName: '/searchEnvs/dev',
     },
+    bookables: {
+      envsKeyName: '/bookablesEnvs/dev',
+    },
     vada: {
       envsKeyName: '/vadaEnvs/dev',
     },
@@ -92,6 +95,9 @@ const stageConfigs = {
     },
     search: {
       envsKeyName: '/searchEnvs/test',
+    },
+    bookables: {
+      envsKeyName: '/bookablesEnvs/test',
     },
     vada: {
       envsKeyName: '/vadaEnvs/test',
@@ -143,6 +149,9 @@ const stageConfigs = {
     search: {
       envsKeyName: '/searchEnvs/stage',
     },
+    bookables: {
+      envsKeyName: '/bookablesEnvs/stage',
+    },
     vada: {
       envsKeyName: '/vadaEnvs/stage',
     },
@@ -193,6 +202,9 @@ const stageConfigs = {
     search: {
       envsKeyName: '/searchEnvs/prod',
     },
+    bookables: {
+      envsKeyName: '/bookablesEnvs/prod',
+    },
     vada: {
       envsKeyName: '/vadaEnvs/prod',
     },
@@ -242,6 +254,9 @@ const stageConfigs = {
     },
     search: {
       envsKeyName: '/searchEnvs/release',
+    },
+    bookables: {
+      envsKeyName: '/bookablesEnvs/release',
     },
     vada: {
       envsKeyName: '/vadaEnvs/release',
