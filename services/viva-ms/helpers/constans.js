@@ -24,3 +24,16 @@ export const VIVA_POST_TYPE_COLLECTION = {
   fastighetsdrift: 'Drift kostnad',
   annat: 'Övrig utgift',
 };
+
+export const TAG_NAMES = {
+  appliesto: 'appliesto',
+  amount: 'amount',
+  description: 'description',
+  date: 'date',
+  group: 'group',
+};
+
+export const PERSON_ROLES = {
+  applicant: 'applicant',
+  coApplicant: 'coApplicant',
+};
