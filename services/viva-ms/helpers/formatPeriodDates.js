@@ -1,19 +1,6 @@
 function formatTimestampToDate(timestamp) {
-  const date = new Date(timestamp);
-  let formattedDateString = date.getFullYear() + '-';
-
-  if (date.getMonth() < 9) {
-    formattedDateString += '0';
-  }
-  formattedDateString += date.getMonth() + 1;
-  formattedDateString += '-';
-
-  if (date.getDate() < 10) {
-    formattedDateString += '0';
-  }
-  formattedDateString += date.getDate();
-
-  return formattedDateString;
+  const [date] = new Date(timestamp).toISOString().split('T');
+  return date;
 }
 
 export default function formatPeriodDates(period) {
