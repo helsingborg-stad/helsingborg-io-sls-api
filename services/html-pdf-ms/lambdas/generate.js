@@ -26,11 +26,6 @@ export async function main(event) {
     return false;
   }
 
-  if (s3Object.ContentType !== 'text/html') {
-    console.error('The retrieved file from s3 does not have content-type set to "text/html"');
-    return false;
-  }
-
   const htmlString = s3Object.Body.toString();
 
   const [htmlToPdfError, pdfBuffer] = await to(htmlToPdf(htmlString));
