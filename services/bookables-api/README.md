@@ -6,11 +6,11 @@ The Bookables Service's purpose is to provide the app with data related to servi
 
 ## Description
 
-The Bookables Service is an API that returns information about the bookable services at Helsingborg Stad. Currently it retrieves the data from the parameter store, for ease of deployment. In the future this could be developed further into a platform with its own dynamo.
+The Bookables Service is an API that returns information about the bookable services at Helsingborg Stad. It retrieves the data from the parameter store.
 
 ## Getting started
 
-1. Read the global requierments for this repo, can be found [here](https://github.com/helsingborg-stad/helsingborg-io-sls-api/blob/dev/README.md)
+1. Read the global requirements for this repo, can be found [here](https://github.com/helsingborg-stad/helsingborg-io-sls-api/blob/dev/README.md)
 
 ### AWS API GATEWAY
 
@@ -31,15 +31,12 @@ $ npm install
 ```bash
 $ sls offline
 ```
-
-When you deploy the service, serverless will output the generated url in the terminal that the service can be accessed from.
-
 ### Deploy and Run on AWS
 
 Deploy command:
 
 ```bash
-$ sls deploy -v
+$ sls deploy
 ```
 
 When you deploy the service, serverless will output the generated url in the terminal that the service can be accessed from.
