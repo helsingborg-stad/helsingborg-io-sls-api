@@ -6,7 +6,6 @@
   "scripts": {
     "test": "node ../../node_modules/.bin/jest"
   },
-  "keywords": [],
   "author": "Helsingborg Stad",
   "license": "MIT"
 }
