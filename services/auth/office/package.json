@@ -1,0 +1,15 @@
+{
+  "name": "outlookauthorizer",
+  "version": "0.0.1",
+  "description": "Lambda authorizer for authenticating Office users",
+  "main": "index.js",
+  "scripts": {
+    "test": "node ../../../node_modules/.bin/jest"
+  },
+  "author": "Helsingborg Stad",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.24.0",
+    "jsonwebtoken": "^8.5.1"
+  }
+}

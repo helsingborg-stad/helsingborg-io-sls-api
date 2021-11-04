@@ -1,6 +1,6 @@
 import to from 'await-to-js';
 
-import generateIAMPolicy from '../helpers/generateIAMPolicy';
+import generateIAMPolicy from '../../../../libs/generateIAMPolicy';
 import { verifyToken } from '../../../../libs/token';
 import config from '../../../../config';
 import secrets from '../../../../libs/secrets';
