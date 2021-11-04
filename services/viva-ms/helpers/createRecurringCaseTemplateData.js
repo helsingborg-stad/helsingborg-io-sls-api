@@ -21,7 +21,7 @@ function mapApplicant(person, answers) {
 }
 
 function mapCoApplicant(person, answers) {
-  const partnerInfoAnswers = formHelpers.filterByFieldIdIncludes(answers, 'personalInfo');
+  const partnerInfoAnswers = formHelpers.filterByFieldIdIncludes(answers, 'partnerInfo');
   const partnerInfo = partnerInfoAnswers.reduce((accumulatedAnswer, answer) => {
     const attribute = formHelpers.getAttributeFromAnswerFieldId(answer.field.id);
     return { ...accumulatedAnswer, [attribute]: answer.value };
