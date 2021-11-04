@@ -18,7 +18,7 @@ helsingborg-io-sls-api, Token -->
 
 ## About Office Authorizer
 
-The Office Authorizer service purpose is to provide an authorization method for Microsoft Office users that us authenticated with
+The Office Authorizer service purpose is to provide an authorization method for Microsoft Office users that is authenticated with
 Azure AD.
 
 ## Getting Started
