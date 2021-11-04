@@ -60,7 +60,7 @@ export function createPersonsObject(persons, answers) {
 }
 
 export function createHousingInfoObject(answers) {
-  const filteredAnswers = formHelpers.filterByFieldIdIncludes(answers, 'housingId');
+  const filteredAnswers = formHelpers.filterByFieldIdIncludes(answers, 'housingInfo');
 
   const housingInfo = filteredAnswers.reduce((accumulatedAnswer, answer) => {
     // field id can be constructed like personInfo.personFirstName, personInfo.personLastName
