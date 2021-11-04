@@ -1,5 +1,5 @@
 import { TAG_NAME, VIVA_POST_TYPE_COLLECTION, PERSON_ROLE } from './constans';
-import formatPeriodDates from './formatPeriodDates';
+import formatPeriodDates, { formatTimestampToDate } from './formatPeriodDates';
 import formHelpers from './formHelpers';
 
 function mapApplicant(person, answers) {
@@ -110,7 +110,7 @@ export function createEconomicsObject(answers) {
       }
 
       if (tags.includes(TAG_NAME.date)) {
-        summaryItem.date = answer.value;
+        summaryItem.date = formatTimestampToDate(answer.value);
       }
 
       const vivaPostType = tags.reduce((type, tag) => {
