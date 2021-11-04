@@ -83,6 +83,16 @@
       </div>
     </header>
 
+    <section>
+        <table>
+            {{#each notes}}
+                <tr>
+                    <td>{{this.title}}</td>
+                    <td>{{this.text}}</td>
+                </tr>
+            {{/each}}
+        </table>
+    </section>
     {{!-- Sections for each person --}}
     {{#each persons}}
     <section>
