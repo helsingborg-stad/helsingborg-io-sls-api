@@ -1,5 +1,5 @@
 {
-  "name": "outlookauthorizer",
+  "name": "officeauthorizer",
   "version": "0.0.1",
   "description": "Lambda authorizer for authenticating Office users",
   "main": "index.js",
