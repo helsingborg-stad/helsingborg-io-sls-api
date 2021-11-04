@@ -71,25 +71,19 @@
             <tr>
                 <td>Adress</td>
                 <td>
-                    {{#if postalAdress}}
                     {{postalAdress}}
-                    {{/if}}
                 </td>
             </tr>
             <tr>
                 <td>Postnummer</td>
                 <td>
-                    {{#if postalCode}}
                     {{postalCode}}
-                    {{/if}}
                 </td>
             </tr>
             <tr>
                 <td>Ort</td>
                 <td>
-                    {{#if postalAdress}}
                     {{postalAdress}}
-                    {{/if}}
                 </td>
             </tr>
             <tr>
@@ -127,9 +121,7 @@
             <tr>
                 <td>Antal boende i bostaden</td>
                 <td>
-                    {{#if numberPeopleLiving}}
-                    {{numberPeopleLiving}}
-                    {{/if}}
+                    {{numberpeopleLiving}}
                 </td>
             </tr>
         </table>
@@ -149,15 +141,16 @@
                 {{#each economics.incomes}}
 
                 {{#if (and
-                (eq this.belongsTo 'APPLICANT')
-                (eq this.type 'incomes'))}}
+                (eq this.belongsTo 'APPLICANT'))}}
                 <tr>
                     <td>
                         {{this.title}} {{this.description}}
                     </td>
                     <td>
                         <span>
-                            {{this.value}}
+                            {{#if this.value}}
+                                {{this.value}} {{this.currency}}
+                            {{/if}}
                         </span>
                         {{#if this.date}}
                         <span>
@@ -178,8 +171,7 @@
                 {{#each economics.incomes}}
 
                 {{#if (and
-                (eq this.belongsTo 'COAPPLICANT')
-                (eq this.type 'incomes'))
+                (eq this.belongsTo 'COAPPLICANT'))
                 }}
                 <tr>
                     <td>
@@ -187,7 +179,9 @@
                     </td>
                     <td>
                         <span>
-                            {{this.value}}
+                            {{#if this.value}}
+                                {{this.value}} {{this.currency}}
+                            {{/if}}
                         </span>
                         {{#if this.date}}
                         <span>
@@ -208,8 +202,7 @@
                 {{#each economics.incomes}}
 
                 {{#if (and
-                (eq this.belongsTo 'HOUSING')
-                (eq this.type 'incomes'))
+                (eq this.belongsTo 'HOUSING'))
                 }}
                 <tr>
                     <td>
@@ -248,8 +241,7 @@
                 {{#each economics.expenses}}
 
                 {{#if (and
-                (eq this.belongsTo 'APPLICANT')
-                (eq this.type 'expenses'))}}
+                (eq this.belongsTo 'APPLICANT'))}}
                 <tr>
                     <td>
                         {{this.title}} {{this.description}}
@@ -276,8 +268,7 @@
                 {{#each economics.expenses}}
 
                 {{#if (and
-                (eq this.belongsTo 'COAPPLICANT')
-                (eq this.type 'expenses'))
+                (eq this.belongsTo 'COAPPLICANT'))
                 }}
                 <tr>
                     <td>
@@ -306,8 +297,7 @@
                 {{#each economics.expenses}}
 
                 {{#if (and
-                (eq this.belongsTo 'HOUSING')
-                (eq this.type 'expenses'))
+                (eq this.belongsTo 'HOUSING'))
                 }}
                 <tr>
                     <td>
