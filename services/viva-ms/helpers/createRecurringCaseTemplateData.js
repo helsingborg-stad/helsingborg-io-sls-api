@@ -59,6 +59,20 @@ export function createPersonsObject(persons, answers) {
   return applicantPersons;
 }
 
+function createNotesObject(answers) {
+  const notes = [];
+  const filteredAnswers = formHelpers.filterByFieldIdIncludes(answers, 'otherMessage');
+  if (filteredAnswers.length) {
+    const [noteAnswer] = filteredAnswers;
+    const note = {
+      title: 'Meddelande från sökande',
+      text: noteAnswer.value,
+    };
+    notes.push(note);
+  }
+  return notes;
+}
+
 export function createHousingInfoObject(answers) {
   const filteredAnswers = formHelpers.filterByFieldIdIncludes(answers, 'housingInfo');
 
@@ -148,8 +162,10 @@ export default function createRecurringCaseTemplateData(caseItem, recurringFormI
   const persons = createPersonsObject(caseItem.persons, recurringform.answers);
   const housing = createHousingInfoObject(recurringform.answers);
   const economics = createEconomicsObject(recurringform.answers);
+  const notes = createNotesObject(recurringform.answers);
 
   return {
+    notes,
     period,
     persons,
     housing,
