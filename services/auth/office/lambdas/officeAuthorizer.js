@@ -17,40 +17,40 @@ export async function main(event) {
 
   if (!decodedToken) {
     console.error('Malformed JWT');
-    throw Error('Unauthorized');
+    throw Error('Unauthorised');
   }
 
   const { header, payload } = decodedToken;
 
   if (header.alg !== JWT.ALG) {
     console.error('Wrong algorithm found in JWT');
-    throw Error('Unauthorized');
+    throw Error('Unauthorised');
   }
 
   const jwksUrl = getjwksUrl(payload.tid, payload.aud);
   const [jwksError, jwksResult] = await to(axios.get(jwksUrl));
   if (jwksError) {
     console.error('Could not fetch JWKs: ', jwksError);
-    throw Error('Unauthorized');
+    throw Error('Unauthorised');
   }
 
   const { keys } = jwksResult.data;
   const signingKeys = getValidSigningKeys(keys);
   if (signingKeys.length === 0) {
     console.error('No valid signing keys found');
-    throw Error('Unauthorized');
+    throw Error('Unauthorised');
   }
 
   const signingKey = signingKeys.find(({ kid }) => kid === header.kid);
   if (!signingKey) {
     console.error('No signing key with matching "kid" where found');
-    throw Error('Unauthorized');
+    throw Error('Unauthorised');
   }
 
   jwt.verify(authorizationToken, signingKey.publicKey, error => {
     if (error) {
       console.error('Failed to verify JWT: ', error);
-      throw Error('Unauthorized');
+      throw Error('Unauthorised');
     }
   });
 
