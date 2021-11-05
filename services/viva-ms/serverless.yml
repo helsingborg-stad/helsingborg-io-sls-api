@@ -213,7 +213,7 @@ functions:
             source:
               - vivaMs.syncWorkflow
             detail-type:
-              - vivaMsSyncWorkflowSuccess
+              - syncWorkflowSuccess
 
   syncExpiryTime:
     handler: lambdas/syncExpiryTime.main
