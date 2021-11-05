@@ -2,7 +2,6 @@
 import AWS from 'aws-sdk';
 import to from 'await-to-js';
 import deepEqual from 'deep-equal';
-import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
 import config from '../../../config';
 import * as dynamoDb from '../../../libs/dynamoDb';
@@ -47,23 +46,7 @@ export async function main(event, context) {
     return false;
   }
 
-  const TableName = config.cases.tableName;
-
-  const UpdateExpression = 'SET details.administrators = :newAdministrators';
-  const ExpressionAttributeValues = { ':newAdministrators': vivaAdministrators };
-
-  const dynamoDbParams = {
-    TableName,
-    Key: {
-      PK,
-      SK,
-    },
-    UpdateExpression,
-    ExpressionAttributeValues,
-    ReturnValues: 'UPDATED_NEW',
-  };
-
-  const [updateError] = await to(sendUpdateRequest(dynamoDbParams));
+  const [updateError] = await to(sendUpdateRequest({ PK, SK }, vivaAdministrators));
   if (updateError) {
     log.error(
       'Could not update case applicant administrator(s)',
@@ -78,13 +61,18 @@ export async function main(event, context) {
   return true;
 }
 
-async function sendUpdateRequest(params) {
-  const [error, result] = await to(dynamoDb.call('update', params));
-  if (error) {
-    throwError(500, error.message);
-  }
+async function sendUpdateRequest(keys, newAdministrators) {
+  const TableName = config.cases.tableName;
 
-  return result;
+  const dynamoDbParams = {
+    TableName,
+    Key: keys,
+    UpdateExpression: 'SET details.administrators = :newAdministrators',
+    ExpressionAttributeValues: { ':newAdministrators': newAdministrators },
+    ReturnValues: 'UPDATED_NEW',
+  };
+
+  return dynamoDb.call('update', dynamoDbParams);
 }
 
 function parseVivaOfficers(vivaOfficer) {
