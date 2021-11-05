@@ -136,7 +136,7 @@ functions:
                   status:
                     M:
                       type:
-                        S: [{"prefix": "active:submitted"}]
+                        S: [{ "prefix": "active:submitted" }]
                   pdfGenerated:
                     S: ["yes"]
                   state:
@@ -173,7 +173,7 @@ functions:
                   status:
                     M:
                       type:
-                        S: [{"prefix": "active:submitted"}]
+                        S: [{ "prefix": "active:submitted" }]
                   state:
                     S: ["VIVA_COMPLETION_REQUIRED"]
 
@@ -222,20 +222,14 @@ functions:
           pattern:
             source:
               - casesApi.updateCase
-            detail-type:
-              - casesApiUpdateCaseSuccess
       - eventBridge:
           pattern:
             source:
               - vivaMs.decideCaseStatus
-            detail-type:
-              - vivaMsDecideCaseStatusSuccess
       - eventBridge:
           pattern:
             source:
               - vivaMs.checkCompletion
-            detail-type:
-              - vivaMsCheckCompletionSuccess
 
   generateRecurringCaseHtml:
     handler: lambdas/generateRecurringCaseHtml.main
