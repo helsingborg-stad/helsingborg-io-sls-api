@@ -1,3 +1,17 @@
+export const NOT_STARTED = 'notStarted';
+export const ACTIVE_ONGOING = 'active:ongoing';
+export const ACTIVE_SIGNATURE_COMPLETED = 'active:signature:completed';
+export const ACTIVE_SIGNATURE_PENDING = 'active:signature:pending';
+export const ACTIVE_SUBMITTED = 'active:submitted';
+export const ACTIVE_PROCESSING = 'active:processing';
+export const CLOSED = 'closed';
+export const NOT_STARTED_VIVA = 'notStarted:viva';
+export const ACTIVE_COMPLETION_REQUIRED_VIVA = 'active:completionRequired:viva';
+export const CLOSED_APPROVED_VIVA = 'closed:approved:viva';
+export const CLOSED_PARTIALLY_APPROVED_VIVA = 'closed:partiallyApproved:viva';
+export const CLOSED_REJECTED_VIVA = 'closed:rejected:viva';
+export const CLOSED_COMPLETION_REJECTED_VIVA = 'closed:completionRejected:viva';
+
 export const CASE_PROVIDER_VIVA = 'VIVA';
 export const VIVA_CASE_CREATED = 'VIVA_CASE_CREATED';
 
