@@ -1,15 +1,16 @@
 import DynamoDB from 'aws-sdk/clients/dynamodb';
-import config from '../../../config';
-import params from '../../../libs/params';
 import to from 'await-to-js';
 import handlebars from 'handlebars';
+
+import config from '../../../config';
+
+import params from '../../../libs/params';
 import { s3Client } from '../../../libs/S3';
-import { putEvent } from '../../../libs/awsEventBridge';
+
 import createRecurringCaseTemplateData from '../helpers/createRecurringCaseTemplateData';
+import putVivaMsEvent from '../helpers/putVivaMsEvent';
 
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
-const PUT_EVENT_DETAIL_TYPE = 'htmlGeneratedSuccess';
-const PUT_EVENT_SOURCE = 'vivaMs.generateRecurringCaseHtml';
 
 handlebars.registerHelper({
   eq: (v1, v2) => v1 === v2,
@@ -72,13 +73,15 @@ export async function main(event) {
   }
 
   const [putEventError] = await to(
-    putEvent(
-      { pdfStorageBucketKey: caseHtmlKey, resourceId: caseItem.id },
-      PUT_EVENT_DETAIL_TYPE,
-      PUT_EVENT_SOURCE
-    )
+    putVivaMsEvent.htmlGeneratedSuccess({
+      pdfStorageBucketKey: caseHtmlKey,
+      resourceId: caseItem.id,
+    })
   );
   if (putEventError) {
-    throw putEventError;
+    console.error(putEventError);
+    return false;
   }
+
+  return true;
 }
