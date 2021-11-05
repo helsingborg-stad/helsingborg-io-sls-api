@@ -14,24 +14,19 @@ export async function main(event, context) {
   const [getCasesError, userCases] = await to(getCasesSumbittedOrProcessing(personalNumber));
   if (getCasesError) {
     log.error(
-      'Get cases error error',
+      'Could not get closed or submitted cases',
       context.awsRequestId,
       'service-viva-ms-syncWorkflow-001',
       getCasesError
     );
 
-    throw getCasesError;
+    return false;
   }
 
   const caseList = userCases.Items;
   if (caseList === undefined || caseList.length === 0) {
-    log.info(
-      'DynamoDB query did not fetch any active:submitted or active:processing case(s)',
-      context.awsRequestId,
-      'service-viva-ms-syncWorkflow-002'
-    );
-
-    return null;
+    log.info('No active:submitted or active:processing case(s) found', context.awsRequestId, null);
+    return true;
   }
 
   for (const caseItem of caseList) {
@@ -47,9 +42,9 @@ export async function main(event, context) {
     );
     if (adapterWorkflowGetError) {
       log.error(
-        'adapterWorkflowGetError',
+        'Could not get workflow information from Vada request',
         context.awsRequestId,
-        'service-viva-ms-syncWorkflow-003',
+        'service-viva-ms-syncWorkflow-002',
         adapterWorkflowGetError
       );
 
@@ -57,25 +52,20 @@ export async function main(event, context) {
     }
 
     if (deepEqual(workflow.attributes, caseItem.details?.workflow)) {
-      log.info(
-        'case workflow is in sync with Viva',
-        context.awsRequestId,
-        'service-viva-ms-syncWorkflow-004'
-      );
-
+      log.info('Case workflow is in sync with Viva', context.awsRequestId, null);
       continue;
     }
 
     const [updateDbWorkflowError] = await to(updateCaseWorkflow(caseKeys, workflow.attributes));
     if (updateDbWorkflowError) {
       log.error(
-        'Update db workflow error',
+        'Could not update case workflow details',
         context.awsRequestId,
-        'service-viva-ms-syncWorkflow-005',
+        'service-viva-ms-syncWorkflow-003',
         updateDbWorkflowError
       );
 
-      throw updateDbWorkflowError;
+      return false;
     }
 
     const [putEventError] = await to(
@@ -83,13 +73,13 @@ export async function main(event, context) {
     );
     if (putEventError) {
       log.error(
-        'Put event error',
+        'Could not put sync workflow success event',
         context.awsRequestId,
-        'service-viva-ms-syncWorkflow-006',
+        'service-viva-ms-syncWorkflow-004',
         putEventError
       );
 
-      throw putEventError;
+      return false;
     }
   }
 
