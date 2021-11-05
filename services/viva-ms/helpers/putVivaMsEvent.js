@@ -17,6 +17,10 @@ export const eventTypeCollection = {
     source: 'vivaMs.checkCompletion',
     detailType: 'checkCompletionSuccess',
   },
+  decideCaseStatusSuccess: {
+    source: 'vivaMs.decideCaseStatus',
+    detailType: 'decideCaseStatusSuccess',
+  },
 };
 
 function putUserEvent(user, type, typeCollection = eventTypeCollection) {
@@ -29,4 +33,5 @@ export default {
   personDetailSuccess: userDetail => putUserEvent(userDetail, 'personDetailSuccess'),
   applicationReceivedSuccess: userDetail => putUserEvent(userDetail, 'applicationReceivedSuccess'),
   checkCompletionSuccess: userDetail => putUserEvent(userDetail, 'checkCompletionSuccess'),
+  decideCaseStatusSuccess: userDetail => putUserEvent(userDetail, 'decideCaseStatusSuccess'),
 };

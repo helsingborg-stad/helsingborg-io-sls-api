@@ -2,10 +2,12 @@
 import to from 'await-to-js';
 
 import config from '../../../config';
-import { putEvent } from '../../../libs/awsEventBridge';
+
 import * as dynamoDb from '../../../libs/dynamoDb';
 import log from '../../../libs/logs';
 import { getStatusByType, statusTypes } from '../../../libs/caseStatuses';
+
+import putVivaMsEvent from '../helpers/putVivaMsEvent';
 
 export async function main(event, context) {
   const { caseKeys, workflow } = event.detail;
@@ -28,15 +30,16 @@ export async function main(event, context) {
   }
 
   log.info('New case status updated successfully', context.awsRequestId, null, newCaseStatus);
-  return await putDecideCaseStatusEvent(caseKeys);
-}
 
-async function putDecideCaseStatusEvent(caseKeys) {
-  const [putEventError] = await to(
-    putEvent({ caseKeys }, 'vivaMsDecideCaseStatusSuccess', 'vivaMs.decideCaseStatus')
-  );
+  const [putEventError] = await to(putVivaMsEvent.decideCaseStatusSuccess({ caseKeys }));
   if (putEventError) {
-    return console.error('(Viva-ms: decideCaseStatus) putEventError.', putEventError);
+    log.error(
+      'Could not put decide status success event',
+      context.awsRequestId,
+      'service-viva-ms-decideCaseStatus-002',
+      putEventError
+    );
+    return false;
   }
 
   return true;
