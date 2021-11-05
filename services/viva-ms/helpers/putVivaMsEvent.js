@@ -13,6 +13,10 @@ export const eventTypeCollection = {
     source: 'vivaMs.submitApplication',
     detailType: 'applicationReceivedSuccess',
   },
+  checkCompletionSuccess: {
+    source: 'vivaMs.checkCompletion',
+    detailType: 'checkCompletionSuccess',
+  },
 };
 
 function putUserEvent(user, type, typeCollection = eventTypeCollection) {
@@ -24,4 +28,5 @@ export default {
   checkOpenPeriodSuccess: userDetail => putUserEvent(userDetail, 'checkOpenPeriodSuccess'),
   personDetailSuccess: userDetail => putUserEvent(userDetail, 'personDetailSuccess'),
   applicationReceivedSuccess: userDetail => putUserEvent(userDetail, 'applicationReceivedSuccess'),
+  checkCompletionSuccess: userDetail => putUserEvent(userDetail, 'checkCompletionSuccess'),
 };
