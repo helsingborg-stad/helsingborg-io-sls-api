@@ -85,9 +85,53 @@ export function createHousingInfoObject(answers) {
   return housingInfo;
 }
 
+function createHousingExpenses(answers) {
+  const categories = [
+    {
+      title: 'Hyra/Avgift',
+      filterTags: ['expenses', 'boende', 'amount'],
+      value: '',
+    },
+    {
+      title: 'Hemförsäkring',
+      filterTags: ['expenses', 'hemforsakring', 'amount'],
+      value: '',
+    },
+    {
+      title: 'Bredband',
+      filterTags: ['expenses', 'bredband', 'amount'],
+      value: '',
+    },
+    {
+      title: 'El',
+      filterTags: ['expenses', 'el', 'amount'],
+      value: '',
+    },
+  ];
+
+  const expenses = categories.map(category => {
+    const [answer] = formHelpers.filterByTags(answers, category.filterTags);
+    if (answer) {
+      return {
+        type: 'expenses',
+        title: category.title,
+        value: answer.value,
+        id: category.filterTags.join(''),
+        belongsTo: 'HOUSING',
+        description: '',
+        date: '',
+        currency: 'kr',
+      };
+    }
+    return undefined;
+  });
+
+  return expenses;
+}
+
 export function createEconomicsObject(answers) {
   const categories = ['expenses', 'incomes'];
-  const [expenses, incomes] = categories.map(category => {
+  let [expenses, incomes] = categories.map(category => {
     const categoryAnswers = formHelpers.filterByTags(answers, category);
     const categorySummaryList = categoryAnswers.reduce((summaryList, answer) => {
       const { tags } = answer.field;
@@ -150,6 +194,12 @@ export function createEconomicsObject(answers) {
     }, []);
     return categorySummaryList;
   });
+
+  const housingExpenses = createHousingExpenses(answers);
+  if (housingExpenses) {
+    expenses = [...expenses, ...housingExpenses];
+  }
+
   return {
     expenses,
     incomes,
