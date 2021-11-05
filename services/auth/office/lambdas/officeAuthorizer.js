@@ -5,7 +5,7 @@ import axios from 'axios';
 import generateIAMPolicy from '../../../../libs/generateIAMPolicy';
 
 import getjwksUrl from '../helpers/getjwksUrl';
-import getValidSigningKeys from '../helpers/getValidSigningKeys';
+import getValidSigningKey from '../helpers/getValidSigningKey';
 
 import { JWT } from '../constants';
 
@@ -35,7 +35,7 @@ export async function main(event) {
   }
 
   const { keys } = jwksResult.data;
-  const signingKeys = getValidSigningKeys(keys);
+  const signingKeys = keys.map(getValidSigningKey).filter(Boolean);
   if (signingKeys.length === 0) {
     console.error('No valid signing keys found');
     throw Error('Unauthorised');
