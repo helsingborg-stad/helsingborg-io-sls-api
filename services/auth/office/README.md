@@ -1,25 +1,23 @@
 <!-- HEADS UP! To avoid retyping too much info. Do a search and replace with your text editor for the following:
 helsingborg-io-sls-api, Token -->
 
-# Helsingborg IO SLS - Token Service
+# Helsingborg IO SLS - Office Authorizer Service
 
 
 ## Table of Contents
-- [Token](#Token)
-  - [Table of Contents](#table-of-contents)
-  - [About Token](#about-token)
-  - [Getting Started](#getting-started)
-    - [Do first](#do-first)
-    - [Run local](#run-local)
-    - [Deploy](#deploy-and-run-on-aws)
-  - [API](#api)
-
+- [Table of Contents](#table-of-contents)
+- [About Token](#about-office-authorizer)
+- [Getting Started](#getting-started)
+  - [Do first](#do-first)
+  - [Run local](#run-local)
+  - [Deploy](#deploy-and-run-on-aws)
 
 
 ## About Office Authorizer
 
 The Office Authorizer service purpose is to provide an authorization method for Microsoft Office users that is authenticated with
 Azure AD.
+
 
 ## Getting Started
 
