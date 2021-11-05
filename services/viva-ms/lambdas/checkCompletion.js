@@ -47,6 +47,7 @@ export async function main(event, context) {
       null,
       applicationStatusList
     );
+    return true;
   }
 
   const vivaCaseSSMParams = await VIVA_CASE_SSM_PARAMS;
@@ -60,7 +61,7 @@ export async function main(event, context) {
       'service-viva-ms-checkCompletion-001',
       updateCaseError
     );
-    return;
+    return false;
   }
 
   log.info('Updated case successfully', context.awsRequestId, null, caseItem);
