@@ -1,6 +1,3 @@
-<!-- HEADS UP! To avoid retyping too much info. Do a search and replace with your text editor for the following:
-helsingborg-io-sls-api, Token -->
-
 # Helsingborg IO SLS - Office Authorizer Service
 
 
