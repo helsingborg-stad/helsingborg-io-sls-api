@@ -2,18 +2,20 @@
 import to from 'await-to-js';
 
 import config from '../../../config';
-import { putEvent } from '../../../libs/awsEventBridge';
-import params from '../../../libs/params';
-// import log from '../../../libs/logs';
+
 import * as dynamoDb from '../../../libs/dynamoDb';
-import validateApplicationStatus from '../helpers/validateApplicationStatus';
+import params from '../../../libs/params';
+import log from '../../../libs/logs';
+import { putEvent } from '../../../libs/awsEventBridge';
 import { getStatusByType, statusTypes } from '../../../libs/caseStatuses';
+
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
+import validateApplicationStatus from '../helpers/validateApplicationStatus';
 
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
 const VIVA_COMPLETION_REQUIRED = 'VIVA_COMPLETION_REQUIRED';
 
-export async function main(event) {
+export async function main(event, context) {
   const { caseKeys } = event.detail;
 
   const personalNumber = caseKeys.PK.substring(5);
@@ -21,10 +23,12 @@ export async function main(event) {
     vivaAdapter.application.status(personalNumber)
   );
   if (applicationStatusError) {
-    return console.error(
-      '(Viva-ms; checkCompletion) applicationStatusError.',
+    log.error(
+      'Viva application status failed',
+      'service-viva-ms-checkCompletion-001',
       applicationStatusError
     );
+    return false;
   }
 
   /**
@@ -37,8 +41,10 @@ export async function main(event) {
    */
   const completionStatusCodes = [64, 128, 256, 512];
   if (!validateApplicationStatus(applicationStatusList, completionStatusCodes)) {
-    console.info(
-      '(Viva-ms: checkCompletion) No completion status(64) found in viva adapter response.',
+    log.info(
+      'No Viva completion status(64) found.',
+      context.awsRequestId,
+      null,
       applicationStatusList
     );
     return await putCheckCompletionEvent(caseKeys);
@@ -48,15 +54,17 @@ export async function main(event) {
   const [updateCaseError, caseItem] = await to(
     updateCaseCompletionAttributes(caseKeys, vivaCaseSSMParams.completionFormId)
   );
-
   if (updateCaseError) {
-    return console.error('(Viva-ms: checkCompletion) updateCaseError.', updateCaseError);
+    log.error(
+      'Could not update case attribute',
+      context.awsRequestId,
+      'service-viva-ms-checkCompletion-002',
+      updateCaseError
+    );
+    return;
   }
 
-  console.log(
-    '(viva-ms: checkCompletion) Updated case with completion data successfully.',
-    caseItem
-  );
+  log.info('Updated case successfully', context.awsRequestId, null, caseItem);
 
   return await putCheckCompletionEvent(caseKeys);
 }
