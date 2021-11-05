@@ -57,7 +57,7 @@ export async function main(event, context) {
     log.error(
       'Could not update case attribute',
       context.awsRequestId,
-      'service-viva-ms-checkCompletion-002',
+      'service-viva-ms-checkCompletion-001',
       updateCaseError
     );
     return;
