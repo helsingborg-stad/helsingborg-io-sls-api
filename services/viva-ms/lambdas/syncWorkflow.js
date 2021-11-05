@@ -2,11 +2,13 @@
 import to from 'await-to-js';
 import deepEqual from 'deep-equal';
 
-import * as dynamoDb from '../../../libs/dynamoDb';
 import config from '../../../config';
-import { putEvent } from '../../../libs/awsEventBridge';
-import vivaAdapter from '../helpers/vivaAdapterRequestClient';
+
+import * as dynamoDb from '../../../libs/dynamoDb';
 import log from '../../../libs/logs';
+
+import putVivaMsEvent from '../helpers/putVivaMsEvent';
+import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
 export async function main(event, context) {
   const { personalNumber } = event.detail.user;
@@ -19,7 +21,6 @@ export async function main(event, context) {
       'service-viva-ms-syncWorkflow-001',
       getCasesError
     );
-
     return false;
   }
 
@@ -47,7 +48,6 @@ export async function main(event, context) {
         'service-viva-ms-syncWorkflow-002',
         adapterWorkflowGetError
       );
-
       continue;
     }
 
@@ -64,13 +64,10 @@ export async function main(event, context) {
         'service-viva-ms-syncWorkflow-003',
         updateDbWorkflowError
       );
-
       return false;
     }
 
-    const [putEventError] = await to(
-      putEvent({ caseKeys, workflow }, 'vivaMsSyncWorkflowSuccess', 'vivaMs.syncWorkflow')
-    );
+    const [putEventError] = await to(putVivaMsEvent.syncWorkflowSuccess({ caseKeys, workflow }));
     if (putEventError) {
       log.error(
         'Could not put sync workflow success event',
@@ -78,7 +75,6 @@ export async function main(event, context) {
         'service-viva-ms-syncWorkflow-004',
         putEventError
       );
-
       return false;
     }
   }
