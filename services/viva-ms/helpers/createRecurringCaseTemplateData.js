@@ -128,6 +128,56 @@ function createHousingExpenses(answers) {
 
   return expenses;
 }
+function createAssetsObject(answers) {
+  const commonFilterTags = ['amount', 'assets'];
+  const categories = [
+    {
+      title: 'Bil',
+      filterTags: ['bil', ...commonFilterTags],
+      value: '',
+    },
+    {
+      title: 'Motorcykel',
+      filterTags: ['motorcykel', ...commonFilterTags],
+      value: '',
+    },
+    {
+      title: 'Hus',
+      filterTags: ['hus', ...commonFilterTags],
+      value: '',
+    },
+    {
+      title: 'Bostadsrätt',
+      filterTags: ['lagenhet', ...commonFilterTags],
+      value: '',
+    },
+    {
+      title: 'Övriga fordon',
+      filterTags: ['other', 'vehicle', ...commonFilterTags],
+      value: '',
+    },
+    {
+      title: 'Övriga tillgångar',
+      filterTags: ['other', 'asset', ...commonFilterTags],
+      value: '',
+    },
+  ];
+
+  const assets = categories.map(category => {
+    const [answer] = formHelpers.filterByTags(answers, category.filterTags);
+    if (answer) {
+      return {
+        type: 'asset',
+        title: category.title,
+        value: answer.value,
+        currency: 'kr',
+      };
+    }
+    return undefined;
+  });
+
+  return assets;
+}
 
 export function createEconomicsObject(answers) {
   const categories = ['expenses', 'incomes'];
@@ -213,9 +263,11 @@ export default function createRecurringCaseTemplateData(caseItem, recurringFormI
   const housing = createHousingInfoObject(recurringform.answers);
   const economics = createEconomicsObject(recurringform.answers);
   const notes = createNotesObject(recurringform.answers);
+  const assets = createAssetsObject(recurringform.answers);
 
   return {
     notes,
+    assets,
     period,
     persons,
     housing,
