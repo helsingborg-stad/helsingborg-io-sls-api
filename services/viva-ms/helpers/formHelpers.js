@@ -17,7 +17,11 @@ function filterByFieldIdIncludes(answers, shouldInclude) {
 }
 
 function filterByTags(answers, tags) {
-  return answers.filter(answer => answer.field.tags.includes(tags));
+  let checkTags = tags;
+  if (typeof tags === 'string') {
+    checkTags = [tags];
+  }
+  return answers.filter(answer => checkTags.every(tag => answer.field.tags.includes(tag)));
 }
 
 export default {
