@@ -1,17 +1,95 @@
 <!DOCTYPE html>
 <html>
-
+<head>
+    <style>
+        html {
+              background: #fff;
+              margin: 30px;
+            }
+            
+            h1 {
+              font-size: 24px;
+            }
+            
+            h2 {
+              margin-top: 50px;
+              font-size: 24px;
+            }
+            
+            h3 {
+              margin-top: 30px;
+              font-size: 16px;
+            }
+            
+            table {
+                width: 100%;
+                border-spacing: 0px;
+                border: none;
+                font-size: 20px;
+            }
+            
+            tr {
+              font-size: 20px;
+            }
+            
+            tr:nth-child(even) {
+              background:#F4F9F8;
+            }
+            
+            td {
+               padding: 10px;
+               border: none;
+               border-spacing: none;
+               font-size: 16px;
+               color: #000;
+            }
+            
+            td:last-child {
+              float: right;
+            }
+            
+            td span {
+              padding: 5px;
+              display:flex;
+              justify-content: flex-end;
+            }
+            
+            header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            }
+            
+            header h1 {
+              font-size: 24px;
+              font-weight: normal;
+            }
+            
+            header p {
+              font-size: 24px;
+              font-weight: bold;
+            }
+    </style>
+</head>
 <body>
-
-    <h1>Ansökan gäller för perioden {{period.endDate}} - {{period.startDate}}</h1>
+    <header>
+      <div>
+        <h1>Ansökan gäller för perioden</h1>
+      </div>
+      <div>
+        <p>
+          {{period.endDate}} - {{period.startDate}}
+        </p>
+      </div>
+    </header>
 
     {{!-- Sections for each person --}}
     {{#each persons}}
     <section>
-        <H1>
+        <H2>
             {{#if (eq this.role 'applicant')}} Sökande {{/if}}
             {{#if (eq this.role 'coApplicant')}} Medsökande {{/if}}
-        </H1>
+        </H2>
         <table>
             <tr>
                 <td>Personnummer</td>
@@ -132,11 +210,11 @@
 
     {{!-- Section for incomes --}}
     <section>
-        <h1>Inkomster</h1>
+        <h2>Inkomster</h2>
         {{#if economics.incomes}}
         {{!-- Sub section for showing appliacnt incomes --}}
         <section>
-            <h2>Sökandes inkomster</h2>
+            <h3>Sökandes inkomster</h3>
             <table>
                 {{#each economics.incomes}}
 
@@ -166,7 +244,7 @@
 
         {{!-- Sub section for showing co-appliacnt incomes --}}
         <section>
-            <h2>Medsökandes inkomster</h2>
+            <h3>Medsökandes inkomster</h3>
             <table>
                 {{#each economics.incomes}}
 
@@ -197,7 +275,7 @@
 
         {{!-- Sub section for showing housing incomes --}}
         <section>
-            <h2>Pengar för inneboende</h2>
+            <h3>Pengar från inneboende</h3>
             <table>
                 {{#each economics.incomes}}
 
@@ -232,11 +310,11 @@
 
     {{!-- Section for expenses --}}
     <section>
-        <h1>Ugifter</h1>
+        <h2>Ugifter</h2>
         {{#if economics.expenses}}
         {{!-- Sub section for showing appliacnt expenses --}}
         <section>
-            <h2>Sökandes utgifter</h2>
+            <h3>Sökandes utgifter</h3>
             <table>
                 {{#each economics.expenses}}
 
@@ -263,7 +341,7 @@
         </section>
         {{!-- Sub section for showing co-appliacnt expenses --}}
         <section>
-            <h2>Medsökandes utgifter</h2>
+            <h3>Medsökandes utgifter</h3>
             <table>
                 {{#each economics.expenses}}
 
@@ -292,7 +370,7 @@
 
         {{!-- Sub section for showing housing expenses --}}
         <section>
-            <h2>Kostander för boende</h2>
+            <h3>Kostander för boende</h3>
             <table>
                 {{#each economics.expenses}}
 
