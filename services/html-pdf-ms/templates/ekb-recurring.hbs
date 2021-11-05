@@ -414,6 +414,21 @@
 
     </section>
 
+    {{!-- Section for assets --}}
+    <section>
+        <h1>Tillgångar</h1>
+        <table>
+            {{#each assets}}
+                {{#if this.value}}
+                    <tr>
+                        <td>{{this.title}}</td>
+                        <td>{{this.value}} {{this.currency}}</td>
+                    </tr>
+                {{/if}}
+            {{/each}}
+        </table>
+    </section>
+
 
 </body>
 
