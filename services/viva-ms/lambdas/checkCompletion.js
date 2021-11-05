@@ -80,8 +80,8 @@ async function putCheckCompletionEvent(caseKeys) {
   return true;
 }
 
-async function updateCaseCompletionAttributes(keys, currentFormId) {
-  const completionStatus = getStatusByType(statusTypes.ACTIVE_COMPLETION_REQUIRED_VIVA);
+async function updateCaseCompletionAttributes(keys, newCurrentFormId) {
+  const newCompletionStatus = getStatusByType(statusTypes.ACTIVE_COMPLETION_REQUIRED_VIVA);
   const [getCaseError, { persons }] = await to(getCase(keys));
   if (getCaseError) {
     throw getCaseError;
@@ -100,20 +100,15 @@ async function updateCaseCompletionAttributes(keys, currentFormId) {
       '#state': 'state',
     },
     ExpressionAttributeValues: {
-      ':newCurrentFormId': currentFormId,
-      ':newCompletionStatus': completionStatus,
+      ':newCurrentFormId': newCurrentFormId,
+      ':newCompletionStatus': newCompletionStatus,
       ':newPersons': newPersons,
       ':newState': VIVA_COMPLETION_REQUIRED,
     },
     ReturnValues: 'UPDATED_NEW',
   };
 
-  const [updateCaseError, caseItem] = await to(dynamoDb.call('update', params));
-  if (updateCaseError) {
-    throw updateCaseError;
-  }
-
-  return caseItem;
+  return dynamoDb.call('update', params);
 }
 
 async function getCase(keys) {
