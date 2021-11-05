@@ -14,7 +14,7 @@ import { getFutureTimestamp, millisecondsToSeconds } from '../../../libs/timesta
 import {
   CASE_PROVIDER_VIVA,
   DELETE_VIVA_CASE_AFTER_12_HOURS,
-  STATE,
+  VIVA_CASE_CREATED,
 } from '../../../libs/constants';
 
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
@@ -111,7 +111,7 @@ async function createRecurringVivaCase(vivaPerson, user) {
       id,
       PK,
       SK,
-      state: STATE.CREATED,
+      state: VIVA_CASE_CREATED,
       expirationTime,
       createdAt: timestampNow,
       updatedAt: null,
