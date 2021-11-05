@@ -25,6 +25,7 @@ export async function main(event, context) {
   if (applicationStatusError) {
     log.error(
       'Viva application status failed',
+      context.awsRequestId,
       'service-viva-ms-checkCompletion-001',
       applicationStatusError
     );
@@ -58,7 +59,7 @@ export async function main(event, context) {
     log.error(
       'Could not update case attribute',
       context.awsRequestId,
-      'service-viva-ms-checkCompletion-001',
+      'service-viva-ms-checkCompletion-002',
       updateCaseError
     );
     return false;
@@ -71,7 +72,7 @@ export async function main(event, context) {
     log.error(
       'Could not put check completion success event',
       context.awsRequestId,
-      'service-viva-ms-checkCompletion-002',
+      'service-viva-ms-checkCompletion-003',
       putEventError
     );
     return false;

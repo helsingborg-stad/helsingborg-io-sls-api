@@ -58,7 +58,7 @@ export async function main(event, context) {
     log.error(
       'createRecurringVivaCaseError',
       context.awsRequestId,
-      'service-viva-ms-createVivaCase-004',
+      'service-viva-ms-createVivaCase-003',
       createRecurringVivaCaseError
     );
     return false;
@@ -285,7 +285,6 @@ async function getFormTemplates(formIdList) {
     )
   );
   if (getError) {
-    console.error('(viva-ms) DynamoDb query on forms table failed!', getError);
     throw getError;
   }
 
