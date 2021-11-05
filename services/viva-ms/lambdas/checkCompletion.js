@@ -6,9 +6,9 @@ import config from '../../../config';
 import * as dynamoDb from '../../../libs/dynamoDb';
 import params from '../../../libs/params';
 import log from '../../../libs/logs';
-import { putEvent } from '../../../libs/awsEventBridge';
 import { getStatusByType, statusTypes } from '../../../libs/caseStatuses';
 
+import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 import validateApplicationStatus from '../helpers/validateApplicationStatus';
 
@@ -47,7 +47,6 @@ export async function main(event, context) {
       null,
       applicationStatusList
     );
-    return await putCheckCompletionEvent(caseKeys);
   }
 
   const vivaCaseSSMParams = await VIVA_CASE_SSM_PARAMS;
@@ -66,15 +65,15 @@ export async function main(event, context) {
 
   log.info('Updated case successfully', context.awsRequestId, null, caseItem);
 
-  return await putCheckCompletionEvent(caseKeys);
-}
-
-async function putCheckCompletionEvent(caseKeys) {
-  const [putEventError] = await to(
-    putEvent({ caseKeys }, 'vivaMsCheckCompletionSuccess', 'vivaMs.checkCompletion')
-  );
+  const [putEventError] = await to(putVivaMsEvent.checkCompletionSuccess({ caseKeys }));
   if (putEventError) {
-    return console.error('(Viva-ms: checkCompletion) putEventError.', putEventError);
+    log.error(
+      'Could not put check completion success event',
+      context.awsRequestId,
+      'service-viva-ms-checkCompletion-002',
+      putEventError
+    );
+    return false;
   }
 
   return true;
