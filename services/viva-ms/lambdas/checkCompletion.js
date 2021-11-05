@@ -6,14 +6,14 @@ import config from '../../../config';
 import * as dynamoDb from '../../../libs/dynamoDb';
 import params from '../../../libs/params';
 import log from '../../../libs/logs';
-import { getStatusByType, statusTypes } from '../../../libs/caseStatuses';
+import { getStatusByType } from '../../../libs/caseStatuses';
+import { VIVA_COMPLETION_REQUIRED, ACTIVE_COMPLETION_REQUIRED_VIVA } from '../../../libs/constants';
 
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 import validateApplicationStatus from '../helpers/validateApplicationStatus';
 
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
-const VIVA_COMPLETION_REQUIRED = 'VIVA_COMPLETION_REQUIRED';
 
 export async function main(event, context) {
   const { caseKeys } = event.detail;
@@ -82,7 +82,7 @@ export async function main(event, context) {
 }
 
 async function updateCaseCompletionAttributes(keys, newCurrentFormId) {
-  const newCompletionStatus = getStatusByType(statusTypes.ACTIVE_COMPLETION_REQUIRED_VIVA);
+  const newCompletionStatus = getStatusByType(ACTIVE_COMPLETION_REQUIRED_VIVA);
   const [getCaseError, { persons }] = await to(getCase(keys));
   if (getCaseError) {
     throw getCaseError;
