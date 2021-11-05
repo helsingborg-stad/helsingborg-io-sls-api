@@ -1,4 +1,4 @@
-import getValidSigningKeys from '../../helpers/getValidSigningKeys';
+import getValidSigningKey from '../../helpers/getValidSigningKey';
 import { beginCertificateString, endCertificateString } from '../../constants';
 
 const correctKey = {
@@ -19,13 +19,19 @@ const wrongKey = {
   issuer: 'https://mock.com',
 };
 
-it('returns valid signing keys', () => {
+it('returns a valid signing key', () => {
   const expectedResult = {
     kid: 'kid_1',
     publicKey: `${beginCertificateString}x5c_1${endCertificateString}`,
   };
 
-  const result = getValidSigningKeys([correctKey, wrongKey]);
+  const result = getValidSigningKey(correctKey);
 
-  expect(result).toEqual([expectedResult]);
+  expect(result).toEqual(expectedResult);
+});
+
+it('returns undefined if key is invalid', () => {
+  const result = getValidSigningKey(wrongKey);
+
+  expect(result).toBeUndefined();
 });
