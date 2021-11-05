@@ -31,20 +31,20 @@ export async function main(event, context) {
   );
   if (vadaMyPagesError) {
     log.error(
-      'vada mypages error',
+      'Could not get Viva applicant administrator(s)',
       context.awsRequestId,
       'service-viva-ms-syncOfficers-001',
       vadaMyPagesError
     );
 
-    return null;
+    return false;
   }
 
   const { officer } = vadaMyPagesResponse;
   const vivaAdministrators = parseVivaOfficers(officer);
 
   if (deepEqual(vivaAdministrators, administrators)) {
-    return null;
+    return false;
   }
 
   const TableName = config.cases.tableName;
@@ -66,13 +66,13 @@ export async function main(event, context) {
   const [updateError] = await to(sendUpdateRequest(dynamoDbParams));
   if (updateError) {
     log.error(
-      'Update request error',
+      'Could not update case applicant administrator(s)',
       context.awsRequestId,
       'service-viva-ms-syncOfficers-002',
       updateError
     );
 
-    return null;
+    return false;
   }
 
   return true;
