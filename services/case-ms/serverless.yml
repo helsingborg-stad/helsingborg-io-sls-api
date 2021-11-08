@@ -34,7 +34,7 @@ provider:
           Action:
             - kms:Decrypt
           Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
-        
+
         - Effect: Allow
           Action:
             - s3:GetObject
@@ -44,12 +44,12 @@ provider:
                 - ""
                 - - Fn::ImportValue: ${self:custom.resourcesStage}-PdfStorageBucketArn
                   - "/*"
-        
-       - Effect: Allow
+
+        - Effect: Allow
           Action:
             - kms:Decrypt
           Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
-          
+
 functions:
   updatePdf:
     handler: lambdas/updatePdf.main
@@ -62,4 +62,3 @@ functions:
               - pdfMs.generate
             detail-type:
               - PdfMsGenerateSuccess
-
