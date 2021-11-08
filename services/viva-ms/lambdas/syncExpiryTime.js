@@ -9,9 +9,9 @@ import { getItem as getStoredUserCase } from '../../../libs/queries';
 import { statusTypes } from '../../../libs/caseStatuses';
 import { getFutureTimestamp, millisecondsToSeconds } from '../../../libs/timestampHelper';
 import {
-  DELETE_VIVA_CASE_AFTER_6_MONTH as AFTER_6_MONTH,
-  DELETE_VIVA_CASE_AFTER_45_DAYS as AFTER_45_DAYS,
-  DELETE_VIVA_CASE_AFTER_72_HOURS as AFTER_3_DAYS,
+  SIX_MONTHS_IN_HOURS,
+  FORTY_FIVE_DAYS_IN_HOURS,
+  SEVENTY_TWO_HOURS,
 } from '../../../libs/constants';
 
 export async function main(event, context) {
@@ -57,26 +57,25 @@ export async function main(event, context) {
 
 function getExpiryHoursOnStatusType(statusType) {
   const statusHourMap = {
-    [statusTypes.ACTIVE_ONGOING]: AFTER_3_DAYS,
+    [statusTypes.ACTIVE_ONGOING]: SEVENTY_TWO_HOURS,
 
-    [statusTypes.ACTIVE_SIGNATURE_PENDING]: AFTER_45_DAYS,
-    [statusTypes.ACTIVE_SIGNATURE_COMPLETED]: AFTER_45_DAYS,
+    [statusTypes.ACTIVE_SIGNATURE_PENDING]: FORTY_FIVE_DAYS_IN_HOURS,
+    [statusTypes.ACTIVE_SIGNATURE_COMPLETED]: FORTY_FIVE_DAYS_IN_HOURS,
 
-    [statusTypes.ACTIVE_SUBMITTED]: AFTER_45_DAYS,
-    [statusTypes.ACTIVE_PROCESSING]: AFTER_45_DAYS,
-    [statusTypes.ACTIVE_COMPLETION_REQUIRED_VIVA]: AFTER_45_DAYS,
+    [statusTypes.ACTIVE_SUBMITTED]: FORTY_FIVE_DAYS_IN_HOURS,
+    [statusTypes.ACTIVE_PROCESSING]: FORTY_FIVE_DAYS_IN_HOURS,
+    [statusTypes.ACTIVE_COMPLETION_REQUIRED_VIVA]: FORTY_FIVE_DAYS_IN_HOURS,
 
-    [statusTypes.CLOSED_APPROVED_VIVA]: AFTER_6_MONTH,
-    [statusTypes.CLOSED_PARTIALLY_APPROVED_VIVA]: AFTER_6_MONTH,
-    [statusTypes.CLOSED_REJECTED_VIVA]: AFTER_6_MONTH,
-    [statusTypes.CLOSED_COMPLETION_REJECTED_VIVA]: AFTER_6_MONTH,
+    [statusTypes.CLOSED_APPROVED_VIVA]: SIX_MONTHS_IN_HOURS,
+    [statusTypes.CLOSED_PARTIALLY_APPROVED_VIVA]: SIX_MONTHS_IN_HOURS,
+    [statusTypes.CLOSED_REJECTED_VIVA]: SIX_MONTHS_IN_HOURS,
+    [statusTypes.CLOSED_COMPLETION_REJECTED_VIVA]: SIX_MONTHS_IN_HOURS,
   };
 
   const hours = statusHourMap[statusType];
 
   if (!hours) {
-    console.log('(Viva-ms: syncExpiryTime) getExpiryHoursOnStatusType', statusType);
-    throw 'Expiry time not set for status!';
+    throw `Expiry time not set for status: ${statusType}`;
   }
 
   return hours;
