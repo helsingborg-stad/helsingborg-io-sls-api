@@ -19,7 +19,6 @@ export async function main(event, context) {
 
   const { completionFormId } = await VIVA_CASE_SSM_PARAMS;
   if (caseItem.currentFormId !== completionFormId) {
-    log.info('Current form is not an completion form.', context.awsRequestId, null);
     return true;
   }
 
@@ -48,9 +47,9 @@ export async function main(event, context) {
   );
   if (postCompletionError) {
     log.error(
-      'post completion error',
+      'Failed to submit Viva completion application',
       context.awsRequestId,
-      'service-viva-ms-submitCompletition-002',
+      'service-viva-ms-submitCompletition-001',
       postCompletionError
     );
     return false;
@@ -60,32 +59,27 @@ export async function main(event, context) {
     log.error(
       'Viva completion receive failed',
       context.awsRequestId,
-      'service-viva-ms-submitCompletition-003',
+      'service-viva-ms-submitCompletition-002',
       postCompletionResponse
     );
     return false;
   }
 
-  log.info('Viva post completion response', context.awsRequestId, null, postCompletionResponse);
-
   const caseKeys = {
     PK: caseItem.PK,
     SK: caseItem.SK,
   };
-  const [updateError, newVivaCase] = await to(
-    updateVivaCaseState(caseKeys, VIVA_COMPLETION_RECEIVED)
-  );
+  const [updateError] = await to(updateVivaCaseState(caseKeys, VIVA_COMPLETION_RECEIVED));
   if (updateError) {
     log.error(
-      'Database update viva case failed',
+      'Failed to update Viva case',
       context.awsRequestId,
-      'service-viva-ms-submitCompletition-004',
+      'service-viva-ms-submitCompletition-003',
       updateError
     );
     return false;
   }
 
-  log.info('Updated viva case successfully', context.awsRequestId, null, newVivaCase);
   return true;
 }
 
