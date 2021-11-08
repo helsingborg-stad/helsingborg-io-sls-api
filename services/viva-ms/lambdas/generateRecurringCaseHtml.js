@@ -11,8 +11,6 @@ import { s3Client } from '../../../libs/S3';
 import createRecurringCaseTemplateData from '../helpers/createRecurringCaseTemplateData';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 
-const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
-
 handlebars.registerHelper({
   eq: (v1, v2) => v1 === v2,
   ne: (v1, v2) => v1 !== v2,
@@ -34,7 +32,20 @@ export async function main(event, context) {
   if (dynamodb.NewImage === undefined) {
     return false;
   }
-  const vivaCaseSsmParams = await VIVA_CASE_SSM_PARAMS;
+
+  const [paramsReadError, vivaCaseSSMParams] = await to(
+    params.read(config.cases.providers.viva.envsKeyName)
+  );
+  if (paramsReadError) {
+    log.error(
+      'Read ssm params ´config.cases.providers.viva.envsKeyName´ failed',
+      context.awsRequestId,
+      'service-viva-ms-generateRecurringCaseHtml-001',
+      paramsReadError
+    );
+    return false;
+  }
+
   const caseItem = DynamoDB.Converter.unmarshall(dynamodb.NewImage);
 
   const [s3GetObjectError, s3Object] = await to(
@@ -59,7 +70,7 @@ export async function main(event, context) {
   const template = handlebars.compile(handlebarsTemplateFileBody);
   const caseTemplateData = createRecurringCaseTemplateData(
     caseItem,
-    vivaCaseSsmParams.recurringFormId
+    vivaCaseSSMParams.recurringFormId
   );
   const html = template(caseTemplateData);
 
