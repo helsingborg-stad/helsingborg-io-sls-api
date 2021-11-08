@@ -3,7 +3,7 @@
 <head>
     <style>
         html {
-              background: #fff;
+              background: #FFF;
               margin: 30px;
             }
             
@@ -33,7 +33,7 @@
             }
             
             tr:nth-child(even) {
-              background:#F4F9F8;
+              background: #F4F9F8;
             }
             
             td {
@@ -50,7 +50,7 @@
             
             td span {
               padding: 5px;
-              display:flex;
+              display: flex;
               justify-content: flex-end;
             }
             
@@ -86,10 +86,10 @@
     {{!-- Sections for each person --}}
     {{#each persons}}
     <section>
-        <H2>
+        <h2>
             {{#if (eq this.role 'applicant')}} Sökande {{/if}}
             {{#if (eq this.role 'coApplicant')}} Medsökande {{/if}}
-        </H2>
+        </h2>
         <table>
             <tr>
                 <td>Personnummer</td>
