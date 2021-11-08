@@ -129,6 +129,60 @@ function createHousingExpenses(answers) {
   return expenses;
 }
 
+function createHousingIncomes(answers) {
+  const commonFilterTags = ['incomes', 'annan'];
+  const filters = [
+    {
+      tags: ['group:hyresdel_hyra', ...commonFilterTags],
+    },
+    {
+      tags: ['group:hyresdel_internet', ...commonFilterTags],
+    },
+    {
+      tags: ['group:hyresdel_el', ...commonFilterTags],
+    },
+  ];
+
+  const incomes = filters.map(filter => {
+    const filteredAnswers = formHelpers.filterByTags(answers, filter.tags);
+
+    if (filteredAnswers.length) {
+      const initialHousingIncome = {
+        type: 'incomes',
+        belongsTo: 'HOUSING',
+        id: filter.tags.join(''),
+        description: '',
+        date: '',
+        value: '',
+        currency: 'kr',
+      };
+
+      const income = filteredAnswers.reduce((currentIncome, answer) => {
+        if (answer.field.tags.includes('description')) {
+          return {
+            ...currentIncome,
+            description: answer.value,
+          };
+        }
+
+        if (answer.field.tags.includes('amount')) {
+          return {
+            ...currentIncome,
+            value: answer.value,
+          };
+        }
+
+        return currentIncome;
+      }, initialHousingIncome);
+
+      return income;
+    }
+    return undefined;
+  });
+
+  return incomes;
+}
+
 export function createEconomicsObject(answers) {
   const categories = ['expenses', 'incomes'];
   let [expenses, incomes] = categories.map(category => {
@@ -198,6 +252,11 @@ export function createEconomicsObject(answers) {
   const housingExpenses = createHousingExpenses(answers);
   if (housingExpenses) {
     expenses = [...expenses, ...housingExpenses];
+  }
+
+  const housingIncomes = createHousingIncomes(answers);
+  if (housingIncomes.length) {
+    incomes = [...incomes, ...housingIncomes];
   }
 
   return {
