@@ -86,11 +86,7 @@ export async function main(event, context) {
   }
 
   const caseKeys = { PK, SK };
-  const newCaseValues = {
-    state: VIVA_APPLICATION_RECEIVED,
-    workflowId: vivaApplicationResponse.id,
-  };
-  const [updateError, newVivaCase] = await to(updateVivaCase(caseKeys, newCaseValues));
+  const [updateError] = await to(updateVivaCase(caseKeys, vivaApplicationResponse.id));
   if (updateError) {
     log.error(
       'Database update viva case failed',
@@ -112,7 +108,6 @@ export async function main(event, context) {
     return false;
   }
 
-  log.info('Updated viva case successfully', context.awsRequestId, null, newVivaCase);
   return true;
 }
 
@@ -124,10 +119,13 @@ function notApplicationReceived(response) {
   return false;
 }
 
-function updateVivaCase(caseKeys, newValues) {
+function updateVivaCase(caseKeys, workflowId) {
   const params = {
     TableName: config.cases.tableName,
-    Key: caseKeys,
+    Key: {
+      PK: caseKeys.PK,
+      SK: caseKeys.SK,
+    },
     UpdateExpression: 'SET #state = :newState, #details.#workflowId = :newWorkflowId',
     ExpressionAttributeNames: {
       '#state': 'state',
@@ -135,8 +133,8 @@ function updateVivaCase(caseKeys, newValues) {
       '#workflowId': 'workflowId',
     },
     ExpressionAttributeValues: {
-      ':newWorkflowId': newValues.workflowId,
-      ':newState': newValues.state,
+      ':newWorkflowId': workflowId,
+      ':newState': VIVA_APPLICATION_RECEIVED,
     },
     ReturnValues: 'UPDATED_NEW',
   };
