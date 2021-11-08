@@ -8,11 +8,11 @@ import * as dynamoDb from '../../../libs/dynamoDb';
 import log from '../../../libs/logs';
 import params from '../../../libs/params';
 import S3 from '../../../libs/S3';
+import { VIVA_COMPLETION_RECEIVED } from '../../../libs/constants';
 
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
-const VIVA_COMPLETION_RECEIVED = 'VIVA_COMPLETION_RECEIVED';
 
 export async function main(event, context) {
   const caseItem = parseDynamoDBItemFromEvent(event);
