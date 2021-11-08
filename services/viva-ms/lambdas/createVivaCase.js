@@ -162,9 +162,7 @@ async function createRecurringVivaCase(vivaPerson, user) {
 
   const [, formTemplates] = await to(getFormTemplates(formIdList));
 
-  const [getLastUpdatedCaseError, lastUpdatedCase] = await to(
-    getLastUpdatedCase(PK, CASE_PROVIDER_VIVA)
-  );
+  const [getLastUpdatedCaseError, lastUpdatedCase] = await to(getLastUpdatedCase(PK));
   if (getLastUpdatedCaseError) {
     throw getLastUpdatedCaseError;
   }
@@ -318,7 +316,7 @@ async function getFormTemplates(formIdList) {
   return formsMap;
 }
 
-async function getLastUpdatedCase(PK, provider) {
+async function getLastUpdatedCase(PK) {
   const lastUpdatedCaseQueryParams = {
     TableName: config.cases.tableName,
     KeyConditionExpression: 'PK = :pk',
@@ -331,7 +329,7 @@ async function getLastUpdatedCase(PK, provider) {
     ExpressionAttributeValues: {
       ':pk': PK,
       ':statusTypeClosed': 'closed',
-      ':provider': provider,
+      ':provider': CASE_PROVIDER_VIVA,
     },
   };
 
