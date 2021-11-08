@@ -4,6 +4,7 @@ import handlebars from 'handlebars';
 
 import config from '../../../config';
 
+import log from '../../../libs/logs';
 import params from '../../../libs/params';
 import { s3Client } from '../../../libs/S3';
 
@@ -28,7 +29,7 @@ handlebars.registerHelper({
   },
 });
 
-export async function main(event) {
+export async function main(event, context) {
   const { dynamodb } = event.detail;
   if (dynamodb.NewImage === undefined) {
     return false;
@@ -45,7 +46,12 @@ export async function main(event) {
       .promise()
   );
   if (s3GetObjectError) {
-    console.error(s3GetObjectError);
+    log.error(
+      'Failed to get object from S3 bucket',
+      context.awsRequestId,
+      'service-viva-ms-generateRecurringCaseHtml-002',
+      s3GetObjectError
+    );
     return false;
   }
 
@@ -68,7 +74,12 @@ export async function main(event) {
       .promise()
   );
   if (s3PutObjectError) {
-    console.error(s3PutObjectError);
+    log.error(
+      'Failed to put object to S3 bucket',
+      context.awsRequestId,
+      'service-viva-ms-generateRecurringCaseHtml-003',
+      s3GetObjectError
+    );
     return false;
   }
 
@@ -79,7 +90,12 @@ export async function main(event) {
     })
   );
   if (putEventError) {
-    console.error(putEventError);
+    log.error(
+      'Put event ´htmlGeneratedSuccess´ failed',
+      context.awsRequestId,
+      'service-viva-ms-generateRecurringCaseHtml-004',
+      putEventError
+    );
     return false;
   }
 
