@@ -3,7 +3,7 @@ import certToPEM from './certToPEM';
 import { JWK } from '../constants';
 
 /**
- * For mor information regarding JWKS properties see:
+ * For more information regarding JWKS properties see:
  * https://auth0.com/docs/security/tokens/json-web-tokens/json-web-key-set-properties
  */
 export default function getValidSigningKey({ use, kty, kid, x5c = [], n, e }) {
