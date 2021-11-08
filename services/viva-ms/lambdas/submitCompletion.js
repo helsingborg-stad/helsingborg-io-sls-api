@@ -12,12 +12,23 @@ import { VIVA_COMPLETION_RECEIVED } from '../../../libs/constants';
 
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
-const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
-
 export async function main(event, context) {
   const caseItem = parseDynamoDBItemFromEvent(event);
 
-  const { completionFormId } = await VIVA_CASE_SSM_PARAMS;
+  const [paramsReadError, vivaCaseSSMParams] = await to(
+    params.read(config.cases.providers.viva.envsKeyName)
+  );
+  if (paramsReadError) {
+    log.error(
+      'Read ssm params ´config.cases.providers.viva.envsKeyName´ failed',
+      context.awsRequestId,
+      'service-viva-ms-submitCompletition-001',
+      paramsReadError
+    );
+    return false;
+  }
+
+  const { completionFormId } = vivaCaseSSMParams;
   if (caseItem.currentFormId !== completionFormId) {
     log.info(
       'Current form is not an completion form',
