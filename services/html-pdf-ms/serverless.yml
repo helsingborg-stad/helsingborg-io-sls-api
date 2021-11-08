@@ -35,12 +35,12 @@ provider:
                 - ""
                 - - Fn::ImportValue: ${self:custom.resourcesStage}-PdfStorageBucketArn
                   - "/*"
-        
+
         - Effect: Allow
           Action:
             - kms:Decrypt
           Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
-        
+
         - Effect: Allow
           Action:
             - events:PutEvents
@@ -49,8 +49,8 @@ provider:
 functions:
   generate:
     handler: lambdas/generate.main
-    layers: 
-      - Fn::ImportValue: ChromeAwsLambdaLayer-${self:provider.stage}
+    layers:
+      - Fn::ImportValue: ChromeAwsLambdaLayer-${self:custom.resourcesStage}
     environment:
       PDF_STORAGE_BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-PdfStorageBucketName
     events:
@@ -60,4 +60,3 @@ functions:
               - vivaMs.generateRecurringCaseHtml
             detail-type:
               - htmlGeneratedSuccess
-
