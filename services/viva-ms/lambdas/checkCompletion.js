@@ -41,9 +41,9 @@ export async function main(event, context) {
   const completionStatusCodes = [64, 128, 256, 512];
   if (!validateApplicationStatus(applicationStatusList, completionStatusCodes)) {
     log.info(
-      'No Viva completion status(64) found.',
+      'No Viva completion status(64) found',
       context.awsRequestId,
-      null,
+      'service-viva-ms-checkCompletion-002',
       applicationStatusList
     );
     return true;
@@ -67,22 +67,27 @@ export async function main(event, context) {
   );
   if (updateCaseError) {
     log.error(
-      'Could not update case attribute',
+      'Update case completion attributes failed',
       context.awsRequestId,
-      'service-viva-ms-checkCompletion-002',
+      'service-viva-ms-checkCompletion-004',
       updateCaseError
     );
     return false;
   }
 
-  log.info('Updated case successfully', context.awsRequestId, null, caseItem);
+  log.info(
+    'Successful update completion attributes on case',
+    context.awsRequestId,
+    'service-viva-ms-checkCompletion-005',
+    caseItem
+  );
 
   const [putEventError] = await to(putVivaMsEvent.checkCompletionSuccess({ caseKeys }));
   if (putEventError) {
     log.error(
-      'Could not put check completion success event',
+      'Put event ´checkCompletionSuccess´ failed',
       context.awsRequestId,
-      'service-viva-ms-checkCompletion-003',
+      'service-viva-ms-checkCompletion-006',
       putEventError
     );
     return false;
@@ -142,7 +147,7 @@ async function getCase(keys) {
 
   const caseItem = dbResponse.Items.find(item => item.PK === keys.PK);
   if (!caseItem) {
-    throw 'Case not found';
+    throw `Case with sort key: ${keys.SK} not found`;
   }
 
   return caseItem;
