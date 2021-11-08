@@ -12,7 +12,6 @@ import { VIVA_APPLICATION_RECEIVED } from '../../../libs/constants';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
-const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
 const dynamoDbConverter = AWS.DynamoDB.Converter;
 
 export async function main(event, context) {
@@ -22,7 +21,20 @@ export async function main(event, context) {
 
   const caseItem = dynamoDbConverter.unmarshall(event.detail.dynamodb.NewImage);
 
-  const { recurringFormId } = await VIVA_CASE_SSM_PARAMS;
+  const [paramsReadError, vivaCaseSSMParams] = await to(
+    params.read(config.cases.providers.viva.envsKeyName)
+  );
+  if (paramsReadError) {
+    log.error(
+      'Read ssm params ´config.cases.providers.viva.envsKeyName´ failed',
+      context.awsRequestId,
+      'service-viva-ms-submitApplication-001',
+      paramsReadError
+    );
+    return false;
+  }
+
+  const { recurringFormId } = vivaCaseSSMParams;
   if (caseItem.currentFormId !== recurringFormId) {
     log.info('Current form is not an recurring form.', context.awsRequestId, null);
     return true;
