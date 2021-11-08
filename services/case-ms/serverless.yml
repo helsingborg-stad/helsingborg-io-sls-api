@@ -19,6 +19,11 @@ provider:
   endpointType: regional
   tracing:
     lambda: true
+
+  environment:
+    stage: ${self:custom.stage}
+    resourcesStage: ${self:custom.resourcesStage}
+
   iam:
     role:
       statements:
@@ -44,11 +49,6 @@ provider:
                 - ""
                 - - Fn::ImportValue: ${self:custom.resourcesStage}-PdfStorageBucketArn
                   - "/*"
-
-        - Effect: Allow
-          Action:
-            - kms:Decrypt
-          Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
 
 functions:
   updatePdf:
