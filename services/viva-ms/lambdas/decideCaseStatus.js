@@ -5,7 +5,13 @@ import config from '../../../config';
 
 import * as dynamoDb from '../../../libs/dynamoDb';
 import log from '../../../libs/logs';
-import { getStatusByType, statusTypes } from '../../../libs/caseStatuses';
+import { getStatusByType } from '../../../libs/caseStatuses';
+import {
+  ACTIVE_PROCESSING,
+  CLOSED_APPROVED_VIVA,
+  CLOSED_REJECTED_VIVA,
+  CLOSED_PARTIALLY_APPROVED_VIVA,
+} from '../../../libs/constants';
 
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 
@@ -73,7 +79,7 @@ function decideNewCaseStatus(workflowAttributes) {
   }
 
   if (calculation != undefined) {
-    return statusTypes.ACTIVE_PROCESSING;
+    return ACTIVE_PROCESSING;
   }
 
   return undefined;
@@ -81,18 +87,18 @@ function decideNewCaseStatus(workflowAttributes) {
 
 function getCaseStatusType(decisionTypeCode, paymentList) {
   if (decisionTypeCode === 1 && paymentList != undefined && paymentList.length > 0) {
-    return statusTypes.CLOSED_APPROVED_VIVA;
+    return CLOSED_APPROVED_VIVA;
   }
 
   if (decisionTypeCode === 2) {
-    return statusTypes.CLOSED_REJECTED_VIVA;
+    return CLOSED_REJECTED_VIVA;
   }
 
   if (decisionTypeCode === 3 && paymentList != undefined && paymentList.length > 0) {
-    return statusTypes.CLOSED_PARTIALLY_APPROVED_VIVA;
+    return CLOSED_PARTIALLY_APPROVED_VIVA;
   }
 
-  return statusTypes.ACTIVE_PROCESSING;
+  return ACTIVE_PROCESSING;
 }
 
 function getDecisionTypeCode(decisionList) {

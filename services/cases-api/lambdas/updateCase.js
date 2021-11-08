@@ -12,7 +12,13 @@ import * as response from '../../../libs/response';
 import * as dynamoDb from '../../../libs/dynamoDb';
 import { decodeToken } from '../../../libs/token';
 import { objectWithoutProperties } from '../../../libs/objects';
-import { getStatusByType, statusTypes } from '../../../libs/caseStatuses';
+import { getStatusByType } from '../../../libs/caseStatuses';
+import {
+  ACTIVE_ONGOING,
+  ACTIVE_SIGNATURE_PENDING,
+  ACTIVE_SIGNATURE_COMPLETED,
+  ACTIVE_SUBMITTED,
+} from '../../../libs/constants';
 
 import statusCheck from '../helpers/statusCheckCondition';
 import { getUserCase } from '../helpers/dynamoDb';
@@ -212,19 +218,19 @@ async function queryFormsIfExistsFormId(formId) {
 function getNewCaseStatus(conditionOption) {
   const statusCheckList = [
     {
-      type: statusTypes.ACTIVE_ONGOING,
+      type: ACTIVE_ONGOING,
       conditionFunction: statusCheck.condition.isOngoing,
     },
     {
-      type: statusTypes.ACTIVE_SIGNATURE_PENDING,
+      type: ACTIVE_SIGNATURE_PENDING,
       conditionFunction: statusCheck.condition.isSignaturePending,
     },
     {
-      type: statusTypes.ACTIVE_SIGNATURE_COMPLETED,
+      type: ACTIVE_SIGNATURE_COMPLETED,
       conditionFunction: statusCheck.condition.isSignatureCompleted,
     },
     {
-      type: statusTypes.ACTIVE_SUBMITTED,
+      type: ACTIVE_SUBMITTED,
       conditionFunction: statusCheck.condition.isSubmitted,
     },
   ];
