@@ -17,8 +17,6 @@ import {
   VIVA_CASE_CREATED,
 } from '../../../libs/constants';
 
-const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
-
 export async function main(event, context) {
   const { clientUser, vivaPersonDetail } = event.detail;
 
@@ -88,8 +86,14 @@ function getCaseListOnPeriod(vivaPerson) {
 }
 
 async function createRecurringVivaCase(vivaPerson, user) {
-  const ssmParams = await VIVA_CASE_SSM_PARAMS;
-  const { recurringFormId, completionFormId } = ssmParams;
+  const [paramsReadError, vivaCaseSSMParams] = await to(
+    params.read(config.cases.providers.viva.envsKeyName)
+  );
+  if (paramsReadError) {
+    throw paramsReadError;
+  }
+
+  const { recurringFormId, completionFormId } = vivaCaseSSMParams;
 
   const applicantPersonalNumber = stripNonNumericalCharacters(
     String(vivaPerson.case.client.pnumber)
