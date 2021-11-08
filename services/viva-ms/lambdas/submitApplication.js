@@ -36,7 +36,11 @@ export async function main(event, context) {
 
   const { recurringFormId } = vivaCaseSSMParams;
   if (caseItem.currentFormId !== recurringFormId) {
-    log.info('Current form is not an recurring form.', context.awsRequestId, null);
+    log.info(
+      'Current form is not an recurring form',
+      context.awsRequestId,
+      'service-viva-ms-submitApplication-002'
+    );
     return true;
   }
 
@@ -55,9 +59,9 @@ export async function main(event, context) {
   );
   if (vivaPostError) {
     log.error(
-      'Viva adapter submit application failed',
+      'Failed to submit Viva application',
       context.awsRequestId,
-      'service-viva-ms-submitApplication-001',
+      'service-viva-ms-submitApplication-003',
       {
         axios: { ...vivaPostError },
       }
@@ -69,7 +73,7 @@ export async function main(event, context) {
     log.error(
       'Viva application receive failed',
       context.awsRequestId,
-      'service-viva-ms-submitApplication-002',
+      'service-viva-ms-submitApplication-004',
       { vivaResponse: { ...vivaApplicationResponse } }
     );
     return false;
@@ -77,9 +81,9 @@ export async function main(event, context) {
 
   if (!vivaApplicationResponse?.id) {
     log.error(
-      'Viva application response does not contain workflow id',
+      'Viva application response does not contain any workflow id',
       context.awsRequestId,
-      'service-viva-ms-submitApplication-003',
+      'service-viva-ms-submitApplication-005',
       vivaApplicationResponse
     );
     return false;
@@ -89,9 +93,9 @@ export async function main(event, context) {
   const [updateError] = await to(updateVivaCase(caseKeys, vivaApplicationResponse.id));
   if (updateError) {
     log.error(
-      'Database update viva case failed',
+      'Failed to update Viva case',
       context.awsRequestId,
-      'service-viva-ms-submitApplication-004',
+      'service-viva-ms-submitApplication-006',
       updateError
     );
     return false;
@@ -100,9 +104,9 @@ export async function main(event, context) {
   const [putEventError] = await to(putVivaMsEvent.applicationReceivedSuccess({ caseKeys }));
   if (putEventError) {
     log.error(
-      'Put event: applicationReceivedSuccess failed',
+      'Put event ´applicationReceivedSuccess´ failed',
       context.awsRequestId,
-      'service-viva-ms-submitApplication-005',
+      'service-viva-ms-submitApplication-007',
       putEventError
     );
     return false;
