@@ -249,3 +249,5 @@ functions:
                     M:
                       type:
                         S: [{ "prefix": "active:submitted" }]
+                  state:
+                    S: ["VIVA_CASE_CREATED"]
