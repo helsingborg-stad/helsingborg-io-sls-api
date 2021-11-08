@@ -137,8 +137,6 @@ functions:
                     M:
                       type:
                         S: [{ "prefix": "active:submitted" }]
-                  pdfGenerated:
-                    S: ["yes"]
                   state:
                     S: ["PDF_GENERATED"]
 

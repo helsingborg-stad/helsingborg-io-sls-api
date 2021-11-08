@@ -81,6 +81,7 @@ functions:
 
     events:
       - eventBridge:
+          enabled: false
           pattern:
             source:
               - cases.database
