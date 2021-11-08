@@ -4,7 +4,7 @@ import axios from 'axios';
 
 import generateIAMPolicy from '../../../../libs/generateIAMPolicy';
 
-import getjwksUrl from '../helpers/getjwksUrl';
+import getJwksUrl from '../helpers/getJwksUrl';
 import getValidSigningKey from '../helpers/getValidSigningKey';
 
 import { JWT } from '../constants';
@@ -27,7 +27,7 @@ export async function main(event) {
     throw Error('Unauthorised');
   }
 
-  const jwksUrl = getjwksUrl(payload.tid, payload.aud);
+  const jwksUrl = getJwksUrl(payload.tid, payload.aud);
   const [jwksError, jwksResult] = await to(axios.get(jwksUrl));
   if (jwksError) {
     console.error('Could not fetch JWKs: ', jwksError);
