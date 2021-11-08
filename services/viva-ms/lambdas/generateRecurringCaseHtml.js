@@ -4,9 +4,11 @@ import handlebars from 'handlebars';
 
 import config from '../../../config';
 
+import * as dynamoDb from '../../../libs/dynamoDb';
 import log from '../../../libs/logs';
 import params from '../../../libs/params';
 import S3 from '../../../libs/S3';
+import { CASE_HTML_GENERATED } from '../../../libs/constants';
 
 import createRecurringCaseTemplateData from '../helpers/createRecurringCaseTemplateData';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
@@ -83,6 +85,21 @@ export async function main(event, context) {
     return false;
   }
 
+  const caseKeys = {
+    PK: caseItem.PK,
+    SK: caseItem.SK,
+  };
+  const [updateCaseError] = await to(updateVivaCaseState(caseKeys));
+  if (updateCaseError) {
+    log.error(
+      'Failed to update case state attribute',
+      context.awsRequestId,
+      'service-viva-ms-generateRecurringCaseHtml-004',
+      updateCaseError
+    );
+    return false;
+  }
+
   const [putEventError] = await to(
     putVivaMsEvent.htmlGeneratedSuccess({
       pdfStorageBucketKey: caseHtmlKey,
@@ -93,11 +110,31 @@ export async function main(event, context) {
     log.error(
       'Put event ´htmlGeneratedSuccess´ failed',
       context.awsRequestId,
-      'service-viva-ms-generateRecurringCaseHtml-004',
+      'service-viva-ms-generateRecurringCaseHtml-005',
       putEventError
     );
     return false;
   }
 
   return true;
+}
+
+function updateVivaCaseState(caseKeys) {
+  const params = {
+    TableName: config.cases.tableName,
+    Key: {
+      PK: caseKeys.PK,
+      SK: caseKeys.SK,
+    },
+    UpdateExpression: 'SET #state = :newState',
+    ExpressionAttributeNames: {
+      '#state': 'state',
+    },
+    ExpressionAttributeValues: {
+      ':newState': CASE_HTML_GENERATED,
+    },
+    ReturnValues: 'NONE',
+  };
+
+  return dynamoDb.call('update', params);
 }
