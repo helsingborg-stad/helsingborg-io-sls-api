@@ -8,13 +8,14 @@ import * as dynamoDB from '../../../libs/dynamoDb';
 import params from '../../../libs/params';
 import log from '../../../libs/logs';
 import { putItem } from '../../../libs/queries';
-import { getStatusByType, statusTypes } from '../../../libs/caseStatuses';
+import { getStatusByType } from '../../../libs/caseStatuses';
 import { populateFormWithPreviousCaseAnswers } from '../../../libs/formAnswers';
 import { getFutureTimestamp, millisecondsToSeconds } from '../../../libs/timestampHelper';
 import {
   CASE_PROVIDER_VIVA,
-  DELETE_VIVA_CASE_AFTER_12_HOURS,
+  TWELVE_HOURS,
   VIVA_CASE_CREATED,
+  NOT_STARTED_VIVA,
 } from '../../../libs/constants';
 
 export async function main(event, context) {
@@ -115,11 +116,11 @@ async function createRecurringVivaCase(vivaPerson, user) {
   const PK = `USER#${applicantPersonalNumber}`;
   const SK = `CASE#${id}`;
   const timestampNow = Date.now();
-  const initialStatus = getStatusByType(statusTypes.NOT_STARTED_VIVA);
+  const initialStatus = getStatusByType(NOT_STARTED_VIVA);
   const workflowId = vivaPerson.application?.workflowid || null;
   const period = getPeriodInMilliseconds(vivaPerson);
 
-  const expirationTime = millisecondsToSeconds(getFutureTimestamp(DELETE_VIVA_CASE_AFTER_12_HOURS));
+  const expirationTime = millisecondsToSeconds(getFutureTimestamp(TWELVE_HOURS));
 
   const caseItemPutParams = {
     TableName: config.cases.tableName,
