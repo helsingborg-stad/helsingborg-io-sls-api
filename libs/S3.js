@@ -1,6 +1,6 @@
 import S3 from 'aws-sdk/clients/s3';
 
-export const s3Client = new S3();
+export const s3Client = new S3({ apiVersion: '2006-03-01' });
 
 async function getSignedUrl(bucketName, method, params) {
   return s3Client.getSignedUrl(method, {
@@ -36,9 +36,20 @@ async function deleteFile(bucketName, key) {
     .promise();
 }
 
+async function storeFile(bucketName, key, body) {
+  return s3Client
+    .putObject({
+      Bucket: bucketName,
+      Key: key,
+      Body: body,
+    })
+    .promise();
+}
+
 export default {
   getSignedUrl,
   getFiles,
   getFile,
   deleteFile,
+  storeFile,
 };
