@@ -13,8 +13,6 @@ import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 import validateApplicationStatus from '../helpers/validateApplicationStatus';
 
-const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
-
 export async function main(event, context) {
   const { caseKeys } = event.detail;
 
@@ -51,7 +49,19 @@ export async function main(event, context) {
     return true;
   }
 
-  const vivaCaseSSMParams = await VIVA_CASE_SSM_PARAMS;
+  const [paramsReadError, vivaCaseSSMParams] = await to(
+    params.read(config.cases.providers.viva.envsKeyName)
+  );
+  if (paramsReadError) {
+    log.error(
+      'Read ssm params ´config.cases.providers.viva.envsKeyName´ failed',
+      context.awsRequestId,
+      'service-viva-ms-checkCompletion-003',
+      paramsReadError
+    );
+    return false;
+  }
+
   const [updateCaseError, caseItem] = await to(
     updateCaseCompletionAttributes(caseKeys, vivaCaseSSMParams.completionFormId)
   );
