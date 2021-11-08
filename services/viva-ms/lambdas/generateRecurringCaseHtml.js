@@ -6,7 +6,7 @@ import config from '../../../config';
 
 import log from '../../../libs/logs';
 import params from '../../../libs/params';
-import { s3Client } from '../../../libs/S3';
+import S3 from '../../../libs/S3';
 
 import createRecurringCaseTemplateData from '../helpers/createRecurringCaseTemplateData';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
@@ -33,6 +33,21 @@ export async function main(event, context) {
     return false;
   }
 
+  const caseItem = DynamoDB.Converter.unmarshall(dynamodb.NewImage);
+
+  const [s3GetObjectError, hbsTemplateS3Object] = await to(
+    S3.getFile(process.env.PDF_STORAGE_BUCKET_NAME, 'templates/ekb-recurring.hbs')
+  );
+  if (s3GetObjectError) {
+    log.error(
+      'Failed to get object from S3 bucket',
+      context.awsRequestId,
+      'service-viva-ms-generateRecurringCaseHtml-001',
+      s3GetObjectError
+    );
+    return false;
+  }
+
   const [paramsReadError, vivaCaseSSMParams] = await to(
     params.read(config.cases.providers.viva.envsKeyName)
   );
@@ -40,33 +55,13 @@ export async function main(event, context) {
     log.error(
       'Read ssm params ´config.cases.providers.viva.envsKeyName´ failed',
       context.awsRequestId,
-      'service-viva-ms-generateRecurringCaseHtml-001',
+      'service-viva-ms-generateRecurringCaseHtml-002',
       paramsReadError
     );
     return false;
   }
 
-  const caseItem = DynamoDB.Converter.unmarshall(dynamodb.NewImage);
-
-  const [s3GetObjectError, s3Object] = await to(
-    s3Client
-      .getObject({
-        Bucket: process.env.PDF_STORAGE_BUCKET_NAME,
-        Key: 'templates/ekb-recurring.hbs',
-      })
-      .promise()
-  );
-  if (s3GetObjectError) {
-    log.error(
-      'Failed to get object from S3 bucket',
-      context.awsRequestId,
-      'service-viva-ms-generateRecurringCaseHtml-002',
-      s3GetObjectError
-    );
-    return false;
-  }
-
-  const handlebarsTemplateFileBody = s3Object.Body.toString();
+  const handlebarsTemplateFileBody = hbsTemplateS3Object.Body.toString();
   const template = handlebars.compile(handlebarsTemplateFileBody);
   const caseTemplateData = createRecurringCaseTemplateData(
     caseItem,
@@ -75,21 +70,15 @@ export async function main(event, context) {
   const html = template(caseTemplateData);
 
   const caseHtmlKey = `html/case-${caseItem.id}.html`;
-  const [s3PutObjectError] = await to(
-    s3Client
-      .putObject({
-        Bucket: process.env.PDF_STORAGE_BUCKET_NAME,
-        Key: caseHtmlKey,
-        Body: html,
-      })
-      .promise()
+  const [s3StoreFileError] = await to(
+    S3.storeFile(process.env.PDF_STORAGE_BUCKET_NAME, caseHtmlKey, html)
   );
-  if (s3PutObjectError) {
+  if (s3StoreFileError) {
     log.error(
       'Failed to put object to S3 bucket',
       context.awsRequestId,
       'service-viva-ms-generateRecurringCaseHtml-003',
-      s3GetObjectError
+      s3StoreFileError
     );
     return false;
   }
