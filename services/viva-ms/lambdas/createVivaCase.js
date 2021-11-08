@@ -20,11 +20,21 @@ import {
 export async function main(event, context) {
   const { clientUser, vivaPersonDetail } = event.detail;
 
-  if (!vivaPersonDetail?.application?.period) {
+  if (clientUser == undefined) {
     log.error(
-      'Viva application period not found in person details.',
+      'Event detail attribute ´clientUser´ is undefined',
       context.awsRequestId,
-      'service-viva-ms-createVivaCase-001'
+      'service-viva-ms-createVivaCase-001',
+      event.detail
+    );
+    return false;
+  }
+
+  if (vivaPersonDetail?.application?.period == undefined) {
+    log.error(
+      'Viva application attribute ´period´ is undefined',
+      context.awsRequestId,
+      'service-viva-ms-createVivaCase-002'
     );
     return false;
   }
