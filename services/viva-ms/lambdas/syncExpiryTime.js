@@ -36,7 +36,7 @@ export async function main(event, context) {
   const expireHours = getExpiryHoursOnStatusType(storedUserCase.Item.status.type);
   const newExpirationTime = millisecondsToSeconds(getFutureTimestamp(expireHours));
 
-  const [updateCaseError, updatedCase] = await to(
+  const [updateCaseError] = await to(
     updateCaseExpirationTime({
       keys: caseKeys,
       newExpirationTime,
@@ -52,12 +52,6 @@ export async function main(event, context) {
     return false;
   }
 
-  log.info(
-    'Case attribute: expirationTime, updated successfully',
-    context.awsRequestId,
-    null,
-    updatedCase
-  );
   return true;
 }
 
