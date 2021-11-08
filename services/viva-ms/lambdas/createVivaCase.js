@@ -42,20 +42,16 @@ export async function main(event, context) {
   const [getCaseListOnPeriodError, caseList] = await to(getCaseListOnPeriod(vivaPersonDetail));
   if (getCaseListOnPeriodError) {
     log.error(
-      'Query cases table failed!',
+      'Failed to query cases table',
       context.awsRequestId,
-      'service-viva-ms-createVivaCase-002',
+      'service-viva-ms-createVivaCase-003',
       getCaseListOnPeriodError
     );
     return false;
   }
 
   if (caseList.Items[0]) {
-    log.info(
-      'Case with specified period already exists. Will not create new case.',
-      context.awsRequestId,
-      null
-    );
+    log.info('Case with specified period already exists', context.awsRequestId, null);
     return false;
   }
 
@@ -64,15 +60,21 @@ export async function main(event, context) {
   );
   if (createRecurringVivaCaseError) {
     log.error(
-      'createRecurringVivaCaseError',
+      'Failed to create recurring Viva case',
       context.awsRequestId,
-      'service-viva-ms-createVivaCase-003',
+      'service-viva-ms-createVivaCase-004',
       createRecurringVivaCaseError
     );
     return false;
   }
 
-  log.info('New Viva case created successfully.', context.awsRequestId, null, createdVivaCase);
+  log.info(
+    'Viva case created successfully',
+    context.awsRequestId,
+    'service-viva-ms-createVivaCase-005',
+    createdVivaCase
+  );
+
   return true;
 }
 
