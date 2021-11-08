@@ -1,5 +1,5 @@
 import { TAG_NAME, VIVA_POST_TYPE_COLLECTION, PERSON_ROLE } from './constans';
-import formatPeriodDates from './formatPeriodDates';
+import formatPeriodDates, { formatTimestampToDate } from './formatPeriodDates';
 import formHelpers from './formHelpers';
 
 function mapApplicant(person, answers) {
@@ -21,7 +21,7 @@ function mapApplicant(person, answers) {
 }
 
 function mapCoApplicant(person, answers) {
-  const partnerInfoAnswers = formHelpers.filterByFieldIdIncludes(answers, 'personalInfo');
+  const partnerInfoAnswers = formHelpers.filterByFieldIdIncludes(answers, 'partnerInfo');
   const partnerInfo = partnerInfoAnswers.reduce((accumulatedAnswer, answer) => {
     const attribute = formHelpers.getAttributeFromAnswerFieldId(answer.field.id);
     return { ...accumulatedAnswer, [attribute]: answer.value };
@@ -60,7 +60,7 @@ export function createPersonsObject(persons, answers) {
 }
 
 export function createHousingInfoObject(answers) {
-  const filteredAnswers = formHelpers.filterByFieldIdIncludes(answers, 'housingId');
+  const filteredAnswers = formHelpers.filterByFieldIdIncludes(answers, 'housingInfo');
 
   const housingInfo = filteredAnswers.reduce((accumulatedAnswer, answer) => {
     // field id can be constructed like personInfo.personFirstName, personInfo.personLastName
@@ -110,7 +110,7 @@ export function createEconomicsObject(answers) {
       }
 
       if (tags.includes(TAG_NAME.date)) {
-        summaryItem.date = answer.value;
+        summaryItem.date = formatTimestampToDate(answer.value);
       }
 
       const vivaPostType = tags.reduce((type, tag) => {
