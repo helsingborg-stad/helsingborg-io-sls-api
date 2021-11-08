@@ -15,6 +15,7 @@ export const CLOSED_COMPLETION_REJECTED_VIVA = 'closed:completionRejected:viva';
 export const CASE_PROVIDER_VIVA = 'VIVA';
 export const VIVA_CASE_CREATED = 'VIVA_CASE_CREATED';
 export const VIVA_COMPLETION_REQUIRED = 'VIVA_COMPLETION_REQUIRED';
+export const VIVA_APPLICATION_RECEIVED = 'VIVA_APPLICATION_RECEIVED';
 
 /**
  * A month is 1/12th of a year. In the Gregorian calendar, an average month has exactly 30.436875 days.

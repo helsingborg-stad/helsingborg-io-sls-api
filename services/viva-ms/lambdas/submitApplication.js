@@ -7,13 +7,12 @@ import config from '../../../config';
 import * as dynamoDb from '../../../libs/dynamoDb';
 import log from '../../../libs/logs';
 import params from '../../../libs/params';
+import { VIVA_APPLICATION_RECEIVED } from '../../../libs/constants';
 
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
 const VIVA_CASE_SSM_PARAMS = params.read(config.cases.providers.viva.envsKeyName);
-const VIVA_APPLICATION_RECEIVED = 'VIVA_APPLICATION_RECEIVED';
-
 const dynamoDbConverter = AWS.DynamoDB.Converter;
 
 export async function main(event, context) {
