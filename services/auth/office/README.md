@@ -20,7 +20,7 @@ Azure AD.
 
 
 ### Do first
-Read the global requierments for this repo, can be found [here](https://github.com/helsingborg-stad/helsingborg-io-sls-api/blob/dev/README.md)
+Read the global requirements for this repo, can be found [here](https://github.com/helsingborg-stad/helsingborg-io-sls-api/blob/dev/README.md)
 
 
 ### Run Local
