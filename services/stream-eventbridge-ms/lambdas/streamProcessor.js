@@ -1,8 +1,8 @@
-import AWS from 'aws-sdk';
+import { EventBridge } from 'aws-sdk/clients/eventbridge';
 
 import log from '../../../libs/logs';
 
-const eventBridge = new AWS.EventBridge();
+const eventBridge = new EventBridge({ apiVersion: '2015-10-07' });
 
 /**
  * Lambda function takes DynamoDB stream events and
@@ -15,7 +15,8 @@ export const main = async (event, context) => {
     log.info(
       `Event: ${record.eventName}/${record.eventID}`,
       context.awsRequestId,
-      'service-stream-event-bridge-ms-001'
+      'service-stream-event-bridge-ms-001',
+      JSON.stringify(record.dynamodb.NewImage)
     );
 
     const [tableArn] = record.eventSourceARN.split('/stream');
