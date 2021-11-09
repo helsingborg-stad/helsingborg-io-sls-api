@@ -1,8 +1,8 @@
-import { EventBridge } from 'aws-sdk/clients/eventbridge';
+import AWS from 'aws-sdk';
 
 import log from '../../../libs/logs';
 
-const eventBridge = new EventBridge({ apiVersion: '2015-10-07' });
+const eventBridge = new AWS.EventBridge();
 
 /**
  * Lambda function takes DynamoDB stream events and
