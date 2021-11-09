@@ -1,4 +1,4 @@
-import getJwksUrl from '../../helpers/getjwksUrl';
+import getJwksUrl from '../../helpers/getJwksUrl';
 
 import { loginMicrosoftUrl } from '../../constants';
 
