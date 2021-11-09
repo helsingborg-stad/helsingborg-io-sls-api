@@ -15,8 +15,7 @@ export const main = async (event, context) => {
     log.info(
       `Event: ${record.eventName}/${record.eventID}`,
       context.awsRequestId,
-      'service-stream-event-bridge-ms-001',
-      JSON.stringify(record.dynamodb.NewImage)
+      'service-stream-event-bridge-ms-001'
     );
 
     const [tableArn] = record.eventSourceARN.split('/stream');
