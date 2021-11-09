@@ -4,7 +4,7 @@ import axios from 'axios';
 
 import generateIAMPolicy from '../../../../libs/generateIAMPolicy';
 
-import getjwksUrl from '../helpers/getjwksUrl';
+import getJwksUrl from '../helpers/getJwksUrl';
 import getValidSigningKey from '../helpers/getValidSigningKey';
 
 import { JWT } from '../constants';
