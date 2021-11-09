@@ -77,7 +77,7 @@ async function htmlToPdf(html) {
     });
 
     const page = await browser.newPage();
-    page.setContent(html);
+    await page.setContent(html);
     const pdf = await page.pdf(PDF_OPTIONS);
 
     return pdf;
