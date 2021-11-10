@@ -36,16 +36,17 @@ it('updates a booking successfully', async () => {
 
   const responseData = {
     data: {
-      type: 'booking',
-      id: '123456789',
+      attributes: {
+        BookingId: '123456789',
+      },
     },
   };
 
   const calendarBookingResponse = {
-    data: JSON.stringify(responseData),
+    data: responseData,
   };
   const expectedResult = {
-    body: JSON.stringify({ jsonapi: { version: '1.0' }, ...responseData }),
+    body: JSON.stringify({ jsonapi: { version: '1.0' }, data: { bookingId: '123456789' } }),
     headers: {
       'Access-Control-Allow-Credentials': true,
       'Access-Control-Allow-Origin': '*',
