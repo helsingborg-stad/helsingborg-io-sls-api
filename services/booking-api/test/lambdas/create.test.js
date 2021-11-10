@@ -30,15 +30,16 @@ beforeEach(() => {
 it('creates a booking successfully', async () => {
   expect.assertions(2);
 
-  const responseData = JSON.stringify({
+  const responseData = {
     jsonapi: { version: '1.0' },
     data: {
-      type: 'booking',
-      id: '123456789',
+      attributes: {
+        BookingId: '123456789',
+      },
     },
-  });
+  };
   const expectedResult = {
-    body: responseData,
+    body: JSON.stringify({ jsonapi: { version: '1.0' }, data: { bookingId: '123456789' } }),
     headers: mockHeaders,
     statusCode: 200,
   };
