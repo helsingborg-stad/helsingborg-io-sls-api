@@ -26,6 +26,9 @@ const stageConfigs = {
     booking: {
       envsKeyName: '/bookingEnvs/dev',
     },
+    datatorget: {
+      envsKeyName: '/datatorgetEnvs/dev',
+    },
     users: {
       tableName: 'users',
     },
@@ -78,6 +81,9 @@ const stageConfigs = {
     },
     booking: {
       envsKeyName: '/bookingEnvs/test',
+    },
+    datatorget: {
+      envsKeyName: '/datatorgetEnvs/test',
     },
     users: {
       tableName: 'users',
@@ -132,6 +138,9 @@ const stageConfigs = {
     booking: {
       envsKeyName: '/bookingEnvs/stage',
     },
+    datatorget: {
+      envsKeyName: '/datatorgetEnvs/stage',
+    },
     users: {
       tableName: 'users',
     },
@@ -185,6 +194,9 @@ const stageConfigs = {
     booking: {
       envsKeyName: '/bookingEnvs/prod',
     },
+    datatorget: {
+      envsKeyName: '/datatorgetEnvs/prod',
+    },
     users: {
       tableName: 'users',
     },
@@ -237,6 +249,9 @@ const stageConfigs = {
     },
     booking: {
       envsKeyName: '/bookingEnvs/release',
+    },
+    datatorget: {
+      envsKeyName: '/datatorgetEnvs/release',
     },
     users: {
       tableName: 'users',
