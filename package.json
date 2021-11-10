@@ -62,6 +62,7 @@
     "axios": "^0.21.2",
     "camelcase": "^6.2.0",
     "chrome-aws-lambda": "^10.1.0",
+    "dayjs": "^1.10.7",
     "deep-equal": "^2.0.5",
     "handlebars": "^4.7.7",
     "hashids": "^2.2.8",
