@@ -125,11 +125,7 @@ it('returns error when required parameters does not exists in event', async () =
     endTime: '2021-05-30T11:00:00',
     subject: 'economy',
   });
-
   const event = { ...mockEvent, body };
-
-  const errorMessage =
-    'Missing one or more required parameters: "requiredAttendees", "startTime", "endTime"';
 
   const expectedResult = {
     body: JSON.stringify({
@@ -137,7 +133,8 @@ it('returns error when required parameters does not exists in event', async () =
       data: {
         status: '403',
         code: '403',
-        message: errorMessage,
+        message:
+          'Missing one or more required parameters: "requiredAttendees", "startTime", "endTime"',
       },
     }),
     headers: mockHeaders,
