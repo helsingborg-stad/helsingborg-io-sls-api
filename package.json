@@ -55,6 +55,7 @@
   },
   "main": "index.js",
   "dependencies": {
+    "@babel/plugin-proposal-optional-chaining": "^7.16.0",
     "@helsingborg-stad/npm-api-error-handling": "^0.15.0",
     "await-to-js": "^2.1.1",
     "aws-sdk": "^2.843.0",
