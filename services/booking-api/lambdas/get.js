@@ -12,6 +12,6 @@ export async function main(event) {
     return response.failure(error);
   }
 
-  const { data } = JSON.parse(getBookingResponse.data);
+  const { data } = getBookingResponse.data;
   return response.success(200, data);
 }
