@@ -1,10 +1,16 @@
 import to from 'await-to-js';
 import dayjs from 'dayjs';
+import dayjsPluginUTC from 'dayjs-plugin-utc';
 
 import * as response from '../../../libs/response';
 
 import createSlotsWithinTimeSpan from '../helpers/createSlots';
 import getTimeSpans from '../helpers/getTimeSpans';
+
+const timeOffset = new Date().getTimezoneOffset();
+console.log('TIME OFFSET: ', timeOffset);
+dayjs.extend(dayjsPluginUTC);
+dayjs().utcOffset(timeOffset);
 
 export async function main(event) {
   console.log('EVENT: ', JSON.stringify(event, undefined));
