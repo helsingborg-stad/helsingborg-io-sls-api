@@ -40,9 +40,6 @@ const stageConfigs = {
         },
       },
     },
-    search: {
-      envsKeyName: '/searchEnvs/dev',
-    },
     bookables: {
       envsKeyName: '/bookablesEnvs/dev',
     },
@@ -92,9 +89,6 @@ const stageConfigs = {
           envsKeyName: '/vivaCaseEnvs/test',
         },
       },
-    },
-    search: {
-      envsKeyName: '/searchEnvs/test',
     },
     bookables: {
       envsKeyName: '/bookablesEnvs/test',
@@ -146,9 +140,6 @@ const stageConfigs = {
         },
       },
     },
-    search: {
-      envsKeyName: '/searchEnvs/stage',
-    },
     bookables: {
       envsKeyName: '/bookablesEnvs/stage',
     },
@@ -199,9 +190,6 @@ const stageConfigs = {
         },
       },
     },
-    search: {
-      envsKeyName: '/searchEnvs/prod',
-    },
     bookables: {
       envsKeyName: '/bookablesEnvs/prod',
     },
@@ -251,9 +239,6 @@ const stageConfigs = {
           envsKeyName: '/vivaCaseEnvs/release',
         },
       },
-    },
-    search: {
-      envsKeyName: '/searchEnvs/release',
     },
     bookables: {
       envsKeyName: '/bookablesEnvs/release',
