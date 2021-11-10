@@ -6,7 +6,8 @@ import booking from '../../helpers/booking';
 jest.mock('../../helpers/booking');
 
 const mockBody = {
-  attendee: 'outlook.user@helsingborg.se',
+  requiredAttendees: ['outlook.user@helsingborg.se'],
+  optionalAttendees: [],
   startTime: '2021-05-30T10:00:00',
   endTime: '2021-05-30T11:00:00',
   subject: 'economy',
@@ -22,24 +23,27 @@ const mockHeaders = {
   'Access-Control-Allow-Origin': '*',
 };
 
+beforeEach(() => {
+  jest.resetAllMocks();
+});
+
 it('creates a booking successfully', async () => {
   expect.assertions(2);
 
-  const calendarBookingResponse = {
+  const responseData = JSON.stringify({
+    jsonapi: { version: '1.0' },
     data: {
-      data: {
-        type: 'booking',
-        id: '123456789',
-      },
+      type: 'booking',
+      id: '123456789',
     },
-  };
+  });
   const expectedResult = {
-    body: JSON.stringify({ jsonapi: { version: '1.0' }, ...calendarBookingResponse.data }),
+    body: responseData,
     headers: mockHeaders,
     statusCode: 200,
   };
 
-  booking.create.mockResolvedValueOnce(calendarBookingResponse);
+  booking.create.mockResolvedValueOnce({ data: responseData });
 
   const result = await main(mockEvent);
 
@@ -70,4 +74,35 @@ it('throws when booking.create fails', async () => {
   const result = await main(mockEvent);
 
   expect(result).toEqual(expectedResult);
+});
+
+it('returns error when required parameters does not exists in event', async () => {
+  expect.assertions(2);
+
+  const body = JSON.stringify({
+    startTime: '2021-05-30T10:00:00',
+    endTime: '2021-05-30T11:00:00',
+    subject: 'economy',
+  });
+
+  const errorMessage =
+    'Missing one or more required parameters: "requiredAttendees", "startTime", "endTime"';
+
+  const expectedResult = {
+    body: JSON.stringify({
+      jsonapi: { version: '1.0' },
+      data: {
+        status: '403',
+        code: '403',
+        message: errorMessage,
+      },
+    }),
+    headers: mockHeaders,
+    statusCode: 403,
+  };
+
+  const result = await main({ body });
+
+  expect(result).toEqual(expectedResult);
+  expect(booking.create).toHaveBeenCalledTimes(0);
 });

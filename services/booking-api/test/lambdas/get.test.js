@@ -46,9 +46,9 @@ it('gets a booking successfully', async () => {
   };
 
   booking.get.mockResolvedValueOnce({
-    data: {
+    data: JSON.stringify({
       data: mockCalendarBooking,
-    },
+    }),
   });
 
   const result = await main(mockEvent);

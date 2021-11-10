@@ -5,13 +5,13 @@ import * as response from '../../../libs/response';
 import booking from '../helpers/booking';
 
 export async function main(event) {
-  const bookingId = event.pathParameters.id;
+  const bookingId = decodeURIComponent(event.pathParameters.id);
 
   const [error, getBookingResponse] = await to(booking.get(bookingId));
   if (error) {
     return response.failure(error);
   }
 
-  const { data } = getBookingResponse.data;
+  const { data } = JSON.parse(getBookingResponse.data);
   return response.success(200, data);
 }
