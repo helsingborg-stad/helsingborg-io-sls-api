@@ -23,9 +23,6 @@ const stageConfigs = {
     bankId: {
       envsKeyName: '/bankidEnvs/dev',
     },
-    booking: {
-      envsKeyName: '/bookingEnvs/dev',
-    },
     datatorget: {
       envsKeyName: '/datatorgetEnvs/dev',
     },
@@ -78,9 +75,6 @@ const stageConfigs = {
     },
     bankId: {
       envsKeyName: '/bankidEnvs/test',
-    },
-    booking: {
-      envsKeyName: '/bookingEnvs/test',
     },
     datatorget: {
       envsKeyName: '/datatorgetEnvs/test',
@@ -135,9 +129,6 @@ const stageConfigs = {
     bankId: {
       envsKeyName: '/bankidEnvs/stage',
     },
-    booking: {
-      envsKeyName: '/bookingEnvs/stage',
-    },
     datatorget: {
       envsKeyName: '/datatorgetEnvs/stage',
     },
@@ -191,9 +182,6 @@ const stageConfigs = {
     bankId: {
       envsKeyName: '/bankidEnvs/prod',
     },
-    booking: {
-      envsKeyName: '/bookingEnvs/prod',
-    },
     datatorget: {
       envsKeyName: '/datatorgetEnvs/prod',
     },
@@ -246,9 +234,6 @@ const stageConfigs = {
     },
     bankId: {
       envsKeyName: '/bankidEnvs/release',
-    },
-    booking: {
-      envsKeyName: '/bookingEnvs/release',
     },
     datatorget: {
       envsKeyName: '/datatorgetEnvs/release',

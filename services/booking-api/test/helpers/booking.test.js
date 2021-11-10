@@ -35,7 +35,7 @@ it('throws if failing making sendBookingPostRequest requests', async () => {
   const status = 500;
   const statusText = 'sendBookingPostRequest error';
 
-  params.read.mockResolvedValueOnce({ outlookBookingEndpoint: mockEndpoint, apiKey: mockApiKey });
+  params.read.mockResolvedValueOnce({ datatorgetEndpoint: mockEndpoint, apiKey: mockApiKey });
   request.call.mockRejectedValueOnce({ response: { status, statusText } });
 
   try {
@@ -50,7 +50,7 @@ test.each(['create', 'cancel', 'get'])(
   async requestName => {
     expect.assertions(1);
 
-    const endpoint = `${mockEndpoint}/${requestName}`;
+    const endpoint = `${mockEndpoint}/booking/${requestName}`;
     const requestParameter = requestName === 'create' ? { bookingId: requestName } : requestName;
     const body = { bookingId: requestName };
     const requestClient = request.requestClient(
@@ -58,7 +58,7 @@ test.each(['create', 'cancel', 'get'])(
       { 'X-ApiKey': mockApiKey }
     );
 
-    params.read.mockResolvedValueOnce({ outlookBookingEndpoint: mockEndpoint, apiKey: mockApiKey });
+    params.read.mockResolvedValueOnce({ datatorgetEndpoint: mockEndpoint, apiKey: mockApiKey });
     request.call.mockResolvedValueOnce();
 
     await booking[requestName](requestParameter);

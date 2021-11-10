@@ -6,9 +6,9 @@ import params from '../../../libs/params';
 import config from '../../../config';
 
 const URI_RESOURCE = {
-  CREATE: 'create',
-  CANCEL: 'cancel',
-  GET: 'get',
+  CREATE: 'booking/create',
+  CANCEL: 'booking/cancel',
+  GET: 'booking/get',
 };
 
 const METHOD = {
@@ -28,14 +28,14 @@ function get(bookingId) {
 }
 
 async function sendBookingPostRequest(path, body) {
-  const { outlookBookingEndpoint, apiKey } = await getSsmParameters();
+  const { datatorgetEndpoint, apiKey } = await getSsmParameters();
 
   const requestClient = request.requestClient(
     { rejectUnauthorized: false },
     { 'X-ApiKey': apiKey }
   );
 
-  const url = `${outlookBookingEndpoint}/${path}`;
+  const url = `${datatorgetEndpoint}/${path}`;
   const [error, response] = await to(request.call(requestClient, METHOD.POST, url, body));
   if (error) {
     const { status, statusText } = error.response;
@@ -46,7 +46,7 @@ async function sendBookingPostRequest(path, body) {
 }
 
 async function getSsmParameters() {
-  const [error, response] = await to(params.read(config.booking.envsKeyName));
+  const [error, response] = await to(params.read(config.datatorget.envsKeyName));
   if (error) {
     throwError(500);
   }
