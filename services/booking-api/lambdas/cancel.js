@@ -5,7 +5,7 @@ import * as response from '../../../libs/response';
 import booking from '../helpers/booking';
 
 export async function main(event) {
-  const bookingId = event.pathParameters.id;
+  const bookingId = decodeURIComponent(event.pathParameters.id);
 
   const [error] = await to(booking.cancel(bookingId));
   if (error) {

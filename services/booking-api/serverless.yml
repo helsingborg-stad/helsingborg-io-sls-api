@@ -40,7 +40,7 @@ provider:
           Action:
             - ssm:GetParameter
           Resource:
-            - !Sub arn:aws:ssm:${self:provider.region}:${AWS::AccountId}:parameter/bookingEnvs/${self:provider.stage}
+            - !Sub arn:aws:ssm:${self:provider.region}:${AWS::AccountId}:parameter/datatorgetEnvs/${self:provider.stage}
 
 functions:
   createBooking:
