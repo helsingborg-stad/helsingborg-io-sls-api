@@ -23,6 +23,9 @@ const stageConfigs = {
     bankId: {
       envsKeyName: '/bankidEnvs/dev',
     },
+    booking: {
+      envsKeyName: '/bookingEnvs/dev',
+    },
     datatorget: {
       envsKeyName: '/datatorgetEnvs/dev',
     },
@@ -39,6 +42,9 @@ const stageConfigs = {
           envsKeyName: '/vivaCaseEnvs/dev',
         },
       },
+    },
+    search: {
+      envsKeyName: '/searchEnvs/dev',
     },
     bookables: {
       envsKeyName: '/bookablesEnvs/dev',
@@ -73,6 +79,9 @@ const stageConfigs = {
     bankId: {
       envsKeyName: '/bankidEnvs/test',
     },
+    booking: {
+      envsKeyName: '/bookingEnvs/test',
+    },
     datatorget: {
       envsKeyName: '/datatorgetEnvs/test',
     },
@@ -89,6 +98,9 @@ const stageConfigs = {
           envsKeyName: '/vivaCaseEnvs/test',
         },
       },
+    },
+    search: {
+      envsKeyName: '/searchEnvs/test',
     },
     bookables: {
       envsKeyName: '/bookablesEnvs/test',
@@ -123,6 +135,9 @@ const stageConfigs = {
     bankId: {
       envsKeyName: '/bankidEnvs/stage',
     },
+    booking: {
+      envsKeyName: '/bookingEnvs/stage',
+    },
     datatorget: {
       envsKeyName: '/datatorgetEnvs/stage',
     },
@@ -139,6 +154,9 @@ const stageConfigs = {
           envsKeyName: '/vivaCaseEnvs/stage',
         },
       },
+    },
+    search: {
+      envsKeyName: '/searchEnvs/stage',
     },
     bookables: {
       envsKeyName: '/bookablesEnvs/stage',
@@ -173,6 +191,9 @@ const stageConfigs = {
     bankId: {
       envsKeyName: '/bankidEnvs/prod',
     },
+    booking: {
+      envsKeyName: '/bookingEnvs/prod',
+    },
     datatorget: {
       envsKeyName: '/datatorgetEnvs/prod',
     },
@@ -189,6 +210,9 @@ const stageConfigs = {
           envsKeyName: '/vivaCaseEnvs/prod',
         },
       },
+    },
+    search: {
+      envsKeyName: '/searchEnvs/prod',
     },
     bookables: {
       envsKeyName: '/bookablesEnvs/prod',
@@ -223,6 +247,9 @@ const stageConfigs = {
     bankId: {
       envsKeyName: '/bankidEnvs/release',
     },
+    booking: {
+      envsKeyName: '/bookingEnvs/release',
+    },
     datatorget: {
       envsKeyName: '/datatorgetEnvs/release',
     },
@@ -239,6 +266,9 @@ const stageConfigs = {
           envsKeyName: '/vivaCaseEnvs/release',
         },
       },
+    },
+    search: {
+      envsKeyName: '/searchEnvs/release',
     },
     bookables: {
       envsKeyName: '/bookablesEnvs/release',
