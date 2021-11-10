@@ -30,9 +30,7 @@ export async function main(event) {
     return response.failure(createError);
   }
 
-  const {
-    data: { type, id },
-  } = JSON.parse(createBookingResponse.data);
+  const newBookingId = createBookingResponse.data.data.attributes.BookingId;
 
-  return response.success(200, { type, id });
+  return response.success(200, { bookingId: newBookingId });
 }
