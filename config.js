@@ -23,8 +23,8 @@ const stageConfigs = {
     bankId: {
       envsKeyName: '/bankidEnvs/dev',
     },
-    booking: {
-      envsKeyName: '/bookingEnvs/dev',
+    datatorget: {
+      envsKeyName: '/datatorgetEnvs/dev',
     },
     users: {
       tableName: 'users',
@@ -40,14 +40,8 @@ const stageConfigs = {
         },
       },
     },
-    search: {
-      envsKeyName: '/searchEnvs/dev',
-    },
     bookables: {
       envsKeyName: '/bookablesEnvs/dev',
-    },
-    timeSlots: {
-      envsKeyName: 'timeSlotsEnvs/dev',
     },
     vada: {
       envsKeyName: '/vadaEnvs/dev',
@@ -79,8 +73,8 @@ const stageConfigs = {
     bankId: {
       envsKeyName: '/bankidEnvs/test',
     },
-    booking: {
-      envsKeyName: '/bookingEnvs/test',
+    datatorget: {
+      envsKeyName: '/datatorgetEnvs/test',
     },
     users: {
       tableName: 'users',
@@ -96,14 +90,8 @@ const stageConfigs = {
         },
       },
     },
-    search: {
-      envsKeyName: '/searchEnvs/test',
-    },
     bookables: {
       envsKeyName: '/bookablesEnvs/test',
-    },
-    timeSlots: {
-      envsKeyName: 'timeSlotsEnvs/test',
     },
     vada: {
       envsKeyName: '/vadaEnvs/test',
@@ -135,8 +123,8 @@ const stageConfigs = {
     bankId: {
       envsKeyName: '/bankidEnvs/stage',
     },
-    booking: {
-      envsKeyName: '/bookingEnvs/stage',
+    datatorget: {
+      envsKeyName: '/datatorgetEnvs/stage',
     },
     users: {
       tableName: 'users',
@@ -152,14 +140,8 @@ const stageConfigs = {
         },
       },
     },
-    search: {
-      envsKeyName: '/searchEnvs/stage',
-    },
     bookables: {
       envsKeyName: '/bookablesEnvs/stage',
-    },
-    timeSlots: {
-      envsKeyName: 'timeSlotsEnvs/stage',
     },
     vada: {
       envsKeyName: '/vadaEnvs/stage',
@@ -191,8 +173,8 @@ const stageConfigs = {
     bankId: {
       envsKeyName: '/bankidEnvs/prod',
     },
-    booking: {
-      envsKeyName: '/bookingEnvs/prod',
+    datatorget: {
+      envsKeyName: '/datatorgetEnvs/prod',
     },
     users: {
       tableName: 'users',
@@ -208,14 +190,8 @@ const stageConfigs = {
         },
       },
     },
-    search: {
-      envsKeyName: '/searchEnvs/prod',
-    },
     bookables: {
       envsKeyName: '/bookablesEnvs/prod',
-    },
-    timeSlots: {
-      envsKeyName: 'timeSlotsEnvs/prod',
     },
     vada: {
       envsKeyName: '/vadaEnvs/prod',
@@ -247,8 +223,8 @@ const stageConfigs = {
     bankId: {
       envsKeyName: '/bankidEnvs/release',
     },
-    booking: {
-      envsKeyName: '/bookingEnvs/release',
+    datatorget: {
+      envsKeyName: '/datatorgetEnvs/release',
     },
     users: {
       tableName: 'users',
@@ -264,14 +240,8 @@ const stageConfigs = {
         },
       },
     },
-    search: {
-      envsKeyName: '/searchEnvs/release',
-    },
     bookables: {
       envsKeyName: '/bookablesEnvs/release',
-    },
-    timeSlots: {
-      envsKeyName: 'timeSlotsEnvs/release',
     },
     vada: {
       envsKeyName: '/vadaEnvs/release',
