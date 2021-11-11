@@ -9,5 +9,7 @@
   "keywords": [],
   "author": "Helsingborg Stad",
   "license": "MIT",
-  "dependencies": {}
+  "dependencies": {
+    "dayjs": "^1.10.7"
+  }
 }

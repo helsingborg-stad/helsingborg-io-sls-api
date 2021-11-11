@@ -1,16 +1,10 @@
 import to from 'await-to-js';
 import dayjs from 'dayjs';
-import dayjsPluginUTC from 'dayjs-plugin-utc';
-import timezone from 'dayjs/plugin/timezone';
 
 import * as response from '../../../libs/response';
 
 import createSlotsWithinTimeSpan from '../helpers/createSlots';
 import getTimeSpans from '../helpers/getTimeSpans';
-
-dayjs.extend(dayjsPluginUTC);
-dayjs.extend(timezone);
-dayjs().tz('Europe/Stockholm');
 
 export async function main(event) {
   console.log('EVENT: ', JSON.stringify(event, undefined));

@@ -16,11 +16,11 @@ beforeEach(() => {
 
   meetingDuration = 30;
   meetingBuffer = 15;
-  startTime = dayjs(timeSpanStart).format('HH:mm:ss');
+  startTime = dayjs(timeSpanStart).format('HH:mm:ssZ');
 });
 
 it('successfully creates timeslot(s) within time span', () => {
-  const endTime = dayjs(timeSpanStart).add(meetingDuration, 'minutes').format('HH:mm:ss');
+  const endTime = dayjs(timeSpanStart).add(meetingDuration, 'minutes').format('HH:mm:ssZ');
 
   const expectedResult = [{ startTime, endTime }];
 
@@ -45,12 +45,12 @@ it('adds the appropriate number of timeslots (with buffer) within time span', ()
 
   const expectedResult = [
     {
-      startTime: firstTimeSlotStart.format('HH:mm:ss'),
-      endTime: firstTimeSlotEnd.format('HH:mm:ss'),
+      startTime: firstTimeSlotStart.format('HH:mm:ssZ'),
+      endTime: firstTimeSlotEnd.format('HH:mm:ssZ'),
     },
     {
-      startTime: secondTimeSlotStart.format('HH:mm:ss'),
-      endTime: secondTimeSlotEnd.format('HH:mm:ss'),
+      startTime: secondTimeSlotStart.format('HH:mm:ssZ'),
+      endTime: secondTimeSlotEnd.format('HH:mm:ssZ'),
     },
   ];
 
