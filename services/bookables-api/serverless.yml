@@ -41,6 +41,7 @@ provider:
             - ssm:GetParameter
           Resource:
             - !Sub arn:aws:ssm:${self:provider.region}:${AWS::AccountId}:parameter/bookablesEnvs/${self:provider.stage}
+            - !Sub arn:aws:ssm:${self:provider.region}:${AWS::AccountId}:parameter/datatorgetEnvs/${self:provider.stage}
 
 functions:
   getBookables:
@@ -51,3 +52,13 @@ functions:
           method: get
           private: true
           cors: true
+
+  getAdministratorsByEmail:
+    handler: lambdas/getAdministratorsByEmail.main
+    events:
+      - http:
+          path: bookables/getAdministratorsByEmail/{email}
+          method: get
+          private: true
+          cors: true
+
