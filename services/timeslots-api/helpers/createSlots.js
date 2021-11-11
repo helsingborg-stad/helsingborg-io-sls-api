@@ -19,8 +19,8 @@ const createSlotsWithinTimeSpan = (timeSpanStart, timeSpanEnd, meetingDuration, 
     const slotEnd = slotStart.add(meetingDuration, 'minutes');
 
     if (slotEnd <= timeSpanEnd) {
-      const endTime = dayjs(slotEnd).format('HH:mm:ssZ');
-      const startTime = dayjs(slotStart).format('HH:mm:ssZ');
+      const endTime = dayjs(slotEnd).utc().format('HH:mm:ssZ');
+      const startTime = dayjs(slotStart).utc().format('HH:mm:ssZ');
 
       timeSlots.push({ startTime, endTime });
     }
