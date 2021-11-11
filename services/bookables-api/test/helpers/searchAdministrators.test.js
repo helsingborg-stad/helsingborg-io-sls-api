@@ -39,6 +39,30 @@ it('throws if it receives an error when making request against datatorget API', 
   }
 });
 
-it('returns a successful response when receiving a successful response from an API', async () => {
-  // TODO: 1. Kolla response från datatorget.
+it('returns a successful response ', async () => {
+  expect.assertions(1);
+
+  params.read.mockResolvedValueOnce({
+    outlookSearchEndpoint: mockOutlookSearchEndpoint,
+    apiKey: mockApiKey,
+  });
+
+  const datatorgetResponse = {
+    jsonapi: {
+      version: '1.0',
+    },
+    data: {
+      data: {
+        type: 'bookings',
+        id: 'xxxx',
+        attributes: ['email_1@email.com', 'email_2@email.com'],
+      },
+    },
+  };
+
+  call.mockImplementation(jest.fn().mockResolvedValueOnce(datatorgetResponse));
+
+  const result = await searchAdministrators({ mailbox: 'bla@helsingborg.se' });
+
+  expect(result).toEqual(datatorgetResponse);
 });
