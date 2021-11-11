@@ -27,7 +27,6 @@ async function getTimeSpans(body) {
     throw outlookError;
   }
 
-  console.log('OUTLOOK RESPONSE: ', outlookResponse);
   const timeSpans = outlookResponse?.data?.data?.attributes || {};
 
   return timeSpans;
