@@ -45,14 +45,25 @@ it('throws if failing making sendBookingPostRequest requests', async () => {
   }
 });
 
-test.each(['create', 'cancel', 'get'])(
-  `booking.%s makes requests against correct endpoint`,
-  async requestName => {
+test.each([
+  {
+    path: 'create',
+    functionCall: { requiredAttendees: ['mock'], startTime: '1', endTime: '2' },
+    requestCall: { requiredAttendees: ['mock'], startTime: '1', endTime: '2' },
+  },
+  { path: 'cancel', functionCall: 'mockId', requestCall: { bookingId: 'mockId' } },
+  { path: 'get', functionCall: 'mockId', requestCall: { bookingId: 'mockId' } },
+  {
+    path: 'search',
+    functionCall: { startTime: '1', endTime: '2', referenceCode: '3' },
+    requestCall: { startTime: '1', endTime: '2', referenceCode: '3' },
+  },
+])(
+  `booking $path makes requests against correct endpoint`,
+  async ({ path, functionCall, requestCall }) => {
     expect.assertions(1);
 
-    const endpoint = `${mockEndpoint}/booking/${requestName}`;
-    const requestParameter = requestName === 'create' ? { bookingId: requestName } : requestName;
-    const body = { bookingId: requestName };
+    const endpoint = `${mockEndpoint}/booking/${path}`;
     const requestClient = request.requestClient(
       { rejectUnauthorized: false },
       { 'X-ApiKey': mockApiKey }
@@ -61,8 +72,8 @@ test.each(['create', 'cancel', 'get'])(
     params.read.mockResolvedValueOnce({ datatorgetEndpoint: mockEndpoint, apiKey: mockApiKey });
     request.call.mockResolvedValueOnce();
 
-    await booking[requestName](requestParameter);
+    await booking[path](functionCall);
 
-    expect(request.call).toHaveBeenCalledWith(requestClient, 'post', endpoint, body);
+    expect(request.call).toHaveBeenCalledWith(requestClient, 'post', endpoint, requestCall);
   }
 );

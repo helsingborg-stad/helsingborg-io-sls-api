@@ -78,3 +78,12 @@ functions:
           method: patch
           private: true
           cors: true
+
+  searchByReferenceCode:
+    handler: lambdas/searchByReferenceCode.main
+    events:
+      - http:
+          path: booking/search
+          method: post
+          private: true
+          cors: true
