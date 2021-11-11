@@ -202,3 +202,55 @@ $ npm run test -- --[option_1] --[option_2]
   }
 }
 ```
+
+### SEARCH BY REFERENCE CODE
+
+#### Request Type
+
+`POST`
+
+#### Endpoint
+
+`/booking/search`
+
+#### JSON Payload
+
+```
+{
+  "startTime": "utc_time_format",
+  "endTime": "utc_time_format",
+  "referenceCode": "reference_code"
+}
+```
+
+#### Expected JSON Response
+
+```
+{
+  "jsonapi": {
+      "version": "1.0"
+  },
+  "data": {
+      "type": "type",
+      "id": "id",
+      "attributes": [
+        {
+            "BookingId": "bookingId",
+            "Attendees": [
+                {
+                    "Email": "email@email.com",
+                    "Type": "Required",
+                    "Status": "Declined"
+                }
+            ],
+            "Subject": "subject",
+            "Body": null,
+            "Location": "location",
+            "ReferenceCode": "reference code",
+            "StartTime": "2021-11-10T10:00:00+01:00",
+            "EndTime": "2021-11-10T11:00:00+01:00"
+        },
+      ]
+  }
+}
+```
