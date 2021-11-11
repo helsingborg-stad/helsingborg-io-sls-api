@@ -1,10 +1,13 @@
 import to from 'await-to-js';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 
 import * as response from '../../../libs/response';
 
 import createSlotsWithinTimeSpan from '../helpers/createSlots';
 import getTimeSpans from '../helpers/getTimeSpans';
+
+dayjs.extend(utc);
 
 export async function main(event) {
   console.log('EVENT: ', JSON.stringify(event, undefined));
@@ -36,7 +39,7 @@ export async function main(event) {
     timeSlots[email] = {};
 
     timeSpansResult[email].forEach(({ StartTime, EndTime }) => {
-      const date = dayjs(StartTime).format('YYYY-MM-DD');
+      const date = dayjs(StartTime).utc().format('YYYY-MM-DD');
 
       if (!timeSlots[email][date]) {
         timeSlots[email][date] = [];

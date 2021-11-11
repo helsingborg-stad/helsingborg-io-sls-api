@@ -1,4 +1,7 @@
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+
+dayjs.extend(utc);
 
 import createSlotsWithinTimeSpan from '../../helpers/createSlots';
 
@@ -16,11 +19,11 @@ beforeEach(() => {
 
   meetingDuration = 30;
   meetingBuffer = 15;
-  startTime = dayjs(timeSpanStart).format('HH:mm:ssZ');
+  startTime = dayjs(timeSpanStart).utc().format('HH:mm:ssZ');
 });
 
 it('successfully creates timeslot(s) within time span', () => {
-  const endTime = dayjs(timeSpanStart).add(meetingDuration, 'minutes').format('HH:mm:ssZ');
+  const endTime = dayjs(timeSpanStart).utc().add(meetingDuration, 'minutes').format('HH:mm:ssZ');
 
   const expectedResult = [{ startTime, endTime }];
 
@@ -37,7 +40,7 @@ it('successfully creates timeslot(s) within time span', () => {
 it('adds the appropriate number of timeslots (with buffer) within time span', () => {
   meetingDuration = 20;
 
-  const firstTimeSlotStart = dayjs(timeSpanStart);
+  const firstTimeSlotStart = dayjs(timeSpanStart).utc();
   const firstTimeSlotEnd = firstTimeSlotStart.add(meetingDuration, 'minutes');
 
   const secondTimeSlotStart = firstTimeSlotStart.add(meetingDuration + meetingBuffer, 'minutes');

@@ -1,5 +1,3 @@
-import dayjs from 'dayjs';
-
 import { main } from '../../lambdas/getTimeSlots';
 import getTimeSpans from '../../helpers/getTimeSpans';
 
@@ -33,21 +31,14 @@ function createLambdaResponse(lambdaResult, statusCode = 200) {
   };
 }
 
-/**
- * Because the local machine and git pipeline have different
- * time offsets, this function is created to get the
- * result localized.
- */
-const getLocalizedTime = date => dayjs(date).format('HH:mm:ssZ');
-
 it('successfully returns available time slots for a single user', async () => {
   expect.assertions(1);
 
   getTimeSpans.mockResolvedValueOnce({
     [mockAttendee]: [
       {
-        StartTime: '2021-10-10T07:00:00+01:00',
-        EndTime: '2021-10-10T09:00:00+01:00',
+        StartTime: '2021-10-10T08:00:00+01:00',
+        EndTime: '2021-10-10T10:00:00+01:00',
       },
     ],
   });
@@ -56,8 +47,8 @@ it('successfully returns available time slots for a single user', async () => {
     [mockAttendee]: {
       '2021-10-10': [
         {
-          startTime: getLocalizedTime('2021-10-10T08:00:00'),
-          endTime: getLocalizedTime('2021-10-10T09:00:00'),
+          startTime: '07:00:00+00:00',
+          endTime: '08:00:00+00:00',
         },
       ],
     },
@@ -76,14 +67,14 @@ it('successfully returns available time slots for multiple users', async () => {
   getTimeSpans.mockResolvedValueOnce({
     [mockAttendee]: [
       {
-        StartTime: '2021-10-10T07:00:00+01:00',
-        EndTime: '2021-10-10T09:00:00+01:00',
+        StartTime: '2021-10-10T08:00:00+01:00',
+        EndTime: '2021-10-10T10:00:00+01:00',
       },
     ],
     [secondMockAttendee]: [
       {
-        StartTime: '2021-10-10T07:00:00+01:00',
-        EndTime: '2021-10-10T10:00:00+01:00',
+        StartTime: '2021-10-10T08:00:00+01:00',
+        EndTime: '2021-10-10T11:00:00+01:00',
       },
     ],
   });
@@ -92,20 +83,20 @@ it('successfully returns available time slots for multiple users', async () => {
     [mockAttendee]: {
       '2021-10-10': [
         {
-          startTime: getLocalizedTime('2021-10-10T08:00:00'),
-          endTime: getLocalizedTime('2021-10-10T09:00:00'),
+          startTime: '07:00:00+00:00',
+          endTime: '08:00:00+00:00',
         },
       ],
     },
     [secondMockAttendee]: {
       '2021-10-10': [
         {
-          startTime: getLocalizedTime('2021-10-10T08:00:00'),
-          endTime: getLocalizedTime('2021-10-10T09:00:00'),
+          startTime: '07:00:00+00:00',
+          endTime: '08:00:00+00:00',
         },
         {
-          startTime: getLocalizedTime('2021-10-10T09:15:00'),
-          endTime: getLocalizedTime('2021-10-10T10:15:00'),
+          startTime: '08:15:00+00:00',
+          endTime: '09:15:00+00:00',
         },
       ],
     },
@@ -124,8 +115,8 @@ it('successfully returns available time slots when fetching multiple time spans'
   getTimeSpans.mockResolvedValueOnce({
     [mockAttendee]: [
       {
-        StartTime: '2021-10-10T07:00:00+01:00',
-        EndTime: '2021-10-10T09:00:00+01:00',
+        StartTime: '2021-10-10T08:00:00+01:00',
+        EndTime: '2021-10-10T10:00:00+01:00',
       },
       {
         StartTime: '2021-10-10T11:00:00+01:00',
@@ -138,12 +129,12 @@ it('successfully returns available time slots when fetching multiple time spans'
     [mockAttendee]: {
       '2021-10-10': [
         {
-          startTime: getLocalizedTime('2021-10-10T08:00:00'),
-          endTime: getLocalizedTime('2021-10-10T09:00:00'),
+          startTime: '07:00:00+00:00',
+          endTime: '08:00:00+00:00',
         },
         {
-          startTime: getLocalizedTime('2021-10-10T12:00:00'),
-          endTime: getLocalizedTime('2021-10-10T13:00:00'),
+          startTime: '10:00:00+00:00',
+          endTime: '11:00:00+00:00',
         },
       ],
     },
@@ -171,8 +162,8 @@ it('successfully returns available time with another meetingDuration and meeting
   getTimeSpans.mockResolvedValueOnce({
     [mockAttendee]: [
       {
-        StartTime: '2021-10-10T07:00:00+01:00',
-        EndTime: '2021-10-10T08:00:00+01:00',
+        StartTime: '2021-10-10T08:00:00+01:00',
+        EndTime: '2021-10-10T09:00:00+01:00',
       },
     ],
   });
@@ -181,16 +172,16 @@ it('successfully returns available time with another meetingDuration and meeting
     [mockAttendee]: {
       '2021-10-10': [
         {
-          startTime: getLocalizedTime('2021-10-10T08:00:00'),
-          endTime: getLocalizedTime('2021-10-10T08:15:00'),
+          startTime: '07:00:00+00:00',
+          endTime: '07:15:00+00:00',
         },
         {
-          startTime: getLocalizedTime('2021-10-10T08:20:00'),
-          endTime: getLocalizedTime('2021-10-10T08:35:00'),
+          startTime: '07:20:00+00:00',
+          endTime: '07:35:00+00:00',
         },
         {
-          startTime: getLocalizedTime('2021-10-10T08:40:00'),
-          endTime: getLocalizedTime('2021-10-10T08:55:00'),
+          startTime: '07:40:00+00:00',
+          endTime: '07:55:00+00:00',
         },
       ],
     },
