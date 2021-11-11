@@ -9,6 +9,7 @@ const URI_RESOURCE = {
   CREATE: 'booking/create',
   CANCEL: 'booking/cancel',
   GET: 'booking/get',
+  SEARCH: 'booking/search',
 };
 
 const METHOD = {
@@ -25,6 +26,10 @@ function cancel(bookingId) {
 
 function get(bookingId) {
   return sendBookingPostRequest(URI_RESOURCE.GET, { bookingId });
+}
+
+function search(body) {
+  return sendBookingPostRequest(URI_RESOURCE.SEARCH, body);
 }
 
 async function sendBookingPostRequest(path, body) {
@@ -54,4 +59,4 @@ async function getSsmParameters() {
   return response;
 }
 
-export default { create, cancel, get };
+export default { create, cancel, get, search };
