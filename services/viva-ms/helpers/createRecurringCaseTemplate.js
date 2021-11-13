@@ -44,11 +44,6 @@ function mapCoApplicant(person, answers) {
   };
 }
 
-function getSecondStringFromDotNotatedString(sourceString) {
-  const [, string] = sourceString.split('.');
-  return string;
-}
-
 function createPersons(persons, answers) {
   const applicantPersons = persons.map(person => {
     if (person.role === PERSON_ROLE.applicant) {
@@ -84,7 +79,7 @@ function createHousingInfo(answers) {
 
   const housingInfo = filteredAnswers.reduce((accumulatedAnswer, answer) => {
     // field id can be constructed like personInfo.personFirstName, personInfo.personLastName
-    const fieldId = getSecondStringFromDotNotatedString(answer.field.id);
+    const fieldId = formHelpers.getSecondStringFromDotNotatedString(answer.field.id);
     return { ...accumulatedAnswer, [fieldId]: answer.value };
   }, {});
 
