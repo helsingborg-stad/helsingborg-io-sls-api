@@ -113,6 +113,7 @@ export async function main(event, context) {
 }
 
 function updateVivaCaseState(caseItem) {
+  const newState = `${CASE_HTML_GENERATED}#${caseItem.state}`;
   const params = {
     TableName: config.cases.tableName,
     Key: {
@@ -124,7 +125,7 @@ function updateVivaCaseState(caseItem) {
       '#state': 'state',
     },
     ExpressionAttributeValues: {
-      ':newState': CASE_HTML_GENERATED,
+      ':newState': newState,
     },
     ReturnValues: 'NONE',
   };
