@@ -33,7 +33,7 @@ export async function main(event) {
   return true;
 }
 
-async function scanCasesById(caseId) {
+function scanCasesById(caseId) {
   const scanParams = {
     TableName: config.cases.tableName,
     FilterExpression: '#id = :id',
@@ -48,9 +48,9 @@ async function scanCasesById(caseId) {
   return dynamoDb.call('scan', scanParams);
 }
 
-async function updateCaseAttributes(currentCase, pdf) {
+function updateCaseAttributes(caseItem, pdf) {
   const isPdf = !!pdf;
-  const newState = `${isPdf ? PDF_GENERATED : PDF_NOT_GENERATED}#${currentCase.state}`;
+  const newState = `${isPdf ? PDF_GENERATED : PDF_NOT_GENERATED}#${caseItem.state}`;
 
   const UpdateExpression =
     'SET #pdf = :newPdf, #pdfGenerated = :newPdfGenerated, #state = :newState';
@@ -68,8 +68,8 @@ async function updateCaseAttributes(currentCase, pdf) {
   const params = {
     TableName: config.cases.tableName,
     Key: {
-      PK: currentCase.PK,
-      SK: currentCase.SK,
+      PK: caseItem.PK,
+      SK: caseItem.SK,
     },
     UpdateExpression,
     ExpressionAttributeNames,
