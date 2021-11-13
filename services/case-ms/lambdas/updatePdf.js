@@ -3,22 +3,17 @@ import to from 'await-to-js';
 import config from '../../../config';
 
 import * as dynamoDb from '../../../libs/dynamoDb';
-import { s3Client } from '../../../libs/S3';
+import S3 from '../../../libs/S3';
 import { PDF_GENERATED, PDF_NOT_GENERATED } from '../../../libs/constants';
 
 export async function main(event) {
-  const { resourceId, pdfStorageBucketKey } = event.detail;
+  const { resourceId, pdfBucketKey } = event.detail;
 
-  const [s3GetObjectError, pdfObject] = await to(
-    s3Client
-      .getObject({
-        Bucket: process.env.PDF_STORAGE_BUCKET_NAME,
-        Key: pdfStorageBucketKey,
-      })
-      .promise()
+  const [getFileS3Error, pdfS3Object] = await to(
+    S3.getFile(process.env.PDF_STORAGE_BUCKET_NAME, pdfBucketKey)
   );
-  if (s3GetObjectError) {
-    console.error(s3GetObjectError);
+  if (getFileS3Error) {
+    console.error(getFileS3Error);
     return false;
   }
 
@@ -29,12 +24,13 @@ export async function main(event) {
   }
 
   const [currentCase] = scanCasesResult.Items;
-
-  const [updateCaseAttributesError] = await to(updateCaseAttributes(currentCase, pdfObject.Body));
+  const [updateCaseAttributesError] = await to(updateCaseAttributes(currentCase, pdfS3Object.Body));
   if (updateCaseAttributesError) {
     console.error(updateCaseAttributesError);
     return false;
   }
+
+  return true;
 }
 
 async function scanCasesById(caseId) {
