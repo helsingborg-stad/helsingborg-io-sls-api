@@ -62,6 +62,8 @@ export async function main(event) {
       return false;
     }
   }
+
+  return true;
 }
 
 async function htmlToPdf(html) {
