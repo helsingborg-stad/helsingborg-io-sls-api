@@ -82,11 +82,7 @@ export async function main(event, context) {
     return false;
   }
 
-  const caseKeys = {
-    PK: caseItem.PK,
-    SK: caseItem.SK,
-  };
-  const [updateCaseError] = await to(updateVivaCaseState(caseKeys));
+  const [updateCaseError] = await to(updateVivaCaseState(caseItem));
   if (updateCaseError) {
     log.error(
       'Failed to update case state attribute',
@@ -116,12 +112,12 @@ export async function main(event, context) {
   return true;
 }
 
-function updateVivaCaseState(caseKeys) {
+function updateVivaCaseState(caseItem) {
   const params = {
     TableName: config.cases.tableName,
     Key: {
-      PK: caseKeys.PK,
-      SK: caseKeys.SK,
+      PK: caseItem.PK,
+      SK: caseItem.SK,
     },
     UpdateExpression: 'SET #state = :newState',
     ExpressionAttributeNames: {
