@@ -1,7 +1,10 @@
-import { s3Client } from '../../../libs/S3';
-import * as dynamoDb from '../../../libs/dynamoDb';
+import to from 'await-to-js';
+
 import config from '../../../config';
-import { to } from 'await-to-js';
+
+import * as dynamoDb from '../../../libs/dynamoDb';
+import { s3Client } from '../../../libs/S3';
+import { PDF_GENERATED, PDF_NOT_GENERATED } from '../../../libs/constants';
 
 export async function main(event) {
   const { resourceId, pdfStorageBucketKey } = event.detail;
@@ -27,11 +30,9 @@ export async function main(event) {
 
   const [currentCase] = scanCasesResult.Items;
 
-  const [updateCasePdfAttributesError] = await to(
-    updateCasePdfAttributes(currentCase, pdfObject.Body)
-  );
-  if (updateCasePdfAttributesError) {
-    console.error(updateCasePdfAttributesError);
+  const [updateCaseAttributesError] = await to(updateCaseAttributes(currentCase, pdfObject.Body));
+  if (updateCaseAttributesError) {
+    console.error(updateCaseAttributesError);
     return false;
   }
 }
@@ -51,7 +52,10 @@ async function scanCasesById(caseId) {
   return dynamoDb.call('scan', scanParams);
 }
 
-async function updateCasePdfAttributes(currentCase, pdf) {
+async function updateCaseAttributes(currentCase, pdf) {
+  const isPdf = !!pdf;
+  const newState = `${isPdf ? PDF_GENERATED : PDF_NOT_GENERATED}#${currentCase.state}`;
+
   const UpdateExpression =
     'SET #pdf = :newPdf, #pdfGenerated = :newPdfGenerated, #state = :newState';
   const ExpressionAttributeNames = {
@@ -61,8 +65,8 @@ async function updateCasePdfAttributes(currentCase, pdf) {
   };
   const ExpressionAttributeValues = {
     ':newPdf': pdf || undefined,
-    ':newPdfGenerated': pdf !== undefined ? 'yes' : 'no',
-    ':newState': pdf != undefined ? 'PDF_GENERATED' : 'PDF_NOT_GENERATED',
+    ':newPdfGenerated': isPdf ? 'yes' : 'no',
+    ':newState': newState,
   };
 
   const params = {
