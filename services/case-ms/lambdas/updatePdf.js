@@ -4,9 +4,10 @@ import config from '../../../config';
 
 import * as dynamoDb from '../../../libs/dynamoDb';
 import S3 from '../../../libs/S3';
+import log from '../../../libs/logs';
 import { PDF_GENERATED, PDF_NOT_GENERATED } from '../../../libs/constants';
 
-export async function main(event) {
+export async function main(event, context) {
   const { keys: caseKeys, pdfStorageBucketKey } = event.detail;
 
   if (!caseKeys?.PK) {
@@ -23,15 +24,23 @@ export async function main(event) {
     S3.getFile(process.env.PDF_STORAGE_BUCKET_NAME, pdfStorageBucketKey)
   );
   if (getFileS3Error) {
-    console.error(getFileS3Error);
+    log.error(
+      'Failed to get file from S3 bucket',
+      context.awsRequestId,
+      'service-case-ms-001',
+      getFileS3Error
+    );
     return false;
   }
 
-  const [updateCasePdfAttributesError] = await to(
-    updateCasePdfAttributes(caseKeys, pdfS3Object.Body)
-  );
-  if (updateCasePdfAttributesError) {
-    console.error(updateCasePdfAttributesError);
+  const [updateCaseAttributesError] = await to(updateCasePdfAttributes(caseKeys, pdfS3Object.Body));
+  if (updateCaseAttributesError) {
+    log.error(
+      'Failed to update case',
+      context.awsRequestId,
+      'service-case-ms-003',
+      updateCaseAttributesError
+    );
     return false;
   }
 
