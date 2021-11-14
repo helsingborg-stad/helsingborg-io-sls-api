@@ -4,29 +4,45 @@ import config from '../../../config';
 
 import * as dynamoDb from '../../../libs/dynamoDb';
 import S3 from '../../../libs/S3';
+import log from '../../../libs/logs';
 import { PDF_GENERATED, PDF_NOT_GENERATED } from '../../../libs/constants';
 
-export async function main(event) {
+export async function main(event, context) {
   const { resourceId, pdfBucketKey } = event.detail;
 
   const [getFileS3Error, pdfS3Object] = await to(
     S3.getFile(process.env.PDF_STORAGE_BUCKET_NAME, pdfBucketKey)
   );
   if (getFileS3Error) {
-    console.error(getFileS3Error);
+    log.error(
+      'Failed to get file from S3 bucket',
+      context.awsRequestId,
+      'service-case-ms-001',
+      getFileS3Error
+    );
     return false;
   }
 
   const [scanCasesByIdError, scanCasesResult] = await to(scanCasesById(resourceId));
   if (scanCasesByIdError) {
-    console.error(scanCasesByIdError);
+    log.error(
+      `Failed to scan for case with id: ${resourceId}`,
+      context.awsRequestId,
+      'service-case-ms-002',
+      scanCasesByIdError
+    );
     return false;
   }
 
   const [currentCase] = scanCasesResult.Items;
   const [updateCaseAttributesError] = await to(updateCaseAttributes(currentCase, pdfS3Object.Body));
   if (updateCaseAttributesError) {
-    console.error(updateCaseAttributesError);
+    log.error(
+      `Failed to update case with id: ${currentCase.id}`,
+      context.awsRequestId,
+      'service-case-ms-003',
+      updateCaseAttributesError
+    );
     return false;
   }
 
