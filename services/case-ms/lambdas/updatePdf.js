@@ -51,28 +51,21 @@ function updateCasePdfAttributes(caseKeys, pdf) {
   const isPdf = !!pdf;
   const newState = isPdf ? PDF_GENERATED : PDF_NOT_GENERATED;
 
-  const UpdateExpression =
-    'SET #pdf = :newPdf, #pdfGenerated = :newPdfGenerated, #state = :newState';
-  const ExpressionAttributeNames = {
-    '#pdf': 'pdf',
-    '#pdfGenerated': 'pdfGenerated',
-    '#state': 'state',
-  };
-  const ExpressionAttributeValues = {
-    ':newPdf': pdf || undefined,
-    ':newPdfGenerated': isPdf ? 'yes' : 'no',
-    ':newState': newState,
-  };
-
   const params = {
     TableName: config.cases.tableName,
     Key: {
       PK: caseKeys.PK,
       SK: caseKeys.SK,
     },
-    UpdateExpression,
-    ExpressionAttributeNames,
-    ExpressionAttributeValues,
+    UpdateExpression: 'SET #pdf = :newPdf, #state = :newState',
+    ExpressionAttributeNames: {
+      '#pdf': 'pdf',
+      '#state': 'state',
+    },
+    ExpressionAttributeValues: {
+      ':newPdf': pdf || undefined,
+      ':newState': newState,
+    },
     ReturnValue: 'NONE',
   };
 
