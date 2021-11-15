@@ -37,9 +37,9 @@ provider:
         - Effect: Allow
           Action:
             - "dynamodb:ListStreams"
-          # Restrict our IAM role permissions to the specific table for the stage
           Resource:
             - "Fn::ImportValue": ${self:custom.resourcesStage}-CasesTableArn
+
         - Effect: Allow
           Action:
             - kms:Decrypt
