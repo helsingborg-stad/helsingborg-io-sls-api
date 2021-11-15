@@ -85,49 +85,6 @@ export function createHousingInfoObject(answers) {
   return housingInfo;
 }
 
-function createHousingExpenses(answers) {
-  const categories = [
-    {
-      title: 'Hyra/Avgift',
-      filterTags: ['expenses', 'boende', 'amount'],
-      value: '',
-    },
-    {
-      title: 'Hemförsäkring',
-      filterTags: ['expenses', 'hemforsakring', 'amount'],
-      value: '',
-    },
-    {
-      title: 'Bredband',
-      filterTags: ['expenses', 'bredband', 'amount'],
-      value: '',
-    },
-    {
-      title: 'El',
-      filterTags: ['expenses', 'el', 'amount'],
-      value: '',
-    },
-  ];
-
-  const expenses = categories.map(category => {
-    const [answer] = formHelpers.filterByTags(answers, category.filterTags);
-    if (answer) {
-      return {
-        type: 'expenses',
-        title: category.title,
-        value: answer.value,
-        id: category.filterTags.join(''),
-        belongsTo: 'HOUSING',
-        description: '',
-        date: '',
-        currency: 'kr',
-      };
-    }
-    return undefined;
-  });
-
-  return expenses;
-}
 function createAssetsObject(answers) {
   const commonFilterTags = ['amount', 'assets'];
   const categories = [
@@ -179,139 +136,205 @@ function createAssetsObject(answers) {
   return assets;
 }
 
-function createHousingIncomes(answers) {
-  const commonFilterTags = ['incomes', 'annan'];
-  const filters = [
-    {
-      tags: ['group:hyresdel_hyra', ...commonFilterTags],
-    },
-    {
-      tags: ['group:hyresdel_internet', ...commonFilterTags],
-    },
-    {
-      tags: ['group:hyresdel_el', ...commonFilterTags],
-    },
-  ];
-
-  const incomes = filters.map(filter => {
-    const filteredAnswers = formHelpers.filterByTags(answers, filter.tags);
-
-    if (filteredAnswers.length) {
-      const initialHousingIncome = {
-        type: 'incomes',
-        belongsTo: 'HOUSING',
-        id: filter.tags.join(''),
-        description: '',
-        date: '',
-        value: '',
-        currency: 'kr',
-      };
-
-      const income = filteredAnswers.reduce((currentIncome, answer) => {
-        if (answer.field.tags.includes('description')) {
-          return {
-            ...currentIncome,
-            description: answer.value,
-          };
-        }
-
-        if (answer.field.tags.includes('amount')) {
-          return {
-            ...currentIncome,
-            value: answer.value,
-          };
-        }
-
-        return currentIncome;
-      }, initialHousingIncome);
-
-      return income;
-    }
-    return undefined;
-  });
-
-  return incomes;
+function getVivaPostType(tags) {
+  const vivaPostType = tags.reduce((type, tag) => VIVA_POST_TYPE_COLLECTION[tag] ?? type, '');
+  return vivaPostType;
 }
 
-export function createEconomicsObject(answers) {
-  const categories = ['expenses', 'incomes'];
-  let [expenses, incomes] = categories.map(category => {
-    const categoryAnswers = formHelpers.filterByTags(answers, category);
-    const categorySummaryList = categoryAnswers.reduce((summaryList, answer) => {
-      const { tags } = answer.field;
+function createFinancialPosts({ answers, filterTags = [], initialPost = {} }) {
+  const filteredAnswers = formHelpers.filterByTags(answers, filterTags);
 
-      const groupTag = formHelpers.getTagIfIncludes(tags, TAG_NAME.group);
+  return filteredAnswers.reduce((posts, answer) => {
+    const { tags } = answer.field;
+    const group = formHelpers.getTagIfIncludes(tags, TAG_NAME.group);
 
-      let summaryItem = {
-        type: category,
-        id: groupTag,
-        belongsTo: 'APPLICANT',
-        title: '',
-        description: '',
-        date: '',
-        value: '',
-        currency: 'kr',
-      };
+    const index = posts.findIndex(post => post.group === group);
+    let post = posts[index];
 
-      const summaryItemIndex = summaryList.findIndex(summaryItem => summaryItem.id === groupTag);
+    const vivaPostType = getVivaPostType(tags);
+    const hasAppliesToTag = tags.includes(TAG_NAME.appliesto);
+    const hasAmountTag = tags.includes(TAG_NAME.amount);
+    const hasDescriptionTag = tags.includes(TAG_NAME.description);
+    const hasDateTag = tags.includes(TAG_NAME.date);
 
-      if (summaryItemIndex !== -1) {
-        summaryItem = summaryList[summaryItemIndex];
-      }
+    post = {
+      ...(post ?? initialPost),
+      ...(hasAppliesToTag && { belongsTo: answer.value }),
+      ...(hasAmountTag && { value: answer.value }),
+      ...(hasDescriptionTag && { description: answer.value }),
+      ...(hasDateTag && { date: formatTimestampToDate(answer.value) }),
+      ...(group && { group }),
+      ...(vivaPostType && { title: vivaPostType }),
+    };
 
-      if (tags.includes(TAG_NAME.appliesto)) {
-        summaryItem.belongsTo = answer.value;
-      }
+    if (index >= 0) {
+      posts[index] = post;
+      return posts;
+    } else {
+      return [...posts, post];
+    }
+  }, []);
+}
 
-      if (tags.includes(TAG_NAME.amount)) {
-        summaryItem.value = answer.value;
-      }
+function getFinancialPosts({ answers, initialValue, tagFilters }) {
+  const posts = tagFilters.reduce((incomes, filter) => {
+    const newIncomes = createFinancialPosts({ answers, filterTags: filter.tags, initialValue });
+    return [...incomes, ...newIncomes];
+  }, []);
+  return posts;
+}
 
-      if (tags.includes(TAG_NAME.description)) {
-        summaryItem.description = answer.value;
-      }
+function getApplicantsIncomes(answers) {
+  const params = {
+    answers,
+    initialPost: {
+      type: 'income',
+      group: '',
+      belongsTo: 'APPLICANT',
+      title: '',
+      description: '',
+      date: '',
+      value: '',
+      currency: 'kr',
+    },
+    tagFilters: [
+      {
+        tags: ['incomes', 'lon'],
+      },
+      {
+        tags: ['incomes', 'other'],
+      },
+      {
+        tags: ['incomes', 'foreignPension'],
+      },
+      {
+        tags: ['incomes', 'loan'],
+      },
+      {
+        tags: ['incomes', 'swish'],
+      },
+    ],
+  };
 
-      if (tags.includes(TAG_NAME.date)) {
-        summaryItem.date = formatTimestampToDate(answer.value);
-      }
+  return getFinancialPosts(params);
+}
 
-      const vivaPostType = tags.reduce((type, tag) => {
-        const isTagVivaPostType = VIVA_POST_TYPE_COLLECTION[tag] !== undefined;
-        if (isTagVivaPostType) {
-          return tag;
-        }
-        return type;
-      }, '');
+function getResidentIncomes(answers) {
+  const params = {
+    answers,
+    initialValue: {
+      type: 'income',
+      group: '',
+      belongsTo: 'APPLICANT',
+      title: '',
+      description: '',
+      date: '',
+      value: '',
+      currency: 'kr',
+    },
+    tagFilters: [
+      {
+        tags: ['incomes', 'resident'],
+      },
+    ],
+  };
 
-      if (vivaPostType) {
-        summaryItem.type = vivaPostType;
-        summaryItem.title = VIVA_POST_TYPE_COLLECTION[vivaPostType];
-      }
+  return getFinancialPosts(params);
+}
 
-      if (summaryItemIndex !== -1) {
-        summaryList[summaryItemIndex] = summaryItem;
-      } else {
-        summaryList.push(summaryItem);
-      }
+function getApplicantsExpenses(answers) {
+  const params = {
+    answers,
+    initialValue: {
+      type: 'expense',
+      group: '',
+      belongsTo: 'APPLICANT',
+      title: '',
+      description: '',
+      date: '',
+      value: '',
+      currency: 'kr',
+    },
+    tagFilters: [
+      {
+        tags: ['expenses', 'annat'],
+      },
+      {
+        tags: ['expenses', 'tandvard'],
+      },
+      {
+        tags: ['expenses', 'annantandvard'],
+      },
+      {
+        tags: ['expenses', 'akuttandvard'],
+      },
+      {
+        tags: ['expenses', 'reskostnad'],
+      },
+      {
+        tags: ['expenses', 'akassa'],
+      },
+      {
+        tags: ['expenses', 'lakarvard'],
+      },
+      {
+        tags: ['expenses', 'medicin'],
+      },
+    ],
+  };
 
-      return summaryList;
-    }, []);
-    return categorySummaryList;
-  });
+  return getFinancialPosts(params);
+}
 
-  const housingExpenses = createHousingExpenses(answers);
-  if (housingExpenses) {
-    expenses = [...expenses, ...housingExpenses];
-  }
+function getHousingExpenses(answers) {
+  const params = {
+    answers,
+    initialValue: {
+      type: 'income',
+      group: '',
+      belongsTo: 'HOUSING',
+      title: '',
+      description: '',
+      date: '',
+      value: '',
+      currency: 'kr',
+    },
+    tagFilters: [
+      {
+        tags: ['expenses', 'el'],
+      },
+      {
+        tags: ['expenses', 'bredband'],
+      },
+      {
+        tags: ['expenses', 'hemforsakring'],
+      },
+      {
+        tags: ['expenses', 'boende'],
+      },
+    ],
+  };
 
-  const housingIncomes = createHousingIncomes(answers);
-  if (housingIncomes.length) {
-    incomes = [...incomes, ...housingIncomes];
-  }
+  return getFinancialPosts(params);
+}
+
+function getFinancials(answers) {
+  const redsidentIncomes = getResidentIncomes(answers);
+  const applicantsIncomes = getApplicantsIncomes(answers);
+  const housingExpenses = getHousingExpenses(answers);
+  const applicantsExpenses = getApplicantsExpenses(answers);
 
   return {
-    expenses,
-    incomes,
+    incomes: {
+      applicant: applicantsIncomes.filter(income => income.belongsTo === 'APPLICANT'),
+      coApplicant: applicantsIncomes.filter(income => income.belongsTo === 'COAPPLICANT'),
+      resident: redsidentIncomes,
+    },
+    expenses: {
+      applicant: applicantsExpenses.filter(expense => expense.belongsTo === 'APPLICANT'),
+      coApplicant: applicantsExpenses.filter(expense => expense.belongsTo === 'COAPPLICANT'),
+      housing: housingExpenses,
+    },
   };
 }
 
@@ -320,7 +343,7 @@ export default function createRecurringCaseTemplateData(caseItem, recurringFormI
   const period = formatPeriodDates(caseItem.details.period);
   const persons = createPersonsObject(caseItem.persons, recurringform.answers);
   const housing = createHousingInfoObject(recurringform.answers);
-  const economics = createEconomicsObject(recurringform.answers);
+  const financials = getFinancials(recurringform.answers);
   const notes = createNotesObject(recurringform.answers);
   const assets = createAssetsObject(recurringform.answers);
 
@@ -330,6 +353,6 @@ export default function createRecurringCaseTemplateData(caseItem, recurringFormI
     period,
     persons,
     housing,
-    economics,
+    financials,
   };
 }
