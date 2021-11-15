@@ -27,13 +27,13 @@ export async function main(event) {
   }
 
   const getHistoricalAttendeesBody = { referenceCode, startTime, endTime };
-  const [searchBookingError, searchBookingResponse] = await to(
+  const [getHistoricalAttendeesError, getHistoricalAttendeesResponse] = await to(
     booking.getHistoricalAttendees(getHistoricalAttendeesBody)
   );
-  if (searchBookingError) {
-    return response.failure(searchBookingError);
+  if (getHistoricalAttendeesError) {
+    return response.failure(getHistoricalAttendeesError);
   }
 
-  const { data } = searchBookingResponse.data;
+  const { data } = getHistoricalAttendeesResponse.data;
   return response.success(200, data);
 }
