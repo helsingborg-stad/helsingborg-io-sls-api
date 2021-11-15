@@ -15,7 +15,7 @@ export async function main(event, context) {
   );
   if (getFileS3Error) {
     log.error(
-      'Failed to get file from S3 bucket',
+      `Failed to get file: ${pdfBucketKey}, from S3 bucket`,
       context.awsRequestId,
       'service-case-ms-001',
       getFileS3Error
