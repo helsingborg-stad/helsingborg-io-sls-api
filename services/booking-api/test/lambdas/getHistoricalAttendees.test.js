@@ -118,3 +118,30 @@ it('returns failure if one of required query strings parameters does not exist',
   expect(result).toEqual(expectedResult);
   expect(booking.getHistoricalAttendees).toHaveBeenCalledTimes(0);
 });
+
+it('returns failure if datatorget request fails', async () => {
+  expect.assertions(2);
+
+  const statusCode = 500;
+  const message = 'error';
+
+  const expectedResult = {
+    body: JSON.stringify({
+      jsonapi: { version: '1.0' },
+      data: {
+        status: '500',
+        code: '500',
+        message,
+      },
+    }),
+    headers: mockHeaders,
+    statusCode,
+  };
+
+  booking.getHistoricalAttendees.mockRejectedValueOnce({ status: statusCode, message });
+
+  const result = await main(mockEvent);
+
+  expect(result).toEqual(expectedResult);
+  expect(booking.getHistoricalAttendees).toHaveBeenCalledTimes(1);
+});
