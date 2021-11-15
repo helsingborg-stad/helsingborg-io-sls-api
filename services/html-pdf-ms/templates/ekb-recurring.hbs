@@ -220,16 +220,15 @@
 
     {{!-- Section for incomes --}}
     <section>
-        <h2>Inkomster</h2>
-        {{#if economics.incomes}}
-        {{!-- Sub section for showing appliacnt incomes --}}
-        <section>
-            <h3>Sökandes inkomster</h3>
-            <table>
-                {{#each economics.incomes}}
+        <h1>Inkomster</h1>
 
-                {{#if (and
-                (eq this.belongsTo 'APPLICANT'))}}
+        {{!-- Sub section for showing appliacnt incomes --}}
+        {{#if financials.incomes.applicant}}
+        <section>
+            <h2>Sökandes inkomster</h2>
+            <table>
+                {{#each financials.incomes.applicant}}
+
                 <tr>
                     <td>
                         {{this.title}} {{this.description}}
@@ -247,20 +246,18 @@
                         {{/if}}
                     </td>
                 </tr>
-                {{/if}}
                 {{/each}}
             </table>
+
         </section>
+        {{/if}}
 
         {{!-- Sub section for showing co-appliacnt incomes --}}
+        {{#if financials.incomes.coApplicant}}
         <section>
-            <h3>Medsökandes inkomster</h3>
+            <h2>Medsökandes inkomster</h2>
             <table>
-                {{#each economics.incomes}}
-
-                {{#if (and
-                (eq this.belongsTo 'COAPPLICANT'))
-                }}
+                {{#each financials.incomes.coApplicant}}
                 <tr>
                     <td>
                         {{this.title}} {{this.description}}
@@ -278,20 +275,18 @@
                         {{/if}}
                     </td>
                 </tr>
-                {{/if}}
                 {{/each}}
             </table>
         </section>
+        {{/if}}
 
-        {{!-- Sub section for showing housing incomes --}}
+        {{!-- Sub section for showing resident incomes --}}
+        {{#if financials.incomes.resident}}
         <section>
-            <h3>Pengar från inneboende</h3>
+            <h2>Pengar för inneboende</h2>
             <table>
-                {{#each economics.incomes}}
+                {{#each financials.incomes.resident}}
 
-                {{#if (and
-                (eq this.belongsTo 'HOUSING'))
-                }}
                 <tr>
                     <td>
                         {{this.title}} {{this.description}}
@@ -307,29 +302,26 @@
                         {{/if}}
                     </td>
                 </tr>
-                {{/if}}
                 {{/each}}
             </table>
         </section>
         {{/if}}
 
-        {{#unless economics.incomes}}
+        {{#unless financials.incomes}}
         <p> Inga utgifter att redovisa</p>
         {{/unless}}
     </section>
 
     {{!-- Section for expenses --}}
     <section>
-        <h2>Utgifter</h2>
-        {{#if economics.expenses}}
+        <h1>Utgifter</h1>
         {{!-- Sub section for showing appliacnt expenses --}}
+        {{#if financials.expenses.applicant}}
         <section>
-            <h3>Sökandes utgifter</h3>
+            <h2>Sökandes utgifter</h2>
             <table>
-                {{#each economics.expenses}}
+                {{#each financials.expenses.applicant}}
 
-                {{#if (and
-                (eq this.belongsTo 'APPLICANT'))}}
                 <tr>
                     <td>
                         {{this.title}} {{this.description}}
@@ -345,70 +337,64 @@
                         {{/if}}
                     </td>
                 </tr>
-                {{/if}}
-                {{/each}}
-            </table>
-        </section>
-        {{!-- Sub section for showing co-appliacnt expenses --}}
-        <section>
-            <h3>Medsökandes utgifter</h3>
-            <table>
-                {{#each economics.expenses}}
-
-                {{#if (and
-                (eq this.belongsTo 'COAPPLICANT'))
-                }}
-                <tr>
-                    <td>
-                        {{this.title}} {{this.description}}
-                    </td>
-                    <td>
-                        <span>
-                            {{this.value}} {{this.currency}}
-                        </span>
-                        {{#if this.date}}
-                        <span>
-                            {{this.date}}
-                        </span>
-                        {{/if}}
-                    </td>
-                </tr>
-                {{/if}}
-                {{/each}}
-            </table>
-        </section>
-
-        {{!-- Sub section for showing housing expenses --}}
-        <section>
-            <h3>Kostander för boende</h3>
-            <table>
-                {{#each economics.expenses}}
-
-                {{#if (and
-                (eq this.belongsTo 'HOUSING'))
-                }}
-                <tr>
-                    <td>
-                        {{this.title}} {{this.description}}
-                    </td>
-                    <td>
-                        <span>
-                            {{this.value}} {{this.currency}}
-                        </span>
-                        {{#if this.date}}
-                        <span>
-                            {{this.date}}
-                        </span>
-                        {{/if}}
-                    </td>
-                </tr>
-                {{/if}}
                 {{/each}}
             </table>
         </section>
         {{/if}}
 
-        {{#unless economics.expenses}}
+        {{!-- Sub section for showing co-appliacnt expenses --}}
+        {{#if financials.expenses.coApplicant}}
+        <section>
+            <h2>Medsökandes utgifter</h2>
+            <table>
+                {{#each financials.expenses.coApplicant}}
+                <tr>
+                    <td>
+                        {{this.title}} {{this.description}}
+                    </td>
+                    <td>
+                        <span>
+                            {{this.value}} {{this.currency}}
+                        </span>
+                        {{#if this.date}}
+                        <span>
+                            {{this.date}}
+                        </span>
+                        {{/if}}
+                    </td>
+                </tr>
+                {{/each}}
+            </table>
+        </section>
+        {{/if}}
+
+        {{!-- Sub section for showing housing expenses --}}
+        {{#if financials.expenses.housing}}
+        <section>
+            <h2>Kostnader för boende</h2>
+            <table>
+                {{#each financials.expenses.housing}}
+                <tr>
+                    <td>
+                        {{this.title}} {{this.description}}
+                    </td>
+                    <td>
+                        <span>
+                            {{this.value}} {{this.currency}}
+                        </span>
+                        {{#if this.date}}
+                        <span>
+                            {{this.date}}
+                        </span>
+                        {{/if}}
+                    </td>
+                </tr>
+                {{/each}}
+            </table>
+        </section>
+        {{/if}}
+
+        {{#unless financials.expenses}}
         <p> Inga utgifter att redovisa</p>
         {{/unless}}
 
