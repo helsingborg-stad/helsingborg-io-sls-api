@@ -31,7 +31,7 @@ handlebars.registerHelper({
 
 export async function main(event, context) {
   const { dynamodb } = event.detail;
-  if (dynamodb.NewImage === undefined) {
+  if (dynamodb.NewImage == undefined) {
     return false;
   }
 
