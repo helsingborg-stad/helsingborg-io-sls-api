@@ -58,6 +58,11 @@ test.each([
     functionCall: { startTime: '1', endTime: '2', referenceCode: '3' },
     requestCall: { startTime: '1', endTime: '2', referenceCode: '3' },
   },
+  {
+    path: 'getHistoricalAttendees',
+    functionCall: { startTime: '1', endTime: '2', referenceCode: '3' },
+    requestCall: { startTime: '1', endTime: '2', referenceCode: '3' },
+  },
 ])(
   `booking $path makes requests against correct endpoint`,
   async ({ path, functionCall, requestCall }) => {

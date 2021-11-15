@@ -87,3 +87,12 @@ functions:
           method: post
           private: true
           cors: true
+
+  getHistoricalAttendees:
+    handler: lambdas/getHistoricalAttendees.main
+    events:
+      - http:
+          path: booking/getHistoricalAttendees/{referenceCode}
+          method: get
+          private: true
+          cors: true

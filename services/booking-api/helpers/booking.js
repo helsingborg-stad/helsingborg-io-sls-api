@@ -10,6 +10,7 @@ const URI_RESOURCE = {
   CANCEL: 'booking/cancel',
   GET: 'booking/get',
   SEARCH: 'booking/search',
+  GET_HISTORICAL_ATTENDEES: 'booking/getHistoricalAttendees',
 };
 
 const METHOD = {
@@ -30,6 +31,10 @@ function get(bookingId) {
 
 function search(body) {
   return sendBookingPostRequest(URI_RESOURCE.SEARCH, body);
+}
+
+function getHistoricalAttendees(body) {
+  return sendBookingPostRequest(URI_RESOURCE.GET_HISTORICAL_ATTENDEES, body);
 }
 
 async function sendBookingPostRequest(path, body) {
@@ -59,4 +64,4 @@ async function getSsmParameters() {
   return response;
 }
 
-export default { create, cancel, get, search };
+export default { create, cancel, get, search, getHistoricalAttendees };
