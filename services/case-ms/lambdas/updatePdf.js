@@ -8,14 +8,14 @@ import log from '../../../libs/logs';
 import { PDF_GENERATED, PDF_NOT_GENERATED } from '../../../libs/constants';
 
 export async function main(event, context) {
-  const { resourceId, pdfBucketKey } = event.detail;
+  const { resourceId, pdfStorageBucketKey } = event.detail;
 
   const [getFileS3Error, pdfS3Object] = await to(
-    S3.getFile(process.env.PDF_STORAGE_BUCKET_NAME, pdfBucketKey)
+    S3.getFile(process.env.PDF_STORAGE_BUCKET_NAME, pdfStorageBucketKey)
   );
   if (getFileS3Error) {
     log.error(
-      `Failed to get file: ${pdfBucketKey}, from S3 bucket`,
+      `Failed to get file: ${pdfStorageBucketKey}, from S3 bucket`,
       context.awsRequestId,
       'service-case-ms-001',
       getFileS3Error
