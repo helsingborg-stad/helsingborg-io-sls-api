@@ -12,9 +12,9 @@ function getAttributeFromAnswerFieldId(fieldId) {
   return attribute;
 }
 
-function getSecondStringFromDotNotatedString(sourceString) {
-  const [, string] = sourceString.split('.');
-  return string;
+function getAttributeFromDotNotation(source, position) {
+  const attributes = source.split('.');
+  return attributes[position];
 }
 
 function filterByFieldIdIncludes(answers, shouldInclude) {
@@ -33,7 +33,7 @@ export default {
   getTagIfIncludes,
   fieldIdIncludes,
   getAttributeFromAnswerFieldId,
-  getSecondStringFromDotNotatedString,
+  getAttributeFromDotNotation,
   filterByTags,
   filterByFieldIdIncludes,
 };
