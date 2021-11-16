@@ -1,14 +1,11 @@
 import AWS from 'aws-sdk';
+import DynamoDB from 'aws-sdk/clients/dynamodb';
 
 import log from '../../../libs/logs';
 
 const eventBridge = new AWS.EventBridge();
 
-/**
- * Lambda function takes DynamoDB stream events and
- * publishes them to an EventBridge Event Bus
- */
-export const main = async (event, context) => {
+export async function main(event, context) {
   const eventsToPut = [];
 
   for (const record of event.Records) {
@@ -18,19 +15,26 @@ export const main = async (event, context) => {
       'service-stream-event-bridge-ms-001'
     );
 
-    const [tableArn] = record.eventSourceARN.split('/stream');
-
-    eventsToPut.push({
-      Time: record.dynamodb.ApproximateCreationDateTime,
-      Source: 'cases.database',
-      Resources: [tableArn],
-      DetailType: record.eventName,
-      Detail: JSON.stringify(record),
-      EventBusName: 'default',
-    });
+    if (isExpirationTimeUnchanged(record)) {
+      const [tableArn] = record.eventSourceARN.split('/stream');
+      eventsToPut.push({
+        Time: record.dynamodb.ApproximateCreationDateTime,
+        Source: 'cases.database',
+        Resources: [tableArn],
+        DetailType: record.eventName,
+        Detail: JSON.stringify(record),
+        EventBusName: 'default',
+      });
+    }
   }
 
   await eventBridge.putEvents({ Entries: eventsToPut }).promise();
 
-  return 'OK';
-};
+  return true;
+}
+
+function isExpirationTimeUnchanged(record) {
+  const oldImage = DynamoDB.Converter.unmarshall(record.dynamodb.OldImage);
+  const newImage = DynamoDB.Converter.unmarshall(record.dynamodb.NewImage);
+  return oldImage.expirationTime === newImage.expirationTime;
+}
