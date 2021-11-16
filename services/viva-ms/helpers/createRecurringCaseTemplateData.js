@@ -1,4 +1,10 @@
-import { TAG_NAME, VIVA_POST_TYPE_COLLECTION, PERSON_ROLE } from './constans';
+import {
+  TAG_NAME,
+  VIVA_POST_TYPE_COLLECTION,
+  PERSON_ROLE,
+  EMPTY_EXPENSE_POST,
+  EMPTY_INCOME_POST,
+} from './constans';
 import formatPeriodDates, { formatTimestampToDate } from './formatPeriodDates';
 import formHelpers from './formHelpers';
 
@@ -176,9 +182,9 @@ function createFinancialPosts({ answers, filterTags = [], initialPost = {} }) {
   }, []);
 }
 
-function getFinancialPosts({ answers, initialValue, tagFilters }) {
+function getFinancialPosts({ answers, initialPost, tagFilters }) {
   const posts = tagFilters.reduce((incomes, filter) => {
-    const newIncomes = createFinancialPosts({ answers, filterTags: filter.tags, initialValue });
+    const newIncomes = createFinancialPosts({ answers, filterTags: filter.tags, initialPost });
     return [...incomes, ...newIncomes];
   }, []);
   return posts;
@@ -187,16 +193,7 @@ function getFinancialPosts({ answers, initialValue, tagFilters }) {
 function getApplicantsIncomes(answers) {
   const params = {
     answers,
-    initialPost: {
-      type: 'income',
-      group: '',
-      belongsTo: 'APPLICANT',
-      title: '',
-      description: '',
-      date: '',
-      value: '',
-      currency: 'kr',
-    },
+    initialPost: EMPTY_INCOME_POST,
     tagFilters: [
       {
         tags: ['incomes', 'lon'],
@@ -222,16 +219,7 @@ function getApplicantsIncomes(answers) {
 function getResidentIncomes(answers) {
   const params = {
     answers,
-    initialValue: {
-      type: 'income',
-      group: '',
-      belongsTo: 'APPLICANT',
-      title: '',
-      description: '',
-      date: '',
-      value: '',
-      currency: 'kr',
-    },
+    initialPost: EMPTY_INCOME_POST,
     tagFilters: [
       {
         tags: ['incomes', 'resident'],
@@ -245,16 +233,7 @@ function getResidentIncomes(answers) {
 function getApplicantsExpenses(answers) {
   const params = {
     answers,
-    initialValue: {
-      type: 'expense',
-      group: '',
-      belongsTo: 'APPLICANT',
-      title: '',
-      description: '',
-      date: '',
-      value: '',
-      currency: 'kr',
-    },
+    initialPost: EMPTY_EXPENSE_POST,
     tagFilters: [
       {
         tags: ['expenses', 'annat'],
@@ -289,15 +268,9 @@ function getApplicantsExpenses(answers) {
 function getHousingExpenses(answers) {
   const params = {
     answers,
-    initialValue: {
-      type: 'income',
-      group: '',
+    initialPost: {
+      ...EMPTY_EXPENSE_POST,
       belongsTo: 'HOUSING',
-      title: '',
-      description: '',
-      date: '',
-      value: '',
-      currency: 'kr',
     },
     tagFilters: [
       {
