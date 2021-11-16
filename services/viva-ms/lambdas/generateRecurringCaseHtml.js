@@ -10,7 +10,7 @@ import params from '../../../libs/params';
 import S3 from '../../../libs/S3';
 import { CASE_HTML_GENERATED } from '../../../libs/constants';
 
-import createRecurringCaseTemplateData from '../helpers/createRecurringCaseTemplateData';
+import createRecurringCaseTemplate from '../helpers/createRecurringCaseTemplate';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 
 handlebars.registerHelper({
@@ -65,10 +65,7 @@ export async function main(event, context) {
 
   const handlebarsTemplateFileBody = hbsTemplateS3Object.Body.toString();
   const template = handlebars.compile(handlebarsTemplateFileBody);
-  const caseTemplateData = createRecurringCaseTemplateData(
-    caseItem,
-    vivaCaseSSMParams.recurringFormId
-  );
+  const caseTemplateData = createRecurringCaseTemplate(caseItem, vivaCaseSSMParams.recurringFormId);
   const html = template(caseTemplateData);
 
   const caseHtmlKey = `html/case-${caseItem.id}.html`;
