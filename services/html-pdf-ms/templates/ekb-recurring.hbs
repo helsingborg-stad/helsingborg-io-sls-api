@@ -1,77 +1,79 @@
 <!DOCTYPE html>
 <html>
-<head>
+
+  <head>
     <style>
-        html {
-              background: #FFF;
-              margin: 30px;
-            }
-            
-            h1 {
-              font-size: 24px;
-            }
-            
-            h2 {
-              margin-top: 50px;
-              font-size: 24px;
-            }
-            
-            h3 {
-              margin-top: 30px;
-              font-size: 16px;
-            }
-            
-            table {
-                width: 100%;
-                border-spacing: 0px;
-                border: none;
-                font-size: 20px;
-            }
-            
-            tr {
-              font-size: 20px;
-            }
-            
-            tr:nth-child(even) {
-              background: #F4F9F8;
-            }
-            
-            td {
-               padding: 10px;
-               border: none;
-               border-spacing: none;
-               font-size: 16px;
-               color: #000;
-            }
-            
-            td:last-child {
-              float: right;
-            }
-            
-            td span {
-              padding: 5px;
-              display: flex;
-              justify-content: flex-end;
-            }
-            
-            header {
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-            }
-            
-            header h1 {
-              font-size: 24px;
-              font-weight: normal;
-            }
-            
-            header p {
-              font-size: 24px;
-              font-weight: bold;
-            }
+      html {
+        background: #FFF;
+        margin: 30px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      h2 {
+        margin-top: 50px;
+        font-size: 24px;
+      }
+
+      h3 {
+        margin-top: 30px;
+        font-size: 16px;
+      }
+
+      table {
+        width: 100%;
+        border-spacing: 0px;
+        border: none;
+        font-size: 20px;
+      }
+
+      tr {
+        font-size: 20px;
+      }
+
+      tr:nth-child(even) {
+        background: #F4F9F8;
+      }
+
+      td {
+        padding: 10px;
+        border: none;
+        border-spacing: none;
+        font-size: 16px;
+        color: #000;
+      }
+
+      td:last-child {
+        float: right;
+      }
+
+      td span {
+        padding: 5px;
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      header h1 {
+        font-size: 24px;
+        font-weight: normal;
+      }
+
+      header p {
+        font-size: 24px;
+        font-weight: bold;
+      }
     </style>
-</head>
-<body>
+  </head>
+
+  <body>
     <header>
       <div>
         <h1>Ansökan gäller för perioden</h1>
@@ -84,338 +86,378 @@
     </header>
 
     <section>
-        <table>
-            {{#each notes}}
-                <tr>
-                    <td>{{this.title}}</td>
-                    <td>{{this.text}}</td>
-                </tr>
-            {{/each}}
-        </table>
+      <table>
+        {{#each notes}}
+        <tr>
+          <td>{{this.title}}</td>
+          <td>{{this.text}}</td>
+        </tr>
+        {{/each}}
+      </table>
     </section>
     {{!-- Sections for each person --}}
     {{#each persons}}
     <section>
-        <h2>
-            {{#if (eq this.role 'applicant')}} Sökande {{/if}}
-            {{#if (eq this.role 'coApplicant')}} Medsökande {{/if}}
-        </h2>
-        <table>
-            <tr>
-                <td>Personnummer</td>
-                <td>{{this.personalNumber}}</td>
-            </tr>
-            <tr>
-                <td>Förnamn</td>
-                <td>{{this.firstName}}</td>
-            </tr>
-            <tr>
-                <td>Efternamn</td>
-                <td>{{this.lastName}}</td>
-            </tr>
-            <tr>
-                <td>Mobiltelefon</td>
-                <td>{{this.phone}}</td>
-            </tr>
-            <tr>
-                <td>Email</td>
-                <td>{{this.email}}</td>
-            </tr>
-            <tr>
-                <td>Sysselsättning</td>
-                <td>
-                    {{#if (eq this.occupation 'fulltime')}}
-                    Arbetar heltid
-                    {{/if}}
-                    {{#if (eq this.occupation 'parttime')}}
-                    Arbetar deltid
-                    {{/if}}
-                    {{#if (eq this.occupation 'unemployed')}}
-                    Arbetssökande
-                    {{/if}}
-                    {{#if (eq this.occupation 'parentalleave')}}
-                    Föräldraledig
-                    {{/if}}
-                    {{#if (eq this.occupation 'studies')}}
-                    Studerande
-                    {{/if}}
-                    {{#if (eq this.occupation 'sick')}}
-                    Sjukskriven med läkarintyg
-                    {{/if}}
-                    {{#if (eq this.occupation 'otheroccuption')}}
-                    Annat
-                    {{/if}}
-                </td>
-            </tr>
-        </table>
+      <h2>
+        {{#if (eq this.role 'applicant')}} Sökande {{/if}}
+        {{#if (eq this.role 'coApplicant')}} Medsökande {{/if}}
+      </h2>
+      <table>
+        <tr>
+          <td>Personnummer</td>
+          <td>{{this.personalNumber}}</td>
+        </tr>
+        <tr>
+          <td>Förnamn</td>
+          <td>{{this.firstName}}</td>
+        </tr>
+        <tr>
+          <td>Efternamn</td>
+          <td>{{this.lastName}}</td>
+        </tr>
+        <tr>
+          <td>Mobiltelefon</td>
+          <td>{{this.phone}}</td>
+        </tr>
+        <tr>
+          <td>Email</td>
+          <td>{{this.email}}</td>
+        </tr>
+        <tr>
+          <td>Sysselsättning</td>
+          <td>
+            {{#if (eq this.occupation 'fulltime')}}
+            Arbetar heltid
+            {{/if}}
+            {{#if (eq this.occupation 'parttime')}}
+            Arbetar deltid
+            {{/if}}
+            {{#if (eq this.occupation 'unemployed')}}
+            Arbetssökande
+            {{/if}}
+            {{#if (eq this.occupation 'parentalleave')}}
+            Föräldraledig
+            {{/if}}
+            {{#if (eq this.occupation 'studies')}}
+            Studerande
+            {{/if}}
+            {{#if (eq this.occupation 'sick')}}
+            Sjukskriven med läkarintyg
+            {{/if}}
+            {{#if (eq this.occupation 'otheroccuption')}}
+            Annat
+            {{/if}}
+          </td>
+        </tr>
+      </table>
     </section>
+    {{/each}}
+
+    {{#if children}}<h2>Barn</h2>{{/if}}
+    {{#each children}}
+    <table>
+      {{#if this.firstName}}
+      <tr>
+        <td>Förnamn:</td>
+        <td>{{this.firstName}}</td>
+      </tr>
+      {{/if}}
+
+      {{#if this.lastName}}
+      <tr>
+        <td>Efternamn:</td>
+        <td>{{this.lastName}}</td>
+      </tr>
+      {{/if}}
+
+      {{#if this.personalNumber}}
+      <tr>
+        <td>Personnummer:</td>
+        <td>{{this.personalNumber}}</td>
+      </tr>
+      {{/if}}
+
+      {{#if this.housing}}
+      <tr>
+        <td>Boendeform:</td>
+        <td>{{this.housing}}</td>
+      </tr>
+      {{/if}}
+
+      {{#if this.school}}
+      <tr>
+        <td>Skola:</td>
+        <td>{{this.school}}</td>
+      </tr>
+      {{/if}}
+    </table>
     {{/each}}
 
     {{!-- Section for housing --}}
     <section>
-        {{#with housing}}
-        <h2>Bostad</h2>
-        <table>
-            <tr>
-                <td>Adress</td>
-                <td>
-                    {{streetAddress}}
-                </td>
-            </tr>
-            <tr>
-                <td>Postnummer</td>
-                <td>
-                    {{postalCode}}
-                </td>
-            </tr>
-            <tr>
-                <td>Ort</td>
-                <td>
-                    {{postalAdress}}
-                </td>
-            </tr>
-            <tr>
-                <td>Boendeform</td>
-                <td>
-                    {{#if (eq this.contract 'lease')}}
-                    Hyresrätt/förstahandskontrakt
-                    {{/if}}
-                    {{#if (eq this.contract 'sublease')}}
-                    Andrahandskontrakt
-                    {{/if}}
-                    {{#if (eq this.contract 'rentasRoommate')}}
-                    Inneboende
-                    {{/if}}
-                    {{#if (eq this.contract 'livingatParents')}}
-                    Bor hos föräldrar
-                    {{/if}}
-                    {{#if (eq this.contract 'livingatChild')}}
-                    Bor hus vuxna barn
-                    {{/if}}
-                    {{#if (eq this.contract 'condo')}}
-                    Bostadsrätt
-                    {{/if}}
-                    {{#if (eq this.contract 'ownHouse')}}
-                    Eget hus
-                    {{/if}}
-                    {{#if (eq this.contract 'noHome')}}
-                    Bostadslös
-                    {{/if}}
-                    {{#if (eq this.contract 'otherLiving')}}
-                    Annat boende
-                    {{/if}}
-                </td>
-            </tr>
-            <tr>
-                <td>Antal boende i bostaden</td>
-                <td>
-                    {{numberpeopleLiving}}
-                </td>
-            </tr>
-        </table>
-        {{else}}
-        <p>Uppgifter om boende saknas i ansökan</p>
-        {{/with}}
+      {{#with housing}}
+      <h2>Bostad</h2>
+      <table>
+        <tr>
+          <td>Adress</td>
+          <td>
+            {{streetAddress}}
+          </td>
+        </tr>
+        <tr>
+          <td>Postnummer</td>
+          <td>
+            {{postalCode}}
+          </td>
+        </tr>
+        <tr>
+          <td>Ort</td>
+          <td>
+            {{postalAdress}}
+          </td>
+        </tr>
+        <tr>
+          <td>Boendeform</td>
+          <td>
+            {{#if (eq this.contract 'lease')}}
+            Hyresrätt/förstahandskontrakt
+            {{/if}}
+            {{#if (eq this.contract 'sublease')}}
+            Andrahandskontrakt
+            {{/if}}
+            {{#if (eq this.contract 'rentasRoommate')}}
+            Inneboende
+            {{/if}}
+            {{#if (eq this.contract 'livingatParents')}}
+            Bor hos föräldrar
+            {{/if}}
+            {{#if (eq this.contract 'livingatChild')}}
+            Bor hus vuxna barn
+            {{/if}}
+            {{#if (eq this.contract 'condo')}}
+            Bostadsrätt
+            {{/if}}
+            {{#if (eq this.contract 'ownHouse')}}
+            Eget hus
+            {{/if}}
+            {{#if (eq this.contract 'noHome')}}
+            Bostadslös
+            {{/if}}
+            {{#if (eq this.contract 'otherLiving')}}
+            Annat boende
+            {{/if}}
+          </td>
+        </tr>
+        <tr>
+          <td>Antal boende i bostaden</td>
+          <td>
+            {{numberpeopleLiving}}
+          </td>
+        </tr>
+      </table>
+      {{else}}
+      <p>Uppgifter om boende saknas i ansökan</p>
+      {{/with}}
     </section>
 
     {{!-- Section for incomes --}}
     <section>
-        <h1>Inkomster</h1>
+      <h1>Inkomster</h1>
 
-        {{!-- Sub section for showing appliacnt incomes --}}
-        {{#if financials.incomes.applicant}}
-        <section>
-            <h2>Sökandes inkomster</h2>
-            <table>
-                {{#each financials.incomes.applicant}}
+      {{!-- Sub section for showing appliacnt incomes --}}
+      {{#if financials.incomes.applicant}}
+      <section>
+        <h2>Sökandes inkomster</h2>
+        <table>
+          {{#each financials.incomes.applicant}}
 
-                <tr>
-                    <td>
-                        {{this.title}} {{this.description}}
-                    </td>
-                    <td>
-                        <span>
-                            {{#if this.value}}
-                                {{this.value}} {{this.currency}}
-                            {{/if}}
-                        </span>
-                        {{#if this.date}}
-                        <span>
-                            {{this.date}}
-                        </span>
-                        {{/if}}
-                    </td>
-                </tr>
-                {{/each}}
-            </table>
+          <tr>
+            <td>
+              {{this.title}} {{this.description}}
+            </td>
+            <td>
+              <span>
+                {{#if this.value}}
+                {{this.value}} {{this.currency}}
+                {{/if}}
+              </span>
+              {{#if this.date}}
+              <span>
+                {{this.date}}
+              </span>
+              {{/if}}
+            </td>
+          </tr>
+          {{/each}}
+        </table>
 
-        </section>
-        {{/if}}
+      </section>
+      {{/if}}
 
-        {{!-- Sub section for showing co-appliacnt incomes --}}
-        {{#if financials.incomes.coApplicant}}
-        <section>
-            <h2>Medsökandes inkomster</h2>
-            <table>
-                {{#each financials.incomes.coApplicant}}
-                <tr>
-                    <td>
-                        {{this.title}} {{this.description}}
-                    </td>
-                    <td>
-                        <span>
-                            {{#if this.value}}
-                                {{this.value}} {{this.currency}}
-                            {{/if}}
-                        </span>
-                        {{#if this.date}}
-                        <span>
-                            {{this.date}}
-                        </span>
-                        {{/if}}
-                    </td>
-                </tr>
-                {{/each}}
-            </table>
-        </section>
-        {{/if}}
+      {{!-- Sub section for showing co-appliacnt incomes --}}
+      {{#if financials.incomes.coApplicant}}
+      <section>
+        <h2>Medsökandes inkomster</h2>
+        <table>
+          {{#each financials.incomes.coApplicant}}
+          <tr>
+            <td>
+              {{this.title}} {{this.description}}
+            </td>
+            <td>
+              <span>
+                {{#if this.value}}
+                {{this.value}} {{this.currency}}
+                {{/if}}
+              </span>
+              {{#if this.date}}
+              <span>
+                {{this.date}}
+              </span>
+              {{/if}}
+            </td>
+          </tr>
+          {{/each}}
+        </table>
+      </section>
+      {{/if}}
 
-        {{!-- Sub section for showing resident incomes --}}
-        {{#if financials.incomes.resident}}
-        <section>
-            <h2>Pengar för inneboende</h2>
-            <table>
-                {{#each financials.incomes.resident}}
+      {{!-- Sub section for showing resident incomes --}}
+      {{#if financials.incomes.resident}}
+      <section>
+        <h2>Pengar för inneboende</h2>
+        <table>
+          {{#each financials.incomes.resident}}
 
-                <tr>
-                    <td>
-                        {{this.title}} {{this.description}}
-                    </td>
-                    <td>
-                        <span>
-                            {{this.value}} {{this.currency}}
-                        </span>
-                        {{#if this.date}}
-                        <span>
-                            {{this.date}}
-                        </span>
-                        {{/if}}
-                    </td>
-                </tr>
-                {{/each}}
-            </table>
-        </section>
-        {{/if}}
+          <tr>
+            <td>
+              {{this.title}} {{this.description}}
+            </td>
+            <td>
+              <span>
+                {{this.value}} {{this.currency}}
+              </span>
+              {{#if this.date}}
+              <span>
+                {{this.date}}
+              </span>
+              {{/if}}
+            </td>
+          </tr>
+          {{/each}}
+        </table>
+      </section>
+      {{/if}}
 
-        {{#unless financials.incomes}}
-        <p> Inga utgifter att redovisa</p>
-        {{/unless}}
+      {{#unless financials.incomes}}
+      <p> Inga utgifter att redovisa</p>
+      {{/unless}}
     </section>
 
     {{!-- Section for expenses --}}
     <section>
-        <h1>Utgifter</h1>
-        {{!-- Sub section for showing appliacnt expenses --}}
-        {{#if financials.expenses.applicant}}
-        <section>
-            <h2>Sökandes utgifter</h2>
-            <table>
-                {{#each financials.expenses.applicant}}
+      <h1>Utgifter</h1>
+      {{!-- Sub section for showing appliacnt expenses --}}
+      {{#if financials.expenses.applicant}}
+      <section>
+        <h2>Sökandes utgifter</h2>
+        <table>
+          {{#each financials.expenses.applicant}}
 
-                <tr>
-                    <td>
-                        {{this.title}} {{this.description}}
-                    </td>
-                    <td>
-                        <span>
-                            {{this.value}} {{this.currency}}
-                        </span>
-                        {{#if this.date}}
-                        <span>
-                            {{this.date}}
-                        </span>
-                        {{/if}}
-                    </td>
-                </tr>
-                {{/each}}
-            </table>
-        </section>
-        {{/if}}
+          <tr>
+            <td>
+              {{this.title}} {{this.description}}
+            </td>
+            <td>
+              <span>
+                {{this.value}} {{this.currency}}
+              </span>
+              {{#if this.date}}
+              <span>
+                {{this.date}}
+              </span>
+              {{/if}}
+            </td>
+          </tr>
+          {{/each}}
+        </table>
+      </section>
+      {{/if}}
 
-        {{!-- Sub section for showing co-appliacnt expenses --}}
-        {{#if financials.expenses.coApplicant}}
-        <section>
-            <h2>Medsökandes utgifter</h2>
-            <table>
-                {{#each financials.expenses.coApplicant}}
-                <tr>
-                    <td>
-                        {{this.title}} {{this.description}}
-                    </td>
-                    <td>
-                        <span>
-                            {{this.value}} {{this.currency}}
-                        </span>
-                        {{#if this.date}}
-                        <span>
-                            {{this.date}}
-                        </span>
-                        {{/if}}
-                    </td>
-                </tr>
-                {{/each}}
-            </table>
-        </section>
-        {{/if}}
+      {{!-- Sub section for showing co-appliacnt expenses --}}
+      {{#if financials.expenses.coApplicant}}
+      <section>
+        <h2>Medsökandes utgifter</h2>
+        <table>
+          {{#each financials.expenses.coApplicant}}
+          <tr>
+            <td>
+              {{this.title}} {{this.description}}
+            </td>
+            <td>
+              <span>
+                {{this.value}} {{this.currency}}
+              </span>
+              {{#if this.date}}
+              <span>
+                {{this.date}}
+              </span>
+              {{/if}}
+            </td>
+          </tr>
+          {{/each}}
+        </table>
+      </section>
+      {{/if}}
 
-        {{!-- Sub section for showing housing expenses --}}
-        {{#if financials.expenses.housing}}
-        <section>
-            <h2>Kostnader för boende</h2>
-            <table>
-                {{#each financials.expenses.housing}}
-                <tr>
-                    <td>
-                        {{this.title}} {{this.description}}
-                    </td>
-                    <td>
-                        <span>
-                            {{this.value}} {{this.currency}}
-                        </span>
-                        {{#if this.date}}
-                        <span>
-                            {{this.date}}
-                        </span>
-                        {{/if}}
-                    </td>
-                </tr>
-                {{/each}}
-            </table>
-        </section>
-        {{/if}}
+      {{!-- Sub section for showing housing expenses --}}
+      {{#if financials.expenses.housing}}
+      <section>
+        <h2>Kostnader för boende</h2>
+        <table>
+          {{#each financials.expenses.housing}}
+          <tr>
+            <td>
+              {{this.title}} {{this.description}}
+            </td>
+            <td>
+              <span>
+                {{this.value}} {{this.currency}}
+              </span>
+              {{#if this.date}}
+              <span>
+                {{this.date}}
+              </span>
+              {{/if}}
+            </td>
+          </tr>
+          {{/each}}
+        </table>
+      </section>
+      {{/if}}
 
-        {{#unless financials.expenses}}
-        <p> Inga utgifter att redovisa</p>
-        {{/unless}}
+      {{#unless financials.expenses}}
+      <p> Inga utgifter att redovisa</p>
+      {{/unless}}
 
     </section>
 
     {{!-- Section for assets --}}
     <section>
-        <h1>Tillgångar</h1>
-        <table>
-            {{#each assets}}
-                {{#if this.value}}
-                    <tr>
-                        <td>{{this.title}}</td>
-                        <td>{{this.value}} {{this.currency}}</td>
-                    </tr>
-                {{/if}}
-            {{/each}}
-        </table>
+      <h1>Tillgångar</h1>
+      <table>
+        {{#each assets}}
+        {{#if this.value}}
+        <tr>
+          <td>{{this.title}}</td>
+          <td>{{this.value}} {{this.currency}}</td>
+        </tr>
+        {{/if}}
+        {{/each}}
+      </table>
     </section>
 
 
-</body>
+  </body>
 
 </html>
