@@ -37,16 +37,6 @@ export async function main(event, context) {
 
   const caseItem = DynamoDB.Converter.unmarshall(dynamodb.NewImage);
 
-  if (isCaseHtmlGenerated()) {
-    log.info(
-      `Html is already generated for case with id: ${caseItem.id}`,
-      context.awsRequestId,
-      'service-viva-ms-generateRecurringCaseHtml-000',
-      caseItem.state
-    );
-    return true;
-  }
-
   const [s3GetObjectError, hbsTemplateS3Object] = await to(
     S3.getFile(process.env.PDF_STORAGE_BUCKET_NAME, 'templates/ekb-recurring.hbs')
   );
@@ -122,13 +112,8 @@ export async function main(event, context) {
   return true;
 }
 
-function isCaseHtmlGenerated(state) {
-  return String(state).includes(CASE_HTML_GENERATED);
-}
-
 function updateVivaCaseState(caseItem) {
-  const newState = `${CASE_HTML_GENERATED}#${caseItem.state}`;
-  const params = {
+  const updateParams = {
     TableName: config.cases.tableName,
     Key: {
       PK: caseItem.PK,
@@ -139,10 +124,10 @@ function updateVivaCaseState(caseItem) {
       '#state': 'state',
     },
     ExpressionAttributeValues: {
-      ':newState': newState,
+      ':newState': CASE_HTML_GENERATED,
     },
     ReturnValues: 'NONE',
   };
 
-  return dynamoDb.call('update', params);
+  return dynamoDb.call('update', updateParams);
 }
