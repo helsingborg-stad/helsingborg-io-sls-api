@@ -137,8 +137,6 @@ functions:
                     M:
                       type:
                         S: [{ "prefix": "active:submitted" }]
-                  pdfGenerated:
-                    S: ["yes"]
                   state:
                     S: ["PDF_GENERATED"]
 
@@ -240,6 +238,7 @@ functions:
           pattern:
             source:
               - cases.database
+              - casesApi.updateCase
             detail-type:
               - MODIFY
             detail:
