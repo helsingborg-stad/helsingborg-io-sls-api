@@ -124,7 +124,7 @@ function createHousingInfo(answers) {
   return housingInfo;
 }
 
-function createAssetsObject(answers) {
+function createAssets(answers) {
   const commonFilterTags = ['amount', 'assets'];
   const categories = [
     {
@@ -352,8 +352,10 @@ export default function createRecurringCaseTemplate(caseItem, recurringFormId) {
   const children = createChildren(recurringForm.answers);
   const housing = createHousingInfo(recurringForm.answers);
   const notes = createNotes(recurringForm.answers);
+  const assets = createAssets(recurringForm.answers);
 
   return {
+    assets,
     notes,
     period,
     persons,
