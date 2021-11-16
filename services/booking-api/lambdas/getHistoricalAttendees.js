@@ -5,8 +5,6 @@ import * as response from '../../../libs/response';
 import booking from '../helpers/booking';
 
 export async function main(event) {
-  console.log('EVENT: ', JSON.stringify(event, undefined));
-
   let referenceCode = event.pathParameters?.referenceCode;
 
   if (!referenceCode) {
