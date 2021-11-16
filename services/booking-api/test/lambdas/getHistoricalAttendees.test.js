@@ -1,5 +1,3 @@
-// import messages from '@helsingborg-stad/npm-api-error-handling/assets/errorMessages';
-
 import { main } from '../../lambdas/getHistoricalAttendees';
 import booking from '../../helpers/booking';
 
