@@ -312,7 +312,7 @@ function getFinancials(answers) {
 }
 
 export default function createRecurringCaseTemplateData(caseItem, recurringFormId) {
-  const recurringform = caseItem.forms[recurringFormId];
+  const recurringForm = caseItem.forms[recurringFormId];
   const period = formatPeriodDates(caseItem.details.period);
   const persons = createPersonsObject(caseItem.persons, recurringform.answers);
   const housing = createHousingInfoObject(recurringform.answers);
