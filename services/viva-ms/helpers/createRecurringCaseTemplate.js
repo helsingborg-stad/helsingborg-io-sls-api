@@ -117,7 +117,7 @@ function createHousingInfo(answers) {
 
   const housingInfo = filteredAnswers.reduce((accumulatedAnswer, answer) => {
     // field id can be constructed like personInfo.personFirstName, personInfo.personLastName
-    const fieldId = formHelpers.getSecondStringFromDotNotatedString(answer.field.id);
+    const fieldId = formHelpers.getAttributeFromDotNotation(answer.field.id, 1);
     return { ...accumulatedAnswer, [fieldId]: answer.value };
   }, {});
 
