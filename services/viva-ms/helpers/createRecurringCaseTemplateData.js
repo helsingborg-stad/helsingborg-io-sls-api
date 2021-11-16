@@ -49,7 +49,7 @@ function getSecondStringFromDotNotatedString(sourceString) {
   return string;
 }
 
-export function createPersonsObject(persons, answers) {
+function createPersonsObject(persons, answers) {
   const applicantPersons = persons.map(person => {
     if (person.role === PERSON_ROLE.applicant) {
       return mapApplicant(person, answers);
@@ -79,7 +79,7 @@ function createNotesObject(answers) {
   return notes;
 }
 
-export function createHousingInfoObject(answers) {
+function createHousingInfoObject(answers) {
   const filteredAnswers = formHelpers.filterByFieldIdIncludes(answers, 'housingInfo');
 
   const housingInfo = filteredAnswers.reduce((accumulatedAnswer, answer) => {
