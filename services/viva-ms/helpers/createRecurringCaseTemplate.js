@@ -49,7 +49,7 @@ function getSecondStringFromDotNotatedString(sourceString) {
   return string;
 }
 
-function createPersonsObject(persons, answers) {
+function createPersons(persons, answers) {
   const applicantPersons = persons.map(person => {
     if (person.role === PERSON_ROLE.applicant) {
       return mapApplicant(person, answers);
@@ -65,7 +65,7 @@ function createPersonsObject(persons, answers) {
   return applicantPersons;
 }
 
-function createNotesObject(answers) {
+function createNotes(answers) {
   const notes = [];
   const filteredAnswers = formHelpers.filterByFieldIdIncludes(answers, 'otherMessage');
   if (filteredAnswers.length) {
@@ -79,7 +79,7 @@ function createNotesObject(answers) {
   return notes;
 }
 
-function createHousingInfoObject(answers) {
+function createHousingInfo(answers) {
   const filteredAnswers = formHelpers.filterByFieldIdIncludes(answers, 'housingInfo');
 
   const housingInfo = filteredAnswers.reduce((accumulatedAnswer, answer) => {
@@ -311,7 +311,7 @@ function getFinancials(answers) {
   };
 }
 
-export default function createRecurringCaseTemplateData(caseItem, recurringFormId) {
+export default function createRecurringCaseTemplate(caseItem, recurringFormId) {
   const recurringForm = caseItem.forms[recurringFormId];
   const period = formatPeriodDates(caseItem.details.period);
   const persons = createPersonsObject(caseItem.persons, recurringform.answers);
