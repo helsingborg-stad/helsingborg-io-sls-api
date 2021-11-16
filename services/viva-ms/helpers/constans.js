@@ -31,9 +31,15 @@ export const TAG_NAME = {
   description: 'description',
   date: 'date',
   group: 'group',
+  school: 'school',
+  housing: 'housing',
+  firstName: 'firstName',
+  lastName: 'lastName',
+  personalNumber: 'personalNumber',
 };
 
 export const PERSON_ROLE = {
   applicant: 'applicant',
   coApplicant: 'coApplicant',
+  children: 'children',
 };

@@ -60,6 +60,44 @@ function createPersons(persons, answers) {
   return applicantPersons;
 }
 
+function createChildren(answers) {
+  const childrenAnswers = formHelpers.filterByTags(answers, 'children');
+
+  const childrenList = childrenAnswers.reduce((children, answer) => {
+    const { tags } = answer.field;
+    const group = formHelpers.getTagIfIncludes(tags, TAG_NAME.group);
+
+    const index = children.findIndex(child => child.group === group);
+    let child = children[index];
+
+    const hasTagFirstName = tags.includes(TAG_NAME.firstName);
+    const hasTagLastName = tags.includes(TAG_NAME.lastName);
+    const hasTagPersonalNumber = tags.includes(TAG_NAME.personalNumber);
+    const hasTagSchool = tags.includes(TAG_NAME.school);
+    const hasTagHousing = tags.includes(TAG_NAME.housing);
+
+    child = {
+      ...(child ?? {}),
+      ...(hasTagFirstName && { firstName: answer.value }),
+      ...(hasTagLastName && { lastName: answer.value }),
+      ...(hasTagPersonalNumber && { personalNumber: answer.value }),
+      ...(hasTagSchool && { school: answer.value }),
+      ...(hasTagHousing && { housing: answer.value }),
+      group,
+    };
+
+    if (index >= 0) {
+      children[index] = child;
+    } else {
+      children.push(child);
+    }
+
+    return children;
+  }, []);
+
+  return childrenList;
+}
+
 function createNotes(answers) {
   const notes = [];
   const filteredAnswers = formHelpers.filterByFieldIdIncludes(answers, 'otherMessage');
@@ -309,17 +347,17 @@ function getFinancials(answers) {
 export default function createRecurringCaseTemplate(caseItem, recurringFormId) {
   const recurringForm = caseItem.forms[recurringFormId];
   const period = formatPeriodDates(caseItem.details.period);
-  const persons = createPersonsObject(caseItem.persons, recurringform.answers);
-  const housing = createHousingInfoObject(recurringform.answers);
-  const financials = getFinancials(recurringform.answers);
-  const notes = createNotesObject(recurringform.answers);
-  const assets = createAssetsObject(recurringform.answers);
+  const financials = getFinancials(recurringForm.answers);
+  const persons = createPersons(caseItem.persons, recurringForm.answers);
+  const children = createChildren(recurringForm.answers);
+  const housing = createHousingInfo(recurringForm.answers);
+  const notes = createNotes(recurringForm.answers);
 
   return {
     notes,
-    assets,
     period,
     persons,
+    children,
     housing,
     financials,
   };
