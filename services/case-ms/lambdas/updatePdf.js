@@ -4,7 +4,19 @@ import config from '../../../config';
 import { to } from 'await-to-js';
 
 export async function main(event) {
-  const { resourceId, pdfStorageBucketKey } = event.detail;
+  const { keys: caseKeys, pdfStorageBucketKey } = event.detail;
+
+  const PKExistsInCaseKeys = 'PK' in caseKeys;
+  if (!PKExistsInCaseKeys) {
+    console.error('Missing attribute PK in event.detial.keys');
+    return false;
+  }
+
+  const SKExistsInCaseKeys = 'SK' in caseKeys;
+  if (!SKExistsInCaseKeys) {
+    console.error('Missing attribute SK in event.detial.keys');
+    return false;
+  }
 
   const [s3GetObjectError, pdfObject] = await to(
     s3Client
@@ -14,21 +26,14 @@ export async function main(event) {
       })
       .promise()
   );
+
   if (s3GetObjectError) {
     console.error(s3GetObjectError);
     return false;
   }
 
-  const [scanCasesByIdError, scanCasesResult] = await to(scanCasesById(resourceId));
-  if (scanCasesByIdError) {
-    console.error(scanCasesByIdError);
-    return false;
-  }
-
-  const [currentCase] = scanCasesResult.Items;
-
   const [updateCasePdfAttributesError] = await to(
-    updateCasePdfAttributes(currentCase, pdfObject.Body)
+    updateCasePdfAttributes(caseKeys, pdfObject.Body)
   );
   if (updateCasePdfAttributesError) {
     console.error(updateCasePdfAttributesError);
@@ -36,22 +41,7 @@ export async function main(event) {
   }
 }
 
-async function scanCasesById(caseId) {
-  const scanParams = {
-    TableName: config.cases.tableName,
-    FilterExpression: '#id = :id',
-    ExpressionAttributeNames: {
-      '#id': 'id',
-    },
-    ExpressionAttributeValues: {
-      ':id': caseId,
-    },
-  };
-
-  return dynamoDb.call('scan', scanParams);
-}
-
-async function updateCasePdfAttributes(currentCase, pdf) {
+async function updateCasePdfAttributes(caseKeys, pdf) {
   const UpdateExpression =
     'SET #pdf = :newPdf, #pdfGenerated = :newPdfGenerated, #state = :newState';
   const ExpressionAttributeNames = {
@@ -68,8 +58,8 @@ async function updateCasePdfAttributes(currentCase, pdf) {
   const params = {
     TableName: config.cases.tableName,
     Key: {
-      PK: currentCase.PK,
-      SK: currentCase.SK,
+      PK: caseKeys.PK,
+      SK: caseKeys.SK,
     },
     UpdateExpression,
     ExpressionAttributeNames,
