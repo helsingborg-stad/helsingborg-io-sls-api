@@ -6,14 +6,12 @@ import { to } from 'await-to-js';
 export async function main(event) {
   const { keys: caseKeys, pdfStorageBucketKey } = event.detail;
 
-  const PKExistsInCaseKeys = 'PK' in caseKeys;
-  if (!PKExistsInCaseKeys) {
+  if (!caseKeys?.PK) {
     console.error('Missing attribute PK in event.detial.keys');
     return false;
   }
 
-  const SKExistsInCaseKeys = 'SK' in caseKeys;
-  if (!SKExistsInCaseKeys) {
+  if (!caseKeys?.SK) {
     console.error('Missing attribute SK in event.detial.keys');
     return false;
   }
