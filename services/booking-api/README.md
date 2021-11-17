@@ -254,3 +254,36 @@ $ npm run test -- --[option_1] --[option_2]
   }
 }
 ```
+
+### GET HISTORICAL ATTENDEES
+
+#### Request Type
+
+`GET`
+
+#### Endpoint
+
+`/booking/getHistoricalAttendees/{referenceCode}?startTime{ISO-string}&endTime{ISO-string}`
+
+#### JSON Payload
+
+`N/A`
+
+#### Expected JSON Response
+
+```
+{
+  "jsonapi": {
+      "version": "1.0"
+  },
+  "data": {
+      "type": "type",
+      "id": "id",
+      "attributes": [
+          "email_1",
+          "email_2
+          ...
+      ]
+  }
+}
+```
