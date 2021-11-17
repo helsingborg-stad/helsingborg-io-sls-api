@@ -103,7 +103,7 @@ export async function main(event, context) {
   const [putEventError] = await to(
     putVivaMsEvent.htmlGeneratedSuccess({
       pdfStorageBucketKey: caseHtmlKey,
-      resourceId: caseItem.id,
+      keys: caseKeys,
     })
   );
   if (putEventError) {
