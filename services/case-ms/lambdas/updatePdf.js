@@ -66,7 +66,7 @@ function scanCasesById(caseId) {
 
 function updateCaseAttributes(caseItem, pdf) {
   const isPdf = !!pdf;
-  const newState = `${isPdf ? PDF_GENERATED : PDF_NOT_GENERATED}#${caseItem.state}`;
+  const newState = isPdf ? PDF_GENERATED : PDF_NOT_GENERATED;
 
   const params = {
     TableName: config.cases.tableName,
