@@ -11,7 +11,7 @@ const PDF_OPTIONS = {
 };
 
 export async function main(event) {
-  const { pdfStorageBucketKey, resourceId } = event.detail;
+  const { pdfStorageBucketKey, keys } = event.detail;
 
   const [getS3ObjectError, s3Object] = await to(
     s3Client
@@ -52,7 +52,7 @@ export async function main(event) {
   if (pdfOutputObject) {
     const [putEventError] = await to(
       putEvent(
-        { resourceId, pdfStorageBucketKey: pdfBucketKey },
+        { keys, pdfStorageBucketKey: pdfBucketKey },
         'PdfMsGenerateSuccess',
         'pdfMs.generate'
       )
