@@ -43,3 +43,25 @@ export const PERSON_ROLE = {
   coApplicant: 'coApplicant',
   children: 'children',
 };
+
+export const EMPTY_INCOME_POST = {
+  type: 'income',
+  group: '',
+  belongsTo: 'APPLICANT',
+  title: '',
+  description: '',
+  date: '',
+  value: '',
+  currency: 'kr',
+};
+
+export const EMPTY_EXPENSE_POST = {
+  type: 'expense',
+  group: '',
+  belongsTo: 'APPLICANT',
+  title: '',
+  description: '',
+  date: '',
+  value: '',
+  currency: 'kr',
+};
