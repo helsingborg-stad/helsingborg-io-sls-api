@@ -237,18 +237,9 @@ functions:
       - eventBridge:
           pattern:
             source:
-              - cases.database
               - casesApi.updateCase
             detail-type:
-              - MODIFY
+              - casesApiUpdateCaseSuccess
             detail:
-              dynamodb:
-                NewImage:
-                  provider:
-                    S: ["VIVA"]
-                  status:
-                    M:
-                      type:
-                        S: [{ "prefix": "active:submitted" }]
-                  state:
-                    S: ["VIVA_CASE_CREATED"]
+              status:
+                type: [{ "prefix": "active:submitted" }]
