@@ -126,27 +126,7 @@
         <tr>
           <td>Sysselsättning</td>
           <td>
-            {{#if (eq this.occupation 'fulltime')}}
-            Arbetar heltid
-            {{/if}}
-            {{#if (eq this.occupation 'parttime')}}
-            Arbetar deltid
-            {{/if}}
-            {{#if (eq this.occupation 'unemployed')}}
-            Arbetssökande
-            {{/if}}
-            {{#if (eq this.occupation 'parentalleave')}}
-            Föräldraledig
-            {{/if}}
-            {{#if (eq this.occupation 'studies')}}
-            Studerande
-            {{/if}}
-            {{#if (eq this.occupation 'sick')}}
-            Sjukskriven med läkarintyg
-            {{/if}}
-            {{#if (eq this.occupation 'otheroccuption')}}
-            Annat
-            {{/if}}
+            {{this.occupation}}
           </td>
         </tr>
       </table>
@@ -219,33 +199,7 @@
         <tr>
           <td>Boendeform</td>
           <td>
-            {{#if (eq this.contract 'lease')}}
-            Hyresrätt/förstahandskontrakt
-            {{/if}}
-            {{#if (eq this.contract 'sublease')}}
-            Andrahandskontrakt
-            {{/if}}
-            {{#if (eq this.contract 'rentasRoommate')}}
-            Inneboende
-            {{/if}}
-            {{#if (eq this.contract 'livingatParents')}}
-            Bor hos föräldrar
-            {{/if}}
-            {{#if (eq this.contract 'livingatChild')}}
-            Bor hus vuxna barn
-            {{/if}}
-            {{#if (eq this.contract 'condo')}}
-            Bostadsrätt
-            {{/if}}
-            {{#if (eq this.contract 'ownHouse')}}
-            Eget hus
-            {{/if}}
-            {{#if (eq this.contract 'noHome')}}
-            Bostadslös
-            {{/if}}
-            {{#if (eq this.contract 'otherLiving')}}
-            Annat boende
-            {{/if}}
+            {{this.contract}}
           </td>
         </tr>
         <tr>
