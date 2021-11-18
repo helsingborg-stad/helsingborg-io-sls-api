@@ -1,4 +1,3 @@
-import DynamoDB from 'aws-sdk/clients/dynamodb';
 import to from 'await-to-js';
 import handlebars from 'handlebars';
 
@@ -6,6 +5,7 @@ import config from '../../../config';
 
 import * as dynamoDb from '../../../libs/dynamoDb';
 import log from '../../../libs/logs';
+import { getItem as getStoredUserCase } from '../../../libs/queries';
 import params from '../../../libs/params';
 import S3 from '../../../libs/S3';
 import { CASE_HTML_GENERATED } from '../../../libs/constants';
@@ -30,12 +30,22 @@ handlebars.registerHelper({
 });
 
 export async function main(event, context) {
-  const { dynamodb } = event.detail;
-  if (dynamodb.NewImage === undefined) {
+  const { caseKeys } = event.detail;
+
+  const [getCaseItemError, caseItem] = await getStoredUserCase(
+    config.cases.tableName,
+    caseKeys.PK,
+    caseKeys.SK
+  );
+  if (getCaseItemError) {
+    log.error(
+      'Error getting stored case from the cases table',
+      context.awsRequestId,
+      'service-viva-ms-generateRecurringCaseHtml-000',
+      getCaseItemError
+    );
     return false;
   }
-
-  const caseItem = DynamoDB.Converter.unmarshall(dynamodb.NewImage);
 
   const [s3GetObjectError, hbsTemplateS3Object] = await to(
     S3.getFile(process.env.PDF_STORAGE_BUCKET_NAME, 'templates/ekb-recurring.hbs')
