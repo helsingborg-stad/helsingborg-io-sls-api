@@ -8,7 +8,7 @@ import * as dynamoDb from '../../../libs/dynamoDb';
 import log from '../../../libs/logs';
 import params from '../../../libs/params';
 import S3 from '../../../libs/S3';
-import { CASE_HTML_GENERATED, CASE_HTML_BEGIN_GENERATE } from '../../../libs/constants';
+import { CASE_HTML_GENERATED } from '../../../libs/constants';
 
 import createRecurringCaseTemplate from '../helpers/createRecurringCaseTemplate';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
@@ -36,19 +36,6 @@ export async function main(event, context) {
   }
 
   const caseItem = DynamoDB.Converter.unmarshall(dynamodb.NewImage);
-
-  const [updateBeginGenerateStateError] = await to(
-    updateVivaCaseState(caseItem, CASE_HTML_BEGIN_GENERATE)
-  );
-  if (updateBeginGenerateStateError) {
-    log.error(
-      'Failed to update case state attribute',
-      context.awsRequestId,
-      'service-viva-ms-generateRecurringCaseHtml-000',
-      updateBeginGenerateStateError
-    );
-    return false;
-  }
 
   const [s3GetObjectError, hbsTemplateS3Object] = await to(
     S3.getFile(process.env.PDF_STORAGE_BUCKET_NAME, 'templates/ekb-recurring.hbs')
@@ -95,7 +82,7 @@ export async function main(event, context) {
     return false;
   }
 
-  const [updateCaseError] = await to(updateVivaCaseState(caseItem, CASE_HTML_GENERATED));
+  const [updateCaseError] = await to(updateVivaCaseState(caseItem));
   if (updateCaseError) {
     log.error(
       'Failed to update case state attribute',
@@ -128,7 +115,7 @@ export async function main(event, context) {
   return true;
 }
 
-function updateVivaCaseState(caseItem, newState) {
+function updateVivaCaseState(caseItem) {
   const updateParams = {
     TableName: config.cases.tableName,
     Key: {
@@ -140,7 +127,7 @@ function updateVivaCaseState(caseItem, newState) {
       '#state': 'state',
     },
     ExpressionAttributeValues: {
-      ':newState': newState,
+      ':newState': CASE_HTML_GENERATED,
     },
     ReturnValues: 'NONE',
   };
