@@ -32,7 +32,7 @@ handlebars.registerHelper({
 export async function main(event, context) {
   const { caseKeys } = event.detail;
 
-  const [getCaseItemError, caseItem] = await getStoredUserCase(
+  const [getCaseItemError, { Item: caseItem }] = await getStoredUserCase(
     config.cases.tableName,
     caseKeys.PK,
     caseKeys.SK
