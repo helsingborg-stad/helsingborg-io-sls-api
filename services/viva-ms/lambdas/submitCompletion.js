@@ -1,11 +1,11 @@
 /* eslint-disable no-console */
-import AWS from 'aws-sdk';
 import to from 'await-to-js';
 
 import config from '../../../config';
 
 import * as dynamoDb from '../../../libs/dynamoDb';
 import log from '../../../libs/logs';
+import { getItem as getStoredUserCase } from '../../../libs/queries';
 import params from '../../../libs/params';
 import S3 from '../../../libs/S3';
 import { VIVA_COMPLETION_RECEIVED } from '../../../libs/constants';
@@ -13,7 +13,22 @@ import { VIVA_COMPLETION_RECEIVED } from '../../../libs/constants';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
 export async function main(event, context) {
-  const caseItem = parseDynamoDBItemFromEvent(event);
+  const { caseKeys } = event.detail;
+
+  const [getCaseItemError, { Item: caseItem }] = await getStoredUserCase(
+    config.cases.tableName,
+    caseKeys.PK,
+    caseKeys.SK
+  );
+  if (getCaseItemError) {
+    log.error(
+      'Error getting stored case from the cases table',
+      context.awsRequestId,
+      'service-viva-ms-submitCompletition-000',
+      getCaseItemError
+    );
+    return false;
+  }
 
   const [paramsReadError, vivaCaseSSMParams] = await to(
     params.read(config.cases.providers.viva.envsKeyName)
@@ -81,10 +96,6 @@ export async function main(event, context) {
     return false;
   }
 
-  const caseKeys = {
-    PK: caseItem.PK,
-    SK: caseItem.SK,
-  };
   const [updateError] = await to(updateVivaCaseState(caseKeys, VIVA_COMPLETION_RECEIVED));
   if (updateError) {
     log.error(
@@ -97,14 +108,6 @@ export async function main(event, context) {
   }
 
   return true;
-}
-
-function parseDynamoDBItemFromEvent(event) {
-  if (event.detail.dynamodb.NewImage === undefined) {
-    throw 'Could not read dynamoDB image from event details';
-  }
-  const dynamoDBItem = AWS.DynamoDB.Converter.unmarshall(event.detail.dynamodb.NewImage);
-  return dynamoDBItem;
 }
 
 function getAttachmentCategory(tags, attachmentCategories = ['expenses', 'incomes', 'completion']) {
