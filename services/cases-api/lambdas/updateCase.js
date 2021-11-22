@@ -173,7 +173,7 @@ export async function main(event, context) {
 
   const [putEventError] = await to(
     putEvent(
-      { caseKeys, status: newCaseStatus },
+      { caseKeys, status: newCaseStatus, state: userCase.state },
       'casesApiUpdateCaseSuccess',
       'casesApi.updateCase'
     )
