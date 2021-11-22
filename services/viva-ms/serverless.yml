@@ -160,20 +160,13 @@ functions:
       - eventBridge:
           pattern:
             source:
-              - cases.database
+              - casesApi.updateCase
             detail-type:
-              - MODIFY
+              - casesApiUpdateCaseSuccess
             detail:
-              dynamodb:
-                NewImage:
-                  provider:
-                    S: ["VIVA"]
                   status:
-                    M:
-                      type:
-                        S: [{ "prefix": "active:submitted" }]
-                  state:
-                    S: ["VIVA_COMPLETION_REQUIRED"]
+                type: [{ "prefix": "active:submitted" }]
+              state: ["VIVA_COMPLETION_REQUIRED"]
 
   syncOfficers:
     handler: lambdas/syncOfficers.main
