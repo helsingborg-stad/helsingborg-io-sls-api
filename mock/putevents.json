@@ -1,7 +1,7 @@
 [
   {
     "Source": "casesApi.updateCase",
-    "Detail": "{ \"caseKeys\": { \"PK\": \"USER#199803312397\", \"SK\": \"CASE#943066fe-d041-4723-a4ff-962f74fc378a\" }, \"status\": { \"type\": \"active:submitted\" } }",
+    "Detail": "{ \"caseKeys\": { \"PK\": \"USER#199803312397\", \"SK\": \"CASE#943066fe-d041-4723-a4ff-962f74fc378a\" }, \"status\": { \"type\": \"active:submitted\" }, \"state\": \"VIVA_COMPLETION_REQUIRED\" }",
     "Resources": [
       "resourceMock"
     ],
