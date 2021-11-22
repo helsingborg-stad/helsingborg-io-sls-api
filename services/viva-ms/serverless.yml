@@ -243,3 +243,5 @@ functions:
             detail:
               status:
                 type: [{ "prefix": "active:submitted" }]
+              state:
+                type: ["VIVA_CASE_CREATED"]
