@@ -1,11 +1,11 @@
 [
   {
-    "Source": "bankId.collect",
-    "Detail": "{ \"user\": { \"personalNumber\": \"199803312397\" } }",
+    "Source": "casesApi.updateCase",
+    "Detail": "{ \"caseKeys\": { \"PK\": \"USER#199803312397\", \"SK\": \"CASE#943066fe-d041-4723-a4ff-962f74fc378a\" }, \"status\": { \"type\": \"active:submitted\" } }",
     "Resources": [
       "resourceMock"
     ],
-    "DetailType": "BankIdCollectComplete",
+    "DetailType": "casesApiUpdateCaseSuccess",
     "EventBusName": "default"
   },
   {
