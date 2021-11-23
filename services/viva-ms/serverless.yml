@@ -164,7 +164,7 @@ functions:
             detail-type:
               - casesApiUpdateCaseSuccess
             detail:
-                  status:
+              status:
                 type: [{ "prefix": "active:submitted" }]
               state: ["VIVA_COMPLETION_REQUIRED"]
 
