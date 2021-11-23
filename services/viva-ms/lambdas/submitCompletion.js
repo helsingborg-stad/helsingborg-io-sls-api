@@ -24,10 +24,21 @@ export async function main(event, context) {
     log.error(
       'Error getting stored case from the cases table',
       context.awsRequestId,
-      'service-viva-ms-submitCompletition-000',
+      'service-viva-ms-submitCompletition-001',
       getCaseItemError
     );
     return false;
+  }
+
+  const caseItemExists = !!caseItem;
+  if (caseItemExists === false) {
+    log.warn(
+      `Requested case item with SK: ${caseKeys.SK}, was not found in the cases table`,
+      context.awsRequestId,
+      'service-viva-ms-submitCompletition-002',
+      caseKeys.SK
+    );
+    return true;
   }
 
   const [paramsReadError, vivaCaseSSMParams] = await to(
@@ -37,7 +48,7 @@ export async function main(event, context) {
     log.error(
       'Read ssm params ´config.cases.providers.viva.envsKeyName´ failed',
       context.awsRequestId,
-      'service-viva-ms-submitCompletition-001',
+      'service-viva-ms-submitCompletition-003',
       paramsReadError
     );
     return false;
@@ -48,7 +59,7 @@ export async function main(event, context) {
     log.info(
       'Current form is not an completion form',
       context.awsRequestId,
-      'service-viva-ms-submitCompletition-002'
+      'service-viva-ms-submitCompletition-004'
     );
     return true;
   }
@@ -63,7 +74,7 @@ export async function main(event, context) {
     log.error(
       'Attachment list error',
       context.awsRequestId,
-      'service-viva-ms-submitCompletition-003',
+      'service-viva-ms-submitCompletition-005',
       attachmentListError
     );
     return false;
@@ -80,7 +91,7 @@ export async function main(event, context) {
     log.error(
       'Failed to submit Viva completion application',
       context.awsRequestId,
-      'service-viva-ms-submitCompletition-004',
+      'service-viva-ms-submitCompletition-006',
       postCompletionError
     );
     return false;
@@ -90,7 +101,7 @@ export async function main(event, context) {
     log.error(
       'Viva completion receive failed',
       context.awsRequestId,
-      'service-viva-ms-submitCompletition-005',
+      'service-viva-ms-submitCompletition-007',
       postCompletionResponse
     );
     return false;
@@ -101,7 +112,7 @@ export async function main(event, context) {
     log.error(
       'Failed to update Viva case',
       context.awsRequestId,
-      'service-viva-ms-submitCompletition-006',
+      'service-viva-ms-submitCompletition-008',
       updateError
     );
     return false;
