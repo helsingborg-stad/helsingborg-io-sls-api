@@ -292,6 +292,9 @@ function getApplicantsExpenses(answers) {
       {
         tags: ['expenses', 'medicin'],
       },
+      {
+        tags: ['expenses', 'barnomsorg'],
+      },
     ],
   };
 
