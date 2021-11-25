@@ -138,6 +138,11 @@ function createAssets(answers) {
       value: '',
     },
     {
+      title: 'Övriga fordon',
+      filterTags: ['other', 'vehicle', ...commonFilterTags],
+      value: '',
+    },
+    {
       title: 'Hus',
       filterTags: ['hus', ...commonFilterTags],
       value: '',
@@ -145,11 +150,6 @@ function createAssets(answers) {
     {
       title: 'Bostadsrätt',
       filterTags: ['lagenhet', ...commonFilterTags],
-      value: '',
-    },
-    {
-      title: 'Övriga fordon',
-      filterTags: ['other', 'vehicle', ...commonFilterTags],
       value: '',
     },
     {
@@ -232,16 +232,16 @@ function getApplicantsIncomes(answers) {
         tags: ['incomes', 'lon'],
       },
       {
-        tags: ['incomes', 'other'],
-      },
-      {
-        tags: ['incomes', 'foreignPension'],
+        tags: ['incomes', 'swish'],
       },
       {
         tags: ['incomes', 'loan'],
       },
       {
-        tags: ['incomes', 'swish'],
+        tags: ['incomes', 'foreignPension'],
+      },
+      {
+        tags: ['incomes', 'other'],
       },
     ],
   };
@@ -269,7 +269,19 @@ function getApplicantsExpenses(answers) {
     initialPost: EMPTY_EXPENSE_POST,
     tagFilters: [
       {
-        tags: ['expenses', 'annat'],
+        tags: ['expenses', 'akassa'],
+      },
+      {
+        tags: ['expenses', 'lakarvard'],
+      },
+      {
+        tags: ['expenses', 'medicin'],
+      },
+      {
+        tags: ['expenses', 'reskostnad'],
+      },
+      {
+        tags: ['expenses', 'akuttandvard'],
       },
       {
         tags: ['expenses', 'tandvard'],
@@ -278,19 +290,7 @@ function getApplicantsExpenses(answers) {
         tags: ['expenses', 'annantandvard'],
       },
       {
-        tags: ['expenses', 'akuttandvard'],
-      },
-      {
-        tags: ['expenses', 'reskostnad'],
-      },
-      {
-        tags: ['expenses', 'akassa'],
-      },
-      {
-        tags: ['expenses', 'lakarvard'],
-      },
-      {
-        tags: ['expenses', 'medicin'],
+        tags: ['expenses', 'annat'],
       },
       {
         tags: ['expenses', 'barnomsorg'],
@@ -310,16 +310,16 @@ function getHousingExpenses(answers) {
     },
     tagFilters: [
       {
-        tags: ['expenses', 'el'],
+        tags: ['expenses', 'boende'],
       },
       {
-        tags: ['expenses', 'bredband'],
+        tags: ['expenses', 'el'],
       },
       {
         tags: ['expenses', 'hemforsakring'],
       },
       {
-        tags: ['expenses', 'boende'],
+        tags: ['expenses', 'bredband'],
       },
     ],
   };
