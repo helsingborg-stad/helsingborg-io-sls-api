@@ -45,17 +45,17 @@ function mapCoApplicant(person, answers) {
 }
 
 function createPersons(persons, answers) {
-  const applicantPersons = persons.map(person => {
+  const applicantPersons = persons.reduce((persons, person) => {
     if (person.role === PERSON_ROLE.applicant) {
-      return mapApplicant(person, answers);
+      return [...persons, mapApplicant(person, answers)];
     }
 
     if (person.role === PERSON_ROLE.coApplicant) {
-      return mapCoApplicant(person, answers);
+      return [...persons, mapCoApplicant(person, answers)];
     }
 
-    return person;
-  });
+    return persons;
+  }, []);
 
   return applicantPersons;
 }
