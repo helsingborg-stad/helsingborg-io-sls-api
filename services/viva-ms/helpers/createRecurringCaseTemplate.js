@@ -342,6 +342,7 @@ function getFinancials(answers) {
     expenses: {
       applicant: applicantsExpenses.filter(expense => expense.belongsTo === 'APPLICANT'),
       coApplicant: applicantsExpenses.filter(expense => expense.belongsTo === 'COAPPLICANT'),
+      children: applicantsExpenses.filter(expense => expense.belongsTo === 'CHILDREN'),
       housing: housingExpenses,
     },
   };
