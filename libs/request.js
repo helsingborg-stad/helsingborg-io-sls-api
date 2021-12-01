@@ -27,6 +27,8 @@ export const requestClient = (
       ...headers,
     },
     timeout,
+    maxContentLength: Infinity,
+    maxBodyLength: Infinity,
   });
 
 export const call = (client, method, url, payload) => client[method](url, payload);
