@@ -99,16 +99,11 @@ function createChildren(answers) {
 }
 
 function createNotes(answers) {
-  const notes = [];
-  const filteredAnswers = formHelpers.filterByFieldIdIncludes(answers, 'otherMessage');
-  if (filteredAnswers.length) {
-    const [noteAnswer] = filteredAnswers;
-    const note = {
-      title: 'Meddelande från sökande',
-      text: noteAnswer.value,
-    };
-    notes.push(note);
-  }
+  const noteAnswers = formHelpers.filterByTags(answers, ['notes', 'note']);
+  const notes = noteAnswers.map(answer => ({
+    title: 'Meddelande från sökande',
+    text: answer.value,
+  }));
   return notes;
 }
 
