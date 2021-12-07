@@ -1,6 +1,15 @@
 [
   {
-    "Source": "casesApi.updateCase",
+    "Source": "bankId.collect",
+    "Detail": "{ \"user\": { \"personalNumber\": \"198602132394\" } }",
+    "Resources": [
+      "resourceMock"
+    ],
+    "DetailType": "BankIdCollectComplete",
+    "EventBusName": "default"
+  },
+  {
+    "Source": "OFFcasesApi.updateCase",
     "Detail": "{ \"caseKeys\": { \"PK\": \"USER#199803312397\", \"SK\": \"CASE#943066fe-d041-4723-a4ff-962f74fc378a\" }, \"status\": { \"type\": \"active:submitted\" }, \"state\": \"VIVA_COMPLETION_REQUIRED\" }",
     "Resources": [
       "resourceMock"

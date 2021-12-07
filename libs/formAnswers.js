@@ -1,4 +1,4 @@
-function generateDataMap(form) {
+export function generateDataMap(form) {
   const dataMap = [];
   if (!form.steps) {
     return dataMap;
@@ -64,7 +64,7 @@ function generateDataMap(form) {
   return dataMap;
 }
 
-function formatAnswer(id, tags, value) {
+export function formatAnswer(id, tags, value) {
   return { field: { id, tags: tags || [] }, value };
 }
 
@@ -144,7 +144,7 @@ function populateAnswers(dataMap, applicants, previousAnswers) {
   return answers;
 }
 
-function mergeAnswers(previousAnswers, newAnswers) {
+export function mergeAnswers(previousAnswers, newAnswers) {
   return Object.values(
     [...previousAnswers, ...newAnswers].reduce((result, current) => {
       result[current.field.id] = {
@@ -163,13 +163,18 @@ export function populateFormWithPreviousCaseAnswers(
   previousForms
 ) {
   const populatedForms = {};
+
   Object.keys(forms).forEach(formId => {
-    const form = forms[formId];
-    const formTemplate = formTemplates?.[formId] || {};
+    const caseFormTemplate = formTemplates?.[formId] || {};
+
     const previousAnswers = previousForms?.[formId]?.answers || [];
-    const dataMap = generateDataMap(formTemplate);
+
+    const dataMap = generateDataMap(caseFormTemplate);
+
     const answers = populateAnswers(dataMap, applicants, previousAnswers);
     const mergedAnswers = mergeAnswers(answers, forms[formId].answers);
+
+    const form = forms[formId];
     populatedForms[formId] = { ...form, answers: mergedAnswers };
   });
 
