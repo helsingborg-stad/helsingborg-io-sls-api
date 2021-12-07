@@ -18,6 +18,8 @@ import {
   NOT_STARTED_VIVA,
 } from '../../../libs/constants';
 
+import populateFormWithVivaChildren from '../helpers/populateForm';
+
 export async function main(event, context) {
   const { clientUser, vivaPersonDetail } = event.detail;
 
@@ -143,6 +145,7 @@ async function createRecurringVivaCase(vivaPerson, user) {
   };
 
   let casePersonList = getCasePersonList(vivaPerson);
+  const vivaChildrenList = getVivaChildren(casePersonList);
   caseItemPutParams.Item['persons'] = casePersonList;
 
   const casePersonCoApplicant = getUserOnRole(casePersonList, 'coApplicant');
@@ -173,6 +176,15 @@ async function createRecurringVivaCase(vivaPerson, user) {
     formTemplates,
     lastUpdatedCase?.forms || {}
   );
+
+  const prePopulatedFormsWithChildren = populateFormWithVivaChildren(
+    initialFormList,
+    vivaChildrenList,
+    formTemplates
+  );
+
+  console.log('prePopulatedFormsWithChildren', prePopulatedFormsWithChildren);
+
   caseItemPutParams.Item['forms'] = prePopulatedForms;
 
   const [putItemError, createdCaseItem] = await to(putItem(caseItemPutParams));
@@ -181,6 +193,11 @@ async function createRecurringVivaCase(vivaPerson, user) {
   }
 
   return createdCaseItem;
+}
+
+function getVivaChildren(casePersonList) {
+  const childrenList = casePersonList.filter(person => person.role === 'children');
+  return childrenList;
 }
 
 function getInitialFormAttributes(formIdList, vivaPerson) {
