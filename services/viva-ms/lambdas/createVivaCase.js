@@ -177,13 +177,15 @@ async function createRecurringVivaCase(vivaPerson, user) {
     lastUpdatedCase?.forms || {}
   );
 
-  const prePopulatedFormsWithChildren = populateFormWithVivaChildren(
-    initialFormList,
-    vivaChildrenList,
-    formTemplates
-  );
-
-  console.log('prePopulatedFormsWithChildren', prePopulatedFormsWithChildren);
+  if (vivaChildrenList.length > 0) {
+    const recurringFormPrePopulated = prePopulatedForms[recurringFormId];
+    const recurringFormWithVivaChildren = populateFormWithVivaChildren(
+      recurringFormPrePopulated,
+      formTemplates[recurringFormId],
+      vivaChildrenList
+    );
+    prePopulatedForms[recurringFormId] = recurringFormWithVivaChildren;
+  }
 
   caseItemPutParams.Item['forms'] = prePopulatedForms;
 
