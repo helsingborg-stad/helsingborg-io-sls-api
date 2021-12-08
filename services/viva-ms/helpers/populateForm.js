@@ -30,7 +30,6 @@ export default function populateFormWithVivaChildren(form, formTemplate, vivaChi
   const childrenAnswers = populateChildrenAnswers(childrenRepeaterInputList, vivaChildrenList);
 
   const mergedChildrenAnswers = mergeAnswers(childrenAnswers, form.answers);
-  console.log('mergedChildrenAnswers', mergedChildrenAnswers);
 
   return { ...form, answers: mergedChildrenAnswers };
 }
