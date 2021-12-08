@@ -158,7 +158,8 @@ async function createRecurringVivaCase(vivaPerson, user) {
 
   casePersonList = casePersonList.map(person => {
     if (person.role === 'applicant' && person.personalNumber === user.personalNumber) {
-      return { ...person, ...user };
+      const personApplicantExtendedInfo = { ...person, ...user };
+      return personApplicantExtendedInfo;
     }
     return person;
   });
