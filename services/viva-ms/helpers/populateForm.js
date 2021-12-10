@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { generateDataMap, formatAnswer, mergeAnswers } from '../../../libs/formAnswers';
 
 export function populateChildrenAnswers(repeaterInputList, childrenList) {
