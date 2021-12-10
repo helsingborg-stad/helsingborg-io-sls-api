@@ -158,7 +158,7 @@ describe('populateChildrenAnswers', () => {
 });
 
 describe('populateFormWithVivaChildren', () => {
-  it('testing', () => {
+  it('filter data map on tag "children" and prepending recurring form with children from Viva', () => {
     const results = populateFormWithVivaChildren(caseRecurringForm, formTemplate, vivaChildrenList);
     expect(results).toEqual(expectedPopulatedFormWithChildren);
   });
