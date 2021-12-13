@@ -90,6 +90,9 @@ functions:
 
   getHistoricalAttendees:
     handler: lambdas/getHistoricalAttendees.main
+    timeout: 12 # time in seconds
+    environment:
+      requestTimeout: 10000 # 10 seconds in ms
     events:
       - http:
           path: booking/getHistoricalAttendees/{referenceCode}
