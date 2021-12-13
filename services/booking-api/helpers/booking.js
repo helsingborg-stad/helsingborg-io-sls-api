@@ -34,15 +34,17 @@ function search(body) {
 }
 
 function getHistoricalAttendees(body) {
-  return sendBookingPostRequest(URI_RESOURCE.GET_HISTORICAL_ATTENDEES, body);
+  const requestTimeout = process.env.requestTimeout;
+  return sendBookingPostRequest(URI_RESOURCE.GET_HISTORICAL_ATTENDEES, body, requestTimeout);
 }
 
-async function sendBookingPostRequest(path, body) {
+async function sendBookingPostRequest(path, body, requestTimeout) {
   const { datatorgetEndpoint, apiKey } = await getSsmParameters();
 
   const requestClient = request.requestClient(
     { rejectUnauthorized: false },
-    { 'X-ApiKey': apiKey }
+    { 'X-ApiKey': apiKey },
+    requestTimeout
   );
 
   const url = `${datatorgetEndpoint}/${path}`;
