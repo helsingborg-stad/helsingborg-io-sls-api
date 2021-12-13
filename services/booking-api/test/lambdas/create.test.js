@@ -44,6 +44,7 @@ it('creates a booking successfully', async () => {
     statusCode: 200,
   };
 
+  booking.search.mockResolvedValueOnce();
   booking.create.mockResolvedValueOnce({ data: responseData });
 
   const result = await main(mockEvent);
@@ -70,6 +71,7 @@ it('throws when booking.create fails', async () => {
     statusCode,
   };
 
+  booking.search.mockResolvedValueOnce();
   booking.create.mockRejectedValueOnce({ status: statusCode, message });
 
   const result = await main(mockEvent);
@@ -106,4 +108,28 @@ it('returns error when required parameters does not exists in event', async () =
 
   expect(result).toEqual(expectedResult);
   expect(booking.create).toHaveBeenCalledTimes(0);
+});
+
+it('returns failure when timeslot is already taken', async () => {
+  expect.assertions(1);
+
+  const statusCode = 500;
+  const expectedResult = {
+    body: JSON.stringify({
+      jsonapi: { version: '1.0' },
+      data: {
+        status: '500',
+        code: '500',
+        message: 'Timeslot not available for booking',
+      },
+    }),
+    headers: mockHeaders,
+    statusCode,
+  };
+
+  booking.search.mockResolvedValueOnce({ data: { data: { attributes: [{ dummy: 'yes' }] } } });
+
+  const result = await main(mockEvent);
+
+  expect(result).toEqual(expectedResult);
 });
