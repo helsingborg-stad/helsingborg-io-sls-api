@@ -1,22 +1,25 @@
 import { generateDataMap, formatAnswer, mergeAnswers } from '../../../libs/formAnswers';
 
 export function populateChildrenAnswers(repeaterInputList, childrenList) {
-  const answers = [];
+  const answers = childrenList.reduce((answers, child, index) => {
+    const childAnswers = Object.keys(child)
+      .map(key => {
+        const childAnswerList = repeaterInputList
+          .map(input => {
+            if (input.tags.includes(key)) {
+              const inputId = input.id.replace('[*]', index);
+              return formatAnswer(inputId, input.tags, child[key]);
+            }
+          })
+          .filter(Boolean);
 
-  childrenList.forEach((child, childrenListIndex) => {
-    for (const [childKey, childValue] of Object.entries(child)) {
-      const childAnswer = repeaterInputList
-        .map(input => {
-          if (input.tags.includes(childKey)) {
-            const inputId = input.id.replace('[*]', childrenListIndex);
-            return formatAnswer(inputId, input.tags, childValue);
-          }
-        })
-        .filter(Boolean);
+        const [childAnswer] = childAnswerList;
+        return childAnswer;
+      })
+      .filter(Boolean);
 
-      answers.push(...childAnswer);
-    }
-  });
+    return [...answers, ...childAnswers];
+  }, []);
 
   return answers;
 }
