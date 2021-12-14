@@ -41,11 +41,13 @@ const vivaChildrenList = [
     firstName: 'Sanna',
     lastName: 'Backman',
     personalNumber: '200605282383',
+    role: 'children',
   },
   {
     firstName: 'Olle',
     lastName: 'Backman',
     personalNumber: '200701282397',
+    role: 'children',
   },
 ];
 
