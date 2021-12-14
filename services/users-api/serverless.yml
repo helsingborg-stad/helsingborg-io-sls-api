@@ -4,7 +4,6 @@ plugins:
   - serverless-bundle
   - serverless-offline
   - serverless-apigw-binary
-  - serverless-apigwy-binary
 
 projectDir: ../../
 
@@ -14,16 +13,13 @@ package:
   individually: true
 
 provider:
-  lambdaHashingVersion: 20201221
   name: aws
-  runtime: nodejs12.x
+  runtime: ${self:custom.runtime}
+  lambdaHashingVersion: 20201221
   stage: dev
   region: eu-north-1
   endpointType: regional
-  logs:
-    restApi: true
   tracing:
-    apiGateway: true
     lambda: true
 
   environment:
@@ -37,6 +33,9 @@ provider:
     restApiResources:
       users:
         "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayResourceUsers
+
+  deploymentBucket:
+    name: ${self:custom.deploymentBucket}
 
   iam:
     role:
@@ -81,7 +80,7 @@ functions:
           cors: true
           private: true
           authorizer:
-            type: CUSTOM
+            type: TOKEN
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   me:
@@ -93,7 +92,7 @@ functions:
           cors: true
           private: true
           authorizer:
-            type: CUSTOM
+            type: TOKEN
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   getAttachmentList:
@@ -107,7 +106,7 @@ functions:
           cors: true
           private: true
           authorizer:
-            type: CUSTOM
+            type: TOKEN
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   uploadAttachment:
@@ -121,7 +120,7 @@ functions:
           cors: true
           private: true
           authorizer:
-            type: CUSTOM
+            type: TOKEN
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   deleteAttachment:
@@ -135,7 +134,7 @@ functions:
           cors: true
           private: true
           authorizer:
-            type: CUSTOM
+            type: TOKEN
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   getAttachment:
@@ -146,11 +145,10 @@ functions:
       - http:
           path: /users/me/attachments/{filename}
           method: get
-          contentHandling: CONVERT_TO_BINARY
           cors: true
           private: true
           authorizer:
-            type: CUSTOM
+            type: TOKEN
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
            

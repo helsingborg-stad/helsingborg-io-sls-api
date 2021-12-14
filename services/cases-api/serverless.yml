@@ -11,9 +11,9 @@ package:
   individually: true
 
 provider:
-  lambdaHashingVersion: 20201221
   name: aws
-  runtime: nodejs12.x
+  runtime: ${self:custom.runtime}
+  lambdaHashingVersion: 20201221
   stage: dev
   region: eu-north-1
   endpointType: regional
@@ -68,6 +68,9 @@ provider:
             - kms:Decrypt
           Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
 
+  deploymentBucket:
+    name: ${self:custom.deploymentBucket}
+
 functions:
   getCase:
     handler: lambdas/getCase.main
@@ -78,7 +81,7 @@ functions:
           cors: true
           private: true
           authorizer:
-            type: CUSTOM
+            type: TOKEN
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   getCaseList:
@@ -90,7 +93,7 @@ functions:
           cors: true
           private: true
           authorizer:
-            type: CUSTOM
+            type: TOKEN
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   createCase:
@@ -102,7 +105,7 @@ functions:
           cors: true
           private: true
           authorizer:
-            type: CUSTOM
+            type: TOKEN
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   updateCase:
@@ -114,7 +117,7 @@ functions:
           cors: true
           private: true
           authorizer:
-            type: CUSTOM
+            type: TOKEN
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   deleteCase:
@@ -126,5 +129,5 @@ functions:
           cors: true
           private: true
           authorizer:
-            type: CUSTOM
+            type: TOKEN
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId

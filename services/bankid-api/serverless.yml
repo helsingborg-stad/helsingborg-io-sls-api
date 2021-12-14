@@ -11,9 +11,9 @@ package:
   individually: true
 
 provider:
-  lambdaHashingVersion: 20201221
   name: aws
-  runtime: nodejs12.x
+  runtime: ${self:custom.runtime}
+  lambdaHashingVersion: 20201221
   stage: dev
   region: eu-north-1
   endpointType: regional
@@ -60,6 +60,9 @@ provider:
             - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${file(../../config.json):${self:custom.stage}.auth.secrets.accessToken.name}-??????"
             - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${file(../../config.json):${self:custom.stage}.auth.secrets.refreshToken.name}-??????"
             - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${file(../../config.json):${self:custom.stage}.auth.secrets.authorizationCode.name}-??????"
+
+  deploymentBucket:
+    name: ${self:custom.deploymentBucket}
 
 functions:
   auth:

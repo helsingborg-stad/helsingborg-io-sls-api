@@ -13,9 +13,9 @@ package:
   individually: true
 
 provider:
-  lambdaHashingVersion: 20201221
   name: aws
-  runtime: nodejs12.x
+  runtime: ${self:custom.runtime}
+  lambdaHashingVersion: 20201221
   stage: dev
   region: eu-north-1
   endpointType: regional
@@ -51,6 +51,9 @@ provider:
 
           Resource:
             - "Fn::ImportValue": ${self:custom.resourcesStage}-FormsTableArn
+
+  deploymentBucket:
+    name: ${self:custom.deploymentBucket}
 
 functions:
   getFormList:

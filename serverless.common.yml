@@ -1,4 +1,6 @@
 custom:
+  deploymentBucket: deployment-${aws:accountId}
+  runtime: nodejs14.x
   bundle:
     packager: yarn
     forceExclude:

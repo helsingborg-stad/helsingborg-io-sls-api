@@ -12,14 +12,13 @@ package:
   individually: true
 
 provider:
-  lambdaHashingVersion: 20201221
   name: aws
-  runtime: nodejs12.x
+  runtime: ${self:custom.runtime}
+  lambdaHashingVersion: 20201221
   stage: dev
   region: eu-north-1
   endpointType: regional
   tracing:
-    apiGateway: true
     lambda: true
   apiGateway:
     restApiId:
@@ -33,6 +32,9 @@ provider:
   environment:
     stage: ${self:custom.stage}
     resourcesStage: ${self:custom.resourcesStage}
+
+  deploymentBucket:
+    name: ${self:custom.deploymentBucket}
 
 functions:
   officeAuthorizer:
@@ -62,7 +64,14 @@ resources:
         RestApiId: ${self:provider.apiGateway.restApiId}
         Type: TOKEN
         IdentitySource: method.request.header.Authorization
-        AuthorizerUri: !Sub "arn:aws:apigateway:${aws:region}:lambda:path/2015-03-31/functions/${OfficeAuthorizerLambdaFunction.Arn}/invocations"
+        AuthorizerUri:
+          Fn::Join:
+            - ""
+            - - "arn:aws:apigateway:"
+              - Ref: "AWS::Region"
+              - ":lambda:path/2015-03-31/functions/"
+              - Fn::GetAtt: "OfficeAuthorizerLambdaFunction.Arn"
+              - "/invocations"
 
   Outputs:
     AuthorizerId:

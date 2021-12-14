@@ -12,9 +12,9 @@ package:
   individually: true
 
 provider:
-  lambdaHashingVersion: 20201221
   name: aws
-  runtime: nodejs12.x
+  runtime: ${self:custom.runtime}
+  lambdaHashingVersion: 20201221
   stage: dev
   region: eu-north-1
   endpointType: regional
@@ -41,6 +41,9 @@ provider:
             - ssm:GetParameter
           Resource:
             - !Sub arn:aws:ssm:${self:provider.region}:${AWS::AccountId}:parameter/datatorgetEnvs/${self:provider.stage}
+
+  deploymentBucket:
+    name: ${self:custom.deploymentBucket}
 
 functions:
   getTimeSlots:

@@ -11,14 +11,16 @@ package:
   individually: true
 
 provider:
+  eventBridge:
+    useCloudFormation: true
   lambdaHashingVersion: 20201221
   name: aws
-  runtime: nodejs12.x
+  runtime: ${self:custom.runtime}
+
   stage: dev
   region: eu-north-1
   endpointType: regional
   tracing:
-    apiGateway: false
     lambda: true
 
   environment:
@@ -44,6 +46,9 @@ provider:
           Action:
             - kms:Decrypt
           Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
+
+  deploymentBucket:
+    name: ${self:custom.deploymentBucket}
 
 functions:
   find:

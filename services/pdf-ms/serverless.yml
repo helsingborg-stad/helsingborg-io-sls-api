@@ -5,7 +5,8 @@ plugins:
 
 projectDir: ../../
 
-custom:
+custom: 
+  extern: ${file(../../serverless.common.yml):custom}
   stage: ${opt:stage, self:provider.stage}
   resourcesStages:
     prod: prod
@@ -24,7 +25,7 @@ package:
 provider:
   lambdaHashingVersion: 20201221
   name: aws
-  runtime: nodejs12.x
+  runtime: ${self:custom.extern.runtime}
   stage: dev
   region: eu-north-1
   endpointType: regional
@@ -63,10 +64,10 @@ provider:
             - s3:GetObject
             - s3:PutObject
           Resource:
-            - Fn::ImportValue: ${self:custom.resourcesStage}-PdfTemplatesBucketArn
+            - Fn::ImportValue: ${self:custom.resourcesStage}-PdfStorageBucketArn
             - Fn::Join:
                 - ""
-                - - Fn::ImportValue: ${self:custom.resourcesStage}-PdfTemplatesBucketArn
+                - - Fn::ImportValue: ${self:custom.resourcesStage}-PdfStorageBucketArn
                   - "/*"
         - Effect: Allow
           Action:
@@ -77,7 +78,7 @@ functions:
   addPdfToCase:
     handler: lambdas/addPdfToCase.main
     environment:
-      BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-PdfTemplatesBucketName
+      BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-PdfStorageBucketName
 
     events:
       - eventBridge:

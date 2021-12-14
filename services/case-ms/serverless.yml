@@ -11,12 +11,14 @@ package:
   individually: true
 
 provider:
-  lambdaHashingVersion: 20201221
   name: aws
-  runtime: nodejs12.x
+  runtime: ${self:custom.runtime}
+  lambdaHashingVersion: 20201221
   stage: dev
   region: eu-north-1
   endpointType: regional
+  eventBridge:
+    useCloudFormation: true
   tracing:
     lambda: true
 
@@ -49,6 +51,9 @@ provider:
                 - ""
                 - - Fn::ImportValue: ${self:custom.resourcesStage}-PdfStorageBucketArn
                   - "/*"
+
+  deploymentBucket:
+    name: ${self:custom.deploymentBucket}
 
 functions:
   updatePdf:
