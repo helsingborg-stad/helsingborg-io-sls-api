@@ -1,4 +1,8 @@
-import { generateDataMap, formatAnswer, mergeAnswers } from '../../../libs/formAnswers';
+import {
+  getFormFieldsWithLoadPreviousAttribute,
+  formatAnswer,
+  mergeAnswers,
+} from '../../../libs/formAnswers';
 
 export function populateChildrenAnswers(repeaterInputList, childrenList) {
   const answers = childrenList.reduce((answers, child, index) => {
@@ -25,9 +29,9 @@ export function populateChildrenAnswers(repeaterInputList, childrenList) {
 }
 
 export default function populateFormWithVivaChildren(form, formTemplate, vivaChildrenList) {
-  const dataMap = generateDataMap(formTemplate);
+  const formFields = getFormFieldsWithLoadPreviousAttribute(formTemplate);
 
-  const childrenRepeaterInputList = dataMap.filter(field => field.tags?.includes('children'));
+  const childrenRepeaterInputList = formFields.filter(field => field.tags?.includes('children'));
 
   const childrenAnswers = populateChildrenAnswers(childrenRepeaterInputList, vivaChildrenList);
 

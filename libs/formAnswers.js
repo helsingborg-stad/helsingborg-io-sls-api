@@ -1,4 +1,4 @@
-export function generateDataMap(form) {
+export function getFormFieldsWithLoadPreviousAttribute(form) {
   const dataMap = [];
   if (!form.steps) {
     return dataMap;
@@ -169,9 +169,9 @@ export function populateFormWithPreviousCaseAnswers(
 
     const previousAnswers = previousForms?.[formId]?.answers || [];
 
-    const dataMap = generateDataMap(caseFormTemplate);
+    const formFields = getFormFieldsWithLoadPreviousAttribute(caseFormTemplate);
 
-    const answers = populateAnswers(dataMap, applicants, previousAnswers);
+    const answers = populateAnswers(formFields, applicants, previousAnswers);
     const mergedAnswers = mergeAnswers(answers, forms[formId].answers);
 
     const form = forms[formId];
