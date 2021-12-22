@@ -8,7 +8,7 @@ import params from '../../../libs/params';
 import log from '../../../libs/logs';
 import { getStatusByType } from '../../../libs/caseStatuses';
 import {
-  VIVA_COMPLETION_REQUIRED,
+  VIVA_COMPLETION_RANDOM_CHECK_REQUIRED,
   ACTIVE_COMPLETION_RANDOM_CHECK_REQUIRED_VIVA,
 } from '../../../libs/constants';
 
@@ -125,7 +125,7 @@ async function updateCaseCompletionAttributes(keys, newCurrentFormId) {
       ':newCurrentFormId': newCurrentFormId,
       ':newCompletionStatus': newCompletionStatus,
       ':newPersons': newPersons,
-      ':newState': VIVA_COMPLETION_REQUIRED,
+      ':newState': VIVA_COMPLETION_RANDOM_CHECK_REQUIRED,
     },
     ReturnValues: 'UPDATED_NEW',
   };
