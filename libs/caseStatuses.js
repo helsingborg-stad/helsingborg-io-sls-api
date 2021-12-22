@@ -8,6 +8,7 @@ import {
   CLOSED,
   NOT_STARTED_VIVA,
   ACTIVE_COMPLETION_REQUIRED_VIVA,
+  ACTIVE_COMPLETION_RANDOM_CHECK_REQUIRED_VIVA,
   CLOSED_APPROVED_VIVA,
   CLOSED_PARTIALLY_APPROVED_VIVA,
   CLOSED_REJECTED_VIVA,
@@ -62,6 +63,12 @@ const statuses = [
   },
   {
     type: ACTIVE_COMPLETION_REQUIRED_VIVA,
+    name: 'Ansökan behöver kompletteras',
+    description:
+      'Du har skickat in en ansökan för #MONTH_NAME. För att vi ska kunna behandla din ansökan finns det uppgifter som du behöver komplettera.\nKomplettering ska ha skickats in till oss senast #COMPLETION_DUEDATE.',
+  },
+  {
+    type: ACTIVE_COMPLETION_RANDOM_CHECK_REQUIRED_VIVA,
     name: 'Stickprovskontroll',
     description:
       'Du måste komplettera din ansökan med bilder som visar dina utgifter och inkomster. Vi behöver din komplettering inom 4 dagar för att kunna betala ut pengar för perioden.',
