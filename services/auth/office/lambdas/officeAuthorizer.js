@@ -10,8 +10,12 @@ import getValidSigningKey from '../helpers/getValidSigningKey';
 import { JWT } from '../constants';
 
 export async function main(event) {
-  const { authorizationToken } = event;
+  let { authorizationToken } = event;
   const { executeResourceArns } = process.env;
+
+  if (authorizationToken.startsWith('Bearer ')) {
+    authorizationToken = authorizationToken.substring(7);
+  }
 
   const decodedToken = jwt.decode(authorizationToken, { complete: true });
 
