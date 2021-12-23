@@ -10,9 +10,15 @@ import log from '../../../libs/logs';
  * Get the referenceCode associated with the user that has the given email or PN
  */
 export const main = async (event, context) => {
-  const body = JSON.parse(event.body);
+  const query = event.pathParameters?.query;
 
-  const { query } = body;
+  if (!query) {
+    return response.failure({
+      status: 400,
+      message: 'Missing required parameter: "query"',
+    });
+  }
+
   const isEmail = query.includes('@');
 
   const action = isEmail ? 'query' : 'get';

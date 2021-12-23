@@ -89,8 +89,8 @@ functions:
     handler: lambdas/fetchReferenceCode.main
     events:
       - http:
-          path: /users/fetchReferenceCode
-          method: post
+          path: /users/fetchReferenceCode/{query}
+          method: get
           cors: true
           private: false
           authorizer:
