@@ -13,7 +13,7 @@ export async function main(event) {
   let { authorizationToken } = event;
   const { executeResourceArns } = process.env;
 
-  if (authorizationToken.startsWith('Bearer ')) {
+  if (typeof authorizationToken === 'string' && authorizationToken.startsWith('Bearer ')) {
     authorizationToken = authorizationToken.substring(7);
   }
 
