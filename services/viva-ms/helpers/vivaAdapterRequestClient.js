@@ -67,6 +67,44 @@ async function postCompletion(payload) {
   return response.data;
 }
 
+async function getLatestWorkflow(personalNumber) {
+  const { hashSalt, hashSaltLength } = await VADA_SSM_PARAMS;
+
+  const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
+
+  const requestParams = {
+    endpoint: `mypages/${hashedPersonalNumber}/workflows/latest`,
+    method: 'get',
+  };
+
+  const [sendVivaAdapterRequestError, response] = await to(sendVivaAdapterRequest(requestParams));
+  if (sendVivaAdapterRequestError) {
+    throw sendVivaAdapterRequestError;
+  }
+
+  return response.data;
+}
+
+async function getWorkflowCompletions(payload) {
+  const { personalNumber, workflowId } = payload;
+
+  const { hashSalt, hashSaltLength } = await VADA_SSM_PARAMS;
+
+  const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
+
+  const requestParams = {
+    endpoint: `mypages/${hashedPersonalNumber}/workflows/${workflowId}/completions`,
+    method: 'get',
+  };
+
+  const [sendVivaAdapterRequestError, response] = await to(sendVivaAdapterRequest(requestParams));
+  if (sendVivaAdapterRequestError) {
+    throw sendVivaAdapterRequestError;
+  }
+
+  return response.data;
+}
+
 async function getWorkflow(payload) {
   const { personalNumber, workflowId } = payload;
 
@@ -191,7 +229,11 @@ async function getApplicationStatus(personalNumber) {
 
 export default {
   completion: { post: postCompletion },
-  workflow: { get: getWorkflow },
+  workflow: {
+    get: getWorkflow,
+    getLatest: getLatestWorkflow,
+    getCompletions: getWorkflowCompletions,
+  },
   officers: { get: getOfficers },
   person: { get: getPerson },
   application: {
