@@ -17,6 +17,10 @@ export const eventTypeCollection = {
     source: 'vivaMs.checkCompletion',
     detailType: 'checkCompletionSuccess',
   },
+  checkCompletionsStatusRequired: {
+    source: 'vivaMs.checkCompletionsStatus',
+    detailType: 'checkCompletionsStatusRequired',
+  },
   decideCaseStatusSuccess: {
     source: 'vivaMs.decideCaseStatus',
     detailType: 'decideCaseStatusSuccess',
@@ -41,6 +45,8 @@ export default {
   personDetailSuccess: userDetail => putUserEvent(userDetail, 'personDetailSuccess'),
   applicationReceivedSuccess: userDetail => putUserEvent(userDetail, 'applicationReceivedSuccess'),
   checkCompletionSuccess: userDetail => putUserEvent(userDetail, 'checkCompletionSuccess'),
+  checkCompletionsStatusRequired: userDetail =>
+    putUserEvent(userDetail, 'checkCompletionsStatusRequired'),
   decideCaseStatusSuccess: userDetail => putUserEvent(userDetail, 'decideCaseStatusSuccess'),
   syncWorkflowSuccess: userDetail => putUserEvent(userDetail, 'syncWorkflowSuccess'),
   htmlGeneratedSuccess: userDetail => putUserEvent(userDetail, 'htmlGeneratedSuccess'),
