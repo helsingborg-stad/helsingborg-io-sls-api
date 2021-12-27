@@ -165,6 +165,17 @@ functions:
               - usersMsFindUserSuccess
               - applicationReceivedSuccess
 
+  setCaseCompletions:
+    handler: lambdas/setCaseCompletions.main
+    timeout: 15
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - vivaMs.checkCompletionsStatus
+            detail-type:
+              - checkCompletionsStatusRequired
+
   submitCompletion:
     handler: lambdas/submitCompletion.main
     timeout: 15
