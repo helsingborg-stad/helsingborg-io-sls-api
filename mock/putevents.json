@@ -9,6 +9,24 @@
     "EventBusName": "default"
   },
   {
+    "Source": "OFFvivaMs.submitApplication",
+    "Detail": "{ \"personalNumber\": \"198602132394\" }",
+    "Resources": [
+      "resourceMock"
+    ],
+    "DetailType": "applicationReceivedSuccess",
+    "EventBusName": "default"
+  },
+  {
+    "Source": "vivaMs.checkCompletionsStatus",
+    "Detail": "{ \"user\": { \"personalNumber\": \"198602132394\" } }",
+    "Resources": [
+      "resourceMock"
+    ],
+    "DetailType": "checkCompletionsStatusRequired",
+    "EventBusName": "default"
+  },
+  {
     "Source": "OFFcasesApi.updateCase",
     "Detail": "{ \"caseKeys\": { \"PK\": \"USER#199803312397\", \"SK\": \"CASE#943066fe-d041-4723-a4ff-962f74fc378a\" }, \"status\": { \"type\": \"active:submitted\" }, \"state\": \"VIVA_COMPLETION_REQUIRED\" }",
     "Resources": [
