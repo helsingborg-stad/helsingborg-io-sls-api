@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-/* eslint-disable no-unused-vars */
 import to from 'await-to-js';
 
 import config from '../../../config';
@@ -15,46 +13,113 @@ import {
   ACTIVE_COMPLETION_RANDOM_CHECK_REQUIRED_VIVA,
 } from '../../../libs/constants';
 
-import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
 export async function main(event, context) {
   const { personalNumber } = event.detail.user;
 
+  const [getLatestWorkflowIdError, latestWorkflowId] = await to(
+    getLatestVivaWorkflowId(personalNumber)
+  );
+  if (getLatestWorkflowIdError) {
+    log.error(
+      'Error getting Viva workflow completions',
+      context.awsRequestId,
+      'service-viva-ms-setCaseCompletions-001',
+      getLatestWorkflowIdError
+    );
+    return false;
+  }
+
   const [getWorkflowCompletionsError, workflowCompletions] = await to(
-    getVivaWorkflowCompletions(personalNumber)
+    getVivaWorkflowCompletions(personalNumber, latestWorkflowId)
   );
   if (getWorkflowCompletionsError) {
     log.error(
       'Error getting Viva workflow completions',
       context.awsRequestId,
-      'service-viva-ms-setCaseCompletions-001',
+      'service-viva-ms-setCaseCompletions-002',
       getWorkflowCompletionsError
     );
     return false;
   }
 
-  console.log('workflowCompletions', workflowCompletions);
-
-  // const [paramsReadError, vivaCaseSSMParams] = await to(
-  //   params.read(config.cases.providers.viva.envsKeyName)
-  // );
-  // if (paramsReadError) {
-  // log.error(
-  //   'Read ssm params [config.cases.providers.viva.envsKeyName] failed',
-  //   context.awsRequestId,
-  //   'service-viva-ms-setCaseCompletions-001',
-  //   paramsReadError
-  // );
-  // return false;
-}
-
-async function getVivaWorkflowCompletions(personalNumber) {
-  const [getLatestWorkflowIdError, workflowId] = await to(getLatestVivaWorkflowId(personalNumber));
-  if (getLatestWorkflowIdError) {
-    throw getLatestWorkflowIdError;
+  const [getCaseError, userCase] = await to(getCase(personalNumber, latestWorkflowId));
+  if (getCaseError) {
+    log.error(
+      'Get case from cases table failed',
+      context.awsRequestId,
+      'service-viva-ms-setCaseCompletions-003',
+      getCaseError
+    );
+    return false;
   }
 
+  const [paramsReadError, vivaCaseSSMParams] = await to(
+    params.read(config.cases.providers.viva.envsKeyName)
+  );
+  if (paramsReadError) {
+    log.error(
+      'Read ssm params [config.cases.providers.viva.envsKeyName] failed',
+      context.awsRequestId,
+      'service-viva-ms-setCaseCompletions-004',
+      paramsReadError
+    );
+    return false;
+  }
+
+  const caseKeys = {
+    PK: userCase.PK,
+    SK: userCase.SK,
+  };
+  const caseUpdateAttributes = {
+    newStatus: getCompletionStatus(workflowCompletions),
+    newState: getCompletionState(workflowCompletions),
+    newCurrentFormId: getCompletionFormId(vivaCaseSSMParams, workflowCompletions),
+    newPersons: resetCasePersonsApplicantSignature(userCase),
+    workflowCompletions,
+  };
+  const [updateCaseCompletionsError, updatedCaseItem] = await to(
+    updateCase(caseKeys, caseUpdateAttributes)
+  );
+  if (updateCaseCompletionsError) {
+    log.error(
+      'Update case completion attributes failed',
+      context.awsRequestId,
+      'service-viva-ms-setCaseCompletions-005',
+      updateCaseCompletionsError
+    );
+    return false;
+  }
+
+  log.info(
+    'Successfully updated completion attributes on case',
+    context.awsRequestId,
+    'service-viva-ms-setCaseCompletions-006',
+    updatedCaseItem
+  );
+
+  return true;
+}
+
+function getCompletionFormId(caseSSMParams, completions) {
+  const { completionRandomCheckFormId, completionFormId } = caseSSMParams;
+  return completions.isRandomCheck ? completionRandomCheckFormId : completionFormId;
+}
+
+function getCompletionStatus(completions) {
+  return completions.isRandomCheck
+    ? getStatusByType(ACTIVE_COMPLETION_RANDOM_CHECK_REQUIRED_VIVA)
+    : getStatusByType(ACTIVE_COMPLETION_REQUIRED_VIVA);
+}
+
+function getCompletionState(completions) {
+  return completions.isRandomCheck
+    ? VIVA_COMPLETION_RANDOM_CHECK_REQUIRED
+    : VIVA_COMPLETION_REQUIRED;
+}
+
+async function getVivaWorkflowCompletions(personalNumber, workflowId) {
   const [getWorkflowCompletionsError, getCompletionsResponse] = await to(
     vivaAdapter.workflow.getCompletions({ personalNumber, workflowId })
   );
@@ -62,9 +127,7 @@ async function getVivaWorkflowCompletions(personalNumber) {
     throw getWorkflowCompletionsError;
   }
 
-  console.log('getCompletionsResponse', getCompletionsResponse);
-
-  return getCompletionsResponse;
+  return getCompletionsResponse.attributes;
 }
 
 async function getLatestVivaWorkflowId(personalNumber) {
@@ -78,68 +141,74 @@ async function getLatestVivaWorkflowId(personalNumber) {
   return getLatestResponse.attributes.workflowid;
 }
 
-// async function updateCaseCompletionAttributes(keys, newCurrentFormId) {
-//   const newCompletionStatus = getStatusByType(ACTIVE_COMPLETION_RANDOM_CHECK_REQUIRED_VIVA);
-//   const [getCaseError, { persons }] = await to(getCase(keys));
-//   if (getCaseError) {
-//     throw getCaseError;
-//   }
-//   const newPersons = persons ? resetApplicantSignature(persons) : [];
+async function getCase(personalNumber, workflowId) {
+  const PK = `USER#${personalNumber}`;
 
-//   const params = {
-//     TableName: config.cases.tableName,
-//     Key: {
-//       PK: keys.PK,
-//       SK: keys.SK,
-//     },
-//     UpdateExpression:
-//       'SET #currentFormId = :newCurrentFormId, #status = :newCompletionStatus, #persons = :newPersons, #state = :newState',
-//     ExpressionAttributeNames: {
-//       '#currentFormId': 'currentFormId',
-//       '#status': 'status',
-//       '#persons': 'persons',
-//       '#state': 'state',
-//     },
-//     ExpressionAttributeValues: {
-//       ':newCurrentFormId': newCurrentFormId,
-//       ':newCompletionStatus': newCompletionStatus,
-//       ':newPersons': newPersons,
-//       ':newState': VIVA_COMPLETION_RANDOM_CHECK_REQUIRED,
-//     },
-//     ReturnValues: 'UPDATED_NEW',
-//   };
+  const queryParams = {
+    TableName: config.cases.tableName,
+    KeyConditionExpression: 'PK = :pk',
+    FilterExpression: 'details.workflowId = :workflowId',
+    ExpressionAttributeValues: {
+      ':pk': PK,
+      ':workflowId': workflowId,
+    },
+  };
 
-//   return dynamoDb.call('update', params);
-// }
+  const [queryError, queryResponse] = await to(dynamoDb.call('query', queryParams));
+  if (queryError) {
+    throw queryError;
+  }
 
-// async function getCase(keys) {
-//   const params = {
-//     TableName: config.cases.tableName,
-//     KeyConditionExpression: 'PK = :pk AND SK = :sk',
-//     ExpressionAttributeValues: {
-//       ':pk': keys.PK,
-//       ':sk': keys.SK,
-//     },
-//   };
+  const caseItem = queryResponse.Items[0];
+  if (!caseItem) {
+    throw `Case with workflow id: ${workflowId} not found`;
+  }
 
-//   const [queryError, queryResponse] = await to(dynamoDb.call('query', params));
-//   if (queryError) {
-//     throw queryError;
-//   }
+  return caseItem;
+}
 
-//   const caseItem = queryResponse.Items.find(item => item.SK === keys.SK);
-//   if (!caseItem) {
-//     throw `Case with sort key: ${keys.SK} not found`;
-//   }
+async function updateCase(keys, caseUpdateAttributes) {
+  const { newStatus, newState, newCurrentFormId, newPersons, workflowCompletions } =
+    caseUpdateAttributes;
 
-//   return caseItem;
-// }
+  const updateParams = {
+    TableName: config.cases.tableName,
+    Key: {
+      PK: keys.PK,
+      SK: keys.SK,
+    },
+    UpdateExpression:
+      'SET #currentFormId = :newCurrentFormId, #status = :newStatus, #persons = :newPersons, #state = :newState, details.completions = :workflowCompletions',
+    ExpressionAttributeNames: {
+      '#currentFormId': 'currentFormId',
+      '#status': 'status',
+      '#persons': 'persons',
+      '#state': 'state',
+    },
+    ExpressionAttributeValues: {
+      ':newCurrentFormId': newCurrentFormId,
+      ':newPersons': newPersons,
+      ':newStatus': newStatus,
+      ':newState': newState,
+      ':workflowCompletions': workflowCompletions,
+    },
+    ReturnValues: 'UPDATED_NEW',
+  };
 
-// function resetApplicantSignature(persons) {
-//   return persons.map(person => {
-//     if (person.role === 'applicant' && person.hasSigned) {
-//       person.hasSigned = false;
-//     }
-//     return person;
-//   });
-// }
+  return dynamoDb.call('update', updateParams);
+}
+
+function resetCasePersonsApplicantSignature(caseItem) {
+  const { persons } = caseItem;
+
+  if (persons == undefined) {
+    return [];
+  }
+
+  return persons.map(person => {
+    if (person.role === 'applicant' && person.hasSigned) {
+      person.hasSigned = false;
+    }
+    return person;
+  });
+}
