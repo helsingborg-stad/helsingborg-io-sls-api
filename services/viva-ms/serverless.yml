@@ -96,9 +96,13 @@ functions:
           pattern:
             source:
               - usersMs.findUser
-              - vivaMs.submitApplication
             detail-type:
               - usersMsFindUserSuccess
+      - eventBridge:
+          pattern:
+            source:
+              - vivaMs.submitApplication
+            detail-type:
               - applicationReceivedSuccess
 
   personApplicationStatus:
