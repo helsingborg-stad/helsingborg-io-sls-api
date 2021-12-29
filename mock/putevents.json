@@ -9,8 +9,8 @@
     "EventBusName": "default"
   },
   {
-    "Source": "usersMs.findUser",
-    "Detail": "{ \"user\": { \"personalNumber\": \"198602132394\" } }",
+    "Source": "OFFusersMs.findUser",
+    "Detail": "{ \"personalNumber\": \"198602132394\" }",
     "Resources": [
       "resourceMock"
     ],
@@ -18,8 +18,8 @@
     "EventBusName": "default"
   },
   {
-    "Source": "OFFvivaMs.submitApplication",
-    "Detail": "{ \"user\": { \"personalNumber\": \"198602132394\" } }",
+    "Source": "vivaMs.submitApplication",
+    "Detail": "{ \"personalNumber\": \"198602132394\" }",
     "Resources": [
       "resourceMock"
     ],
@@ -27,17 +27,8 @@
     "EventBusName": "default"
   },
   {
-    "Source": "OFFvivaMs.checkCompletionsStatus",
-    "Detail": "{ \"user\": { \"personalNumber\": \"198602132394\" } }",
-    "Resources": [
-      "resourceMock"
-    ],
-    "DetailType": "checkCompletionsStatusRequired",
-    "EventBusName": "default"
-  },
-  {
     "Source": "OFFcasesApi.updateCase",
-    "Detail": "{ \"caseKeys\": { \"PK\": \"USER#199803312397\", \"SK\": \"CASE#943066fe-d041-4723-a4ff-962f74fc378a\" }, \"status\": { \"type\": \"active:submitted\" }, \"state\": \"VIVA_COMPLETION_RANDOM_CHECK_REQUIRED\" }",
+    "Detail": "{ \"caseKeys\": { \"PK\": \"USER#198602132394\", \"SK\": \"CASE#a68e6de8-05c9-41a7-bde3-dab8bb3aa309\" }, \"status\": { \"type\": \"active:submitted\" }, \"state\": \"VIVA_COMPLETION_RANDOM_CHECK_REQUIRED\" }",
     "Resources": [
       "resourceMock"
     ],
