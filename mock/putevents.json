@@ -1,6 +1,6 @@
 [
   {
-    "Source": "OFFbankId.collect",
+    "Source": "bankId.collect",
     "Detail": "{ \"user\": { \"personalNumber\": \"198602132394\" } }",
     "Resources": [
       "resourceMock"
@@ -18,7 +18,7 @@
     "EventBusName": "default"
   },
   {
-    "Source": "vivaMs.submitApplication",
+    "Source": "OFFvivaMs.submitApplication",
     "Detail": "{ \"personalNumber\": \"198602132394\" }",
     "Resources": [
       "resourceMock"
