@@ -1,31 +1,16 @@
-/* eslint-disable no-console */
 import to from 'await-to-js';
 
 import log from '../../../libs/logs';
 
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
-import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 import validateApplicationStatus from '../helpers/validateApplicationStatus';
 
 export async function main(event, context) {
-  const clientUser = event.detail;
-
-  const [applicationStatusError, applicationStatusList] = await to(
-    vivaAdapter.application.status(clientUser.personalNumber)
-  );
-  if (applicationStatusError) {
-    log.error(
-      'Vada: applicationStatusError',
-      context.awsRequestId,
-      'service-viva-ms-personApplicationStatus-001',
-      applicationStatusError
-    );
-    return false;
-  }
+  const { user, status } = event.detail;
 
   /**
    * The combination of status codes 1, 128, 256, 512
-   * determines if a Viva application workflow is open for applicant.
+   * determines if a Viva application workflow is open for applicant
    *
    * 1 - Application(period) is open for applicant,
    * 128 - Case exsits in Viva
@@ -34,20 +19,20 @@ export async function main(event, context) {
    *
    */
   const periodOpenStatusCodes = [1, 128, 256, 512];
-  if (!validateApplicationStatus(applicationStatusList, periodOpenStatusCodes)) {
+  if (!validateApplicationStatus(status, periodOpenStatusCodes)) {
     log.info(
-      'validateApplicationStatus. No open application period.',
+      'No open application period',
       context.awsRequestId,
-      null,
-      applicationStatusList
+      'service-viva-ms-personApplicationStatus-001',
+      status
     );
     return false;
   }
 
-  const [putEventError] = await to(putVivaMsEvent.checkOpenPeriodSuccess({ user: clientUser }));
+  const [putEventError] = await to(putVivaMsEvent.checkOpenPeriodSuccess({ user }));
   if (putEventError) {
     log.error(
-      'putEventError: statusApplySuccess',
+      'Put event [checkOpenPeriodSuccess] failed',
       context.awsRequestId,
       'service-viva-ms-personApplicationStatus-002',
       putEventError
