@@ -108,7 +108,7 @@ async function createRecurringVivaCase(vivaPerson, user) {
     throw paramsReadError;
   }
 
-  const { recurringFormId, completionFormId } = vivaCaseSSMParams;
+  const { recurringFormId, completionFormId, completionRandomCheckFormId } = vivaCaseSSMParams;
 
   const applicantPersonalNumber = stripNonNumericalCharacters(
     String(vivaPerson.case.client.pnumber)
@@ -153,7 +153,7 @@ async function createRecurringVivaCase(vivaPerson, user) {
     caseItemPutParams.Item['GSI1'] = `USER#${casePersonCoApplicant.personalNumber}`;
   }
 
-  const formIdList = [recurringFormId, completionFormId];
+  const formIdList = [recurringFormId, completionFormId, completionRandomCheckFormId];
   const initialFormList = getInitialFormAttributes(formIdList, vivaPerson);
 
   casePersonList = casePersonList.map(person => {
@@ -216,11 +216,12 @@ function getInitialFormAttributes(formIdList, vivaPerson) {
     },
   };
 
-  const [recurringFormId, completionFormId] = formIdList;
+  const [recurringFormId, completionFormId, completionRandomCheckFormId] = formIdList;
 
   const initialFormList = {
     [recurringFormId]: initialFormAttributes,
     [completionFormId]: initialFormAttributes,
+    [completionRandomCheckFormId]: initialFormAttributes,
   };
 
   return initialFormList;
