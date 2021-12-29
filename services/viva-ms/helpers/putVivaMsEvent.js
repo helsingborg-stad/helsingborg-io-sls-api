@@ -35,19 +35,18 @@ export const eventTypeCollection = {
   },
 };
 
-function putUserEvent(user, type, typeCollection = eventTypeCollection) {
+function putUserEvent(detail, type, typeCollection = eventTypeCollection) {
   const { detailType, source } = typeCollection[type];
-  return putEvent(user, detailType, source);
+  return putEvent(detail, detailType, source);
 }
 
 export default {
-  checkOpenPeriodSuccess: userDetail => putUserEvent(userDetail, 'checkOpenPeriodSuccess'),
-  personDetailSuccess: userDetail => putUserEvent(userDetail, 'personDetailSuccess'),
-  applicationReceivedSuccess: userDetail => putUserEvent(userDetail, 'applicationReceivedSuccess'),
-  checkCompletionSuccess: userDetail => putUserEvent(userDetail, 'checkCompletionSuccess'),
-  checkCompletionsStatusRequired: userDetail =>
-    putUserEvent(userDetail, 'checkCompletionsStatusRequired'),
-  decideCaseStatusSuccess: userDetail => putUserEvent(userDetail, 'decideCaseStatusSuccess'),
-  syncWorkflowSuccess: userDetail => putUserEvent(userDetail, 'syncWorkflowSuccess'),
-  htmlGeneratedSuccess: userDetail => putUserEvent(userDetail, 'htmlGeneratedSuccess'),
+  checkOpenPeriodSuccess: detail => putUserEvent(detail, 'checkOpenPeriodSuccess'),
+  personDetailSuccess: detail => putUserEvent(detail, 'personDetailSuccess'),
+  applicationReceivedSuccess: detail => putUserEvent(detail, 'applicationReceivedSuccess'),
+  checkCompletionSuccess: detail => putUserEvent(detail, 'checkCompletionSuccess'),
+  checkCompletionsStatusRequired: detail => putUserEvent(detail, 'checkCompletionsStatusRequired'),
+  decideCaseStatusSuccess: detail => putUserEvent(detail, 'decideCaseStatusSuccess'),
+  syncWorkflowSuccess: detail => putUserEvent(detail, 'syncWorkflowSuccess'),
+  htmlGeneratedSuccess: detail => putUserEvent(detail, 'htmlGeneratedSuccess'),
 };
