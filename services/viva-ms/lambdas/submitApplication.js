@@ -101,7 +101,8 @@ export async function main(event, context) {
     return false;
   }
 
-  const [putEventError] = await to(putVivaMsEvent.applicationReceivedSuccess({ caseKeys }));
+  const clientUser = { personalNumber };
+  const [putEventError] = await to(putVivaMsEvent.applicationReceivedSuccess(clientUser));
   if (putEventError) {
     log.error(
       'Put event ´applicationReceivedSuccess´ failed',
