@@ -88,6 +88,19 @@ provider:
           Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
 
 functions:
+  applicationStatus:
+    handler: lambdas/applicationStatus.main
+    timeout: 15
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - usersMs.findUser
+              - vivaMs.submitApplication
+            detail-type:
+              - usersMsFindUserSuccess
+              - applicationReceivedSuccess
+
   personApplicationStatus:
     handler: lambdas/personApplicationStatus.main
     timeout: 15
@@ -95,9 +108,9 @@ functions:
       - eventBridge:
           pattern:
             source:
-              - usersMs.findUser
+              - vivaMs.applicationStatus
             detail-type:
-              - usersMsFindUserSuccess
+              - applicationStatusSuccess
 
   personApplication:
     handler: lambdas/personApplication.main
@@ -143,16 +156,16 @@ functions:
                   state:
                     S: ["PDF_GENERATED"]
 
-  checkCompletion:
-    handler: lambdas/checkCompletion.main
-    timeout: 15
-    events:
-      - eventBridge:
-          pattern:
-            source:
-              - vivaMs.submitApplication
-            detail-type:
-              - applicationReceivedSuccess
+  # checkCompletion:
+  #   handler: lambdas/checkCompletion.main
+  #   timeout: 15
+  #   events:
+  #     - eventBridge:
+  #         pattern:
+  #           source:
+  #             - vivaMs.submitApplication
+  #           detail-type:
+  #             - applicationReceivedSuccess
 
   checkCompletionsStatus:
     handler: lambdas/checkCompletionsStatus.main
@@ -161,11 +174,9 @@ functions:
       - eventBridge:
           pattern:
             source:
-              - usersMs.findUser
-              - vivaMs.submitApplication
+              - vivaMs.applicationStatus
             detail-type:
-              - usersMsFindUserSuccess
-              - applicationReceivedSuccess
+              - applicationStatusSuccess
 
   setCaseCompletions:
     handler: lambdas/setCaseCompletions.main
