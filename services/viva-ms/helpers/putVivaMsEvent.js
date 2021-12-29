@@ -33,6 +33,10 @@ export const eventTypeCollection = {
     source: 'vivaMs.generateRecurringCaseHtml',
     detailType: 'htmlGeneratedSuccess',
   },
+  applicationStatusSuccess: {
+    source: 'vivaMs.applicationStatus',
+    detailType: 'applicationStatusSuccess',
+  },
 };
 
 function putUserEvent(detail, type, typeCollection = eventTypeCollection) {
@@ -49,4 +53,5 @@ export default {
   decideCaseStatusSuccess: detail => putUserEvent(detail, 'decideCaseStatusSuccess'),
   syncWorkflowSuccess: detail => putUserEvent(detail, 'syncWorkflowSuccess'),
   htmlGeneratedSuccess: detail => putUserEvent(detail, 'htmlGeneratedSuccess'),
+  applicationStatusSuccess: detail => putUserEvent(detail, 'applicationStatusSuccess'),
 };
