@@ -22,5 +22,22 @@ export async function main(event: { body: string }) {
   }
 
   const { data } = searchBookingResponse?.data ?? {};
+
+  const emails = data.attributes.map(booking => booking.Attendees[0].Email);
+  const uniqueEmails = [...new Set(emails)];
+
+  const emailToDetails = {};
+  for (const email of uniqueEmails) {
+    const lookupResponse = await booking.getAdministratorDetails({ email });
+    emailToDetails[email] = lookupResponse?.data?.data?.attributes;
+  }
+
+  data.attributes.forEach(booking => {
+    booking.Attendees[0] = {
+      ...booking.Attendees[0],
+      ...emailToDetails[booking.Attendees[0].Email],
+    };
+  });
+
   return response.success(200, data);
 }
