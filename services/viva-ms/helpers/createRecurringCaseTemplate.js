@@ -331,12 +331,16 @@ function getFinancials(answers) {
   return {
     incomes: {
       applicant: applicantsIncomes.filter(income => income.belongsTo === 'APPLICANT'),
-      coApplicant: applicantsIncomes.filter(income => income.belongsTo === 'COAPPLICANT'),
+      coApplicant: applicantsIncomes.filter(
+        income => income.belongsTo === 'COAPPLICANT' && income.value !== ''
+      ),
       resident: redsidentIncomes,
     },
     expenses: {
       applicant: applicantsExpenses.filter(expense => expense.belongsTo === 'APPLICANT'),
-      coApplicant: applicantsExpenses.filter(expense => expense.belongsTo === 'COAPPLICANT'),
+      coApplicant: applicantsExpenses.filter(
+        expense => expense.belongsTo === 'COAPPLICANT' && expense.value !== ''
+      ),
       children: applicantsExpenses.filter(expense => expense.belongsTo === 'CHILDREN'),
       housing: housingExpenses,
     },
