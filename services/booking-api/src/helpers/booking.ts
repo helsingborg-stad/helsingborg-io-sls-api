@@ -47,6 +47,15 @@ export interface BookingCreateResponse {
     };
   };
 }
+export interface GetHistoricalAttendeesResponse {
+  data?: {
+    data?: {
+      type: string;
+      id: string;
+      attributes: string[];
+    };
+  };
+}
 
 interface BookingError {
   response: {
@@ -61,6 +70,7 @@ const URI_RESOURCE = {
   GET: 'booking/get',
   SEARCH: 'booking/search',
   GET_HISTORICAL_ATTENDEES: 'booking/getHistoricalAttendees',
+  GET_ADMINISTRATOR_DETAILS: 'misc/getUserDetails',
 };
 
 const METHOD = {
@@ -89,6 +99,13 @@ function getHistoricalAttendees(body: BookingBody) {
     URI_RESOURCE.GET_HISTORICAL_ATTENDEES,
     body,
     Number(requestTimeout)
+  );
+}
+
+function getAdministratorDetails(body) {
+  return sendBookingPostRequest<GetHistoricalAttendeesResponse>(
+    URI_RESOURCE.GET_ADMINISTRATOR_DETAILS,
+    body
   );
 }
 
@@ -126,4 +143,4 @@ async function getSsmParameters() {
   return response;
 }
 
-export default { create, cancel, get, search, getHistoricalAttendees };
+export default { create, cancel, get, search, getHistoricalAttendees, getAdministratorDetails };
