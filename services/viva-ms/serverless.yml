@@ -159,17 +159,6 @@ functions:
                   state:
                     S: ["PDF_GENERATED"]
 
-  # checkCompletion:
-  #   handler: lambdas/checkCompletion.main
-  #   timeout: 15
-  #   events:
-  #     - eventBridge:
-  #         pattern:
-  #           source:
-  #             - vivaMs.submitApplication
-  #           detail-type:
-  #             - applicationReceivedSuccess
-
   checkCompletionsStatus:
     handler: lambdas/checkCompletionsStatus.main
     timeout: 15
@@ -207,7 +196,7 @@ functions:
             detail:
               status:
                 type: [{ "prefix": "active:submitted" }]
-              state: ["VIVA_COMPLETION_RANDOM_CHECK_REQUIRED"]
+              state: ["VIVA_RANDOM_CHECK_REQUIRED"]
 
   syncOfficers:
     handler: lambdas/syncOfficers.main

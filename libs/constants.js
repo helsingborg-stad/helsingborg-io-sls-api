@@ -8,8 +8,7 @@ export const CLOSED = 'closed';
 
 export const NOT_STARTED_VIVA = 'notStarted:viva';
 export const ACTIVE_COMPLETION_REQUIRED_VIVA = 'active:completionRequired:viva';
-export const ACTIVE_COMPLETION_RANDOM_CHECK_REQUIRED_VIVA =
-  'active:completionRandomCheckRequired:viva';
+export const ACTIVE_RANDOM_CHECK_REQUIRED_VIVA = 'active:randomCheckRequired:viva';
 export const CLOSED_APPROVED_VIVA = 'closed:approved:viva';
 export const CLOSED_PARTIALLY_APPROVED_VIVA = 'closed:partiallyApproved:viva';
 export const CLOSED_REJECTED_VIVA = 'closed:rejected:viva';
@@ -18,9 +17,9 @@ export const CLOSED_COMPLETION_REJECTED_VIVA = 'closed:completionRejected:viva';
 export const CASE_PROVIDER_VIVA = 'VIVA';
 export const VIVA_CASE_CREATED = 'VIVA_CASE_CREATED';
 export const VIVA_COMPLETION_REQUIRED = 'VIVA_COMPLETION_REQUIRED';
-export const VIVA_COMPLETION_RANDOM_CHECK_REQUIRED = 'VIVA_COMPLETION_RANDOM_CHECK_REQUIRED';
+export const VIVA_RANDOM_CHECK_REQUIRED = 'VIVA_RANDOM_CHECK_REQUIRED';
 export const VIVA_COMPLETION_RECEIVED = 'VIVA_COMPLETION_RECEIVED';
-export const VIVA_COMPLETION_RANDOM_CHECK_RECEIVED = 'VIVA_COMPLETION_RANDOM_CHECK_RECEIVED';
+export const VIVA_RANDOM_CHECK_RECEIVED = 'VIVA_RANDOM_CHECK_RECEIVED';
 export const VIVA_APPLICATION_RECEIVED = 'VIVA_APPLICATION_RECEIVED';
 
 export const CASE_HTML_GENERATED = 'CASE_HTML_GENERATED';
