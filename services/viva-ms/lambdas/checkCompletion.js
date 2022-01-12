@@ -12,6 +12,12 @@ import {
   ACTIVE_RANDOM_CHECK_REQUIRED_VIVA,
 } from '../../../libs/constants';
 
+import {
+  VIVA_STATUS_COMPLETION,
+  VIVA_STATUS_CASE_EXISTS,
+  VIVA_STATUS_WEB_APPLICATION_ACTIVE,
+  VIVA_STATUS_WEB_APPLICATION_ALLOWED,
+} from '../helpers/constans';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 import validateApplicationStatus from '../helpers/validateApplicationStatus';
@@ -33,15 +39,12 @@ export async function main(event, context) {
     return false;
   }
 
-  /**
-   * The Combination of Status Codes 64, 128, 256, 512
-   * determines if a VIVA Application Workflow requires completion
-   * 64 - Completion is required,
-   * 128 - Case exsits in VIVA
-   * 256 - An active e-application is activated in VIVA
-   * 512 - Application allows e-application
-   */
-  const completionStatusCodes = [64, 128, 256, 512];
+  const completionStatusCodes = [
+    VIVA_STATUS_COMPLETION,
+    VIVA_STATUS_CASE_EXISTS,
+    VIVA_STATUS_WEB_APPLICATION_ACTIVE,
+    VIVA_STATUS_WEB_APPLICATION_ALLOWED,
+  ];
   if (!validateApplicationStatus(applicationStatusList, completionStatusCodes)) {
     log.info(
       'No Viva completion status(64) found',
