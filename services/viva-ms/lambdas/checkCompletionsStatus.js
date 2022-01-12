@@ -22,7 +22,7 @@ export async function main(event, context) {
   ];
   if (!validateApplicationStatus(status, completionStatusCodes)) {
     log.info(
-      'No Viva completion status(64) found',
+      `No Viva completion status(${VIVA_STATUS_COMPLETION}) found`,
       context.awsRequestId,
       'service-viva-ms-checkCompletionsStatus-001',
       status
