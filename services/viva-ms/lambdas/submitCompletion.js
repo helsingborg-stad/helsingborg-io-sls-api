@@ -108,7 +108,7 @@ export async function main(event, context) {
     return false;
   }
 
-  const [updateError] = await to(updateVivaCaseState(caseKeys, VIVA_COMPLETION_RECEIVED));
+  const [updateError] = await to(updateCaseState(caseKeys, VIVA_COMPLETION_RECEIVED));
   if (updateError) {
     log.error(
       'Failed to update Viva case',
@@ -180,8 +180,8 @@ function notCompletionReceived(response) {
   return false;
 }
 
-function updateVivaCaseState(caseKeys, newState) {
-  const params = {
+function updateCaseState(caseKeys, newState) {
+  const updateParams = {
     TableName: config.cases.tableName,
     Key: caseKeys,
     UpdateExpression: 'SET #state = :newState',
@@ -194,5 +194,5 @@ function updateVivaCaseState(caseKeys, newState) {
     ReturnValues: 'UPDATED_NEW',
   };
 
-  return dynamoDb.call('update', params);
+  return dynamoDb.call('update', updateParams);
 }
