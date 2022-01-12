@@ -8,8 +8,8 @@ import params from '../../../libs/params';
 import log from '../../../libs/logs';
 import { getStatusByType } from '../../../libs/caseStatuses';
 import {
-  VIVA_COMPLETION_RANDOM_CHECK_REQUIRED,
-  ACTIVE_COMPLETION_RANDOM_CHECK_REQUIRED_VIVA,
+  VIVA_RANDOM_CHECK_REQUIRED,
+  ACTIVE_RANDOM_CHECK_REQUIRED_VIVA,
 } from '../../../libs/constants';
 
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
@@ -100,7 +100,7 @@ export async function main(event, context) {
 }
 
 async function updateCaseCompletionAttributes(keys, newCurrentFormId) {
-  const newCompletionStatus = getStatusByType(ACTIVE_COMPLETION_RANDOM_CHECK_REQUIRED_VIVA);
+  const newCompletionStatus = getStatusByType(ACTIVE_RANDOM_CHECK_REQUIRED_VIVA);
   const [getCaseError, { persons }] = await to(getCase(keys));
   if (getCaseError) {
     throw getCaseError;
@@ -125,7 +125,7 @@ async function updateCaseCompletionAttributes(keys, newCurrentFormId) {
       ':newCurrentFormId': newCurrentFormId,
       ':newCompletionStatus': newCompletionStatus,
       ':newPersons': newPersons,
-      ':newState': VIVA_COMPLETION_RANDOM_CHECK_REQUIRED,
+      ':newState': VIVA_RANDOM_CHECK_REQUIRED,
     },
     ReturnValues: 'UPDATED_NEW',
   };

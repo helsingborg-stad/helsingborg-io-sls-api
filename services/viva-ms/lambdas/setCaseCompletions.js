@@ -8,9 +8,9 @@ import log from '../../../libs/logs';
 import { getStatusByType } from '../../../libs/caseStatuses';
 import {
   VIVA_COMPLETION_REQUIRED,
-  VIVA_COMPLETION_RANDOM_CHECK_REQUIRED,
+  VIVA_RANDOM_CHECK_REQUIRED,
   ACTIVE_COMPLETION_REQUIRED_VIVA,
-  ACTIVE_COMPLETION_RANDOM_CHECK_REQUIRED_VIVA,
+  ACTIVE_RANDOM_CHECK_REQUIRED_VIVA,
 } from '../../../libs/constants';
 
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
@@ -109,14 +109,12 @@ function getCompletionFormId(caseSSMParams, completions) {
 
 function getCompletionStatus(completions) {
   return completions.isRandomCheck
-    ? getStatusByType(ACTIVE_COMPLETION_RANDOM_CHECK_REQUIRED_VIVA)
+    ? getStatusByType(ACTIVE_RANDOM_CHECK_REQUIRED_VIVA)
     : getStatusByType(ACTIVE_COMPLETION_REQUIRED_VIVA);
 }
 
 function getCompletionState(completions) {
-  return completions.isRandomCheck
-    ? VIVA_COMPLETION_RANDOM_CHECK_REQUIRED
-    : VIVA_COMPLETION_REQUIRED;
+  return completions.isRandomCheck ? VIVA_RANDOM_CHECK_REQUIRED : VIVA_COMPLETION_REQUIRED;
 }
 
 async function getVivaWorkflowCompletions(personalNumber, workflowId) {
