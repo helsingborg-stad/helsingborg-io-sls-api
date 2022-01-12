@@ -54,8 +54,8 @@ export async function main(event, context) {
     return false;
   }
 
-  const { completionFormId } = vivaCaseSSMParams;
-  if (caseItem.currentFormId !== completionFormId) {
+  const { randomCheckFormId, completionFormId } = vivaCaseSSMParams;
+  if ([randomCheckFormId, completionFormId].includes(caseItem.currentFormId) === false) {
     log.info(
       'Current form is not an completion form',
       context.awsRequestId,
