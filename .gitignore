@@ -48,6 +48,9 @@ env.yml
 # Jetbrains IDEs
 .idea
 
+# Typescript
+out
+
 # stuff
 .DS_Store
 .vscode
