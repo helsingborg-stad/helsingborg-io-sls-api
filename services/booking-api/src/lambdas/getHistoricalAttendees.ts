@@ -4,6 +4,8 @@ import * as response from '../libs/response';
 
 import booking from '../helpers/booking';
 
+const emailToDetails = {};
+
 export async function main(event: {
   pathParameters: Record<string, string>;
   queryStringParameters: Record<string, string>;
@@ -36,5 +38,15 @@ export async function main(event: {
   }
 
   const { data } = getHistoricalAttendeesResponse?.data ?? {};
+
+  for (const email of data.attributes) {
+    if (!emailToDetails[email]) {
+      const lookupResponse = await booking.getAdministratorDetails({ email });
+      emailToDetails[email] = lookupResponse?.data?.data?.attributes;
+    }
+  }
+
+  data.attributes = data.attributes.map(email => emailToDetails[email]);
+
   return response.success(200, data);
 }
