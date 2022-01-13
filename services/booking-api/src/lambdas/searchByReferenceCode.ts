@@ -4,6 +4,8 @@ import * as response from '../libs/response';
 
 import booking from '../helpers/booking';
 
+const emailToDetails = {};
+
 export async function main(event: { body: string }) {
   const body = JSON.parse(event.body);
 
@@ -26,10 +28,11 @@ export async function main(event: { body: string }) {
   const emails = data.attributes.map(booking => booking.Attendees[0].Email);
   const uniqueEmails = [...new Set(emails)];
 
-  const emailToDetails = {};
   for (const email of uniqueEmails) {
-    const lookupResponse = await booking.getAdministratorDetails({ email });
-    emailToDetails[email] = lookupResponse?.data?.data?.attributes;
+    if (!emailToDetails[email]) {
+      const lookupResponse = await booking.getAdministratorDetails({ email });
+      emailToDetails[email] = lookupResponse?.data?.data?.attributes;
+    }
   }
 
   data.attributes.forEach(booking => {
