@@ -41,8 +41,13 @@ export async function main(event: {
 
   for (const email of data.attributes) {
     if (!emailToDetails[email]) {
-      const lookupResponse = await booking.getAdministratorDetails({ email });
-      emailToDetails[email] = lookupResponse?.data?.data?.attributes;
+      let attributes = { email };
+      try {
+        const lookupResponse = await booking.getAdministratorDetails({ email });
+        attributes = lookupResponse?.data?.data?.attributes ?? { email };
+      } finally {
+        emailToDetails[email] = attributes;
+      }
     }
   }
 
