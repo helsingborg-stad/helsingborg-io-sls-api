@@ -197,7 +197,7 @@ functions:
             detail:
               status:
                 type: [{ "prefix": "active:submitted" }]
-              state: ["VIVA_RANDOM_CHECK_REQUIRED"]
+              state: ["VIVA_RANDOM_CHECK_REQUIRED", "VIVA_COMPLETION_REQUIRED"]
 
   syncOfficers:
     handler: lambdas/syncOfficers.main
