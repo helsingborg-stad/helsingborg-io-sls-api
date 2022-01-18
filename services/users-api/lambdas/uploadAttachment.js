@@ -15,6 +15,12 @@ const allowedMimes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf']
 export async function main(event, context) {
   const decodedToken = decodeToken(event);
 
+  if (!event?.body) {
+    const errorMessage = 'Body data is missing in request';
+    log.error(errorMessage, context.awsRequestId, 'service-users-api-uploadAttachment-000');
+    return response.failure(new BadRequestError(errorMessage));
+  }
+
   const { fileName, mime } = JSON.parse(event.body);
 
   if (!fileName) {
