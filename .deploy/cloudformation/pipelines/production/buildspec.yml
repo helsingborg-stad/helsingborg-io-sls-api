@@ -14,7 +14,7 @@ phases:
       - npm install -g yarn
       - yarn global add serverless@2.60.3
       - yarn install
-      - cd .deploy 
+      - cd .deploy
       - yarn install
       - cd ..
   build:
@@ -24,6 +24,7 @@ phases:
       - AWS_SECRET_ACCESS_KEY=`node -pe 'JSON.parse(process.argv[1]).Credentials.SecretAccessKey' "$CRED"`
       - AWS_SESSION_TOKEN=`node -pe 'JSON.parse(process.argv[1]).Credentials.SessionToken' "$CRED"`
       - AWS_EXPIRATION=`node -pe 'JSON.parse(process.argv[1]).Credentials.Expiration' "$CRED"`
+      - for BUCKET in $(aws s3api list-buckets --query "Buckets[? contains(Name, 'serverlessdeployment')].Name" --output text); do aws s3 rm s3://${BUCKET} --recursive ; done # Cleanup old buckets or it will timeout deploy.
       - node .deploy /root/last-build/last-deployed-commit-sha-$ENV
       - mkdir -p /root/last-build
       - git rev-parse HEAD > /root/last-build/last-deployed-commit-sha-$ENV
