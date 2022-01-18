@@ -83,10 +83,7 @@ jobs:
         env:
           GIT_BASE_REF: ${{ github.base_ref }}
         run: |
-          echo "hello"
           sometest=$(git diff --name-only --diff-filter=d origin/$GIT_BASE_REF HEAD)
-          echo "sometest"
-          echo $sometest
           file_list=$(git diff --name-only --diff-filter=d origin/$GIT_BASE_REF HEAD | egrep -i '\.([jt]sx?)$' || true)
           echo "files"
           echo $file_list
