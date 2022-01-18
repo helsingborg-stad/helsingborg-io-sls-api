@@ -7,27 +7,22 @@ import config from '../../../config';
 const URI_SOURCE = 'misc/getGroupMembers';
 
 async function searchAdministrators(body) {
-  const [readError, { datatorgetEndpoint, apiKey }] = await to(
-    params.read(config.datatorget.envsKeyName)
-  );
-  if (readError) {
-    console.error('Read parameter error: ', readError);
-    throw readError;
-  }
+    const [readError, { datatorgetEndpoint, apiKey }] = await to(params.read(config.datatorget.envsKeyName));
+    if (readError) {
+        console.error('Read parameter error: ', readError);
+        throw readError;
+    }
 
-  const requestClient = request.requestClient(
-    { rejectUnauthorized: false },
-    { 'X-ApiKey': apiKey }
-  );
+    const requestClient = request.requestClient({ rejectUnauthorized: false }, { 'X-ApiKey': apiKey });
 
-  const [datatorgetError, datatorgetResponse] = await to(
-    request.call(requestClient, 'post', `${datatorgetEndpoint}/${URI_SOURCE}`, body)
-  );
-  if (datatorgetError) {
-    throw datatorgetError;
-  }
+    const [datatorgetError, datatorgetResponse] = await to(
+        request.call(requestClient, 'post', `${datatorgetEndpoint}/${URI_SOURCE}`, body)
+    );
+    if (datatorgetError) {
+        throw datatorgetError;
+    }
 
-  return datatorgetResponse;
+    return datatorgetResponse;
 }
 
 export default searchAdministrators;

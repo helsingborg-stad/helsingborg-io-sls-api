@@ -5,17 +5,17 @@ import params from '../../../libs/params';
 import config from '../../../config';
 
 async function getBookables() {
-  const { bookables } = await getSsmParameters();
-  return bookables;
+    const { bookables } = await getSsmParameters();
+    return bookables;
 }
 
 async function getSsmParameters() {
-  const [error, response] = await to(params.read(config.bookables.envsKeyName));
-  if (error) {
-    throwError(500);
-  }
+    const [error, response] = await to(params.read(config.bookables.envsKeyName));
+    if (error) {
+        throwError(500);
+    }
 
-  return response;
+    return response;
 }
 
 export { getBookables };

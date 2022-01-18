@@ -5,14 +5,14 @@ import jwt from 'jsonwebtoken';
  * @param {*} httpEvent the event passed to the lambda
  */
 export function decodeToken(httpEvent) {
-  const authorizationValue = httpEvent.headers.Authorization;
+    const authorizationValue = httpEvent.headers.Authorization;
 
-  const token = authorizationValue.includes('Bearer')
-    ? authorizationValue.substr(authorizationValue.indexOf(' ') + 1)
-    : authorizationValue;
+    const token = authorizationValue.includes('Bearer')
+        ? authorizationValue.substr(authorizationValue.indexOf(' ') + 1)
+        : authorizationValue;
 
-  const decodedToken = jwt.decode(token);
-  return decodedToken;
+    const decodedToken = jwt.decode(token);
+    return decodedToken;
 }
 
 /**
@@ -22,12 +22,12 @@ export function decodeToken(httpEvent) {
  * @param {number} expireTimeInSeconds the expire time for the token in seconds.
  */
 export async function signToken(jsonToSign, secret, expireTimeInMinutes) {
-  // Add expiration time to JWT token.
-  // The format is in seconds since Jan 1, 1970, not milliseconds, to match the default iat format of JWT.
-  jsonToSign.exp = parseInt(Date.now() / 1000) + expireTimeInMinutes * 60;
+    // Add expiration time to JWT token.
+    // The format is in seconds since Jan 1, 1970, not milliseconds, to match the default iat format of JWT.
+    jsonToSign.exp = parseInt(Date.now() / 1000) + expireTimeInMinutes * 60;
 
-  const token = jwt.sign(jsonToSign, secret);
-  return token;
+    const token = jwt.sign(jsonToSign, secret);
+    return token;
 }
 
 /**
@@ -36,10 +36,10 @@ export async function signToken(jsonToSign, secret, expireTimeInMinutes) {
  * @param {string} secret the secret key to verify the signature in the JSON Web Token.
  */
 export async function verifyToken(token, secret) {
-  return jwt.verify(token, secret, (error, decoded) => {
-    if (error) {
-      throw error;
-    }
-    return decoded;
-  });
+    return jwt.verify(token, secret, (error, decoded) => {
+        if (error) {
+            throw error;
+        }
+        return decoded;
+    });
 }

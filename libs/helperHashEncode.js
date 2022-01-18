@@ -9,13 +9,13 @@ import Hashids from 'hashids';
  * @returns {string} Hashed personal number
  */
 function encode(number, hashSalt, hashSaltLength) {
-  const hashids = new Hashids(hashSalt, hashSaltLength);
-  const encodedNumber = hashids.encode(number);
-  return encodedNumber;
+    const hashids = new Hashids(hashSalt, hashSaltLength);
+    const encodedNumber = hashids.encode(number);
+    return encodedNumber;
 }
 
 const hash = {
-  encode,
+    encode,
 };
 
 export default hash;

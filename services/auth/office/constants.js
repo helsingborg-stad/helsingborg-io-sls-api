@@ -1,10 +1,10 @@
 const JWK = {
-  USE: 'sig',
-  KTY: 'RSA',
+    USE: 'sig',
+    KTY: 'RSA',
 };
 
 const JWT = {
-  ALG: 'RS256',
+    ALG: 'RS256',
 };
 
 const loginMicrosoftUrl = 'https://login.microsoftonline.com';

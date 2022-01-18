@@ -8,66 +8,61 @@ import log from '../../../libs/logs';
 import { PDF_GENERATED, PDF_NOT_GENERATED } from '../../../libs/constants';
 
 export async function main(event, context) {
-  const { keys: caseKeys, pdfStorageBucketKey } = event.detail;
+    const { keys: caseKeys, pdfStorageBucketKey } = event.detail;
 
-  if (!caseKeys?.PK) {
-    console.error('Missing attribute PK in event.detial.keys');
-    return false;
-  }
+    if (!caseKeys?.PK) {
+        console.error('Missing attribute PK in event.detial.keys');
+        return false;
+    }
 
-  if (!caseKeys?.SK) {
-    console.error('Missing attribute SK in event.detial.keys');
-    return false;
-  }
+    if (!caseKeys?.SK) {
+        console.error('Missing attribute SK in event.detial.keys');
+        return false;
+    }
 
-  const [getFileS3Error, pdfS3Object] = await to(
-    S3.getFile(process.env.PDF_STORAGE_BUCKET_NAME, pdfStorageBucketKey)
-  );
-  if (getFileS3Error) {
-    log.error(
-      `Failed to get file: ${pdfStorageBucketKey}, from S3 bucket`,
-      context.awsRequestId,
-      'service-case-ms-001',
-      getFileS3Error
+    const [getFileS3Error, pdfS3Object] = await to(
+        S3.getFile(process.env.PDF_STORAGE_BUCKET_NAME, pdfStorageBucketKey)
     );
-    return false;
-  }
+    if (getFileS3Error) {
+        log.error(
+            `Failed to get file: ${pdfStorageBucketKey}, from S3 bucket`,
+            context.awsRequestId,
+            'service-case-ms-001',
+            getFileS3Error
+        );
+        return false;
+    }
 
-  const [updateCaseAttributesError] = await to(updateCasePdfAttributes(caseKeys, pdfS3Object.Body));
-  if (updateCaseAttributesError) {
-    log.error(
-      'Failed to update case',
-      context.awsRequestId,
-      'service-case-ms-003',
-      updateCaseAttributesError
-    );
-    return false;
-  }
+    const [updateCaseAttributesError] = await to(updateCasePdfAttributes(caseKeys, pdfS3Object.Body));
+    if (updateCaseAttributesError) {
+        log.error('Failed to update case', context.awsRequestId, 'service-case-ms-003', updateCaseAttributesError);
+        return false;
+    }
 
-  return true;
+    return true;
 }
 
 function updateCasePdfAttributes(caseKeys, pdf) {
-  const isPdf = !!pdf;
-  const newState = isPdf ? PDF_GENERATED : PDF_NOT_GENERATED;
+    const isPdf = !!pdf;
+    const newState = isPdf ? PDF_GENERATED : PDF_NOT_GENERATED;
 
-  const params = {
-    TableName: config.cases.tableName,
-    Key: {
-      PK: caseKeys.PK,
-      SK: caseKeys.SK,
-    },
-    UpdateExpression: 'SET #pdf = :newPdf, #state = :newState',
-    ExpressionAttributeNames: {
-      '#pdf': 'pdf',
-      '#state': 'state',
-    },
-    ExpressionAttributeValues: {
-      ':newPdf': pdf || undefined,
-      ':newState': newState,
-    },
-    ReturnValue: 'NONE',
-  };
+    const params = {
+        TableName: config.cases.tableName,
+        Key: {
+            PK: caseKeys.PK,
+            SK: caseKeys.SK,
+        },
+        UpdateExpression: 'SET #pdf = :newPdf, #state = :newState',
+        ExpressionAttributeNames: {
+            '#pdf': 'pdf',
+            '#state': 'state',
+        },
+        ExpressionAttributeValues: {
+            ':newPdf': pdf || undefined,
+            ':newState': newState,
+        },
+        ReturnValue: 'NONE',
+    };
 
-  return dynamoDb.call('update', params);
+    return dynamoDb.call('update', params);
 }

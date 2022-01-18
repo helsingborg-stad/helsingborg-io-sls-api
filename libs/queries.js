@@ -9,15 +9,15 @@ import * as dynamoDb from './dynamoDb';
  * @param {string} SK The Sort Key to look for in the table
  */
 export async function getItem(TableName, PK, SK) {
-  const params = {
-    TableName,
-    Key: {
-      PK,
-      SK: SK || PK,
-    },
-  };
+    const params = {
+        TableName,
+        Key: {
+            PK,
+            SK: SK || PK,
+        },
+    };
 
-  return await to(dynamoDb.call('get', params));
+    return await to(dynamoDb.call('get', params));
 }
 
 /**
@@ -25,12 +25,12 @@ export async function getItem(TableName, PK, SK) {
  * @param {object} params The request params for the creation of a new item in a dynamodb table.
  */
 export async function putItem(params) {
-  const [dynamoDbError, dynamoDbResponse] = await to(dynamoDb.call('put', params));
-  if (dynamoDbError) {
-    throwError(dynamoDbError.statusCode, dynamoDbError.message);
-  }
+    const [dynamoDbError, dynamoDbResponse] = await to(dynamoDb.call('put', params));
+    if (dynamoDbError) {
+        throwError(dynamoDbError.statusCode, dynamoDbError.message);
+    }
 
-  return dynamoDbResponse;
+    return dynamoDbResponse;
 }
 
 /**
@@ -40,20 +40,15 @@ export async function putItem(params) {
  * @param {string} SK The Sort Key to look for in the table
  * @param {string} errorMessage The error message to pass if a item does not exists
  */
-export async function itemExists(
-  TableName,
-  PK,
-  SK,
-  errorMessage = 'The requested item does not exists'
-) {
-  const [error, response] = await getItem(TableName, PK, SK);
-  if (error) throwError(error.statusCode);
+export async function itemExists(TableName, PK, SK, errorMessage = 'The requested item does not exists') {
+    const [error, response] = await getItem(TableName, PK, SK);
+    if (error) throwError(error.statusCode);
 
-  if (Object.keys(response).length === 0 && response.constructor === Object) {
-    throwError(404, errorMessage);
-  }
+    if (Object.keys(response).length === 0 && response.constructor === Object) {
+        throwError(404, errorMessage);
+    }
 
-  return response;
+    return response;
 }
 
 /**
@@ -65,79 +60,74 @@ export async function itemExists(
  * @param {any} item The item to append to the list
  */
 export async function appendItemToList(tableName, PK, listName, item) {
-  const params = {
-    TableName: tableName,
-    Key: { PK },
-    UpdateExpression: 'SET #list = list_append(#list, :vals)',
-    ExpressionAttributeNames: {
-      '#list': listName,
-    },
-    ExpressionAttributeValues: {
-      ':vals': [item],
-    },
-    ReturnValues: 'ALL_NEW',
-  };
-  const [error, dynamoDbResponse] = await to(dynamoDb.call('update', params));
-  if (error) throwError(error.statusCode, error.message);
+    const params = {
+        TableName: tableName,
+        Key: { PK },
+        UpdateExpression: 'SET #list = list_append(#list, :vals)',
+        ExpressionAttributeNames: {
+            '#list': listName,
+        },
+        ExpressionAttributeValues: {
+            ':vals': [item],
+        },
+        ReturnValues: 'ALL_NEW',
+    };
+    const [error, dynamoDbResponse] = await to(dynamoDb.call('update', params));
+    if (error) throwError(error.statusCode, error.message);
 
-  return dynamoDbResponse;
+    return dynamoDbResponse;
 }
 
 export async function updateItem(TableName, PK, keys, validKeys) {
-  const ExpressionAttributeNames = {};
-  const ExpressionAttributeValues = {};
+    const ExpressionAttributeNames = {};
+    const ExpressionAttributeValues = {};
 
-  const UpdateExpression = createUpdateExpression(
-    validKeys,
-    keys,
-    ExpressionAttributeNames,
-    ExpressionAttributeValues
-  );
+    const UpdateExpression = createUpdateExpression(
+        validKeys,
+        keys,
+        ExpressionAttributeNames,
+        ExpressionAttributeValues
+    );
 
-  const params = {
-    TableName,
-    Key: {
-      PK,
-    },
-    UpdateExpression,
-    ExpressionAttributeNames,
-    ExpressionAttributeValues,
-    ReturnValues: 'ALL_NEW',
-  };
+    const params = {
+        TableName,
+        Key: {
+            PK,
+        },
+        UpdateExpression,
+        ExpressionAttributeNames,
+        ExpressionAttributeValues,
+        ReturnValues: 'ALL_NEW',
+    };
 
-  const [error, dynamoDbResponse] = await to(dynamoDb.call('update', params));
-  if (error) throwError(error.statusCode, error.message);
+    const [error, dynamoDbResponse] = await to(dynamoDb.call('update', params));
+    if (error) throwError(error.statusCode, error.message);
 
-  return dynamoDbResponse;
+    return dynamoDbResponse;
 }
 
-export function createUpdateExpression(
-  validKeys,
-  keys,
-  ExpressionAttributeNames,
-  ExpressionAttributeValues
-) {
-  let UpdateExpression = 'SET ';
-  let keyCounter = Object.keys(keys).length;
+export function createUpdateExpression(validKeys, keys, ExpressionAttributeNames, ExpressionAttributeValues) {
+    let UpdateExpression = 'SET ';
+    let keyCounter = Object.keys(keys).length;
 
-  if (keyCounter > 0) {
-    for (const key in keys) {
-      // Prevent creation of invalid attributes.
-      if (!validKeys.includes(key)) {
-        throwError(404, 'Invalid DynamoDB update');
-        // TODO: Return error.
-      }
+    if (keyCounter > 0) {
+        for (const key in keys) {
+            // Prevent creation of invalid attributes.
+            if (!validKeys.includes(key)) {
+                throwError(404, 'Invalid DynamoDB update');
+                // TODO: Return error.
+            }
 
-      UpdateExpression += `#${key} = :new${key}`;
-      ExpressionAttributeNames[`#${key}`] = key;
-      ExpressionAttributeValues[`:new${key}`] = keys[key];
+            UpdateExpression += `#${key} = :new${key}`;
+            ExpressionAttributeNames[`#${key}`] = key;
+            ExpressionAttributeValues[`:new${key}`] = keys[key];
 
-      if (keyCounter > 1) {
-        UpdateExpression += ', ';
-        keyCounter--;
-      }
+            if (keyCounter > 1) {
+                UpdateExpression += ', ';
+                keyCounter--;
+            }
+        }
     }
-  }
 
-  return UpdateExpression;
+    return UpdateExpression;
 }

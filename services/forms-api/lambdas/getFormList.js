@@ -8,26 +8,21 @@ import log from '../../../libs/logs';
  * Handler function for all forms from the database.
  */
 export async function main(_event, context) {
-  const params = {
-    TableName: config.forms.tableName,
-    ProjectionExpression: '#n, description, id, createdAt, updatedAt, subform, formType',
-    ExpressionAttributeNames: { '#n': 'name' },
-  };
-  const [error, queryResponse] = await to(makeScanQuery(params));
-  if (error) {
-    log.error(
-      'Get form list request error',
-      context.awsRequestId,
-      'service-forms-api-getFormList-001',
-      error
-    );
+    const params = {
+        TableName: config.forms.tableName,
+        ProjectionExpression: '#n, description, id, createdAt, updatedAt, subform, formType',
+        ExpressionAttributeNames: { '#n': 'name' },
+    };
+    const [error, queryResponse] = await to(makeScanQuery(params));
+    if (error) {
+        log.error('Get form list request error', context.awsRequestId, 'service-forms-api-getFormList-001', error);
 
-    return buildResponse(400, error);
-  }
-  return buildResponse(200, { count: queryResponse[1].Count, forms: queryResponse[1].Items });
+        return buildResponse(400, error);
+    }
+    return buildResponse(200, { count: queryResponse[1].Count, forms: queryResponse[1].Items });
 }
 
 async function makeScanQuery(params) {
-  const [error, result] = await to(dynamoDb.call('scan', params));
-  return [error, result];
+    const [error, result] = await to(dynamoDb.call('scan', params));
+    return [error, result];
 }
