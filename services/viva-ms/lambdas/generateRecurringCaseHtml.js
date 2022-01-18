@@ -11,7 +11,7 @@ import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import { getClosedUserCases, updateVivaCaseState } from '../helpers/dynamoDb';
 
 export async function main(event, context) {
-    const { caseKeys } = event.detail;
+  const { caseKeys } = event.detail;
 
   const [getCaseItemError, storedUserCase] = await getStoredUserCase(
     config.cases.tableName,
@@ -39,15 +39,8 @@ export async function main(event, context) {
       'service-viva-ms-generateRecurringCaseHtml-002',
       paramsReadError
     );
-    if (s3GetObjectError) {
-        log.error(
-            'Failed to get object from S3 bucket',
-            context.awsRequestId,
-            'service-viva-ms-generateRecurringCaseHtml-001',
-            s3GetObjectError
-        );
-        return false;
-    }
+    return false;
+  }
 
   const [getClosedCasesError, closedUserCases] = await to(getClosedUserCases(caseKeys.PK));
   if (getClosedCasesError) {
@@ -91,49 +84,51 @@ export async function main(event, context) {
   const caseTemplateData = createRecurringCaseTemplate(caseItem, changedAnswerValues);
   const html = template(caseTemplateData);
 
-    const caseHtmlKey = `html/case-${caseItem.id}.html`;
-    const [s3StoreFileError] = await to(S3.storeFile(process.env.PDF_STORAGE_BUCKET_NAME, caseHtmlKey, html));
-    if (s3StoreFileError) {
-        log.error(
-            'Failed to put object to S3 bucket',
-            context.awsRequestId,
-            'service-viva-ms-generateRecurringCaseHtml-003',
-            s3StoreFileError
-        );
-        return false;
-    }
-
-    const [updateCaseError] = await to(updateVivaCaseState(caseItem));
-    if (updateCaseError) {
-        log.error(
-            'Failed to update case state attribute',
-            context.awsRequestId,
-            'service-viva-ms-generateRecurringCaseHtml-004',
-            updateCaseError
-        );
-        return false;
-    }
-
-    const [putEventError] = await to(
-        putVivaMsEvent.htmlGeneratedSuccess({
-            pdfStorageBucketKey: caseHtmlKey,
-            keys: {
-                PK: caseItem.PK,
-                SK: caseItem.SK,
-            },
-        })
+  const caseHtmlKey = `html/case-${caseItem.id}.html`;
+  const [s3StoreFileError] = await to(
+    S3.storeFile(process.env.PDF_STORAGE_BUCKET_NAME, caseHtmlKey, html)
+  );
+  if (s3StoreFileError) {
+    log.error(
+      'Failed to put object to S3 bucket',
+      context.awsRequestId,
+      'service-viva-ms-generateRecurringCaseHtml-003',
+      s3StoreFileError
     );
-    if (putEventError) {
-        log.error(
-            'Put event ´htmlGeneratedSuccess´ failed',
-            context.awsRequestId,
-            'service-viva-ms-generateRecurringCaseHtml-005',
-            putEventError
-        );
-        return false;
-    }
+    return false;
+  }
 
-    return true;
+  const [updateCaseError] = await to(updateVivaCaseState(caseItem));
+  if (updateCaseError) {
+    log.error(
+      'Failed to update case state attribute',
+      context.awsRequestId,
+      'service-viva-ms-generateRecurringCaseHtml-004',
+      updateCaseError
+    );
+    return false;
+  }
+
+  const [putEventError] = await to(
+    putVivaMsEvent.htmlGeneratedSuccess({
+      pdfStorageBucketKey: caseHtmlKey,
+      keys: {
+        PK: caseItem.PK,
+        SK: caseItem.SK,
+      },
+    })
+  );
+  if (putEventError) {
+    log.error(
+      'Put event ´htmlGeneratedSuccess´ failed',
+      context.awsRequestId,
+      'service-viva-ms-generateRecurringCaseHtml-005',
+      putEventError
+    );
+    return false;
+  }
+
+  return true;
 }
 
 function getChangedCaseAnswerValues(currentAnswerList, previousAnswerList) {

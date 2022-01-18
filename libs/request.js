@@ -14,16 +14,22 @@ import https from 'https';
  * @param {string} contentType
  * @returns AxiosInstance
  */
-export const requestClient = (options, headers = {}, timeout = 5000, contentType = 'application/json') =>
-    axios.create({
-        httpsAgent: new https.Agent({ ...options }),
-        headers: {
-            'Content-Type': contentType,
-            ...headers,
-        },
-        timeout,
-        maxContentLength: Infinity,
-        maxBodyLength: Infinity,
-    });
+export const requestClient = (
+  options,
+  headers = {},
+  timeout = 5000,
+  contentType = 'application/json'
+) =>
+  axios.create({
+    httpsAgent: new https.Agent({ ...options }),
+    headers: {
+      'Content-Type': contentType,
+      ...headers,
+    },
+    timeout,
+    maxContentLength: Infinity,
+    maxBodyLength: Infinity,
+  });
 
-export const call = (client, method, url, payload) => client[method](url, payload);
+export const call = (client, method, url, payload) =>
+  client[method](url, payload);

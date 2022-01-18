@@ -6,36 +6,36 @@ import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
 export async function main(event, context) {
-    const clientUser = event.detail;
+  const clientUser = event.detail;
 
-    const [applicationStatusError, applicationStatusList] = await to(
-        vivaAdapter.application.status(clientUser.personalNumber)
+  const [applicationStatusError, applicationStatusList] = await to(
+    vivaAdapter.application.status(clientUser.personalNumber)
+  );
+  if (applicationStatusError) {
+    log.error(
+      'Error getting Viva application status',
+      context.awsRequestId,
+      'service-viva-ms-applicationStatus-001',
+      applicationStatusError
     );
-    if (applicationStatusError) {
-        log.error(
-            'Error getting Viva application status',
-            context.awsRequestId,
-            'service-viva-ms-applicationStatus-001',
-            applicationStatusError
-        );
-        return false;
-    }
+    return false;
+  }
 
-    const [putEventError] = await to(
-        putVivaMsEvent.applicationStatusSuccess({
-            user: clientUser,
-            status: applicationStatusList,
-        })
+  const [putEventError] = await to(
+    putVivaMsEvent.applicationStatusSuccess({
+      user: clientUser,
+      status: applicationStatusList,
+    })
+  );
+  if (putEventError) {
+    log.error(
+      'Error put event [applicationStatusSuccess]',
+      context.awsRequestId,
+      'service-viva-ms-applicationStatus-002',
+      putEventError
     );
-    if (putEventError) {
-        log.error(
-            'Error put event [applicationStatusSuccess]',
-            context.awsRequestId,
-            'service-viva-ms-applicationStatus-002',
-            putEventError
-        );
-        return false;
-    }
+    return false;
+  }
 
-    return true;
+  return true;
 }

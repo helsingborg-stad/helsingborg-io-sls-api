@@ -1,9 +1,9 @@
 import to from 'await-to-js';
 import {
-    throwError,
-    BadRequestError,
-    ResourceNotFoundError,
-    InternalServerError,
+  throwError,
+  BadRequestError,
+  ResourceNotFoundError,
+  InternalServerError,
 } from '@helsingborg-stad/npm-api-error-handling';
 
 import config from '../../../config';
@@ -14,10 +14,10 @@ import { decodeToken } from '../../../libs/token';
 import { objectWithoutProperties } from '../../../libs/objects';
 import { getStatusByType } from '../../../libs/caseStatuses';
 import {
-    ACTIVE_ONGOING,
-    ACTIVE_SIGNATURE_PENDING,
-    ACTIVE_SIGNATURE_COMPLETED,
-    ACTIVE_SUBMITTED,
+  ACTIVE_ONGOING,
+  ACTIVE_SIGNATURE_PENDING,
+  ACTIVE_SIGNATURE_COMPLETED,
+  ACTIVE_SUBMITTED,
 } from '../../../libs/constants';
 
 import statusCheck from '../helpers/statusCheckCondition';
@@ -26,214 +26,281 @@ import { updateCaseValidationSchema } from '../helpers/schema';
 import log from '../../../libs/logs';
 
 export async function main(event, context) {
-    const requestJsonBody = JSON.parse(event.body);
-    const { id } = event.pathParameters;
-    const { personalNumber } = decodeToken(event);
+  const requestJsonBody = JSON.parse(event.body);
+  const { id } = event.pathParameters;
+  const { personalNumber } = decodeToken(event);
 
-    if (!id) {
-        const errorMessage = 'Missing required path parameter "id"';
-        log.error(errorMessage, context.awsRequestId, 'service-cases-api-updateCase-001');
-
-        return response.failure(new BadRequestError(errorMessage));
-    }
-
-    const { error, value: validatedJsonBody } = updateCaseValidationSchema.validate(requestJsonBody, {
-        abortEarly: false,
-    });
-    if (error) {
-        log.error(error.message.replace(/"/g, "'"), context.awsRequestId, 'service-cases-api-updateCase-002', error);
-
-        return response.failure(new BadRequestError(error.message.replace(/"/g, "'")));
-    }
-
-    const [getUserCaseError, userCase] = await to(getUserCase(personalNumber, id));
-    if (getUserCaseError) {
-        log.error('Get User case error', context.awsRequestId, 'service-cases-api-updateCase-003', getUserCaseError);
-
-        return response.failure(new InternalServerError(getUserCaseError));
-    }
-
-    if (!userCase) {
-        const errorMessage = 'Case not found';
-        log.error(errorMessage, context.awsRequestId, 'service-cases-api-updateCase-004');
-
-        return response.failure(new ResourceNotFoundError(errorMessage));
-    }
-
-    if (!Object.prototype.hasOwnProperty.call(userCase, 'persons')) {
-        const errorMessage = 'Case attribute "persons" not found. The attribute "persons" is mandatory!';
-        log.error(errorMessage, context.awsRequestId, 'service-cases-api-updateCase-005');
-
-        return response.failure(new InternalServerError(errorMessage));
-    }
-
-    const { currentFormId, currentPosition, answers, signature, encryption } = validatedJsonBody;
-
-    const UpdateExpression = ['updatedAt = :newUpdatedAt'];
-    const ExpressionAttributeNames = {};
-    const ExpressionAttributeValues = { ':newUpdatedAt': Date.now() };
-
-    const updatedPeopleSignature = updatePeopleSignature(personalNumber, userCase.persons, signature);
-    const newCaseStatus = getNewCaseStatus({
-        answers,
-        people: updatedPeopleSignature,
-    });
-    if (newCaseStatus) {
-        UpdateExpression.push('#status = :newStatus');
-        ExpressionAttributeNames['#status'] = 'status';
-        ExpressionAttributeValues[':newStatus'] = newCaseStatus;
-    }
-
-    if (currentFormId) {
-        const [queryFormError] = await to(queryFormsIfExistsFormId(currentFormId));
-        if (queryFormError) {
-            log.error('Query form error', context.awsRequestId, 'service-cases-api-updateCase-006', queryFormError);
-
-            return response.failure(queryFormError);
-        }
-
-        UpdateExpression.push('currentFormId = :newCurrentFormId');
-        ExpressionAttributeValues[':newCurrentFormId'] = currentFormId;
-    }
-
-    ExpressionAttributeNames['#formId'] = currentFormId;
-
-    if (currentPosition || answers) {
-        if (!currentFormId) {
-            const errorMessage = 'currentFormId is needed when updating currentPosition and/or answers';
-            log.error(errorMessage, context.awsRequestId, 'service-cases-api-updateCase-007');
-
-            return response.failure(new BadRequestError(errorMessage));
-        }
-
-        if (currentPosition) {
-            UpdateExpression.push(`forms.#formId.currentPosition = :newCurrentPosition`);
-            ExpressionAttributeValues[':newCurrentPosition'] = currentPosition;
-        }
-
-        if (answers) {
-            UpdateExpression.push(`forms.#formId.answers = :newAnswers`);
-            ExpressionAttributeValues[':newAnswers'] = answers;
-        }
-    }
-
-    if (encryption) {
-        UpdateExpression.push(`forms.#formId.encryption = :newEncryption`);
-        ExpressionAttributeValues[':newEncryption'] = encryption;
-    }
-
-    UpdateExpression.push('persons = :newPersons');
-    ExpressionAttributeValues[':newPersons'] = Object.assign([], userCase.persons, updatedPeopleSignature);
-
-    const caseKeys = {
-        PK: userCase.PK,
-        SK: userCase.SK,
-    };
-
-    const updateCaseParams = {
-        TableName: config.cases.tableName,
-        Key: caseKeys,
-        UpdateExpression: `SET ${UpdateExpression.join(', ')}`,
-        ExpressionAttributeNames,
-        ExpressionAttributeValues,
-        ReturnValues: 'ALL_NEW',
-    };
-
-    const [updateCaseError, updateCaseResponse] = await to(sendUpdateCaseRequest(updateCaseParams));
-    if (updateCaseError) {
-        log.error('Update case error', context.awsRequestId, 'service-cases-api-updateCase-008', updateCaseError);
-
-        return response.failure(new InternalServerError(updateCaseError));
-    }
-
-    const [putEventError] = await to(
-        putEvent(
-            { caseKeys, status: newCaseStatus, state: userCase.state },
-            'casesApiUpdateCaseSuccess',
-            'casesApi.updateCase'
-        )
+  if (!id) {
+    const errorMessage = 'Missing required path parameter "id"';
+    log.error(
+      errorMessage,
+      context.awsRequestId,
+      'service-cases-api-updateCase-001'
     );
-    if (putEventError) {
-        throw putEventError;
+
+    return response.failure(new BadRequestError(errorMessage));
+  }
+
+  const { error, value: validatedJsonBody } =
+    updateCaseValidationSchema.validate(requestJsonBody, {
+      abortEarly: false,
+    });
+  if (error) {
+    log.error(
+      error.message.replace(/"/g, "'"),
+      context.awsRequestId,
+      'service-cases-api-updateCase-002',
+      error
+    );
+
+    return response.failure(
+      new BadRequestError(error.message.replace(/"/g, "'"))
+    );
+  }
+
+  const [getUserCaseError, userCase] = await to(
+    getUserCase(personalNumber, id)
+  );
+  if (getUserCaseError) {
+    log.error(
+      'Get User case error',
+      context.awsRequestId,
+      'service-cases-api-updateCase-003',
+      getUserCaseError
+    );
+
+    return response.failure(new InternalServerError(getUserCaseError));
+  }
+
+  if (!userCase) {
+    const errorMessage = 'Case not found';
+    log.error(
+      errorMessage,
+      context.awsRequestId,
+      'service-cases-api-updateCase-004'
+    );
+
+    return response.failure(new ResourceNotFoundError(errorMessage));
+  }
+
+  if (!Object.prototype.hasOwnProperty.call(userCase, 'persons')) {
+    const errorMessage =
+      'Case attribute "persons" not found. The attribute "persons" is mandatory!';
+    log.error(
+      errorMessage,
+      context.awsRequestId,
+      'service-cases-api-updateCase-005'
+    );
+
+    return response.failure(new InternalServerError(errorMessage));
+  }
+
+  const { currentFormId, currentPosition, answers, signature, encryption } =
+    validatedJsonBody;
+
+  const UpdateExpression = ['updatedAt = :newUpdatedAt'];
+  const ExpressionAttributeNames = {};
+  const ExpressionAttributeValues = { ':newUpdatedAt': Date.now() };
+
+  const updatedPeopleSignature = updatePeopleSignature(
+    personalNumber,
+    userCase.persons,
+    signature
+  );
+  const newCaseStatus = getNewCaseStatus({
+    answers,
+    people: updatedPeopleSignature,
+  });
+  if (newCaseStatus) {
+    UpdateExpression.push('#status = :newStatus');
+    ExpressionAttributeNames['#status'] = 'status';
+    ExpressionAttributeValues[':newStatus'] = newCaseStatus;
+  }
+
+  if (currentFormId) {
+    const [queryFormError] = await to(queryFormsIfExistsFormId(currentFormId));
+    if (queryFormError) {
+      log.error(
+        'Query form error',
+        context.awsRequestId,
+        'service-cases-api-updateCase-006',
+        queryFormError
+      );
+
+      return response.failure(queryFormError);
     }
 
-    const attributes = objectWithoutProperties(updateCaseResponse.Attributes, ['PK', 'SK', 'GSI1']);
-    return response.success(200, {
-        type: 'updateCase',
-        attributes,
-    });
+    UpdateExpression.push('currentFormId = :newCurrentFormId');
+    ExpressionAttributeValues[':newCurrentFormId'] = currentFormId;
+  }
+
+  ExpressionAttributeNames['#formId'] = currentFormId;
+
+  if (currentPosition || answers) {
+    if (!currentFormId) {
+      const errorMessage =
+        'currentFormId is needed when updating currentPosition and/or answers';
+      log.error(
+        errorMessage,
+        context.awsRequestId,
+        'service-cases-api-updateCase-007'
+      );
+
+      return response.failure(new BadRequestError(errorMessage));
+    }
+
+    if (currentPosition) {
+      UpdateExpression.push(
+        `forms.#formId.currentPosition = :newCurrentPosition`
+      );
+      ExpressionAttributeValues[':newCurrentPosition'] = currentPosition;
+    }
+
+    if (answers) {
+      UpdateExpression.push(`forms.#formId.answers = :newAnswers`);
+      ExpressionAttributeValues[':newAnswers'] = answers;
+    }
+  }
+
+  if (encryption) {
+    UpdateExpression.push(`forms.#formId.encryption = :newEncryption`);
+    ExpressionAttributeValues[':newEncryption'] = encryption;
+  }
+
+  UpdateExpression.push('persons = :newPersons');
+  ExpressionAttributeValues[':newPersons'] = Object.assign(
+    [],
+    userCase.persons,
+    updatedPeopleSignature
+  );
+
+  const caseKeys = {
+    PK: userCase.PK,
+    SK: userCase.SK,
+  };
+
+  const updateCaseParams = {
+    TableName: config.cases.tableName,
+    Key: caseKeys,
+    UpdateExpression: `SET ${UpdateExpression.join(', ')}`,
+    ExpressionAttributeNames,
+    ExpressionAttributeValues,
+    ReturnValues: 'ALL_NEW',
+  };
+
+  const [updateCaseError, updateCaseResponse] = await to(
+    sendUpdateCaseRequest(updateCaseParams)
+  );
+  if (updateCaseError) {
+    log.error(
+      'Update case error',
+      context.awsRequestId,
+      'service-cases-api-updateCase-008',
+      updateCaseError
+    );
+
+    return response.failure(new InternalServerError(updateCaseError));
+  }
+
+  const [putEventError] = await to(
+    putEvent(
+      { caseKeys, status: newCaseStatus, state: userCase.state },
+      'casesApiUpdateCaseSuccess',
+      'casesApi.updateCase'
+    )
+  );
+  if (putEventError) {
+    throw putEventError;
+  }
+
+  const attributes = objectWithoutProperties(updateCaseResponse.Attributes, [
+    'PK',
+    'SK',
+    'GSI1',
+  ]);
+  return response.success(200, {
+    type: 'updateCase',
+    attributes,
+  });
 }
 
 async function sendUpdateCaseRequest(params) {
-    const [dynamoDbUpdateCallError, dynamoDbUpdateResult] = await to(dynamoDb.call('update', params));
-    if (dynamoDbUpdateCallError) {
-        throw dynamoDbUpdateCallError;
-    }
+  const [dynamoDbUpdateCallError, dynamoDbUpdateResult] = await to(
+    dynamoDb.call('update', params)
+  );
+  if (dynamoDbUpdateCallError) {
+    throw dynamoDbUpdateCallError;
+  }
 
-    return dynamoDbUpdateResult;
+  return dynamoDbUpdateResult;
 }
 
 async function queryFormsIfExistsFormId(formId) {
-    const dynamoDbQueryParams = {
-        TableName: config.forms.tableName,
-        KeyConditionExpression: 'PK = :pk',
-        ExpressionAttributeValues: { ':pk': `FORM#${formId}` },
-    };
+  const dynamoDbQueryParams = {
+    TableName: config.forms.tableName,
+    KeyConditionExpression: 'PK = :pk',
+    ExpressionAttributeValues: { ':pk': `FORM#${formId}` },
+  };
 
-    const [dynamoDbQueryCallError, dynamoDbQueryCallResult] = await to(dynamoDb.call('query', dynamoDbQueryParams));
-    if (dynamoDbQueryCallError) {
-        throwError(dynamoDbQueryCallError.statusCode, dynamoDbQueryCallError.message);
-    }
+  const [dynamoDbQueryCallError, dynamoDbQueryCallResult] = await to(
+    dynamoDb.call('query', dynamoDbQueryParams)
+  );
+  if (dynamoDbQueryCallError) {
+    throwError(
+      dynamoDbQueryCallError.statusCode,
+      dynamoDbQueryCallError.message
+    );
+  }
 
-    if (dynamoDbQueryCallResult.Items.length === 0) {
-        throwError(404, 'The requested form id does not exists');
-    }
+  if (dynamoDbQueryCallResult.Items.length === 0) {
+    throwError(404, 'The requested form id does not exists');
+  }
 
-    return dynamoDbQueryCallResult;
+  return dynamoDbQueryCallResult;
 }
 
 function getNewCaseStatus(conditionOption) {
-    const statusCheckList = [
-        {
-            type: ACTIVE_ONGOING,
-            conditionFunction: statusCheck.condition.isOngoing,
-        },
-        {
-            type: ACTIVE_SIGNATURE_PENDING,
-            conditionFunction: statusCheck.condition.isSignaturePending,
-        },
-        {
-            type: ACTIVE_SIGNATURE_COMPLETED,
-            conditionFunction: statusCheck.condition.isSignatureCompleted,
-        },
-        {
-            type: ACTIVE_SUBMITTED,
-            conditionFunction: statusCheck.condition.isSubmitted,
-        },
-    ];
+  const statusCheckList = [
+    {
+      type: ACTIVE_ONGOING,
+      conditionFunction: statusCheck.condition.isOngoing,
+    },
+    {
+      type: ACTIVE_SIGNATURE_PENDING,
+      conditionFunction: statusCheck.condition.isSignaturePending,
+    },
+    {
+      type: ACTIVE_SIGNATURE_COMPLETED,
+      conditionFunction: statusCheck.condition.isSignatureCompleted,
+    },
+    {
+      type: ACTIVE_SUBMITTED,
+      conditionFunction: statusCheck.condition.isSubmitted,
+    },
+  ];
 
-    const statusType = statusCheckList.reduce((type, statusCheckItem) => {
-        if (statusCheckItem.conditionFunction(conditionOption)) {
-            return statusCheckItem.type;
-        }
-        return type;
-    }, undefined);
+  const statusType = statusCheckList.reduce((type, statusCheckItem) => {
+    if (statusCheckItem.conditionFunction(conditionOption)) {
+      return statusCheckItem.type;
+    }
+    return type;
+  }, undefined);
 
-    return getStatusByType(statusType);
+  return getStatusByType(statusType);
 }
 
 function updatePeopleSignature(matchPersonalNumber, people, signature) {
-    if (!people) {
-        return [];
+  if (!people) {
+    return [];
+  }
+
+  return people.map((person) => {
+    const newPerson = { ...person };
+
+    if (newPerson.personalNumber === matchPersonalNumber && signature) {
+      newPerson.hasSigned = signature.success;
     }
 
-    return people.map((person) => {
-        const newPerson = { ...person };
-
-        if (newPerson.personalNumber === matchPersonalNumber && signature) {
-            newPerson.hasSigned = signature.success;
-        }
-
-        return newPerson;
-    });
+    return newPerson;
+  });
 }

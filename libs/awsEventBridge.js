@@ -9,15 +9,15 @@ const eventBridge = new AWS.EventBridge();
  * @param {String} Source The source of the event.
  */
 export function putEvent(Detail, DetailType, Source) {
-    const params = {
-        Entries: [
-            {
-                Detail: JSON.stringify(Detail),
-                DetailType,
-                Source,
-            },
-        ],
-    };
+  const params = {
+    Entries: [
+      {
+        Detail: JSON.stringify(Detail),
+        DetailType,
+        Source,
+      },
+    ],
+  };
 
-    return eventBridge.putEvents(params).promise();
+  return eventBridge.putEvents(params).promise();
 }
