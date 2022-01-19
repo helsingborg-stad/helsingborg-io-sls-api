@@ -1,0 +1,46 @@
+service: status-api
+
+plugins:
+  - serverless-bundle
+  - serverless-add-api-key
+
+projectDir: ../../
+
+custom: ${file(../../serverless.common.yml):custom}
+
+package:
+  individually: true
+
+provider:
+  lambdaHashingVersion: 20201221
+  name: aws
+  runtime: nodejs14.x
+  stage: dev
+  region: eu-north-1
+  endpointType: regional
+  tracing:
+    lambda: true
+  apiGateway:
+    restApiId:
+      !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiId
+    restApiRootResourceId:
+      !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
+    restApiResources:
+      status:
+        !ImportValue ${self:custom.stage}-ExtApiGatewayResourceStatus
+
+  environment:
+    stage: ${self:custom.stage}
+    resourcesStage: ${self:custom.resourcesStage}
+
+functions:
+  getStatus:
+    handler: lambdas/getStatus.main
+    environment:
+      message: ""
+    events:
+      - http:
+          path: status
+          method: get
+          private: true
+          cors: true
