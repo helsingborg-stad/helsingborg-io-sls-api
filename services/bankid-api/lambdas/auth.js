@@ -19,6 +19,11 @@ export const main = async (event, context) => {
     personalNumber,
   };
 
+  log.info('Bank Id Auth input', context.awsRequestId, null, {
+    endUserIp,
+    personalNumber: personalNumber.slice(2, 9),
+  });
+
   const [error, bankIdAuthResponse] = await to(sendBankIdAuthRequest(bankIdSSMparams, payload));
   if (!bankIdAuthResponse) {
     log.error(
