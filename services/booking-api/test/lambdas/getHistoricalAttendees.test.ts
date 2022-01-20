@@ -9,7 +9,7 @@ const mockHeaders = {
   'Access-Control-Allow-Origin': '*',
 };
 
-const mockCalendarBooking = {
+const mockDatatorgetResponse = {
   type: 'bookings',
   id: '123456789',
   attributes: ['outlook_1@helsingborg.se', 'outlook_2@helsingborg.se'],
@@ -17,7 +17,10 @@ const mockCalendarBooking = {
 
 const getHistoricalAttendeesMockData = {
   jsonapi: { version: '1.0' },
-  data: mockCalendarBooking,
+  data: {
+    ...mockDatatorgetResponse,
+    attributes: [{ Email: 'outlook_1@helsingborg.se' }, { Email: 'outlook_2@helsingborg.se' }],
+  },
 };
 
 const mockReferenceCode = '1a2bc3';
@@ -58,7 +61,7 @@ it('gets historical attendees successfully', async () => {
 
   getHistoricalAttendees.mockResolvedValueOnce({
     data: {
-      data: mockCalendarBooking,
+      data: mockDatatorgetResponse,
     },
   });
 
