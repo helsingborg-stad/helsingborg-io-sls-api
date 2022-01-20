@@ -59,8 +59,7 @@ function setChangedCaseAnswerValues(currentAnswerList, previousAnswerList) {
   }
 }
 
-// eslint-disable-next-line no-unused-vars
-async function main(event, context) {
+export async function main(event, context) {
   const { caseKeys } = event.detail;
 
   const [getCaseItemError, { Item: caseItem }] = await getStoredUserCase(
