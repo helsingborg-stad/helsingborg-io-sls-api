@@ -102,7 +102,8 @@ function createNotes(answers) {
   const noteAnswers = formHelpers.filterByTags(answers, ['notes', 'note']);
   const notes = noteAnswers.map(answer => ({
     title: 'Meddelande från sökande',
-    text: answer.value,
+    // \u00A0 is the unicode for a zero-width space.
+    text: answer.value?.replace(/\u00A0/g, ' '),
   }));
   return notes;
 }
