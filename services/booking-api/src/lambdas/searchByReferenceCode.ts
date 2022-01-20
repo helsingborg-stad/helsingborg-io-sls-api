@@ -32,10 +32,10 @@ export async function main(event: { body: string }) {
 
   for (const email of uniqueEmails) {
     if (!emailToDetails[email]) {
-      let attributes = { email };
+      let attributes = { Email: email };
       try {
         const lookupResponse = await booking.getAdministratorDetails({ email });
-        attributes = lookupResponse?.data?.data?.attributes ?? { email };
+        attributes = lookupResponse?.data?.data?.attributes ?? { Email: email };
       } finally {
         emailToDetails[email] = attributes;
       }
@@ -44,7 +44,7 @@ export async function main(event: { body: string }) {
 
   data.attributes.forEach(booking => {
     booking.Attendees.forEach((attendee, index) => {
-      booking.Attendees[index] = emailToDetails[attendee.Email];
+      booking.Attendees[index] = { ...attendee, ...emailToDetails[attendee.Email] };
     });
   });
 
