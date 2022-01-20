@@ -7,12 +7,18 @@ import {
 } from './constans';
 import formatPeriodDates, { formatTimestampToDate } from './formatPeriodDates';
 import formHelpers from './formHelpers';
+import { encode } from 'html-entities';
+
+function formatAnswerValue(answer) {
+  const color = formHelpers.getTagIfIncludes(answer.field.tags, 'changed') ? 'red' : 'black';
+  return `<span class="${color}">${encode(answer.value)}</span>`;
+}
 
 function mapApplicant(person, answers) {
   const personalInfoAnswers = formHelpers.filterByFieldIdIncludes(answers, 'personalInfo');
   const personalInfo = personalInfoAnswers.reduce((accumulatedAnswer, answer) => {
     const attribute = formHelpers.getAttributeFromAnswerFieldId(answer.field.id);
-    return { ...accumulatedAnswer, [attribute]: answer.value };
+    return { ...accumulatedAnswer, [attribute]: formatAnswerValue(answer) };
   }, {});
 
   return {
@@ -30,7 +36,7 @@ function mapCoApplicant(person, answers) {
   const partnerInfoAnswers = formHelpers.filterByFieldIdIncludes(answers, 'partnerInfo');
   const partnerInfo = partnerInfoAnswers.reduce((accumulatedAnswer, answer) => {
     const attribute = formHelpers.getAttributeFromAnswerFieldId(answer.field.id);
-    return { ...accumulatedAnswer, [attribute]: answer.value };
+    return { ...accumulatedAnswer, [attribute]: formatAnswerValue(answer) };
   }, {});
 
   return {
@@ -75,14 +81,15 @@ function createChildren(answers) {
     const hasTagPersonalNumber = tags.includes(TAG_NAME.personalNumber);
     const hasTagSchool = tags.includes(TAG_NAME.school);
     const hasTagHousing = tags.includes(TAG_NAME.housing);
+    const formattedValue = formatAnswerValue(answer);
 
     child = {
       ...(child ?? {}),
-      ...(hasTagFirstName && { firstName: answer.value }),
-      ...(hasTagLastName && { lastName: answer.value }),
-      ...(hasTagPersonalNumber && { personalNumber: answer.value }),
-      ...(hasTagSchool && { school: answer.value }),
-      ...(hasTagHousing && { housing: answer.value }),
+      ...(hasTagFirstName && { firstName: formattedValue }),
+      ...(hasTagLastName && { lastName: formattedValue }),
+      ...(hasTagPersonalNumber && { personalNumber: formattedValue }),
+      ...(hasTagSchool && { school: formattedValue }),
+      ...(hasTagHousing && { housing: formattedValue }),
       group,
     };
 
@@ -113,7 +120,7 @@ function createHousingInfo(answers) {
   const housingInfo = filteredAnswers.reduce((accumulatedAnswer, answer) => {
     // field id can be constructed like personInfo.personFirstName, personInfo.personLastName
     const fieldId = formHelpers.getAttributeFromDotNotation(answer.field.id, 1);
-    return { ...accumulatedAnswer, [fieldId]: answer.value };
+    return { ...accumulatedAnswer, [fieldId]: formatAnswerValue(answer) };
   }, {});
 
   return housingInfo;
@@ -212,7 +219,11 @@ function createFinancialPosts({ answers, filterTags = [], initialPost = {} }) {
 
 function getFinancialPosts({ answers, initialPost, tagFilters }) {
   const posts = tagFilters.reduce((incomes, filter) => {
-    const newIncomes = createFinancialPosts({ answers, filterTags: filter.tags, initialPost });
+    const newIncomes = createFinancialPosts({
+      answers,
+      filterTags: filter.tags,
+      initialPost,
+    });
     return [...incomes, ...newIncomes];
   }, []);
   return posts;

@@ -29,7 +29,38 @@ handlebars.registerHelper({
   },
 });
 
-export async function main(event, context) {
+async function getClosedUserCases(primaryKey) {
+  const dynamoDbQueryCasesParams = {
+    TableName: config.cases.tableName,
+    KeyConditionExpression: 'PK = :pk and begins_with(SK, :sk)',
+    FilterExpression: 'begins_with(#status.#type, :statusTypeClosed)',
+    ExpressionAttributeNames: {
+      '#status': 'status',
+      '#type': 'type',
+    },
+    ExpressionAttributeValues: {
+      ':pk': primaryKey,
+      ':sk': 'CASE#',
+      ':statusTypeClosed': 'closed',
+    },
+  };
+  return await to(dynamoDb.call('query', dynamoDbQueryCasesParams));
+}
+
+function setChangedCaseAnswerValues(currentAnswerList, previousAnswerList) {
+  for (const answer of currentAnswerList) {
+    const previousAnswer = previousAnswerList.find(item => item.field.id === answer.field.id);
+
+    if (!previousAnswer) {
+      answer.field.tags.push('changed');
+    } else if (previousAnswer && previousAnswer.value !== answer.value) {
+      answer.field.tags.push('changed');
+    }
+  }
+}
+
+// eslint-disable-next-line no-unused-vars
+async function main(event, context) {
   const { caseKeys } = event.detail;
 
   const [getCaseItemError, { Item: caseItem }] = await getStoredUserCase(
@@ -46,20 +77,6 @@ export async function main(event, context) {
     );
     return false;
   }
-
-  const [s3GetObjectError, hbsTemplateS3Object] = await to(
-    S3.getFile(process.env.PDF_STORAGE_BUCKET_NAME, 'templates/ekb-recurring.hbs')
-  );
-  if (s3GetObjectError) {
-    log.error(
-      'Failed to get object from S3 bucket',
-      context.awsRequestId,
-      'service-viva-ms-generateRecurringCaseHtml-001',
-      s3GetObjectError
-    );
-    return false;
-  }
-
   const [paramsReadError, vivaCaseSSMParams] = await to(
     params.read(config.cases.providers.viva.envsKeyName)
   );
@@ -69,6 +86,39 @@ export async function main(event, context) {
       context.awsRequestId,
       'service-viva-ms-generateRecurringCaseHtml-002',
       paramsReadError
+    );
+    return false;
+  }
+
+  const [getClosedCasesError, { Items: closedCases }] = await getClosedUserCases(caseKeys.PK);
+  if (getClosedCasesError) {
+    log.error(
+      'Error getting previous items from the cases table',
+      context.awsRequestId,
+      'service-viva-ms-generateRecurringCaseHtml-006',
+      getClosedCasesError
+    );
+    return false;
+  }
+
+  if (closedCases.length > 0) {
+    const [closedCase] = closedCases.sort((caseA, caseB) => caseB.updatedAt - caseA.updatedAt);
+
+    setChangedCaseAnswerValues(
+      caseItem.forms[vivaCaseSSMParams.recurringFormId].answers,
+      closedCase.forms[vivaCaseSSMParams.recurringFormId].answers
+    );
+  }
+
+  const [s3GetObjectError, hbsTemplateS3Object] = await to(
+    S3.getFile(process.env.PDF_STORAGE_BUCKET_NAME, 'templates/ekb-recurring-v2.hbs')
+  );
+  if (s3GetObjectError) {
+    log.error(
+      'Failed to get object from S3 bucket',
+      context.awsRequestId,
+      'service-viva-ms-generateRecurringCaseHtml-001',
+      s3GetObjectError
     );
     return false;
   }
