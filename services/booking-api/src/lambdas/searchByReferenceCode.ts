@@ -25,7 +25,9 @@ export async function main(event: { body: string }) {
 
   const { data } = searchBookingResponse?.data ?? {};
 
-  const emails = data.attributes.map(booking => booking.Attendees[0].Email);
+  const emails = data.attributes
+    .flatMap(booking => booking.Attendees)
+    .map(attendee => attendee.Email);
   const uniqueEmails = [...new Set(emails)];
 
   for (const email of uniqueEmails) {
@@ -41,10 +43,9 @@ export async function main(event: { body: string }) {
   }
 
   data.attributes.forEach(booking => {
-    booking.Attendees[0] = {
-      ...booking.Attendees[0],
-      ...emailToDetails[booking.Attendees[0].Email],
-    };
+    booking.Attendees.forEach((attendee, index) => {
+      booking.Attendees[index] = emailToDetails[attendee.Email];
+    });
   });
 
   return response.success(200, data);
