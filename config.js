@@ -52,6 +52,9 @@ const stageConfigs = {
     pdf: {
       envsKeyName: '/pdfEnvs/dev',
     },
+    version: {
+      envsKeyName: '/versionEnvs/dev',
+    },
   },
   test: {
     auth: {
@@ -101,6 +104,9 @@ const stageConfigs = {
     },
     pdf: {
       envsKeyName: '/pdfEnvs/test',
+    },
+    version: {
+      envsKeyName: '/versionEnvs/test',
     },
   },
   stage: {
@@ -152,6 +158,9 @@ const stageConfigs = {
     pdf: {
       envsKeyName: '/pdfEnvs/stage',
     },
+    version: {
+      envsKeyName: '/versionEnvs/stage',
+    },
   },
   prod: {
     auth: {
@@ -202,6 +211,9 @@ const stageConfigs = {
     pdf: {
       envsKeyName: '/pdfEnvs/prod',
     },
+    version: {
+      envsKeyName: '/versionEnvs/prod',
+    },
   },
   release: {
     auth: {
@@ -251,6 +263,9 @@ const stageConfigs = {
     },
     pdf: {
       envsKeyName: '/pdfEnvs/release',
+    },
+    version: {
+      envsKeyName: '/versionEnvs/release',
     },
   },
 };
