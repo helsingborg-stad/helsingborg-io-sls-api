@@ -9,7 +9,7 @@ const COMPARISON_RESULT = {
 };
 
 /**
- * Calculate the version status
+ * Decides the status to return depending on currentVersion
  *
  * @param {string} currentVersion The current application version (in semver format)
  * @param {string} minVersion The minimum allowed application version (in semver format)
