@@ -43,8 +43,8 @@ provider:
             - !Sub arn:aws:ssm:${self:provider.region}:${AWS::AccountId}:parameter/versionEnvs/${self:provider.stage}
 
 functions:
-  getVersionStatus:
-    handler: lambdas/getVersionStatus.main
+  get:
+    handler: lambdas/getStatus.main
     events:
       - http:
           path: version
