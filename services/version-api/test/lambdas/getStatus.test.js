@@ -1,4 +1,5 @@
-import { main } from '../../lambdas/getVersionStatus';
+import { main } from '../../lambdas/getStatus';
+
 import { getVersionConfigurations } from '../../helpers/getVersionConfigurations';
 
 import { VERSION_STATUS } from '../../constants';
@@ -19,6 +20,7 @@ const mockHeaders = {
   'Access-Control-Allow-Origin': '*',
 };
 const mockJsonApi = { version: '1.0' };
+const mockContext = { awsRequestId: '123' };
 
 let mockEvent;
 beforeEach(() => {
@@ -39,7 +41,7 @@ it('returns the version status successfully', async () => {
     statusCode: 200,
   };
 
-  const result = await main(mockEvent);
+  const result = await main(mockEvent, mockContext);
 
   expect(result).toEqual(expectedResult);
 });
@@ -57,7 +59,7 @@ test.each(malformedUserAgents)('returns failure for`User-Agent` %s', async userA
     statusCode: 500,
   };
 
-  const result = await main(mockEvent);
+  const result = await main(mockEvent, mockContext);
 
   expect(result).toEqual(expectedResult);
 });
