@@ -7,7 +7,7 @@ import config from '../../../config';
 /**
  * Fetch application version configurations from AWS SSM Parameter store
  *
- * @returns {Promise<{versions: {ios: {min: string, max: string}, android:{ min: string, max: string}}}>} SSM parameters
+ * @returns {Promise<{versions: {ios: {min: string, max: string}, android: {min: string, max: string}}}>} SSM parameters
  */
 async function getVersionConfigurations() {
   const [error, response] = await to(params.read(config.version.envsKeyName));
