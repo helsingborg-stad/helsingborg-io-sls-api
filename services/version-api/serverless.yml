@@ -1,0 +1,54 @@
+service: version-api
+
+plugins:
+  - serverless-bundle
+  - serverless-add-api-key
+
+projectDir: ../../
+
+custom: ${file(../../serverless.common.yml):custom}
+
+package:
+  individually: true
+
+provider:
+  lambdaHashingVersion: 20201221
+  name: aws
+  runtime: nodejs14.x
+  stage: dev
+  region: eu-north-1
+  endpointType: regional
+  tracing:
+    lambda: true
+  apiGateway:
+    restApiId:
+      !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiId
+    restApiRootResourceId:
+      !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
+    restApiResources:
+      version:
+        !ImportValue ${self:custom.stage}-ExtApiGatewayResourceVersion
+
+  environment:
+    stage: ${self:custom.stage}
+    resourcesStage: ${self:custom.resourcesStage}
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - ssm:GetParameter
+          Resource:
+            - !Sub arn:aws:ssm:${self:provider.region}:${AWS::AccountId}:parameter/versionEnvs/${self:provider.stage}
+
+functions:
+  getVersionStatus:
+    handler: lambdas/getVersionStatus.main
+    events:
+      - http:
+          path: version
+          method: get
+          private: true
+          cors: true
+
