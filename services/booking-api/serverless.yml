@@ -51,6 +51,9 @@ functions:
           method: post
           private: true
           cors: true
+          authorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   cancelBooking:
     handler: lambdas/cancel.main
@@ -60,6 +63,9 @@ functions:
           method: delete
           private: true
           cors: true
+          authorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   getBooking:
     handler: lambdas/get.main
@@ -69,6 +75,9 @@ functions:
           method: get
           private: true
           cors: true
+          authorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   updateBooking:
     handler: lambdas/update.main
@@ -78,6 +87,9 @@ functions:
           method: patch
           private: true
           cors: true
+          authorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   searchByReferenceCode:
     handler: lambdas/searchByReferenceCode.main
@@ -87,6 +99,9 @@ functions:
           method: post
           private: true
           cors: true
+          authorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   getHistoricalAttendees:
     handler: lambdas/getHistoricalAttendees.main
@@ -99,3 +114,6 @@ functions:
           method: get
           private: true
           cors: true
+          authorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue ${self:custom.stage}-authorizerId
