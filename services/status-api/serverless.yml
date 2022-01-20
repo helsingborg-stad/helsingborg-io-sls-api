@@ -34,8 +34,8 @@ provider:
     resourcesStage: ${self:custom.resourcesStage}
 
 functions:
-  getStatus:
-    handler: lambdas/getStatus.main
+  get:
+    handler: lambdas/get.main
     environment:
       message: ""
     events:
