@@ -1,4 +1,4 @@
-import { decideVersionStatus } from '../../helpers/decideVersionStatus';
+import { getApplicationUpdateStatus } from '../../helpers/getApplicationUpdateStatus';
 
 import { VERSION_STATUS } from '../../constants';
 
@@ -11,7 +11,7 @@ const testCases = [
 test.each(testCases)(
   'current: $current, min: $min, max: $max, expected: $expected',
   ({ current, min, max, expected }) => {
-    const result = decideVersionStatus(current, min, max);
+    const result = getApplicationUpdateStatus({ current, min, max });
 
     expect(result).toBe(expected);
   }
