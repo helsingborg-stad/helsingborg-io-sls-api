@@ -25,7 +25,7 @@ export async function main(event, context) {
       context.awsRequestId,
       'service-version-api-001'
     );
-    return response.failure({ status: 500, message: 'Malformed `User-Agent` header' });
+    return response.failure({ status: 400, message: 'Malformed `User-Agent` header' });
   }
 
   const [configurationsError, { versions }] = await to(getVersionConfigurations());

@@ -53,10 +53,10 @@ test.each(malformedUserAgents)('returns failure for`User-Agent` %s', async userA
   const expectedResult = {
     body: JSON.stringify({
       jsonapi: mockJsonApi,
-      data: { status: '500', code: '500', message: 'Malformed `User-Agent` header' },
+      data: { status: '400', code: '400', message: 'Malformed `User-Agent` header' },
     }),
     headers: mockHeaders,
-    statusCode: 500,
+    statusCode: 400,
   };
 
   const result = await main(mockEvent, mockContext);
