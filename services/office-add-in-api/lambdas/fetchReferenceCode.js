@@ -68,7 +68,7 @@ export const main = async (event, context) => {
 
   const user = isEmail ? userGetResponse.Items[0] : userGetResponse.Item;
 
-  return response.buildResponse(200, {
+  return response.success(200, {
     type: 'userFetchReferenceCode',
     referenceCode: user.uuid,
   });
