@@ -18,7 +18,7 @@ export async function main(event) {
   const emailIsValid = emailRegex.test(email);
 
   if (!emailIsValid) {
-    response.failure({
+    return response.failure({
       status: 400,
       message: 'Malformed email',
     });
