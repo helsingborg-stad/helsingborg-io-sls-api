@@ -28,18 +28,18 @@ export async function main(event, context) {
     return response.failure({ status: 400, message: 'Malformed `User-Agent` header' });
   }
 
-  const [configurationsError, { versions }] = await to(getVersionConfigurations());
-  if (configurationsError) {
+  const [configurationError, configuration] = await to(getVersionConfigurations());
+  if (configurationError) {
     log.error(
       'Failed fetching version configurations from SSM',
       context.awsRequestId,
       'service-version-api-002',
-      configurationsError
+      configurationError
     );
-    return response.failure(configurationsError);
+    return response.failure(configurationError);
   }
 
-  const { min, max } = versions[deviceOS];
+  const { min, max } = configuration.versions[deviceOS];
   const versionStatus = getApplicationUpdateStatus({ current: deviceApplicationVersion, min, max });
 
   return response.success(200, { versionStatus });
