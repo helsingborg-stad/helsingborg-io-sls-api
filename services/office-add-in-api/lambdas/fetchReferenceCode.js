@@ -44,7 +44,7 @@ export const main = async (event, context) => {
     log.error(
       'Fetch reference code request error',
       context.awsRequestId,
-      'service-users-api-fetchReferenceCode-500',
+      'service-users-api-fetchReferenceCode-001',
       error
     );
     const errorMessage = 'Internal server error';
@@ -59,7 +59,7 @@ export const main = async (event, context) => {
     (!isEmail && (userGetResponse.Item === undefined || userGetResponse.Item === {}))
   ) {
     const errorMessage = 'No user with that personal number or email found in the database.';
-    log.warn(errorMessage, context.awsRequestId, 'service-users-api-fetchReferenceCode-404', error);
+    log.warn(errorMessage, context.awsRequestId, 'service-users-api-fetchReferenceCode-002', error);
     return response.failure({
       status: 404,
       message: errorMessage,
