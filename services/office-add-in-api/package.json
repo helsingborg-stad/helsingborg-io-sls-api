@@ -1,13 +1,11 @@
 {
   "name": "office-add-in-api",
   "version": "0.0.1",
-  "description": "",
+  "description": "API for Mitt Helsingborg Outlook add-in",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
   "author": "Helsingborg Stad",
-  "license": "MIT",
-  "dependencies": {}
+  "license": "MIT"
 }
