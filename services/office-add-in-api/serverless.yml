@@ -1,0 +1,58 @@
+service: office-add-in-api
+
+plugins:
+  - serverless-bundle
+  - serverless-add-api-key
+
+projectDir: ../../
+
+custom: ${file(../../serverless.common.yml):custom}
+
+package:
+  individually: true
+
+provider:
+  lambdaHashingVersion: 20201221
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: eu-north-1
+  endpointType: regional
+  tracing:
+    lambda: true
+  apiGateway:
+    restApiId:
+      !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiId
+    restApiRootResourceId:
+      !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
+    restApiResources:
+      office-add-in:
+        !ImportValue ${self:custom.stage}-ExtApiGatewayResourceOfficeAddIn
+
+  environment:
+    stage: ${self:custom.stage}
+    resourcesStage: ${self:custom.resourcesStage}
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:GetItem
+          Resource:
+            - "Fn::ImportValue": ${self:custom.resourcesStage}-UsersTableArn
+            - "Fn::ImportValue": ${self:custom.resourcesStage}-UsersTableAllIndexArn
+
+functions:
+  fetchReferenceCode:
+    handler: lambdas/fetchReferenceCode.main
+    events:
+      - http:
+          path: /office-add-in/fetchReferenceCode/{query}
+          method: get
+          cors: true
+          private: false
+          authorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue ${self:custom.stage}-officeAuthorizerId
