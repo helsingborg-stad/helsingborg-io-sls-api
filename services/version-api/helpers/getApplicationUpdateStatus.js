@@ -1,4 +1,4 @@
-import smCompare from 'semver-compare';
+import semverCompare from 'semver-compare';
 
 import { VERSION_STATUS } from '../constants';
 
@@ -13,8 +13,8 @@ const COMPARISON_RESULT = {
  * @returns {'OK' | 'UPDATE_OPTIONAL' | 'UPDATE_REQUIRED'} Status
  */
 function getApplicationUpdateStatus({ current, min, max }) {
-  const currentComparedToMax = smCompare(current, max);
-  const currentComparedToMin = smCompare(current, min);
+  const currentComparedToMax = semverCompare(current, max);
+  const currentComparedToMin = semverCompare(current, min);
 
   if (currentComparedToMax === COMPARISON_RESULT.EQUAL) {
     return VERSION_STATUS.OK;
