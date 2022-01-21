@@ -10,7 +10,7 @@ const COMPARISON_RESULT = {
 
 /**
  * @param {{current: string, min: string, max: string}} parameters (properties in semver format i.e "1.2.0")
- * @returns {string} Status
+ * @returns {'OK' | 'UPDATE_OPTIONAL' | 'UPDATE_REQUIRED'} Status
  */
 function getApplicationUpdateStatus({ current, min, max }) {
   const currentComparedToMax = smCompare(current, max);
