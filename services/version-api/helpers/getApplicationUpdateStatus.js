@@ -13,18 +13,21 @@ const COMPARISON_RESULT = {
  * @returns {string} Status
  */
 function getApplicationUpdateStatus({ current, min, max }) {
-  const maxComparison = smCompare(current, max);
-  const minComparison = smCompare(current, min);
+  const currentComparedToMax = smCompare(current, max);
+  const currentComparedToMin = smCompare(current, min);
 
-  if (maxComparison === COMPARISON_RESULT.EQUAL) {
+  if (currentComparedToMax === COMPARISON_RESULT.EQUAL) {
     return VERSION_STATUS.OK;
   }
 
-  if (maxComparison === COMPARISON_RESULT.SMALLER && minComparison === COMPARISON_RESULT.GREATER) {
+  if (
+    currentComparedToMax === COMPARISON_RESULT.SMALLER &&
+    currentComparedToMin === COMPARISON_RESULT.GREATER
+  ) {
     return VERSION_STATUS.UPDATE_OPTIONAL;
   }
 
-  if (minComparison === COMPARISON_RESULT.SMALLER) {
+  if (currentComparedToMin === COMPARISON_RESULT.SMALLER) {
     return VERSION_STATUS.UPDATE_REQUIRED;
   }
 
