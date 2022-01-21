@@ -51,7 +51,4 @@ functions:
           method: get
           private: true
           cors: true
-          authorizer:
-            type: CUSTOM
-            authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
