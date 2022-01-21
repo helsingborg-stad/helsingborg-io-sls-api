@@ -7,6 +7,23 @@ import booking from '../helpers/booking';
 export async function main(event) {
   const { email } = event.pathParameters;
 
+  if (!email) {
+    return response.failure({
+      status: 400,
+      message: 'Missing required parameter: "email"',
+    });
+  }
+
+  const emailRegex = /.*@.*\..*/;
+  const emailIsValid = emailRegex.test(email);
+
+  if (!emailIsValid) {
+    response.failure({
+      status: 400,
+      message: 'Malformed email',
+    });
+  }
+
   const [error, getAdministratorDetailsResponse] = await to(
     booking.getAdministratorDetails({ email })
   );
