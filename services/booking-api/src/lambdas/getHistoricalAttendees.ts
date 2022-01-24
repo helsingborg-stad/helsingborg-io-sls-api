@@ -61,20 +61,20 @@ export async function main(
 
   const promises = data.attributes.map(async email => {
     if (!emailToDetails[email]) {
-      let attributes = { Email: email };
-      try {
-        const lookupResponse = await booking.getAdministratorDetails({ email });
-        attributes = lookupResponse?.data?.data?.attributes ?? { Email: email };
-      } catch (error) {
+      const [getAdministratorDetailsError, getAdministratorDetailsResponse] = await to(
+        booking.getAdministratorDetails({ email })
+      );
+      if (getAdministratorDetailsError) {
         log.warn(
           'Datatorget lookup failed, using fallback',
           context.awsRequestId,
           'service-booking-getHistoricalAttendees-004',
-          error
+          getAdministratorDetailsError
         );
-      } finally {
-        emailToDetails[email] = attributes;
       }
+      emailToDetails[email] = getAdministratorDetailsResponse?.data?.data?.attributes ?? {
+        Email: email,
+      };
     }
   });
 
