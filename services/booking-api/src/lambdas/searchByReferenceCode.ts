@@ -3,14 +3,20 @@ import to from 'await-to-js';
 import * as response from '../libs/response';
 
 import booking from '../helpers/booking';
+import log from '../libs/logs';
 
 const emailToDetails = {};
 
-export async function main(event: { body: string }) {
+export async function main(event: { body: string }, context: { awsRequestId: string }) {
   const body = JSON.parse(event.body);
 
   const { referenceCode, startTime, endTime } = body;
   if (!referenceCode || !startTime || !endTime) {
+    log.error(
+      'Missing one or more required query string parameters: "startTime", "endTime"',
+      context.awsRequestId,
+      'service-booking-api-searchByReferenceCode-001'
+    );
     return response.failure({
       status: 403,
       message: 'Missing one of more required parameter: "referenceCode", "startTime", "endTime"',
@@ -20,6 +26,12 @@ export async function main(event: { body: string }) {
   const searchBookingBody = { referenceCode, startTime, endTime };
   const [searchBookingError, searchBookingResponse] = await to(booking.search(searchBookingBody));
   if (searchBookingError) {
+    log.error(
+      'Failed to retrieve bookings from datatorget',
+      context.awsRequestId,
+      'service-booking-api-searchByReferenceCode-002',
+      searchBookingError
+    );
     return response.failure(searchBookingError);
   }
 
@@ -32,13 +44,20 @@ export async function main(event: { body: string }) {
 
   const promises = uniqueEmails.map(async email => {
     if (!emailToDetails[email]) {
-      let attributes = { Email: email };
-      try {
-        const lookupResponse = await booking.getAdministratorDetails({ email });
-        attributes = lookupResponse?.data?.data?.attributes ?? { Email: email };
-      } finally {
-        emailToDetails[email] = attributes;
+      const [getAdministratorDetailsError, getAdministratorDetailsResponse] = await to(
+        booking.getAdministratorDetails({ email })
+      );
+      if (getAdministratorDetailsError) {
+        log.warn(
+          'Datatorget lookup failed, using fallback',
+          context.awsRequestId,
+          'service-booking-api-searchByReferenceCode-003',
+          getAdministratorDetailsError
+        );
       }
+      emailToDetails[email] = getAdministratorDetailsResponse?.data?.data?.attributes ?? {
+        Email: email,
+      };
     }
   });
 
