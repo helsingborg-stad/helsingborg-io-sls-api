@@ -30,7 +30,7 @@ export async function main(event: { body: string }) {
     .map(attendee => attendee.Email);
   const uniqueEmails = [...new Set(emails)];
 
-  for (const email of uniqueEmails) {
+  const promises = uniqueEmails.map(async email => {
     if (!emailToDetails[email]) {
       let attributes = { Email: email };
       try {
@@ -40,7 +40,9 @@ export async function main(event: { body: string }) {
         emailToDetails[email] = attributes;
       }
     }
-  }
+  });
+
+  await Promise.all(promises);
 
   data.attributes.forEach(booking => {
     booking.Attendees.forEach((attendee, index) => {
