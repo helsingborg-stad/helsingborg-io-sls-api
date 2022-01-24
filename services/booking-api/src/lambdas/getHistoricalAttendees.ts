@@ -17,6 +17,11 @@ export async function main(
   let referenceCode = event.pathParameters?.referenceCode;
 
   if (!referenceCode) {
+    log.error(
+      'Missing path parameter',
+      context.awsRequestId,
+      'service-booking-api-getHistoricalAttendees-001'
+    );
     return response.failure({
       status: 403,
       message: 'Missing required parameter: "referenceCode"',
@@ -27,9 +32,14 @@ export async function main(
   const { startTime = '', endTime = '' } = event.queryStringParameters ?? {};
 
   if (!startTime || !endTime) {
+    log.error(
+      'Missing one or more required query string parameters: "startTime", "endTime"',
+      context.awsRequestId,
+      'service-booking-api-getHistoricalAttendees-002'
+    );
     return response.failure({
       status: 403,
-      message: 'Missing one or more required query string parameters: "startTime", "endTime',
+      message: 'Missing one or more required query string parameters: "startTime", "endTime"',
     });
   }
 
@@ -38,6 +48,12 @@ export async function main(
     booking.getHistoricalAttendees(getHistoricalAttendeesBody)
   );
   if (getHistoricalAttendeesError) {
+    log.error(
+      'Could not get historical attendees from datatorget',
+      context.awsRequestId,
+      'service-booking-api-getHistoricalAttendees-003',
+      getHistoricalAttendeesError
+    );
     return response.failure(getHistoricalAttendeesError);
   }
 
@@ -51,9 +67,9 @@ export async function main(
         attributes = lookupResponse?.data?.data?.attributes ?? { Email: email };
       } catch (error) {
         log.warn(
-          'Datatorget lookup failed',
+          'Datatorget lookup failed, using fallback',
           context.awsRequestId,
-          'service-booking-getHistoricalAttendees-001',
+          'service-booking-getHistoricalAttendees-004',
           error
         );
       } finally {
