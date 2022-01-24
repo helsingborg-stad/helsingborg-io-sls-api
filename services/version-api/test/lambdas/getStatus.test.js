@@ -11,6 +11,7 @@ getVersionConfigurations.mockResolvedValue({
     ios: {
       min: '1.0.0',
       max: '1.3.0',
+      updateUrl: 'Some url',
     },
   },
 });
@@ -35,7 +36,7 @@ it('returns the version status successfully', async () => {
   const expectedResult = {
     body: JSON.stringify({
       jsonapi: mockJsonApi,
-      data: { versionStatus: VERSION_STATUS.OK },
+      data: { status: VERSION_STATUS.OK, updateUrl: 'Some url' },
     }),
     headers: mockHeaders,
     statusCode: 200,
