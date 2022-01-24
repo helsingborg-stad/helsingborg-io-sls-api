@@ -52,7 +52,12 @@ export interface GetHistoricalAttendeesResponse {
     data?: {
       type: string;
       id: string;
-      attributes: string[];
+      attributes: {
+        Email: string;
+        JobTitle: string;
+        Department: string;
+        DisplayName: string;
+      };
     };
   };
 }
