@@ -13,9 +13,15 @@ const mockBody = {
   endTime: '2021-12-31T00:00:00+01:00',
   referenceCode: 'mockReferenceCode',
 };
+
 const mockEvent = {
   body: JSON.stringify(mockBody),
 };
+
+const mockContext = {
+  awsRequestId: 'xxxxx',
+};
+
 const mockHeaders = {
   'Access-Control-Allow-Credentials': true,
   'Access-Control-Allow-Origin': '*',
@@ -42,6 +48,7 @@ const mockCalendarSearch = [
 
 beforeEach(() => {
   jest.resetAllMocks();
+  booking.getAdministratorDetails.mockRejectedValue();
 });
 
 it('gets booking from a successful search', async () => {
@@ -61,7 +68,7 @@ it('gets booking from a successful search', async () => {
     },
   });
 
-  const result = await main(mockEvent);
+  const result = await main(mockEvent, mockContext);
 
   expect(result).toEqual(expectedResult);
   expect(booking.search).toHaveBeenCalledWith(mockBody);
@@ -87,7 +94,7 @@ it('throws when searching for a booking fails', async () => {
 
   search.mockRejectedValueOnce({ status: statusCode, message });
 
-  const result = await main(mockEvent);
+  const result = await main(mockEvent, mockContext);
 
   expect(result).toEqual(expectedResult);
 });
@@ -112,7 +119,7 @@ it('returns failure if required paramerer is missing', async () => {
     statusCode: 403,
   };
 
-  const result = await main(event);
+  const result = await main(event, mockContext);
 
   expect(result).toEqual(expectedResult);
   expect(booking.search).toHaveBeenCalledTimes(0);
