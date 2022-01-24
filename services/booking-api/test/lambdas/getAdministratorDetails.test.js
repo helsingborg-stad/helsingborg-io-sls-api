@@ -8,6 +8,10 @@ const mockHeaders = {
   'Access-Control-Allow-Origin': '*',
 };
 
+const mockContext = {
+  awsRequestId: 'xxxxx',
+};
+
 const mockEmail = 'mock@email.com';
 const mockBadEmail = 'notAnEmail';
 const mockJobTitle = 'Mock job title';
@@ -92,7 +96,7 @@ it('retrieves AD details successfully', async () => {
 
   booking.getAdministratorDetails.mockResolvedValueOnce(mockDatatorgetResponse);
 
-  const result = await main(mockEvent);
+  const result = await main(mockEvent, mockContext);
 
   expect(result).toEqual(expectedResult);
   expect(booking.getAdministratorDetails).toHaveBeenCalledTimes(1);
@@ -111,7 +115,7 @@ it('returns 400 if no email in request', async () => {
     statusCode: 400,
   };
 
-  const result = await main(mockEvent);
+  const result = await main(mockEvent, mockContext);
 
   expect(result).toEqual(expectedResult);
   expect(booking.getAdministratorDetails).not.toHaveBeenCalled();
@@ -132,7 +136,7 @@ it('returns 400 if bad email in request', async () => {
     statusCode: 400,
   };
 
-  const result = await main(mockEvent);
+  const result = await main(mockEvent, mockContext);
 
   expect(result).toEqual(expectedResult);
   expect(booking.getAdministratorDetails).not.toHaveBeenCalled();
@@ -158,7 +162,7 @@ it('returns 500 if datatorget request fails', async () => {
     message: 'Internal server error',
   });
 
-  const result = await main(mockEvent);
+  const result = await main(mockEvent, mockContext);
 
   expect(result).toEqual(expectedResult);
   expect(booking.getAdministratorDetails).toHaveBeenCalledTimes(1);
