@@ -50,7 +50,6 @@ provider:
         - Effect: Allow
           Action:
             - kms:Decrypt
-            - kms:GenerateDataKey
           Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
 
 functions:
