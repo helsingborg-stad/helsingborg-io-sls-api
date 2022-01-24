@@ -20,7 +20,7 @@ export async function main(event: {
   }
 
   referenceCode = decodeURIComponent(referenceCode);
-  const { startTime = '', endTime = '' } = event.queryStringParameters;
+  const { startTime = '', endTime = '' } = event.queryStringParameters ?? {};
 
   if (!startTime || !endTime) {
     return response.failure({
