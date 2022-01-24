@@ -162,7 +162,7 @@ it('returns failure if one of required query strings parameters does not exist',
   mockEvent.queryStringParameters.startTime = undefined;
 
   const statusCode = 403;
-  const message = 'Missing one or more required query string parameters: "startTime", "endTime';
+  const message = 'Missing one or more required query string parameters: "startTime", "endTime"';
 
   const expectedResult = {
     body: JSON.stringify({
