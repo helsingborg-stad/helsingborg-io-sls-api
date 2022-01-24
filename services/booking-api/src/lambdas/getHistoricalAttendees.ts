@@ -39,7 +39,7 @@ export async function main(event: {
 
   const { data } = getHistoricalAttendeesResponse?.data ?? {};
 
-  for (const email of data.attributes) {
+  const promises = data.attributes.map(async email => {
     if (!emailToDetails[email]) {
       let attributes = { Email: email };
       try {
@@ -49,7 +49,9 @@ export async function main(event: {
         emailToDetails[email] = attributes;
       }
     }
-  }
+  });
+
+  await Promise.all(promises);
 
   data.attributes = data.attributes.map(email => emailToDetails[email]);
 
