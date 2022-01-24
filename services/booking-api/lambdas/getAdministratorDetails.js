@@ -3,11 +3,17 @@ import to from 'await-to-js';
 import * as response from '../../../libs/response';
 
 import booking from '../helpers/booking';
+import log from '../../../libs/logs';
 
-export async function main(event) {
+export async function main(event, context) {
   const { email } = event.pathParameters;
 
   if (!email) {
+    log.error(
+      'Missing path parameter',
+      context.awsRequestId,
+      'service-booking-api-getAdministratorDetails-001'
+    );
     return response.failure({
       status: 400,
       message: 'Missing required parameter: "email"',
@@ -18,6 +24,11 @@ export async function main(event) {
   const emailIsValid = emailRegex.test(email);
 
   if (!emailIsValid) {
+    log.error(
+      'Path parameter is not a valid email',
+      context.awsRequestId,
+      'service-booking-api-getAdministratorDetails-002'
+    );
     return response.failure({
       status: 400,
       message: 'Malformed email',
