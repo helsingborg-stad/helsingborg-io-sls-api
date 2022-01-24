@@ -20,7 +20,7 @@ export async function main(event, context) {
     });
   }
 
-  const emailRegex = /.*@.*\..*/;
+  const emailRegex = /.+@.+\..+/;
   const emailIsValid = emailRegex.test(email);
 
   if (!emailIsValid) {
