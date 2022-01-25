@@ -6,6 +6,12 @@ import {
   ACTIVE_SUBMITTED,
   ACTIVE_PROCESSING,
   CLOSED,
+  ACTIVE_COMPLETION_ONGOING,
+  ACTIVE_COMPLETION_SUBMITTED,
+  ACTIVE_COMPLETION_PROCESSING,
+  ACTIVE_RANDOM_CHECK_ONGOING,
+  ACTIVE_RANDOM_CHECK_SUBMITTED,
+  ACTIVE_RANDOM_CHECK_PROCESSING,
   NOT_STARTED_VIVA,
   ACTIVE_COMPLETION_REQUIRED_VIVA,
   ACTIVE_RANDOM_CHECK_REQUIRED_VIVA,
@@ -52,6 +58,38 @@ const statuses = [
     type: CLOSED,
     name: 'Avslutat',
     description: 'Ditt ärende är avslutat.',
+  },
+  {
+    type: ACTIVE_COMPLETION_ONGOING,
+    name: 'Pågående komplettering',
+    description:
+      'Du har påbörjat komplettering. Du kan öppna din ansökan och fortsätta där du slutade.',
+  },
+  {
+    type: ACTIVE_COMPLETION_SUBMITTED,
+    name: 'Inskickad',
+    description: 'Komplettering är inskickad.',
+  },
+  {
+    type: ACTIVE_COMPLETION_PROCESSING,
+    name: 'Komplettering behandlas',
+    description: 'Komplettering är mottaget och bearbetas.',
+  },
+  {
+    type: ACTIVE_RANDOM_CHECK_ONGOING,
+    name: 'Pågående stickprovskontroll',
+    description:
+      'Du har påbörjat stickprovskontroll. Du kan öppna din ansökan och fortsätta där du slutade.',
+  },
+  {
+    type: ACTIVE_RANDOM_CHECK_SUBMITTED,
+    name: 'Inskickad',
+    description: 'Stickprovskontroll är inskickad.',
+  },
+  {
+    type: ACTIVE_RANDOM_CHECK_PROCESSING,
+    name: 'Stickprovskontroll behandlas',
+    description: 'Stickprovskontroll är mottaget och bearbetas.',
   },
   /**
    * Service: Ekonomiskt bistånd
