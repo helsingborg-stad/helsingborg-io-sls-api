@@ -28,7 +28,7 @@ export async function getUserCase(personalNumber, id) {
   return userCase;
 }
 
-async function getUserApplicantCase(personalNumber, id) {
+function getUserApplicantCase(personalNumber, id) {
   const PK = `USER#${personalNumber}`;
   const SK = `CASE#${id}`;
 
@@ -45,7 +45,7 @@ async function getUserApplicantCase(personalNumber, id) {
   return dynamoDb.call('query', params);
 }
 
-async function getUserCoApplicantCase(personalNumber, id) {
+function getUserCoApplicantCase(personalNumber, id) {
   const GSI1 = `USER#${personalNumber}`;
   const SK = `CASE#${id}`;
 
