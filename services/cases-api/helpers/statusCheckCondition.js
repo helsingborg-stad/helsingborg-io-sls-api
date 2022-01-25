@@ -1,3 +1,6 @@
+const COMPLETION_REQUIRED = 'COMPLETION_REQUIRED';
+const RANDOM_CHECK_REQUIRED = 'RANDOM_CHECK_REQUIRED';
+
 function isOngoing({ answers, people }) {
   return answers && isEncrypted(answers) && !hasApplicantSigned(people);
 }
@@ -14,6 +17,22 @@ function isSignatureCompleted({ answers, people }) {
 
 function isSubmitted({ answers, people }) {
   return answers && !isEncrypted(answers) && hasAllSigned(people);
+}
+
+function isCompletionOngoing({ answers, people, state }) {
+  return isOngoing({ answers, people }) && state?.includes(COMPLETION_REQUIRED);
+}
+
+function isCompletionSubmitted({ answers, people, state }) {
+  return isSubmitted({ answers, people }) && state?.includes(COMPLETION_REQUIRED);
+}
+
+function isRandomCheckOngoing({ answers, people, state }) {
+  return isOngoing({ answers, people }) && state?.includes(RANDOM_CHECK_REQUIRED);
+}
+
+function isRandomCheckSubmitted({ answers, people, state }) {
+  return isSubmitted({ answers, people }) && state?.includes(RANDOM_CHECK_REQUIRED);
 }
 
 function hasAllSigned(people) {
@@ -49,5 +68,9 @@ export default {
     isSubmitted,
     isSignatureCompleted,
     isSignaturePending,
+    isCompletionOngoing,
+    isCompletionSubmitted,
+    isRandomCheckOngoing,
+    isRandomCheckSubmitted,
   },
 };
