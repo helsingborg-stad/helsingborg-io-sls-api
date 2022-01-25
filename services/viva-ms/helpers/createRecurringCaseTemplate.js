@@ -359,15 +359,14 @@ function getFinancials(answers) {
   };
 }
 
-export default function createRecurringCaseTemplate(caseItem, recurringFormId) {
-  const recurringForm = caseItem.forms[recurringFormId];
+export default function createRecurringCaseTemplate(caseItem, answers) {
   const period = formatPeriodDates(caseItem.details.period);
-  const financials = getFinancials(recurringForm.answers);
-  const persons = createPersons(caseItem.persons, recurringForm.answers);
-  const children = createChildren(recurringForm.answers);
-  const housing = createHousingInfo(recurringForm.answers);
-  const notes = createNotes(recurringForm.answers);
-  const assets = createAssets(recurringForm.answers);
+  const financials = getFinancials(answers);
+  const persons = createPersons(caseItem.persons, answers);
+  const children = createChildren(answers);
+  const housing = createHousingInfo(answers);
+  const notes = createNotes(answers);
+  const assets = createAssets(answers);
 
   return {
     assets,

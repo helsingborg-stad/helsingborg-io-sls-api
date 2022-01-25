@@ -76,10 +76,8 @@ export async function main(event, context) {
 
   const handlebarsTemplateFileBody = hbsTemplateS3Object.Body.toString();
   const template = handlebars.compile(handlebarsTemplateFileBody);
-  const caseTemplateData = createRecurringCaseTemplate(
-    { ...caseItem, answers },
-    vivaCaseSSMParams.recurringFormId
-  );
+
+  const caseTemplateData = createRecurringCaseTemplate(caseItem, answers);
   const html = template(caseTemplateData);
 
   const caseHtmlKey = `html/case-${caseItem.id}.html`;
