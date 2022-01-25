@@ -1,63 +1,14 @@
 import to from 'await-to-js';
-import handlebars from 'handlebars';
-
+import handlebars from '../helpers/htmlTemplate';
 import config from '../../../config';
-
-import * as dynamoDb from '../../../libs/dynamoDb';
 import log from '../../../libs/logs';
 import { getItem as getStoredUserCase } from '../../../libs/queries';
 import params from '../../../libs/params';
 import S3 from '../../../libs/S3';
-import { CASE_HTML_GENERATED } from '../../../libs/constants';
 
 import createRecurringCaseTemplate from '../helpers/createRecurringCaseTemplate';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
-
-handlebars.registerHelper({
-  eq: (v1, v2) => v1 === v2,
-  ne: (v1, v2) => v1 !== v2,
-  lt: (v1, v2) => v1 < v2,
-  gt: (v1, v2) => v1 > v2,
-  lte: (v1, v2) => v1 <= v2,
-  gte: (v1, v2) => v1 >= v2,
-  includes: (v1, v2) => v1.includes(v2),
-  and() {
-    return Array.prototype.every.call(arguments, Boolean);
-  },
-  or() {
-    return Array.prototype.slice.call(arguments, 0, -1).some(Boolean);
-  },
-});
-
-async function getClosedUserCases(primaryKey) {
-  const dynamoDbQueryCasesParams = {
-    TableName: config.cases.tableName,
-    KeyConditionExpression: 'PK = :pk and begins_with(SK, :sk)',
-    FilterExpression: 'begins_with(#status.#type, :statusTypeClosed)',
-    ExpressionAttributeNames: {
-      '#status': 'status',
-      '#type': 'type',
-    },
-    ExpressionAttributeValues: {
-      ':pk': primaryKey,
-      ':sk': 'CASE#',
-      ':statusTypeClosed': 'closed',
-    },
-  };
-  return await to(dynamoDb.call('query', dynamoDbQueryCasesParams));
-}
-
-function setChangedCaseAnswerValues(currentAnswerList, previousAnswerList) {
-  for (const answer of currentAnswerList) {
-    const previousAnswer = previousAnswerList.find(item => item.field.id === answer.field.id);
-
-    if (!previousAnswer) {
-      answer.field.tags.push('changed');
-    } else if (previousAnswer && previousAnswer.value !== answer.value) {
-      answer.field.tags.push('changed');
-    }
-  }
-}
+import { getClosedUserCases, updateVivaCaseState } from '../helpers/dynamoDb';
 
 export async function main(event, context) {
   const { caseKeys } = event.detail;
@@ -89,7 +40,7 @@ export async function main(event, context) {
     return false;
   }
 
-  const [getClosedCasesError, { Items: closedCases }] = await getClosedUserCases(caseKeys.PK);
+  const [getClosedCasesError, { Items: closedCases }] = await to(getClosedUserCases(caseKeys.PK));
   if (getClosedCasesError) {
     log.error(
       'Error getting previous items from the cases table',
@@ -100,10 +51,11 @@ export async function main(event, context) {
     return false;
   }
 
+  let answers = caseItem.forms[vivaCaseSSMParams.recurringFormId].answers;
   if (closedCases.length > 0) {
     const [closedCase] = closedCases.sort((caseA, caseB) => caseB.updatedAt - caseA.updatedAt);
 
-    setChangedCaseAnswerValues(
+    answers = getChangedCaseAnswerValues(
       caseItem.forms[vivaCaseSSMParams.recurringFormId].answers,
       closedCase.forms[vivaCaseSSMParams.recurringFormId].answers
     );
@@ -124,7 +76,10 @@ export async function main(event, context) {
 
   const handlebarsTemplateFileBody = hbsTemplateS3Object.Body.toString();
   const template = handlebars.compile(handlebarsTemplateFileBody);
-  const caseTemplateData = createRecurringCaseTemplate(caseItem, vivaCaseSSMParams.recurringFormId);
+  const caseTemplateData = createRecurringCaseTemplate(
+    { ...caseItem, answers },
+    vivaCaseSSMParams.recurringFormId
+  );
   const html = template(caseTemplateData);
 
   const caseHtmlKey = `html/case-${caseItem.id}.html`;
@@ -174,22 +129,23 @@ export async function main(event, context) {
   return true;
 }
 
-function updateVivaCaseState(caseItem) {
-  const updateParams = {
-    TableName: config.cases.tableName,
-    Key: {
-      PK: caseItem.PK,
-      SK: caseItem.SK,
-    },
-    UpdateExpression: 'SET #state = :newState',
-    ExpressionAttributeNames: {
-      '#state': 'state',
-    },
-    ExpressionAttributeValues: {
-      ':newState': CASE_HTML_GENERATED,
-    },
-    ReturnValues: 'NONE',
-  };
+function getChangedCaseAnswerValues(currentAnswerList, previousAnswerList) {
+  return currentAnswerList.map(answer => {
+    const tags = [...answer.field.tags];
 
-  return dynamoDb.call('update', updateParams);
+    const previousAnswer = previousAnswerList.find(item => item.field.id === answer.field.id);
+
+    if (!previousAnswer) {
+      tags.push('changed');
+    } else if (previousAnswer && previousAnswer.value !== answer.value) {
+      tags.push('changed');
+    }
+    return {
+      ...answer,
+      field: {
+        ...answer.field,
+        tags,
+      },
+    };
+  });
 }
