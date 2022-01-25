@@ -6,6 +6,13 @@ export const ACTIVE_SUBMITTED = 'active:submitted';
 export const ACTIVE_PROCESSING = 'active:processing';
 export const CLOSED = 'closed';
 
+export const ACTIVE_COMPLETION_ONGOING = 'active:completion:ongoing';
+export const ACTIVE_COMPLETION_SUBMITTED = 'active:completion:submitted';
+export const ACTIVE_COMPLETION_PROCESSING = 'active:completion:processing';
+export const ACTIVE_RANDOM_CHECK_ONGOING = 'active:randomCheck:ongoing';
+export const ACTIVE_RANDOM_CHECK_SUBMITTED = 'active:randomCheck:submitted';
+export const ACTIVE_RANDOM_CHECK_PROCESSING = 'active:randomCheck:processing';
+
 export const NOT_STARTED_VIVA = 'notStarted:viva';
 export const ACTIVE_COMPLETION_REQUIRED_VIVA = 'active:completionRequired:viva';
 export const ACTIVE_RANDOM_CHECK_REQUIRED_VIVA = 'active:randomCheckRequired:viva';
