@@ -8,7 +8,7 @@ import log from '../../../libs/logs';
 import { getItem as getStoredUserCase } from '../../../libs/queries';
 import params from '../../../libs/params';
 import S3 from '../../../libs/S3';
-import { VIVA_COMPLETION_RECEIVED } from '../../../libs/constants';
+import { VIVA_COMPLETION_RECEIVED, VIVA_RANDOM_CHECK_RECEIVED } from '../../../libs/constants';
 
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
@@ -54,20 +54,21 @@ export async function main(event, context) {
     return false;
   }
 
+  const { currentFormId } = caseItem;
   const { randomCheckFormId, completionFormId } = vivaCaseSSMParams;
-  const notCompletionForm = ![randomCheckFormId, completionFormId].includes(caseItem.currentFormId);
+  const notCompletionForm = ![randomCheckFormId, completionFormId].includes(currentFormId);
   if (notCompletionForm) {
     log.info(
-      'Current form is not an completion form',
+      'Current form is not an completion/random check form',
       context.awsRequestId,
       'service-viva-ms-submitCompletion-004',
-      caseItem.currentFormId
+      currentFormId
     );
     return true;
   }
 
   const personalNumber = caseItem.PK.substr(5);
-  const caseAnswers = caseItem.forms[caseItem.currentFormId].answers;
+  const caseAnswers = caseItem.forms[currentFormId].answers;
 
   const [attachmentListError, attachmentList] = await to(
     answersToAttachmentList(personalNumber, caseAnswers)
@@ -109,7 +110,9 @@ export async function main(event, context) {
     return false;
   }
 
-  const [updateError] = await to(updateCaseState(caseKeys, VIVA_COMPLETION_RECEIVED));
+  const [updateError] = await to(
+    updateCaseState(caseKeys, getReceivedState(currentFormId, randomCheckFormId))
+  );
   if (updateError) {
     log.error(
       'Failed to update Viva case',
@@ -181,18 +184,23 @@ function notCompletionReceived(response) {
   return false;
 }
 
+function getReceivedState(currentFormId, randomCheckFormId) {
+  return currentFormId === randomCheckFormId
+    ? VIVA_RANDOM_CHECK_RECEIVED
+    : VIVA_COMPLETION_RECEIVED;
+}
+
 function updateCaseState(caseKeys, newState) {
   const updateParams = {
     TableName: config.cases.tableName,
-    Key: caseKeys,
+    Key: {
+      PK: caseKeys.PK,
+      SK: caseKeys.SK,
+    },
     UpdateExpression: 'SET #state = :newState',
-    ExpressionAttributeNames: {
-      '#state': 'state',
-    },
-    ExpressionAttributeValues: {
-      ':newState': newState,
-    },
-    ReturnValues: 'UPDATED_NEW',
+    ExpressionAttributeNames: { '#state': 'state' },
+    ExpressionAttributeValues: { ':newState': newState },
+    ReturnValues: 'NONE',
   };
 
   return dynamoDb.call('update', updateParams);
