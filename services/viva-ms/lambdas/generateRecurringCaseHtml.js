@@ -133,9 +133,7 @@ function getChangedCaseAnswerValues(currentAnswerList, previousAnswerList) {
 
     const previousAnswer = previousAnswerList.find(item => item.field.id === answer.field.id);
 
-    if (!previousAnswer) {
-      tags.push('changed');
-    } else if (previousAnswer && previousAnswer.value !== answer.value) {
+    if (previousAnswer?.value !== answer.value) {
       tags.push('changed');
     }
     return {
