@@ -25,7 +25,7 @@ A setup of `versionEnvs` AWS parameterstore on aws. This can be created from the
 ### Installation
 
 ```bash
-$ npm install
+$ yarn install
 ```
 
 ### Deploy and Run on AWS
@@ -53,13 +53,13 @@ When you tear down the service, serverless will remove all resources created in 
 Run test command:
 
 ```bash
-$ npm run test
+$ yarn test
 ```
 
 Run test command with [options](https://jestjs.io/docs/cli#options):
 
 ```bash
-$ npm run test --[option_1] --[option_2]
+$ yarn test --[option_1] --[option_2]
 ```
 
 ## API
@@ -86,8 +86,11 @@ The `updateUrl` property is a path to an updated version of the application (pre
         "version": "1.0"
     },
     "data": {
-        "status": "OK | UPDATE_OPTIONAL | UPDATE_REQUIRED",
-        "updateUrl": "URL",
+        "type": "getStatus",
+        "attributes": {
+            "status": "OK | UPDATE_OPTIONAL | UPDATE_REQUIRED",
+            "updateUrl": "URL"
+        }
     }
 }
 ```
