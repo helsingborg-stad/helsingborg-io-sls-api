@@ -42,5 +42,5 @@ export async function main(event, context) {
   const { min, max, updateUrl } = configuration.versions[deviceOS];
   const status = getApplicationUpdateStatus({ current: deviceApplicationVersion, min, max });
 
-  return response.success(200, { status, updateUrl });
+  return response.success(200, { type: 'getStatus', attributes: { status, updateUrl } });
 }

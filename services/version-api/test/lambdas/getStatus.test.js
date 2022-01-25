@@ -36,7 +36,7 @@ it('returns the version status successfully', async () => {
   const expectedResult = {
     body: JSON.stringify({
       jsonapi: mockJsonApi,
-      data: { status: VERSION_STATUS.OK, updateUrl: 'Some url' },
+      data: { type: 'getStatus', attributes: { status: VERSION_STATUS.OK, updateUrl: 'Some url' } },
     }),
     headers: mockHeaders,
     statusCode: 200,
