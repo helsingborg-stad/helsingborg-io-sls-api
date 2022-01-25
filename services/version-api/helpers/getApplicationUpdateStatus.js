@@ -1,6 +1,6 @@
 import semverCompare from 'semver-compare';
 
-import { VERSION_STATUS } from '../constants';
+import { VERSION_STATUS } from './constants';
 
 const COMPARISON_RESULT = {
   EQUAL: 0,
