@@ -2,7 +2,7 @@ import { main } from '../../lambdas/getStatus';
 
 import { getVersionConfigurations } from '../../helpers/getVersionConfigurations';
 
-import { VERSION_STATUS } from '../../constants';
+import { VERSION_STATUS } from '../../helpers/constants';
 
 jest.mock('../../helpers/getVersionConfigurations');
 
