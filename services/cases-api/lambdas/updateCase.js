@@ -18,6 +18,10 @@ import {
   ACTIVE_SIGNATURE_PENDING,
   ACTIVE_SIGNATURE_COMPLETED,
   ACTIVE_SUBMITTED,
+  ACTIVE_COMPLETION_ONGOING,
+  ACTIVE_COMPLETION_SUBMITTED,
+  ACTIVE_RANDOM_CHECK_ONGOING,
+  ACTIVE_RANDOM_CHECK_SUBMITTED,
 } from '../../../libs/constants';
 
 import statusCheck from '../helpers/statusCheckCondition';
@@ -88,6 +92,7 @@ export async function main(event, context) {
   const newCaseStatus = getNewCaseStatus({
     answers,
     people: updatedPeopleSignature,
+    state: userCase.state,
   });
   if (newCaseStatus) {
     UpdateExpression.push('#status = :newStatus');
@@ -236,6 +241,22 @@ function getNewCaseStatus(conditionOption) {
     {
       type: ACTIVE_SUBMITTED,
       conditionFunction: statusCheck.condition.isSubmitted,
+    },
+    {
+      type: ACTIVE_COMPLETION_ONGOING,
+      conditionFunction: statusCheck.condition.isCompletionOngoing,
+    },
+    {
+      type: ACTIVE_COMPLETION_SUBMITTED,
+      conditionFunction: statusCheck.condition.isCompletionSubmitted,
+    },
+    {
+      type: ACTIVE_RANDOM_CHECK_ONGOING,
+      conditionFunction: statusCheck.condition.isRandomCheckOngoing,
+    },
+    {
+      type: ACTIVE_RANDOM_CHECK_SUBMITTED,
+      conditionFunction: statusCheck.condition.isRandomCheckSubmitted,
     },
   ];
 
