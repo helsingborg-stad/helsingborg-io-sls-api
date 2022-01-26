@@ -40,7 +40,9 @@ export async function main(event, context) {
     return false;
   }
 
-  const [getClosedCasesError, { Items: closedCases }] = await to(getClosedUserCases(caseKeys.PK));
+  const [getClosedCasesError, { Items: closedCaseList }] = await to(
+    getClosedUserCases(caseKeys.PK)
+  );
   if (getClosedCasesError) {
     log.error(
       'Error getting previous items from the cases table',
@@ -51,13 +53,14 @@ export async function main(event, context) {
     return false;
   }
 
-  let answers = caseItem.forms[vivaCaseSSMParams.recurringFormId].answers;
-  if (closedCases.length > 0) {
-    const [closedCase] = closedCases.sort((caseA, caseB) => caseB.updatedAt - caseA.updatedAt);
+  const { recurringFormId } = vivaCaseSSMParams;
+  let changedAnswerValues = caseItem.forms[recurringFormId].answers;
+  if (closedCaseList.length > 0) {
+    const [closedCase] = closedCaseList.sort((caseA, caseB) => caseB.updatedAt - caseA.updatedAt);
 
-    answers = getChangedCaseAnswerValues(
-      caseItem.forms[vivaCaseSSMParams.recurringFormId].answers,
-      closedCase.forms[vivaCaseSSMParams.recurringFormId].answers
+    changedAnswerValues = getChangedCaseAnswerValues(
+      caseItem.forms[recurringFormId].answers,
+      closedCase.forms[recurringFormId].answers
     );
   }
 
@@ -77,7 +80,7 @@ export async function main(event, context) {
   const handlebarsTemplateFileBody = hbsTemplateS3Object.Body.toString();
   const template = handlebars.compile(handlebarsTemplateFileBody);
 
-  const caseTemplateData = createRecurringCaseTemplate(caseItem, answers);
+  const caseTemplateData = createRecurringCaseTemplate(caseItem, changedAnswerValues);
   const html = template(caseTemplateData);
 
   const caseHtmlKey = `html/case-${caseItem.id}.html`;
@@ -128,18 +131,20 @@ export async function main(event, context) {
 }
 
 function getChangedCaseAnswerValues(currentAnswerList, previousAnswerList) {
-  return currentAnswerList.map(answer => {
-    const tags = [...answer.field.tags];
+  return currentAnswerList.map(currentAnswer => {
+    const tags = [...currentAnswer.field.tags];
 
-    const previousAnswer = previousAnswerList.find(item => item.field.id === answer.field.id);
+    const previousAnswer = previousAnswerList.find(
+      previousAnswer => previousAnswer.field.id === currentAnswer.field.id
+    );
 
-    if (previousAnswer?.value !== answer.value) {
+    if (previousAnswer?.value !== currentAnswer.value) {
       tags.push('changed');
     }
     return {
-      ...answer,
+      ...currentAnswer,
       field: {
-        ...answer.field,
+        ...currentAnswer.field,
         tags,
       },
     };
