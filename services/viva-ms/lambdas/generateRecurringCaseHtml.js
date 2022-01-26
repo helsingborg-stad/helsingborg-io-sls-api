@@ -13,11 +13,13 @@ import { getClosedUserCases, updateVivaCaseState } from '../helpers/dynamoDb';
 export async function main(event, context) {
   const { caseKeys } = event.detail;
 
-  const [getCaseItemError, { Item: caseItem }] = await getStoredUserCase(
+  const [getCaseItemError, storedUserCase] = await getStoredUserCase(
     config.cases.tableName,
     caseKeys.PK,
     caseKeys.SK
   );
+  const { Item: caseItem } = storedUserCase;
+
   if (getCaseItemError) {
     log.error(
       'Error getting stored case from the cases table',
@@ -40,9 +42,7 @@ export async function main(event, context) {
     return false;
   }
 
-  const [getClosedCasesError, { Items: closedCaseList }] = await to(
-    getClosedUserCases(caseKeys.PK)
-  );
+  const [getClosedCasesError, closedUserCases] = await to(getClosedUserCases(caseKeys.PK));
   if (getClosedCasesError) {
     log.error(
       'Error getting previous items from the cases table',
@@ -52,6 +52,7 @@ export async function main(event, context) {
     );
     return false;
   }
+  const { Items: closedCaseList } = closedUserCases;
 
   const { recurringFormId } = vivaCaseSSMParams;
   let changedAnswerValues = caseItem.forms[recurringFormId].answers;
