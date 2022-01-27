@@ -96,3 +96,18 @@ functions:
           method: get
           private: true
           cors: true
+          authorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue ${self:custom.stage}-authorizerId
+
+  getAdministratorDetails:
+    handler: src/lambdas/getAdministratorDetails.main
+    events:
+      - http:
+          path: booking/getAdministratorDetails/{email}
+          method: get
+          private: true
+          cors: true
+          authorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue ${self:custom.stage}-authorizerId
