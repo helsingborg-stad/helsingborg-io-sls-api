@@ -4,8 +4,7 @@ import * as response from '../libs/response';
 
 import log from '../libs/logs';
 import booking from '../helpers/booking';
-
-const emailToDetails = {};
+import getEmailToDetailsMapping from '../helpers/mapAdminDetails';
 
 export async function main(
   event: {
@@ -59,26 +58,7 @@ export async function main(
 
   const { data } = getHistoricalAttendeesResponse?.data ?? {};
 
-  const promises = data.attributes.map(async email => {
-    if (!emailToDetails[email]) {
-      const [getAdministratorDetailsError, getAdministratorDetailsResponse] = await to(
-        booking.getAdministratorDetails({ email })
-      );
-      if (getAdministratorDetailsError) {
-        log.warn(
-          'Datatorget lookup failed, using fallback',
-          context.awsRequestId,
-          'service-booking-getHistoricalAttendees-004',
-          getAdministratorDetailsError
-        );
-      }
-      emailToDetails[email] = getAdministratorDetailsResponse?.data?.data?.attributes ?? {
-        Email: email,
-      };
-    }
-  });
-
-  await Promise.all(promises);
+  const emailToDetails = await getEmailToDetailsMapping(data.attributes);
 
   const newData = { ...data, attributes: data.attributes.map(email => emailToDetails[email]) };
 

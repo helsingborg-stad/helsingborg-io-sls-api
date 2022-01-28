@@ -4,8 +4,7 @@ import * as response from '../libs/response';
 
 import booking from '../helpers/booking';
 import log from '../libs/logs';
-
-const emailToDetails = {};
+import getEmailToDetailsMapping from '../helpers/mapAdminDetails';
 
 export async function main(event: { body: string }, context: { awsRequestId: string }) {
   const body = JSON.parse(event.body);
@@ -42,26 +41,7 @@ export async function main(event: { body: string }, context: { awsRequestId: str
     .map(attendee => attendee.Email);
   const uniqueEmails = [...new Set(emails)];
 
-  const promises = uniqueEmails.map(async email => {
-    if (!emailToDetails[email]) {
-      const [getAdministratorDetailsError, getAdministratorDetailsResponse] = await to(
-        booking.getAdministratorDetails({ email })
-      );
-      if (getAdministratorDetailsError) {
-        log.warn(
-          'Datatorget lookup failed, using fallback',
-          context.awsRequestId,
-          'service-booking-api-searchByReferenceCode-003',
-          getAdministratorDetailsError
-        );
-      }
-      emailToDetails[email] = getAdministratorDetailsResponse?.data?.data?.attributes ?? {
-        Email: email,
-      };
-    }
-  });
-
-  await Promise.all(promises);
+  const emailToDetails = await getEmailToDetailsMapping(uniqueEmails);
 
   data.attributes.forEach(booking => {
     booking.Attendees.forEach((attendee, index) => {
