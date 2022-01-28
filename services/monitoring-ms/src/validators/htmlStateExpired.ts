@@ -1,7 +1,7 @@
 import { Validator } from 'helpers/types';
 
-const htmlStateExpired: Validator = (userCase, { getAge }) => {
-  const testId = '  ';
+const htmlStateExpiredText: Validator = (userCase, { getAge }) => {
+  const testId = 'TEST_HTML_EXPIRED';
   // Perform testing on the User case
   if (userCase.state === 'CASE_HTML_GENERATED') {
     if (getAge(userCase.updatedAt) > 7200000) {
@@ -14,4 +14,4 @@ const htmlStateExpired: Validator = (userCase, { getAge }) => {
   }
 };
 
-export default htmlStateExpired;
+export default htmlStateExpiredText;
