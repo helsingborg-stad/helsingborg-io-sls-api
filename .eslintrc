@@ -1,8 +1,5 @@
 {
-  "extends": [
-    "eslint:recommended",
-    "prettier"
-  ],
+  "extends": ["eslint:recommended", "prettier"],
   "parser": "babel-eslint",
   "env": {
     "node": true,
@@ -18,9 +15,7 @@
     "ecmaVersion": 2020,
     "sourceType": "module"
   },
-  "plugins": [
-    "prettier"
-  ],
+  "plugins": ["prettier"],
   "rules": {
     "no-console": 1,
     "no-debugger": 0,
@@ -60,10 +55,7 @@
         "destructuring": "all"
       }
     ],
-    "arrow-body-style": [
-      2,
-      "as-needed"
-    ],
+    "arrow-body-style": [2, "as-needed"],
     "prettier/prettier": [
       "error",
       {
@@ -90,17 +82,13 @@
         "allowTemplateLiterals": true
       }
     ],
-    "semi": [
-      "error",
-      "always"
-    ]
+    "semi": ["error", "always"]
   },
   "overrides": [
     {
-      "files": [
-        "**/*.ts"
-      ],
+      "files": ["**/*.ts"],
       "parser": "@typescript-eslint/parser",
+      "extends": "plugin:@typescript-eslint/recommended",
       "rules": {
         "no-undef": "off"
       }

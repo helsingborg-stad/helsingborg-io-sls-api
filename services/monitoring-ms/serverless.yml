@@ -1,0 +1,43 @@
+service: monitoring-ms
+
+plugins:
+  - serverless-bundle
+
+projectDir: ../../
+
+custom: ${file(../../serverless.common.yml):custom}
+
+package:
+  individually: true
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: dev
+  region: eu-north-1
+  endpointType: regional
+  lambdaHashingVersion: 20201221
+
+  environment:
+    stage: ${self:custom.stage}
+    resourcesStage: ${self:custom.resourcesStage}
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Scan
+          Resource:
+            - 'Fn::ImportValue': ${self:custom.resourcesStage}-CasesTableArn
+
+        - Effect: Allow
+          Action:
+            - kms:Decrypt
+          Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
+
+functions:
+  monitor:
+    handler: src/lambdas/index.main
+    events:
+      - schedule: rate(2 hours)

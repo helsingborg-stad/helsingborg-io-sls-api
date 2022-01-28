@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "es2021",
+    "moduleResolution": "node",
+    "module": "commonjs",
+    "types": ["node", "jest"],
+    "typeRoots": ["node_modules/@types"],
+    "rootDir": ".",
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "strictPropertyInitialization": true,
+    "strictNullChecks": true,
+    "strict": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true
+  }
+}

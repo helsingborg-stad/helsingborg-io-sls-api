@@ -51,3 +51,4 @@ env.yml
 # stuff
 .DS_Store
 .vscode
+dist

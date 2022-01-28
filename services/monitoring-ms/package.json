@@ -1,0 +1,12 @@
+{
+  "name": "monitoring-ms",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "author": "Petter Andersson",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "build": "npx tsc",
+    "test": "npx jest --coverage"
+  }
+}
