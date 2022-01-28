@@ -3,10 +3,13 @@ const messages = require('@helsingborg-stad/npm-api-error-handling/assets/errorM
 
 import { main } from '../../src/lambdas/searchByReferenceCode';
 import booking from '../../src/helpers/booking';
+import helpersMapAdminDetails from '../../src/helpers/mapAdminDetails';
 
-jest.mock('../../src/helpers/booking');
+jest.mock('../../helpers/booking');
+jest.mock('../../helpers/mapAdminDetails');
 
 const { search, getAdministratorDetails } = jest.mocked(booking);
+const mapAdminDetails = jest.mocked(helpersMapAdminDetails);
 
 const mockBody = {
   startTime: '2021-11-01T00:00:00+01:00',
@@ -46,19 +49,15 @@ const mockCalendarSearch = [
   },
 ];
 
-const mockLookupResponse = {
-  data: {
-    data: {
-      type: 'userdetails',
-      id: 'id',
-      attributes: {
-        Email: 'test@mail.com',
-        DisplayName: 'Display Name',
-        Department: 'Department',
-        JobTitle: 'Job Title',
-      },
-    },
-  },
+const mockAD = {
+  Email: 'test@mail.com',
+  DisplayName: 'Display Name',
+  Department: 'Department',
+  JobTitle: 'Job Title',
+};
+
+const mockMappings = {
+  [mockAD.Email]: mockAD,
 };
 
 const mockReturnBody = [
@@ -85,35 +84,11 @@ const mockReturnBody = [
 
 beforeEach(() => {
   jest.resetAllMocks();
+  mapAdminDetails.mockResolvedValue(mockMappings);
 });
 
-it('gets booking from a successful search without AD lookup', async () => {
-  expect.assertions(3);
-
-  const expectedResult = {
-    body: JSON.stringify({ jsonapi: { version: '1.0' }, data: { attributes: mockCalendarSearch } }),
-    headers: mockHeaders,
-    statusCode: 200,
-  };
-
-  search.mockResolvedValueOnce({
-    data: {
-      data: {
-        attributes: mockCalendarSearch,
-      },
-    },
-  });
-  getAdministratorDetails.mockRejectedValueOnce(undefined);
-
-  const result = await main(mockEvent, mockContext);
-
-  expect(result).toEqual(expectedResult);
-  expect(search).toHaveBeenCalledWith(mockBody);
-  expect(getAdministratorDetails).toHaveBeenCalledTimes(1);
-});
-
-it('gets booking from a successful search with successful AD lookup', async () => {
-  expect.assertions(3);
+it('gets booking from a successful search', async () => {
+  expect.assertions(2);
 
   const expectedResult = {
     body: JSON.stringify({ jsonapi: { version: '1.0' }, data: { attributes: mockReturnBody } }),
@@ -128,40 +103,11 @@ it('gets booking from a successful search with successful AD lookup', async () =
       },
     },
   });
-  getAdministratorDetails.mockResolvedValueOnce(mockLookupResponse);
 
   const result = await main(mockEvent, mockContext);
 
   expect(result).toEqual(expectedResult);
   expect(search).toHaveBeenCalledWith(mockBody);
-  expect(getAdministratorDetails).toHaveBeenCalledTimes(1);
-});
-
-it('caches AD lookup between calls', async () => {
-  expect.assertions(4);
-
-  const expectedResult = {
-    body: JSON.stringify({ jsonapi: { version: '1.0' }, data: { attributes: mockReturnBody } }),
-    headers: mockHeaders,
-    statusCode: 200,
-  };
-
-  search.mockResolvedValue({
-    data: {
-      data: {
-        attributes: mockCalendarSearch,
-      },
-    },
-  });
-  getAdministratorDetails.mockResolvedValueOnce(mockLookupResponse);
-
-  const result1 = await main(mockEvent, mockContext);
-  const result2 = await main(mockEvent, mockContext);
-
-  expect(result1).toEqual(expectedResult);
-  expect(result2).toEqual(expectedResult);
-  expect(search).toHaveBeenCalledWith(mockBody);
-  expect(getAdministratorDetails).toHaveBeenCalledTimes(1);
 });
 
 it('throws when searching for a booking fails', async () => {
@@ -191,7 +137,7 @@ it('throws when searching for a booking fails', async () => {
 });
 
 it('returns failure if required paramerer is missing', async () => {
-  expect.assertions(3);
+  expect.assertions(2);
 
   const event = {
     body: JSON.stringify({ startTime: '2021-11-01T00:00:00+01:00' }),
@@ -214,5 +160,4 @@ it('returns failure if required paramerer is missing', async () => {
 
   expect(result).toEqual(expectedResult);
   expect(search).not.toHaveBeenCalled();
-  expect(getAdministratorDetails).not.toHaveBeenCalled();
 });

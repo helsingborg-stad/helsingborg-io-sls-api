@@ -47,17 +47,18 @@ export interface BookingCreateResponse {
     };
   };
 }
+export interface GetHistoricalAttendeesAttributes {
+  Email: string;
+  JobTitle: string;
+  Department: string;
+  DisplayName: string;
+}
 export interface GetHistoricalAttendeesResponse {
   data?: {
     data?: {
       type: string;
       id: string;
-      attributes: {
-        Email: string;
-        JobTitle: string;
-        Department: string;
-        DisplayName: string;
-      };
+      attributes: GetHistoricalAttendeesAttributes;
     };
   };
 }
