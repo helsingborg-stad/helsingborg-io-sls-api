@@ -1,6 +1,6 @@
 import testHtmlExpired from '../src/validators/htmlStateExpired';
 
-it('Should return undefined if updated within 2 hours ', async () => {
+it('Should return undefined if test succeeds. (status not lingering for more than 2 hours)', async () => {
   const result = testHtmlExpired(
     {
       PK: '####',
@@ -18,7 +18,7 @@ it('Should return undefined if updated within 2 hours ', async () => {
   expect(result).toBeUndefined();
 });
 
-it('Should return undefined if NOT updated within 2 hours ', async () => {
+it('Should return error if status has not updated within 2 hours ', async () => {
   const result = testHtmlExpired(
     {
       PK: '####',
