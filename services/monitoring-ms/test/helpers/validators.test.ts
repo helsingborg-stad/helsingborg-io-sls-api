@@ -2,7 +2,7 @@ import { ValidatorData } from '../../src/helpers/types';
 import validateCases from '../../src/helpers/validateCases';
 import htmlStateExpiredTest from '../../src/validators/htmlStateExpired';
 
-it('', async () => {
+it('Test validateCases function', async () => {
   const result: ValidatorData[] = [];
 
   await validateCases({
