@@ -1,22 +1,9 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "dist",
     "baseUrl": "src",
-    "rootDir": "../..",
-    "target": "es2021",
-    "moduleResolution": "node",
-    "module": "CommonJS",
-    "types": ["node", "jest"],
-    "typeRoots": ["../../node_modules/@types"],
-    "allowJs": true,
-    "resolveJsonModule": true,
-    "strictPropertyInitialization": true,
-    "strictNullChecks": true,
-    "strict": true,
-    "sourceMap": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true
+    "rootDir": "../.."
   },
   "include": ["src/**/*"]
 }
