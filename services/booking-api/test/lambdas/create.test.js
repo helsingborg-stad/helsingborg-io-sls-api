@@ -15,6 +15,9 @@ const mockBody = {
   location: 'secret location',
   referenceCode: 'code1234',
 };
+const mockContext = {
+  awsRequestId: '123',
+};
 const mockEvent = {
   body: JSON.stringify(mockBody),
 };
@@ -30,6 +33,21 @@ beforeEach(() => {
 it('creates a booking successfully', async () => {
   expect.assertions(2);
 
+  const searchResponseData = {
+    data: {
+      attributes: [
+        {
+          BookingId: '123456789',
+          Attendees: [
+            {
+              Type: 'Required',
+              Status: 'Declined',
+            },
+          ],
+        },
+      ],
+    },
+  };
   const responseData = {
     jsonapi: { version: '1.0' },
     data: {
@@ -44,10 +62,10 @@ it('creates a booking successfully', async () => {
     statusCode: 200,
   };
 
-  booking.search.mockResolvedValueOnce();
+  booking.search.mockResolvedValueOnce({ data: searchResponseData });
   booking.create.mockResolvedValueOnce({ data: responseData });
 
-  const result = await main(mockEvent);
+  const result = await main(mockEvent, mockContext);
 
   expect(result).toEqual(expectedResult);
   expect(booking.create).toHaveBeenCalledWith(mockBody);
@@ -71,10 +89,10 @@ it('throws when booking.create fails', async () => {
     statusCode,
   };
 
-  booking.search.mockResolvedValueOnce();
+  booking.search.mockResolvedValueOnce({ data: { data: { attributes: [] } } });
   booking.create.mockRejectedValueOnce({ status: statusCode, message });
 
-  const result = await main(mockEvent);
+  const result = await main(mockEvent, mockContext);
 
   expect(result).toEqual(expectedResult);
 });
@@ -104,7 +122,7 @@ it('returns error when required parameters does not exists in event', async () =
     statusCode: 403,
   };
 
-  const result = await main({ body });
+  const result = await main({ body }, mockContext);
 
   expect(result).toEqual(expectedResult);
   expect(booking.create).toHaveBeenCalledTimes(0);
@@ -112,6 +130,22 @@ it('returns error when required parameters does not exists in event', async () =
 
 it('returns failure when timeslot is already taken', async () => {
   expect.assertions(1);
+
+  const searchResponseData = {
+    data: {
+      attributes: [
+        {
+          BookingId: '123456789',
+          Attendees: [
+            {
+              Type: 'Required',
+              Status: 'Not declined',
+            },
+          ],
+        },
+      ],
+    },
+  };
 
   const statusCode = 500;
   const expectedResult = {
@@ -127,9 +161,9 @@ it('returns failure when timeslot is already taken', async () => {
     statusCode,
   };
 
-  booking.search.mockResolvedValueOnce({ data: { data: { attributes: [{ dummy: 'yes' }] } } });
+  booking.search.mockResolvedValueOnce({ data: searchResponseData });
 
-  const result = await main(mockEvent);
+  const result = await main(mockEvent, mockContext);
 
   expect(result).toEqual(expectedResult);
 });
