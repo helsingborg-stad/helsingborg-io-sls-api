@@ -8,6 +8,9 @@ export interface Case {
   state: string;
 }
 
+export interface CaseResponse {
+  Items: Case[];
+}
 export interface ValidatorData {
   testId: string;
   level: 'error' | 'warning' | 'info' | 'debug';
@@ -19,7 +22,9 @@ export interface ValidatorContext {
 }
 
 export interface CaseValidatorContext extends ValidatorContext {
-  log: (data: ValidatorData | undefined, userCase: Case) => void;
+  getCases: () => Promise<CaseResponse>;
+  log: (data: ValidatorData, userCase: Case) => void;
+  getTests: () => Validator[];
 }
 
 export type Validator = (userCase: Case, context: ValidatorContext) => ValidatorData | undefined;

@@ -1,13 +1,17 @@
-import { Case, CaseValidatorContext } from './types';
+import { CaseValidatorContext } from './types';
 import validatorList from '../validators';
 
-export default function validateCases(userCaseList: Case[], context: CaseValidatorContext): void {
+export default async function validateCases(context: CaseValidatorContext): Promise<void> {
+  const { Items: userCaseList } = await context.getCases();
+
   userCaseList.forEach(userCase => {
     for (const validator of validatorList) {
       const data = validator(userCase, {
         getAge: context.getAge,
       });
-      context.log(data, userCase);
+      if (data) {
+        context.log(data, userCase);
+      }
     }
   });
 }
