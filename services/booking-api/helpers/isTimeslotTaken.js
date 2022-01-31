@@ -4,7 +4,7 @@
  */
 function isBookingBusy({ Attendees }) {
   return Attendees.filter(({ Type }) => Type === 'Required').every(
-    ({ Status }) => Status === 'Accepted'
+    ({ Status }) => Status !== 'Declined'
   );
 }
 
