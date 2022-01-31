@@ -4,7 +4,7 @@ if (require.main === module) {
 import validateCases from '../helpers/validateCases';
 import * as dynamoDb from '../../../../libs/dynamoDb';
 import log from '../../../../libs/logs';
-import { CaseResponse, CaseValidatorContext } from 'helpers/types';
+import { CaseResponse, CaseValidatorContext } from '../helpers/types';
 import validatorList from 'validators';
 
 export async function main(): Promise<boolean> {
