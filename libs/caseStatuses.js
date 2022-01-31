@@ -8,10 +8,8 @@ import {
   CLOSED,
   ACTIVE_COMPLETION_ONGOING,
   ACTIVE_COMPLETION_SUBMITTED,
-  ACTIVE_COMPLETION_PROCESSING,
   ACTIVE_RANDOM_CHECK_ONGOING,
   ACTIVE_RANDOM_CHECK_SUBMITTED,
-  ACTIVE_RANDOM_CHECK_PROCESSING,
   NOT_STARTED_VIVA,
   ACTIVE_COMPLETION_REQUIRED_VIVA,
   ACTIVE_RANDOM_CHECK_REQUIRED_VIVA,
@@ -71,11 +69,6 @@ const statuses = [
     description: 'Komplettering är inskickad.',
   },
   {
-    type: ACTIVE_COMPLETION_PROCESSING,
-    name: 'Komplettering behandlas',
-    description: 'Komplettering är mottaget och bearbetas.',
-  },
-  {
     type: ACTIVE_RANDOM_CHECK_ONGOING,
     name: 'Pågående stickprovskontroll',
     description:
@@ -85,11 +78,6 @@ const statuses = [
     type: ACTIVE_RANDOM_CHECK_SUBMITTED,
     name: 'Inskickad',
     description: 'Stickprovskontroll är inskickad.',
-  },
-  {
-    type: ACTIVE_RANDOM_CHECK_PROCESSING,
-    name: 'Stickprovskontroll behandlas',
-    description: 'Stickprovskontroll är mottaget och bearbetas.',
   },
   /**
    * Service: Ekonomiskt bistånd
