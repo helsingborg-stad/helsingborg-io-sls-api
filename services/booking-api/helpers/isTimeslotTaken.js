@@ -1,12 +1,19 @@
 /**
- * @param {{ BookingId: string, Attendees: [{ Type: string, Status: string }]}[]} bookings
+ * @param {{ Type: string, Status: string }[]} attendees
+ * @returns { boolean }
+ */
+function allRequiredAttendeesHaveAccepted({ Attendees }) {
+  return Attendees.filter(({ Type }) => Type === 'Required').every(
+    ({ Status }) => Status === 'Accepted'
+  );
+}
+
+/**
+ * @param {{ Attendees: [{ Type: string, Status: string }]}[]} bookings
  * @returns { boolean }
  */
 function isTimeslotTaken(bookings) {
-  const declinedBookings = ({ Attendees }) =>
-    Attendees.some(({ Type, Status }) => Type === 'Required' && Status === 'Declined');
-
-  return bookings.filter(declinedBookings)?.length === 0;
+  return bookings.some(allRequiredAttendeesHaveAccepted);
 }
 
 export { isTimeslotTaken };
