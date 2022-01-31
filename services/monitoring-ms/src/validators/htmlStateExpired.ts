@@ -1,4 +1,4 @@
-import { Validator } from 'helpers/types';
+import { Validator } from '../helpers/types';
 
 const htmlStateExpiredText: Validator = (userCase, { getAge }) => {
   const testId = 'TEST_HTML_EXPIRED';

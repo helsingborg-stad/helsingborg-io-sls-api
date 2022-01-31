@@ -8,5 +8,6 @@
   "scripts": {
     "build": "npx tsc",
     "test": "npx jest --coverage"
-  }
+  },
+  "devDependencies": {}
 }
