@@ -1,5 +1,5 @@
 /**
- * @param {{ Type: string, Status: string }[]} attendees
+ * @param {{ Attendees: { Type: string, Status: string }[]}} booking
  * @returns { boolean }
  */
 function allRequiredAttendeesHaveAccepted({ Attendees }) {
@@ -9,7 +9,7 @@ function allRequiredAttendeesHaveAccepted({ Attendees }) {
 }
 
 /**
- * @param {{ Attendees: [{ Type: string, Status: string }]}[]} bookings
+ * @param {{ Attendees: { Type: string, Status: string }[]}[]} bookings
  * @returns { boolean }
  */
 function isTimeslotTaken(bookings) {
