@@ -29,7 +29,7 @@ describe('isTimeSlotTaken', () => {
 
     expect(result).toEqual(truth);
   });
-  it('returns false if there is at least one declined required attendee', () => {
+  it('returns false if at least one required attendee has declined', () => {
     const bookings = [{ Attendees: [mockAttendeeRequiredAccepted, mockAttendeeRequiredDeclined] }];
     const truth = false;
 
@@ -54,7 +54,7 @@ describe('isTimeSlotTaken', () => {
 
     expect(result).toEqual(truth);
   });
-  it('returns false if any required attendee has declined even if all optional attendees have accepted', () => {
+  it('returns false if at least one required attendee has declined even if all other required or optional attendees have accepted', () => {
     const bookings = [
       {
         Attendees: [
@@ -75,8 +75,7 @@ describe('isTimeSlotTaken', () => {
     const bookings = [
       { Attendees: [mockAttendeeRequiredAccepted, mockAttendeeRequiredDeclined] },
       { Attendees: [mockAttendeeRequiredAccepted, mockAttendeeRequiredAccepted] },
-      { Attendees: [mockAttendeeRequiredAccepted, mockAttendeeRequiredDeclined] },
-      { Attendees: [mockAttendeeRequiredAccepted, mockAttendeeRequiredDeclined] },
+      { Attendees: [mockAttendeeRequiredDeclined, mockAttendeeRequiredDeclined] },
     ];
     const truth = true;
 
