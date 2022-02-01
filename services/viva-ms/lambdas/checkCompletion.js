@@ -17,7 +17,7 @@ import {
   VIVA_STATUS_CASE_EXISTS,
   VIVA_STATUS_WEB_APPLICATION_ACTIVE,
   VIVA_STATUS_WEB_APPLICATION_ALLOWED,
-} from '../helpers/constans';
+} from '../helpers/constants';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 import validateApplicationStatus from '../helpers/validateApplicationStatus';
