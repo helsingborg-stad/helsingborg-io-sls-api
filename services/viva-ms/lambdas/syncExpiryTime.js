@@ -13,6 +13,10 @@ import {
   ACTIVE_SIGNATURE_COMPLETED,
   ACTIVE_SUBMITTED,
   ACTIVE_PROCESSING,
+  ACTIVE_COMPLETION_ONGOING,
+  ACTIVE_RANDOM_CHECK_ONGOING,
+  ACTIVE_COMPLETION_SUBMITTED,
+  ACTIVE_RANDOM_CHECK_SUBMITTED,
   ACTIVE_COMPLETION_REQUIRED_VIVA,
   ACTIVE_RANDOM_CHECK_REQUIRED_VIVA,
   CLOSED_APPROVED_VIVA,
@@ -48,7 +52,7 @@ export async function main(event, context) {
 
   const [updateCaseError] = await to(
     updateCaseExpirationTime({
-      keys: caseKeys,
+      caseKeys,
       newExpirationTime,
     })
   );
@@ -74,6 +78,13 @@ function getExpiryHoursOnStatusType(statusType) {
 
     [ACTIVE_SUBMITTED]: FORTY_FIVE_DAYS_IN_HOURS,
     [ACTIVE_PROCESSING]: FORTY_FIVE_DAYS_IN_HOURS,
+
+    [ACTIVE_COMPLETION_SUBMITTED]: FORTY_FIVE_DAYS_IN_HOURS,
+    [ACTIVE_RANDOM_CHECK_SUBMITTED]: FORTY_FIVE_DAYS_IN_HOURS,
+
+    [ACTIVE_COMPLETION_ONGOING]: FORTY_FIVE_DAYS_IN_HOURS,
+    [ACTIVE_RANDOM_CHECK_ONGOING]: FORTY_FIVE_DAYS_IN_HOURS,
+
     [ACTIVE_COMPLETION_REQUIRED_VIVA]: FORTY_FIVE_DAYS_IN_HOURS,
     [ACTIVE_RANDOM_CHECK_REQUIRED_VIVA]: FORTY_FIVE_DAYS_IN_HOURS,
 
@@ -93,20 +104,19 @@ function getExpiryHoursOnStatusType(statusType) {
 }
 
 function updateCaseExpirationTime(caseAttributes) {
-  const TableName = config.cases.tableName;
-  const Key = caseAttributes.keys;
-  const UpdateExpression = 'SET expirationTime = :newExpirationTime';
-  const ExpressionAttributeValues = {
-    ':newExpirationTime': caseAttributes.newExpirationTime,
-  };
-
-  const params = {
-    TableName,
-    Key,
-    UpdateExpression,
-    ExpressionAttributeValues,
+  const { caseKeys, newExpirationTime } = caseAttributes;
+  const updateParams = {
+    TableName: config.cases.tableName,
+    Key: {
+      PK: caseKeys.PK,
+      SK: caseKeys.SK,
+    },
+    UpdateExpression: 'SET expirationTime = :newExpirationTime',
+    ExpressionAttributeValues: {
+      ':newExpirationTime': newExpirationTime,
+    },
     ReturnValues: 'UPDATED_NEW',
   };
 
-  return dynamoDb.call('update', params);
+  return dynamoDb.call('update', updateParams);
 }
