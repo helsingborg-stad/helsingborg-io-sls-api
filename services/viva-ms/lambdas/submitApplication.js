@@ -20,6 +20,8 @@ const destructRecord = record => {
 };
 
 export async function main(event, context) {
+  log.info(`Retreiving (${event.Records.length}) records`);
+
   let failedRecords = event.Records.map(record => record.messageId);
 
   const [paramsReadError, vivaCaseSSMParams] = await to(
@@ -36,96 +38,110 @@ export async function main(event, context) {
   }
 
   for (const record of event.Records) {
-    const caseItem = destructRecord(record);
-
-    const { recurringFormId } = vivaCaseSSMParams;
-
-    if (caseItem.currentFormId !== recurringFormId) {
-      failedRecords = failedRecords.filter(itemId => itemId != record.itemId);
-      log.info(
-        'Current form is not an recurring form',
-        context.awsRequestId,
-        'service-viva-ms-submitApplication-002'
-      );
-      continue;
-    }
-
-    const { PK, SK, pdf: pdfBinaryBuffer } = caseItem;
-    const personalNumber = PK.substring(5);
-
-    const [vivaPostError, vivaApplicationResponse] = await to(
-      vivaAdapter.application.post({
-        applicationType: 'recurrent',
-        personalNumber,
-        workflowId: caseItem.details?.workflowId || '',
-        answers: caseItem.forms[recurringFormId].answers,
-        rawData: pdfBinaryBuffer.toString(),
-        rawDataType: 'pdf',
-      })
+    log.info(
+      `Processing record id: (${record.messageId}), receive-count: (${record.attributes.ApproximateReceiveCount}))`
     );
-    if (vivaPostError) {
-      log.error(
-        'Failed to submit Viva application',
-        context.awsRequestId,
-        'service-viva-ms-submitApplication-003',
-        {
-          axios: { ...vivaPostError },
-        }
-      );
-      continue;
-    }
 
-    if (notApplicationReceived(vivaApplicationResponse)) {
-      log.error(
-        'Viva application receive failed',
-        context.awsRequestId,
-        'service-viva-ms-submitApplication-004',
-        { vivaResponse: { ...vivaApplicationResponse } }
-      );
-      continue;
-    }
+    try {
+      const caseItem = destructRecord(record);
 
-    if (!vivaApplicationResponse?.id) {
-      log.error(
-        'Viva application response does not contain any workflow id',
-        context.awsRequestId,
-        'service-viva-ms-submitApplication-005',
-        vivaApplicationResponse
-      );
-      continue;
-    }
+      const { recurringFormId } = vivaCaseSSMParams;
 
-    const caseKeys = { PK, SK };
-    const [updateError] = await to(updateVivaCase(caseKeys, vivaApplicationResponse.id));
-    if (updateError) {
-      log.error(
-        'Failed to update Viva case',
-        context.awsRequestId,
-        'service-viva-ms-submitApplication-006',
-        updateError
-      );
-      continue;
-    }
+      if (caseItem.currentFormId !== recurringFormId) {
+        failedRecords = failedRecords.filter(itemId => itemId != record.messageId);
+        log.info(
+          'Current form is not an recurring form',
+          context.awsRequestId,
+          'service-viva-ms-submitApplication-002'
+        );
+        continue;
+      }
 
-    const clientUser = { personalNumber };
-    const [putEventError] = await to(putVivaMsEvent.applicationReceivedSuccess(clientUser));
-    if (putEventError) {
-      log.error(
-        'Put event ´applicationReceivedSuccess´ failed',
-        context.awsRequestId,
-        'service-viva-ms-submitApplication-007',
-        putEventError
+      const { PK, SK, pdf: pdfBinaryBuffer } = caseItem;
+      const personalNumber = PK.substring(5);
+
+      const [vivaPostError, vivaApplicationResponse] = await to(
+        vivaAdapter.application.post({
+          applicationType: 'recurrent',
+          personalNumber,
+          workflowId: caseItem.details?.workflowId || '',
+          answers: caseItem.forms[recurringFormId].answers,
+          rawData: pdfBinaryBuffer.toString(),
+          rawDataType: 'pdf',
+        })
       );
-      continue;
+      if (vivaPostError) {
+        log.error(
+          'Failed to submit Viva application',
+          context.awsRequestId,
+          'service-viva-ms-submitApplication-003',
+          {
+            axios: { ...vivaPostError },
+          }
+        );
+        continue;
+      }
+
+      if (notApplicationReceived(vivaApplicationResponse)) {
+        log.error(
+          'Viva application receive failed',
+          context.awsRequestId,
+          'service-viva-ms-submitApplication-004',
+          { vivaResponse: { ...vivaApplicationResponse } }
+        );
+        continue;
+      }
+
+      if (!vivaApplicationResponse?.id) {
+        log.error(
+          'Viva application response does not contain any workflow id',
+          context.awsRequestId,
+          'service-viva-ms-submitApplication-005',
+          vivaApplicationResponse
+        );
+        continue;
+      }
+
+      const caseKeys = { PK, SK };
+      const [updateError] = await to(updateVivaCase(caseKeys, vivaApplicationResponse.id));
+      if (updateError) {
+        log.error(
+          'Failed to update Viva case',
+          context.awsRequestId,
+          'service-viva-ms-submitApplication-006',
+          updateError
+        );
+        continue;
+      }
+
+      const clientUser = { personalNumber };
+      const [putEventError] = await to(putVivaMsEvent.applicationReceivedSuccess(clientUser));
+      if (putEventError) {
+        log.error(
+          'Put event ´applicationReceivedSuccess´ failed',
+          context.awsRequestId,
+          'service-viva-ms-submitApplication-007',
+          putEventError
+        );
+        continue;
+      }
+      failedRecords = failedRecords.filter(itemId => itemId != record.messageId);
+    } catch (ex) {
+      log.error(
+        ('Event could not be parsed',
+        context.awsRequestId,
+        'service-viva-ms-submitApplication-020',
+        ex)
+      );
     }
-    failedRecords = failedRecords.filter(itemId => itemId != record.itemId);
   }
-  log.info(failedRecords);
-  return {
-    batchItemFailures: failedRecords.map(itemId => ({
-      itemIdentifier: itemId,
+  const result = {
+    batchItemFailures: failedRecords.map(messageId => ({
+      itemIdentifier: messageId,
     })),
   };
+  log.info(result);
+  return result;
 }
 
 function notApplicationReceived(response) {
