@@ -4,7 +4,7 @@ import {
   PERSON_ROLE,
   EMPTY_EXPENSE_POST,
   EMPTY_INCOME_POST,
-} from './constans';
+} from './constants';
 import formatPeriodDates, { formatTimestampToDate } from './formatPeriodDates';
 import formHelpers from './formHelpers';
 import { encode } from 'html-entities';
