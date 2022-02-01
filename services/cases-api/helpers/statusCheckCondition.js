@@ -9,17 +9,8 @@ import {
   ACTIVE_RANDOM_CHECK_SUBMITTED,
 } from '../../../libs/constants';
 
-const CASE_CREATED = 'CASE_CREATED';
 const COMPLETION_REQUIRED = 'COMPLETION_REQUIRED';
 const RANDOM_CHECK_REQUIRED = 'RANDOM_CHECK_REQUIRED';
-
-function isAnswersEncryptedApplicantNotSigend({ answers, people }) {
-  return answers && isEncrypted(answers) && !hasApplicantSigned(people);
-}
-
-function isOngoing({ answers, people, state }) {
-  return isAnswersEncryptedApplicantNotSigend({ answers, people }) && state?.includes(CASE_CREATED);
-}
 
 function isSignaturePending({ answers, people }) {
   return (
@@ -31,27 +22,44 @@ function isSignatureCompleted({ answers, people }) {
   return answers && isEncrypted(answers) && hasAllSigned(people);
 }
 
+function isOngoing({ answers, people }) {
+  return isAnswersEncryptedApplicantNotSigend({ answers, people });
+}
+
 function isSubmitted({ answers, people }) {
   return answers && !isEncrypted(answers) && hasAllSigned(people);
 }
 
 function isCompletionOngoing({ answers, people, state }) {
   return (
-    isAnswersEncryptedApplicantNotSigend({ answers, people }) &&
-    state?.includes(COMPLETION_REQUIRED)
+    isAnswersEncryptedApplicantNotSigend({ answers, people }) && state.includes(COMPLETION_REQUIRED)
   );
 }
 
 function isCompletionSubmitted({ answers, people, state }) {
-  return isSubmitted({ answers, people }) && state?.includes(COMPLETION_REQUIRED);
+  return (
+    answers && !isEncrypted(answers) && hasAllSigned(people) && state.includes(COMPLETION_REQUIRED)
+  );
 }
 
 function isRandomCheckOngoing({ answers, people, state }) {
-  return isOngoing({ answers, people }) && state?.includes(RANDOM_CHECK_REQUIRED);
+  return (
+    isAnswersEncryptedApplicantNotSigend({ answers, people }) &&
+    state.includes(RANDOM_CHECK_REQUIRED)
+  );
 }
 
 function isRandomCheckSubmitted({ answers, people, state }) {
-  return isSubmitted({ answers, people }) && state?.includes(RANDOM_CHECK_REQUIRED);
+  return (
+    answers &&
+    !isEncrypted(answers) &&
+    hasAllSigned(people) &&
+    state.includes(RANDOM_CHECK_REQUIRED)
+  );
+}
+
+function isAnswersEncryptedApplicantNotSigend({ answers, people }) {
+  return answers && isEncrypted(answers) && !hasApplicantSigned(people);
 }
 
 function hasAllSigned(people) {
@@ -84,16 +92,16 @@ function isEncrypted(answers) {
 export default function geStatusTypeOnCondition(conditionOption) {
   const statusCheckList = [
     {
-      type: ACTIVE_ONGOING,
-      conditionFunction: isOngoing,
-    },
-    {
       type: ACTIVE_SIGNATURE_PENDING,
       conditionFunction: isSignaturePending,
     },
     {
       type: ACTIVE_SIGNATURE_COMPLETED,
       conditionFunction: isSignatureCompleted,
+    },
+    {
+      type: ACTIVE_ONGOING,
+      conditionFunction: isOngoing,
     },
     {
       type: ACTIVE_SUBMITTED,
