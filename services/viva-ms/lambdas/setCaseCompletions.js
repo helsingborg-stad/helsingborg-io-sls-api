@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import to from 'await-to-js';
 
 import config from '../../../config';
@@ -24,19 +25,6 @@ export async function main(event, context) {
     return false;
   }
 
-  const [getWorkflowCompletionsError, workflowCompletions] = await to(
-    completionsHelper.get.workflow.completions(personalNumber, latestWorkflowId)
-  );
-  if (getWorkflowCompletionsError) {
-    log.error(
-      'Error getting Viva workflow completions',
-      context.awsRequestId,
-      'service-viva-ms-setCaseCompletions-002',
-      getWorkflowCompletionsError
-    );
-    return false;
-  }
-
   const [getCaseError, userCase] = await to(
     completionsHelper.get.caseOnWorkflowId(personalNumber, latestWorkflowId)
   );
@@ -46,6 +34,24 @@ export async function main(event, context) {
       context.awsRequestId,
       'service-viva-ms-setCaseCompletions-003',
       getCaseError
+    );
+    return false;
+  }
+
+  if (completionsHelper.isCaseStateCompletions(userCase)) {
+    console.log('Case is already in completions state. Will not update case.');
+    return true;
+  }
+
+  const [getWorkflowCompletionsError, workflowCompletions] = await to(
+    completionsHelper.get.workflow.completions(personalNumber, latestWorkflowId)
+  );
+  if (getWorkflowCompletionsError) {
+    log.error(
+      'Error getting Viva workflow completions',
+      context.awsRequestId,
+      'service-viva-ms-setCaseCompletions-002',
+      getWorkflowCompletionsError
     );
     return false;
   }
