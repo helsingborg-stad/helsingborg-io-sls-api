@@ -183,9 +183,7 @@ functions:
             detail:
               status:
                 type: [{ 'prefix': 'active:submitted' }]
-              state:
-                - VIVA_RANDOM_CHECK_REQUIRED
-                - VIVA_COMPLETION_REQUIRED
+              state: ['VIVA_RANDOM_CHECK_REQUIRED', 'VIVA_COMPLETION_REQUIRED']
 
   syncOfficers:
     handler: lambdas/syncOfficers.main
@@ -232,6 +230,9 @@ functions:
           pattern:
             source:
               - casesApi.updateCase
+            detail:
+              state:
+                [{ 'anything-but': ['VIVA_RANDOM_CHECK_REQUIRED', 'VIVA_COMPLETION_REQUIRED'] }]
       - eventBridge:
           pattern:
             source:
