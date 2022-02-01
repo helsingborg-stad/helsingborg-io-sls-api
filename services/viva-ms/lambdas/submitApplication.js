@@ -20,8 +20,7 @@ const destructRecord = record => {
 };
 
 export async function main(event, context) {
-  log.info(event);
-  const failedRecords = event.Records.map(record => record.messageId);
+  let failedRecords = event.Records.map(record => record.messageId);
 
   const [paramsReadError, vivaCaseSSMParams] = await to(
     params.read(config.cases.providers.viva.envsKeyName)
@@ -42,7 +41,7 @@ export async function main(event, context) {
     const { recurringFormId } = vivaCaseSSMParams;
 
     if (caseItem.currentFormId !== recurringFormId) {
-      failedRecords.shift();
+      failedRecords = failedRecords.filter(itemId => itemId != record.itemId);
       log.info(
         'Current form is not an recurring form',
         context.awsRequestId,
@@ -119,7 +118,7 @@ export async function main(event, context) {
       );
       continue;
     }
-    failedRecords.shift();
+    failedRecords = failedRecords.filter(itemId => itemId != record.itemId);
   }
   log.info(failedRecords);
   return {
