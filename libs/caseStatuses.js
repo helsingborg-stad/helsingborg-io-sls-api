@@ -17,6 +17,7 @@ import {
   CLOSED_PARTIALLY_APPROVED_VIVA,
   CLOSED_REJECTED_VIVA,
   CLOSED_COMPLETION_REJECTED_VIVA,
+  CLOSED_RANDOM_CHECK_REJECTED_VIVA,
 } from './constants';
 
 const statuses = [
@@ -118,6 +119,12 @@ const statuses = [
   },
   {
     type: CLOSED_COMPLETION_REJECTED_VIVA,
+    name: 'Avslagen',
+    description:
+      'Din ansökan är inte godkänd eftersom vi saknar komplettering för perioden. Därför kan vi inte gå vidare och godkänna din ansökan.',
+  },
+  {
+    type: CLOSED_RANDOM_CHECK_REJECTED_VIVA,
     name: 'Avslagen',
     description:
       'Din ansökan är inte godkänd eftersom vi saknar stickprov för perioden. Därför kan vi inte gå vidare och godkänna din ansökan.',
