@@ -128,10 +128,10 @@ export async function main(event, context) {
       failedRecords = failedRecords.filter(itemId => itemId != record.messageId);
     } catch (ex) {
       log.error(
-        ('Event could not be parsed',
+        'Event could not be parsed',
         context.awsRequestId,
         'service-viva-ms-submitApplication-020',
-        ex)
+        ex
       );
     }
   }
