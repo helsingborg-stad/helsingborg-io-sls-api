@@ -13,6 +13,8 @@ import {
 
 import vivaAdapter from './vivaAdapterRequestClient';
 
+const COMPLETIONS_TYPE = ['RANDOM_CHECK', 'COMPLETION'];
+
 function getCompletionFormId(completionForms, completions) {
   const { randomCheckFormId, completionFormId } = completionForms;
   return completions.isRandomCheck ? randomCheckFormId : completionFormId;
@@ -76,6 +78,11 @@ async function getCaseOnWorkflowId(personalNumber, workflowId) {
   return caseItem;
 }
 
+function isCaseStateCompletions(caseItem) {
+  const { state } = caseItem;
+  return COMPLETIONS_TYPE.reduce((all, type) => state.includes(type) || all, false);
+}
+
 export default {
   get: {
     formId: getCompletionFormId,
@@ -87,4 +94,5 @@ export default {
       latest: getLatestVivaWorkflowId,
     },
   },
+  isCaseStateCompletions,
 };
