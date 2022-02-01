@@ -11,6 +11,17 @@ export const ACTIVE_COMPLETION_SUBMITTED = 'active:completion:submitted';
 export const ACTIVE_RANDOM_CHECK_ONGOING = 'active:randomCheck:ongoing';
 export const ACTIVE_RANDOM_CHECK_SUBMITTED = 'active:randomCheck:submitted';
 
+export const CASE_HTML_GENERATED = 'CASE_HTML_GENERATED';
+export const PDF_GENERATED = 'PDF_GENERATED';
+export const PDF_NOT_GENERATED = 'PDF_NOT_GENERATED';
+
+export const CASE_PROVIDER_VIVA = 'VIVA';
+
+/**
+ * Service: Ekonomiskt bistånd
+ */
+
+// Case status type
 export const NOT_STARTED_VIVA = 'notStarted:viva';
 export const ACTIVE_COMPLETION_REQUIRED_VIVA = 'active:completionRequired:viva';
 export const ACTIVE_RANDOM_CHECK_REQUIRED_VIVA = 'active:randomCheckRequired:viva';
@@ -18,18 +29,15 @@ export const CLOSED_APPROVED_VIVA = 'closed:approved:viva';
 export const CLOSED_PARTIALLY_APPROVED_VIVA = 'closed:partiallyApproved:viva';
 export const CLOSED_REJECTED_VIVA = 'closed:rejected:viva';
 export const CLOSED_COMPLETION_REJECTED_VIVA = 'closed:completionRejected:viva';
+export const CLOSED_RANDOM_CHECK_REJECTED_VIVA = 'closed:randomCheckRejected:viva';
 
-export const CASE_PROVIDER_VIVA = 'VIVA';
+// Case state
 export const VIVA_CASE_CREATED = 'VIVA_CASE_CREATED';
-export const VIVA_COMPLETION_REQUIRED = 'VIVA_COMPLETION_REQUIRED';
-export const VIVA_RANDOM_CHECK_REQUIRED = 'VIVA_RANDOM_CHECK_REQUIRED';
-export const VIVA_COMPLETION_RECEIVED = 'VIVA_COMPLETION_RECEIVED';
-export const VIVA_RANDOM_CHECK_RECEIVED = 'VIVA_RANDOM_CHECK_RECEIVED';
 export const VIVA_APPLICATION_RECEIVED = 'VIVA_APPLICATION_RECEIVED';
-
-export const CASE_HTML_GENERATED = 'CASE_HTML_GENERATED';
-export const PDF_GENERATED = 'PDF_GENERATED';
-export const PDF_NOT_GENERATED = 'PDF_NOT_GENERATED';
+export const VIVA_COMPLETION_REQUIRED = 'VIVA_COMPLETION_REQUIRED';
+export const VIVA_COMPLETION_RECEIVED = 'VIVA_COMPLETION_RECEIVED';
+export const VIVA_RANDOM_CHECK_REQUIRED = 'VIVA_RANDOM_CHECK_REQUIRED';
+export const VIVA_RANDOM_CHECK_RECEIVED = 'VIVA_RANDOM_CHECK_RECEIVED';
 
 /**
  * A month is 1/12th of a year. In the Gregorian calendar, an average month has exactly 30.436875 days.
