@@ -6,10 +6,10 @@ export const ACTIVE_SUBMITTED = 'active:submitted';
 export const ACTIVE_PROCESSING = 'active:processing';
 export const CLOSED = 'closed';
 
-export const ACTIVE_COMPLETION_ONGOING = 'active:completion:ongoing';
-export const ACTIVE_COMPLETION_SUBMITTED = 'active:completion:submitted';
-export const ACTIVE_RANDOM_CHECK_ONGOING = 'active:randomCheck:ongoing';
-export const ACTIVE_RANDOM_CHECK_SUBMITTED = 'active:randomCheck:submitted';
+export const ACTIVE_COMPLETION_ONGOING = 'active:ongoing:completion';
+export const ACTIVE_RANDOM_CHECK_ONGOING = 'active:ongoing:randomCheck';
+export const ACTIVE_COMPLETION_SUBMITTED = 'active:submitted:completion';
+export const ACTIVE_RANDOM_CHECK_SUBMITTED = 'active:submitted:randomCheck';
 
 export const CASE_HTML_GENERATED = 'CASE_HTML_GENERATED';
 export const PDF_GENERATED = 'PDF_GENERATED';
