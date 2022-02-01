@@ -1,8 +1,24 @@
+import {
+  ACTIVE_ONGOING,
+  ACTIVE_SIGNATURE_PENDING,
+  ACTIVE_SIGNATURE_COMPLETED,
+  ACTIVE_SUBMITTED,
+  ACTIVE_COMPLETION_ONGOING,
+  ACTIVE_COMPLETION_SUBMITTED,
+  ACTIVE_RANDOM_CHECK_ONGOING,
+  ACTIVE_RANDOM_CHECK_SUBMITTED,
+} from '../../../libs/constants';
+
+const CASE_CREATED = 'CASE_CREATED';
 const COMPLETION_REQUIRED = 'COMPLETION_REQUIRED';
 const RANDOM_CHECK_REQUIRED = 'RANDOM_CHECK_REQUIRED';
 
-function isOngoing({ answers, people }) {
+function isAnswersEncryptedApplicantNotSigend({ answers, people }) {
   return answers && isEncrypted(answers) && !hasApplicantSigned(people);
+}
+
+function isOngoing({ answers, people, state }) {
+  return isAnswersEncryptedApplicantNotSigend({ answers, people }) && state?.includes(CASE_CREATED);
 }
 
 function isSignaturePending({ answers, people }) {
@@ -20,7 +36,10 @@ function isSubmitted({ answers, people }) {
 }
 
 function isCompletionOngoing({ answers, people, state }) {
-  return isOngoing({ answers, people }) && state?.includes(COMPLETION_REQUIRED);
+  return (
+    isAnswersEncryptedApplicantNotSigend({ answers, people }) &&
+    state?.includes(COMPLETION_REQUIRED)
+  );
 }
 
 function isCompletionSubmitted({ answers, people, state }) {
@@ -62,15 +81,48 @@ function isEncrypted(answers) {
   return keys.length === 1 && keys.includes('encryptedAnswers');
 }
 
-export default {
-  condition: {
-    isOngoing,
-    isSubmitted,
-    isSignatureCompleted,
-    isSignaturePending,
-    isCompletionOngoing,
-    isCompletionSubmitted,
-    isRandomCheckOngoing,
-    isRandomCheckSubmitted,
-  },
-};
+export default function geStatusTypeOnCondition(conditionOption) {
+  const statusCheckList = [
+    {
+      type: ACTIVE_ONGOING,
+      conditionFunction: isOngoing,
+    },
+    {
+      type: ACTIVE_SIGNATURE_PENDING,
+      conditionFunction: isSignaturePending,
+    },
+    {
+      type: ACTIVE_SIGNATURE_COMPLETED,
+      conditionFunction: isSignatureCompleted,
+    },
+    {
+      type: ACTIVE_SUBMITTED,
+      conditionFunction: isSubmitted,
+    },
+    {
+      type: ACTIVE_COMPLETION_ONGOING,
+      conditionFunction: isCompletionOngoing,
+    },
+    {
+      type: ACTIVE_COMPLETION_SUBMITTED,
+      conditionFunction: isCompletionSubmitted,
+    },
+    {
+      type: ACTIVE_RANDOM_CHECK_ONGOING,
+      conditionFunction: isRandomCheckOngoing,
+    },
+    {
+      type: ACTIVE_RANDOM_CHECK_SUBMITTED,
+      conditionFunction: isRandomCheckSubmitted,
+    },
+  ];
+
+  const statusType = statusCheckList.reduce((type, statusCheckItem) => {
+    if (statusCheckItem.conditionFunction(conditionOption)) {
+      return statusCheckItem.type;
+    }
+    return type;
+  }, undefined);
+
+  return statusType;
+}

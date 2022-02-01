@@ -13,18 +13,8 @@ import * as dynamoDb from '../../../libs/dynamoDb';
 import { decodeToken } from '../../../libs/token';
 import { objectWithoutProperties } from '../../../libs/objects';
 import { getStatusByType } from '../../../libs/caseStatuses';
-import {
-  ACTIVE_ONGOING,
-  ACTIVE_SIGNATURE_PENDING,
-  ACTIVE_SIGNATURE_COMPLETED,
-  ACTIVE_SUBMITTED,
-  ACTIVE_COMPLETION_ONGOING,
-  ACTIVE_COMPLETION_SUBMITTED,
-  ACTIVE_RANDOM_CHECK_ONGOING,
-  ACTIVE_RANDOM_CHECK_SUBMITTED,
-} from '../../../libs/constants';
 
-import statusCheck from '../helpers/statusCheckCondition';
+import geStatusTypeOnCondition from '../helpers/statusCheckCondition';
 import { getUserCase } from '../helpers/dynamoDb';
 import { updateCaseValidationSchema } from '../helpers/schema';
 import log from '../../../libs/logs';
@@ -89,11 +79,12 @@ export async function main(event, context) {
   const ExpressionAttributeValues = { ':newUpdatedAt': Date.now() };
 
   const updatedPeopleSignature = updatePeopleSignature(personalNumber, userCase.persons, signature);
-  const newCaseStatus = getNewCaseStatus({
+  const newCaseStatusType = geStatusTypeOnCondition({
     answers,
     people: updatedPeopleSignature,
     state: userCase.state,
   });
+  const newCaseStatus = getStatusByType(newCaseStatusType);
   if (newCaseStatus) {
     UpdateExpression.push('#status = :newStatus');
     ExpressionAttributeNames['#status'] = 'status';
@@ -222,52 +213,6 @@ async function queryFormsIfExistsFormId(formId) {
   }
 
   return dynamoDbQueryCallResult;
-}
-
-function getNewCaseStatus(conditionOption) {
-  const statusCheckList = [
-    {
-      type: ACTIVE_ONGOING,
-      conditionFunction: statusCheck.condition.isOngoing,
-    },
-    {
-      type: ACTIVE_SIGNATURE_PENDING,
-      conditionFunction: statusCheck.condition.isSignaturePending,
-    },
-    {
-      type: ACTIVE_SIGNATURE_COMPLETED,
-      conditionFunction: statusCheck.condition.isSignatureCompleted,
-    },
-    {
-      type: ACTIVE_SUBMITTED,
-      conditionFunction: statusCheck.condition.isSubmitted,
-    },
-    {
-      type: ACTIVE_COMPLETION_ONGOING,
-      conditionFunction: statusCheck.condition.isCompletionOngoing,
-    },
-    {
-      type: ACTIVE_COMPLETION_SUBMITTED,
-      conditionFunction: statusCheck.condition.isCompletionSubmitted,
-    },
-    {
-      type: ACTIVE_RANDOM_CHECK_ONGOING,
-      conditionFunction: statusCheck.condition.isRandomCheckOngoing,
-    },
-    {
-      type: ACTIVE_RANDOM_CHECK_SUBMITTED,
-      conditionFunction: statusCheck.condition.isRandomCheckSubmitted,
-    },
-  ];
-
-  const statusType = statusCheckList.reduce((type, statusCheckItem) => {
-    if (statusCheckItem.conditionFunction(conditionOption)) {
-      return statusCheckItem.type;
-    }
-    return type;
-  }, undefined);
-
-  return getStatusByType(statusType);
 }
 
 function updatePeopleSignature(matchPersonalNumber, people, signature) {
