@@ -34,13 +34,13 @@ provider:
           Action:
             - SSM:GetParameter*
           Resource:
-            - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${file(../../config.json):${self:custom.stage}.vada.envsKeyName}"
-            - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${file(../../config.json):${self:custom.stage}.cases.providers.viva.envsKeyName}"
+            - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${file(../../config.json):${self:custom.stage}.vada.envsKeyName}'
+            - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${file(../../config.json):${self:custom.stage}.cases.providers.viva.envsKeyName}'
 
         - Effect: Allow
           Action:
             - events:PutEvents
-          Resource: "*"
+          Resource: '*'
 
         - Effect: Allow
           Action:
@@ -49,14 +49,14 @@ provider:
           Resource:
             - Fn::ImportValue: ${self:custom.resourcesStage}-AttachmentsBucketArn
             - Fn::Join:
-                - ""
+                - ''
                 - - Fn::ImportValue: ${self:custom.resourcesStage}-AttachmentsBucketArn
-                  - "/*"
+                  - '/*'
             - Fn::ImportValue: ${self:custom.resourcesStage}-PdfStorageBucketArn
             - Fn::Join:
-                - ""
+                - ''
                 - - Fn::ImportValue: ${self:custom.resourcesStage}-PdfStorageBucketArn
-                  - "/*"
+                  - '/*'
 
         - Effect: Allow
           Action:
@@ -65,21 +65,21 @@ provider:
             - dynamodb:Query
             - dynamodb:GetItem
           Resource:
-            - "Fn::ImportValue": ${self:custom.resourcesStage}-CasesTableArn
+            - 'Fn::ImportValue': ${self:custom.resourcesStage}-CasesTableArn
 
         - Effect: Allow
           Action:
             - dynamodb:Query
             - dynamodb:GetItem
           Resource:
-            - "Fn::ImportValue": ${self:custom.resourcesStage}-UsersTableArn
+            - 'Fn::ImportValue': ${self:custom.resourcesStage}-UsersTableArn
 
         - Effect: Allow
           Action:
             - dynamodb:Query
             - dynamodb:GetItem
           Resource:
-            - "Fn::ImportValue": ${self:custom.resourcesStage}-FormsTableArn
+            - 'Fn::ImportValue': ${self:custom.resourcesStage}-FormsTableArn
 
         - Effect: Allow
           Action:
@@ -142,23 +142,9 @@ functions:
     handler: lambdas/submitApplication.main
     timeout: 15
     events:
-      - eventBridge:
-          pattern:
-            source:
-              - cases.database
-            detail-type:
-              - MODIFY
-            detail:
-              dynamodb:
-                NewImage:
-                  provider:
-                    S: ["VIVA"]
-                  status:
-                    M:
-                      type:
-                        S: [{ "prefix": "active:submitted" }]
-                  state:
-                    S: ["PDF_GENERATED"]
+      - sqs:
+          arn: !ImportValue ${self:custom.stage}-VivaSubmissionQueue
+          batchSize: 1
 
   checkCompletionsStatus:
     handler: lambdas/checkCompletionsStatus.main
@@ -196,7 +182,7 @@ functions:
               - casesApiUpdateCaseSuccess
             detail:
               status:
-                type: [{ "prefix": "active:submitted" }]
+                type: [{ 'prefix': 'active:submitted' }]
               state:
                 - VIVA_RANDOM_CHECK_REQUIRED
                 - VIVA_COMPLETION_REQUIRED
@@ -216,7 +202,7 @@ functions:
               dynamodb:
                 NewImage:
                   provider:
-                    S: ["VIVA"]
+                    S: ['VIVA']
 
   syncWorkflow:
     handler: lambdas/syncWorkflow.main
@@ -268,5 +254,5 @@ functions:
               - casesApiUpdateCaseSuccess
             detail:
               status:
-                type: [{ "prefix": "active:submitted" }]
-              state: ["VIVA_CASE_CREATED"]
+                type: [{ 'prefix': 'active:submitted' }]
+              state: ['VIVA_CASE_CREATED']
