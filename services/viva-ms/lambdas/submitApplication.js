@@ -13,135 +13,90 @@ import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
 const dynamoDbConverter = AWS.DynamoDB.Converter;
-
+class TraceException extends Error {
+  constructor(message, customData) {
+    super(message);
+    this.customData = customData;
+  }
+}
 const destructRecord = record => {
   const body = JSON.parse(record.body);
   return dynamoDbConverter.unmarshall(body.detail.dynamodb.NewImage);
 };
 
 export async function main(event, context) {
-  log.info(`Retreiving (${event.Records.length}) records`);
-
-  let failedRecords = event.Records.map(record => record.messageId);
-
+  if (event.Records.length !== 1) {
+    throw new TraceException(`Lambda received (${event.Records.length}) but expected only one.`);
+  }
   const [paramsReadError, vivaCaseSSMParams] = await to(
     params.read(config.cases.providers.viva.envsKeyName)
   );
   if (paramsReadError) {
-    log.error(
-      'Read ssm params ´config.cases.providers.viva.envsKeyName´ failed',
-      context.awsRequestId,
-      'service-viva-ms-submitApplication-001',
-      paramsReadError
-    );
-    return null;
+    throw new TraceException('Read ssm params ´config.cases.providers.viva.envsKeyName´ failed');
   }
+  const [record] = event.Records;
+  const caseItem = destructRecord(record);
 
-  for (const record of event.Records) {
+  log.info(
+    `Processing record id: (${record.messageId}), receive-count: (${record.attributes.ApproximateReceiveCount}))`
+  );
+
+  const { recurringFormId } = vivaCaseSSMParams;
+
+  if (caseItem.currentFormId !== recurringFormId) {
     log.info(
-      `Processing record id: (${record.messageId}), receive-count: (${record.attributes.ApproximateReceiveCount}))`
+      'Current form is not an recurring form',
+      context.awsRequestId,
+      'service-viva-ms-submitApplication-002'
     );
-
-    try {
-      const caseItem = destructRecord(record);
-
-      const { recurringFormId } = vivaCaseSSMParams;
-
-      if (caseItem.currentFormId !== recurringFormId) {
-        failedRecords = failedRecords.filter(itemId => itemId != record.messageId);
-        log.info(
-          'Current form is not an recurring form',
-          context.awsRequestId,
-          'service-viva-ms-submitApplication-002'
-        );
-        continue;
-      }
-
-      const { PK, SK, pdf: pdfBinaryBuffer } = caseItem;
-      const personalNumber = PK.substring(5);
-
-      const [vivaPostError, vivaApplicationResponse] = await to(
-        vivaAdapter.application.post({
-          applicationType: 'recurrent',
-          personalNumber,
-          workflowId: caseItem.details?.workflowId || '',
-          answers: caseItem.forms[recurringFormId].answers,
-          rawData: pdfBinaryBuffer.toString(),
-          rawDataType: 'pdf',
-        })
-      );
-      if (vivaPostError) {
-        log.error(
-          'Failed to submit Viva application',
-          context.awsRequestId,
-          'service-viva-ms-submitApplication-003',
-          {
-            axios: { ...vivaPostError },
-          }
-        );
-        continue;
-      }
-
-      if (notApplicationReceived(vivaApplicationResponse)) {
-        log.error(
-          'Viva application receive failed',
-          context.awsRequestId,
-          'service-viva-ms-submitApplication-004',
-          { vivaResponse: { ...vivaApplicationResponse } }
-        );
-        continue;
-      }
-
-      if (!vivaApplicationResponse?.id) {
-        log.error(
-          'Viva application response does not contain any workflow id',
-          context.awsRequestId,
-          'service-viva-ms-submitApplication-005',
-          vivaApplicationResponse
-        );
-        continue;
-      }
-
-      const caseKeys = { PK, SK };
-      const [updateError] = await to(updateVivaCase(caseKeys, vivaApplicationResponse.id));
-      if (updateError) {
-        log.error(
-          'Failed to update Viva case',
-          context.awsRequestId,
-          'service-viva-ms-submitApplication-006',
-          updateError
-        );
-        continue;
-      }
-
-      const clientUser = { personalNumber };
-      const [putEventError] = await to(putVivaMsEvent.applicationReceivedSuccess(clientUser));
-      if (putEventError) {
-        log.error(
-          'Put event ´applicationReceivedSuccess´ failed',
-          context.awsRequestId,
-          'service-viva-ms-submitApplication-007',
-          putEventError
-        );
-        continue;
-      }
-      failedRecords = failedRecords.filter(itemId => itemId != record.messageId);
-    } catch (ex) {
-      log.error(
-        'Event could not be parsed',
-        context.awsRequestId,
-        'service-viva-ms-submitApplication-020',
-        ex
-      );
-    }
+    return true;
   }
-  const result = {
-    batchItemFailures: failedRecords.map(messageId => ({
-      itemIdentifier: messageId,
-    })),
-  };
-  log.info(result);
-  return result;
+
+  const { PK, SK, pdf: pdfBinaryBuffer } = caseItem;
+  const personalNumber = PK.substring(5);
+
+  const [vivaPostError, vivaApplicationResponse] = await to(
+    vivaAdapter.application.post({
+      applicationType: 'recurrent',
+      personalNumber,
+      workflowId: caseItem.details?.workflowId || '',
+      answers: caseItem.forms[recurringFormId].answers,
+      rawData: pdfBinaryBuffer.toString(),
+      rawDataType: 'pdf',
+    })
+  );
+
+  if (vivaPostError) {
+    throw new TraceException('Failed to submit Viva application', {
+      axios: { ...vivaPostError },
+    });
+  }
+
+  if (notApplicationReceived(vivaApplicationResponse)) {
+    throw new TraceException('Viva application receive failed', {
+      vivaResponse: { ...vivaApplicationResponse },
+    });
+  }
+
+  if (!vivaApplicationResponse?.id) {
+    throw new TraceException(
+      'Viva application response does not contain any workflow id',
+      vivaApplicationResponse
+    );
+  }
+
+  const caseKeys = { PK, SK };
+  const [updateError] = await to(updateVivaCase(caseKeys, vivaApplicationResponse.id));
+  if (updateError) {
+    throw new TraceException('Failed to update Viva case', updateError);
+  }
+
+  const clientUser = { personalNumber };
+  const [putEventError] = await to(putVivaMsEvent.applicationReceivedSuccess(clientUser));
+  if (putEventError) {
+    throw new TraceException('Put event ´applicationReceivedSuccess´ failed', putEventError);
+  }
+  return true;
 }
 
 function notApplicationReceived(response) {
