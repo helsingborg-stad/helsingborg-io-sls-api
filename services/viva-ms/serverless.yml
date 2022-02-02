@@ -145,7 +145,6 @@ functions:
       - sqs:
           arn: !ImportValue ${self:custom.stage}-VivaSubmissionQueueArn
           batchSize: 1
-          functionResponseType: ReportBatchItemFailures
 
   checkCompletionsStatus:
     handler: lambdas/checkCompletionsStatus.main
