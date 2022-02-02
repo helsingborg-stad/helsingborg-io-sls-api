@@ -82,12 +82,11 @@ export async function main(event, context) {
   return true;
 }
 
-async function getCasesSumbittedOrProcessing(personalNumber) {
-  const TableName = config.cases.tableName;
+function getCasesSumbittedOrProcessing(personalNumber) {
   const PK = `USER#${personalNumber}`;
 
-  const params = {
-    TableName,
+  const queryParams = {
+    TableName: config.cases.tableName,
     KeyConditionExpression: 'PK = :pk',
     FilterExpression:
       '(begins_with(#status.#type, :statusTypeSubmitted) or begins_with(#status.#type, :statusTypeProcessing)) and provider = :provider',
@@ -103,19 +102,20 @@ async function getCasesSumbittedOrProcessing(personalNumber) {
     },
   };
 
-  return dynamoDb.call('query', params);
+  return dynamoDb.call('query', queryParams);
 }
 
-async function updateCaseWorkflow(caseKeys, workflow) {
-  const TableName = config.cases.tableName;
-
-  const params = {
-    TableName,
-    Key: caseKeys,
+function updateCaseWorkflow(caseKeys, workflow) {
+  const updateParams = {
+    TableName: config.cases.tableName,
+    Key: {
+      PK: caseKeys.PK,
+      SK: caseKeys.SK,
+    },
     UpdateExpression: 'SET details.workflow = :newWorkflow',
     ExpressionAttributeValues: { ':newWorkflow': workflow },
     ReturnValues: 'NONE',
   };
 
-  return dynamoDb.call('update', params);
+  return dynamoDb.call('update', updateParams);
 }
