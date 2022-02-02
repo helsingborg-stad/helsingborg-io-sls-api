@@ -22,12 +22,12 @@ export async function main(event, context) {
   ];
   if (!validateApplicationStatus(status, completionStatusCodes)) {
     log.info(
-      `No Viva completion status(${VIVA_STATUS_COMPLETION}) found`,
+      `No completions found, status code: ${VIVA_STATUS_COMPLETION}`,
       context.awsRequestId,
       'service-viva-ms-checkCompletionsStatus-001',
       status
     );
-    return false;
+    return true;
   }
 
   const [putEventError] = await to(putVivaMsEvent.checkCompletionsStatusRequired({ user }));

@@ -22,12 +22,12 @@ export async function main(event, context) {
   ];
   if (!validateApplicationStatus(status, periodOpenStatusCodes)) {
     log.info(
-      'No open application period found',
+      `No open application found, status code: ${VIVA_STATUS_APPLICATION_PERIOD_OPEN}`,
       context.awsRequestId,
       'service-viva-ms-personApplicationStatus-001',
       status
     );
-    return false;
+    return true;
   }
 
   const [putEventError] = await to(putVivaMsEvent.checkOpenPeriodSuccess({ user }));
