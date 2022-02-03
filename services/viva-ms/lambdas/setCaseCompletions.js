@@ -7,6 +7,7 @@ import * as dynamoDb from '../../../libs/dynamoDb';
 import params from '../../../libs/params';
 import log from '../../../libs/logs';
 
+import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import completionsHelper from '../helpers/completions';
 
 export async function main(event, context) {
@@ -91,10 +92,21 @@ export async function main(event, context) {
     return false;
   }
 
+  const [putEventError] = await to(putVivaMsEvent.setCaseCompletionsSuccess({ caseKeys }));
+  if (putEventError) {
+    log.error(
+      'Error put event [setCaseCompletionsSuccess]',
+      context.awsRequestId,
+      'service-viva-ms-setCaseCompletions-006',
+      putEventError
+    );
+    return false;
+  }
+
   log.info(
-    'Successfully updated completion attributes on case',
+    'Successfully updated completions attributes on case',
     context.awsRequestId,
-    'service-viva-ms-setCaseCompletions-006',
+    'service-viva-ms-setCaseCompletions-007',
     updatedCaseItem
   );
 

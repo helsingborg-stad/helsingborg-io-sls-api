@@ -37,6 +37,10 @@ export const eventTypeCollection = {
     source: 'vivaMs.applicationStatus',
     detailType: 'applicationStatusSuccess',
   },
+  setCaseCompletionsSuccess: {
+    source: 'vivaMs.setCaseCompletions',
+    detailType: 'setSuccess',
+  },
 };
 
 function putUserEvent(detail, type, typeCollection = eventTypeCollection) {
@@ -54,4 +58,5 @@ export default {
   syncWorkflowSuccess: detail => putUserEvent(detail, 'syncWorkflowSuccess'),
   htmlGeneratedSuccess: detail => putUserEvent(detail, 'htmlGeneratedSuccess'),
   applicationStatusSuccess: detail => putUserEvent(detail, 'applicationStatusSuccess'),
+  setCaseCompletionsSuccess: detail => putUserEvent(detail, 'setCaseCompletionsSuccess'),
 };
