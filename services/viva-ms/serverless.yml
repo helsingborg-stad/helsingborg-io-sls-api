@@ -253,7 +253,7 @@ functions:
       - eventBridge:
           pattern:
             source:
-              - vivaMs.checkCompletionsStatus
+              - vivaMs.setCaseCompletions
 
   generateRecurringCaseHtml:
     handler: lambdas/generateRecurringCaseHtml.main
