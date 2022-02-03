@@ -6,14 +6,9 @@ import config from '../../../config';
 import * as dynamoDb from '../../../libs/dynamoDb';
 import log from '../../../libs/logs';
 import { getStatusByType } from '../../../libs/caseStatuses';
-import {
-  ACTIVE_PROCESSING,
-  CLOSED_APPROVED_VIVA,
-  CLOSED_REJECTED_VIVA,
-  CLOSED_PARTIALLY_APPROVED_VIVA,
-} from '../../../libs/constants';
 
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
+import decideNewCaseStatus from '../helpers/caseDecision';
 
 export async function main(event, context) {
   const { caseKeys, workflow } = event.detail;
@@ -64,67 +59,4 @@ async function updateCaseStatus(caseKeys, newStatus) {
   };
 
   return dynamoDb.call('update', params);
-}
-
-function decideNewCaseStatus(workflowAttributes) {
-  const decisionList = makeArray(workflowAttributes.decision?.decisions?.decision);
-  const paymentList = makeArray(workflowAttributes.payments?.payment);
-  const calculation = workflowAttributes.calculations?.calculation;
-
-  const decisionTypeCode = getDecisionTypeCode(decisionList);
-
-  if (decisionTypeCode != undefined) {
-    const caseStatus = getCaseStatusType(decisionTypeCode, paymentList);
-    return caseStatus;
-  }
-
-  if (calculation != undefined) {
-    return ACTIVE_PROCESSING;
-  }
-
-  return undefined;
-}
-
-function getCaseStatusType(decisionTypeCode, paymentList) {
-  if (decisionTypeCode === 1 && paymentList != undefined && paymentList.length > 0) {
-    return CLOSED_APPROVED_VIVA;
-  }
-
-  if (decisionTypeCode === 2) {
-    return CLOSED_REJECTED_VIVA;
-  }
-
-  if (decisionTypeCode === 3 && paymentList != undefined && paymentList.length > 0) {
-    return CLOSED_PARTIALLY_APPROVED_VIVA;
-  }
-
-  return ACTIVE_PROCESSING;
-}
-
-function getDecisionTypeCode(decisionList) {
-  if (decisionList == undefined && decisionList.length == 0) {
-    return undefined;
-  }
-
-  let typeCode = 0;
-
-  decisionList.forEach(decision => {
-    typeCode = typeCode | parseInt(decision.typecode, 10);
-  });
-
-  return typeCode;
-}
-
-function makeArray(value) {
-  let list = [];
-
-  if (Array.isArray(value)) {
-    list = [...value];
-  }
-
-  if (value != undefined) {
-    list.push(value);
-  }
-
-  return list;
 }
