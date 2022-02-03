@@ -12,7 +12,7 @@ phases:
       - echo "//npm.pkg.github.com/:_authToken=$NPM_TOKEN" >> .npmrc
       - echo "always-auth=true" >> .npmrc
       - npm install -g yarn
-      - yarn global add serverless
+      - yarn global add serverless@2.60.3
       - yarn install
       - cd .deploy 
       - yarn install
