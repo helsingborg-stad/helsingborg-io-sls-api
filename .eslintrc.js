@@ -20,10 +20,6 @@ module.exports = {
     es6: true,
     jest: true,
   },
-  globals: {
-    Atomics: 'readonly',
-    SharedArrayBuffer: 'readonly',
-  },
   plugins: ['jest'],
   overrides: [
     {
