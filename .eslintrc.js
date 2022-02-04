@@ -13,7 +13,7 @@ module.exports = {
       impliedStrict: true,
     },
   },
-  ignorePatterns: ['out/**/*'],
+  ignorePatterns: ['dist/**/*'],
   env: {
     es2021: true,
     node: true,
@@ -24,7 +24,7 @@ module.exports = {
     Atomics: 'readonly',
     SharedArrayBuffer: 'readonly',
   },
-  plugins: ['prettier', 'jest'],
+  plugins: ['jest'],
   overrides: [
     {
       files: ['*.ts', '*.tsx'],
