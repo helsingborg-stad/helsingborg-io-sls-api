@@ -37,13 +37,7 @@ export async function main(event, context) {
     return response.failure(validationError);
   }
 
-  const {
-    statusType,
-    currentFormId,
-    provider,
-    details,
-    forms: initialForms,
-  } = validatedEventBody;
+  const { statusType, currentFormId, provider, details, forms: initialForms } = validatedEventBody;
   const { personalNumber } = decodedToken;
 
   const id = uuid.v4();
@@ -63,9 +57,7 @@ export async function main(event, context) {
     return response.failure(userError);
   }
   const [, formTemplates] = await to(getFormTemplates(initialForms, context));
-  const [previousCaseError, previousCase] = await to(
-    getLastUpdatedCase(PK, provider)
-  );
+  const [previousCaseError, previousCase] = await to(getLastUpdatedCase(PK, provider));
   if (previousCaseError) {
     log.error(
       'DynamoDb query on cases table failed',
@@ -121,11 +113,7 @@ export async function main(event, context) {
   // Since we cannot use the ReturnValues attribute on the DynamoDB putItem operation to return the created item,
   // we need to do a second request in order to retrive the item/case after successfull creation.
   // This can be found in the AWS docs https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_PutItem.html#DDB-PutItem-request-ReturnValues
-  const [getItemError, caseItem] = await getItem(
-    config.cases.tableName,
-    PK,
-    SK
-  );
+  const [getItemError, caseItem] = await getItem(config.cases.tableName, PK, SK);
   if (getItemError) {
     log.error(
       'Get item error',
@@ -218,8 +206,7 @@ async function getLastUpdatedCase(PK, provider) {
   const params = {
     TableName: config.cases.tableName,
     KeyConditionExpression: 'PK = :pk',
-    FilterExpression:
-      'begins_with(#status.#type, :statusTypeClosed) and #provider = :provider',
+    FilterExpression: 'begins_with(#status.#type, :statusTypeClosed) and #provider = :provider',
     ExpressionAttributeNames: {
       '#status': 'status',
       '#type': 'type',
@@ -237,9 +224,7 @@ async function getLastUpdatedCase(PK, provider) {
     throwError(error.statusCode, error.message);
   }
 
-  const sortedCases = dbResponse.Items.sort(
-    (a, b) => b.updatedAt - a.updatedAt
-  );
+  const sortedCases = dbResponse.Items.sort((a, b) => b.updatedAt - a.updatedAt);
 
   return sortedCases?.[0] || {};
 }

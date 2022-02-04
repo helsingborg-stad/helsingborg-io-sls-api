@@ -47,18 +47,14 @@ export async function main(event) {
     throw Error('Unauthorised');
   }
 
-  jwt.verify(authorizationToken, signingKey.publicKey, (error) => {
+  jwt.verify(authorizationToken, signingKey.publicKey, error => {
     if (error) {
       console.error('Failed to verify JWT: ', error);
       throw Error('Unauthorised');
     }
   });
 
-  const iamPolicy = generateIAMPolicy(
-    'officeUser',
-    'Allow',
-    executeResourceArns
-  );
+  const iamPolicy = generateIAMPolicy('officeUser', 'Allow', executeResourceArns);
 
   return iamPolicy;
 }

@@ -35,21 +35,15 @@ export const main = async (event, context) => {
 
   //convert to camelCase
   const attributes = {};
-  Object.keys(userGetResponse).forEach((key) => {
+  Object.keys(userGetResponse).forEach(key => {
     attributes[camelCase(key)] = userGetResponse[key];
   });
 
   //Returning no results from the db is not an error, so we need to check for this separately,
   //and return a 404 if no results were found
   if (Object.keys(attributes).length === 0) {
-    const errorMessage =
-      'No user with that personal number found in the database.';
-    log.warn(
-      errorMessage,
-      context.awsRequestId,
-      'service-users-api-getUser-001',
-      error
-    );
+    const errorMessage = 'No user with that personal number found in the database.';
+    log.warn(errorMessage, context.awsRequestId, 'service-users-api-getUser-001', error);
 
     return response.buildResponse(404, {
       type: 'userGet',

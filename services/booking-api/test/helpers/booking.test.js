@@ -91,11 +91,6 @@ test.each([
 
     await booking[path](functionCall);
 
-    expect(request.call).toHaveBeenCalledWith(
-      requestClient,
-      'post',
-      endpoint,
-      requestCall
-    );
+    expect(request.call).toHaveBeenCalledWith(requestClient, 'post', endpoint, requestCall);
   }
 );

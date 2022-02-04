@@ -105,8 +105,7 @@ it('returns failure if required paramerer is missing', async () => {
       data: {
         status: '403',
         code: '403',
-        message:
-          'Missing one of more required parameter: "referenceCode", "startTime", "endTime"',
+        message: 'Missing one of more required parameter: "referenceCode", "startTime", "endTime"',
       },
     }),
     headers: mockHeaders,

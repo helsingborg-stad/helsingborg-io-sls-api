@@ -12,10 +12,4 @@ const loginMicrosoftUrl = 'https://login.microsoftonline.com';
 const beginCertificateString = '-----BEGIN CERTIFICATE-----\n';
 const endCertificateString = '\n-----END CERTIFICATE-----\n';
 
-export {
-  JWK,
-  JWT,
-  loginMicrosoftUrl,
-  beginCertificateString,
-  endCertificateString,
-};
+export { JWK, JWT, loginMicrosoftUrl, beginCertificateString, endCertificateString };

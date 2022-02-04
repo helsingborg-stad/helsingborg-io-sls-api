@@ -30,9 +30,7 @@ export async function main(event, context) {
     return false;
   }
 
-  const [putEventError] = await to(
-    putVivaMsEvent.checkCompletionsStatusRequired({ user })
-  );
+  const [putEventError] = await to(putVivaMsEvent.checkCompletionsStatusRequired({ user }));
   if (putEventError) {
     log.error(
       'Put event [checkCompletionsStatusRequired] failed',

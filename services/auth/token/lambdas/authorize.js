@@ -12,11 +12,7 @@ export async function main(event, context) {
   const { authorizationToken } = event;
 
   if (!authorizationToken) {
-    log.warn(
-      'Unauthorized!',
-      context.awsRequestId,
-      'service-auth-token-authorize-001'
-    );
+    log.warn('Unauthorized!', context.awsRequestId, 'service-auth-token-authorize-001');
 
     throw Error('Unauthorized');
   }
@@ -26,36 +22,21 @@ export async function main(event, context) {
     : authorizationToken;
 
   const [getSecretError, secret] = await to(
-    secrets.get(
-      CONFIG_AUTH_SECRETS_ACCESS_TOKEN.name,
-      CONFIG_AUTH_SECRETS_ACCESS_TOKEN.keyName
-    )
+    secrets.get(CONFIG_AUTH_SECRETS_ACCESS_TOKEN.name, CONFIG_AUTH_SECRETS_ACCESS_TOKEN.keyName)
   );
   if (getSecretError) {
-    log.warn(
-      'Unauthorized!',
-      context.awsRequestId,
-      'service-auth-token-authorize-002'
-    );
+    log.warn('Unauthorized!', context.awsRequestId, 'service-auth-token-authorize-002');
 
     throw Error('Unauthorized');
   }
 
   const [error, decodedToken] = await to(verifyToken(token, secret));
   if (error) {
-    log.warn(
-      'Unauthorized!',
-      context.awsRequestId,
-      'service-auth-token-authorize-003'
-    );
+    log.warn('Unauthorized!', context.awsRequestId, 'service-auth-token-authorize-003');
 
     throw Error('Unauthorized');
   }
 
-  const IAMPolicy = generateIAMPolicy(
-    decodedToken.personalNumber,
-    'Allow',
-    '*'
-  );
+  const IAMPolicy = generateIAMPolicy(decodedToken.personalNumber, 'Allow', '*');
   return IAMPolicy;
 }

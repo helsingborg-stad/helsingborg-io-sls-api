@@ -1,9 +1,6 @@
 /* eslint-disable no-console */
 import to from 'await-to-js';
-import {
-  throwError,
-  ResourceNotFoundError,
-} from '@helsingborg-stad/npm-api-error-handling';
+import { throwError, ResourceNotFoundError } from '@helsingborg-stad/npm-api-error-handling';
 
 import config from '../../../config';
 import * as response from '../../../libs/response';
@@ -16,9 +13,7 @@ export async function main(event, context) {
   const decodedToken = decodeToken(event);
   const { id } = event.pathParameters;
 
-  const [getUserCaseError, userCase] = await to(
-    getUserCase(decodedToken.personalNumber, id)
-  );
+  const [getUserCaseError, userCase] = await to(getUserCase(decodedToken.personalNumber, id));
   if (getUserCaseError) {
     log.error(
       'Get user case error',
@@ -32,20 +27,12 @@ export async function main(event, context) {
 
   if (!userCase) {
     const errorMessage = `User case with id: ${id} not found`;
-    log.error(
-      errorMessage,
-      context.awsRequestId,
-      'service-cases-api-getCase-002'
-    );
+    log.error(errorMessage, context.awsRequestId, 'service-cases-api-getCase-002');
 
     return response.failure(new ResourceNotFoundError(errorMessage));
   }
 
-  const userCaseWithoutKeys = objectWithoutProperties(userCase, [
-    'PK',
-    'SK',
-    'GSI1',
-  ]);
+  const userCaseWithoutKeys = objectWithoutProperties(userCase, ['PK', 'SK', 'GSI1']);
 
   return response.success(200, {
     type: 'getCase',
@@ -61,10 +48,7 @@ async function getUserCase(personalNumber, id) {
   );
   if (getUserApplicantCaseError) {
     console.error('getUserApplicantCaseError', getUserApplicantCaseError);
-    throwError(
-      getUserApplicantCaseError.statusCode,
-      getUserApplicantCaseError.message
-    );
+    throwError(getUserApplicantCaseError.statusCode, getUserApplicantCaseError.message);
   }
 
   const [getCoApplicantCaseError, userCoApplicantCaseResult] = await to(
@@ -72,15 +56,10 @@ async function getUserCase(personalNumber, id) {
   );
   if (getCoApplicantCaseError) {
     console.error('getCoApplicantCaseError', getCoApplicantCaseError);
-    throwError(
-      getCoApplicantCaseError.statusCode,
-      getCoApplicantCaseError.message
-    );
+    throwError(getCoApplicantCaseError.statusCode, getCoApplicantCaseError.message);
   }
 
-  const concatAndDeDuplicateCase = (...userCaseList) => [
-    ...new Set([].concat(...userCaseList)),
-  ];
+  const concatAndDeDuplicateCase = (...userCaseList) => [...new Set([].concat(...userCaseList))];
   const userCaseList = concatAndDeDuplicateCase(
     userApplicantCaseResult.Items,
     userCoApplicantCaseResult.Items

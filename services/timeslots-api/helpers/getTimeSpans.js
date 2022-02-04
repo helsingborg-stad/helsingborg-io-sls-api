@@ -20,12 +20,7 @@ async function getTimeSpans(body) {
   );
 
   const [outlookError, outlookResponse] = await to(
-    request.call(
-      requestClient,
-      'post',
-      `${datatorgetEndpoint}/${URI_RESOURCE}`,
-      body
-    )
+    request.call(requestClient, 'post', `${datatorgetEndpoint}/${URI_RESOURCE}`, body)
   );
   if (outlookError) {
     console.error('Could not fetch time spans from outlook: ', outlookError);

@@ -48,11 +48,7 @@ async function postCompletion(payload) {
 
   const { hashSalt, hashSaltLength } = await VADA_SSM_PARAMS;
 
-  const hashedPersonalNumber = hash.encode(
-    personalNumber,
-    hashSalt,
-    hashSaltLength
-  );
+  const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
   const requestParams = {
     endpoint: `applications/${hashedPersonalNumber}/completions`,
@@ -63,9 +59,7 @@ async function postCompletion(payload) {
     },
   };
 
-  const [sendVivaAdapterRequestError, response] = await to(
-    sendVivaAdapterRequest(requestParams)
-  );
+  const [sendVivaAdapterRequestError, response] = await to(sendVivaAdapterRequest(requestParams));
   if (sendVivaAdapterRequestError) {
     throw sendVivaAdapterRequestError;
   }
@@ -76,20 +70,14 @@ async function postCompletion(payload) {
 async function getLatestWorkflow(personalNumber) {
   const { hashSalt, hashSaltLength } = await VADA_SSM_PARAMS;
 
-  const hashedPersonalNumber = hash.encode(
-    personalNumber,
-    hashSalt,
-    hashSaltLength
-  );
+  const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
   const requestParams = {
     endpoint: `mypages/${hashedPersonalNumber}/workflows/latest`,
     method: 'get',
   };
 
-  const [sendVivaAdapterRequestError, response] = await to(
-    sendVivaAdapterRequest(requestParams)
-  );
+  const [sendVivaAdapterRequestError, response] = await to(sendVivaAdapterRequest(requestParams));
   if (sendVivaAdapterRequestError) {
     throw sendVivaAdapterRequestError;
   }
@@ -102,20 +90,14 @@ async function getWorkflowCompletions(payload) {
 
   const { hashSalt, hashSaltLength } = await VADA_SSM_PARAMS;
 
-  const hashedPersonalNumber = hash.encode(
-    personalNumber,
-    hashSalt,
-    hashSaltLength
-  );
+  const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
   const requestParams = {
     endpoint: `mypages/${hashedPersonalNumber}/workflows/${workflowId}/completions`,
     method: 'get',
   };
 
-  const [sendVivaAdapterRequestError, response] = await to(
-    sendVivaAdapterRequest(requestParams)
-  );
+  const [sendVivaAdapterRequestError, response] = await to(sendVivaAdapterRequest(requestParams));
   if (sendVivaAdapterRequestError) {
     throw sendVivaAdapterRequestError;
   }
@@ -128,20 +110,14 @@ async function getWorkflow(payload) {
 
   const { hashSalt, hashSaltLength } = await VADA_SSM_PARAMS;
 
-  const hashedPersonalNumber = hash.encode(
-    personalNumber,
-    hashSalt,
-    hashSaltLength
-  );
+  const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
   const requestParams = {
     endpoint: `mypages/${hashedPersonalNumber}/workflows/${workflowId}`,
     method: 'get',
   };
 
-  const [sendVivaAdapterRequestError, response] = await to(
-    sendVivaAdapterRequest(requestParams)
-  );
+  const [sendVivaAdapterRequestError, response] = await to(sendVivaAdapterRequest(requestParams));
   if (sendVivaAdapterRequestError) {
     throw sendVivaAdapterRequestError;
   }
@@ -152,20 +128,14 @@ async function getWorkflow(payload) {
 async function getOfficers(personalNumber) {
   const { hashSalt, hashSaltLength } = await VADA_SSM_PARAMS;
 
-  const hashedPersonalNumber = hash.encode(
-    personalNumber,
-    hashSalt,
-    hashSaltLength
-  );
+  const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
   const requestParams = {
     endpoint: `mypages/${hashedPersonalNumber}`,
     method: 'get',
   };
 
-  const [sendVivaAdapterRequestError, response] = await to(
-    sendVivaAdapterRequest(requestParams)
-  );
+  const [sendVivaAdapterRequestError, response] = await to(sendVivaAdapterRequest(requestParams));
   if (sendVivaAdapterRequestError) {
     throw sendVivaAdapterRequestError;
   }
@@ -174,21 +144,10 @@ async function getOfficers(personalNumber) {
 }
 
 async function postApplication(payload) {
-  const {
-    personalNumber,
-    applicationType,
-    answers,
-    rawData,
-    rawDataType,
-    workflowId,
-  } = payload;
+  const { personalNumber, applicationType, answers, rawData, rawDataType, workflowId } = payload;
   const { hashSalt, hashSaltLength } = await VADA_SSM_PARAMS;
 
-  const hashedPersonalNumber = hash.encode(
-    personalNumber,
-    hashSalt,
-    hashSaltLength
-  );
+  const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
   const requestParams = {
     endpoint: 'applications',
@@ -203,9 +162,7 @@ async function postApplication(payload) {
     },
   };
 
-  const [sendVivaAdapterRequestError, response] = await to(
-    sendVivaAdapterRequest(requestParams)
-  );
+  const [sendVivaAdapterRequestError, response] = await to(sendVivaAdapterRequest(requestParams));
   if (sendVivaAdapterRequestError) {
     throw sendVivaAdapterRequestError;
   }
@@ -216,20 +173,14 @@ async function postApplication(payload) {
 async function getApplication(personalNumber) {
   const { hashSalt, hashSaltLength } = await VADA_SSM_PARAMS;
 
-  const hashedPersonalNumber = hash.encode(
-    personalNumber,
-    hashSalt,
-    hashSaltLength
-  );
+  const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
   const requestParams = {
     endpoint: `mypages/${hashedPersonalNumber}`,
     method: 'get',
   };
 
-  const [sendVivaAdapterRequestError, response] = await to(
-    sendVivaAdapterRequest(requestParams)
-  );
+  const [sendVivaAdapterRequestError, response] = await to(sendVivaAdapterRequest(requestParams));
   if (sendVivaAdapterRequestError) {
     throw sendVivaAdapterRequestError;
   }
@@ -240,20 +191,14 @@ async function getApplication(personalNumber) {
 async function getPerson(personalNumber) {
   const { hashSalt, hashSaltLength } = await VADA_SSM_PARAMS;
 
-  const hashedPersonalNumber = hash.encode(
-    personalNumber,
-    hashSalt,
-    hashSaltLength
-  );
+  const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
   const requestParams = {
     endpoint: `mypages/${hashedPersonalNumber}`,
     method: 'get',
   };
 
-  const [sendVivaAdapterRequestError, response] = await to(
-    sendVivaAdapterRequest(requestParams)
-  );
+  const [sendVivaAdapterRequestError, response] = await to(sendVivaAdapterRequest(requestParams));
   if (sendVivaAdapterRequestError) {
     throw sendVivaAdapterRequestError;
   }
@@ -267,20 +212,14 @@ async function getPerson(personalNumber) {
 async function getApplicationStatus(personalNumber) {
   const { hashSalt, hashSaltLength } = await VADA_SSM_PARAMS;
 
-  const hashedPersonalNumber = hash.encode(
-    personalNumber,
-    hashSalt,
-    hashSaltLength
-  );
+  const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
   const requestParams = {
     endpoint: `applications/${hashedPersonalNumber}/status`,
     method: 'get',
   };
 
-  const [sendVivaAdapterRequestError, response] = await to(
-    sendVivaAdapterRequest(requestParams)
-  );
+  const [sendVivaAdapterRequestError, response] = await to(sendVivaAdapterRequest(requestParams));
   if (sendVivaAdapterRequestError) {
     throw sendVivaAdapterRequestError;
   }

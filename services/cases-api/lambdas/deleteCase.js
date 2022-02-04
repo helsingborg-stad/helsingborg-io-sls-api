@@ -24,9 +24,7 @@ export async function main(event, context) {
     ReturnValues: 'ALL_OLD',
   };
 
-  const [error, deleteCaseResponse] = await to(
-    sendDeleteCaseRequest(deleteCaseParams)
-  );
+  const [error, deleteCaseResponse] = await to(sendDeleteCaseRequest(deleteCaseParams));
   if (error) {
     log.error(
       'Delete case Request error',

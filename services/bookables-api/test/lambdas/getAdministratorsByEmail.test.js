@@ -5,10 +5,7 @@ import { getBookables } from '../../helpers/bookables';
 jest.mock('../../helpers/searchAdministrators');
 jest.mock('../../helpers/bookables');
 
-const mockAdministrators = [
-  'administrator@helsingborg.se',
-  'administrator_2@helsingborg.se',
-];
+const mockAdministrators = ['administrator@helsingborg.se', 'administrator_2@helsingborg.se'];
 const email = 'mock@helsingborg.se';
 const mockHeaders = {
   'Access-Control-Allow-Credentials': true,

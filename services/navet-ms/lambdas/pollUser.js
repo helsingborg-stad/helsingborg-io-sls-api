@@ -1,9 +1,6 @@
 /* eslint-disable no-console */
 import to from 'await-to-js';
-import {
-  InternalServerError,
-  UnauthorizedError,
-} from '@helsingborg-stad/npm-api-error-handling';
+import { InternalServerError, UnauthorizedError } from '@helsingborg-stad/npm-api-error-handling';
 
 import config from '../../../config';
 import params from '../../../libs/params';
@@ -23,9 +20,7 @@ const NAVET_PARAMS = params.read(config.navet.envsKeyName);
 export async function main(event, context) {
   const { user } = event.detail;
 
-  const [requestNavetUserError, navetUser] = await to(
-    requestNavetUser(user.personalNumber)
-  );
+  const [requestNavetUserError, navetUser] = await to(requestNavetUser(user.personalNumber));
   if (requestNavetUserError) {
     log.error(
       'Navet request user error',
@@ -61,9 +56,7 @@ function getNavetPollEventDetail(navetUser) {
 async function requestNavetUser(personalNumber) {
   const ssmParams = await NAVET_PARAMS;
 
-  const [getNavetClientError, navetRequestClient] = await to(
-    getNavetRequestClient(ssmParams)
-  );
+  const [getNavetClientError, navetRequestClient] = await to(getNavetRequestClient(ssmParams));
   if (getNavetClientError) {
     throw getNavetClientError;
   }
@@ -99,9 +92,7 @@ async function requestNavetUser(personalNumber) {
 }
 
 async function getNavetPersonPost(navetUser) {
-  const [getPersonPostError, navetPerson] = await to(
-    getPersonPostCollection(navetUser.data)
-  );
+  const [getPersonPostError, navetPerson] = await to(getPersonPostCollection(navetUser.data));
   if (getPersonPostError) {
     throw getPersonPostError;
   }

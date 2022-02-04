@@ -10,12 +10,7 @@ import dayjs from 'dayjs';
  * @param {number} meetingBuffer The time between two meetings
  * @returns {{startTime: string, endTime: strig}[]} Array of start times and end times objects
  */
-const createSlotsWithinTimeSpan = (
-  timeSpanStart,
-  timeSpanEnd,
-  meetingDuration,
-  meetingBuffer
-) => {
+const createSlotsWithinTimeSpan = (timeSpanStart, timeSpanEnd, meetingDuration, meetingBuffer) => {
   const timeSlots = [];
 
   let slotStart = timeSpanStart;

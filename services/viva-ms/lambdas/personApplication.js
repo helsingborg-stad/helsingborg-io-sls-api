@@ -12,10 +12,7 @@ export async function main(event) {
     vivaAdapter.person.get(clientUser.personalNumber)
   );
   if (getVivaPersonError) {
-    console.error(
-      '(Viva-ms: personApplication) getVivaPersonError',
-      getVivaPersonError
-    );
+    console.error('(Viva-ms: personApplication) getVivaPersonError', getVivaPersonError);
     return false;
   }
 

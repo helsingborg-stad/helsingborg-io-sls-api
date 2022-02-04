@@ -7,9 +7,9 @@ import {
 export function populateChildrenAnswers(repeaterInputList, childrenList) {
   const answers = childrenList.reduce((answers, child, index) => {
     const childAnswers = Object.keys(child)
-      .map((key) => {
+      .map(key => {
         const childAnswerList = repeaterInputList
-          .map((input) => {
+          .map(input => {
             if (input.tags.includes(key)) {
               const inputId = input.id.replace('[*]', index);
               return formatAnswer(inputId, input.tags, child[key]);
@@ -28,21 +28,12 @@ export function populateChildrenAnswers(repeaterInputList, childrenList) {
   return answers;
 }
 
-export default function populateFormWithVivaChildren(
-  form,
-  formTemplate,
-  vivaChildrenList
-) {
+export default function populateFormWithVivaChildren(form, formTemplate, vivaChildrenList) {
   const formFields = getFormFieldsWithLoadPreviousAttribute(formTemplate);
 
-  const childrenRepeaterInputList = formFields.filter((field) =>
-    field.tags?.includes('children')
-  );
+  const childrenRepeaterInputList = formFields.filter(field => field.tags?.includes('children'));
 
-  const childrenAnswers = populateChildrenAnswers(
-    childrenRepeaterInputList,
-    vivaChildrenList
-  );
+  const childrenAnswers = populateChildrenAnswers(childrenRepeaterInputList, vivaChildrenList);
 
   const mergedChildrenAnswers = mergeAnswers(childrenAnswers, form.answers);
 

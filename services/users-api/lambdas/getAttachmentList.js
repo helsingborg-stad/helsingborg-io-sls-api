@@ -12,9 +12,7 @@ export async function main(event, context) {
   const decodedToken = decodeToken(event);
   const { personalNumber } = decodedToken;
 
-  const [getFilesError, s3Files] = await to(
-    getFilesFromUserS3Bucket(personalNumber)
-  );
+  const [getFilesError, s3Files] = await to(getFilesFromUserS3Bucket(personalNumber));
   if (getFilesError) {
     log.error(
       'Get file error',
@@ -26,10 +24,7 @@ export async function main(event, context) {
     return response.failure(getFilesError);
   }
 
-  const files = getUserFilesWithoutPersonalNumberPrefix(
-    s3Files,
-    personalNumber
-  );
+  const files = getUserFilesWithoutPersonalNumberPrefix(s3Files, personalNumber);
 
   const totalFileSizeSumInBytes = files.reduce(
     (fileSizeSum, file) => fileSizeSum + file.sizeInBytes,
@@ -46,9 +41,7 @@ export async function main(event, context) {
 }
 
 async function getFilesFromUserS3Bucket(personalNumber) {
-  const [getFilesError, s3Files] = await to(
-    S3.getFiles(BUCKET_NAME, `${personalNumber}/`)
-  );
+  const [getFilesError, s3Files] = await to(S3.getFiles(BUCKET_NAME, `${personalNumber}/`));
   if (getFilesError) {
     throwError(getFilesError.statusCode, getFilesError.message);
   }
@@ -57,10 +50,8 @@ async function getFilesFromUserS3Bucket(personalNumber) {
 }
 
 function getUserFilesWithoutPersonalNumberPrefix(s3Files, prefix) {
-  const nonPrefixedFiles = s3Files.Contents.filter(
-    (file) => file.Key !== `${prefix}/`
-  );
-  return nonPrefixedFiles.map((file) => ({
+  const nonPrefixedFiles = s3Files.Contents.filter(file => file.Key !== `${prefix}/`);
+  return nonPrefixedFiles.map(file => ({
     s3key: file.Key,
     name: file.Key.substring(`${prefix}/`.length),
     sizeInBytes: file.Size,

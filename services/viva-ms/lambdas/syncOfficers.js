@@ -16,9 +16,7 @@ export async function main(event, context) {
     return null;
   }
 
-  const unMarshalledCaseData = dynamoDbConverter.unmarshall(
-    event.detail.dynamodb.NewImage
-  );
+  const unMarshalledCaseData = dynamoDbConverter.unmarshall(event.detail.dynamodb.NewImage);
 
   const { PK, SK, details } = unMarshalledCaseData;
   if (!('administrators' in details)) {
@@ -48,9 +46,7 @@ export async function main(event, context) {
     return false;
   }
 
-  const [updateError] = await to(
-    sendUpdateRequest({ PK, SK }, vivaAdministrators)
-  );
+  const [updateError] = await to(sendUpdateRequest({ PK, SK }, vivaAdministrators));
   if (updateError) {
     log.error(
       'Could not update case applicant administrator(s)',
@@ -89,7 +85,7 @@ function parseVivaOfficers(vivaOfficer) {
     vivaOfficers.push(vivaOfficer);
   }
 
-  const vivaAdministrators = vivaOfficers.map((officer) => {
+  const vivaAdministrators = vivaOfficers.map(officer => {
     const { name: complexName, title, mail: email, phone } = officer;
     const name = complexName.replace(/^CN=(.+)\/OU.*$/, `$1`);
 

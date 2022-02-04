@@ -29,11 +29,7 @@ export async function main(event, context) {
 
   if (queryResponse[1].Count === 0) {
     const errorMessage = 'Form with that id not found in the database.';
-    log.error(
-      errorMessage,
-      context.awsRequestId,
-      'service-cases-api-getForm-002'
-    );
+    log.error(errorMessage, context.awsRequestId, 'service-cases-api-getForm-002');
     return buildResponse(404, { error: errorMessage });
   }
   return buildResponse(200, queryResponse[1].Items[0]);

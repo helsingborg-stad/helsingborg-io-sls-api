@@ -18,9 +18,7 @@ export async function main(event) {
   }
 
   const searchBookingBody = { startTime, endTime };
-  const [searchBookingError, searchResponse] = await to(
-    booking.search(searchBookingBody)
-  );
+  const [searchBookingError, searchResponse] = await to(booking.search(searchBookingBody));
   if (searchBookingError) {
     return response.failure(searchBookingError);
   }
@@ -34,9 +32,7 @@ export async function main(event) {
   }
 
   const createBookingBody = getCreateBookingBody(body);
-  const [error, createBookingResponse] = await to(
-    booking.create(createBookingBody)
-  );
+  const [error, createBookingResponse] = await to(booking.create(createBookingBody));
   if (error) {
     return response.failure(error);
   }

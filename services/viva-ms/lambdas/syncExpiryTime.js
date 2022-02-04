@@ -6,10 +6,7 @@ import config from '../../../config';
 import * as dynamoDb from '../../../libs/dynamoDb';
 import log from '../../../libs/logs';
 import { getItem as getStoredUserCase } from '../../../libs/queries';
-import {
-  getFutureTimestamp,
-  millisecondsToSeconds,
-} from '../../../libs/timestampHelper';
+import { getFutureTimestamp, millisecondsToSeconds } from '../../../libs/timestampHelper';
 import {
   ACTIVE_ONGOING,
   ACTIVE_SIGNATURE_PENDING,
@@ -46,12 +43,8 @@ export async function main(event, context) {
     return false;
   }
 
-  const expireHours = getExpiryHoursOnStatusType(
-    storedUserCase.Item.status.type
-  );
-  const newExpirationTime = millisecondsToSeconds(
-    getFutureTimestamp(expireHours)
-  );
+  const expireHours = getExpiryHoursOnStatusType(storedUserCase.Item.status.type);
+  const newExpirationTime = millisecondsToSeconds(getFutureTimestamp(expireHours));
 
   const [updateCaseError] = await to(
     updateCaseExpirationTime({

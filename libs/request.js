@@ -31,5 +31,4 @@ export const requestClient = (
     maxBodyLength: Infinity,
   });
 
-export const call = (client, method, url, payload) =>
-  client[method](url, payload);
+export const call = (client, method, url, payload) => client[method](url, payload);

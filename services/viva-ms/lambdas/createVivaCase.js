@@ -10,10 +10,7 @@ import log from '../../../libs/logs';
 import { putItem } from '../../../libs/queries';
 import { getStatusByType } from '../../../libs/caseStatuses';
 import { populateFormWithPreviousCaseAnswers } from '../../../libs/formAnswers';
-import {
-  getFutureTimestamp,
-  millisecondsToSeconds,
-} from '../../../libs/timestampHelper';
+import { getFutureTimestamp, millisecondsToSeconds } from '../../../libs/timestampHelper';
 import {
   CASE_PROVIDER_VIVA,
   TWELVE_HOURS,
@@ -45,9 +42,7 @@ export async function main(event, context) {
     return false;
   }
 
-  const [getCaseListOnPeriodError, caseList] = await to(
-    getCaseListOnPeriod(vivaPersonDetail)
-  );
+  const [getCaseListOnPeriodError, caseList] = await to(getCaseListOnPeriod(vivaPersonDetail));
   if (getCaseListOnPeriodError) {
     log.error(
       'Failed to query cases table',
@@ -59,11 +54,7 @@ export async function main(event, context) {
   }
 
   if (caseList.Items[0]) {
-    log.info(
-      'Case with specified period already exists',
-      context.awsRequestId,
-      null
-    );
+    log.info('Case with specified period already exists', context.awsRequestId, null);
     return false;
   }
 
@@ -91,9 +82,7 @@ export async function main(event, context) {
 }
 
 function getCaseListOnPeriod(vivaPerson) {
-  const personalNumber = stripNonNumericalCharacters(
-    String(vivaPerson.case.client.pnumber)
-  );
+  const personalNumber = stripNonNumericalCharacters(String(vivaPerson.case.client.pnumber));
   const { startDate, endDate } = getPeriodInMilliseconds(vivaPerson);
 
   const casesQueryParams = {
@@ -119,8 +108,7 @@ async function createRecurringVivaCase(vivaPerson, user) {
     throw paramsReadError;
   }
 
-  const { recurringFormId, completionFormId, randomCheckFormId } =
-    vivaCaseSSMParams;
+  const { recurringFormId, completionFormId, randomCheckFormId } = vivaCaseSSMParams;
 
   const applicantPersonalNumber = stripNonNumericalCharacters(
     String(vivaPerson.case.client.pnumber)
@@ -134,9 +122,7 @@ async function createRecurringVivaCase(vivaPerson, user) {
   const workflowId = vivaPerson.application?.workflowid || null;
   const period = getPeriodInMilliseconds(vivaPerson);
 
-  const expirationTime = millisecondsToSeconds(
-    getFutureTimestamp(TWELVE_HOURS)
-  );
+  const expirationTime = millisecondsToSeconds(getFutureTimestamp(TWELVE_HOURS));
 
   const caseItemPutParams = {
     TableName: config.cases.tableName,
@@ -164,19 +150,14 @@ async function createRecurringVivaCase(vivaPerson, user) {
 
   const casePersonCoApplicant = getUserOnRole(casePersonList, 'coApplicant');
   if (casePersonCoApplicant) {
-    caseItemPutParams.Item[
-      'GSI1'
-    ] = `USER#${casePersonCoApplicant.personalNumber}`;
+    caseItemPutParams.Item['GSI1'] = `USER#${casePersonCoApplicant.personalNumber}`;
   }
 
   const formIdList = [recurringFormId, completionFormId, randomCheckFormId];
   const initialFormList = getInitialFormAttributes(formIdList, vivaPerson);
 
-  casePersonList = casePersonList.map((person) => {
-    if (
-      person.role === 'applicant' &&
-      person.personalNumber === user.personalNumber
-    ) {
+  casePersonList = casePersonList.map(person => {
+    if (person.role === 'applicant' && person.personalNumber === user.personalNumber) {
       const personApplicantExtendedInfo = { ...person, ...user };
       return personApplicantExtendedInfo;
     }
@@ -185,9 +166,7 @@ async function createRecurringVivaCase(vivaPerson, user) {
 
   const [, formTemplates] = await to(getFormTemplates(formIdList));
 
-  const [getLastUpdatedCaseError, lastUpdatedCase] = await to(
-    getLastUpdatedCase(PK)
-  );
+  const [getLastUpdatedCaseError, lastUpdatedCase] = await to(getLastUpdatedCase(PK));
   if (getLastUpdatedCaseError) {
     throw getLastUpdatedCaseError;
   }
@@ -220,9 +199,7 @@ async function createRecurringVivaCase(vivaPerson, user) {
 }
 
 function getVivaChildren(casePersonList) {
-  const childrenList = casePersonList.filter(
-    (person) => person.role === 'children'
-  );
+  const childrenList = casePersonList.filter(person => person.role === 'children');
   return childrenList;
 }
 
@@ -280,7 +257,7 @@ function getEncryptionAttributes(vivaPerson) {
 }
 
 function getUserOnRole(userList, role) {
-  const user = userList.find((user) => user.role == role);
+  const user = userList.find(user => user.role == role);
   return user;
 }
 
@@ -308,7 +285,7 @@ function getCasePersonList(vivaPerson) {
     child: CHILDREN,
   };
 
-  const casePersonList = vivaPersonList.map((vivaPerson) => {
+  const casePersonList = vivaPersonList.map(vivaPerson => {
     const { pnumber, fname: firstName, lname: lastName, type } = vivaPerson;
     const personalNumber = stripNonNumericalCharacters(String(pnumber));
 
@@ -332,7 +309,7 @@ function getCasePersonList(vivaPerson) {
 async function getFormTemplates(formIdList) {
   const [getError, rawForms] = await to(
     Promise.all(
-      formIdList.map((formId) => {
+      formIdList.map(formId => {
         const formGetParams = {
           TableName: config.forms.tableName,
           Key: {
@@ -347,7 +324,7 @@ async function getFormTemplates(formIdList) {
     throw getError;
   }
 
-  const forms = rawForms.map((rawForm) => rawForm.Item);
+  const forms = rawForms.map(rawForm => rawForm.Item);
 
   const formsMap = forms.reduce(
     (formsMap, form) => ({
@@ -364,8 +341,7 @@ async function getLastUpdatedCase(PK) {
   const lastUpdatedCaseQueryParams = {
     TableName: config.cases.tableName,
     KeyConditionExpression: 'PK = :pk',
-    FilterExpression:
-      'begins_with(#status.#type, :statusTypeClosed) and #provider = :provider',
+    FilterExpression: 'begins_with(#status.#type, :statusTypeClosed) and #provider = :provider',
     ExpressionAttributeNames: {
       '#status': 'status',
       '#type': 'type',
@@ -378,16 +354,12 @@ async function getLastUpdatedCase(PK) {
     },
   };
 
-  const [queryError, queryResponse] = await to(
-    dynamoDB.call('query', lastUpdatedCaseQueryParams)
-  );
+  const [queryError, queryResponse] = await to(dynamoDB.call('query', lastUpdatedCaseQueryParams));
   if (queryError) {
     throw queryError;
   }
 
-  const sortedCases = queryResponse.Items.sort(
-    (a, b) => b.updatedAt - a.updatedAt
-  );
+  const sortedCases = queryResponse.Items.sort((a, b) => b.updatedAt - a.updatedAt);
   return sortedCases?.[0] || {};
 }
 

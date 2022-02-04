@@ -11,15 +11,12 @@ export async function main(event) {
   if (!referenceCode || !startTime || !endTime) {
     return response.failure({
       status: 403,
-      message:
-        'Missing one of more required parameter: "referenceCode", "startTime", "endTime"',
+      message: 'Missing one of more required parameter: "referenceCode", "startTime", "endTime"',
     });
   }
 
   const searchBookingBody = { referenceCode, startTime, endTime };
-  const [searchBookingError, searchBookingResponse] = await to(
-    booking.search(searchBookingBody)
-  );
+  const [searchBookingError, searchBookingResponse] = await to(booking.search(searchBookingBody));
   if (searchBookingError) {
     return response.failure(searchBookingError);
   }

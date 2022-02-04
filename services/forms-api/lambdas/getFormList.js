@@ -10,8 +10,7 @@ import log from '../../../libs/logs';
 export async function main(_event, context) {
   const params = {
     TableName: config.forms.tableName,
-    ProjectionExpression:
-      '#n, description, id, createdAt, updatedAt, subform, formType',
+    ProjectionExpression: '#n, description, id, createdAt, updatedAt, subform, formType',
     ExpressionAttributeNames: { '#n': 'name' },
   };
   const [error, queryResponse] = await to(makeScanQuery(params));

@@ -21,12 +21,7 @@ async function searchAdministrators(body) {
   );
 
   const [datatorgetError, datatorgetResponse] = await to(
-    request.call(
-      requestClient,
-      'post',
-      `${datatorgetEndpoint}/${URI_SOURCE}`,
-      body
-    )
+    request.call(requestClient, 'post', `${datatorgetEndpoint}/${URI_SOURCE}`, body)
   );
   if (datatorgetError) {
     throw datatorgetError;

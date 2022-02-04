@@ -1,9 +1,6 @@
 /* eslint-disable no-console */
 import to from 'await-to-js';
-import {
-  throwError,
-  BadRequestError,
-} from '@helsingborg-stad/npm-api-error-handling';
+import { throwError, BadRequestError } from '@helsingborg-stad/npm-api-error-handling';
 import S3 from '../../../libs/S3';
 import * as response from '../../../libs/response';
 import { decodeToken } from '../../../libs/token';
@@ -14,17 +11,13 @@ const BUCKET_NAME = process.env.BUCKET_NAME;
 export async function main(event, context) {
   const { filename } = event.pathParameters;
   if (!filename) {
-    return response.failure(
-      new BadRequestError('Missing filename in path query string')
-    );
+    return response.failure(new BadRequestError('Missing filename in path query string'));
   }
 
   const decodedToken = decodeToken(event);
   const { personalNumber } = decodedToken;
 
-  const [getFilesError, userS3Files] = await to(
-    getFilesFromUserS3Bucket(personalNumber)
-  );
+  const [getFilesError, userS3Files] = await to(getFilesFromUserS3Bucket(personalNumber));
   if (getFilesError) {
     log.error(
       'Get files error',
@@ -68,9 +61,7 @@ export async function main(event, context) {
 }
 
 async function getFilesFromUserS3Bucket(personalNumber) {
-  const [getFilesError, s3Files] = await to(
-    S3.getFiles(BUCKET_NAME, `${personalNumber}/`)
-  );
+  const [getFilesError, s3Files] = await to(S3.getFiles(BUCKET_NAME, `${personalNumber}/`));
   if (getFilesError) {
     throwError(getFilesError.statusCode, getFilesError.message);
   }
@@ -88,7 +79,7 @@ async function deleteFile(fileKey) {
 }
 
 async function findFile(s3Files, fileKey) {
-  const fileKeyExists = s3Files.Contents.find((file) => file?.Key === fileKey);
+  const fileKeyExists = s3Files.Contents.find(file => file?.Key === fileKey);
   if (!fileKeyExists) {
     throwError(404, `No file with key '${fileKey}' found`);
   }

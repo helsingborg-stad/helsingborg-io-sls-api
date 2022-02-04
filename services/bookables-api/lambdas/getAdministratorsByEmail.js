@@ -20,9 +20,7 @@ export async function main(event) {
     return response.failure(getBookablesError);
   }
 
-  const sharedEmail = bookablesResponse.find(
-    ({ sharedMailbox }) => sharedMailbox === email
-  );
+  const sharedEmail = bookablesResponse.find(({ sharedMailbox }) => sharedMailbox === email);
   if (sharedEmail === undefined) {
     return response.failure({ status: 404, message: 'Email does not exist' });
   }

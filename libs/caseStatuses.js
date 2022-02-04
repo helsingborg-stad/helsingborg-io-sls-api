@@ -59,8 +59,7 @@ const statuses = [
   {
     type: NOT_STARTED_VIVA,
     name: 'Öppen',
-    description:
-      'Ansökan är öppen. Du kan nu söka ekonomiskt bistånd för perioden.',
+    description: 'Ansökan är öppen. Du kan nu söka ekonomiskt bistånd för perioden.',
   },
   {
     type: ACTIVE_COMPLETION_REQUIRED_VIVA,
@@ -99,7 +98,6 @@ const statuses = [
   },
 ];
 
-export const getStatusByType = (type) =>
-  statuses.find((status) => status.type === type);
+export const getStatusByType = type => statuses.find(status => status.type === type);
 
 export default statuses;

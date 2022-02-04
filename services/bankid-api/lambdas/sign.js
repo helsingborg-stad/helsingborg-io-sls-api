@@ -16,9 +16,7 @@ export const main = async (event, context) => {
   const bankidSSMParams = await SSMParams;
   const { endUserIp, personalNumber, userVisibleData } = JSON.parse(event.body);
 
-  const [validationError] = await to(
-    validateEventBody(event.body, validateTokenEventBody)
-  );
+  const [validationError] = await to(validateEventBody(event.body, validateTokenEventBody));
 
   if (validationError && !valid) {
     log.error(
@@ -39,9 +37,7 @@ export const main = async (event, context) => {
       : undefined,
   };
 
-  const [error, bankIdSignResponse] = await to(
-    sendBankIdSignRequest(bankidSSMParams, payload)
-  );
+  const [error, bankIdSignResponse] = await to(sendBankIdSignRequest(bankidSSMParams, payload));
 
   if (!bankIdSignResponse) {
     log.error(
@@ -79,19 +75,12 @@ async function sendBankIdSignRequest(params, payload) {
   let error, bankIdClientResponse, bankIdSignResponse;
   [error, bankIdClientResponse] = await to(bankId.client(params));
 
-  if (!bankIdClientResponse)
-    throwError(error.response.status, error.response.data.details);
+  if (!bankIdClientResponse) throwError(error.response.status, error.response.data.details);
 
   [error, bankIdSignResponse] = await to(
-    request.call(
-      bankIdClientResponse,
-      'post',
-      bankId.url(params.apiUrl, '/sign'),
-      payload
-    )
+    request.call(bankIdClientResponse, 'post', bankId.url(params.apiUrl, '/sign'), payload)
   );
 
-  if (!bankIdSignResponse)
-    throwError(error.response.status, error.response.data.details);
+  if (!bankIdSignResponse) throwError(error.response.status, error.response.data.details);
   return bankIdSignResponse;
 }

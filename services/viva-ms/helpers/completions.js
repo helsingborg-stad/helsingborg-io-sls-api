@@ -25,9 +25,7 @@ function getCompletionStatus(completions) {
 }
 
 function getCompletionState(completions) {
-  return completions.isRandomCheck
-    ? VIVA_RANDOM_CHECK_REQUIRED
-    : VIVA_COMPLETION_REQUIRED;
+  return completions.isRandomCheck ? VIVA_RANDOM_CHECK_REQUIRED : VIVA_COMPLETION_REQUIRED;
 }
 
 async function getVivaWorkflowCompletions(personalNumber, workflowId) {
@@ -65,9 +63,7 @@ async function getCaseOnWorkflowId(personalNumber, workflowId) {
     },
   };
 
-  const [queryError, queryResponse] = await to(
-    dynamoDb.call('query', queryParams)
-  );
+  const [queryError, queryResponse] = await to(dynamoDb.call('query', queryParams));
   if (queryError) {
     throw queryError;
   }

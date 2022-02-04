@@ -18,9 +18,7 @@ export async function getUserCase(personalNumber, id) {
     throw getCoApplicantCaseError;
   }
 
-  const concatAndDeDuplicateCase = (...userCaseList) => [
-    ...new Set([].concat(...userCaseList)),
-  ];
+  const concatAndDeDuplicateCase = (...userCaseList) => [...new Set([].concat(...userCaseList))];
   const userCaseList = concatAndDeDuplicateCase(
     userApplicantCaseResult.Items,
     userCoApplicantCaseResult.Items

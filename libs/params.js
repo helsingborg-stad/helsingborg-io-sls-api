@@ -15,9 +15,7 @@ async function read(name) {
     WithDecryption: true,
   };
 
-  const [ssmError, ssmParameters] = await to(
-    ssm.getParameter(requestParameters).promise()
-  );
+  const [ssmError, ssmParameters] = await to(ssm.getParameter(requestParameters).promise());
   if (ssmError) {
     throw ssmError;
   }

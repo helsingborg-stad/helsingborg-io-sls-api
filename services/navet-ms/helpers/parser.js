@@ -19,7 +19,7 @@ export const getPersonPostSoapRequestPayload = ({
   </soapenv:Body>
 </soapenv:Envelope>`;
 
-export const getPersonPostCollection = (xml) =>
+export const getPersonPostCollection = xml =>
   new Promise((resolve, reject) => {
     try {
       const xmlPersonPostArray = xml.split('Folkbokforingsposter>');
@@ -47,7 +47,7 @@ export const getPersonPostCollection = (xml) =>
     }
   });
 
-export const getErrorMessageFromXML = (xml) =>
+export const getErrorMessageFromXML = xml =>
   new Promise((resolve, reject) => {
     try {
       const parsedOnce = xml.split('<faultstring>');

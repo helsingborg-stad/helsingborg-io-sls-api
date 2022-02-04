@@ -55,9 +55,7 @@ export async function main(event, context) {
   }
 
   const { randomCheckFormId, completionFormId } = vivaCaseSSMParams;
-  const notCompletionForm = ![randomCheckFormId, completionFormId].includes(
-    caseItem.currentFormId
-  );
+  const notCompletionForm = ![randomCheckFormId, completionFormId].includes(caseItem.currentFormId);
   if (notCompletionForm) {
     log.info(
       'Current form is not an completion form',
@@ -111,9 +109,7 @@ export async function main(event, context) {
     return false;
   }
 
-  const [updateError] = await to(
-    updateCaseState(caseKeys, VIVA_COMPLETION_RECEIVED)
-  );
+  const [updateError] = await to(updateCaseState(caseKeys, VIVA_COMPLETION_RECEIVED));
   if (updateError) {
     log.error(
       'Failed to update Viva case',
@@ -127,16 +123,8 @@ export async function main(event, context) {
   return true;
 }
 
-function getAttachmentCategory(
-  tags,
-  attachmentCategories = ['expenses', 'incomes', 'completion']
-) {
-  if (
-    tags &&
-    tags.includes('viva') &&
-    tags.includes('attachment') &&
-    tags.includes('category')
-  ) {
+function getAttachmentCategory(tags, attachmentCategories = ['expenses', 'incomes', 'completion']) {
+  if (tags && tags.includes('viva') && tags.includes('attachment') && tags.includes('category')) {
     return attachmentCategories.reduce((acc, curr) => {
       if (tags.includes(curr)) {
         return curr;
@@ -161,14 +149,9 @@ async function answersToAttachmentList(personalNumber, answerList) {
     }
 
     for (const valueItem of answer.value) {
-      const s3FileKey = generateFileKey(
-        personalNumber,
-        valueItem.uploadedFileName
-      );
+      const s3FileKey = generateFileKey(personalNumber, valueItem.uploadedFileName);
 
-      const [getFileError, file] = await to(
-        S3.getFile(process.env.BUCKET_NAME, s3FileKey)
-      );
+      const [getFileError, file] = await to(S3.getFile(process.env.BUCKET_NAME, s3FileKey));
       if (getFileError) {
         // Throwing the error for a single file would prevent all files from being retrived, since the loop would exit.
         // So instead we log the error and continue the loop iteration.

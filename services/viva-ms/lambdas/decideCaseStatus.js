@@ -35,16 +35,9 @@ export async function main(event, context) {
     );
   }
 
-  log.info(
-    'New case status updated successfully',
-    context.awsRequestId,
-    null,
-    newCaseStatus
-  );
+  log.info('New case status updated successfully', context.awsRequestId, null, newCaseStatus);
 
-  const [putEventError] = await to(
-    putVivaMsEvent.decideCaseStatusSuccess({ caseKeys })
-  );
+  const [putEventError] = await to(putVivaMsEvent.decideCaseStatusSuccess({ caseKeys }));
   if (putEventError) {
     log.error(
       'Could not put decide status success event',
@@ -74,9 +67,7 @@ async function updateCaseStatus(caseKeys, newStatus) {
 }
 
 function decideNewCaseStatus(workflowAttributes) {
-  const decisionList = makeArray(
-    workflowAttributes.decision?.decisions?.decision
-  );
+  const decisionList = makeArray(workflowAttributes.decision?.decisions?.decision);
   const paymentList = makeArray(workflowAttributes.payments?.payment);
   const calculation = workflowAttributes.calculations?.calculation;
 
@@ -95,11 +86,7 @@ function decideNewCaseStatus(workflowAttributes) {
 }
 
 function getCaseStatusType(decisionTypeCode, paymentList) {
-  if (
-    decisionTypeCode === 1 &&
-    paymentList != undefined &&
-    paymentList.length > 0
-  ) {
+  if (decisionTypeCode === 1 && paymentList != undefined && paymentList.length > 0) {
     return CLOSED_APPROVED_VIVA;
   }
 
@@ -107,11 +94,7 @@ function getCaseStatusType(decisionTypeCode, paymentList) {
     return CLOSED_REJECTED_VIVA;
   }
 
-  if (
-    decisionTypeCode === 3 &&
-    paymentList != undefined &&
-    paymentList.length > 0
-  ) {
+  if (decisionTypeCode === 3 && paymentList != undefined && paymentList.length > 0) {
     return CLOSED_PARTIALLY_APPROVED_VIVA;
   }
 
@@ -125,7 +108,7 @@ function getDecisionTypeCode(decisionList) {
 
   let typeCode = 0;
 
-  decisionList.forEach((decision) => {
+  decisionList.forEach(decision => {
     typeCode = typeCode | parseInt(decision.typecode, 10);
   });
 

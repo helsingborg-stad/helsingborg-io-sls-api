@@ -62,9 +62,7 @@ it('returns an IAM policy if JWT token is valid', async () => {
   jest.spyOn(axios, 'get').mockResolvedValueOnce({ data: mockJWKKeys });
   const expectedResult = {
     policyDocument: {
-      Statement: [
-        { Action: 'execute-api:Invoke', Effect: 'Allow', Resource: 'mockArn' },
-      ],
+      Statement: [{ Action: 'execute-api:Invoke', Effect: 'Allow', Resource: 'mockArn' }],
       Version: '2012-10-17',
     },
     principalId: 'officeUser',
@@ -105,10 +103,7 @@ it('throws if JWKS could not be fetched', async () => {
 
   await expect(main(mockEvent)).rejects.toThrow();
 
-  expect(consoleSpy).toHaveBeenCalledWith(
-    'Could not fetch JWKs: ',
-    mockAxiosError
-  );
+  expect(consoleSpy).toHaveBeenCalledWith('Could not fetch JWKs: ', mockAxiosError);
   expect(consoleSpy).toHaveBeenCalledTimes(1);
 });
 
@@ -133,9 +128,7 @@ it('throws if no valid signing key with matching kid where found', async () => {
 
   await expect(main(mockEvent)).rejects.toThrow();
 
-  expect(consoleSpy).toHaveBeenCalledWith(
-    'No signing key with matching "kid" where found'
-  );
+  expect(consoleSpy).toHaveBeenCalledWith('No signing key with matching "kid" where found');
   expect(consoleSpy).toHaveBeenCalledTimes(1);
 });
 
@@ -144,16 +137,11 @@ it('throws if jwt fails to verify the JWT', async () => {
 
   const verifyError = 'verifyError';
   jest.spyOn(jwt, 'decode').mockReturnValueOnce(mockDecodedToken);
-  jest
-    .spyOn(jwt, 'verify')
-    .mockImplementationOnce((_, __, cb) => cb(verifyError));
+  jest.spyOn(jwt, 'verify').mockImplementationOnce((_, __, cb) => cb(verifyError));
   jest.spyOn(axios, 'get').mockResolvedValueOnce({ data: mockJWKKeys });
 
   await expect(main(mockEvent)).rejects.toThrow();
 
-  expect(consoleSpy).toHaveBeenCalledWith(
-    'Failed to verify JWT: ',
-    verifyError
-  );
+  expect(consoleSpy).toHaveBeenCalledWith('Failed to verify JWT: ', verifyError);
   expect(consoleSpy).toHaveBeenCalledTimes(1);
 });

@@ -16,10 +16,7 @@ export async function main(event, context) {
   const { formId } = event.pathParameters;
   const PK = `FORM#${formId}`;
   //remove forbidden keys so that they are not updated
-  const requestBody = objectWithoutProperties(
-    JSON.parse(event.body),
-    forbiddenKeys
-  );
+  const requestBody = objectWithoutProperties(JSON.parse(event.body), forbiddenKeys);
 
   const ExpressionAttributeNames = {};
   const ExpressionAttributeValues = {};
@@ -70,12 +67,7 @@ export async function main(event, context) {
 
   const [error, dynamoDbResponse] = await to(dynamoDb.call('update', params));
   if (error) {
-    log.error(
-      'Form update error',
-      context.awsRequestId,
-      'service-forms-api-updateForm-003',
-      error
-    );
+    log.error('Form update error', context.awsRequestId, 'service-forms-api-updateForm-003', error);
 
     return buildResponse(error.status, error);
   }

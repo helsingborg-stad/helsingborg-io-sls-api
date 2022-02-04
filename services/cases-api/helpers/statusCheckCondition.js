@@ -4,10 +4,7 @@ function isOngoing({ answers, people }) {
 
 function isSignaturePending({ answers, people }) {
   return (
-    answers &&
-    isEncrypted(answers) &&
-    hasApplicantSigned(people) &&
-    !hasCoApplicantsSigned(people)
+    answers && isEncrypted(answers) && hasApplicantSigned(people) && !hasCoApplicantsSigned(people)
   );
 }
 
@@ -21,25 +18,19 @@ function isSubmitted({ answers, people }) {
 
 function hasAllSigned(people) {
   const peopleWhoMustSign = selectPeopleWhoMustSign(people);
-  return peopleWhoMustSign.every((person) => person.hasSigned === true);
+  return peopleWhoMustSign.every(person => person.hasSigned === true);
 }
 
 function selectPeopleWhoMustSign(people) {
-  return people.filter((person) =>
-    Object.prototype.hasOwnProperty.call(person, 'hasSigned')
-  );
+  return people.filter(person => Object.prototype.hasOwnProperty.call(person, 'hasSigned'));
 }
 
 function hasApplicantSigned(people) {
-  return people.some(
-    (person) => person.role === 'applicant' && person.hasSigned === true
-  );
+  return people.some(person => person.role === 'applicant' && person.hasSigned === true);
 }
 
 function hasCoApplicantsSigned(people) {
-  return people.every(
-    (person) => person.role === 'coApplicant' && person.hasSigned === true
-  );
+  return people.every(person => person.role === 'coApplicant' && person.hasSigned === true);
 }
 
 function isEncrypted(answers) {

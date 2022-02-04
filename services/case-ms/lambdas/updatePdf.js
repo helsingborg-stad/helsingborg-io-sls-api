@@ -33,9 +33,7 @@ export async function main(event, context) {
     return false;
   }
 
-  const [updateCaseAttributesError] = await to(
-    updateCasePdfAttributes(caseKeys, pdfS3Object.Body)
-  );
+  const [updateCaseAttributesError] = await to(updateCasePdfAttributes(caseKeys, pdfS3Object.Body));
   if (updateCaseAttributesError) {
     log.error(
       'Failed to update case',

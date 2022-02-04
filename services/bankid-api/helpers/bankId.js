@@ -4,7 +4,7 @@ import * as certs from '../../../libs/certificates';
 
 export const url = (baseUrl, path) => `${baseUrl}${path}`;
 
-export const client = async (params) => {
+export const client = async params => {
   const { bucketName, passphrase, caName, pfxName } = params;
 
   try {

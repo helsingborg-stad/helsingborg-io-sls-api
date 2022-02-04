@@ -20,9 +20,7 @@ function validateTypes(data, requiredProps) {
     if (!data[prop.name]) {
       errors.push(`Missing required property: ${prop.name}.`);
     } else if (typeof data[prop.name] !== prop.type) {
-      errors.push(
-        `The property '${prop.name}' needs to be of type '${prop.type}'`
-      );
+      errors.push(`The property '${prop.name}' needs to be of type '${prop.type}'`);
     }
   }
   return errors;

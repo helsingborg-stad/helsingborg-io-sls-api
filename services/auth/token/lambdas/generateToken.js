@@ -60,11 +60,7 @@ export const main = async (event, context) => {
   const personalNumber = decodedGrantToken.personalNumber;
 
   const [getAccessTokenError, accessToken] = await to(
-    generateToken(
-      CONFIG_AUTH_SECRETS.accessToken,
-      personalNumber,
-      ACCESS_TOKEN_EXPIRES_IN_MINUTES
-    )
+    generateToken(CONFIG_AUTH_SECRETS.accessToken, personalNumber, ACCESS_TOKEN_EXPIRES_IN_MINUTES)
   );
 
   if (getAccessTokenError) {
@@ -143,16 +139,12 @@ function getGrantTypeValues(eventBody) {
 }
 
 async function generateToken(secretConfig, personalNumber, expiresInMinutes) {
-  const [getSecretError, secret] = await to(
-    secrets.get(secretConfig.name, secretConfig.keyName)
-  );
+  const [getSecretError, secret] = await to(secrets.get(secretConfig.name, secretConfig.keyName));
   if (getSecretError) {
     throwError(getSecretError.code, getSecretError.message);
   }
 
-  const [signTokenError, token] = await to(
-    signToken({ personalNumber }, secret, expiresInMinutes)
-  );
+  const [signTokenError, token] = await to(signToken({ personalNumber }, secret, expiresInMinutes));
   if (signTokenError) {
     throwError(401, signTokenError.message);
   }
@@ -161,15 +153,11 @@ async function generateToken(secretConfig, personalNumber, expiresInMinutes) {
 }
 
 async function validateToken(secretConfig, token) {
-  const [getSecretError, secret] = await to(
-    secrets.get(secretConfig.name, secretConfig.keyName)
-  );
+  const [getSecretError, secret] = await to(secrets.get(secretConfig.name, secretConfig.keyName));
   if (getSecretError) {
     throwError(getSecretError.code, getSecretError.message);
   }
-  const [verifyTokenError, verifiedToken] = await to(
-    verifyToken(token, secret)
-  );
+  const [verifyTokenError, verifiedToken] = await to(verifyToken(token, secret));
   if (verifyTokenError) {
     throwError(401, verifyTokenError.message);
   }

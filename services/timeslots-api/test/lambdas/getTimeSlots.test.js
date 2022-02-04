@@ -211,8 +211,7 @@ it('returns failure if no attendees is provided in the request', async () => {
   const expectedError = {
     status: '403',
     code: '403',
-    message:
-      'Missing one or more required parameters: "attendees", "startTime", "endTime"',
+    message: 'Missing one or more required parameters: "attendees", "startTime", "endTime"',
   };
 
   const expectedResult = createLambdaResponse(expectedError, 403);

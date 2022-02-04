@@ -12,8 +12,7 @@ import { signToken } from '../../../libs/token';
 import log from '../../../libs/logs';
 
 const SSMParams = params.read(config.bankId.envsKeyName);
-const CONFIG_AUTH_SECRETS_AUTHORIZATION_CODE =
-  config.auth.secrets.authorizationCode;
+const CONFIG_AUTH_SECRETS_AUTHORIZATION_CODE = config.auth.secrets.authorizationCode;
 
 export const main = async (event, context) => {
   const { body, headers } = event;
@@ -21,10 +20,7 @@ export const main = async (event, context) => {
 
   const bankidSSMParams = await SSMParams;
 
-  console.info(
-    '🚀 ~ file: collect.js ~ line 21 ~ headers -> User-Agent',
-    headers['User-Agent']
-  );
+  console.info('🚀 ~ file: collect.js ~ line 21 ~ headers -> User-Agent', headers['User-Agent']);
 
   const payload = { orderRef };
 
@@ -65,8 +61,7 @@ export const main = async (event, context) => {
       'bankId.collect'
     );
 
-    const personalNumber =
-      bankIdCollectResponse.data.completionData.user.personalNumber;
+    const personalNumber = bankIdCollectResponse.data.completionData.user.personalNumber;
 
     const [generateAuthorizationCodeError, authorizationCode] = await to(
       generateAuthorizationCode(personalNumber)
@@ -89,10 +84,7 @@ export const main = async (event, context) => {
     };
   }
 
-  console.info(
-    '🚀 ~ file: collect.js ~ line 70 ~ responseAttributes',
-    responseAttributes
-  );
+  console.info('🚀 ~ file: collect.js ~ line 70 ~ responseAttributes', responseAttributes);
 
   return response.success(200, {
     type: 'bankIdCollect',
@@ -118,10 +110,7 @@ async function generateAuthorizationCode(personalNumber) {
     )
   );
   if (authorizationCodeSecretError) {
-    throwError(
-      authorizationCodeSecretError.code,
-      authorizationCodeSecretError.message
-    );
+    throwError(authorizationCodeSecretError.code, authorizationCodeSecretError.message);
   }
 
   const signTokenPayload = {
@@ -130,11 +119,7 @@ async function generateAuthorizationCode(personalNumber) {
 
   const tokenExpireTimeInMinutes = 5;
   const [signTokenError, signedToken] = await to(
-    signToken(
-      signTokenPayload,
-      auhtorizationCodeSecret,
-      tokenExpireTimeInMinutes
-    )
+    signToken(signTokenPayload, auhtorizationCodeSecret, tokenExpireTimeInMinutes)
   );
   if (signTokenError) {
     throwError(500, signTokenError.message);
@@ -150,12 +135,7 @@ async function sendBankIdCollectRequest(params, payload) {
   if (!bankIdClientResponse) throwError(503);
 
   [error, bankIdCollectResponse] = await to(
-    request.call(
-      bankIdClientResponse,
-      'post',
-      bankId.url(params.apiUrl, '/collect'),
-      payload
-    )
+    request.call(bankIdClientResponse, 'post', bankId.url(params.apiUrl, '/collect'), payload)
   );
   if (!bankIdCollectResponse) {
     if (error.response.data.details === 'No such order') {

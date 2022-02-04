@@ -32,19 +32,14 @@ export async function main(event, context) {
 
   if (!id) {
     const errorMessage = 'Missing required path parameter "id"';
-    log.error(
-      errorMessage,
-      context.awsRequestId,
-      'service-cases-api-updateCase-001'
-    );
+    log.error(errorMessage, context.awsRequestId, 'service-cases-api-updateCase-001');
 
     return response.failure(new BadRequestError(errorMessage));
   }
 
-  const { error, value: validatedJsonBody } =
-    updateCaseValidationSchema.validate(requestJsonBody, {
-      abortEarly: false,
-    });
+  const { error, value: validatedJsonBody } = updateCaseValidationSchema.validate(requestJsonBody, {
+    abortEarly: false,
+  });
   if (error) {
     log.error(
       error.message.replace(/"/g, "'"),
@@ -53,14 +48,10 @@ export async function main(event, context) {
       error
     );
 
-    return response.failure(
-      new BadRequestError(error.message.replace(/"/g, "'"))
-    );
+    return response.failure(new BadRequestError(error.message.replace(/"/g, "'")));
   }
 
-  const [getUserCaseError, userCase] = await to(
-    getUserCase(personalNumber, id)
-  );
+  const [getUserCaseError, userCase] = await to(getUserCase(personalNumber, id));
   if (getUserCaseError) {
     log.error(
       'Get User case error',
@@ -74,11 +65,7 @@ export async function main(event, context) {
 
   if (!userCase) {
     const errorMessage = 'Case not found';
-    log.error(
-      errorMessage,
-      context.awsRequestId,
-      'service-cases-api-updateCase-004'
-    );
+    log.error(errorMessage, context.awsRequestId, 'service-cases-api-updateCase-004');
 
     return response.failure(new ResourceNotFoundError(errorMessage));
   }
@@ -86,27 +73,18 @@ export async function main(event, context) {
   if (!Object.prototype.hasOwnProperty.call(userCase, 'persons')) {
     const errorMessage =
       'Case attribute "persons" not found. The attribute "persons" is mandatory!';
-    log.error(
-      errorMessage,
-      context.awsRequestId,
-      'service-cases-api-updateCase-005'
-    );
+    log.error(errorMessage, context.awsRequestId, 'service-cases-api-updateCase-005');
 
     return response.failure(new InternalServerError(errorMessage));
   }
 
-  const { currentFormId, currentPosition, answers, signature, encryption } =
-    validatedJsonBody;
+  const { currentFormId, currentPosition, answers, signature, encryption } = validatedJsonBody;
 
   const UpdateExpression = ['updatedAt = :newUpdatedAt'];
   const ExpressionAttributeNames = {};
   const ExpressionAttributeValues = { ':newUpdatedAt': Date.now() };
 
-  const updatedPeopleSignature = updatePeopleSignature(
-    personalNumber,
-    userCase.persons,
-    signature
-  );
+  const updatedPeopleSignature = updatePeopleSignature(personalNumber, userCase.persons, signature);
   const newCaseStatus = getNewCaseStatus({
     answers,
     people: updatedPeopleSignature,
@@ -138,21 +116,14 @@ export async function main(event, context) {
 
   if (currentPosition || answers) {
     if (!currentFormId) {
-      const errorMessage =
-        'currentFormId is needed when updating currentPosition and/or answers';
-      log.error(
-        errorMessage,
-        context.awsRequestId,
-        'service-cases-api-updateCase-007'
-      );
+      const errorMessage = 'currentFormId is needed when updating currentPosition and/or answers';
+      log.error(errorMessage, context.awsRequestId, 'service-cases-api-updateCase-007');
 
       return response.failure(new BadRequestError(errorMessage));
     }
 
     if (currentPosition) {
-      UpdateExpression.push(
-        `forms.#formId.currentPosition = :newCurrentPosition`
-      );
+      UpdateExpression.push(`forms.#formId.currentPosition = :newCurrentPosition`);
       ExpressionAttributeValues[':newCurrentPosition'] = currentPosition;
     }
 
@@ -188,9 +159,7 @@ export async function main(event, context) {
     ReturnValues: 'ALL_NEW',
   };
 
-  const [updateCaseError, updateCaseResponse] = await to(
-    sendUpdateCaseRequest(updateCaseParams)
-  );
+  const [updateCaseError, updateCaseResponse] = await to(sendUpdateCaseRequest(updateCaseParams));
   if (updateCaseError) {
     log.error(
       'Update case error',
@@ -213,11 +182,7 @@ export async function main(event, context) {
     throw putEventError;
   }
 
-  const attributes = objectWithoutProperties(updateCaseResponse.Attributes, [
-    'PK',
-    'SK',
-    'GSI1',
-  ]);
+  const attributes = objectWithoutProperties(updateCaseResponse.Attributes, ['PK', 'SK', 'GSI1']);
   return response.success(200, {
     type: 'updateCase',
     attributes,
@@ -225,9 +190,7 @@ export async function main(event, context) {
 }
 
 async function sendUpdateCaseRequest(params) {
-  const [dynamoDbUpdateCallError, dynamoDbUpdateResult] = await to(
-    dynamoDb.call('update', params)
-  );
+  const [dynamoDbUpdateCallError, dynamoDbUpdateResult] = await to(dynamoDb.call('update', params));
   if (dynamoDbUpdateCallError) {
     throw dynamoDbUpdateCallError;
   }
@@ -246,10 +209,7 @@ async function queryFormsIfExistsFormId(formId) {
     dynamoDb.call('query', dynamoDbQueryParams)
   );
   if (dynamoDbQueryCallError) {
-    throwError(
-      dynamoDbQueryCallError.statusCode,
-      dynamoDbQueryCallError.message
-    );
+    throwError(dynamoDbQueryCallError.statusCode, dynamoDbQueryCallError.message);
   }
 
   if (dynamoDbQueryCallResult.Items.length === 0) {
@@ -294,7 +254,7 @@ function updatePeopleSignature(matchPersonalNumber, people, signature) {
     return [];
   }
 
-  return people.map((person) => {
+  return people.map(person => {
     const newPerson = { ...person };
 
     if (newPerson.personalNumber === matchPersonalNumber && signature) {

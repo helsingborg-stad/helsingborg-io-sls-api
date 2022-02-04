@@ -25,9 +25,7 @@ export async function main(event) {
   }
 
   const createBookingBody = getCreateBookingBody(body);
-  const [createError, createBookingResponse] = await to(
-    booking.create(createBookingBody)
-  );
+  const [createError, createBookingResponse] = await to(booking.create(createBookingBody));
   if (createError) {
     return response.failure(createError);
   }

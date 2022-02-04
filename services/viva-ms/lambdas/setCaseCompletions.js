@@ -70,16 +70,11 @@ export async function main(event, context) {
   const caseUpdateAttributes = {
     newStatus: completionsHelper.get.status(workflowCompletions),
     newState: completionsHelper.get.state(workflowCompletions),
-    newCurrentFormId: completionsHelper.get.formId(
-      vivaCaseSSMParams,
-      workflowCompletions
-    ),
+    newCurrentFormId: completionsHelper.get.formId(vivaCaseSSMParams, workflowCompletions),
     newPersons: resetCasePersonsApplicantSignature(userCase),
     workflowCompletions,
   };
-  const [updateCaseError, updatedCaseItem] = await to(
-    updateCase(caseKeys, caseUpdateAttributes)
-  );
+  const [updateCaseError, updatedCaseItem] = await to(updateCase(caseKeys, caseUpdateAttributes));
   if (updateCaseError) {
     log.error(
       'Update case completion attributes failed',
@@ -101,13 +96,8 @@ export async function main(event, context) {
 }
 
 async function updateCase(keys, caseUpdateAttributes) {
-  const {
-    newStatus,
-    newState,
-    newCurrentFormId,
-    newPersons,
-    workflowCompletions,
-  } = caseUpdateAttributes;
+  const { newStatus, newState, newCurrentFormId, newPersons, workflowCompletions } =
+    caseUpdateAttributes;
 
   const updateParams = {
     TableName: config.cases.tableName,
@@ -138,7 +128,7 @@ async function updateCase(keys, caseUpdateAttributes) {
 
 function resetCasePersonsApplicantSignature(caseItem) {
   const { persons = [] } = caseItem;
-  return persons.map((person) => {
+  return persons.map(person => {
     if (person.role === 'applicant' && person.hasSigned) {
       person.hasSigned = false;
     }

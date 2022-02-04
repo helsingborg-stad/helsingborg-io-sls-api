@@ -13,9 +13,7 @@ import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 export async function main(event, context) {
   const { personalNumber } = event.detail.user;
 
-  const [getCasesError, userCases] = await to(
-    getCasesSumbittedOrProcessing(personalNumber)
-  );
+  const [getCasesError, userCases] = await to(getCasesSumbittedOrProcessing(personalNumber));
   if (getCasesError) {
     log.error(
       'Could not get closed or submitted cases',
@@ -28,11 +26,7 @@ export async function main(event, context) {
 
   const caseList = userCases.Items;
   if (caseList === undefined || caseList.length === 0) {
-    log.info(
-      'No active:submitted or active:processing case(s) found',
-      context.awsRequestId,
-      null
-    );
+    log.info('No active:submitted or active:processing case(s) found', context.awsRequestId, null);
     return true;
   }
 
@@ -58,17 +52,11 @@ export async function main(event, context) {
     }
 
     if (deepEqual(workflow.attributes, caseItem.details?.workflow)) {
-      log.info(
-        'Case workflow is in sync with Viva',
-        context.awsRequestId,
-        null
-      );
+      log.info('Case workflow is in sync with Viva', context.awsRequestId, null);
       continue;
     }
 
-    const [updateDbWorkflowError] = await to(
-      updateCaseWorkflow(caseKeys, workflow.attributes)
-    );
+    const [updateDbWorkflowError] = await to(updateCaseWorkflow(caseKeys, workflow.attributes));
     if (updateDbWorkflowError) {
       log.error(
         'Could not update case workflow details',
@@ -79,9 +67,7 @@ export async function main(event, context) {
       return false;
     }
 
-    const [putEventError] = await to(
-      putVivaMsEvent.syncWorkflowSuccess({ caseKeys, workflow })
-    );
+    const [putEventError] = await to(putVivaMsEvent.syncWorkflowSuccess({ caseKeys, workflow }));
     if (putEventError) {
       log.error(
         'Could not put sync workflow success event',

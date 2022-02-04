@@ -45,9 +45,7 @@ export async function main(event, context) {
     VIVA_STATUS_WEB_APPLICATION_ACTIVE,
     VIVA_STATUS_WEB_APPLICATION_ALLOWED,
   ];
-  if (
-    !validateApplicationStatus(applicationStatusList, completionStatusCodes)
-  ) {
+  if (!validateApplicationStatus(applicationStatusList, completionStatusCodes)) {
     log.info(
       'No Viva completion status(64) found',
       context.awsRequestId,
@@ -90,9 +88,7 @@ export async function main(event, context) {
     caseItem
   );
 
-  const [putEventError] = await to(
-    putVivaMsEvent.checkCompletionSuccess({ caseKeys })
-  );
+  const [putEventError] = await to(putVivaMsEvent.checkCompletionSuccess({ caseKeys }));
   if (putEventError) {
     log.error(
       'Put event ´checkCompletionSuccess´ failed',
@@ -107,9 +103,7 @@ export async function main(event, context) {
 }
 
 async function updateCaseCompletionAttributes(keys, newCurrentFormId) {
-  const newCompletionStatus = getStatusByType(
-    ACTIVE_RANDOM_CHECK_REQUIRED_VIVA
-  );
+  const newCompletionStatus = getStatusByType(ACTIVE_RANDOM_CHECK_REQUIRED_VIVA);
   const [getCaseError, { persons }] = await to(getCase(keys));
   if (getCaseError) {
     throw getCaseError;
@@ -157,7 +151,7 @@ async function getCase(keys) {
     throw error;
   }
 
-  const caseItem = dbResponse.Items.find((item) => item.PK === keys.PK);
+  const caseItem = dbResponse.Items.find(item => item.PK === keys.PK);
   if (!caseItem) {
     throw `Case with sort key: ${keys.SK} not found`;
   }
@@ -166,7 +160,7 @@ async function getCase(keys) {
 }
 
 function resetApplicantSignature(persons) {
-  return persons.map((person) => {
+  return persons.map(person => {
     if (person.role === 'applicant' && person.hasSigned) {
       person.hasSigned = false;
     }

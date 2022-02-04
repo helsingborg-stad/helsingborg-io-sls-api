@@ -1,5 +1,5 @@
 function getTagIfIncludes(tags, string) {
-  return tags.find((tag) => tag.includes(string));
+  return tags.find(tag => tag.includes(string));
 }
 
 function fieldIdIncludes(fieldId, string) {
@@ -18,9 +18,7 @@ function getAttributeFromDotNotation(source, position) {
 }
 
 function filterByFieldIdIncludes(answers, shouldInclude) {
-  return answers.filter((answer) =>
-    fieldIdIncludes(answer.field.id, shouldInclude)
-  );
+  return answers.filter(answer => fieldIdIncludes(answer.field.id, shouldInclude));
 }
 
 function filterByTags(answers, tags) {
@@ -28,9 +26,7 @@ function filterByTags(answers, tags) {
   if (typeof tags === 'string') {
     checkTags = [tags];
   }
-  return answers.filter((answer) =>
-    checkTags.every((tag) => answer.field.tags.includes(tag))
-  );
+  return answers.filter(answer => checkTags.every(tag => answer.field.tags.includes(tag)));
 }
 
 export default {

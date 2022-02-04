@@ -35,11 +35,7 @@ function search(body) {
 
 function getHistoricalAttendees(body) {
   const requestTimeout = process.env.requestTimeout;
-  return sendBookingPostRequest(
-    URI_RESOURCE.GET_HISTORICAL_ATTENDEES,
-    body,
-    requestTimeout
-  );
+  return sendBookingPostRequest(URI_RESOURCE.GET_HISTORICAL_ATTENDEES, body, requestTimeout);
 }
 
 async function sendBookingPostRequest(path, body, requestTimeout) {
@@ -52,9 +48,7 @@ async function sendBookingPostRequest(path, body, requestTimeout) {
   );
 
   const url = `${datatorgetEndpoint}/${path}`;
-  const [error, response] = await to(
-    request.call(requestClient, METHOD.POST, url, body)
-  );
+  const [error, response] = await to(request.call(requestClient, METHOD.POST, url, body));
   if (error) {
     const { status, statusText } = error.response;
     throw { status, message: statusText };
@@ -64,9 +58,7 @@ async function sendBookingPostRequest(path, body, requestTimeout) {
 }
 
 async function getSsmParameters() {
-  const [error, response] = await to(
-    params.read(config.datatorget.envsKeyName)
-  );
+  const [error, response] = await to(params.read(config.datatorget.envsKeyName));
   if (error) {
     throwError(500);
   }

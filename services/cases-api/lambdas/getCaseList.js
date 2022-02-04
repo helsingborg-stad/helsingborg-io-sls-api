@@ -1,9 +1,6 @@
 /* eslint-disable no-console */
 import to from 'await-to-js';
-import {
-  throwError,
-  ResourceNotFoundError,
-} from '@helsingborg-stad/npm-api-error-handling';
+import { throwError, ResourceNotFoundError } from '@helsingborg-stad/npm-api-error-handling';
 
 import config from '../../../config';
 import * as response from '../../../libs/response';
@@ -17,9 +14,7 @@ export async function main(event, context) {
 
   const { personalNumber } = decodedToken;
 
-  const [getUserCaseListError, userCaseList] = await to(
-    getUserCaseList(personalNumber)
-  );
+  const [getUserCaseListError, userCaseList] = await to(getUserCaseList(personalNumber));
   if (getUserCaseListError) {
     log.error(
       'Get User Case list error',
@@ -33,16 +28,12 @@ export async function main(event, context) {
 
   if (userCaseList.length === 0) {
     const errorMessage = 'No user cases found';
-    log.error(
-      errorMessage,
-      context.awsRequestId,
-      'service-cases-api-getCaseList-002'
-    );
+    log.error(errorMessage, context.awsRequestId, 'service-cases-api-getCaseList-002');
 
     return response.failure(new ResourceNotFoundError(errorMessage));
   }
 
-  const userCaseListWithoutKeys = userCaseList.map((item) =>
+  const userCaseListWithoutKeys = userCaseList.map(item =>
     objectWithoutProperties(item, ['PK', 'SK', 'GSI1'])
   );
 
@@ -59,33 +50,19 @@ async function getUserCaseList(personalNumber) {
     getUserApplicantCaseList(personalNumber)
   );
   if (getUserApplicantCaseListError) {
-    console.error(
-      'getUserApplicantCaseListError',
-      getUserApplicantCaseListError
-    );
-    throwError(
-      getUserApplicantCaseListError.statusCode,
-      getUserApplicantCaseListError.message
-    );
+    console.error('getUserApplicantCaseListError', getUserApplicantCaseListError);
+    throwError(getUserApplicantCaseListError.statusCode, getUserApplicantCaseListError.message);
   }
 
   const [getUserCoApplicantCaseListError, coApplicantCaseListResult] = await to(
     getUserCoApplicantCaseList(personalNumber)
   );
   if (getUserCoApplicantCaseListError) {
-    console.error(
-      'getUserCoApplicantCaseListError',
-      getUserCoApplicantCaseListError
-    );
-    throwError(
-      getUserCoApplicantCaseListError.statusCode,
-      getUserCoApplicantCaseListError.message
-    );
+    console.error('getUserCoApplicantCaseListError', getUserCoApplicantCaseListError);
+    throwError(getUserCoApplicantCaseListError.statusCode, getUserCoApplicantCaseListError.message);
   }
 
-  const concatAndDeDuplicateCaseList = (...cases) => [
-    ...new Set([].concat(...cases)),
-  ];
+  const concatAndDeDuplicateCaseList = (...cases) => [...new Set([].concat(...cases))];
   return concatAndDeDuplicateCaseList(
     applicantCaseListResult.Items,
     coApplicantCaseListResult.Items

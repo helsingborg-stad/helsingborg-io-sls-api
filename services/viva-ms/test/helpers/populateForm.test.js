@@ -1,7 +1,5 @@
 import { describe } from 'jest-circus';
-import populateFormWithVivaChildren, {
-  populateChildrenAnswers,
-} from '../../helpers/populateForm';
+import populateFormWithVivaChildren, { populateChildrenAnswers } from '../../helpers/populateForm';
 import formTemplate from '../mock/formTemplate.json';
 
 const caseRecurringForm = {
@@ -156,21 +154,14 @@ const expectedPopulatedFormWithChildren = {
 
 describe('populateChildrenAnswers', () => {
   it('populate answers with children from Viva according to recurring form template', () => {
-    const results = populateChildrenAnswers(
-      repeaterInputFields,
-      vivaChildrenList
-    );
+    const results = populateChildrenAnswers(repeaterInputFields, vivaChildrenList);
     expect(results).toEqual(expectedChildrenAnswers);
   });
 });
 
 describe('populateFormWithVivaChildren', () => {
   it('filter data map on tag "children" and prepending recurring form with children from Viva', () => {
-    const results = populateFormWithVivaChildren(
-      caseRecurringForm,
-      formTemplate,
-      vivaChildrenList
-    );
+    const results = populateFormWithVivaChildren(caseRecurringForm, formTemplate, vivaChildrenList);
     expect(results).toEqual(expectedPopulatedFormWithChildren);
   });
 });

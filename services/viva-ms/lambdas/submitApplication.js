@@ -92,9 +92,7 @@ export async function main(event, context) {
   }
 
   const caseKeys = { PK, SK };
-  const [updateError] = await to(
-    updateVivaCase(caseKeys, vivaApplicationResponse.id)
-  );
+  const [updateError] = await to(updateVivaCase(caseKeys, vivaApplicationResponse.id));
   if (updateError) {
     log.error(
       'Failed to update Viva case',
@@ -106,9 +104,7 @@ export async function main(event, context) {
   }
 
   const clientUser = { personalNumber };
-  const [putEventError] = await to(
-    putVivaMsEvent.applicationReceivedSuccess(clientUser)
-  );
+  const [putEventError] = await to(putVivaMsEvent.applicationReceivedSuccess(clientUser));
   if (putEventError) {
     log.error(
       'Put event ´applicationReceivedSuccess´ failed',
@@ -137,8 +133,7 @@ function updateVivaCase(caseKeys, workflowId) {
       PK: caseKeys.PK,
       SK: caseKeys.SK,
     },
-    UpdateExpression:
-      'SET #state = :newState, #details.#workflowId = :newWorkflowId',
+    UpdateExpression: 'SET #state = :newState, #details.#workflowId = :newWorkflowId',
     ExpressionAttributeNames: {
       '#state': 'state',
       '#details': 'details',

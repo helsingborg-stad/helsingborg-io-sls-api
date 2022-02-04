@@ -45,20 +45,13 @@ function putUserEvent(detail, type, typeCollection = eventTypeCollection) {
 }
 
 export default {
-  checkOpenPeriodSuccess: (detail) =>
-    putUserEvent(detail, 'checkOpenPeriodSuccess'),
-  personDetailSuccess: (detail) => putUserEvent(detail, 'personDetailSuccess'),
-  applicationReceivedSuccess: (detail) =>
-    putUserEvent(detail, 'applicationReceivedSuccess'),
-  checkCompletionSuccess: (detail) =>
-    putUserEvent(detail, 'checkCompletionSuccess'),
-  checkCompletionsStatusRequired: (detail) =>
-    putUserEvent(detail, 'checkCompletionsStatusRequired'),
-  decideCaseStatusSuccess: (detail) =>
-    putUserEvent(detail, 'decideCaseStatusSuccess'),
-  syncWorkflowSuccess: (detail) => putUserEvent(detail, 'syncWorkflowSuccess'),
-  htmlGeneratedSuccess: (detail) =>
-    putUserEvent(detail, 'htmlGeneratedSuccess'),
-  applicationStatusSuccess: (detail) =>
-    putUserEvent(detail, 'applicationStatusSuccess'),
+  checkOpenPeriodSuccess: detail => putUserEvent(detail, 'checkOpenPeriodSuccess'),
+  personDetailSuccess: detail => putUserEvent(detail, 'personDetailSuccess'),
+  applicationReceivedSuccess: detail => putUserEvent(detail, 'applicationReceivedSuccess'),
+  checkCompletionSuccess: detail => putUserEvent(detail, 'checkCompletionSuccess'),
+  checkCompletionsStatusRequired: detail => putUserEvent(detail, 'checkCompletionsStatusRequired'),
+  decideCaseStatusSuccess: detail => putUserEvent(detail, 'decideCaseStatusSuccess'),
+  syncWorkflowSuccess: detail => putUserEvent(detail, 'syncWorkflowSuccess'),
+  htmlGeneratedSuccess: detail => putUserEvent(detail, 'htmlGeneratedSuccess'),
+  applicationStatusSuccess: detail => putUserEvent(detail, 'applicationStatusSuccess'),
 };

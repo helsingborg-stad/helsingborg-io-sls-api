@@ -30,9 +30,7 @@ export async function main(event, context) {
     return false;
   }
 
-  const [putEventError] = await to(
-    putVivaMsEvent.checkOpenPeriodSuccess({ user })
-  );
+  const [putEventError] = await to(putVivaMsEvent.checkOpenPeriodSuccess({ user }));
   if (putEventError) {
     log.error(
       'Put event [checkOpenPeriodSuccess] failed',

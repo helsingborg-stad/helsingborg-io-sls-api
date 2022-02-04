@@ -13,19 +13,12 @@ export async function main(event) {
   console.log('EVENT: ', JSON.stringify(event, undefined));
   const body = JSON.parse(event.body);
 
-  const {
-    startTime,
-    endTime,
-    attendees = [],
-    meetingDuration = 60,
-    meetingBuffer = 15,
-  } = body;
+  const { startTime, endTime, attendees = [], meetingDuration = 60, meetingBuffer = 15 } = body;
 
   if (attendees.length === 0 || !startTime || !endTime) {
     return response.failure({
       status: 403,
-      message:
-        'Missing one or more required parameters: "attendees", "startTime", "endTime"',
+      message: 'Missing one or more required parameters: "attendees", "startTime", "endTime"',
     });
   }
 
@@ -35,16 +28,14 @@ export async function main(event) {
     endTime,
     meetingDurationMinutes: meetingDuration + meetingBuffer,
   };
-  const [getTimeSpansError, timeSpansResult] = await to(
-    getTimeSpans(getTimeSpansBody)
-  );
+  const [getTimeSpansError, timeSpansResult] = await to(getTimeSpans(getTimeSpansBody));
   if (getTimeSpansError) {
     console.error('Could not get time spans: ', getTimeSpansError);
     return response.failure(getTimeSpansError);
   }
 
   const timeSlots = {};
-  Object.keys(timeSpansResult).forEach((email) => {
+  Object.keys(timeSpansResult).forEach(email => {
     timeSlots[email] = {};
 
     timeSpansResult[email].forEach(({ StartTime, EndTime }) => {
@@ -57,12 +48,7 @@ export async function main(event) {
       const start = dayjs(StartTime);
       const end = dayjs(EndTime);
 
-      const slots = createSlotsWithinTimeSpan(
-        start,
-        end,
-        meetingDuration,
-        meetingBuffer
-      );
+      const slots = createSlotsWithinTimeSpan(start, end, meetingDuration, meetingBuffer);
       timeSlots[email][date].push(...slots);
     });
   });

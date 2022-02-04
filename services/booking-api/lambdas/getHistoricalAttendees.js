@@ -20,14 +20,14 @@ export async function main(event) {
   if (!startTime | !endTime) {
     return response.failure({
       status: 403,
-      message:
-        'Missing one or more required query string parameters: "startTime", "endTime',
+      message: 'Missing one or more required query string parameters: "startTime", "endTime',
     });
   }
 
   const getHistoricalAttendeesBody = { referenceCode, startTime, endTime };
-  const [getHistoricalAttendeesError, getHistoricalAttendeesResponse] =
-    await to(booking.getHistoricalAttendees(getHistoricalAttendeesBody));
+  const [getHistoricalAttendeesError, getHistoricalAttendeesResponse] = await to(
+    booking.getHistoricalAttendees(getHistoricalAttendeesBody)
+  );
   if (getHistoricalAttendeesError) {
     return response.failure(getHistoricalAttendeesError);
   }

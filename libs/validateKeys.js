@@ -2,7 +2,7 @@
 
 export function validateKeys(obj, keys) {
   for (const i in keys) {
-    if (!Object.keys(obj).find((item) => item === keys[i])) {
+    if (!Object.keys(obj).find(item => item === keys[i])) {
       return false;
     }
   }

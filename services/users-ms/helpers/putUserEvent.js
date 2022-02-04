@@ -22,7 +22,7 @@ function putUserEvent(user, type, typeCollection = eventTypeCollection) {
 }
 
 export default {
-  notFound: (userDetail) => putUserEvent(userDetail, 'notFound'),
-  exists: (userDetail) => putUserEvent(userDetail, 'exists'),
-  createSuccess: (userDetail) => putUserEvent(userDetail, 'createSuccess'),
+  notFound: userDetail => putUserEvent(userDetail, 'notFound'),
+  exists: userDetail => putUserEvent(userDetail, 'exists'),
+  createSuccess: userDetail => putUserEvent(userDetail, 'createSuccess'),
 };
