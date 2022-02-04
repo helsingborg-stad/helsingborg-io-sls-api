@@ -1,3 +1,4 @@
+import geStatusTypeOnCondition from '../../helpers/statusCheckCondition';
 import {
   // status type
   ACTIVE_ONGOING,
@@ -12,8 +13,6 @@ import {
   VIVA_COMPLETION_REQUIRED,
   VIVA_RANDOM_CHECK_REQUIRED,
 } from '../../../../libs/constants';
-
-import geStatusTypeOnCondition from '../../helpers/statusCheckCondition';
 
 const ANYTHING = 'ANYTHING';
 
@@ -217,5 +216,6 @@ const testContitionList = [
 
 test.each(testContitionList)('$description', ({ conditionOption, expectedResult }) => {
   const result = geStatusTypeOnCondition(conditionOption);
+
   expect(result).toBe(expectedResult);
 });
