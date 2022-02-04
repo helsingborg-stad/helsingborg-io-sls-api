@@ -50,4 +50,5 @@ env.yml
 
 # stuff
 .DS_Store
-.vscode
+.vscode/launch.json
+.vscode/settings.json
