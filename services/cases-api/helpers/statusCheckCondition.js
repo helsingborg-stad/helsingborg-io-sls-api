@@ -12,11 +12,13 @@ import {
 } from '../../../libs/constants';
 
 function isSignaturePending({ answers, people }) {
-  return isEncrypted(answers) && hasApplicantSigned(people) && !hasCoApplicantsSigned(people);
+  return (
+    answers && isEncrypted(answers) && hasApplicantSigned(people) && !hasCoApplicantsSigned(people)
+  );
 }
 
 function isSignatureCompleted({ answers, people }) {
-  return isEncrypted(answers) && hasAllSigned(people);
+  return answers && isEncrypted(answers) && hasAllSigned(people);
 }
 
 function isOngoing({ answers, people }) {
@@ -24,7 +26,7 @@ function isOngoing({ answers, people }) {
 }
 
 function isSubmitted({ answers, people }) {
-  return !isEncrypted(answers) && hasAllSigned(people);
+  return answers && !isEncrypted(answers) && hasAllSigned(people);
 }
 
 function isCompletionOngoing({ answers, people, state }) {
@@ -34,7 +36,9 @@ function isCompletionOngoing({ answers, people, state }) {
 }
 
 function isCompletionSubmitted({ answers, people, state }) {
-  return !isEncrypted(answers) && hasAllSigned(people) && state.includes(COMPLETION_REQUIRED);
+  return (
+    answers && !isEncrypted(answers) && hasAllSigned(people) && state.includes(COMPLETION_REQUIRED)
+  );
 }
 
 function isRandomCheckOngoing({ answers, people, state }) {
@@ -45,11 +49,16 @@ function isRandomCheckOngoing({ answers, people, state }) {
 }
 
 function isRandomCheckSubmitted({ answers, people, state }) {
-  return !isEncrypted(answers) && hasAllSigned(people) && state.includes(RANDOM_CHECK_REQUIRED);
+  return (
+    answers &&
+    !isEncrypted(answers) &&
+    hasAllSigned(people) &&
+    state.includes(RANDOM_CHECK_REQUIRED)
+  );
 }
 
 function isAnswersEncryptedApplicantNotSigend({ answers, people }) {
-  return isEncrypted(answers) && !hasApplicantSigned(people);
+  return answers && isEncrypted(answers) && !hasApplicantSigned(people);
 }
 
 function hasAllSigned(people) {
