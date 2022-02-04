@@ -4,7 +4,7 @@
   "description": "Lambda authorizer for authenticating Office users",
   "main": "index.js",
   "scripts": {
-    "test": "node ../../../node_modules/.bin/jest"
+    "test": "cd ../../../ && node node_modules/.bin/jest auth/office"
   },
   "author": "Helsingborg Stad",
   "license": "MIT",
