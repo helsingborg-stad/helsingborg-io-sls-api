@@ -1,8 +1,12 @@
 module.exports = {
   transform: {
-    '^.+\\.[t|j]sx?$': 'babel-jest',
+    '^.+\\.[t|j]sx?$': 'ts-jest',
   },
-  collectCoverageFrom: ['lambdas/*.js', 'helpers/*.js'],
+  globals: {
+    'ts-jest': {
+      babelConfig: 'babel-base.config.js',
+    },
+  },
   coverageThreshold: {
     global: {
       branches: 80,
