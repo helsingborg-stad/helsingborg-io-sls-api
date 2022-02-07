@@ -2,12 +2,12 @@ module.exports = {
   extends: ['eslint:recommended', 'plugin:jest/style', 'plugin:jest/recommended', 'prettier'],
   parser: '@babel/eslint-parser',
   parserOptions: {
-    requireConfigFile: false,
     ecmaVersion: 2021,
     sourceType: 'module',
     ecmaFeatures: {
       impliedStrict: true,
     },
+    babelOptions: { rootMode: 'upward' },
   },
   ignorePatterns: ['dist/**/*'],
   env: {
