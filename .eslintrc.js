@@ -20,7 +20,10 @@ module.exports = {
     es6: true,
     jest: true,
   },
-  plugins: ['jest'],
+  rules: {
+    'no-console': 2,
+  },
+  plugins: ['jest', 'prettier'],
   overrides: [
     {
       files: ['*.ts', '*.tsx'],
