@@ -4,7 +4,7 @@ module.exports = {
   },
   globals: {
     'ts-jest': {
-      babelConfig: 'babel-base.config.js',
+      babelConfig: 'babel.config.js',
     },
   },
   coverageThreshold: {
