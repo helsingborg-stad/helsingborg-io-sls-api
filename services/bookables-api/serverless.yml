@@ -52,9 +52,6 @@ functions:
           method: get
           private: true
           cors: true
-          authorizer:
-            type: CUSTOM
-            authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   getAdministratorsByEmail:
     handler: lambdas/getAdministratorsByEmail.main
@@ -64,7 +61,4 @@ functions:
           method: get
           private: true
           cors: true
-          authorizer:
-            type: CUSTOM
-            authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
