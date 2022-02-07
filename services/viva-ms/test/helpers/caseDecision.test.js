@@ -117,7 +117,7 @@ const workflowCalculationANDDecisionRejected = {
 
 it('Before the Viva administrator processes the application the case status must be unchanged', () => {
   const results = decideNewCaseStatus(workflow);
-  expect(results).toBe(undefined);
+  expect(results).toBeUndefined();
 });
 
 it(`Calculation exists in the Viva workflow collection, then status type must be ${ACTIVE_PROCESSING}`, () => {
@@ -127,7 +127,7 @@ it(`Calculation exists in the Viva workflow collection, then status type must be
 
 it('Payment exists in the Viva workflow collection, then the case status must be unchanged', () => {
   const results = decideNewCaseStatus(workflowPayment);
-  expect(results).toBe(undefined);
+  expect(results).toBeUndefined();
 });
 
 it(`Decision(approved) exists in the Viva workflow collection, then status type must be ${ACTIVE_PROCESSING}`, () => {
