@@ -1,11 +1,5 @@
 module.exports = {
-  extends: [
-    'eslint:recommended',
-    'plugin:jest/style',
-    'plugin:jest/recommended',
-    'prettier',
-    'plugin:prettier/recommended',
-  ],
+  extends: ['eslint:recommended', 'plugin:jest/style', 'plugin:jest/recommended', 'prettier'],
   parserOptions: {
     ecmaVersion: 2021,
     sourceType: 'module',
@@ -23,7 +17,7 @@ module.exports = {
   rules: {
     'no-console': 2,
   },
-  plugins: ['jest', 'prettier'],
+  plugins: ['jest'],
   overrides: [
     {
       files: ['*.ts', '*.tsx'],
