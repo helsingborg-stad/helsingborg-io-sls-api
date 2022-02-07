@@ -11,7 +11,7 @@
   },
   "homepage": "https://github.com/helsingborg-stad/helsingborg-io-sls-api#readme",
   "scripts": {
-    "test": "jest --coverage",
+    "test": "jest",
     "lint": "eslint --ignore-path .gitignore .",
     "lint:fix": "eslint . --fix"
   },

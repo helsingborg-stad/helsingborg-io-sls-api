@@ -17,7 +17,7 @@ module.exports = {
     jest: true,
   },
   rules: {
-    'no-console': 2,
+    'no-console': 1,
   },
   plugins: ['jest'],
   overrides: [
