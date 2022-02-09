@@ -230,9 +230,6 @@ functions:
           pattern:
             source:
               - casesApi.updateCase
-            detail:
-              state:
-                [{ 'anything-but': ['VIVA_RANDOM_CHECK_REQUIRED', 'VIVA_COMPLETION_REQUIRED'] }]
       - eventBridge:
           pattern:
             source:
