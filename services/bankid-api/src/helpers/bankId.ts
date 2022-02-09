@@ -1,10 +1,11 @@
 /* eslint-disable no-useless-catch */
-import { requestClient } from '../../../libs/request';
-import * as certs from '../../../libs/certificates';
+import { requestClient } from '../libs/request';
+import * as certs from '../libs/certificates';
+import { BankIdParams } from './types';
 
-export const url = (baseUrl, path) => `${baseUrl}${path}`;
+export const url = (baseUrl: string, path: string) => `${baseUrl}${path}`;
 
-export const client = async params => {
+export const client = async (params: BankIdParams) => {
   const { bucketName, passphrase, caName, pfxName } = params;
 
   try {

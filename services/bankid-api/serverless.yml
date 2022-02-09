@@ -21,12 +21,12 @@ provider:
     lambda: true
   apiGateway:
     restApiId:
-      "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayRestApiId
+      'Fn::ImportValue': ${self:custom.stage}-ExtApiGatewayRestApiId
     restApiRootResourceId:
-      "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
+      'Fn::ImportValue': ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
     restApiResources:
       auth:
-        "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayResourceAuth
+        'Fn::ImportValue': ${self:custom.stage}-ExtApiGatewayResourceAuth
 
   environment:
     stage: ${self:custom.stage}
@@ -38,32 +38,32 @@ provider:
         - Effect: Allow
           Action:
             - s3:getObject
-          Resource: 
-            - "Fn::Join": 
-              - ""
-              - - Fn::ImportValue: ${self:custom.stage}-CertificatesBucketArn
-                - "/*"
+          Resource:
+            - 'Fn::Join':
+                - ''
+                - - Fn::ImportValue: ${self:custom.stage}-CertificatesBucketArn
+                  - '/*'
         - Effect: Allow
           Action:
             - events:PutEvents
-          Resource: "*"
+          Resource: '*'
 
         - Effect: Allow
           Action:
             - SSM:GetParameter*
           Resource:
-            - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${file(../../config.json):${self:custom.stage}.bankId.envsKeyName}"
+            - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${file(../../config.json):${self:custom.stage}.bankId.envsKeyName}'
         - Effect: Allow
           Action:
             - secretsmanager:GetSecretValue
           Resource:
-            - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${file(../../config.json):${self:custom.stage}.auth.secrets.accessToken.name}-??????"
-            - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${file(../../config.json):${self:custom.stage}.auth.secrets.refreshToken.name}-??????"
-            - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${file(../../config.json):${self:custom.stage}.auth.secrets.authorizationCode.name}-??????"
+            - !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${file(../../config.json):${self:custom.stage}.auth.secrets.accessToken.name}-??????'
+            - !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${file(../../config.json):${self:custom.stage}.auth.secrets.refreshToken.name}-??????'
+            - !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${file(../../config.json):${self:custom.stage}.auth.secrets.authorizationCode.name}-??????'
 
 functions:
   auth:
-    handler: lambdas/auth.main
+    handler: src/lambdas/auth.main
     events:
       - http:
           path: auth/bankid/auth
@@ -71,7 +71,7 @@ functions:
           private: true
           cors: true
   sign:
-    handler: lambdas/sign.main
+    handler: src/lambdas/sign.main
     events:
       - http:
           path: auth/bankid/sign
@@ -79,7 +79,7 @@ functions:
           private: true
           cors: true
   collect:
-    handler: lambdas/collect.main
+    handler: src/lambdas/collect.main
     events:
       - http:
           path: auth/bankid/collect
@@ -87,7 +87,7 @@ functions:
           private: true
           cors: true
   cancel:
-    handler: lambdas/cancel.main
+    handler: src/lambdas/cancel.main
     events:
       - http:
           path: auth/bankid/cancel
