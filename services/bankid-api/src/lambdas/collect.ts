@@ -1,20 +1,39 @@
 /* eslint-disable no-console */
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import to from 'await-to-js';
-import config from '../../../config';
-import { putEvent } from '../../../libs/awsEventBridge';
-import params from '../../../libs/params';
-import * as request from '../../../libs/request';
-import * as response from '../../../libs/response';
+import config from '../libs/config';
+import { putEvent } from '../libs/awsEventBridge';
+import params from '../libs/params';
+import * as request from '../libs/request';
+import * as response from '../libs/response';
 import * as bankId from '../helpers/bankId';
-import secrets from '../../../libs/secrets';
-import { signToken } from '../../../libs/token';
-import log from '../../../libs/logs';
+import secrets from '../libs/secrets';
+import { signToken } from '../libs/token';
+import log from '../libs/logs';
+import { BankIdError, BankIdParams } from 'helpers/types';
 
 const SSMParams = params.read(config.bankId.envsKeyName);
 const CONFIG_AUTH_SECRETS_AUTHORIZATION_CODE = config.auth.secrets.authorizationCode;
 
-export const main = async (event, context) => {
+interface BankIdCollectLambdaRequest {
+  orderRef: string;
+}
+
+interface BankIdCollectResponse {
+  data: {
+    status: string;
+    completionData: {
+      user: {
+        personalNumber: string;
+      };
+    };
+  };
+}
+
+export const main = async (
+  event: { body: string; headers: Record<string, string> },
+  context: { awsRequestId: string }
+) => {
   const { body, headers } = event;
   const { orderRef } = JSON.parse(body);
 
@@ -22,11 +41,12 @@ export const main = async (event, context) => {
 
   console.info('🚀 ~ file: collect.js ~ line 21 ~ headers -> User-Agent', headers['User-Agent']);
 
-  const payload = { orderRef };
+  const payload: BankIdCollectLambdaRequest = { orderRef };
 
-  const [bankIdCollectRequestError, bankIdCollectResponse] = await to(
-    sendBankIdCollectRequest(bankidSSMParams, payload)
-  );
+  const [bankIdCollectRequestError, bankIdCollectResponse] = await to<
+    BankIdCollectResponse | undefined,
+    BankIdError
+  >(sendBankIdCollectRequest(bankidSSMParams, payload));
 
   if (bankIdCollectRequestError) {
     log.error(
@@ -41,30 +61,30 @@ export const main = async (event, context) => {
 
   let responseAttributes = {};
 
-  if (!isBankidCollectStatusComplete(bankIdCollectResponse.data)) {
-    responseAttributes = bankIdCollectResponse.data;
+  if (!isBankidCollectStatusComplete(bankIdCollectResponse?.data)) {
+    responseAttributes = bankIdCollectResponse?.data ?? {};
   }
 
-  if (isBankidCollectStatusComplete(bankIdCollectResponse.data)) {
+  if (isBankidCollectStatusComplete(bankIdCollectResponse?.data)) {
     responseAttributes = {
-      ...bankIdCollectResponse.data,
+      ...bankIdCollectResponse?.data,
     };
   }
 
   if (
     isUserAgentMittHelsingborgApp(headers) &&
-    isBankidCollectStatusComplete(bankIdCollectResponse.data)
+    isBankidCollectStatusComplete(bankIdCollectResponse?.data)
   ) {
     await putEvent(
-      bankIdCollectResponse.data.completionData,
+      bankIdCollectResponse?.data.completionData ?? {},
       'BankIdCollectComplete',
       'bankId.collect'
     );
 
-    const personalNumber = bankIdCollectResponse.data.completionData.user.personalNumber;
+    const personalNumber = bankIdCollectResponse?.data.completionData.user.personalNumber;
 
     const [generateAuthorizationCodeError, authorizationCode] = await to(
-      generateAuthorizationCode(personalNumber)
+      generateAuthorizationCode(personalNumber ?? '')
     );
 
     if (generateAuthorizationCodeError) {
@@ -72,7 +92,7 @@ export const main = async (event, context) => {
         'Bank Id Authorization code error',
         context.awsRequestId,
         'service-bankid-api-collect-002',
-        bankIdCollectRequestError
+        bankIdCollectRequestError ?? {}
       );
 
       return response.failure(generateAuthorizationCodeError);
@@ -92,18 +112,22 @@ export const main = async (event, context) => {
   });
 };
 
-function isBankidCollectStatusComplete(responseData) {
+function isBankidCollectStatusComplete(responseData: BankIdCollectResponse['data'] | undefined) {
   return responseData && responseData.status === 'complete';
 }
 
-function isUserAgentMittHelsingborgApp(headers) {
+function isUserAgentMittHelsingborgApp(headers: Record<string, string>) {
   const { ['User-Agent']: userAgent } = headers;
   const searchElementRegex = /^Mitt\s?Helsingborg.*$/;
   return searchElementRegex.test(userAgent);
 }
 
-async function generateAuthorizationCode(personalNumber) {
-  const [authorizationCodeSecretError, auhtorizationCodeSecret] = await to(
+async function generateAuthorizationCode(personalNumber: string) {
+  type AuthError = {
+    code: number;
+    message: string;
+  };
+  const [authorizationCodeSecretError, auhtorizationCodeSecret] = await to<string, AuthError>(
     secrets.get(
       CONFIG_AUTH_SECRETS_AUTHORIZATION_CODE.name,
       CONFIG_AUTH_SECRETS_AUTHORIZATION_CODE.keyName
@@ -119,7 +143,7 @@ async function generateAuthorizationCode(personalNumber) {
 
   const tokenExpireTimeInMinutes = 5;
   const [signTokenError, signedToken] = await to(
-    signToken(signTokenPayload, auhtorizationCodeSecret, tokenExpireTimeInMinutes)
+    signToken(signTokenPayload, auhtorizationCodeSecret ?? '', tokenExpireTimeInMinutes)
   );
   if (signTokenError) {
     throwError(500, signTokenError.message);
@@ -128,20 +152,21 @@ async function generateAuthorizationCode(personalNumber) {
   return signedToken;
 }
 
-async function sendBankIdCollectRequest(params, payload) {
-  let error, bankIdClientResponse, bankIdCollectResponse;
-
-  [error, bankIdClientResponse] = await to(bankId.client(params));
+async function sendBankIdCollectRequest(
+  params: BankIdParams,
+  payload: BankIdCollectLambdaRequest
+): Promise<BankIdCollectResponse | undefined> {
+  const [, bankIdClientResponse] = await to(bankId.client(params));
   if (!bankIdClientResponse) throwError(503);
 
-  [error, bankIdCollectResponse] = await to(
+  const [error, bankIdCollectResponse] = await to<BankIdCollectResponse, BankIdError>(
     request.call(bankIdClientResponse, 'post', bankId.url(params.apiUrl, '/collect'), payload)
   );
   if (!bankIdCollectResponse) {
-    if (error.response.data.details === 'No such order') {
+    if (error?.response.data?.details === 'No such order') {
       throwError(404, error.response.data.details);
     }
-    throwError(error.response.status, error.response.data.details);
+    throwError(error?.response.status, error?.response.data?.details);
   }
 
   return bankIdCollectResponse;
