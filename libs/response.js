@@ -1,4 +1,4 @@
-import config from '../config';
+import config from './config';
 
 export function success(statusCode = 200, body) {
   return buildResponse(statusCode, body);
