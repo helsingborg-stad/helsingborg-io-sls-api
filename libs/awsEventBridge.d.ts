@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  *
  * @param {Object} Detail The detailed payload for the event.
