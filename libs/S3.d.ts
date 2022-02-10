@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export const s3Client: any;
 declare namespace _default {
-    export { getSignedUrl };
-    export { getFiles };
-    export { getFile };
-    export { deleteFile };
-    export { storeFile };
+  export { getSignedUrl };
+  export { getFiles };
+  export { getFile };
+  export { deleteFile };
+  export { storeFile };
 }
 export default _default;
 declare function getSignedUrl(bucketName: any, method: any, params: any): Promise<any>;

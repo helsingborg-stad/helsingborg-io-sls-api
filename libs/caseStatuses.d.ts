@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export function getStatusByType(type: any): {
   type: string;
   name: string;

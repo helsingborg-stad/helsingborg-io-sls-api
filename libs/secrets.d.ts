@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export default secrets;
 declare namespace secrets {
-    export { get };
+  export { get };
 }
 /**
  * Retrives a secret from the aws secrets manager
