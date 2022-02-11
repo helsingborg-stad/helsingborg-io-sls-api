@@ -1,20 +1,20 @@
-import jwt from 'jsonwebtoken';
+import jwt, { NotBeforeError } from 'jsonwebtoken';
 import axios from 'axios';
 
-import { main } from '../../lambdas/officeAuthorizer';
+import { LambdaEvent, main } from '../../src/lambdas/officeAuthorizer';
 
 jest.mock('jsonwebtoken');
 jest.mock('axios');
 
-const mockEvent = {
-  Authorization: 'mockJWT',
+const mockEvent: LambdaEvent = {
+  authorizationToken: 'mockJWT',
 };
 
 process.env.executeResourceArns = 'mockArn';
 
-let consoleSpy;
-let mockDecodedToken;
-let mockJWKKeys;
+let consoleSpy: jest.SpyInstance;
+let mockDecodedToken: { header: Record<string, string>; payload: Record<string, string> };
+let mockJWKKeys: { keys: Record<string, string | string[]>[] };
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -76,7 +76,7 @@ it('returns an IAM policy if JWT token is valid', async () => {
 it('throws if JWT is invalid or malformed', async () => {
   expect.assertions(3);
 
-  await expect(main({ Authorization: 'fakeJWT' })).rejects.toThrow();
+  await expect(main({ authorizationToken: 'fakeJWT' })).rejects.toThrow();
 
   expect(consoleSpy).toHaveBeenCalledWith('Malformed JWT');
   expect(consoleSpy).toHaveBeenCalledTimes(1);
@@ -135,10 +135,18 @@ it('throws if no valid signing key with matching kid where found', async () => {
 it('throws if jwt fails to verify the JWT', async () => {
   expect.assertions(3);
 
-  const verifyError = 'verifyError';
+  type Overload = (
+    token: string,
+    secretOrPublicKey: jwt.Secret | jwt.GetPublicKeyOrSecret,
+    callback?: jwt.VerifyCallback<string | jwt.JwtPayload> | undefined
+  ) => void;
+
+  const t = jest.spyOn(jwt, 'verify') as unknown as jest.MockedFunction<Overload>;
+
+  const verifyError = new NotBeforeError('verifyError', new Date());
   jest.spyOn(jwt, 'decode').mockReturnValueOnce(mockDecodedToken);
-  jest.spyOn(jwt, 'verify').mockImplementationOnce((_, __, cb) => cb(verifyError));
   jest.spyOn(axios, 'get').mockResolvedValueOnce({ data: mockJWKKeys });
+  t.mockImplementationOnce((_, __, cb) => (cb ? cb(verifyError, 'null') : undefined));
 
   await expect(main(mockEvent)).rejects.toThrow();
 

@@ -1,7 +1,7 @@
-import getValidSigningKey from '../../helpers/getValidSigningKey';
-import { beginCertificateString, endCertificateString } from '../../constants';
+import getValidSigningKey, { SigningKey } from '../../src/helpers/getValidSigningKey';
+import { beginCertificateString, endCertificateString } from '../../src/constants';
 
-const correctKey = {
+const correctKey: SigningKey = {
   kty: 'RSA',
   use: 'sig',
   kid: 'kid_1',
@@ -31,7 +31,7 @@ it('returns a valid signing key', () => {
 });
 
 it('returns undefined if key is invalid', () => {
-  const result = getValidSigningKey(wrongKey);
+  const result = getValidSigningKey(wrongKey as SigningKey);
 
   expect(result).toBeUndefined();
 });

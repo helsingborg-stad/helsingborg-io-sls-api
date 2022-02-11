@@ -1,15 +1,25 @@
+/* eslint-disable no-console */
 import to from 'await-to-js';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import axios from 'axios';
 
-import generateIAMPolicy from '../../../../libs/generateIAMPolicy';
+import generateIAMPolicy from '../libs/generateIAMPolicy';
 
 import getJwksUrl from '../helpers/getJwksUrl';
-import getValidSigningKey from '../helpers/getValidSigningKey';
+import getValidSigningKey, { SigningKey } from '../helpers/getValidSigningKey';
 
 import { JWT } from '../constants';
 
-export async function main(event) {
+export interface LambdaEvent {
+  authorizationToken: string;
+}
+
+interface JwkResult {
+  data: {
+    keys: SigningKey[];
+  };
+}
+export async function main(event: LambdaEvent) {
   const { authorizationToken } = event;
   const { executeResourceArns } = process.env;
 
@@ -20,7 +30,7 @@ export async function main(event) {
     throw Error('Unauthorised');
   }
 
-  const { header, payload } = decodedToken;
+  const { header, payload } = decodedToken as JwtPayload;
 
   if (header.alg !== JWT.ALG) {
     console.error('Wrong algorithm found in JWT');
@@ -28,20 +38,20 @@ export async function main(event) {
   }
 
   const jwksUrl = getJwksUrl(payload.tid, payload.aud);
-  const [jwksError, jwksResult] = await to(axios.get(jwksUrl));
+  const [jwksError, jwksResult] = await to<JwkResult>(axios.get(jwksUrl));
   if (jwksError) {
     console.error('Could not fetch JWKs: ', jwksError);
     throw Error('Unauthorised');
   }
 
-  const { keys } = jwksResult.data;
+  const { keys } = jwksResult?.data ?? { keys: [] };
   const signingKeys = keys.map(getValidSigningKey).filter(Boolean);
   if (signingKeys.length === 0) {
     console.error('No valid signing keys found');
     throw Error('Unauthorised');
   }
 
-  const signingKey = signingKeys.find(({ kid }) => kid === header.kid);
+  const signingKey = signingKeys.find(key => key?.kid === header.kid);
   if (!signingKey) {
     console.error('No signing key with matching "kid" where found');
     throw Error('Unauthorised');
@@ -54,7 +64,7 @@ export async function main(event) {
     }
   });
 
-  const iamPolicy = generateIAMPolicy('officeUser', 'Allow', executeResourceArns);
+  const iamPolicy = generateIAMPolicy('officeUser', 'Allow', executeResourceArns ?? '');
 
   return iamPolicy;
 }
