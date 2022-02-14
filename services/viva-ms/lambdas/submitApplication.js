@@ -14,8 +14,10 @@ import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
 const dynamoDbConverter = AWS.DynamoDB.Converter;
 class TraceException extends Error {
-  constructor(message, customData) {
+  constructor(message, requestId, customData) {
     super(message);
+    this.level = 'error';
+    this.requestId = requestId;
     this.customData = customData;
   }
 }
@@ -26,20 +28,31 @@ const destructRecord = record => {
 
 export async function main(event, context) {
   if (event.Records.length !== 1) {
-    throw new TraceException(`Lambda received (${event.Records.length}) but expected only one.`);
+    throw new TraceException(
+      `Lambda received (${event.Records.length}) but expected only one.`,
+      context.awsRequestId
+    );
   }
   const [paramsReadError, vivaCaseSSMParams] = await to(
     params.read(config.cases.providers.viva.envsKeyName)
   );
   if (paramsReadError) {
-    throw new TraceException('Read ssm params ´config.cases.providers.viva.envsKeyName´ failed');
+    throw new TraceException(
+      'Read ssm params ´config.cases.providers.viva.envsKeyName´ failed',
+      context.awsRequestId
+    );
   }
   const [record] = event.Records;
   const caseItem = destructRecord(record);
+  const { PK, SK, pdf: pdfBinaryBuffer } = caseItem;
 
-  log.info(
-    `Processing record id: (${record.messageId}), receive-count: (${record.attributes.ApproximateReceiveCount}))`
-  );
+  log.info('Processing record', context.awsRequestId, undefined, {
+    messageId: record.messageId,
+    receiveCount: record.attributes.ApproximateReceiveCount,
+    firstReceived: record.attributes.ApproximateFirstReceiveTimestamp,
+    visibilityTimeout: record.attributes.VisibilityTimeout,
+    caseId: SK,
+  });
 
   const { recurringFormId } = vivaCaseSSMParams;
 
@@ -52,7 +65,6 @@ export async function main(event, context) {
     return true;
   }
 
-  const { PK, SK, pdf: pdfBinaryBuffer } = caseItem;
   const personalNumber = PK.substring(5);
 
   const [vivaPostError, vivaApplicationResponse] = await to(
@@ -67,13 +79,31 @@ export async function main(event, context) {
   );
 
   if (vivaPostError) {
-    throw new TraceException('Failed to submit Viva application', {
-      axios: { ...vivaPostError },
-    });
+    const error = {
+      messageId: record.messageId,
+      httpStatusCode: vivaPostError.status,
+      vivaErrorCode: vivaPostError.vadaResponse?.error?.details?.errorCode ?? 'N/A',
+      vivaErrorMessage: vivaPostError.vadaResponse?.error?.details?.errorMessage ?? 'N/A',
+      caseId: SK,
+    };
+    if (error.vivaErrorCode === '1014') {
+      log.warn(
+        'Failed to submit Viva application. Will NOT be retried.',
+        context.awsRequestId,
+        null,
+        error
+      );
+      return true;
+    }
+    throw new TraceException(
+      'Failed to submit Viva application. Will be retried.',
+      context.awsRequestId,
+      error
+    );
   }
 
   if (notApplicationReceived(vivaApplicationResponse)) {
-    throw new TraceException('Viva application receive failed', {
+    throw new TraceException('Viva application receive failed', context.awsRequestId, {
       vivaResponse: { ...vivaApplicationResponse },
     });
   }
@@ -81,6 +111,7 @@ export async function main(event, context) {
   if (!vivaApplicationResponse?.id) {
     throw new TraceException(
       'Viva application response does not contain any workflow id',
+      context.awsRequestId,
       vivaApplicationResponse
     );
   }
@@ -88,14 +119,22 @@ export async function main(event, context) {
   const caseKeys = { PK, SK };
   const [updateError] = await to(updateVivaCase(caseKeys, vivaApplicationResponse.id));
   if (updateError) {
-    throw new TraceException('Failed to update Viva case', updateError);
+    throw new TraceException('Failed to update Viva case', context.awsRequestId, updateError);
   }
 
   const clientUser = { personalNumber };
   const [putEventError] = await to(putVivaMsEvent.applicationReceivedSuccess(clientUser));
   if (putEventError) {
-    throw new TraceException('Put event ´applicationReceivedSuccess´ failed', putEventError);
+    throw new TraceException(
+      'Put event ´applicationReceivedSuccess´ failed',
+      context.awsRequestId,
+      putEventError
+    );
   }
+  log.info('Record processed SUCCESSFULLY', context.awsRequestId, undefined, {
+    messageId: record.messageId,
+    caseId: SK,
+  });
   return true;
 }
 
