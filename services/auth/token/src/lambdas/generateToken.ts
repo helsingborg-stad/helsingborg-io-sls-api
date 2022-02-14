@@ -1,18 +1,40 @@
 import to from 'await-to-js';
-import config from '../../../../config';
-import secrets from '../../../../libs/secrets';
-import * as response from '../../../../libs/response';
-import { signToken, verifyToken } from '../../../../libs/token';
+import config from '../libs/config';
+import secrets from '../libs/secrets';
+import * as response from '../libs/response';
+import { signToken, verifyToken } from '../libs/token';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import tokenValidationSchema from '../helpers/schema';
-import log from '../../../../libs/logs';
+import log from '../libs/logs';
+import Joi from 'joi';
 
 const CONFIG_AUTH_SECRETS = config.auth.secrets;
 const ACCESS_TOKEN_EXPIRES_IN_MINUTES = 20;
 const REFRESH_TOKEN_EXPIRES_IN_MINUTES = 30;
 
-export const main = async (event, context) => {
-  const [parseJsonError, parsedJson] = await to(parseJson(event.body));
+interface SecretsConfig {
+  name: string;
+  keyName: string;
+}
+
+interface AuthLambdaRequest {
+  grant_type: string;
+  refresh_token?: string;
+  code?: string;
+}
+
+interface JWTToken {
+  personalNumber: string;
+}
+
+interface SDKError {
+  code: string;
+  message: string;
+}
+export const main = async (event: { body: string }, context: { awsRequestId: string }) => {
+  const [parseJsonError, parsedJson] = await to<AuthLambdaRequest | undefined>(
+    parseJson(event.body)
+  );
 
   if (parseJsonError) {
     log.warn(
@@ -26,7 +48,12 @@ export const main = async (event, context) => {
   }
 
   const [validationError, validatedEventBody] = await to(
-    validateEventBody(parsedJson, tokenValidationSchema)
+    validateEventBody(
+      parsedJson ?? {
+        grant_type: '',
+      },
+      tokenValidationSchema
+    )
   );
 
   if (validationError) {
@@ -43,7 +70,7 @@ export const main = async (event, context) => {
   const grantTypeValues = getGrantTypeValues(validatedEventBody);
 
   const [validateTokenError, decodedGrantToken] = await to(
-    validateToken(grantTypeValues.secretsConfig, grantTypeValues.token)
+    validateToken(grantTypeValues?.secretsConfig, grantTypeValues?.token ?? '')
   );
 
   if (validateTokenError) {
@@ -57,7 +84,7 @@ export const main = async (event, context) => {
     return response.failure(validateTokenError);
   }
 
-  const personalNumber = decodedGrantToken.personalNumber;
+  const personalNumber = decodedGrantToken?.personalNumber ?? '';
 
   const [getAccessTokenError, accessToken] = await to(
     generateToken(CONFIG_AUTH_SECRETS.accessToken, personalNumber, ACCESS_TOKEN_EXPIRES_IN_MINUTES)
@@ -102,7 +129,7 @@ export const main = async (event, context) => {
   return response.success(200, successResponsePayload);
 };
 
-async function validateEventBody(eventBody, schema) {
+async function validateEventBody(eventBody: AuthLambdaRequest, schema: Joi.ObjectSchema) {
   const { error, value } = schema.validate(eventBody, { abortEarly: false });
   if (error) {
     const matchDoubleQuote = /"/g;
@@ -113,16 +140,16 @@ async function validateEventBody(eventBody, schema) {
   return value;
 }
 
-async function parseJson(eventBody) {
+async function parseJson(eventBody: string): Promise<AuthLambdaRequest | undefined> {
   try {
     const parsedJsonData = JSON.parse(eventBody);
-    return parsedJsonData;
+    return parsedJsonData as AuthLambdaRequest;
   } catch (error) {
-    throwError(400, error.message);
+    throwError(400, (error as SDKError).message);
   }
 }
 
-function getGrantTypeValues(eventBody) {
+function getGrantTypeValues(eventBody: AuthLambdaRequest) {
   if (eventBody.grant_type === 'authorization_code') {
     return {
       secretsConfig: CONFIG_AUTH_SECRETS.authorizationCode,
@@ -138,13 +165,21 @@ function getGrantTypeValues(eventBody) {
   }
 }
 
-async function generateToken(secretConfig, personalNumber, expiresInMinutes) {
-  const [getSecretError, secret] = await to(secrets.get(secretConfig.name, secretConfig.keyName));
+async function generateToken(
+  secretConfig: SecretsConfig,
+  personalNumber: string,
+  expiresInMinutes: number
+) {
+  const [getSecretError, secret] = await to<string, SDKError>(
+    secrets.get(secretConfig.name, secretConfig.keyName)
+  );
   if (getSecretError) {
     throwError(getSecretError.code, getSecretError.message);
   }
 
-  const [signTokenError, token] = await to(signToken({ personalNumber }, secret, expiresInMinutes));
+  const [signTokenError, token] = await to(
+    signToken({ personalNumber }, secret ?? '', expiresInMinutes)
+  );
   if (signTokenError) {
     throwError(401, signTokenError.message);
   }
@@ -152,15 +187,23 @@ async function generateToken(secretConfig, personalNumber, expiresInMinutes) {
   return token;
 }
 
-async function validateToken(secretConfig, token) {
-  const [getSecretError, secret] = await to(secrets.get(secretConfig.name, secretConfig.keyName));
+async function validateToken(secretConfig: SecretsConfig, token: string): Promise<JWTToken> {
+  const [getSecretError, secret] = await to<string, SDKError>(
+    secrets.get(secretConfig.name, secretConfig.keyName)
+  );
   if (getSecretError) {
     throwError(getSecretError.code, getSecretError.message);
   }
-  const [verifyTokenError, verifiedToken] = await to(verifyToken(token, secret));
+  const [verifyTokenError, verifiedToken] = await to<JWTToken, SDKError>(
+    verifyToken(token, secret ?? '')
+  );
   if (verifyTokenError) {
     throwError(401, verifyTokenError.message);
   }
 
-  return verifiedToken;
+  return (
+    verifiedToken ?? {
+      personalNumber: '',
+    }
+  );
 }

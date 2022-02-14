@@ -1,10 +1,10 @@
 import to from 'await-to-js';
 
-import generateIAMPolicy from '../../../../libs/generateIAMPolicy';
-import { verifyToken } from '../../../../libs/token';
-import config from '../../../../config';
-import secrets from '../../../../libs/secrets';
-import log from '../../../../libs/logs';
+import generateIAMPolicy from '../libs/generateIAMPolicy';
+import { verifyToken } from '../libs/token';
+import config from '../libs/config';
+import secrets from '../libs/secrets';
+import log from '../libs/logs';
 
 const CONFIG_AUTH_SECRETS_ACCESS_TOKEN = config.auth.secrets.accessToken;
 
