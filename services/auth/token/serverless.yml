@@ -24,12 +24,12 @@ provider:
     lambda: true
   apiGateway:
     restApiId:
-      "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayRestApiId
+      'Fn::ImportValue': ${self:custom.stage}-ExtApiGatewayRestApiId
     restApiRootResourceId:
-      "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
+      'Fn::ImportValue': ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
     restApiResources:
       auth:
-        "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayResourceAuth
+        'Fn::ImportValue': ${self:custom.stage}-ExtApiGatewayResourceAuth
 
   environment:
     stage: ${self:custom.stage}
@@ -41,16 +41,16 @@ provider:
         - Effect: Allow
           Action:
             - secretsmanager:GetSecretValue
-          Resource: 
-            - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${file(../../../config.json):${self:custom.stage}.auth.secrets.accessToken.name}-??????"
-            - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${file(../../../config.json):${self:custom.stage}.auth.secrets.refreshToken.name}-??????"
-            - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${file(../../../config.json):${self:custom.stage}.auth.secrets.authorizationCode.name}-??????"
+          Resource:
+            - !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${file(../../../config.json):${self:custom.stage}.auth.secrets.accessToken.name}-??????'
+            - !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${file(../../../config.json):${self:custom.stage}.auth.secrets.refreshToken.name}-??????'
+            - !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${file(../../../config.json):${self:custom.stage}.auth.secrets.authorizationCode.name}-??????'
 functions:
   authorizer:
-    handler: lambdas/authorize.main
+    handler: src/lambdas/authorize.main
 
   generateToken:
-    handler: lambdas/generateToken.main
+    handler: src/lambdas/generateToken.main
     events:
       - http:
           path: auth/token
@@ -67,7 +67,7 @@ resources:
           Fn::GetAtt: AuthorizerLambdaFunction.Arn
         Action: lambda:InvokeFunction
         Principal:
-          Fn::Join: ["", ["apigateway.", { Ref: "AWS::URLSuffix" }]]
+          Fn::Join: ['', ['apigateway.', { Ref: 'AWS::URLSuffix' }]]
     Authorizer:
       Type: AWS::ApiGateway::Authorizer
       Properties:
@@ -78,12 +78,12 @@ resources:
         AuthorizerResultTtlInSeconds: 300
         AuthorizerUri:
           Fn::Join:
-            - ""
-            - - "arn:aws:apigateway:"
-              - Ref: "AWS::Region"
-              - ":lambda:path/2015-03-31/functions/"
-              - Fn::GetAtt: "AuthorizerLambdaFunction.Arn"
-              - "/invocations"
+            - ''
+            - - 'arn:aws:apigateway:'
+              - Ref: 'AWS::Region'
+              - ':lambda:path/2015-03-31/functions/'
+              - Fn::GetAtt: 'AuthorizerLambdaFunction.Arn'
+              - '/invocations'
   Outputs:
     AuthorizerId:
       Value:
