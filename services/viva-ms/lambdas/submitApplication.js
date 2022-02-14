@@ -68,7 +68,10 @@ export async function main(event, context) {
 
   if (vivaPostError) {
     throw new TraceException('Failed to submit Viva application', {
-      axios: { ...vivaPostError },
+      errorCode: vivaPostError.status,
+      recordId: record.messageId,
+      receiveCount: record.attributes.ApproximateReceiveCount,
+      caseId: SK,
     });
   }
 
