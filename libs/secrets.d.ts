@@ -7,4 +7,4 @@ declare namespace secrets {
  * Retrives a secret from the aws secrets manager
  * @param {string} secretName the name or arn of the secret that are being retrived
  */
-declare function get(secretName: string, secretKeyName: any): Promise<any>;
+declare function get(secretName: string, secretKeyName: string): Promise<any>;
