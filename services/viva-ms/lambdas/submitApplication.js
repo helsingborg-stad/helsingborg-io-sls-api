@@ -16,6 +16,7 @@ const dynamoDbConverter = AWS.DynamoDB.Converter;
 class TraceException extends Error {
   constructor(message, requestId, customData) {
     super(message);
+    this.level = 'error';
     this.requestId = requestId;
     this.customData = customData;
   }
@@ -45,7 +46,7 @@ export async function main(event, context) {
   const caseItem = destructRecord(record);
   const { PK, SK, pdf: pdfBinaryBuffer } = caseItem;
 
-  log.info('Processing record', context.awsRequestId, null, {
+  log.info('Processing record', context.awsRequestId, undefined, {
     messageId: record.messageId,
     receiveCount: record.attributes.ApproximateReceiveCount,
     firstReceived: record.attributes.ApproximateFirstReceiveTimestamp,
@@ -81,8 +82,8 @@ export async function main(event, context) {
     const error = {
       messageId: record.messageId,
       httpStatusCode: vivaPostError.status,
-      vivaErrorCode: vivaPostError.vadaResponse?.error?.details?.errorCode ?? 'HTTPS',
-      vivaErrorMessage: vivaPostError.vadaResponse?.error?.details?.errorMessage ?? '',
+      vivaErrorCode: vivaPostError.vadaResponse?.error?.details?.errorCode ?? 'N/A',
+      vivaErrorMessage: vivaPostError.vadaResponse?.error?.details?.errorMessage ?? 'N/A',
       caseId: SK,
     };
     switch (error.vivaErrorCode) {
@@ -131,6 +132,10 @@ export async function main(event, context) {
       putEventError
     );
   }
+  log.info('Record processed SUCCESSFULLY', context.awsRequestId, undefined, {
+    messageId: record.messageId,
+    caseId: SK,
+  });
   return true;
 }
 
