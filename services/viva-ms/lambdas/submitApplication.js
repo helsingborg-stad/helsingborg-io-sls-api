@@ -67,12 +67,19 @@ export async function main(event, context) {
   );
 
   if (vivaPostError) {
-    throw new TraceException('Failed to submit Viva application', {
-      errorCode: vivaPostError.status,
+    const error = {
+      statusCode: vivaPostError.status,
       recordId: record.messageId,
+      statusMessage: vivaPostError.vadaResponse?.error?.details?.errorMessage ?? '',
       receiveCount: record.attributes.ApproximateReceiveCount,
       caseId: SK,
-    });
+    };
+    switch (vivaPostError.vadaResponse?.error?.details?.errorCode) {
+      case 1014:
+        log.warn('Failed to submit Viva application', error);
+        return true;
+    }
+    throw new TraceException('Failed to submit Viva application', error);
   }
 
   if (notApplicationReceived(vivaApplicationResponse)) {
