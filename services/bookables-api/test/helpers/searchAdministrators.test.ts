@@ -1,12 +1,14 @@
 import searchAdministrators from '../../src/helpers/searchAdministrators';
 import params from '../../src/libs/params';
-import { call } from '../../src/libs/request';
+import * as request from '../../src/libs/request';
 
 jest.mock('../../src/libs/params');
 jest.mock('../../src/libs/request');
 
 const mockApiKey = 'mockKey';
 const mockOutlookSearchEndpoint = 'mockEndpoint';
+const { read } = jest.mocked(params);
+const { call } = jest.mocked(request);
 
 it('throws if it receives an error when making request against datatorget API', async () => {
   expect.assertions(1);
@@ -23,12 +25,12 @@ it('throws if it receives an error when making request against datatorget API', 
     ],
   };
 
-  (params.read as jest.Mock).mockResolvedValueOnce({
+  read.mockResolvedValueOnce({
     outlookSearchEndpoint: mockOutlookSearchEndpoint,
     apiKey: mockApiKey,
   });
 
-  (call as jest.Mock).mockImplementation(jest.fn().mockRejectedValueOnce(datatorgetError));
+  call.mockImplementation(jest.fn().mockRejectedValueOnce(datatorgetError));
 
   try {
     await searchAdministrators({ mailbox: 'bla@helsingborg.se' });
@@ -41,7 +43,7 @@ it('throws if it receives an error when making request against datatorget API', 
 it('returns a successful response', async () => {
   expect.assertions(1);
 
-  (params.read as jest.Mock).mockResolvedValueOnce({
+  read.mockResolvedValueOnce({
     outlookSearchEndpoint: mockOutlookSearchEndpoint,
     apiKey: mockApiKey,
   });
@@ -59,7 +61,7 @@ it('returns a successful response', async () => {
     },
   };
 
-  (call as jest.Mock).mockImplementation(jest.fn().mockResolvedValueOnce(datatorgetResponse));
+  call.mockImplementation(jest.fn().mockResolvedValueOnce(datatorgetResponse));
 
   const result = await searchAdministrators({ mailbox: 'bla@helsingborg.se' });
 
