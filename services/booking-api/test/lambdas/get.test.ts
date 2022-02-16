@@ -1,9 +1,10 @@
-import messages from '@helsingborg-stad/npm-api-error-handling/assets/errorMessages';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const messages = require('@helsingborg-stad/npm-api-error-handling/assets/errorMessages');
 
-import { main } from '../../lambdas/get';
-import booking from '../../helpers/booking';
+import { main } from '../../src/lambdas/get';
+import booking from '../../src/helpers/booking';
 
-jest.mock('../../helpers/booking');
+jest.mock('../../src/helpers/booking');
 
 const mockBookingId = '1a2bc3';
 const mockEvent = {
@@ -45,7 +46,7 @@ it('gets a booking successfully', async () => {
     statusCode: 200,
   };
 
-  booking.get.mockResolvedValueOnce({
+  (booking.get as jest.Mock).mockResolvedValueOnce({
     data: {
       data: mockCalendarBooking,
     },
@@ -75,7 +76,7 @@ it('throws when fetching a booking fails', async () => {
     statusCode,
   };
 
-  booking.get.mockRejectedValueOnce({ status: statusCode, message });
+  (booking.get as jest.Mock).mockRejectedValueOnce({ status: statusCode, message });
 
   const result = await main(mockEvent);
 

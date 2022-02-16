@@ -1,15 +1,16 @@
-import { InternalServerError } from '@helsingborg-stad/npm-api-error-handling/src/errors';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { InternalServerError } = require('@helsingborg-stad/npm-api-error-handling/src/errors');
 
-import booking from '../../helpers/booking';
-import params from '../../../../libs/params';
-import * as request from '../../../../libs/request';
+import booking from '../../src/helpers/booking';
+import { BookingBody } from '../../src/helpers/getCreateBookingBody';
+import params from '../../src/libs/params';
+import * as request from '../../src/libs/request';
 
-jest.mock('../../../../libs/params');
-jest.mock('../../../../libs/request');
+jest.mock('../../src/libs/params');
+jest.mock('../../src/libs/request');
 
 const mockEndpoint = 'https://mockEndpoint.se';
 const mockApiKey = '1235';
-const mockBody = { id: 'testID' };
 
 process.env.stage = 'dev';
 
@@ -20,11 +21,12 @@ beforeEach(() => {
 it('throws if failing fetching SSM parameters', async () => {
   expect.assertions(1);
 
-  params.read.mockRejectedValueOnce({});
+  (params.read as jest.Mock).mockRejectedValueOnce({});
 
   try {
-    await booking.get(mockBody);
+    await booking.get(undefined);
   } catch (error) {
+    // eslint-disable-next-line jest/no-conditional-expect
     expect(error).toBeInstanceOf(InternalServerError);
   }
 });
@@ -35,12 +37,16 @@ it('throws if failing making sendBookingPostRequest requests', async () => {
   const status = 500;
   const statusText = 'sendBookingPostRequest error';
 
-  params.read.mockResolvedValueOnce({ datatorgetEndpoint: mockEndpoint, apiKey: mockApiKey });
-  request.call.mockRejectedValueOnce({ response: { status, statusText } });
+  (params.read as jest.Mock).mockResolvedValueOnce({
+    datatorgetEndpoint: mockEndpoint,
+    apiKey: mockApiKey,
+  });
+  (request.call as jest.Mock).mockRejectedValueOnce({ response: { status, statusText } });
 
   try {
-    await booking.get(mockBody);
+    await booking.get(undefined);
   } catch (error) {
+    // eslint-disable-next-line jest/no-conditional-expect
     expect(error).toEqual({ status, message: statusText });
   }
 });
@@ -74,10 +80,29 @@ test.each([
       { 'X-ApiKey': mockApiKey }
     );
 
-    params.read.mockResolvedValueOnce({ datatorgetEndpoint: mockEndpoint, apiKey: mockApiKey });
-    request.call.mockResolvedValueOnce();
+    (params.read as jest.Mock).mockResolvedValueOnce({
+      datatorgetEndpoint: mockEndpoint,
+      apiKey: mockApiKey,
+    });
+    (request.call as jest.Mock).mockResolvedValueOnce(undefined);
 
-    await booking[path](functionCall);
+    switch (path) {
+      case 'get':
+        await booking.get(functionCall as string);
+        break;
+      case 'getHistoricalAttendees':
+        await booking.getHistoricalAttendees(functionCall as BookingBody);
+        break;
+      case 'search':
+        await booking.search(functionCall as BookingBody);
+        break;
+      case 'cancel':
+        await booking.cancel(functionCall as string);
+        break;
+      case 'create':
+        await booking.create(functionCall as BookingBody);
+        break;
+    }
 
     expect(request.call).toHaveBeenCalledWith(requestClient, 'post', endpoint, requestCall);
   }

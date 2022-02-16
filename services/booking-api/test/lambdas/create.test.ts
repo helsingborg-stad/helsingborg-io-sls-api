@@ -1,9 +1,13 @@
-import messages from '@helsingborg-stad/npm-api-error-handling/assets/errorMessages';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const messages = require('@helsingborg-stad/npm-api-error-handling/assets/errorMessages');
 
-import { main } from '../../lambdas/create';
-import booking from '../../helpers/booking';
+import { main } from '../../src/lambdas/create';
+import booking from '../../src/helpers/booking';
 
-jest.mock('../../helpers/booking');
+jest.mock('../../src/helpers/booking');
+
+const { search } = jest.mocked(booking);
+const { create } = jest.mocked(booking);
 
 const mockBody = {
   requiredAttendees: ['outlook.user@helsingborg.se'],
@@ -62,8 +66,8 @@ it('creates a booking successfully', async () => {
     statusCode: 200,
   };
 
-  booking.search.mockResolvedValueOnce({ data: searchResponseData });
-  booking.create.mockResolvedValueOnce({ data: responseData });
+  search.mockResolvedValueOnce({ data: searchResponseData });
+  create.mockResolvedValueOnce({ data: responseData });
 
   const result = await main(mockEvent, mockContext);
 
@@ -89,8 +93,8 @@ it('throws when booking.create fails', async () => {
     statusCode,
   };
 
-  booking.search.mockResolvedValueOnce({ data: { data: { attributes: [] } } });
-  booking.create.mockRejectedValueOnce({ status: statusCode, message });
+  search.mockResolvedValueOnce({ data: { data: { attributes: [] } } });
+  create.mockRejectedValueOnce({ status: statusCode, message });
 
   const result = await main(mockEvent, mockContext);
 
@@ -161,7 +165,7 @@ it('returns failure when timeslot is already taken', async () => {
     statusCode,
   };
 
-  booking.search.mockResolvedValueOnce({ data: searchResponseData });
+  search.mockResolvedValueOnce({ data: searchResponseData });
 
   const result = await main(mockEvent, mockContext);
 
