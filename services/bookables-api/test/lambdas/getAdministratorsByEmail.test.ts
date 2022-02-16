@@ -1,9 +1,12 @@
 import { main } from '../../src/lambdas/getAdministratorsByEmail';
 import searchAdministrators from '../../src/helpers/searchAdministrators';
-import { getBookables } from '../../src/helpers/bookables';
+import * as bookables from '../../src/helpers/bookables';
 
 jest.mock('../../src/helpers/searchAdministrators');
 jest.mock('../../src/helpers/bookables');
+
+const { getBookables } = jest.mocked(bookables);
+const mockedSearchAdministrators = jest.mocked(searchAdministrators);
 
 const mockAdministrators = ['administrator@helsingborg.se', 'administrator_2@helsingborg.se'];
 const email = 'mock@helsingborg.se';
@@ -28,12 +31,15 @@ beforeEach(() => {
 it('fetches administrators by email successfully', async () => {
   expect.assertions(3);
 
-  (getBookables as jest.Mock).mockResolvedValueOnce([
+  getBookables.mockResolvedValueOnce([
     {
       sharedMailbox: email,
+      name: 'name',
+      address: 'address',
+      formId: 'formId',
     },
   ]);
-  (searchAdministrators as jest.Mock).mockResolvedValueOnce({
+  mockedSearchAdministrators.mockResolvedValueOnce({
     data: {
       data: {
         attributes: mockAdministrators,
@@ -83,9 +89,12 @@ it('returns a failure when required parameter is not provided in the event', asy
 it('returns a failure if "searchAdministrators" function fails', async () => {
   expect.assertions(2);
 
-  (getBookables as jest.Mock).mockResolvedValueOnce([
+  getBookables.mockResolvedValueOnce([
     {
       sharedMailbox: email,
+      name: 'name',
+      address: 'address',
+      formId: 'formId',
     },
   ]);
 
@@ -99,7 +108,7 @@ it('returns a failure if "searchAdministrators" function fails', async () => {
     statusCode: 500,
   };
 
-  (searchAdministrators as jest.Mock).mockRejectedValueOnce({ status: 500, message });
+  mockedSearchAdministrators.mockRejectedValueOnce({ status: 500, message });
 
   const result = await main(mockEvent);
 
@@ -110,9 +119,12 @@ it('returns a failure if "searchAdministrators" function fails', async () => {
 it('returns a failure if provided email does not exists', async () => {
   expect.assertions(2);
 
-  (getBookables as jest.Mock).mockResolvedValueOnce([
+  getBookables.mockResolvedValueOnce([
     {
       sharedMailbox: 'mail that does not exist',
+      name: 'name',
+      address: 'address',
+      formId: 'formId',
     },
   ]);
 
