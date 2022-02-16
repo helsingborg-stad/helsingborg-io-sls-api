@@ -6,6 +6,8 @@ import booking from '../../src/helpers/booking';
 
 jest.mock('../../src/helpers/booking');
 
+const { search } = jest.mocked(booking);
+
 const mockBody = {
   startTime: '2021-11-01T00:00:00+01:00',
   endTime: '2021-12-31T00:00:00+01:00',
@@ -51,7 +53,7 @@ it('gets booking from a successful search', async () => {
     statusCode: 200,
   };
 
-  (booking.search as jest.Mock).mockResolvedValueOnce({
+  search.mockResolvedValueOnce({
     data: {
       data: {
         attributes: mockCalendarSearch,
@@ -83,7 +85,7 @@ it('throws when searching for a booking fails', async () => {
     statusCode,
   };
 
-  (booking.search as jest.Mock).mockRejectedValueOnce({ status: statusCode, message });
+  search.mockRejectedValueOnce({ status: statusCode, message });
 
   const result = await main(mockEvent);
 
