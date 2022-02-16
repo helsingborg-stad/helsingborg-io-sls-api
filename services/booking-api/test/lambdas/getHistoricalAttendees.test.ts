@@ -1,7 +1,7 @@
-import { main } from '../../lambdas/getHistoricalAttendees';
-import booking from '../../helpers/booking';
+import { main } from '../../src/lambdas/getHistoricalAttendees';
+import booking from '../../src/helpers/booking';
 
-jest.mock('../../helpers/booking');
+jest.mock('../../src/helpers/booking');
 
 const mockHeaders = {
   'Access-Control-Allow-Credentials': true,
@@ -22,7 +22,15 @@ const getHistoricalAttendeesMockData = {
 const mockReferenceCode = '1a2bc3';
 const mockStartTime = 'startTime';
 const mockEndTime = 'mockEndTime';
-let mockEvent;
+let mockEvent: {
+  pathParameters: {
+    referenceCode?: string;
+  };
+  queryStringParameters: {
+    startTime?: string;
+    endTime?: string;
+  };
+};
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -47,7 +55,7 @@ it('gets historical attendees successfully', async () => {
     statusCode: 200,
   };
 
-  booking.getHistoricalAttendees.mockResolvedValueOnce({
+  (booking.getHistoricalAttendees as jest.Mock).mockResolvedValueOnce({
     data: {
       data: mockCalendarBooking,
     },
@@ -136,7 +144,10 @@ it('returns failure if datatorget request fails', async () => {
     statusCode,
   };
 
-  booking.getHistoricalAttendees.mockRejectedValueOnce({ status: statusCode, message });
+  (booking.getHistoricalAttendees as jest.Mock).mockRejectedValueOnce({
+    status: statusCode,
+    message,
+  });
 
   const result = await main(mockEvent);
 

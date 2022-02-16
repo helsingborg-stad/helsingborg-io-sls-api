@@ -1,4 +1,15 @@
-export default body => {
+export interface BookingBody {
+  requiredAttendees?: string[];
+  startTime?: string;
+  endTime?: string;
+  optionalAttendees?: string[];
+  subject?: string;
+  location?: string;
+  referenceCode?: string;
+  body?: string;
+}
+
+export default (body: BookingBody) => {
   const {
     requiredAttendees,
     startTime,

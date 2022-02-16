@@ -1,13 +1,13 @@
 import to from 'await-to-js';
 
-import * as response from '../../../libs/response';
-import log from '../../../libs/logs';
+import * as response from '../libs/response';
+import log from '../libs/logs';
 
 import booking from '../helpers/booking';
 import { isTimeslotTaken } from '../helpers/isTimeslotTaken';
 import getCreateBookingBody from '../helpers/getCreateBookingBody';
 
-export async function main(event, { awsRequestId }) {
+export async function main(event: { body: string }, { awsRequestId }) {
   const body = JSON.parse(event.body);
   const { requiredAttendees = [], startTime, endTime } = body;
 
@@ -32,7 +32,7 @@ export async function main(event, { awsRequestId }) {
     return response.failure(searchBookingError);
   }
 
-  const bookingExist = searchResponse?.data?.data?.attributes?.length > 0;
+  const bookingExist = searchResponse?.data?.data?.attributes?.length ?? 0 > 0;
   const timeslotTaken = isTimeslotTaken(searchResponse?.data?.data?.attributes);
 
   if (bookingExist && timeslotTaken) {
@@ -49,7 +49,7 @@ export async function main(event, { awsRequestId }) {
     return response.failure(error);
   }
 
-  const bookingId = createBookingResponse.data.data.attributes.BookingId;
+  const bookingId = createBookingResponse?.data?.data?.attributes.BookingId;
 
   return response.success(200, { bookingId });
 }
