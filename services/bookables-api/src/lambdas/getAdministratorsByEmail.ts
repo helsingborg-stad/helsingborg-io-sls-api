@@ -1,11 +1,11 @@
 import to from 'await-to-js';
 
-import * as response from '../../../libs/response';
+import * as response from '../libs/response';
 
 import searchAdministrators from '../helpers/searchAdministrators';
 import { getBookables } from '../helpers/bookables';
 
-export async function main(event) {
+export async function main(event: { pathParameters: { email?: string } }) {
   const { email } = event.pathParameters;
 
   if (!email) {
@@ -17,7 +17,7 @@ export async function main(event) {
     return response.failure(getBookablesError);
   }
 
-  const sharedEmail = bookablesResponse.find(({ sharedMailbox }) => sharedMailbox === email);
+  const sharedEmail = bookablesResponse?.find(({ sharedMailbox }) => sharedMailbox === email);
   if (sharedEmail === undefined) {
     return response.failure({ status: 404, message: 'Email does not exist' });
   }
@@ -30,6 +30,6 @@ export async function main(event) {
     return response.failure(searchAdministratorsError);
   }
 
-  const { data } = searchAdministratorsResult.data;
+  const { data } = searchAdministratorsResult?.data ?? {};
   return response.success(200, data);
 }

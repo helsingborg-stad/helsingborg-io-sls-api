@@ -1,6 +1,6 @@
 import to from 'await-to-js';
 
-import * as response from '../../../libs/response';
+import * as response from '../libs/response';
 
 import { getBookables } from '../helpers/bookables';
 
