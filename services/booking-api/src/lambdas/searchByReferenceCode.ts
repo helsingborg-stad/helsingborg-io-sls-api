@@ -1,10 +1,10 @@
 import to from 'await-to-js';
 
-import * as response from '../../../libs/response';
+import * as response from '../libs/response';
 
 import booking from '../helpers/booking';
 
-export async function main(event) {
+export async function main(event: { body: string }) {
   const body = JSON.parse(event.body);
 
   const { referenceCode, startTime, endTime } = body;
@@ -21,6 +21,6 @@ export async function main(event) {
     return response.failure(searchBookingError);
   }
 
-  const { data } = searchBookingResponse.data;
+  const { data } = searchBookingResponse?.data ?? {};
   return response.success(200, data);
 }

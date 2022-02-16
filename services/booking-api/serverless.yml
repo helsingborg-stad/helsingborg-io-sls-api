@@ -14,20 +14,17 @@ package:
 provider:
   lambdaHashingVersion: 20201221
   name: aws
-  runtime: nodejs12.x
+  runtime: nodejs14.x
   stage: dev
   region: eu-north-1
   endpointType: regional
   tracing:
     lambda: true
   apiGateway:
-    restApiId:
-      !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiId
-    restApiRootResourceId:
-      !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
+    restApiId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiId
+    restApiRootResourceId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
     restApiResources:
-      booking:
-        !ImportValue ${self:custom.stage}-ExtApiGatewayResourceBooking
+      booking: !ImportValue ${self:custom.stage}-ExtApiGatewayResourceBooking
 
   environment:
     stage: ${self:custom.stage}
@@ -44,7 +41,7 @@ provider:
 
 functions:
   createBooking:
-    handler: lambdas/create.main
+    handler: src/lambdas/create.main
     events:
       - http:
           path: booking
@@ -53,7 +50,7 @@ functions:
           cors: true
 
   cancelBooking:
-    handler: lambdas/cancel.main
+    handler: src/lambdas/cancel.main
     events:
       - http:
           path: booking/{id}
@@ -62,7 +59,7 @@ functions:
           cors: true
 
   getBooking:
-    handler: lambdas/get.main
+    handler: src/lambdas/get.main
     events:
       - http:
           path: booking/{id}
@@ -71,7 +68,7 @@ functions:
           cors: true
 
   updateBooking:
-    handler: lambdas/update.main
+    handler: src/lambdas/update.main
     events:
       - http:
           path: booking/{id}
@@ -80,7 +77,7 @@ functions:
           cors: true
 
   searchByReferenceCode:
-    handler: lambdas/searchByReferenceCode.main
+    handler: src/lambdas/searchByReferenceCode.main
     events:
       - http:
           path: booking/search
@@ -89,7 +86,7 @@ functions:
           cors: true
 
   getHistoricalAttendees:
-    handler: lambdas/getHistoricalAttendees.main
+    handler: src/lambdas/getHistoricalAttendees.main
     timeout: 12 # time in seconds
     environment:
       requestTimeout: 10000 # 10 seconds in ms

@@ -1,11 +1,19 @@
-import messages from '@helsingborg-stad/npm-api-error-handling/assets/errorMessages';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const messages = require('@helsingborg-stad/npm-api-error-handling/assets/errorMessages');
 
-import { main } from '../../lambdas/update';
-import booking from '../../helpers/booking';
-import { isTimeslotTaken } from '../../helpers/isTimeslotTaken';
+import { main } from '../../src/lambdas/update';
+import booking from '../../src/helpers/booking';
+import { isTimeslotTaken } from '../../src/helpers/isTimeslotTaken';
 
-jest.mock('../../helpers/booking');
-jest.mock('../../helpers/isTimeslotTaken');
+jest.mock('../../src/helpers/booking');
+jest.mock('../../src/helpers/isTimeslotTaken');
+
+jest.mock('../../src/helpers/booking');
+
+const { search } = jest.mocked(booking);
+const { create } = jest.mocked(booking);
+const { cancel } = jest.mocked(booking);
+const mockedTimeSlotTaken = jest.mocked(isTimeslotTaken);
 
 const mockContext = { awsRequestId: 'xxxxx' };
 const mockBookingId = '1a2bc3';
@@ -36,7 +44,12 @@ const mockHeaders = {
 const mockSearchResponse = {
   data: {
     data: {
-      attributes: ['fake object'],
+      attributes: [
+        {
+          BookingId: '123456789',
+          Attendees: [],
+        },
+      ],
     },
   },
 };
@@ -68,10 +81,10 @@ it('updates a booking successfully', async () => {
     statusCode: 200,
   };
 
-  booking.cancel.mockResolvedValueOnce();
-  booking.create.mockResolvedValueOnce(calendarBookingResponse);
-  booking.search.mockResolvedValueOnce(mockSearchResponse);
-  isTimeslotTaken.mockReturnValueOnce(false);
+  cancel.mockResolvedValueOnce(undefined);
+  create.mockResolvedValueOnce(calendarBookingResponse);
+  search.mockResolvedValueOnce(mockSearchResponse);
+  mockedTimeSlotTaken.mockReturnValueOnce(false);
 
   const result = await main(mockEvent, mockContext);
 
@@ -97,8 +110,8 @@ it('does not update if timeslot is taken', async () => {
     statusCode: 403,
   };
 
-  booking.search.mockResolvedValueOnce(mockSearchResponse);
-  isTimeslotTaken.mockReturnValueOnce(true);
+  search.mockResolvedValueOnce(mockSearchResponse);
+  mockedTimeSlotTaken.mockReturnValueOnce(true);
 
   const result = await main(mockEvent, mockContext);
 
@@ -127,9 +140,9 @@ it('throws when booking.cancel fails', async () => {
     statusCode,
   };
 
-  booking.cancel.mockRejectedValueOnce({ status: statusCode, message });
-  booking.search.mockResolvedValueOnce(mockSearchResponse);
-  isTimeslotTaken.mockReturnValueOnce(false);
+  cancel.mockRejectedValueOnce({ status: statusCode, message });
+  search.mockResolvedValueOnce(mockSearchResponse);
+  mockedTimeSlotTaken.mockReturnValueOnce(false);
 
   const result = await main(mockEvent, mockContext);
 
@@ -158,10 +171,10 @@ it('throws when booking.create fails', async () => {
     statusCode,
   };
 
-  booking.cancel.mockResolvedValueOnce();
-  booking.create.mockRejectedValueOnce({ status: statusCode, message });
-  booking.search.mockResolvedValueOnce(mockSearchResponse);
-  isTimeslotTaken.mockReturnValueOnce(false);
+  cancel.mockResolvedValueOnce(undefined);
+  create.mockRejectedValueOnce({ status: statusCode, message });
+  search.mockResolvedValueOnce(mockSearchResponse);
+  mockedTimeSlotTaken.mockReturnValueOnce(false);
 
   const result = await main(mockEvent, mockContext);
 

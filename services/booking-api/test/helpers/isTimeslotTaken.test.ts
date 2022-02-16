@@ -1,4 +1,4 @@
-import { isTimeslotTaken } from '../../helpers/isTimeslotTaken';
+import { isTimeslotTaken } from '../../src/helpers/isTimeslotTaken';
 
 const mockAttendeeRequiredAccepted = {
   Type: 'Required',

@@ -1,13 +1,16 @@
 import to from 'await-to-js';
 
-import * as response from '../../../libs/response';
-import log from '../../../libs/logs';
+import * as response from '../libs/response';
+import log from '../libs/logs';
 
 import booking from '../helpers/booking';
 import { isTimeslotTaken } from '../helpers/isTimeslotTaken';
 import getCreateBookingBody from '../helpers/getCreateBookingBody';
 
-export async function main(event, { awsRequestId }) {
+export async function main(
+  event: { pathParameters: Record<string, string>; body: string },
+  { awsRequestId }
+) {
   const bookingId = decodeURIComponent(event.pathParameters.id);
 
   const body = JSON.parse(event.body);
@@ -30,7 +33,7 @@ export async function main(event, { awsRequestId }) {
     return response.failure({ message, status: 500 });
   }
 
-  const bookingExist = searchResponse?.data?.data?.attributes?.length > 0;
+  const bookingExist = searchResponse?.data?.data?.attributes?.length ?? 0 > 0;
   const timeslotTaken = isTimeslotTaken(searchResponse?.data?.data?.attributes);
 
   if (bookingExist && timeslotTaken) {
@@ -54,7 +57,7 @@ export async function main(event, { awsRequestId }) {
     return response.failure({ message, status: 500 });
   }
 
-  const newBookingId = createBookingResponse.data.data.attributes.BookingId;
+  const newBookingId = createBookingResponse?.data?.data?.attributes.BookingId;
 
   return response.success(200, { bookingId: newBookingId });
 }

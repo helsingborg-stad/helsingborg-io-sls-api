@@ -1,10 +1,13 @@
 import to from 'await-to-js';
 
-import * as response from '../../../libs/response';
+import * as response from '../libs/response';
 
 import booking from '../helpers/booking';
 
-export async function main(event) {
+export async function main(event: {
+  pathParameters: Record<string, string>;
+  queryStringParameters: Record<string, string>;
+}) {
   let referenceCode = event.pathParameters?.referenceCode;
 
   if (!referenceCode) {
@@ -17,7 +20,7 @@ export async function main(event) {
   referenceCode = decodeURIComponent(referenceCode);
   const { startTime = '', endTime = '' } = event.queryStringParameters;
 
-  if (!startTime | !endTime) {
+  if (!startTime || !endTime) {
     return response.failure({
       status: 403,
       message: 'Missing one or more required query string parameters: "startTime", "endTime',
@@ -32,6 +35,6 @@ export async function main(event) {
     return response.failure(getHistoricalAttendeesError);
   }
 
-  const { data } = getHistoricalAttendeesResponse.data;
+  const { data } = getHistoricalAttendeesResponse?.data ?? {};
   return response.success(200, data);
 }

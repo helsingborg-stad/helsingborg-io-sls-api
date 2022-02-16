@@ -1,10 +1,10 @@
 import to from 'await-to-js';
 
-import * as response from '../../../libs/response';
+import * as response from '../libs/response';
 
 import booking from '../helpers/booking';
 
-export async function main(event) {
+export async function main(event: { pathParameters: Record<string, string> }) {
   const bookingId = decodeURIComponent(event.pathParameters.id);
 
   const [error] = await to(booking.cancel(bookingId));
