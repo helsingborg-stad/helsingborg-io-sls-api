@@ -6,8 +6,7 @@ import booking from '../../src/helpers/booking';
 
 jest.mock('../../src/helpers/booking');
 
-const { search } = jest.mocked(booking);
-const { create } = jest.mocked(booking);
+const { search, create } = jest.mocked(booking);
 
 const mockBody = {
   requiredAttendees: ['outlook.user@helsingborg.se'],

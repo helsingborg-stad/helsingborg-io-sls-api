@@ -3,6 +3,7 @@ import booking from '../../src/helpers/booking';
 
 jest.mock('../../src/helpers/booking');
 
+const { getHistoricalAttendees } = jest.mocked(booking);
 const mockHeaders = {
   'Access-Control-Allow-Credentials': true,
   'Access-Control-Allow-Origin': '*',
@@ -55,7 +56,7 @@ it('gets historical attendees successfully', async () => {
     statusCode: 200,
   };
 
-  (booking.getHistoricalAttendees as jest.Mock).mockResolvedValueOnce({
+  getHistoricalAttendees.mockResolvedValueOnce({
     data: {
       data: mockCalendarBooking,
     },
@@ -144,7 +145,7 @@ it('returns failure if datatorget request fails', async () => {
     statusCode,
   };
 
-  (booking.getHistoricalAttendees as jest.Mock).mockRejectedValueOnce({
+  getHistoricalAttendees.mockRejectedValueOnce({
     status: statusCode,
     message,
   });
