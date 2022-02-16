@@ -13,7 +13,7 @@ package:
 provider:
   lambdaHashingVersion: 20201221
   name: aws
-  runtime: nodejs12.x
+  runtime: nodejs14.x
   stage: dev
   region: eu-north-1
   endpointType: regional
@@ -46,13 +46,13 @@ provider:
           Resource:
             - Fn::ImportValue: ${self:custom.resourcesStage}-PdfStorageBucketArn
             - Fn::Join:
-                - ""
+                - ''
                 - - Fn::ImportValue: ${self:custom.resourcesStage}-PdfStorageBucketArn
-                  - "/*"
+                  - '/*'
 
 functions:
   updatePdf:
-    handler: lambdas/updatePdf.main
+    handler: src/lambdas/updatePdf.main
     environment:
       PDF_STORAGE_BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-PdfStorageBucketName
     events:

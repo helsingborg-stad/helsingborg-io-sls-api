@@ -1,13 +1,25 @@
+/* eslint-disable no-console */
 import to from 'await-to-js';
 
-import config from '../../../config';
+import config from '../libs/config';
 
-import * as dynamoDb from '../../../libs/dynamoDb';
-import S3 from '../../../libs/S3';
-import log from '../../../libs/logs';
-import { PDF_GENERATED, PDF_NOT_GENERATED } from '../../../libs/constants';
+import * as dynamoDb from '../libs/dynamoDb';
+import S3 from '../libs/S3';
+import log from '../libs/logs';
+import { PDF_GENERATED, PDF_NOT_GENERATED } from '../libs/constants';
 
-export async function main(event, context) {
+interface CaseKeys {
+  PK: string;
+  SK: string;
+}
+
+interface CaseRequest {
+  detail: {
+    keys: CaseKeys;
+    pdfStorageBucketKey: string;
+  };
+}
+export async function main(event: CaseRequest, context: { awsRequestId: string }) {
   const { keys: caseKeys, pdfStorageBucketKey } = event.detail;
 
   if (!caseKeys?.PK) {
@@ -47,7 +59,7 @@ export async function main(event, context) {
   return true;
 }
 
-function updateCasePdfAttributes(caseKeys, pdf) {
+function updateCasePdfAttributes(caseKeys: CaseKeys, pdf: string) {
   const isPdf = !!pdf;
   const newState = isPdf ? PDF_GENERATED : PDF_NOT_GENERATED;
 
