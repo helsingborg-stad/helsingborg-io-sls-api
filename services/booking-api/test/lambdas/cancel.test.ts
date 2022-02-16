@@ -6,6 +6,8 @@ import booking from '../../src/helpers/booking';
 
 jest.mock('../../src/helpers/booking');
 
+const { cancel } = jest.mocked(booking);
+
 const mockBookingId = '1a2bc3';
 const mockEvent = {
   pathParameters: {
@@ -28,7 +30,7 @@ it('cancels a booking successfully', async () => {
     headers: mockHeaders,
     statusCode: 200,
   };
-  (booking.cancel as jest.Mock).mockResolvedValue(undefined);
+  cancel.mockResolvedValue(undefined);
 
   const result = await main(mockEvent);
 
@@ -54,7 +56,7 @@ it('throws when booking.cancel fails', async () => {
     statusCode,
   };
 
-  (booking.cancel as jest.Mock).mockRejectedValueOnce({ status: statusCode, message });
+  cancel.mockRejectedValueOnce({ status: statusCode, message });
 
   const result = await main(mockEvent);
 

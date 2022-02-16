@@ -12,6 +12,9 @@ jest.mock('../../src/libs/request');
 const mockEndpoint = 'https://mockEndpoint.se';
 const mockApiKey = '1235';
 
+const { read } = jest.mocked(params);
+const { call } = jest.mocked(request);
+
 process.env.stage = 'dev';
 
 beforeEach(() => {
@@ -21,7 +24,7 @@ beforeEach(() => {
 it('throws if failing fetching SSM parameters', async () => {
   expect.assertions(1);
 
-  (params.read as jest.Mock).mockRejectedValueOnce({});
+  read.mockRejectedValueOnce({});
 
   try {
     await booking.get(undefined);
@@ -37,11 +40,11 @@ it('throws if failing making sendBookingPostRequest requests', async () => {
   const status = 500;
   const statusText = 'sendBookingPostRequest error';
 
-  (params.read as jest.Mock).mockResolvedValueOnce({
+  read.mockResolvedValueOnce({
     datatorgetEndpoint: mockEndpoint,
     apiKey: mockApiKey,
   });
-  (request.call as jest.Mock).mockRejectedValueOnce({ response: { status, statusText } });
+  call.mockRejectedValueOnce({ response: { status, statusText } });
 
   try {
     await booking.get(undefined);
@@ -80,11 +83,11 @@ test.each([
       { 'X-ApiKey': mockApiKey }
     );
 
-    (params.read as jest.Mock).mockResolvedValueOnce({
+    read.mockResolvedValueOnce({
       datatorgetEndpoint: mockEndpoint,
       apiKey: mockApiKey,
     });
-    (request.call as jest.Mock).mockResolvedValueOnce(undefined);
+    call.mockResolvedValueOnce(undefined);
 
     switch (path) {
       case 'get':

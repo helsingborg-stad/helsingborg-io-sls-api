@@ -7,23 +7,53 @@ import params from '../libs/params';
 import config from '../libs/config';
 import { BookingBody } from './getCreateBookingBody';
 
+<<<<<<< HEAD
 interface Attendees {
+=======
+interface Attendee {
+  Email: string;
+>>>>>>> 84f15a0 (fix: change to jest.mocked instead of type cast)
   Type: string;
   Status: string;
 }
 
+<<<<<<< HEAD
 interface Booking {
   BookingId: string;
   Attendees: Attendees[];
+=======
+export interface BookingAttributes {
+  BookingId: string;
+  Attendees: Attendee[];
+  Subject: string;
+  Body: string | null;
+  Location: string;
+  ReferenceCode: string;
+  StartTime: string;
+  EndTime: string;
+>>>>>>> 84f15a0 (fix: change to jest.mocked instead of type cast)
 }
 export interface BookingSearchResponse {
   data?: {
     data?: {
+<<<<<<< HEAD
       attributes: Booking[];
+=======
+      attributes: BookingAttributes[];
+>>>>>>> 84f15a0 (fix: change to jest.mocked instead of type cast)
     };
   };
 }
 
+export interface HistoricalAttendeesResponse {
+  data?: {
+    data?: {
+      type: string;
+      id: string;
+      attributes: string[];
+    };
+  };
+}
 export interface BookingCreateResponse {
   data?: {
     data?: {
@@ -56,7 +86,7 @@ function create(body: BookingBody) {
 }
 
 function cancel(bookingId: string) {
-  return sendBookingPostRequest<BookingCreateResponse>(URI_RESOURCE.CANCEL, { bookingId });
+  return sendBookingPostRequest<undefined>(URI_RESOURCE.CANCEL, { bookingId });
 }
 
 function get(bookingId: string | undefined) {
@@ -69,7 +99,7 @@ function search(body: BookingBody) {
 
 function getHistoricalAttendees(body: BookingBody) {
   const requestTimeout = process.env.requestTimeout;
-  return sendBookingPostRequest<BookingCreateResponse>(
+  return sendBookingPostRequest<HistoricalAttendeesResponse>(
     URI_RESOURCE.GET_HISTORICAL_ATTENDEES,
     body,
     Number(requestTimeout)

@@ -10,9 +10,7 @@ jest.mock('../../src/helpers/isTimeslotTaken');
 
 jest.mock('../../src/helpers/booking');
 
-const { search } = jest.mocked(booking);
-const { create } = jest.mocked(booking);
-const { cancel } = jest.mocked(booking);
+const { search, create, cancel } = jest.mocked(booking);
 const mockedTimeSlotTaken = jest.mocked(isTimeslotTaken);
 
 const mockContext = { awsRequestId: 'xxxxx' };

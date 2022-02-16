@@ -6,6 +6,7 @@ import booking from '../../src/helpers/booking';
 
 jest.mock('../../src/helpers/booking');
 
+const { get } = jest.mocked(booking);
 const mockBookingId = '1a2bc3';
 const mockEvent = {
   pathParameters: {
@@ -46,7 +47,7 @@ it('gets a booking successfully', async () => {
     statusCode: 200,
   };
 
-  (booking.get as jest.Mock).mockResolvedValueOnce({
+  get.mockResolvedValueOnce({
     data: {
       data: mockCalendarBooking,
     },
@@ -76,7 +77,7 @@ it('throws when fetching a booking fails', async () => {
     statusCode,
   };
 
-  (booking.get as jest.Mock).mockRejectedValueOnce({ status: statusCode, message });
+  get.mockRejectedValueOnce({ status: statusCode, message });
 
   const result = await main(mockEvent);
 
