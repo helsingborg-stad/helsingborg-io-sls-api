@@ -72,6 +72,7 @@
     "html-entities": "^2.3.2",
     "joi": "^17.5.0",
     "puppeteer-core": "^10.4.0",
+    "serverless-deployment-bucket": "^1.5.1",
     "winston": "^3.3.3"
   },
   "config": {

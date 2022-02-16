@@ -4,6 +4,7 @@ plugins:
   - serverless-bundle
   - serverless-offline
   - serverless-add-api-key
+  - serverless-deployment-bucket
 
 projectDir: ../../../
 
@@ -30,6 +31,8 @@ provider:
     restApiResources:
       auth:
         "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayResourceAuth
+  deploymentBucket:
+    name: ${self:custom.deploymentBucketName}
 
   environment:
     stage: ${self:custom.stage}
@@ -41,7 +44,7 @@ provider:
         - Effect: Allow
           Action:
             - secretsmanager:GetSecretValue
-          Resource: 
+          Resource:
             - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${file(../../../config.json):${self:custom.stage}.auth.secrets.accessToken.name}-??????"
             - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${file(../../../config.json):${self:custom.stage}.auth.secrets.refreshToken.name}-??????"
             - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${file(../../../config.json):${self:custom.stage}.auth.secrets.authorizationCode.name}-??????"

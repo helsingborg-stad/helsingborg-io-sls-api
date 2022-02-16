@@ -2,6 +2,7 @@ service: navet-ms
 
 plugins:
   - serverless-bundle
+  - serverless-deployment-bucket
 
 projectDir: ../../
 
@@ -19,6 +20,8 @@ provider:
   endpointType: regional
   tracing:
     lambda: true
+  deploymentBucket:
+    name: ${self:custom.deploymentBucketName}
 
   environment:
     stage: ${self:custom.stage}
@@ -31,15 +34,15 @@ provider:
           Action:
             - s3:getObject
           Resource:
-            - "Fn::Join": 
-              - ""
-              - - Fn::ImportValue: ${self:custom.stage}-CertificatesBucketArn
-                - "/*"
+            - "Fn::Join":
+                - ""
+                - - Fn::ImportValue: ${self:custom.stage}-CertificatesBucketArn
+                  - "/*"
 
         - Effect: Allow
           Action:
             - SSM:GetParameter*
-          Resource: 
+          Resource:
             - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${file(../../config.json):${self:custom.stage}.navet.envsKeyName}"
 
         - Effect: Allow

@@ -2,6 +2,7 @@ service: cases-api
 
 plugins:
   - serverless-bundle
+  - serverless-deployment-bucket
 
 projectDir: ../../
 
@@ -19,6 +20,8 @@ provider:
   endpointType: regional
   tracing:
     lambda: true
+  deploymentBucket:
+    name: ${self:custom.deploymentBucketName}
 
   environment:
     stage: ${self:custom.stage}

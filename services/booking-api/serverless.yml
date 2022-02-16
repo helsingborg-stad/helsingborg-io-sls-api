@@ -3,6 +3,7 @@ service: booking-api
 plugins:
   - serverless-bundle
   - serverless-add-api-key
+  - serverless-deployment-bucket
 
 projectDir: ../../
 
@@ -21,13 +22,12 @@ provider:
   tracing:
     lambda: true
   apiGateway:
-    restApiId:
-      !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiId
-    restApiRootResourceId:
-      !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
+    restApiId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiId
+    restApiRootResourceId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
     restApiResources:
-      booking:
-        !ImportValue ${self:custom.stage}-ExtApiGatewayResourceBooking
+      booking: !ImportValue ${self:custom.stage}-ExtApiGatewayResourceBooking
+  deploymentBucket:
+    name: ${self:custom.deploymentBucketName}
 
   environment:
     stage: ${self:custom.stage}

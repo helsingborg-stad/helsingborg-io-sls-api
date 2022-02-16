@@ -4,6 +4,7 @@ plugins:
   - serverless-bundle
   - serverless-offline
   - serverless-add-api-key
+  - serverless-deployment-bucket
 
 projectDir: ../../
 
@@ -24,6 +25,8 @@ provider:
   tracing:
     apiGateway: true
     lambda: true
+  deploymentBucket:
+    name: ${self:custom.deploymentBucketName}
 
   environment:
     stage: ${self:custom.stage}
@@ -89,7 +92,6 @@ functions:
           cors: true
           private: true
 
-
   deleteForm:
     handler: lambdas/deleteForm.main
     events:
@@ -98,4 +100,3 @@ functions:
           method: delete
           cors: true
           private: true
-

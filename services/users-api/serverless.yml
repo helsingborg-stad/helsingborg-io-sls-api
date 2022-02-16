@@ -5,6 +5,7 @@ plugins:
   - serverless-offline
   - serverless-apigw-binary
   - serverless-apigwy-binary
+  - serverless-deployment-bucket
 
 projectDir: ../../
 
@@ -25,6 +26,8 @@ provider:
   tracing:
     apiGateway: true
     lambda: true
+  deploymentBucket:
+    name: ${self:custom.deploymentBucketName}
 
   environment:
     stage: ${self:custom.stage}
@@ -152,5 +155,3 @@ functions:
           authorizer:
             type: CUSTOM
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
-
-           

@@ -3,6 +3,7 @@ service: stream-eventbridge-ms
 plugins:
   - serverless-bundle
   - serverless-offline
+  - serverless-deployment-bucket
 
 projectDir: ../../
 
@@ -21,6 +22,8 @@ provider:
   tracing:
     apiGateway: false
     lambda: true
+  deploymentBucket:
+    name: ${self:custom.deploymentBucketName}
 
   environment:
     stage: ${self:custom.stage}

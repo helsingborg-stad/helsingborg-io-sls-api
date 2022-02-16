@@ -2,6 +2,7 @@ service: viva-ms
 
 plugins:
   - serverless-bundle
+  - serverless-deployment-bucket
 
 projectDir: ../../
 
@@ -22,6 +23,8 @@ provider:
   tracing:
     apiGateway: false
     lambda: true
+  deploymentBucket:
+    name: ${self:custom.deploymentBucketName}
 
   environment:
     stage: ${self:custom.stage}

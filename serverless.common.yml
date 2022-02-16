@@ -2,7 +2,7 @@ custom:
   bundle:
     packager: yarn
     forceExclude:
-        - chrome-aws-lambda
+      - chrome-aws-lambda
   # Our stage is based on what is passed in when running serverless
   # commands. Or fallsback to what we have set in the provider section.
   stage: ${opt:stage, self:provider.stage}
@@ -14,6 +14,8 @@ custom:
     release: release
   resourcesStage: ${self:custom.resourcesStages.${self:custom.stage}, self:custom.resourcesStages.dev}
 
+  deploymentBucketName: deployment-${aws:accountId}
+
   apiKeys:
     - name: helsingborg-io-apikey
       deleteAtRemoval: false
@@ -21,8 +23,8 @@ custom:
         name: hbg-authorizer-${self:custom.stage}
 
   apigwBinary:
-    types:           #list of mime-types 
-      - 'image/jpg'
-      - 'image/jpeg'
-      - 'image/png'
-      - 'application/pdf'
+    types: #list of mime-types
+      - "image/jpg"
+      - "image/jpeg"
+      - "image/png"
+      - "application/pdf"

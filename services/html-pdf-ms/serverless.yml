@@ -2,6 +2,7 @@ service: html-pdf-ms
 
 plugins:
   - serverless-bundle
+  - serverless-deployment-bucket
 
 projectDir: ../../
 
@@ -17,6 +18,8 @@ provider:
   stage: dev
   region: eu-north-1
   endpointType: regional
+  deploymentBucket:
+    name: ${self:custom.deploymentBucketName}
 
   environment:
     stage: ${self:custom.stage}
