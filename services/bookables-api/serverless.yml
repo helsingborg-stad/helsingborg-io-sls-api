@@ -21,13 +21,10 @@ provider:
   tracing:
     lambda: true
   apiGateway:
-    restApiId:
-      !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiId
-    restApiRootResourceId:
-      !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
+    restApiId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiId
+    restApiRootResourceId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
     restApiResources:
-      bookables:
-        !ImportValue ${self:custom.stage}-ExtApiGatewayResourceBookables
+      bookables: !ImportValue ${self:custom.stage}-ExtApiGatewayResourceBookables
 
   environment:
     stage: ${self:custom.stage}
@@ -45,7 +42,7 @@ provider:
 
 functions:
   getBookables:
-    handler: lambdas/getBookables.main
+    handler: src/lambdas/getBookables.main
     events:
       - http:
           path: bookables
@@ -54,11 +51,10 @@ functions:
           cors: true
 
   getAdministratorsByEmail:
-    handler: lambdas/getAdministratorsByEmail.main
+    handler: src/lambdas/getAdministratorsByEmail.main
     events:
       - http:
           path: bookables/getAdministratorsByEmail/{email}
           method: get
           private: true
           cors: true
-
