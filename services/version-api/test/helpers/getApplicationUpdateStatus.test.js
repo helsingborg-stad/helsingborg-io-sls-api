@@ -1,6 +1,6 @@
-import { getApplicationUpdateStatus } from '../../helpers/getApplicationUpdateStatus';
+import { getApplicationUpdateStatus } from '../../src/helpers/getApplicationUpdateStatus';
 
-import { VERSION_STATUS } from '../../helpers/constants';
+import { VERSION_STATUS } from '../../src/helpers/constants';
 
 const testCases = [
   { current: '1.2.0', min: '1.0.0', max: '1.2.0', expected: VERSION_STATUS.OK },

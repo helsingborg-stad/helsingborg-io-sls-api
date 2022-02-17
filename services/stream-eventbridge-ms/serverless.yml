@@ -32,13 +32,13 @@ provider:
         - Effect: Allow
           Action:
             - events:PutEvents
-          Resource: "*"
+          Resource: '*'
 
         - Effect: Allow
           Action:
-            - "dynamodb:ListStreams"
+            - 'dynamodb:ListStreams'
           Resource:
-            - "Fn::ImportValue": ${self:custom.resourcesStage}-CasesTableArn
+            - 'Fn::ImportValue': ${self:custom.resourcesStage}-CasesTableArn
 
         - Effect: Allow
           Action:
@@ -47,7 +47,7 @@ provider:
 
 functions:
   streamProcessor:
-    handler: lambdas/streamProcessor.main
+    handler: src/lambdas/streamProcessor.main
     events:
       - stream:
           type: dynamodb
