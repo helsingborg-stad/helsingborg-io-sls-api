@@ -1,11 +1,11 @@
-import decideNewCaseStatus from '../../helpers/caseDecision';
+import decideNewCaseStatus from '../../src/helpers/caseDecision';
 
 import {
   ACTIVE_PROCESSING,
   CLOSED_APPROVED_VIVA,
   CLOSED_REJECTED_VIVA,
   CLOSED_PARTIALLY_APPROVED_VIVA,
-} from '../../../../libs/constants';
+} from '../../src/libs/constants';
 
 const workflow = {
   workflowid: 'EA2F293CA4763D1AC12587DD004F4ADE',

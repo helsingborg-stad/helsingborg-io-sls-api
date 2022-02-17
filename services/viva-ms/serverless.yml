@@ -89,7 +89,7 @@ provider:
 
 functions:
   applicationStatus:
-    handler: lambdas/applicationStatus.main
+    handler: src/lambdas/applicationStatus.main
     timeout: 15
     events:
       - eventBridge:
@@ -106,7 +106,7 @@ functions:
               - applicationReceivedSuccess
 
   personApplicationStatus:
-    handler: lambdas/personApplicationStatus.main
+    handler: src/lambdas/personApplicationStatus.main
     timeout: 15
     events:
       - eventBridge:
@@ -117,7 +117,7 @@ functions:
               - applicationStatusSuccess
 
   personApplication:
-    handler: lambdas/personApplication.main
+    handler: src/lambdas/personApplication.main
     timeout: 15
     events:
       - eventBridge:
@@ -128,7 +128,7 @@ functions:
               - checkOpenPeriodSuccess
 
   createVivaCase:
-    handler: lambdas/createVivaCase.main
+    handler: src/lambdas/createVivaCase.main
     timeout: 15
     events:
       - eventBridge:
@@ -139,7 +139,7 @@ functions:
               - personDetailSuccess
 
   submitApplication:
-    handler: lambdas/submitApplication.main
+    handler: src/lambdas/submitApplication.main
     timeout: 15
     events:
       - sqs:
@@ -147,7 +147,7 @@ functions:
           batchSize: 1
 
   checkCompletionsStatus:
-    handler: lambdas/checkCompletionsStatus.main
+    handler: src/lambdas/checkCompletionsStatus.main
     timeout: 15
     events:
       - eventBridge:
@@ -158,7 +158,7 @@ functions:
               - applicationStatusSuccess
 
   setCaseCompletions:
-    handler: lambdas/setCaseCompletions.main
+    handler: src/lambdas/setCaseCompletions.main
     timeout: 15
     events:
       - eventBridge:
@@ -169,7 +169,7 @@ functions:
               - checkCompletionsStatusRequired
 
   submitCompletion:
-    handler: lambdas/submitCompletion.main
+    handler: src/lambdas/submitCompletion.main
     timeout: 15
     environment:
       BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-AttachmentsBucketName
@@ -186,7 +186,7 @@ functions:
               state: ['VIVA_RANDOM_CHECK_REQUIRED', 'VIVA_COMPLETION_REQUIRED']
 
   syncOfficers:
-    handler: lambdas/syncOfficers.main
+    handler: src/lambdas/syncOfficers.main
     timeout: 15
     events:
       - eventBridge:
@@ -203,7 +203,7 @@ functions:
                     S: ['VIVA']
 
   syncWorkflow:
-    handler: lambdas/syncWorkflow.main
+    handler: src/lambdas/syncWorkflow.main
     timeout: 15
     events:
       - eventBridge:
@@ -214,7 +214,7 @@ functions:
               - BankIdCollectComplete
 
   decideCaseStatus:
-    handler: lambdas/decideCaseStatus.main
+    handler: src/lambdas/decideCaseStatus.main
     events:
       - eventBridge:
           pattern:
@@ -224,7 +224,7 @@ functions:
               - syncWorkflowSuccess
 
   syncExpiryTime:
-    handler: lambdas/syncExpiryTime.main
+    handler: src/lambdas/syncExpiryTime.main
     events:
       - eventBridge:
           pattern:
@@ -240,7 +240,7 @@ functions:
               - vivaMs.setCaseCompletions
 
   generateRecurringCaseHtml:
-    handler: lambdas/generateRecurringCaseHtml.main
+    handler: src/lambdas/generateRecurringCaseHtml.main
     environment:
       PDF_STORAGE_BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-PdfStorageBucketName
     events:

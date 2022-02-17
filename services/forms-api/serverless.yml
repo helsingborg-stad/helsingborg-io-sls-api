@@ -15,7 +15,7 @@ package:
 provider:
   lambdaHashingVersion: 20201221
   name: aws
-  runtime: nodejs12.x
+  runtime: nodejs14.x
   stage: dev
   region: eu-north-1
   endpointType: regional
@@ -30,12 +30,12 @@ provider:
     resourcesStage: ${self:custom.resourcesStage}
   apiGateway:
     restApiId:
-      "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayRestApiId
+      'Fn::ImportValue': ${self:custom.stage}-ExtApiGatewayRestApiId
     restApiRootResourceId:
-      "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
+      'Fn::ImportValue': ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
     restApiResources:
       forms:
-        "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayResourceForms
+        'Fn::ImportValue': ${self:custom.stage}-ExtApiGatewayResourceForms
 
   iam:
     role:
@@ -50,11 +50,11 @@ provider:
             - dynamodb:DeleteItem
 
           Resource:
-            - "Fn::ImportValue": ${self:custom.resourcesStage}-FormsTableArn
+            - 'Fn::ImportValue': ${self:custom.resourcesStage}-FormsTableArn
 
 functions:
   getFormList:
-    handler: lambdas/getFormList.main
+    handler: src/lambdas/getFormList.main
     events:
       - http:
           path: /forms
@@ -63,7 +63,7 @@ functions:
           private: true
 
   getForm:
-    handler: lambdas/getForm.main
+    handler: src/lambdas/getForm.main
     events:
       - http:
           path: /forms/{formId}
@@ -72,7 +72,7 @@ functions:
           private: true
 
   createForm:
-    handler: lambdas/createForm.main
+    handler: src/lambdas/createForm.main
     events:
       - http:
           path: /forms
@@ -81,7 +81,7 @@ functions:
           private: true
 
   updateForm:
-    handler: lambdas/updateForm.main
+    handler: src/lambdas/updateForm.main
     events:
       - http:
           path: /forms/{formId}
@@ -89,13 +89,11 @@ functions:
           cors: true
           private: true
 
-
   deleteForm:
-    handler: lambdas/deleteForm.main
+    handler: src/lambdas/deleteForm.main
     events:
       - http:
           path: /forms/{formId}
           method: delete
           cors: true
           private: true
-

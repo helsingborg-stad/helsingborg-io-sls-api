@@ -14,20 +14,17 @@ package:
 provider:
   lambdaHashingVersion: 20201221
   name: aws
-  runtime: nodejs12.x
+  runtime: nodejs14.x
   stage: dev
   region: eu-north-1
   endpointType: regional
   tracing:
     lambda: true
   apiGateway:
-    restApiId:
-      !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiId
-    restApiRootResourceId:
-      !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
+    restApiId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiId
+    restApiRootResourceId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
     restApiResources:
-      timeslots:
-        !ImportValue ${self:custom.stage}-ExtApiGatewayResourceTimeSlots
+      timeslots: !ImportValue ${self:custom.stage}-ExtApiGatewayResourceTimeSlots
 
   environment:
     stage: ${self:custom.stage}
@@ -44,11 +41,10 @@ provider:
 
 functions:
   getTimeSlots:
-    handler: lambdas/getTimeSlots.main
+    handler: src/lambdas/getTimeSlots.main
     events:
       - http:
           path: timeslots/getTimeSlots
           method: post
           private: true
           cors: true
-

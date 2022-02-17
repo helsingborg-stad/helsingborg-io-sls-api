@@ -21,13 +21,10 @@ provider:
   tracing:
     lambda: true
   apiGateway:
-    restApiId:
-      !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiId
-    restApiRootResourceId:
-      !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
+    restApiId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiId
+    restApiRootResourceId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
     restApiResources:
-      status:
-        !ImportValue ${self:custom.stage}-ExtApiGatewayResourceStatus
+      status: !ImportValue ${self:custom.stage}-ExtApiGatewayResourceStatus
 
   environment:
     stage: ${self:custom.stage}
@@ -35,9 +32,9 @@ provider:
 
 functions:
   get:
-    handler: lambdas/get.main
+    handler: src/lambdas/get.main
     environment:
-      message: ""
+      message: ''
     events:
       - http:
           path: status

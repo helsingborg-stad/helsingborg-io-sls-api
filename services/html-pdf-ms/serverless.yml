@@ -32,9 +32,9 @@ provider:
           Resource:
             - Fn::ImportValue: ${self:custom.resourcesStage}-PdfStorageBucketArn
             - Fn::Join:
-                - ""
+                - ''
                 - - Fn::ImportValue: ${self:custom.resourcesStage}-PdfStorageBucketArn
-                  - "/*"
+                  - '/*'
 
         - Effect: Allow
           Action:
@@ -45,11 +45,11 @@ provider:
         - Effect: Allow
           Action:
             - events:PutEvents
-          Resource: "*"
+          Resource: '*'
 
 functions:
   generate:
-    handler: lambdas/generate.main
+    handler: src/lambdas/generate.main
     layers:
       - Fn::ImportValue: ChromeAwsLambdaLayer-${self:custom.resourcesStage}
     environment:

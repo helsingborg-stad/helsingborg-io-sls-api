@@ -1,4 +1,4 @@
-import geStatusTypeOnCondition from '../../helpers/statusCheckCondition';
+import geStatusTypeOnCondition from '../../src/helpers/statusCheckCondition';
 import {
   // status type
   ACTIVE_ONGOING,
