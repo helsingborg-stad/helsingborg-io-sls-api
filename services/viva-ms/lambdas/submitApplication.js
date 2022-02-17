@@ -86,15 +86,14 @@ export async function main(event, context) {
       vivaErrorMessage: vivaPostError.vadaResponse?.error?.details?.errorMessage ?? 'N/A',
       caseId: SK,
     };
-    switch (error.vivaErrorCode) {
-      case '1014':
-        log.warn(
-          'Failed to submit Viva application. Will NOT be retried.',
-          context.awsRequestId,
-          null,
-          error
-        );
-        return true;
+    if (error.vivaErrorCode === '1014') {
+      log.warn(
+        'Failed to submit Viva application. Will NOT be retried.',
+        context.awsRequestId,
+        null,
+        error
+      );
+      return true;
     }
     throw new TraceException(
       'Failed to submit Viva application. Will be retried.',
