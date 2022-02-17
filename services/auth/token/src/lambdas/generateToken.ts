@@ -31,7 +31,7 @@ interface SDKError {
   code: string;
   message: string;
 }
-export const main = async (event: { body: string }, context: { awsRequestId: string }) => {
+export async function main(event: { body: string }, context: { awsRequestId: string }) {
   const [parseJsonError, parsedJson] = await to<AuthLambdaRequest | undefined>(
     parseJson(event.body)
   );
@@ -127,7 +127,7 @@ export const main = async (event: { body: string }, context: { awsRequestId: str
     },
   };
   return response.success(200, successResponsePayload);
-};
+}
 
 async function validateEventBody(eventBody: AuthLambdaRequest, schema: Joi.ObjectSchema) {
   const { error, value } = schema.validate(eventBody, { abortEarly: false });
