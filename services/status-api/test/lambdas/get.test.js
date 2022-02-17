@@ -1,4 +1,4 @@
-import { main } from '../../lambdas/get';
+import { main } from '../../src/lambdas/get';
 
 const oldEnvironment = { ...process.env };
 

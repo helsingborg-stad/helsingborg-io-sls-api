@@ -1,10 +1,10 @@
-import { main } from '../../lambdas/getStatus';
+import { main } from '../../src/lambdas/getStatus';
 
-import { getVersionConfigurations } from '../../helpers/getVersionConfigurations';
+import { getVersionConfigurations } from '../../src/helpers/getVersionConfigurations';
 
-import { VERSION_STATUS } from '../../helpers/constants';
+import { VERSION_STATUS } from '../../src/helpers/constants';
 
-jest.mock('../../helpers/getVersionConfigurations');
+jest.mock('../../src/helpers/getVersionConfigurations');
 
 getVersionConfigurations.mockResolvedValue({
   versions: {

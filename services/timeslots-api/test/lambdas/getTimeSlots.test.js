@@ -1,7 +1,7 @@
-import { main } from '../../lambdas/getTimeSlots';
-import getTimeSpans from '../../helpers/getTimeSpans';
+import { main } from '../../src/lambdas/getTimeSlots';
+import getTimeSpans from '../../src/helpers/getTimeSpans';
 
-jest.mock('../../helpers/getTimeSpans');
+jest.mock('../../src/helpers/getTimeSpans');
 
 const mockAttendee = 'outlook@helsingborg.se';
 const secondMockAttendee = 'outlook_2@helsingborg.se';

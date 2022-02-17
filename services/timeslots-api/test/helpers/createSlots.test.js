@@ -3,7 +3,7 @@ import utc from 'dayjs/plugin/utc';
 
 dayjs.extend(utc);
 
-import createSlotsWithinTimeSpan from '../../helpers/createSlots';
+import createSlotsWithinTimeSpan from '../../src/helpers/createSlots';
 
 let timeSpanStart;
 let timeSpanEnd;

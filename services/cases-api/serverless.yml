@@ -36,7 +36,7 @@ provider:
         - Effect: Allow
           Action:
             - events:PutEvents
-          Resource: "*"
+          Resource: '*'
 
         - Effect: Allow
           Action:
@@ -70,7 +70,7 @@ provider:
 
 functions:
   getCase:
-    handler: lambdas/getCase.main
+    handler: src/lambdas/getCase.main
     events:
       - http:
           path: /cases/{id}
@@ -82,7 +82,7 @@ functions:
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   getCaseList:
-    handler: lambdas/getCaseList.main
+    handler: src/lambdas/getCaseList.main
     events:
       - http:
           path: /cases
@@ -94,7 +94,7 @@ functions:
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   createCase:
-    handler: lambdas/createCase.main
+    handler: src/lambdas/createCase.main
     events:
       - http:
           path: /cases
@@ -106,7 +106,7 @@ functions:
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   updateCase:
-    handler: lambdas/updateCase.main
+    handler: src/lambdas/updateCase.main
     events:
       - http:
           path: /cases/{id}
@@ -118,7 +118,7 @@ functions:
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   deleteCase:
-    handler: lambdas/deleteCase.main
+    handler: src/lambdas/deleteCase.main
     events:
       - http:
           path: /cases/{id}

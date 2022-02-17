@@ -31,12 +31,12 @@ provider:
     resourcesStage: ${self:custom.resourcesStage}
   apiGateway:
     restApiId:
-      "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayRestApiId
+      'Fn::ImportValue': ${self:custom.stage}-ExtApiGatewayRestApiId
     restApiRootResourceId:
-      "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
+      'Fn::ImportValue': ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
     restApiResources:
       users:
-        "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayResourceUsers
+        'Fn::ImportValue': ${self:custom.stage}-ExtApiGatewayResourceUsers
 
   iam:
     role:
@@ -47,7 +47,7 @@ provider:
             - dynamodb:GetItem
           # Restrict our IAM role permissions to the specific table for the stage
           Resource:
-            - "Fn::ImportValue": ${self:custom.resourcesStage}-UsersTableArn
+            - 'Fn::ImportValue': ${self:custom.resourcesStage}-UsersTableArn
 
         - Effect: Allow
           Action:
@@ -59,9 +59,9 @@ provider:
           Resource:
             - Fn::ImportValue: ${self:custom.resourcesStage}-AttachmentsBucketArn
             - Fn::Join:
-                - ""
+                - ''
                 - - Fn::ImportValue: ${self:custom.resourcesStage}-AttachmentsBucketArn
-                  - "/*"
+                  - '/*'
         - Effect: Allow
           Action:
             - kms:Decrypt
@@ -73,7 +73,7 @@ provider:
 
 functions:
   getUser:
-    handler: lambdas/getUser.main
+    handler: src/lambdas/getUser.main
     events:
       - http:
           path: /users/{personalNumber}
@@ -85,7 +85,7 @@ functions:
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   me:
-    handler: lambdas/getUser.main
+    handler: src/lambdas/getUser.main
     events:
       - http:
           path: /users/me
@@ -97,7 +97,7 @@ functions:
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   getAttachmentList:
-    handler: lambdas/getAttachmentList.main
+    handler: src/lambdas/getAttachmentList.main
     environment:
       BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-AttachmentsBucketName
     events:
@@ -111,7 +111,7 @@ functions:
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   uploadAttachment:
-    handler: lambdas/uploadAttachment.main
+    handler: src/lambdas/uploadAttachment.main
     environment:
       BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-AttachmentsBucketName
     events:
@@ -125,7 +125,7 @@ functions:
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   deleteAttachment:
-    handler: lambdas/deleteAttachment.main
+    handler: src/lambdas/deleteAttachment.main
     environment:
       BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-AttachmentsBucketName
     events:
@@ -139,7 +139,7 @@ functions:
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   getAttachment:
-    handler: lambdas/getAttachment.main
+    handler: src/lambdas/getAttachment.main
     environment:
       BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-AttachmentsBucketName
     events:
@@ -152,5 +152,3 @@ functions:
           authorizer:
             type: CUSTOM
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
-
-           

@@ -1,5 +1,7 @@
 import { describe } from 'jest-circus';
-import populateFormWithVivaChildren, { populateChildrenAnswers } from '../../helpers/populateForm';
+import populateFormWithVivaChildren, {
+  populateChildrenAnswers,
+} from '../../src/helpers/populateForm';
 import formTemplate from '../mock/formTemplate.json';
 
 const caseRecurringForm = {
