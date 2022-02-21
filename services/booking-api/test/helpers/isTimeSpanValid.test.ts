@@ -1,13 +1,13 @@
 import { isTimeSpanValid } from '../../src/helpers/isTimeSpanValid';
 
 const mockTimeSpan1 = {
-  startTime: '2022-02-21T08:00:00Z',
-  endTime: '2022-02-21T16:00:00Z',
+  StartTime: '2022-02-21T08:00:00Z',
+  EndTime: '2022-02-21T16:00:00Z',
 };
 
 const mockTimeSpan2 = {
-  startTime: '2022-02-21T12:00:00Z',
-  endTime: '2022-02-21T16:00:00Z',
+  StartTime: '2022-02-21T12:00:00Z',
+  EndTime: '2022-02-21T16:00:00Z',
 };
 
 const mockBooking1 = {

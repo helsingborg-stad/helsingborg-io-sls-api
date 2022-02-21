@@ -1,7 +1,7 @@
 import moment from 'moment';
 
 type TimeInterval = { startTime: string; endTime: string };
-type TimeSpanData = Record<string, TimeInterval[]>;
+type TimeSpanData = Record<string, { StartTime: string; EndTime: string }[]>;
 
 function isBookingInsideTimeSpan(booking: TimeInterval, timeSpan: TimeInterval) {
   const bookingStartTime = moment(booking.startTime);
@@ -16,7 +16,12 @@ function isBookingInsideTimeSpan(booking: TimeInterval, timeSpan: TimeInterval) 
 
 function isTimeSpanValid(bookingInterval: TimeInterval, timeSpanData: TimeSpanData) {
   return Object.values(timeSpanData).every(timeArray =>
-    timeArray.some(timeSpan => isBookingInsideTimeSpan(bookingInterval, timeSpan))
+    timeArray.some(timeSpan =>
+      isBookingInsideTimeSpan(bookingInterval, {
+        startTime: timeSpan.StartTime,
+        endTime: timeSpan.EndTime,
+      })
+    )
   );
 }
 
