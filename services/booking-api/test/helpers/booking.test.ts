@@ -56,28 +56,41 @@ it('throws if failing making sendBookingPostRequest requests', async () => {
 
 test.each([
   {
-    path: 'create',
+    bookingRequest: booking.create,
+    uriPath: 'create',
     functionCall: { requiredAttendees: ['mock'], startTime: '1', endTime: '2' },
     requestCall: { requiredAttendees: ['mock'], startTime: '1', endTime: '2' },
   },
-  { path: 'cancel', functionCall: 'mockId', requestCall: { bookingId: 'mockId' } },
-  { path: 'get', functionCall: 'mockId', requestCall: { bookingId: 'mockId' } },
   {
-    path: 'search',
+    bookingRequest: booking.cancel,
+    uriPath: 'cancel',
+    functionCall: 'mockId',
+    requestCall: { bookingId: 'mockId' },
+  },
+  {
+    bookingRequest: booking.get,
+    uriPath: 'get',
+    functionCall: 'mockId',
+    requestCall: { bookingId: 'mockId' },
+  },
+  {
+    bookingRequest: booking.search,
+    uriPath: 'search',
     functionCall: { startTime: '1', endTime: '2', referenceCode: '3' },
     requestCall: { startTime: '1', endTime: '2', referenceCode: '3' },
   },
   {
-    path: 'getHistoricalAttendees',
+    bookingRequest: booking.getHistoricalAttendees,
+    uriPath: 'getHistoricalAttendees',
     functionCall: { startTime: '1', endTime: '2', referenceCode: '3' },
     requestCall: { startTime: '1', endTime: '2', referenceCode: '3' },
   },
 ])(
-  `booking $path makes requests against correct endpoint`,
-  async ({ path, functionCall, requestCall }) => {
+  `booking $uriPath makes requests against correct endpoint`,
+  async ({ bookingRequest, uriPath, functionCall, requestCall }) => {
     expect.assertions(1);
 
-    const endpoint = `${mockEndpoint}/booking/${path}`;
+    const endpoint = `${mockEndpoint}/booking/${uriPath}`;
     const requestClient = request.requestClient(
       { rejectUnauthorized: false },
       { 'X-ApiKey': mockApiKey }
@@ -89,23 +102,7 @@ test.each([
     });
     call.mockResolvedValueOnce(undefined);
 
-    switch (path) {
-      case 'get':
-        await booking.get(functionCall as string);
-        break;
-      case 'getHistoricalAttendees':
-        await booking.getHistoricalAttendees(functionCall as BookingBody);
-        break;
-      case 'search':
-        await booking.search(functionCall as BookingBody);
-        break;
-      case 'cancel':
-        await booking.cancel(functionCall as string);
-        break;
-      case 'create':
-        await booking.create(functionCall as BookingBody);
-        break;
-    }
+    await bookingRequest(functionCall as BookingBody & string);
 
     expect(request.call).toHaveBeenCalledWith(requestClient, 'post', endpoint, requestCall);
   }
