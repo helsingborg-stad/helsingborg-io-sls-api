@@ -5,7 +5,9 @@ import log from '../libs/logs';
 
 import booking from '../helpers/booking';
 import { isTimeslotTaken } from '../helpers/isTimeslotTaken';
+import { isTimeSpanValid } from '../helpers/isTimeSpanValid';
 import getCreateBookingBody from '../helpers/getCreateBookingBody';
+import getTimeSpans from '../../../timeslots-api/src/helpers/getTimeSpans';
 
 export async function main(event: { body: string }, { awsRequestId }: { awsRequestId: string }) {
   const body = JSON.parse(event.body);
@@ -23,12 +25,38 @@ export async function main(event: { body: string }, { awsRequestId }: { awsReque
     });
   }
 
+  const getTimeSpanBody = {
+    emails: requiredAttendees,
+    startTime,
+    endTime,
+    meetingDurationMinutes: 0,
+  };
+  const [getTimeSpanError, getTimeSpanResponse] = await to(getTimeSpans(getTimeSpanBody));
+
+  if (getTimeSpanError) {
+    message = `Error finding timeSpan ${startTime} - ${endTime}`;
+    log.error(message, awsRequestId, 'service-booking-api-create-002', getTimeSpanError);
+    return response.failure(getTimeSpanError);
+  }
+
+  const timeSpansExist = getTimeSpanResponse?.data?.data?.attributes?.length ?? 0 > 0;
+  const timeValid = isTimeSpanValid(
+    { startTime, endTime },
+    getTimeSpanResponse?.data?.data?.attributes ?? {}
+  );
+
+  if (!timeSpansExist || !timeValid) {
+    message = 'No timeslot exists in the given interval';
+    log.error(message, awsRequestId, 'service-booking-api-create-003', getTimeSpanError);
+    return response.failure({ message, status: 403 });
+  }
+
   const searchBookingBody = { startTime, endTime };
   const [searchBookingError, searchResponse] = await to(booking.search(searchBookingBody));
 
   if (searchBookingError) {
     message = `Error finding bookings between ${startTime} - ${endTime}`;
-    log.error(message, awsRequestId, 'service-booking-api-create-002', searchBookingError);
+    log.error(message, awsRequestId, 'service-booking-api-create-004', searchBookingError);
     return response.failure(searchBookingError);
   }
 
@@ -37,15 +65,15 @@ export async function main(event: { body: string }, { awsRequestId }: { awsReque
 
   if (bookingExist && timeslotTaken) {
     message = 'Timeslot not available for booking';
-    log.error(message, awsRequestId, 'service-booking-api-create-003', searchBookingError);
-    return response.failure({ message, status: 500 });
+    log.error(message, awsRequestId, 'service-booking-api-create-005', searchBookingError);
+    return response.failure({ message, status: 403 });
   }
 
   const createBookingBody = getCreateBookingBody(body);
   const [error, createBookingResponse] = await to(booking.create(createBookingBody));
   if (error) {
     message = 'Could not create new booking';
-    log.error(message, awsRequestId, 'service-booking-api-create-004', searchBookingError);
+    log.error(message, awsRequestId, 'service-booking-api-create-006', searchBookingError);
     return response.failure(error);
   }
 
