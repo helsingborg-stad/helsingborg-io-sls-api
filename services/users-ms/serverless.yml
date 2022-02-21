@@ -33,12 +33,12 @@ provider:
             - dynamodb:PutItem
             - dynamodb:GetItem
           Resource:
-            - "Fn::ImportValue": ${self:custom.resourcesStage}-UsersTableArn
+            - 'Fn::ImportValue': ${self:custom.resourcesStage}-UsersTableArn
 
         - Effect: Allow
           Action:
             - events:PutEvents
-          Resource: "*"
+          Resource: '*'
 
         - Effect: Allow
           Action:
@@ -47,7 +47,7 @@ provider:
 
 functions:
   find:
-    handler: lambdas/findUser.main
+    handler: src/lambdas/findUser.main
     events:
       - eventBridge:
           pattern:
@@ -63,7 +63,7 @@ functions:
               - usersMsCreateUserSuccess
 
   create:
-    handler: lambdas/createUser.main
+    handler: src/lambdas/createUser.main
     events:
       - eventBridge:
           pattern:
