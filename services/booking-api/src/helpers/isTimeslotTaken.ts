@@ -1,8 +1,10 @@
+import { Attendee, BookingAttributes } from './booking';
+
 /**
  * @param {{ Attendees: { Type: string, Status: string }[]}} booking
  * @returns { boolean }
  */
-function isBookingBusy({ Attendees }) {
+function isBookingBusy({ Attendees }: { Attendees: Attendee[] }) {
   return Attendees.filter(({ Type }) => Type === 'Required').every(
     ({ Status }) => Status !== 'Declined'
   );
@@ -12,7 +14,7 @@ function isBookingBusy({ Attendees }) {
  * @param {{ Attendees: { Type: string, Status: string }[]}[]} bookings
  * @returns { boolean }
  */
-function isTimeslotTaken(bookings) {
+function isTimeslotTaken(bookings: BookingAttributes[]) {
   return bookings.some(isBookingBusy);
 }
 

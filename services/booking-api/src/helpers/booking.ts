@@ -7,40 +7,26 @@ import params from '../libs/params';
 import config from '../libs/config';
 import { BookingBody } from './getCreateBookingBody';
 
-<<<<<<< HEAD
-interface Attendees {
-=======
-interface Attendee {
-  Email: string;
->>>>>>> 84f15a0 (fix: change to jest.mocked instead of type cast)
+export interface Attendee {
+  Email?: string;
   Type: string;
   Status: string;
 }
 
-<<<<<<< HEAD
-interface Booking {
-  BookingId: string;
-  Attendees: Attendees[];
-=======
 export interface BookingAttributes {
   BookingId: string;
   Attendees: Attendee[];
-  Subject: string;
-  Body: string | null;
-  Location: string;
-  ReferenceCode: string;
-  StartTime: string;
-  EndTime: string;
->>>>>>> 84f15a0 (fix: change to jest.mocked instead of type cast)
+  Subject?: string;
+  Body?: string | null;
+  Location?: string;
+  ReferenceCode?: string;
+  StartTime?: string;
+  EndTime?: string;
 }
 export interface BookingSearchResponse {
   data?: {
     data?: {
-<<<<<<< HEAD
-      attributes: Booking[];
-=======
       attributes: BookingAttributes[];
->>>>>>> 84f15a0 (fix: change to jest.mocked instead of type cast)
     };
   };
 }
