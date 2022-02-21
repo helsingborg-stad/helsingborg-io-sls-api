@@ -1,8 +1,12 @@
-/* eslint-disable no-console */
 import to from 'await-to-js';
-import { throwError, ResourceNotFoundError } from '@helsingborg-stad/npm-api-error-handling';
+import {
+  throwError,
+  ResourceNotFoundError,
+  InternalServerError
+} from '@helsingborg-stad/npm-api-error-handling';
 
 import config from '../libs/config';
+import { putEvent } from '../libs/awsEventBridge';
 import * as response from '../libs/response';
 import * as dynamoDb from '../libs/dynamoDb';
 import { decodeToken } from '../libs/token';
@@ -14,6 +18,23 @@ export async function main(event, context) {
 
   const { personalNumber } = decodedToken;
 
+  const [putEventError] = await to(
+    putEvent(
+      { personalNumber },
+      'casesApiInvokeSuccess',
+      'casesApi.getCaseList'
+    )
+  );
+  if (putEventError) {
+    log.error(
+      'Error put event [casesApiInvokeSuccess]',
+      context.awsRequestId,
+      'service-cases-api-getCaseList-003',
+      putEventError
+    );
+    return response.failure(new InternalServerError(putEventError));
+  }
+
   const [getUserCaseListError, userCaseList] = await to(getUserCaseList(personalNumber));
   if (getUserCaseListError) {
     log.error(
@@ -23,7 +44,7 @@ export async function main(event, context) {
       getUserCaseListError
     );
 
-    return response.failure(getUserCaseListError);
+    return response.failure(new InternalServerError(getUserCaseListError));
   }
 
   if (userCaseList.length === 0) {
@@ -50,7 +71,6 @@ async function getUserCaseList(personalNumber) {
     getUserApplicantCaseList(personalNumber)
   );
   if (getUserApplicantCaseListError) {
-    console.error('getUserApplicantCaseListError', getUserApplicantCaseListError);
     throwError(getUserApplicantCaseListError.statusCode, getUserApplicantCaseListError.message);
   }
 
@@ -58,7 +78,6 @@ async function getUserCaseList(personalNumber) {
     getUserCoApplicantCaseList(personalNumber)
   );
   if (getUserCoApplicantCaseListError) {
-    console.error('getUserCoApplicantCaseListError', getUserCoApplicantCaseListError);
     throwError(getUserCoApplicantCaseListError.statusCode, getUserCoApplicantCaseListError.message);
   }
 
@@ -69,11 +88,11 @@ async function getUserCaseList(personalNumber) {
   );
 }
 
-async function getUserApplicantCaseList(personalNumber) {
+function getUserApplicantCaseList(personalNumber) {
   const PK = `USER#${personalNumber}`;
   const SK = 'CASE#';
 
-  const params = {
+  const queryParams = {
     TableName: config.cases.tableName,
     KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
     ExpressionAttributeValues: {
@@ -82,14 +101,14 @@ async function getUserApplicantCaseList(personalNumber) {
     },
   };
 
-  return dynamoDb.call('query', params);
+  return dynamoDb.call('query', queryParams);
 }
 
-async function getUserCoApplicantCaseList(personalNumber) {
+function getUserCoApplicantCaseList(personalNumber) {
   const GSI1 = `USER#${personalNumber}`;
   const SK = 'CASE#';
 
-  const params = {
+  const queryParams = {
     TableName: config.cases.tableName,
     IndexName: 'GSI1-SK-index',
     KeyConditionExpression: 'GSI1 = :gsi1 AND begins_with(SK, :sk)',
@@ -99,5 +118,5 @@ async function getUserCoApplicantCaseList(personalNumber) {
     },
   };
 
-  return dynamoDb.call('query', params);
+  return dynamoDb.call('query', queryParams);
 }
