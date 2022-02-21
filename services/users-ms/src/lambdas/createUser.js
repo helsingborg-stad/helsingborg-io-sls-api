@@ -2,11 +2,11 @@
 import to from 'await-to-js';
 
 import uuid from 'uuid';
-import config from '../../../config';
-import * as dynamoDb from '../../../libs/dynamoDb';
+import config from '../libs/config';
+import * as dynamoDb from '../libs/dynamoDb';
 
 import putUserEvent from '../helpers/putUserEvent';
-import log from '../../../libs/logs';
+import log from '../libs/logs';
 
 export async function main(event, context) {
   const userDetail = event.detail;

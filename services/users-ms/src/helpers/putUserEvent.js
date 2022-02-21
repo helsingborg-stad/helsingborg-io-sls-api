@@ -1,4 +1,4 @@
-import { putEvent } from '../../../libs/awsEventBridge';
+import { putEvent } from '../libs/awsEventBridge';
 
 export const eventTypeCollection = {
   notFound: {
