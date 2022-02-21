@@ -85,18 +85,6 @@ functions:
             type: CUSTOM
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
-  fetchReferenceCode:
-    handler: lambdas/fetchReferenceCode.main
-    events:
-      - http:
-          path: /users/fetchReferenceCode/{query}
-          method: get
-          cors: true
-          private: false
-          authorizer:
-            type: CUSTOM
-            authorizerId: !ImportValue ${self:custom.stage}-officeAuthorizerId
-
   me:
     handler: src/lambdas/getUser.main
     events:
