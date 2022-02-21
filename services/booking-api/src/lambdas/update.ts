@@ -9,7 +9,7 @@ import getCreateBookingBody from '../helpers/getCreateBookingBody';
 
 export async function main(
   event: { pathParameters: Record<string, string>; body: string },
-  { awsRequestId }
+  { awsRequestId }: { awsRequestId: string }
 ) {
   const bookingId = decodeURIComponent(event.pathParameters.id);
 
@@ -34,7 +34,7 @@ export async function main(
   }
 
   const bookingExist = searchResponse?.data?.data?.attributes?.length ?? 0 > 0;
-  const timeslotTaken = isTimeslotTaken(searchResponse?.data?.data?.attributes);
+  const timeslotTaken = isTimeslotTaken(searchResponse?.data?.data?.attributes ?? []);
 
   if (bookingExist && timeslotTaken) {
     message = 'Timeslot not available for booking';
