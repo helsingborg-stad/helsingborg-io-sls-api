@@ -59,15 +59,15 @@ export async function main(event: CaseRequest, context: { awsRequestId: string }
   return true;
 }
 
-function updateCasePdfAttributes(caseKeys: CaseKeys, pdf: string) {
+function updateCasePdfAttributes(keys: CaseKeys, pdf: string) {
   const isPdf = !!pdf;
   const newState = isPdf ? PDF_GENERATED : PDF_NOT_GENERATED;
 
   const params = {
     TableName: config.cases.tableName,
     Key: {
-      PK: caseKeys.PK,
-      SK: caseKeys.SK,
+      PK: keys.PK,
+      SK: keys.SK,
     },
     UpdateExpression: 'SET #pdf = :newPdf, #state = :newState',
     ExpressionAttributeNames: {
