@@ -45,9 +45,9 @@ provider:
           Action:
             - dynamodb:Query
             - dynamodb:GetItem
-          # Restrict our IAM role permissions to the specific table for the stage
           Resource:
             - 'Fn::ImportValue': ${self:custom.resourcesStage}-UsersTableArn
+            - 'Fn::ImportValue': ${self:custom.resourcesStage}-UsersTableAllIndexArn
 
         - Effect: Allow
           Action:
@@ -62,6 +62,7 @@ provider:
                 - ''
                 - - Fn::ImportValue: ${self:custom.resourcesStage}-AttachmentsBucketArn
                   - '/*'
+
         - Effect: Allow
           Action:
             - kms:Decrypt
@@ -83,6 +84,18 @@ functions:
           authorizer:
             type: CUSTOM
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
+
+  fetchReferenceCode:
+    handler: lambdas/fetchReferenceCode.main
+    events:
+      - http:
+          path: /users/fetchReferenceCode
+          method: post
+          cors: true
+          private: false
+          authorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue ${self:custom.stage}-officeAuthorizerId
 
   me:
     handler: src/lambdas/getUser.main
