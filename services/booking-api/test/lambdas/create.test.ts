@@ -2,7 +2,7 @@
 const messages = require('@helsingborg-stad/npm-api-error-handling/assets/errorMessages');
 
 import { main } from '../../src/lambdas/create';
-import booking from '../../src/helpers/booking';
+import booking, { BookingSearchResponse } from '../../src/helpers/booking';
 
 jest.mock('../../src/helpers/booking');
 
@@ -36,7 +36,7 @@ beforeEach(() => {
 it('creates a booking successfully', async () => {
   expect.assertions(2);
 
-  const searchResponseData = {
+  const searchResponseData: BookingSearchResponse['data'] = {
     data: {
       attributes: [
         {

@@ -7,7 +7,7 @@ import booking from '../helpers/booking';
 import { isTimeslotTaken } from '../helpers/isTimeslotTaken';
 import getCreateBookingBody from '../helpers/getCreateBookingBody';
 
-export async function main(event: { body: string }, { awsRequestId }) {
+export async function main(event: { body: string }, { awsRequestId }: { awsRequestId: string }) {
   const body = JSON.parse(event.body);
   const { requiredAttendees = [], startTime, endTime } = body;
 
@@ -33,7 +33,7 @@ export async function main(event: { body: string }, { awsRequestId }) {
   }
 
   const bookingExist = searchResponse?.data?.data?.attributes?.length ?? 0 > 0;
-  const timeslotTaken = isTimeslotTaken(searchResponse?.data?.data?.attributes);
+  const timeslotTaken = isTimeslotTaken(searchResponse?.data?.data?.attributes ?? []);
 
   if (bookingExist && timeslotTaken) {
     message = 'Timeslot not available for booking';
