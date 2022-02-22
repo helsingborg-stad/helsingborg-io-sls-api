@@ -1,6 +1,6 @@
-import getJwksUrl from '../../helpers/getJwksUrl';
+import getJwksUrl from '../../src/helpers/getJwksUrl';
 
-import { loginMicrosoftUrl } from '../../constants';
+import { loginMicrosoftUrl } from '../../src/constants';
 
 it('successfully creates a jwks url for Microsoft', () => {
   const tid = 'mockTid';

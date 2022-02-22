@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import axios from 'axios';
 
-import { main } from '../../lambdas/officeAuthorizer';
+import { main } from '../../src/lambdas/officeAuthorizer';
 
 jest.mock('jsonwebtoken');
 jest.mock('axios');

@@ -2,7 +2,7 @@ import to from 'await-to-js';
 import jwt from 'jsonwebtoken';
 import axios from 'axios';
 
-import generateIAMPolicy from '../../../../libs/generateIAMPolicy';
+import generateIAMPolicy from '../libs/generateIAMPolicy';
 
 import getJwksUrl from '../helpers/getJwksUrl';
 import getValidSigningKey from '../helpers/getValidSigningKey';
