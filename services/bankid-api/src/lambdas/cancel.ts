@@ -14,7 +14,9 @@ interface BankIdCancelLambdaRequest {
   orderRef: string;
 }
 
-type BankIdCancelResponse = Record<string, never> | undefined;
+interface BankIdCancelResponse {
+  data?: Record<string, never>;
+}
 
 export const main = async (event: { body: string }, context: { awsRequestId: string }) => {
   const { orderRef } = JSON.parse(event.body);
@@ -35,8 +37,11 @@ export const main = async (event: { body: string }, context: { awsRequestId: str
     return response.failure(error);
   }
 
+  const attributes = bankIdCancelResponse.data ? bankIdCancelResponse.data : {};
+
   return response.success(200, {
     type: 'bankidCancel',
+    attributes,
   });
 };
 
