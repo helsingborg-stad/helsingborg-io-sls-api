@@ -4,14 +4,19 @@ const messages = require('@helsingborg-stad/npm-api-error-handling/assets/errorM
 import { main } from '../../src/lambdas/update';
 import booking from '../../src/helpers/booking';
 import { isTimeslotTaken } from '../../src/helpers/isTimeslotTaken';
+import getTimeSpans from '../../src/libs/getTimeSpans';
+import { isTimeSpanValid } from '../../src/helpers/isTimeSpanValid';
 
 jest.mock('../../src/helpers/booking');
 jest.mock('../../src/helpers/isTimeslotTaken');
-
+jest.mock('../../src/libs/getTimeSpans');
+jest.mock('../../src/helpers/isTimeSpanValid');
 jest.mock('../../src/helpers/booking');
 
 const { search, create, cancel } = jest.mocked(booking);
 const mockedTimeSlotTaken = jest.mocked(isTimeslotTaken);
+const mockedGetTimeSpans = jest.mocked(getTimeSpans);
+const mockedIsTimeSpanValid = jest.mocked(isTimeSpanValid);
 
 const mockContext = { awsRequestId: 'xxxxx' };
 const mockBookingId = '1a2bc3';
@@ -51,6 +56,7 @@ const mockSearchResponse = {
     },
   },
 };
+const getTimeSpansResponse = { data: { attributes: 'FAKE DATA' } };
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -79,10 +85,12 @@ it('updates a booking successfully', async () => {
     statusCode: 200,
   };
 
-  cancel.mockResolvedValueOnce(undefined);
-  create.mockResolvedValueOnce(calendarBookingResponse);
+  mockedGetTimeSpans.mockResolvedValueOnce({ data: getTimeSpansResponse });
+  mockedIsTimeSpanValid.mockReturnValueOnce(true);
   search.mockResolvedValueOnce(mockSearchResponse);
   mockedTimeSlotTaken.mockReturnValueOnce(false);
+  cancel.mockResolvedValueOnce(undefined);
+  create.mockResolvedValueOnce(calendarBookingResponse);
 
   const result = await main(mockEvent, mockContext);
 
@@ -91,6 +99,33 @@ it('updates a booking successfully', async () => {
   expect(booking.create).toHaveBeenCalledWith(mockBody);
   expect(booking.search).toHaveBeenCalledWith(mockSearchBody);
   expect(isTimeslotTaken).toHaveBeenCalledWith(mockSearchResponse.data.data.attributes);
+});
+
+it('does not update if timespan does not exist', async () => {
+  expect.assertions(5);
+
+  const expectedResult = {
+    body: JSON.stringify({
+      jsonapi: { version: '1.0' },
+      data: { status: '403', code: '403', message: 'No timeslot exists in the given interval' },
+    }),
+    headers: {
+      'Access-Control-Allow-Credentials': true,
+      'Access-Control-Allow-Origin': '*',
+    },
+    statusCode: 403,
+  };
+
+  mockedGetTimeSpans.mockResolvedValueOnce({ data: getTimeSpansResponse });
+  mockedIsTimeSpanValid.mockReturnValueOnce(false);
+
+  const result = await main(mockEvent, mockContext);
+
+  expect(result).toEqual(expectedResult);
+  expect(booking.cancel).not.toHaveBeenCalled();
+  expect(booking.create).not.toHaveBeenCalled();
+  expect(booking.search).not.toHaveBeenCalled();
+  expect(isTimeslotTaken).not.toHaveBeenCalled();
 });
 
 it('does not update if timeslot is taken', async () => {
@@ -108,6 +143,8 @@ it('does not update if timeslot is taken', async () => {
     statusCode: 403,
   };
 
+  mockedGetTimeSpans.mockResolvedValueOnce({ data: getTimeSpansResponse });
+  mockedIsTimeSpanValid.mockReturnValueOnce(true);
   search.mockResolvedValueOnce(mockSearchResponse);
   mockedTimeSlotTaken.mockReturnValueOnce(true);
 
@@ -138,9 +175,11 @@ it('throws when booking.cancel fails', async () => {
     statusCode,
   };
 
-  cancel.mockRejectedValueOnce({ status: statusCode, message });
+  mockedGetTimeSpans.mockResolvedValueOnce({ data: getTimeSpansResponse });
+  mockedIsTimeSpanValid.mockReturnValueOnce(true);
   search.mockResolvedValueOnce(mockSearchResponse);
   mockedTimeSlotTaken.mockReturnValueOnce(false);
+  cancel.mockRejectedValueOnce({ status: statusCode, message });
 
   const result = await main(mockEvent, mockContext);
 
@@ -169,10 +208,12 @@ it('throws when booking.create fails', async () => {
     statusCode,
   };
 
-  cancel.mockResolvedValueOnce(undefined);
-  create.mockRejectedValueOnce({ status: statusCode, message });
+  mockedGetTimeSpans.mockResolvedValueOnce({ data: getTimeSpansResponse });
+  mockedIsTimeSpanValid.mockReturnValueOnce(true);
   search.mockResolvedValueOnce(mockSearchResponse);
   mockedTimeSlotTaken.mockReturnValueOnce(false);
+  cancel.mockResolvedValueOnce(undefined);
+  create.mockRejectedValueOnce({ status: statusCode, message });
 
   const result = await main(mockEvent, mockContext);
 
