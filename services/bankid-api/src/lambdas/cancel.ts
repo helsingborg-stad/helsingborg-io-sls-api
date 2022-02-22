@@ -48,7 +48,7 @@ export const main = async (event: { body: string }, context: { awsRequestId: str
 async function sendBankIdCancelRequest(
   params: BankIdParams,
   payload: BankIdCancelLambdaRequest
-): Promise<BankIdCancelResponse> {
+): Promise<BankIdCancelResponse | undefined> {
   const [, bankIdClientResponse] = await to(bankId.client(params));
   if (!bankIdClientResponse) throwError(503);
 
