@@ -14,7 +14,7 @@ package:
 provider:
   lambdaHashingVersion: 20201221
   name: aws
-  runtime: nodejs12.x
+  runtime: nodejs14.x
   stage: dev
   region: eu-north-1
   endpointType: regional
@@ -23,12 +23,12 @@ provider:
     lambda: true
   apiGateway:
     restApiId:
-      "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayRestApiId
+      'Fn::ImportValue': ${self:custom.stage}-ExtApiGatewayRestApiId
     restApiRootResourceId:
-      "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
+      'Fn::ImportValue': ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
     restApiResources:
       auth:
-        "Fn::ImportValue": ${self:custom.stage}-ExtApiGatewayResourceAuth
+        'Fn::ImportValue': ${self:custom.stage}-ExtApiGatewayResourceAuth
 
   environment:
     stage: ${self:custom.stage}
@@ -36,14 +36,13 @@ provider:
 
 functions:
   officeAuthorizer:
-    handler: lambdas/officeAuthorizer.main
+    handler: src/lambdas/officeAuthorizer.main
     environment:
-      executeResourceArns:
-        !Join
-            - ""
-            - - "arn:aws:execute-api:${self:provider.region}:${aws:accountId}:"
-              - Fn::ImportValue: ${self:custom.stage}-ExtApiGatewayRestApiId
-              - /*/*/*/*
+      executeResourceArns: !Join
+        - ''
+        - - 'arn:aws:execute-api:${self:provider.region}:${aws:accountId}:'
+          - Fn::ImportValue: ${self:custom.stage}-ExtApiGatewayRestApiId
+          - /*/*/*/*
 
 resources:
   Resources:
@@ -52,8 +51,7 @@ resources:
       Properties:
         FunctionName: !GetAtt OfficeAuthorizerLambdaFunction.Arn
         Action: lambda:InvokeFunction
-        Principal:
-          !Join ["", ["apigateway.", { Ref: "AWS::URLSuffix" }]]
+        Principal: !Join ['', ['apigateway.', { Ref: 'AWS::URLSuffix' }]]
 
     GatewayOfficeAuthorizer:
       Type: AWS::ApiGateway::Authorizer
@@ -62,7 +60,7 @@ resources:
         RestApiId: ${self:provider.apiGateway.restApiId}
         Type: TOKEN
         IdentitySource: method.request.header.Authorization
-        AuthorizerUri: !Sub "arn:aws:apigateway:${aws:region}:lambda:path/2015-03-31/functions/${OfficeAuthorizerLambdaFunction.Arn}/invocations"
+        AuthorizerUri: !Sub 'arn:aws:apigateway:${aws:region}:lambda:path/2015-03-31/functions/${OfficeAuthorizerLambdaFunction.Arn}/invocations'
 
   Outputs:
     AuthorizerId:

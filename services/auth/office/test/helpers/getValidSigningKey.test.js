@@ -1,5 +1,5 @@
-import getValidSigningKey from '../../helpers/getValidSigningKey';
-import { beginCertificateString, endCertificateString } from '../../constants';
+import getValidSigningKey from '../../src/helpers/getValidSigningKey';
+import { beginCertificateString, endCertificateString } from '../../src/constants';
 
 const correctKey = {
   kty: 'RSA',
