@@ -20,10 +20,12 @@ interface BankIdSignLambdaRequest {
 }
 
 interface BankIdSignResponse {
-  orderRef: string;
-  autoStartToken: string;
-  qrStartToken: string;
-  qrStartSecret: string;
+  data?: {
+    orderRef: string;
+    autoStartToken: string;
+    qrStartToken: string;
+    qrStartSecret: string;
+  };
 }
 
 export const main = async (event: { body: string }, context: { awsRequestId: string }) => {
@@ -65,9 +67,11 @@ export const main = async (event: { body: string }, context: { awsRequestId: str
 
     return failure(error);
   }
+  const attributes = bankIdSignResponse.data ? bankIdSignResponse.data : {};
 
   return success(200, {
     type: 'bankIdSign',
+    attributes,
   });
 };
 // Not validating personalNumber as it is an optional Parameter
