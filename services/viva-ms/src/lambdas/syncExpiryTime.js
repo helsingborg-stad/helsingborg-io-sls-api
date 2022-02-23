@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import to from 'await-to-js';
 
 import config from '../libs/config';
@@ -22,7 +21,6 @@ import {
   CLOSED_APPROVED_VIVA,
   CLOSED_PARTIALLY_APPROVED_VIVA,
   CLOSED_REJECTED_VIVA,
-  CLOSED_COMPLETION_REJECTED_VIVA,
   SIX_MONTHS_IN_HOURS,
   FORTY_FIVE_DAYS_IN_HOURS,
   SEVENTY_TWO_HOURS,
@@ -91,7 +89,6 @@ function getExpiryHoursOnStatusType(statusType) {
     [CLOSED_APPROVED_VIVA]: SIX_MONTHS_IN_HOURS,
     [CLOSED_PARTIALLY_APPROVED_VIVA]: SIX_MONTHS_IN_HOURS,
     [CLOSED_REJECTED_VIVA]: SIX_MONTHS_IN_HOURS,
-    [CLOSED_COMPLETION_REJECTED_VIVA]: SIX_MONTHS_IN_HOURS,
   };
 
   const hours = statusHourMap[statusType];

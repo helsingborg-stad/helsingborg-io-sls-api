@@ -1,17 +1,18 @@
-import geStatusTypeOnCondition from '../../src/helpers/statusCheckCondition';
+import getStatusTypeOnCondition from '../../src/helpers/statusCheckCondition';
 import {
   // status type
   ACTIVE_ONGOING,
   ACTIVE_SIGNATURE_PENDING,
   ACTIVE_SUBMITTED,
+  ACTIVE_COMPLETION_REQUIRED,
   ACTIVE_COMPLETION_ONGOING,
   ACTIVE_COMPLETION_SUBMITTED,
+  ACTIVE_RANDOM_CHECK_REQUIRED,
   ACTIVE_RANDOM_CHECK_ONGOING,
   ACTIVE_RANDOM_CHECK_SUBMITTED,
 
   // state
-  VIVA_COMPLETION_REQUIRED,
-  VIVA_RANDOM_CHECK_REQUIRED,
+  COMPLETIONS_REQUIRED,
 } from '../../../../libs/constants';
 
 const ANYTHING = 'ANYTHING';
@@ -113,37 +114,41 @@ const testContitionList = [
     conditionOption: {
       answers: encryptedAnswers,
       people: peopleApplicantNotSigned,
-      state: VIVA_COMPLETION_REQUIRED,
+      statusType: ACTIVE_COMPLETION_REQUIRED,
+      state: COMPLETIONS_REQUIRED,
     },
     expectedResult: ACTIVE_COMPLETION_ONGOING,
-    description: `Encrypted answers, applicant NOT signed, state is ${VIVA_COMPLETION_REQUIRED}, must result in status type: ${ACTIVE_COMPLETION_ONGOING}`,
+    description: `Encrypted answers, applicant NOT signed, state is ${COMPLETIONS_REQUIRED}, must result in status type: ${ACTIVE_COMPLETION_ONGOING}`,
   },
   {
     conditionOption: {
       answers: encryptedAnswers,
       people: peopleAllApplicantsNotSigned,
-      state: VIVA_COMPLETION_REQUIRED,
+      statusType: ACTIVE_COMPLETION_REQUIRED,
+      state: COMPLETIONS_REQUIRED,
     },
     expectedResult: ACTIVE_COMPLETION_ONGOING,
-    description: `Encrypted answers, all applicants NOT signed, state is ${VIVA_COMPLETION_REQUIRED}, must result in status type: ${ACTIVE_COMPLETION_ONGOING}`,
+    description: `Encrypted answers, all applicants NOT signed, state is ${COMPLETIONS_REQUIRED}, must result in status type: ${ACTIVE_COMPLETION_ONGOING}`,
   },
   {
     conditionOption: {
       answers: encryptedAnswers,
       people: peopleApplicantNotSigned,
-      state: VIVA_RANDOM_CHECK_REQUIRED,
+      statusType: ACTIVE_RANDOM_CHECK_REQUIRED,
+      state: COMPLETIONS_REQUIRED,
     },
     expectedResult: ACTIVE_RANDOM_CHECK_ONGOING,
-    description: `Encrypted answers, applicant NOT signed, state is ${VIVA_RANDOM_CHECK_REQUIRED}, must result in status type: ${ACTIVE_RANDOM_CHECK_ONGOING}`,
+    description: `Encrypted answers, applicant NOT signed, state is ${COMPLETIONS_REQUIRED}, must result in status type: ${ACTIVE_RANDOM_CHECK_ONGOING}`,
   },
   {
     conditionOption: {
       answers: encryptedAnswers,
       people: peopleAllApplicantsNotSigned,
-      state: VIVA_RANDOM_CHECK_REQUIRED,
+      statusType: ACTIVE_RANDOM_CHECK_REQUIRED,
+      state: COMPLETIONS_REQUIRED,
     },
     expectedResult: ACTIVE_RANDOM_CHECK_ONGOING,
-    description: `Encrypted answers, all applicants NOT signed, state is ${VIVA_RANDOM_CHECK_REQUIRED}, must result in status type: ${ACTIVE_RANDOM_CHECK_ONGOING}`,
+    description: `Encrypted answers, all applicants NOT signed, state is ${COMPLETIONS_REQUIRED}, must result in status type: ${ACTIVE_RANDOM_CHECK_ONGOING}`,
   },
 
   // submitted
@@ -169,37 +174,41 @@ const testContitionList = [
     conditionOption: {
       answers: decryptedAnswers,
       people: peopleApplicantSigned,
-      state: VIVA_COMPLETION_REQUIRED,
+      statusType: ACTIVE_COMPLETION_REQUIRED,
+      state: COMPLETIONS_REQUIRED,
     },
     expectedResult: ACTIVE_COMPLETION_SUBMITTED,
-    description: `Decrypted answers, applicant signed, state is ${VIVA_COMPLETION_REQUIRED}, must result in status type: ${ACTIVE_COMPLETION_SUBMITTED}`,
+    description: `Decrypted answers, applicant signed, state is ${COMPLETIONS_REQUIRED}, must result in status type: ${ACTIVE_COMPLETION_SUBMITTED}`,
   },
   {
     conditionOption: {
       answers: decryptedAnswers,
       people: peopleAllApplicantsSigned,
-      state: VIVA_COMPLETION_REQUIRED,
+      statusType: ACTIVE_COMPLETION_REQUIRED,
+      state: COMPLETIONS_REQUIRED,
     },
     expectedResult: ACTIVE_COMPLETION_SUBMITTED,
-    description: `Decrypted answers, all applicants signed, state is ${VIVA_COMPLETION_REQUIRED}, must result in status type: ${ACTIVE_COMPLETION_SUBMITTED}`,
+    description: `Decrypted answers, all applicants signed, state is ${COMPLETIONS_REQUIRED}, must result in status type: ${ACTIVE_COMPLETION_SUBMITTED}`,
   },
   {
     conditionOption: {
       answers: decryptedAnswers,
       people: peopleApplicantSigned,
-      state: VIVA_RANDOM_CHECK_REQUIRED,
+      statusType: ACTIVE_RANDOM_CHECK_REQUIRED,
+      state: COMPLETIONS_REQUIRED,
     },
     expectedResult: ACTIVE_RANDOM_CHECK_SUBMITTED,
-    description: `Decrypted answers, applicant signed, state is ${VIVA_RANDOM_CHECK_REQUIRED}, must result in status type: ${ACTIVE_RANDOM_CHECK_SUBMITTED}`,
+    description: `Decrypted answers, applicant signed, state is ${COMPLETIONS_REQUIRED}, must result in status type: ${ACTIVE_RANDOM_CHECK_SUBMITTED}`,
   },
   {
     conditionOption: {
       answers: decryptedAnswers,
       people: peopleAllApplicantsSigned,
-      state: VIVA_RANDOM_CHECK_REQUIRED,
+      statusType: ACTIVE_RANDOM_CHECK_REQUIRED,
+      state: COMPLETIONS_REQUIRED,
     },
     expectedResult: ACTIVE_RANDOM_CHECK_SUBMITTED,
-    description: `Decrypted answers, all applicants signed, state is ${VIVA_RANDOM_CHECK_REQUIRED}, must result in status type: ${ACTIVE_RANDOM_CHECK_SUBMITTED}`,
+    description: `Decrypted answers, all applicants signed, state is ${COMPLETIONS_REQUIRED}, must result in status type: ${ACTIVE_RANDOM_CHECK_SUBMITTED}`,
   },
 
   // signature
@@ -215,7 +224,7 @@ const testContitionList = [
 ];
 
 test.each(testContitionList)('$description', ({ conditionOption, expectedResult }) => {
-  const result = geStatusTypeOnCondition(conditionOption);
+  const result = getStatusTypeOnCondition(conditionOption);
 
   expect(result).toBe(expectedResult);
 });

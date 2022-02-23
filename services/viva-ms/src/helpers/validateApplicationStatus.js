@@ -1,7 +1,14 @@
-export default function validateApplicationStatus(statusList, requiredStatusCodes) {
+export default function validateApplicationStatus(statusList, requiredCodeList) {
   if (!Array.isArray(statusList)) {
     return false;
   }
-  const filteredStatusList = statusList.filter(status => requiredStatusCodes.includes(status.code));
-  return filteredStatusList.length === requiredStatusCodes.length;
+  const uniqueStatusCodes = new Set([...statusList.map(status => status.code)]);
+  const uniqueRequiredCodes = new Set([...requiredCodeList]);
+
+  const isEqualSize = uniqueStatusCodes.size === uniqueRequiredCodes.size;
+  const hasSameCodes = [...uniqueStatusCodes].every(code =>
+    [...uniqueRequiredCodes].includes(code)
+  );
+
+  return isEqualSize && hasSameCodes;
 }

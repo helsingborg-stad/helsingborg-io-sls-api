@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import to from 'await-to-js';
 
 import config from '../libs/config';
@@ -6,53 +5,26 @@ import config from '../libs/config';
 import * as dynamoDb from '../libs/dynamoDb';
 import params from '../libs/params';
 import log from '../libs/logs';
+import { getItem as getCase } from '../libs/queries';
+import { COMPLETIONS_REQUIRED } from '../libs/constants';
 
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import completionsHelper from '../helpers/completions';
 
 export async function main(event, context) {
-  const { personalNumber } = event.detail.user;
+  const { caseKeys } = event.detail;
 
-  const [getLatestWorkflowIdError, latestWorkflowId] = await to(
-    completionsHelper.get.workflow.latest(personalNumber)
-  );
-  if (getLatestWorkflowIdError) {
-    log.error(
-      'Error getting the latest Viva workflow',
-      context.awsRequestId,
-      'service-viva-ms-setCaseCompletions-001',
-      getLatestWorkflowIdError
-    );
-    return false;
-  }
-
-  const [getCaseError, userCase] = await to(
-    completionsHelper.get.caseOnWorkflowId(personalNumber, latestWorkflowId)
+  const [getCaseError, { Item: caseItem }] = await getCase(
+    config.cases.tableName,
+    caseKeys.PK,
+    caseKeys.SK
   );
   if (getCaseError) {
     log.error(
-      'Get case from cases table failed',
+      'Get case failed',
       context.awsRequestId,
-      'service-viva-ms-setCaseCompletions-003',
+      'service-viva-ms-setCaseCompletions-025',
       getCaseError
-    );
-    return false;
-  }
-
-  if (completionsHelper.isCaseStateCompletions(userCase)) {
-    console.log('Case is already in completions state. Will not update case.');
-    return true;
-  }
-
-  const [getWorkflowCompletionsError, workflowCompletions] = await to(
-    completionsHelper.get.workflow.completions(personalNumber, latestWorkflowId)
-  );
-  if (getWorkflowCompletionsError) {
-    log.error(
-      'Error getting Viva workflow completions',
-      context.awsRequestId,
-      'service-viva-ms-setCaseCompletions-002',
-      getWorkflowCompletionsError
     );
     return false;
   }
@@ -64,29 +36,24 @@ export async function main(event, context) {
     log.error(
       'Read ssm params [config.cases.providers.viva.envsKeyName] failed',
       context.awsRequestId,
-      'service-viva-ms-setCaseCompletions-004',
+      'service-viva-ms-setCaseCompletions-020',
       paramsReadError
     );
     return false;
   }
 
-  const caseKeys = {
-    PK: userCase.PK,
-    SK: userCase.SK,
-  };
   const caseUpdateAttributes = {
-    newStatus: completionsHelper.get.status(workflowCompletions),
-    newState: completionsHelper.get.state(workflowCompletions),
-    newCurrentFormId: completionsHelper.get.formId(vivaCaseSSMParams, workflowCompletions),
-    newPersons: resetCasePersonsApplicantSignature(userCase),
-    workflowCompletions,
+    newStatus: completionsHelper.get.status(caseItem.details.completions),
+    newState: COMPLETIONS_REQUIRED,
+    newCurrentFormId: completionsHelper.get.formId(vivaCaseSSMParams, caseItem.details.completions),
+    newPersons: resetCasePersonsApplicantSignature(caseItem),
   };
   const [updateCaseError, updatedCaseItem] = await to(updateCase(caseKeys, caseUpdateAttributes));
   if (updateCaseError) {
     log.error(
       'Update case completion attributes failed',
       context.awsRequestId,
-      'service-viva-ms-setCaseCompletions-005',
+      'service-viva-ms-setCaseCompletions-030',
       updateCaseError
     );
     return false;
@@ -97,25 +64,24 @@ export async function main(event, context) {
     log.error(
       'Error put event [setCaseCompletionsSuccess]',
       context.awsRequestId,
-      'service-viva-ms-setCaseCompletions-006',
+      'service-viva-ms-setCaseCompletions-040',
       putEventError
     );
     return false;
   }
 
   log.info(
-    'Successfully updated completions attributes on case',
+    'Successfully updated case',
     context.awsRequestId,
-    'service-viva-ms-setCaseCompletions-007',
-    updatedCaseItem
+    'service-viva-ms-setCaseCompletions-050',
+    updatedCaseItem.id
   );
 
   return true;
 }
 
-async function updateCase(keys, caseUpdateAttributes) {
-  const { newStatus, newState, newCurrentFormId, newPersons, workflowCompletions } =
-    caseUpdateAttributes;
+function updateCase(keys, caseUpdateAttributes) {
+  const { newStatus, newState, newCurrentFormId, newPersons } = caseUpdateAttributes;
 
   const updateParams = {
     TableName: config.cases.tableName,
@@ -124,7 +90,7 @@ async function updateCase(keys, caseUpdateAttributes) {
       SK: keys.SK,
     },
     UpdateExpression:
-      'SET #currentFormId = :newCurrentFormId, #status = :newStatus, #persons = :newPersons, #state = :newState, details.completions = :workflowCompletions',
+      'SET #currentFormId = :newCurrentFormId, #status = :newStatus, #persons = :newPersons, #state = :newState',
     ExpressionAttributeNames: {
       '#currentFormId': 'currentFormId',
       '#status': 'status',
@@ -136,7 +102,6 @@ async function updateCase(keys, caseUpdateAttributes) {
       ':newPersons': newPersons,
       ':newStatus': newStatus,
       ':newState': newState,
-      ':workflowCompletions': workflowCompletions,
     },
     ReturnValues: 'UPDATED_NEW',
   };

@@ -3,12 +3,13 @@ import {
   ACTIVE_SIGNATURE_PENDING,
   ACTIVE_SIGNATURE_COMPLETED,
   ACTIVE_SUBMITTED,
+  ACTIVE_COMPLETION_REQUIRED,
   ACTIVE_COMPLETION_ONGOING,
   ACTIVE_COMPLETION_SUBMITTED,
+  ACTIVE_RANDOM_CHECK_REQUIRED,
   ACTIVE_RANDOM_CHECK_ONGOING,
   ACTIVE_RANDOM_CHECK_SUBMITTED,
-  COMPLETION_REQUIRED,
-  RANDOM_CHECK_REQUIRED,
+  COMPLETIONS_REQUIRED,
 } from '../libs/constants';
 
 function isSignaturePending({ answers, people }) {
@@ -21,39 +22,49 @@ function isSignatureCompleted({ answers, people }) {
   return answers && isEncrypted(answers) && hasAllSigned(people);
 }
 
-function isOngoing({ answers, people }) {
-  return isAnswersEncryptedApplicantNotSigend({ answers, people });
-}
-
-function isSubmitted({ answers, people }) {
-  return answers && !isEncrypted(answers) && hasAllSigned(people);
-}
-
-function isCompletionOngoing({ answers, people, state }) {
+function isOngoing({ answers, people, state }) {
   return (
-    isAnswersEncryptedApplicantNotSigend({ answers, people }) && state.includes(COMPLETION_REQUIRED)
+    isAnswersEncryptedApplicantNotSigend({ answers, people }) && state !== COMPLETIONS_REQUIRED
   );
 }
 
-function isCompletionSubmitted({ answers, people, state }) {
-  return (
-    answers && !isEncrypted(answers) && hasAllSigned(people) && state.includes(COMPLETION_REQUIRED)
-  );
+function isSubmitted({ answers, people, state }) {
+  return answers && !isEncrypted(answers) && hasAllSigned(people) && state !== COMPLETIONS_REQUIRED;
 }
 
-function isRandomCheckOngoing({ answers, people, state }) {
+function isCompletionOngoing({ answers, people, state, statusType }) {
   return (
     isAnswersEncryptedApplicantNotSigend({ answers, people }) &&
-    state.includes(RANDOM_CHECK_REQUIRED)
+    state === COMPLETIONS_REQUIRED &&
+    statusType.startsWith(ACTIVE_COMPLETION_REQUIRED)
   );
 }
 
-function isRandomCheckSubmitted({ answers, people, state }) {
+function isCompletionSubmitted({ answers, people, state, statusType }) {
   return (
     answers &&
     !isEncrypted(answers) &&
     hasAllSigned(people) &&
-    state.includes(RANDOM_CHECK_REQUIRED)
+    state === COMPLETIONS_REQUIRED &&
+    statusType.startsWith(ACTIVE_COMPLETION_REQUIRED)
+  );
+}
+
+function isRandomCheckOngoing({ answers, people, state, statusType }) {
+  return (
+    isAnswersEncryptedApplicantNotSigend({ answers, people }) &&
+    state === COMPLETIONS_REQUIRED &&
+    statusType.startsWith(ACTIVE_RANDOM_CHECK_REQUIRED)
+  );
+}
+
+function isRandomCheckSubmitted({ answers, people, state, statusType }) {
+  return (
+    answers &&
+    !isEncrypted(answers) &&
+    hasAllSigned(people) &&
+    state === COMPLETIONS_REQUIRED &&
+    statusType.startsWith(ACTIVE_RANDOM_CHECK_REQUIRED)
   );
 }
 
@@ -107,20 +118,20 @@ export default function geStatusTypeOnCondition(conditionOption) {
       conditionFunction: isSubmitted,
     },
     {
-      type: ACTIVE_COMPLETION_ONGOING,
-      conditionFunction: isCompletionOngoing,
-    },
-    {
-      type: ACTIVE_COMPLETION_SUBMITTED,
-      conditionFunction: isCompletionSubmitted,
-    },
-    {
       type: ACTIVE_RANDOM_CHECK_ONGOING,
       conditionFunction: isRandomCheckOngoing,
     },
     {
       type: ACTIVE_RANDOM_CHECK_SUBMITTED,
       conditionFunction: isRandomCheckSubmitted,
+    },
+    {
+      type: ACTIVE_COMPLETION_ONGOING,
+      conditionFunction: isCompletionOngoing,
+    },
+    {
+      type: ACTIVE_COMPLETION_SUBMITTED,
+      conditionFunction: isCompletionSubmitted,
     },
   ];
 

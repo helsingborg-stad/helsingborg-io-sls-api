@@ -1,5 +1,7 @@
 service: viva-ms
 
+frameworkVersion: '2'
+
 plugins:
   - serverless-bundle
 
@@ -147,8 +149,8 @@ functions:
           arn: !ImportValue ${self:custom.stage}-VivaSubmissionQueueArn
           batchSize: 1
 
-  checkCompletionsStatus:
-    handler: src/lambdas/checkCompletionsStatus.main
+  syncCaseCompletions:
+    handler: src/lambdas/syncCaseCompletions.main
     timeout: 15
     events:
       - eventBridge:
@@ -157,6 +159,17 @@ functions:
               - vivaMs.applicationStatus
             detail-type:
               - applicationStatusSuccess
+
+  checkCompletionsStatus:
+    handler: src/lambdas/checkCompletionsStatus.main
+    timeout: 15
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - vivaMs.syncCaseCompletions
+            detail-type:
+              - syncSuccess
 
   setCaseCompletions:
     handler: src/lambdas/setCaseCompletions.main
@@ -168,6 +181,21 @@ functions:
               - vivaMs.checkCompletionsStatus
             detail-type:
               - checkCompletionsStatusRequired
+            detail:
+              caseState: [{ 'anything-but': ['COMPLETIONS_REQUIRED'] }]
+
+  checkCompletionsDueDate:
+    handler: src/lambdas/checkCompletionsDueDate.main
+    timeout: 15
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - vivaMs.checkCompletionsStatus
+            detail-type:
+              - checkCompletionSuccess
+            detail:
+              caseState: ['COMPLETIONS_REQUIRED']
 
   submitCompletion:
     handler: src/lambdas/submitCompletion.main
@@ -184,7 +212,7 @@ functions:
             detail:
               status:
                 type: [{ 'prefix': 'active:submitted' }]
-              state: ['VIVA_RANDOM_CHECK_REQUIRED', 'VIVA_COMPLETION_REQUIRED']
+              state: ['COMPLETIONS_REQUIRED']
 
   syncOfficers:
     handler: src/lambdas/syncOfficers.main

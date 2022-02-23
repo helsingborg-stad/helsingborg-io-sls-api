@@ -49,6 +49,7 @@ env.yml
 .idea
 
 # stuff
+tmp/*
 .DS_Store
 .vscode
 !.vscode/extensions.json

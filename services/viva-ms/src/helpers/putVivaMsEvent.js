@@ -14,7 +14,7 @@ export const eventTypeCollection = {
     detailType: 'applicationReceivedSuccess',
   },
   checkCompletionSuccess: {
-    source: 'vivaMs.checkCompletion',
+    source: 'vivaMs.checkCompletionsStatus',
     detailType: 'checkCompletionSuccess',
   },
   checkCompletionsStatusRequired: {
@@ -41,6 +41,10 @@ export const eventTypeCollection = {
     source: 'vivaMs.setCaseCompletions',
     detailType: 'setSuccess',
   },
+  syncCaseCompletionsSuccess: {
+    source: 'vivaMs.syncCaseCompletions',
+    detailType: 'syncSuccess',
+  },
 };
 
 function putUserEvent(detail, type, typeCollection = eventTypeCollection) {
@@ -59,4 +63,5 @@ export default {
   htmlGeneratedSuccess: detail => putUserEvent(detail, 'htmlGeneratedSuccess'),
   applicationStatusSuccess: detail => putUserEvent(detail, 'applicationStatusSuccess'),
   setCaseCompletionsSuccess: detail => putUserEvent(detail, 'setCaseCompletionsSuccess'),
+  syncCaseCompletionsSuccess: detail => putUserEvent(detail, 'syncCaseCompletionsSuccess'),
 };

@@ -17,7 +17,10 @@ provider:
   stage: dev
   region: eu-north-1
   endpointType: regional
+  eventBridge:
+    useCloudFormation: true
   tracing:
+    apiGateway: false
     lambda: true
 
   environment:

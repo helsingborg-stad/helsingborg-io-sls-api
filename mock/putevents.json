@@ -1,6 +1,6 @@
 [
   {
-    "Source": "OFFbankId.collect",
+    "Source": "bankId.collect",
     "Detail": "{ \"user\": { \"personalNumber\": \"198602132394\" } }",
     "Resources": ["resourceMock"],
     "DetailType": "BankIdCollectComplete",
@@ -28,10 +28,17 @@
     "EventBusName": "default"
   },
   {
-    "Source": "casesApi.getCaseList",
-    "Detail": "{ \"personalNumber\": \"198602132394\" }",
+    "Source": "OFFpdfMs.generate",
+    "Detail": "{ \"keys\": { \"PK\": \"USER#198602102389\", \"SK\": \"CASE#7ceb3af4-2097-4205-bcb5-4a1d331fb3aa\" }, \"pdfStorageBucketKey\": \"pdf/07ede0ad-9e31-4c48-8d20-c5e8e933b2a6.pdf\" }",
     "Resources": ["resourceMock"],
-    "DetailType": "casesApiInvokeSuccess",
+    "DetailType": "PdfMsGenerateSuccess",
+    "EventBusName": "default"
+  },
+  {
+    "Source": "OFFvivaMs.setCaseCompletions",
+    "Detail": "{ \"keys\": { \"PK\": \"USER#198602102389\", \"SK\": \"CASE#7ceb3af4-2097-4205-bcb5-4a1d331fb3aa\" }, \"pdfStorageBucketKey\": \"pdf/07ede0ad-9e31-4c48-8d20-c5e8e933b2a6.pdf\" }",
+    "Resources": ["resourceMock"],
+    "DetailType": "stateSet",
     "EventBusName": "default"
   }
 ]

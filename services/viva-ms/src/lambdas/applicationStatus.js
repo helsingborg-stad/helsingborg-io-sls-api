@@ -8,7 +8,7 @@ import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 export async function main(event, context) {
   const clientUser = event.detail;
 
-  const [applicationStatusError, applicationStatusList] = await to(
+  const [applicationStatusError, vivaApplicantStatusCodeList] = await to(
     vivaAdapter.application.status(clientUser.personalNumber)
   );
   if (applicationStatusError) {
@@ -24,7 +24,7 @@ export async function main(event, context) {
   const [putEventError] = await to(
     putVivaMsEvent.applicationStatusSuccess({
       user: clientUser,
-      status: applicationStatusList,
+      vivaApplicantStatusCodeList,
     })
   );
   if (putEventError) {

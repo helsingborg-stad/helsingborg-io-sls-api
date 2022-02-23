@@ -5,15 +5,11 @@ import config from '../libs/config';
 import * as dynamoDb from '../libs/dynamoDb';
 import { getStatusByType } from '../libs/caseStatuses';
 import {
-  VIVA_COMPLETION_REQUIRED,
-  VIVA_RANDOM_CHECK_REQUIRED,
   ACTIVE_COMPLETION_REQUIRED_VIVA,
   ACTIVE_RANDOM_CHECK_REQUIRED_VIVA,
 } from '../libs/constants';
 
 import vivaAdapter from './vivaAdapterRequestClient';
-
-const COMPLETIONS_TYPE = ['RANDOM_CHECK', 'COMPLETION'];
 
 function getCompletionFormId(completionForms, completions) {
   const { randomCheckFormId, completionFormId } = completionForms;
@@ -26,30 +22,17 @@ function getCompletionStatus(completions) {
     : getStatusByType(ACTIVE_COMPLETION_REQUIRED_VIVA);
 }
 
-function getCompletionState(completions) {
-  return completions.isRandomCheck ? VIVA_RANDOM_CHECK_REQUIRED : VIVA_COMPLETION_REQUIRED;
-}
-
 async function getVivaWorkflowCompletions(personalNumber, workflowId) {
-  const [getWorkflowCompletionsError, getCompletionsResponse] = await to(
-    vivaAdapter.workflow.getCompletions({ personalNumber, workflowId })
-  );
-  if (getWorkflowCompletionsError) {
-    throw getWorkflowCompletionsError;
-  }
-
+  const getCompletionsResponse = await vivaAdapter.workflow.getCompletions({
+    personalNumber,
+    workflowId,
+  });
   return getCompletionsResponse.attributes;
 }
 
 async function getLatestVivaWorkflowId(personalNumber) {
-  const [getLatestError, getLatestResponse] = await to(
-    vivaAdapter.workflow.getLatest(personalNumber)
-  );
-  if (getLatestError) {
-    throw getLatestError;
-  }
-
-  return getLatestResponse.attributes.workflowid;
+  const getLatestWorkflowResponse = await vivaAdapter.workflow.getLatest(personalNumber);
+  return getLatestWorkflowResponse.attributes.workflowid;
 }
 
 async function getCaseOnWorkflowId(personalNumber, workflowId) {
@@ -78,21 +61,36 @@ async function getCaseOnWorkflowId(personalNumber, workflowId) {
   return caseItem;
 }
 
-function isCaseStateCompletions(caseItem) {
-  const { state } = caseItem;
-  return COMPLETIONS_TYPE.reduce((all, type) => state.includes(type) || all, false);
+function getLocaleDate(value) {
+  const LOCALE_OPTION = {
+    timeZone: 'Europe/Stockholm',
+  };
+
+  return new Date(new Date(value).toLocaleDateString('sv-SE', LOCALE_OPTION)).setHours(0, 0, 0, 0);
+}
+
+function notDueDateExpired(date) {
+  const today = getLocaleDate(Date.now());
+  const dueDate = getLocaleDate(date);
+
+  if (today < dueDate) {
+    return true;
+  }
+
+  return false;
 }
 
 export default {
   get: {
     formId: getCompletionFormId,
     status: getCompletionStatus,
-    state: getCompletionState,
     caseOnWorkflowId: getCaseOnWorkflowId,
     workflow: {
       completions: getVivaWorkflowCompletions,
-      latest: getLatestVivaWorkflowId,
+      latest: {
+        id: getLatestVivaWorkflowId,
+      },
     },
   },
-  isCaseStateCompletions,
+  notDueDateExpired,
 };
