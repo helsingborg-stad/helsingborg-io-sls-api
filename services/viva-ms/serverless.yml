@@ -129,6 +129,7 @@ functions:
 
   createVivaCase:
     handler: src/lambdas/createVivaCase.main
+    reservedConcurrency: 1
     timeout: 15
     events:
       - eventBridge:
