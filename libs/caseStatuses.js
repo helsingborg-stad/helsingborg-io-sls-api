@@ -1,4 +1,5 @@
 import {
+  NEW_APPLICATION,
   NOT_STARTED,
   ACTIVE_ONGOING,
   ACTIVE_SIGNATURE_COMPLETED,
@@ -10,6 +11,7 @@ import {
   ACTIVE_COMPLETION_SUBMITTED,
   ACTIVE_RANDOM_CHECK_ONGOING,
   ACTIVE_RANDOM_CHECK_SUBMITTED,
+  NEW_APPLICATION_VIVA,
   NOT_STARTED_VIVA,
   ACTIVE_COMPLETION_REQUIRED_VIVA,
   ACTIVE_RANDOM_CHECK_REQUIRED_VIVA,
@@ -21,6 +23,11 @@ import {
 } from './constants';
 
 const statuses = [
+  {
+    type: NEW_APPLICATION,
+    name: 'Nyansökan',
+    description: 'Ansökan öppen.',
+  },
   {
     type: NOT_STARTED,
     name: 'Ej påbörjad',
@@ -83,6 +90,11 @@ const statuses = [
   /**
    * Service: Ekonomiskt bistånd
    */
+  {
+    type: NEW_APPLICATION_VIVA,
+    name: 'Grundansökan',
+    description: 'Du kan söka ekonomiskt bistånd.',
+  },
   {
     type: NOT_STARTED_VIVA,
     name: 'Öppen',
