@@ -4,13 +4,12 @@ const messages = require('@helsingborg-stad/npm-api-error-handling/assets/errorM
 import { main } from '../../src/lambdas/create';
 import booking, { BookingSearchResponse } from '../../src/helpers/booking';
 import { isTimeslotTaken } from '../../src/helpers/isTimeslotTaken';
-import getTimeSpans from '../../src/libs/getTimeSpans';
+import getTimeSpans from '../../src/helpers/getTimeSpans';
 import { areAllAttendeesAvailable } from '../../src/helpers/timeSpanHelper';
-import { not } from 'joi';
 
 jest.mock('../../src/helpers/booking');
 jest.mock('../../src/helpers/isTimeslotTaken');
-jest.mock('../../src/libs/getTimeSpans');
+jest.mock('../../src/helpers/getTimeSpans');
 jest.mock('../../src/helpers/timeSpanHelper');
 
 const { search, create } = jest.mocked(booking);
