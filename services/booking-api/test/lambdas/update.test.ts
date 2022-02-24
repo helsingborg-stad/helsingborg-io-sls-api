@@ -5,12 +5,12 @@ import { main } from '../../src/lambdas/update';
 import booking from '../../src/helpers/booking';
 import { isTimeslotTaken } from '../../src/helpers/isTimeslotTaken';
 import getTimeSpans from '../../src/libs/getTimeSpans';
-import { areAllAttendeesAvailable } from '../../src/helpers/isTimeSpanValid';
+import { areAllAttendeesAvailable } from '../../src/helpers/timeSpanHelper';
 
 jest.mock('../../src/helpers/booking');
 jest.mock('../../src/helpers/isTimeslotTaken');
 jest.mock('../../src/libs/getTimeSpans');
-jest.mock('../../src/helpers/isTimeSpanValid');
+jest.mock('../../src/helpers/timeSpanHelper');
 jest.mock('../../src/helpers/booking');
 
 const { search, create, cancel } = jest.mocked(booking);
