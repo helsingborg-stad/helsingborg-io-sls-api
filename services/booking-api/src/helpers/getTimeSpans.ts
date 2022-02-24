@@ -1,3 +1,4 @@
+import { GetTimeSpansResponse, TimeSpanData } from './types';
 import to from 'await-to-js';
 
 import * as request from '../libs/request';
@@ -6,7 +7,7 @@ import config from '../libs/config';
 
 const URI_RESOURCE = 'timeslot/searchAvailableIntervals';
 
-async function getTimeSpans(body) {
+async function getTimeSpans(body: unknown): Promise<TimeSpanData> {
   const [parameterError, { datatorgetEndpoint, apiKey }] = await to(
     params.read(config.datatorget.envsKeyName)
   );
@@ -27,7 +28,8 @@ async function getTimeSpans(body) {
     throw outlookError;
   }
 
-  const timeSpans = outlookResponse?.data?.data?.attributes || {};
+  const typedResponse = outlookResponse as GetTimeSpansResponse;
+  const timeSpans = typedResponse?.data?.data?.attributes || {};
 
   return timeSpans;
 }

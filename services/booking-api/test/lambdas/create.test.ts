@@ -1,8 +1,10 @@
+import { TimeSpanData } from './../../src/helpers/types';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const messages = require('@helsingborg-stad/npm-api-error-handling/assets/errorMessages');
 
 import { main } from '../../src/lambdas/create';
-import booking, { BookingSearchResponse } from '../../src/helpers/booking';
+import booking from '../../src/helpers/booking';
+import { BookingSearchResponse } from '../../src/helpers/types';
 import { isTimeslotTaken } from '../../src/helpers/isTimeslotTaken';
 import getTimeSpans from '../../src/helpers/getTimeSpans';
 import { areAllAttendeesAvailable } from '../../src/helpers/timeSpanHelper';
@@ -37,7 +39,9 @@ const mockHeaders = {
   'Access-Control-Allow-Credentials': true,
   'Access-Control-Allow-Origin': '*',
 };
-const getTimeSpansResponse = { mockAttendee: ['FAKE DATA'] };
+const getTimeSpansResponse: TimeSpanData = {
+  mockAttendee: [{ StartTime: 'mock start time', EndTime: 'mock end time' }],
+};
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -75,7 +79,7 @@ it('creates a booking successfully', async () => {
     statusCode: 200,
   };
 
-  mockedGetTimeSpans.mockResolvedValueOnce({ data: getTimeSpansResponse });
+  mockedGetTimeSpans.mockResolvedValueOnce(getTimeSpansResponse);
   mockedAreAllAttendeesAvailable.mockReturnValueOnce(true);
   search.mockResolvedValueOnce({ data: searchResponseData });
   mockedIsTimeSlotTaken.mockReturnValueOnce(false);
@@ -109,7 +113,7 @@ it('throws when booking.create fails', async () => {
     statusCode,
   };
 
-  mockedGetTimeSpans.mockResolvedValueOnce({ data: getTimeSpansResponse });
+  mockedGetTimeSpans.mockResolvedValueOnce(getTimeSpansResponse);
   mockedAreAllAttendeesAvailable.mockReturnValueOnce(true);
   search.mockResolvedValueOnce({ data: { data: { attributes: [] } } });
   mockedIsTimeSlotTaken.mockReturnValueOnce(false);
@@ -177,7 +181,7 @@ it('returns failure when timespan does not exist', async () => {
     statusCode,
   };
 
-  mockedGetTimeSpans.mockResolvedValueOnce({ data: getTimeSpansResponse });
+  mockedGetTimeSpans.mockResolvedValueOnce(getTimeSpansResponse);
   mockedAreAllAttendeesAvailable.mockReturnValueOnce(false);
 
   const result = await main(mockEvent, mockContext);
@@ -223,7 +227,7 @@ it('returns failure when timeslot is already taken', async () => {
     statusCode,
   };
 
-  mockedGetTimeSpans.mockResolvedValueOnce({ data: getTimeSpansResponse });
+  mockedGetTimeSpans.mockResolvedValueOnce(getTimeSpansResponse);
   mockedAreAllAttendeesAvailable.mockReturnValueOnce(true);
   search.mockResolvedValueOnce({ data: searchResponseData });
   mockedIsTimeSlotTaken.mockReturnValueOnce(true);

@@ -5,55 +5,13 @@ import to from 'await-to-js';
 import * as request from '../libs/request';
 import params from '../libs/params';
 import config from '../libs/config';
-import { BookingBody } from './getCreateBookingBody';
-
-export interface Attendee {
-  Email?: string;
-  Type: string;
-  Status: string;
-}
-
-export interface BookingAttributes {
-  BookingId: string;
-  Attendees: Attendee[];
-  Subject?: string;
-  Body?: string | null;
-  Location?: string;
-  ReferenceCode?: string;
-  StartTime?: string;
-  EndTime?: string;
-}
-export interface BookingSearchResponse {
-  data?: {
-    data?: {
-      attributes: BookingAttributes[];
-    };
-  };
-}
-
-export interface HistoricalAttendeesResponse {
-  data?: {
-    data?: {
-      type: string;
-      id: string;
-      attributes: string[];
-    };
-  };
-}
-export interface BookingCreateResponse {
-  data?: {
-    data?: {
-      attributes: Record<string, string>;
-    };
-  };
-}
-
-interface BookingError {
-  response: {
-    status: number;
-    statusText: string;
-  };
-}
+import {
+  BookingCreateResponse,
+  BookingSearchResponse,
+  HistoricalAttendeesResponse,
+  BookingError,
+  BookingBody,
+} from './types';
 
 const URI_RESOURCE = {
   CREATE: 'booking/create',

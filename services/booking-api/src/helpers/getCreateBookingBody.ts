@@ -1,13 +1,4 @@
-export interface BookingBody {
-  requiredAttendees?: string[];
-  startTime?: string;
-  endTime?: string;
-  optionalAttendees?: string[];
-  subject?: string;
-  location?: string;
-  referenceCode?: string;
-  body?: string;
-}
+import { BookingBody } from './types';
 
 export default (body: BookingBody) => {
   const {
