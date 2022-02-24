@@ -96,3 +96,12 @@ functions:
           method: get
           private: true
           cors: true
+
+  getTimeSlots:
+    handler: src/lambdas/getTimeSlots.main
+    events:
+      - http:
+          path: booking/getTimeSlots
+          method: post
+          private: true
+          cors: true
