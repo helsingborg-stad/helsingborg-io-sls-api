@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "es2021",
     "moduleResolution": "node",
-    "module": "CommonJS",
+    "module": "es6",
     "types": ["node", "jest"],
     "typeRoots": ["node_modules/@types"],
     "allowJs": true,
