@@ -3,14 +3,18 @@ const messages = require('@helsingborg-stad/npm-api-error-handling/assets/errorM
 
 import { main } from '../../src/lambdas/create';
 import booking, { BookingSearchResponse } from '../../src/helpers/booking';
+import { isTimeslotTaken } from '../../src/helpers/isTimeslotTaken';
 import getTimeSpans from '../../src/libs/getTimeSpans';
 import { areAllAttendeesAvailable } from '../../src/helpers/timeSpanHelper';
+import { not } from 'joi';
 
 jest.mock('../../src/helpers/booking');
+jest.mock('../../src/helpers/isTimeslotTaken');
 jest.mock('../../src/libs/getTimeSpans');
 jest.mock('../../src/helpers/timeSpanHelper');
 
 const { search, create } = jest.mocked(booking);
+const mockedIsTimeSlotTaken = jest.mocked(isTimeslotTaken);
 const mockedGetTimeSpans = jest.mocked(getTimeSpans);
 const mockedAreAllAttendeesAvailable = jest.mocked(areAllAttendeesAvailable);
 
@@ -41,7 +45,7 @@ beforeEach(() => {
 });
 
 it('creates a booking successfully', async () => {
-  expect.assertions(5);
+  expect.assertions(6);
 
   const searchResponseData: BookingSearchResponse['data'] = {
     data: {
@@ -75,6 +79,7 @@ it('creates a booking successfully', async () => {
   mockedGetTimeSpans.mockResolvedValueOnce({ data: getTimeSpansResponse });
   mockedAreAllAttendeesAvailable.mockReturnValueOnce(true);
   search.mockResolvedValueOnce({ data: searchResponseData });
+  mockedIsTimeSlotTaken.mockReturnValueOnce(false);
   create.mockResolvedValueOnce({ data: responseData });
 
   const result = await main(mockEvent, mockContext);
@@ -82,12 +87,13 @@ it('creates a booking successfully', async () => {
   expect(mockedGetTimeSpans).toHaveBeenCalled();
   expect(mockedAreAllAttendeesAvailable).toHaveBeenCalled();
   expect(booking.search).toHaveBeenCalled();
+  expect(mockedIsTimeSlotTaken).toHaveBeenCalled();
   expect(booking.create).toHaveBeenCalledWith(mockBody);
   expect(result).toEqual(expectedResult);
 });
 
 it('throws when booking.create fails', async () => {
-  expect.assertions(5);
+  expect.assertions(6);
 
   const statusCode = 500;
   const message = messages[statusCode];
@@ -107,6 +113,7 @@ it('throws when booking.create fails', async () => {
   mockedGetTimeSpans.mockResolvedValueOnce({ data: getTimeSpansResponse });
   mockedAreAllAttendeesAvailable.mockReturnValueOnce(true);
   search.mockResolvedValueOnce({ data: { data: { attributes: [] } } });
+  mockedIsTimeSlotTaken.mockReturnValueOnce(false);
   create.mockRejectedValueOnce({ status: statusCode, message });
 
   const result = await main(mockEvent, mockContext);
@@ -114,12 +121,13 @@ it('throws when booking.create fails', async () => {
   expect(mockedGetTimeSpans).toHaveBeenCalled();
   expect(mockedAreAllAttendeesAvailable).toHaveBeenCalled();
   expect(booking.search).toHaveBeenCalled();
+  expect(mockedIsTimeSlotTaken).toHaveBeenCalled();
   expect(booking.create).toHaveBeenCalledWith(mockBody);
   expect(result).toEqual(expectedResult);
 });
 
 it('returns error when required parameters does not exists in event', async () => {
-  expect.assertions(5);
+  expect.assertions(6);
 
   const body = JSON.stringify({
     startTime: '2021-05-30T10:00:00',
@@ -148,12 +156,13 @@ it('returns error when required parameters does not exists in event', async () =
   expect(mockedGetTimeSpans).not.toHaveBeenCalled();
   expect(mockedAreAllAttendeesAvailable).not.toHaveBeenCalled();
   expect(booking.search).not.toHaveBeenCalled();
+  expect(mockedIsTimeSlotTaken).not.toHaveBeenCalled();
   expect(booking.create).not.toHaveBeenCalled();
   expect(result).toEqual(expectedResult);
 });
 
 it('returns failure when timespan does not exist', async () => {
-  expect.assertions(3);
+  expect.assertions(6);
 
   const statusCode = 403;
   const expectedResult = {
@@ -176,11 +185,14 @@ it('returns failure when timespan does not exist', async () => {
 
   expect(mockedGetTimeSpans).toHaveBeenCalled();
   expect(mockedAreAllAttendeesAvailable).toHaveBeenCalled();
+  expect(booking.search).not.toHaveBeenCalled();
+  expect(mockedIsTimeSlotTaken).not.toHaveBeenCalled();
+  expect(booking.create).not.toHaveBeenCalled();
   expect(result).toEqual(expectedResult);
 });
 
 it('returns failure when timeslot is already taken', async () => {
-  expect.assertions(5);
+  expect.assertions(6);
 
   const searchResponseData = {
     data: {
@@ -215,12 +227,14 @@ it('returns failure when timeslot is already taken', async () => {
   mockedGetTimeSpans.mockResolvedValueOnce({ data: getTimeSpansResponse });
   mockedAreAllAttendeesAvailable.mockReturnValueOnce(true);
   search.mockResolvedValueOnce({ data: searchResponseData });
+  mockedIsTimeSlotTaken.mockReturnValueOnce(true);
 
   const result = await main(mockEvent, mockContext);
 
   expect(mockedGetTimeSpans).toHaveBeenCalled();
   expect(mockedAreAllAttendeesAvailable).toHaveBeenCalled();
   expect(booking.search).toHaveBeenCalled();
+  expect(mockedIsTimeSlotTaken).toHaveBeenCalled();
   expect(booking.create).not.toHaveBeenCalled();
   expect(result).toEqual(expectedResult);
 });
