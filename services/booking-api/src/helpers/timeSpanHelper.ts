@@ -1,17 +1,17 @@
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 type TimeInterval = { startTime: string; endTime: string };
 type MSGraphTimeInterval = { StartTime: string; EndTime: string };
 type TimeSpanData = Record<string, MSGraphTimeInterval[]>;
 
 function isBookingInsideTimeSpan(booking: TimeInterval, timeSpan: TimeInterval) {
-  const bookingStartTime = moment(booking.startTime);
-  const bookingEndTime = moment(booking.endTime);
-  const timeSpanStartTime = moment(timeSpan.startTime);
-  const timeSpanEndTime = moment(timeSpan.endTime);
+  const bookingStartTime = dayjs(booking.startTime);
+  const bookingEndTime = dayjs(booking.endTime);
+  const timeSpanStartTime = dayjs(timeSpan.startTime);
+  const timeSpanEndTime = dayjs(timeSpan.endTime);
   return (
-    bookingStartTime.isSameOrAfter(timeSpanStartTime) &&
-    bookingEndTime.isSameOrBefore(timeSpanEndTime)
+    (bookingStartTime.isSame(timeSpanStartTime) || bookingStartTime.isAfter(timeSpanStartTime)) &&
+    (bookingEndTime.isSame(timeSpanEndTime) || bookingEndTime.isBefore(timeSpanEndTime))
   );
 }
 
