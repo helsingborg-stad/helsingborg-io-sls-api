@@ -2,9 +2,9 @@ import to from 'await-to-js';
 
 import * as response from '../libs/response';
 import log from '../libs/logs';
-import getTimeSpans from '../libs/getTimeSpans';
 
 import booking from '../helpers/booking';
+import getTimeSpans from '../helpers/getTimeSpans';
 import { isTimeslotTaken } from '../helpers/isTimeslotTaken';
 import { areAllAttendeesAvailable } from '../helpers/timeSpanHelper';
 import getCreateBookingBody from '../helpers/getCreateBookingBody';
