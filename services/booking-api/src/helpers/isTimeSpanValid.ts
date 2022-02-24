@@ -1,7 +1,8 @@
 import moment from 'moment';
 
 type TimeInterval = { startTime: string; endTime: string };
-type TimeSpanData = Record<string, { StartTime: string; EndTime: string }[]>;
+type MSGraphTimeInterval = { StartTime: string; EndTime: string };
+type TimeSpanData = Record<string, MSGraphTimeInterval[]>;
 
 function isBookingInsideTimeSpan(booking: TimeInterval, timeSpan: TimeInterval) {
   const bookingStartTime = moment(booking.startTime);
@@ -14,15 +15,23 @@ function isBookingInsideTimeSpan(booking: TimeInterval, timeSpan: TimeInterval) 
   );
 }
 
-function isTimeSpanValid(bookingInterval: TimeInterval, timeSpanData: TimeSpanData) {
-  return Object.values(timeSpanData).every(timeArray =>
-    timeArray.some(timeSpan =>
-      isBookingInsideTimeSpan(bookingInterval, {
-        startTime: timeSpan.StartTime,
-        endTime: timeSpan.EndTime,
-      })
-    )
+function timeSpanArrayCoversBooking(
+  timeArray: MSGraphTimeInterval[],
+  bookingInterval: TimeInterval
+) {
+  return timeArray.some(timeSpan =>
+    isBookingInsideTimeSpan(bookingInterval, {
+      startTime: timeSpan.StartTime,
+      endTime: timeSpan.EndTime,
+    })
   );
 }
 
-export { isTimeSpanValid };
+function areAllAttendeesAvailable(bookingInterval: TimeInterval, timeSpanData: TimeSpanData) {
+  const timeSpanArrays = Object.values(timeSpanData);
+  return timeSpanArrays.every(timeSpanArray =>
+    timeSpanArrayCoversBooking(timeSpanArray, bookingInterval)
+  );
+}
+
+export { areAllAttendeesAvailable };

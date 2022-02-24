@@ -6,7 +6,7 @@ import getTimeSpans from '../libs/getTimeSpans';
 
 import booking from '../helpers/booking';
 import { isTimeslotTaken } from '../helpers/isTimeslotTaken';
-import { isTimeSpanValid } from '../helpers/isTimeSpanValid';
+import { areAllAttendeesAvailable } from '../helpers/isTimeSpanValid';
 import getCreateBookingBody from '../helpers/getCreateBookingBody';
 
 export async function main(event: { body: string }, { awsRequestId }: { awsRequestId: string }) {
@@ -39,12 +39,9 @@ export async function main(event: { body: string }, { awsRequestId }: { awsReque
     return response.failure(getTimeSpanError);
   }
 
-  const timeSpansExist = Object.values(getTimeSpanResponse ?? {}).flat().length > 0;
+  const timeSpansExist = Object.values(getTimeSpanResponse).flat().length > 0;
 
-  const timeValid = isTimeSpanValid(
-    { startTime, endTime },
-    getTimeSpanResponse?.data?.data?.attributes ?? {}
-  );
+  const timeValid = areAllAttendeesAvailable({ startTime, endTime }, getTimeSpanResponse);
 
   if (!timeSpansExist || !timeValid) {
     message = 'No timeslot exists in the given interval';

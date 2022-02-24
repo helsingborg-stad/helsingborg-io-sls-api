@@ -4,7 +4,7 @@ const messages = require('@helsingborg-stad/npm-api-error-handling/assets/errorM
 import { main } from '../../src/lambdas/create';
 import booking, { BookingSearchResponse } from '../../src/helpers/booking';
 import getTimeSpans from '../../src/libs/getTimeSpans';
-import { isTimeSpanValid } from '../../src/helpers/isTimeSpanValid';
+import { areAllAttendeesAvailable } from '../../src/helpers/isTimeSpanValid';
 
 jest.mock('../../src/helpers/booking');
 jest.mock('../../src/libs/getTimeSpans');
@@ -12,7 +12,7 @@ jest.mock('../../src/helpers/isTimeSpanValid');
 
 const { search, create } = jest.mocked(booking);
 const mockedGetTimeSpans = jest.mocked(getTimeSpans);
-const mockedIsTimeSpanValid = jest.mocked(isTimeSpanValid);
+const mockedAreAllAttendeesAvailable = jest.mocked(areAllAttendeesAvailable);
 
 const mockBody = {
   requiredAttendees: ['outlook.user@helsingborg.se'],
@@ -34,7 +34,7 @@ const mockHeaders = {
   'Access-Control-Allow-Credentials': true,
   'Access-Control-Allow-Origin': '*',
 };
-const getTimeSpansResponse = { data: { attributes: 'FAKE DATA' } };
+const getTimeSpansResponse = { mockAttendee: ['FAKE DATA'] };
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -75,7 +75,7 @@ it('creates a booking successfully', async () => {
   search.mockResolvedValueOnce({ data: searchResponseData });
   create.mockResolvedValueOnce({ data: responseData });
   mockedGetTimeSpans.mockResolvedValueOnce({ data: getTimeSpansResponse });
-  mockedIsTimeSpanValid.mockReturnValueOnce(true);
+  mockedAreAllAttendeesAvailable.mockReturnValueOnce(true);
 
   const result = await main(mockEvent, mockContext);
 
@@ -104,7 +104,7 @@ it('throws when booking.create fails', async () => {
   search.mockResolvedValueOnce({ data: { data: { attributes: [] } } });
   create.mockRejectedValueOnce({ status: statusCode, message });
   mockedGetTimeSpans.mockResolvedValueOnce({ data: getTimeSpansResponse });
-  mockedIsTimeSpanValid.mockReturnValueOnce(true);
+  mockedAreAllAttendeesAvailable.mockReturnValueOnce(true);
 
   const result = await main(mockEvent, mockContext);
 
@@ -160,7 +160,7 @@ it('returns failure when timespan does not exist', async () => {
   };
 
   mockedGetTimeSpans.mockResolvedValueOnce({ data: getTimeSpansResponse });
-  mockedIsTimeSpanValid.mockReturnValueOnce(false);
+  mockedAreAllAttendeesAvailable.mockReturnValueOnce(false);
 
   const result = await main(mockEvent, mockContext);
 
@@ -201,7 +201,7 @@ it('returns failure when timeslot is already taken', async () => {
   };
 
   mockedGetTimeSpans.mockResolvedValueOnce({ data: getTimeSpansResponse });
-  mockedIsTimeSpanValid.mockReturnValueOnce(true);
+  mockedAreAllAttendeesAvailable.mockReturnValueOnce(true);
   search.mockResolvedValueOnce({ data: searchResponseData });
 
   const result = await main(mockEvent, mockContext);
