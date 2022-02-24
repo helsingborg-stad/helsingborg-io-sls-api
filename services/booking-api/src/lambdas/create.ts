@@ -1,4 +1,3 @@
-import { TimeSpanData } from './../helpers/types';
 import to from 'await-to-js';
 
 import * as response from '../libs/response';
@@ -34,16 +33,15 @@ export async function main(event: { body: string }, { awsRequestId }: { awsReque
   };
   const [getTimeSpanError, getTimeSpanResponse] = await to(getTimeSpans(getTimeSpanBody));
 
-  if (getTimeSpanError) {
+  if (getTimeSpanError || !getTimeSpanResponse) {
     message = `Error finding timeSpan ${startTime} - ${endTime}`;
     log.error(message, awsRequestId, 'service-booking-api-create-002', getTimeSpanError);
     return response.failure(getTimeSpanError);
   }
 
-  const timeSpanData = getTimeSpanResponse as TimeSpanData;
-  const timeSpansExist = Object.values(timeSpanData).flat().length > 0;
+  const timeSpansExist = Object.values(getTimeSpanResponse).flat().length > 0;
 
-  const timeValid = areAllAttendeesAvailable({ startTime, endTime }, timeSpanData);
+  const timeValid = areAllAttendeesAvailable({ startTime, endTime }, getTimeSpanResponse);
 
   if (!timeSpansExist || !timeValid) {
     message = 'No timeslot exists in the given interval';
