@@ -6,7 +6,7 @@ import getTimeSpans from '../libs/getTimeSpans';
 
 import booking from '../helpers/booking';
 import { isTimeslotTaken } from '../helpers/isTimeslotTaken';
-import { isTimeSpanValid } from '../helpers/isTimeSpanValid';
+import { areAllAttendeesAvailable } from '../helpers/isTimeSpanValid';
 import getCreateBookingBody from '../helpers/getCreateBookingBody';
 
 export async function main(
@@ -40,11 +40,8 @@ export async function main(
     return response.failure(getTimeSpanError);
   }
 
-  const timeSpansExist = Object.values(getTimeSpanResponse ?? {}).flat().length > 0;
-  const timeValid = isTimeSpanValid(
-    { startTime, endTime },
-    getTimeSpanResponse?.data?.data?.attributes ?? {}
-  );
+  const timeSpansExist = Object.values(getTimeSpanResponse).flat().length > 0;
+  const timeValid = areAllAttendeesAvailable({ startTime, endTime }, getTimeSpanResponse);
 
   if (!timeSpansExist || !timeValid) {
     message = 'No timeslot exists in the given interval';
