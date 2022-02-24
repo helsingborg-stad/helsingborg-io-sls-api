@@ -1,3 +1,4 @@
+import { TimeInterval } from './../helpers/types';
 import to from 'await-to-js';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -9,7 +10,7 @@ import getTimeSpans from '../helpers/getTimeSpans';
 
 dayjs.extend(utc);
 
-export async function main(event) {
+export async function main(event: { body: string }) {
   console.log('EVENT: ', JSON.stringify(event, undefined));
   const body = JSON.parse(event.body);
 
@@ -29,12 +30,12 @@ export async function main(event) {
     meetingDurationMinutes: meetingDuration + meetingBuffer,
   };
   const [getTimeSpansError, timeSpansResult] = await to(getTimeSpans(getTimeSpansBody));
-  if (getTimeSpansError) {
+  if (getTimeSpansError || !timeSpansResult) {
     console.error('Could not get time spans: ', getTimeSpansError);
     return response.failure(getTimeSpansError);
   }
 
-  const timeSlots = {};
+  const timeSlots: Record<string, Record<string, TimeInterval[]>> = {};
   Object.keys(timeSpansResult).forEach(email => {
     timeSlots[email] = {};
 
