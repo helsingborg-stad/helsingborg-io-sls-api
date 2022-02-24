@@ -62,7 +62,7 @@ beforeEach(() => {
 });
 
 it('updates a booking successfully', async () => {
-  expect.assertions(5);
+  expect.assertions(7);
 
   const responseData = {
     data: {
@@ -93,15 +93,17 @@ it('updates a booking successfully', async () => {
 
   const result = await main(mockEvent, mockContext);
 
-  expect(result).toEqual(expectedResult);
+  expect(mockedGetTimeSpans).toHaveBeenCalled();
+  expect(mockedAreAllAttendeesAvailable).toHaveBeenCalled();
+  expect(booking.search).toHaveBeenCalledWith(mockSearchBody);
+  expect(mockedIsTimeSlotTaken).toHaveBeenCalledWith(mockSearchResponse.data.data.attributes);
   expect(booking.cancel).toHaveBeenCalledWith(mockBookingId);
   expect(booking.create).toHaveBeenCalledWith(mockBody);
-  expect(booking.search).toHaveBeenCalledWith(mockSearchBody);
-  expect(isTimeslotTaken).toHaveBeenCalledWith(mockSearchResponse.data.data.attributes);
+  expect(result).toEqual(expectedResult);
 });
 
 it('does not update if timespan does not exist', async () => {
-  expect.assertions(5);
+  expect.assertions(7);
 
   const expectedResult = {
     body: JSON.stringify({
@@ -120,15 +122,17 @@ it('does not update if timespan does not exist', async () => {
 
   const result = await main(mockEvent, mockContext);
 
-  expect(result).toEqual(expectedResult);
+  expect(mockedGetTimeSpans).toHaveBeenCalled();
+  expect(mockedAreAllAttendeesAvailable).toHaveBeenCalled();
+  expect(booking.search).not.toHaveBeenCalled();
+  expect(mockedIsTimeSlotTaken).not.toHaveBeenCalled();
   expect(booking.cancel).not.toHaveBeenCalled();
   expect(booking.create).not.toHaveBeenCalled();
-  expect(booking.search).not.toHaveBeenCalled();
-  expect(isTimeslotTaken).not.toHaveBeenCalled();
+  expect(result).toEqual(expectedResult);
 });
 
 it('does not update if timeslot is taken', async () => {
-  expect.assertions(5);
+  expect.assertions(7);
 
   const expectedResult = {
     body: JSON.stringify({
@@ -149,15 +153,17 @@ it('does not update if timeslot is taken', async () => {
 
   const result = await main(mockEvent, mockContext);
 
-  expect(result).toEqual(expectedResult);
+  expect(mockedGetTimeSpans).toHaveBeenCalled();
+  expect(mockedAreAllAttendeesAvailable).toHaveBeenCalled();
+  expect(booking.search).toHaveBeenCalledWith(mockSearchBody);
+  expect(mockedIsTimeSlotTaken).toHaveBeenCalledWith(mockSearchResponse.data.data.attributes);
   expect(booking.cancel).not.toHaveBeenCalled();
   expect(booking.create).not.toHaveBeenCalled();
-  expect(booking.search).toHaveBeenCalledWith(mockSearchBody);
-  expect(isTimeslotTaken).toHaveBeenCalledWith(mockSearchResponse.data.data.attributes);
+  expect(result).toEqual(expectedResult);
 });
 
 it('throws when booking.cancel fails', async () => {
-  expect.assertions(5);
+  expect.assertions(7);
 
   const statusCode = 500;
   const message = messages[statusCode];
@@ -182,15 +188,17 @@ it('throws when booking.cancel fails', async () => {
 
   const result = await main(mockEvent, mockContext);
 
-  expect(result).toEqual(expectedResult);
+  expect(mockedGetTimeSpans).toHaveBeenCalled();
+  expect(mockedAreAllAttendeesAvailable).toHaveBeenCalled();
+  expect(booking.search).toHaveBeenCalledWith(mockSearchBody);
+  expect(mockedIsTimeSlotTaken).toHaveBeenCalledWith(mockSearchResponse.data.data.attributes);
   expect(booking.cancel).toHaveBeenCalledTimes(1);
   expect(booking.create).not.toHaveBeenCalled();
-  expect(booking.search).toHaveBeenCalledWith(mockSearchBody);
-  expect(isTimeslotTaken).toHaveBeenCalledWith(mockSearchResponse.data.data.attributes);
+  expect(result).toEqual(expectedResult);
 });
 
 it('throws when booking.create fails', async () => {
-  expect.assertions(5);
+  expect.assertions(7);
 
   const statusCode = 500;
   const message = messages[statusCode];
@@ -216,15 +224,17 @@ it('throws when booking.create fails', async () => {
 
   const result = await main(mockEvent, mockContext);
 
-  expect(result).toEqual(expectedResult);
+  expect(mockedGetTimeSpans).toHaveBeenCalled();
+  expect(mockedAreAllAttendeesAvailable).toHaveBeenCalled();
+  expect(booking.search).toHaveBeenCalledWith(mockSearchBody);
+  expect(mockedIsTimeSlotTaken).toHaveBeenCalledWith(mockSearchResponse.data.data.attributes);
   expect(booking.cancel).toHaveBeenCalledTimes(1);
   expect(booking.create).toHaveBeenCalledTimes(1);
-  expect(booking.search).toHaveBeenCalledWith(mockSearchBody);
-  expect(isTimeslotTaken).toHaveBeenCalledWith(mockSearchResponse.data.data.attributes);
+  expect(result).toEqual(expectedResult);
 });
 
 it('returns error when required parameters does not exists in event', async () => {
-  expect.assertions(5);
+  expect.assertions(7);
 
   const body = JSON.stringify({
     startTime: '2021-05-30T10:00:00',
@@ -249,9 +259,11 @@ it('returns error when required parameters does not exists in event', async () =
 
   const result = await main(event, mockContext);
 
-  expect(result).toEqual(expectedResult);
-  expect(booking.create).not.toHaveBeenCalled();
-  expect(booking.cancel).not.toHaveBeenCalled();
+  expect(mockedGetTimeSpans).not.toHaveBeenCalled();
+  expect(mockedAreAllAttendeesAvailable).not.toHaveBeenCalled();
   expect(booking.search).not.toHaveBeenCalled();
-  expect(isTimeslotTaken).not.toHaveBeenCalled();
+  expect(mockedIsTimeSlotTaken).not.toHaveBeenCalled();
+  expect(booking.cancel).not.toHaveBeenCalled();
+  expect(booking.create).not.toHaveBeenCalled();
+  expect(result).toEqual(expectedResult);
 });
