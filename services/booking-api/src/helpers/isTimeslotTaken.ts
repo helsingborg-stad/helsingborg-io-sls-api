@@ -1,4 +1,4 @@
-import { Attendee, BookingAttributes } from './booking';
+import { Attendee, BookingAttributes } from './types';
 
 /**
  * @param {{ Attendees: { Type: string, Status: string }[]}} booking

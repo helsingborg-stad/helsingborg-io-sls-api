@@ -6,6 +6,7 @@ import booking from '../../src/helpers/booking';
 import { isTimeslotTaken } from '../../src/helpers/isTimeslotTaken';
 import getTimeSpans from '../../src/helpers/getTimeSpans';
 import { areAllAttendeesAvailable } from '../../src/helpers/timeSpanHelper';
+import { TimeSpanData } from '../../src/helpers/types';
 
 jest.mock('../../src/helpers/booking');
 jest.mock('../../src/helpers/isTimeslotTaken');
@@ -55,8 +56,9 @@ const mockSearchResponse = {
     },
   },
 };
-const getTimeSpansResponse = { mockAttendee: ['FAKE DATA'] };
-
+const getTimeSpansResponse: TimeSpanData = {
+  mockAttendee: [{ StartTime: 'mock start time', EndTime: 'mock end time' }],
+};
 beforeEach(() => {
   jest.resetAllMocks();
 });
@@ -84,7 +86,7 @@ it('updates a booking successfully', async () => {
     statusCode: 200,
   };
 
-  mockedGetTimeSpans.mockResolvedValueOnce({ data: getTimeSpansResponse });
+  mockedGetTimeSpans.mockResolvedValueOnce(getTimeSpansResponse);
   mockedAreAllAttendeesAvailable.mockReturnValueOnce(true);
   search.mockResolvedValueOnce(mockSearchResponse);
   mockedIsTimeSlotTaken.mockReturnValueOnce(false);
@@ -117,7 +119,7 @@ it('does not update if timespan does not exist', async () => {
     statusCode: 403,
   };
 
-  mockedGetTimeSpans.mockResolvedValueOnce({ data: getTimeSpansResponse });
+  mockedGetTimeSpans.mockResolvedValueOnce(getTimeSpansResponse);
   mockedAreAllAttendeesAvailable.mockReturnValueOnce(false);
 
   const result = await main(mockEvent, mockContext);
@@ -146,7 +148,7 @@ it('does not update if timeslot is taken', async () => {
     statusCode: 403,
   };
 
-  mockedGetTimeSpans.mockResolvedValueOnce({ data: getTimeSpansResponse });
+  mockedGetTimeSpans.mockResolvedValueOnce(getTimeSpansResponse);
   mockedAreAllAttendeesAvailable.mockReturnValueOnce(true);
   search.mockResolvedValueOnce(mockSearchResponse);
   mockedIsTimeSlotTaken.mockReturnValueOnce(true);
@@ -180,7 +182,7 @@ it('throws when booking.cancel fails', async () => {
     statusCode,
   };
 
-  mockedGetTimeSpans.mockResolvedValueOnce({ data: getTimeSpansResponse });
+  mockedGetTimeSpans.mockResolvedValueOnce(getTimeSpansResponse);
   mockedAreAllAttendeesAvailable.mockReturnValueOnce(true);
   search.mockResolvedValueOnce(mockSearchResponse);
   mockedIsTimeSlotTaken.mockReturnValueOnce(false);
@@ -215,7 +217,7 @@ it('throws when booking.create fails', async () => {
     statusCode,
   };
 
-  mockedGetTimeSpans.mockResolvedValueOnce({ data: getTimeSpansResponse });
+  mockedGetTimeSpans.mockResolvedValueOnce(getTimeSpansResponse);
   mockedAreAllAttendeesAvailable.mockReturnValueOnce(true);
   search.mockResolvedValueOnce(mockSearchResponse);
   mockedIsTimeSlotTaken.mockReturnValueOnce(false);

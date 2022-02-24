@@ -1,8 +1,5 @@
 import dayjs from 'dayjs';
-
-type TimeInterval = { startTime: string; endTime: string };
-type MSGraphTimeInterval = { StartTime: string; EndTime: string };
-type TimeSpanData = Record<string, MSGraphTimeInterval[]>;
+import { TimeInterval, MSGraphTimeInterval, TimeSpanData } from './types';
 
 function isBookingInsideTimeSpan(booking: TimeInterval, timeSpan: TimeInterval) {
   const bookingStartTime = dayjs(booking.startTime);

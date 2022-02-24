@@ -1,3 +1,4 @@
+import { TimeSpanData } from './../helpers/types';
 import to from 'await-to-js';
 
 import * as response from '../libs/response';
@@ -39,9 +40,10 @@ export async function main(event: { body: string }, { awsRequestId }: { awsReque
     return response.failure(getTimeSpanError);
   }
 
-  const timeSpansExist = Object.values(getTimeSpanResponse).flat().length > 0;
+  const timeSpanData = getTimeSpanResponse as TimeSpanData;
+  const timeSpansExist = Object.values(timeSpanData).flat().length > 0;
 
-  const timeValid = areAllAttendeesAvailable({ startTime, endTime }, getTimeSpanResponse);
+  const timeValid = areAllAttendeesAvailable({ startTime, endTime }, timeSpanData);
 
   if (!timeSpansExist || !timeValid) {
     message = 'No timeslot exists in the given interval';
