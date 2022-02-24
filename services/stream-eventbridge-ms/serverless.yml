@@ -2,7 +2,6 @@ service: stream-eventbridge-ms
 
 plugins:
   - serverless-bundle
-  - serverless-offline
 
 projectDir: ../../
 

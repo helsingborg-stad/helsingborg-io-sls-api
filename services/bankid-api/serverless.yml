@@ -74,6 +74,7 @@ functions:
           method: post
           private: true
           cors: true
+
   sign:
     handler: src/lambdas/sign.main
     events:
@@ -82,6 +83,7 @@ functions:
           method: post
           private: true
           cors: true
+
   collect:
     handler: src/lambdas/collect.main
     events:
@@ -90,6 +92,7 @@ functions:
           method: post
           private: true
           cors: true
+
   cancel:
     handler: src/lambdas/cancel.main
     events:

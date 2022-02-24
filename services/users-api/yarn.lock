@@ -2,19 +2,7 @@
 # yarn lockfile v1
 
 
-bluebird@^3.5.0:
-  version "3.7.2"
-  resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.7.2.tgz#9f229c15be272454ffa973ace0dbee79a1b0c36f"
-  integrity sha512-XpNj6GDQzdfW+r2Wnn7xiSAd7TM3jzkxGXBGTtWKuSXv1xUV+azxAm8jdWZN06QTQk+2N2XB9jRDkvbmQmcRtg==
-
 serverless-apigw-binary@^0.4.4:
   version "0.4.4"
   resolved "https://registry.yarnpkg.com/serverless-apigw-binary/-/serverless-apigw-binary-0.4.4.tgz#f3cffd8365322a2a1d8bde5fd94b306b7a64d4fb"
   integrity sha512-2DJmQTzeXa/+8u9ekReqf7j4gQjBtzQE4MK9nlOnEz4F7MVWCQXYlLPmf2TXSoxxJZzlWvIiNzCTq6vAT9F5FQ==
-
-serverless-apigwy-binary@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/serverless-apigwy-binary/-/serverless-apigwy-binary-1.0.0.tgz#eb403a42305801816eefd61c8956efb7fab85f8a"
-  integrity sha512-nr2fDkGRk6/PioE5l6Dk5anYmrN4pdjoT4eHxr+RGIn+ZRJcYDlNBB6ytVRvSAL2txkkNd44HA/hKSGbHQw96Q==
-  dependencies:
-    bluebird "^3.5.0"

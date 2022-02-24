@@ -4,11 +4,7 @@ import log from '../libs/logs';
 
 const eventBridge = new AWS.EventBridge();
 
-/**
- * Lambda function takes DynamoDB stream events and
- * publishes them to an EventBridge Event Bus
- */
-export const main = async (event, context) => {
+export async function main(event, context) {
   const eventsToPut = [];
 
   for (const record of event.Records) {
@@ -32,5 +28,5 @@ export const main = async (event, context) => {
 
   await eventBridge.putEvents({ Entries: eventsToPut }).promise();
 
-  return 'OK';
-};
+  return true;
+}

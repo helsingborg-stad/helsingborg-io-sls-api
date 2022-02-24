@@ -2,7 +2,6 @@ service: forms-api
 
 plugins:
   - serverless-bundle
-  - serverless-offline
   - serverless-add-api-key
 
 projectDir: ../../
@@ -19,15 +18,13 @@ provider:
   stage: dev
   region: eu-north-1
   endpointType: regional
-  logs:
-    restApi: true
   tracing:
-    apiGateway: true
     lambda: true
 
   environment:
     stage: ${self:custom.stage}
     resourcesStage: ${self:custom.resourcesStage}
+
   apiGateway:
     restApiId:
       'Fn::ImportValue': ${self:custom.stage}-ExtApiGatewayRestApiId
@@ -48,7 +45,6 @@ provider:
             - dynamodb:PutItem
             - dynamodb:UpdateItem
             - dynamodb:DeleteItem
-
           Resource:
             - 'Fn::ImportValue': ${self:custom.resourcesStage}-FormsTableArn
 
