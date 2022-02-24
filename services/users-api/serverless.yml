@@ -16,7 +16,7 @@ package:
 provider:
   lambdaHashingVersion: 20201221
   name: aws
-  runtime: nodejs12.x
+  runtime: nodejs14.x
   stage: dev
   region: eu-north-1
   endpointType: regional
