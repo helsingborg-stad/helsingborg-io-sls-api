@@ -6,7 +6,7 @@ import utc from 'dayjs/plugin/utc';
 import * as response from '../libs/response';
 
 import createSlotsWithinTimeSpan from '../helpers/createSlots';
-import getTimeSpans from '../helpers/getTimeSpans';
+import booking from '../helpers/booking';
 
 dayjs.extend(utc);
 
@@ -29,17 +29,18 @@ export async function main(event: { body: string }) {
     endTime,
     meetingDurationMinutes: meetingDuration + meetingBuffer,
   };
-  const [getTimeSpansError, timeSpansResult] = await to(getTimeSpans(getTimeSpansBody));
-  if (getTimeSpansError || !timeSpansResult) {
+  const [getTimeSpansError, timeSpansResult] = await to(booking.getTimeSpans(getTimeSpansBody));
+  const timeSpanData = timeSpansResult?.data?.data?.attributes;
+  if (getTimeSpansError || !timeSpanData) {
     console.error('Could not get time spans: ', getTimeSpansError);
     return response.failure(getTimeSpansError);
   }
 
   const timeSlots: Record<string, Record<string, TimeInterval[]>> = {};
-  Object.keys(timeSpansResult).forEach(email => {
+  Object.keys(timeSpanData).forEach(email => {
     timeSlots[email] = {};
 
-    timeSpansResult[email].forEach(({ StartTime, EndTime }) => {
+    timeSpanData[email].forEach(({ StartTime, EndTime }) => {
       const date = dayjs(StartTime).utc().format('YYYY-MM-DD');
 
       if (!timeSlots[email][date]) {

@@ -4,12 +4,11 @@ import * as response from '../libs/response';
 import log from '../libs/logs';
 
 import booking from '../helpers/booking';
-import getTimeSpans from '../helpers/getTimeSpans';
 import { isTimeslotTaken } from '../helpers/isTimeslotTaken';
 import { areAllAttendeesAvailable } from '../helpers/timeSpanHelper';
 import getCreateBookingBody from '../helpers/getCreateBookingBody';
 
-export async function main(event: { body: string }, { awsRequestId }: { awsRequestId: string }) {
+export async function main(event: { body: string }, context: { awsRequestId: string }) {
   const body = JSON.parse(event.body);
   const { requiredAttendees = [], startTime, endTime } = body;
 
@@ -18,34 +17,34 @@ export async function main(event: { body: string }, { awsRequestId }: { awsReque
   if (requiredAttendees.length === 0 || !startTime || !endTime) {
     message =
       'Missing one or more required parameters: "requiredAttendees", "startTime", "endTime"';
-    log.error(message, awsRequestId, 'service-booking-api-create-001');
+    log.error(message, context.awsRequestId, 'service-booking-api-create-001');
     return response.failure({
       status: 403,
       message,
     });
   }
 
-  const getTimeSpanBody = {
+  const getTimeSpansBody = {
     emails: requiredAttendees,
     startTime,
     endTime,
     meetingDurationMinutes: 0,
   };
-  const [getTimeSpanError, getTimeSpanResponse] = await to(getTimeSpans(getTimeSpanBody));
-
-  if (getTimeSpanError || !getTimeSpanResponse) {
+  const [getTimeSpansError, timeSpansResult] = await to(booking.getTimeSpans(getTimeSpansBody));
+  const timeSpanData = timeSpansResult?.data?.data?.attributes;
+  if (getTimeSpansError || !timeSpanData) {
     message = `Error finding timeSpan ${startTime} - ${endTime}`;
-    log.error(message, awsRequestId, 'service-booking-api-create-002', getTimeSpanError);
-    return response.failure(getTimeSpanError);
+    log.error(message, context.awsRequestId, 'service-booking-api-create-002', getTimeSpansError);
+    return response.failure(getTimeSpansError);
   }
 
-  const timeSpansExist = Object.values(getTimeSpanResponse).flat().length > 0;
+  const timeSpansExist = Object.values(timeSpanData).flat().length > 0;
 
-  const timeValid = areAllAttendeesAvailable({ startTime, endTime }, getTimeSpanResponse);
+  const timeValid = areAllAttendeesAvailable({ startTime, endTime }, timeSpanData);
 
   if (!timeSpansExist || !timeValid) {
     message = 'No timeslot exists in the given interval';
-    log.error(message, awsRequestId, 'service-booking-api-create-003');
+    log.error(message, context.awsRequestId, 'service-booking-api-create-003');
     return response.failure({ message, status: 403 });
   }
 
@@ -54,7 +53,7 @@ export async function main(event: { body: string }, { awsRequestId }: { awsReque
 
   if (searchBookingError) {
     message = `Error finding bookings between ${startTime} - ${endTime}`;
-    log.error(message, awsRequestId, 'service-booking-api-create-004', searchBookingError);
+    log.error(message, context.awsRequestId, 'service-booking-api-create-004', searchBookingError);
     return response.failure(searchBookingError);
   }
 
@@ -63,7 +62,7 @@ export async function main(event: { body: string }, { awsRequestId }: { awsReque
 
   if (bookingExist && timeslotTaken) {
     message = 'Timeslot not available for booking';
-    log.error(message, awsRequestId, 'service-booking-api-create-005', searchBookingError);
+    log.error(message, context.awsRequestId, 'service-booking-api-create-005', searchBookingError);
     return response.failure({ message, status: 403 });
   }
 
@@ -71,7 +70,7 @@ export async function main(event: { body: string }, { awsRequestId }: { awsReque
   const [error, createBookingResponse] = await to(booking.create(createBookingBody));
   if (error) {
     message = 'Could not create new booking';
-    log.error(message, awsRequestId, 'service-booking-api-create-006', searchBookingError);
+    log.error(message, context.awsRequestId, 'service-booking-api-create-006', searchBookingError);
     return response.failure(error);
   }
 

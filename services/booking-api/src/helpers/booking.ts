@@ -11,8 +11,9 @@ import {
   HistoricalAttendeesResponse,
   BookingError,
   BookingBody,
-  GetHistoricalAttendeesAttributes,
   GetHistoricalAttendeesResponse,
+  GetTimeSpansResponse,
+  GetTimeSpansBody,
 } from './types';
 
 const URI_RESOURCE = {
@@ -22,6 +23,7 @@ const URI_RESOURCE = {
   SEARCH: 'booking/search',
   GET_HISTORICAL_ATTENDEES: 'booking/getHistoricalAttendees',
   GET_ADMINISTRATOR_DETAILS: 'misc/getUserDetails',
+  GET_TIME_SPANS: 'timeslot/searchAvailableIntervals',
 };
 
 const METHOD = {
@@ -60,6 +62,10 @@ function getAdministratorDetails(body: { email: string }) {
   );
 }
 
+function getTimeSpans(body: GetTimeSpansBody) {
+  return sendBookingPostRequest<GetTimeSpansResponse>(URI_RESOURCE.GET_TIME_SPANS, body);
+}
+
 async function sendBookingPostRequest<T>(
   path: string,
   body: unknown,
@@ -94,4 +100,12 @@ async function getSsmParameters() {
   return response;
 }
 
-export default { create, cancel, get, search, getHistoricalAttendees, getAdministratorDetails };
+export default {
+  create,
+  cancel,
+  get,
+  search,
+  getHistoricalAttendees,
+  getAdministratorDetails,
+  getTimeSpans,
+};

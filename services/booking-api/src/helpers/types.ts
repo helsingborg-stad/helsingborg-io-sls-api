@@ -85,10 +85,17 @@ export interface GetHistoricalAttendeesResponse {
 
 export type TimeSpanData = Record<string, MSGraphTimeInterval[]>;
 
+export interface GetTimeSpansBody {
+  emails: string[];
+  startTime: string;
+  endTime: string;
+  meetingDurationMinutes: number;
+}
+
 export interface GetTimeSpansResponse {
-  data: {
-    data: {
-      attributes: TimeSpanData;
+  data?: {
+    data?: {
+      attributes?: TimeSpanData;
     };
   };
 }

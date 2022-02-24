@@ -4,7 +4,6 @@ import * as response from '../libs/response';
 import log from '../libs/logs';
 
 import booking from '../helpers/booking';
-import getTimeSpans from '../helpers/getTimeSpans';
 import { isTimeslotTaken } from '../helpers/isTimeslotTaken';
 import { areAllAttendeesAvailable } from '../helpers/timeSpanHelper';
 import getCreateBookingBody from '../helpers/getCreateBookingBody';
@@ -26,26 +25,26 @@ export async function main(
     return response.failure({ status: 403, message });
   }
 
-  const getTimeSpanBody = {
+  const getTimeSpansBody = {
     emails: requiredAttendees,
     startTime,
     endTime,
     meetingDurationMinutes: 0,
   };
-  const [getTimeSpanError, getTimeSpanResponse] = await to(getTimeSpans(getTimeSpanBody));
-
-  if (getTimeSpanError || !getTimeSpanResponse) {
+  const [getTimeSpansError, timeSpansResult] = await to(booking.getTimeSpans(getTimeSpansBody));
+  const timeSpanData = timeSpansResult?.data?.data?.attributes;
+  if (getTimeSpansError || !timeSpanData) {
     message = `Error finding timeSpan ${startTime} - ${endTime}`;
-    log.error(message, awsRequestId, 'service-booking-api-update-002', getTimeSpanError);
-    return response.failure(getTimeSpanError);
+    log.error(message, awsRequestId, 'service-booking-api-update-002', getTimeSpansError);
+    return response.failure(getTimeSpansError);
   }
 
-  const timeSpansExist = Object.values(getTimeSpanResponse).flat().length > 0;
-  const timeValid = areAllAttendeesAvailable({ startTime, endTime }, getTimeSpanResponse);
+  const timeSpansExist = Object.values(timeSpanData).flat().length > 0;
+  const timeValid = areAllAttendeesAvailable({ startTime, endTime }, timeSpanData);
 
   if (!timeSpansExist || !timeValid) {
     message = 'No timeslot exists in the given interval';
-    log.error(message, awsRequestId, 'service-booking-api-update-003', getTimeSpanError);
+    log.error(message, awsRequestId, 'service-booking-api-update-003', getTimeSpansError);
     return response.failure({ message, status: 403 });
   }
 
