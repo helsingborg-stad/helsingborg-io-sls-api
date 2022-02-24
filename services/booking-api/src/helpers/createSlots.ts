@@ -1,4 +1,5 @@
-import dayjs from 'dayjs';
+import { TimeInterval } from './types';
+import dayjs, { Dayjs } from 'dayjs';
 
 /**
  * Function for creating time slots within a
@@ -10,8 +11,13 @@ import dayjs from 'dayjs';
  * @param {number} meetingBuffer The time between two meetings
  * @returns {{startTime: string, endTime: strig}[]} Array of start times and end times objects
  */
-const createSlotsWithinTimeSpan = (timeSpanStart, timeSpanEnd, meetingDuration, meetingBuffer) => {
-  const timeSlots = [];
+const createSlotsWithinTimeSpan = (
+  timeSpanStart: Dayjs,
+  timeSpanEnd: Dayjs,
+  meetingDuration: number,
+  meetingBuffer: number
+) => {
+  const timeSlots: TimeInterval[] = [];
 
   let slotStart = timeSpanStart;
 
