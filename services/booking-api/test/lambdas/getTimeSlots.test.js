@@ -1,7 +1,9 @@
 import { main } from '../../src/lambdas/getTimeSlots';
-import getTimeSpans from '../../src/helpers/getTimeSpans';
+import booking from '../../src/helpers/booking';
 
-jest.mock('../../src/helpers/getTimeSpans');
+jest.mock('../../src/helpers/booking');
+
+const { getTimeSpans } = jest.mocked(booking);
 
 const mockAttendee = 'outlook@helsingborg.se';
 const secondMockAttendee = 'outlook_2@helsingborg.se';
@@ -35,12 +37,18 @@ it('successfully returns available time slots for a single user', async () => {
   expect.assertions(1);
 
   getTimeSpans.mockResolvedValueOnce({
-    [mockAttendee]: [
-      {
-        StartTime: '2021-10-10T08:00:00+01:00',
-        EndTime: '2021-10-10T10:00:00+01:00',
+    data: {
+      data: {
+        attributes: {
+          [mockAttendee]: [
+            {
+              StartTime: '2021-10-10T08:00:00+01:00',
+              EndTime: '2021-10-10T10:00:00+01:00',
+            },
+          ],
+        },
       },
-    ],
+    },
   });
 
   const expectedTimeSlots = {
@@ -65,18 +73,24 @@ it('successfully returns available time slots for multiple users', async () => {
   expect.assertions(1);
 
   getTimeSpans.mockResolvedValueOnce({
-    [mockAttendee]: [
-      {
-        StartTime: '2021-10-10T08:00:00+01:00',
-        EndTime: '2021-10-10T10:00:00+01:00',
+    data: {
+      data: {
+        attributes: {
+          [mockAttendee]: [
+            {
+              StartTime: '2021-10-10T08:00:00+01:00',
+              EndTime: '2021-10-10T10:00:00+01:00',
+            },
+          ],
+          [secondMockAttendee]: [
+            {
+              StartTime: '2021-10-10T08:00:00+01:00',
+              EndTime: '2021-10-10T11:00:00+01:00',
+            },
+          ],
+        },
       },
-    ],
-    [secondMockAttendee]: [
-      {
-        StartTime: '2021-10-10T08:00:00+01:00',
-        EndTime: '2021-10-10T11:00:00+01:00',
-      },
-    ],
+    },
   });
 
   const expectedTimeSlots = {
@@ -113,16 +127,22 @@ it('successfully returns available time slots when fetching multiple time spans'
   expect.assertions(1);
 
   getTimeSpans.mockResolvedValueOnce({
-    [mockAttendee]: [
-      {
-        StartTime: '2021-10-10T08:00:00+01:00',
-        EndTime: '2021-10-10T10:00:00+01:00',
+    data: {
+      data: {
+        attributes: {
+          [mockAttendee]: [
+            {
+              StartTime: '2021-10-10T08:00:00+01:00',
+              EndTime: '2021-10-10T10:00:00+01:00',
+            },
+            {
+              StartTime: '2021-10-10T11:00:00+01:00',
+              EndTime: '2021-10-10T12:00:00+01:00',
+            },
+          ],
+        },
       },
-      {
-        StartTime: '2021-10-10T11:00:00+01:00',
-        EndTime: '2021-10-10T12:00:00+01:00',
-      },
-    ],
+    },
   });
 
   const expectedTimeSlots = {
@@ -160,12 +180,18 @@ it('successfully returns available time with another meetingDuration and meeting
   };
 
   getTimeSpans.mockResolvedValueOnce({
-    [mockAttendee]: [
-      {
-        StartTime: '2021-10-10T08:00:00+01:00',
-        EndTime: '2021-10-10T09:00:00+01:00',
+    data: {
+      data: {
+        attributes: {
+          [mockAttendee]: [
+            {
+              StartTime: '2021-10-10T08:00:00+01:00',
+              EndTime: '2021-10-10T09:00:00+01:00',
+            },
+          ],
+        },
       },
-    ],
+    },
   });
 
   const expectedTimeSlots = {
@@ -222,7 +248,13 @@ it('returns no time slots for a user if a time span is empty', async () => {
   expect.assertions(1);
 
   getTimeSpans.mockResolvedValueOnce({
-    [mockAttendee]: [],
+    data: {
+      data: {
+        attributes: {
+          [mockAttendee]: [],
+        },
+      },
+    },
   });
 
   const expectedResult = createLambdaResponse({ [mockAttendee]: {} });

@@ -1,5 +1,7 @@
 import to from 'await-to-js';
-import booking, { GetHistoricalAttendeesAttributes } from './booking';
+import booking from './booking';
+
+import { GetHistoricalAttendeesAttributes } from './types';
 
 const emailToDetailsCollection: { [key: string]: GetHistoricalAttendeesAttributes } = {};
 
