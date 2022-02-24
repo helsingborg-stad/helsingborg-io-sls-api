@@ -6,7 +6,7 @@ import getTimeSpans from '../libs/getTimeSpans';
 
 import booking from '../helpers/booking';
 import { isTimeslotTaken } from '../helpers/isTimeslotTaken';
-import { areAllAttendeesAvailable } from '../helpers/isTimeSpanValid';
+import { areAllAttendeesAvailable } from '../helpers/timeSpanHelper';
 import getCreateBookingBody from '../helpers/getCreateBookingBody';
 
 export async function main(

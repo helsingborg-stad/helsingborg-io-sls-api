@@ -1,4 +1,4 @@
-import { areAllAttendeesAvailable } from '../../src/helpers/isTimeSpanValid';
+import { areAllAttendeesAvailable } from '../../src/helpers/timeSpanHelper';
 
 const mockTimeSpan1 = {
   StartTime: '2022-02-21T08:00:00Z',
