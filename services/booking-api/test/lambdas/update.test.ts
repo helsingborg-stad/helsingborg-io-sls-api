@@ -11,10 +11,9 @@ jest.mock('../../src/helpers/booking');
 jest.mock('../../src/helpers/isTimeslotTaken');
 jest.mock('../../src/libs/getTimeSpans');
 jest.mock('../../src/helpers/timeSpanHelper');
-jest.mock('../../src/helpers/booking');
 
 const { search, create, cancel } = jest.mocked(booking);
-const mockedTimeSlotTaken = jest.mocked(isTimeslotTaken);
+const mockedIsTimeSlotTaken = jest.mocked(isTimeslotTaken);
 const mockedGetTimeSpans = jest.mocked(getTimeSpans);
 const mockedAreAllAttendeesAvailable = jest.mocked(areAllAttendeesAvailable);
 
@@ -88,7 +87,7 @@ it('updates a booking successfully', async () => {
   mockedGetTimeSpans.mockResolvedValueOnce({ data: getTimeSpansResponse });
   mockedAreAllAttendeesAvailable.mockReturnValueOnce(true);
   search.mockResolvedValueOnce(mockSearchResponse);
-  mockedTimeSlotTaken.mockReturnValueOnce(false);
+  mockedIsTimeSlotTaken.mockReturnValueOnce(false);
   cancel.mockResolvedValueOnce(undefined);
   create.mockResolvedValueOnce(calendarBookingResponse);
 
@@ -146,7 +145,7 @@ it('does not update if timeslot is taken', async () => {
   mockedGetTimeSpans.mockResolvedValueOnce({ data: getTimeSpansResponse });
   mockedAreAllAttendeesAvailable.mockReturnValueOnce(true);
   search.mockResolvedValueOnce(mockSearchResponse);
-  mockedTimeSlotTaken.mockReturnValueOnce(true);
+  mockedIsTimeSlotTaken.mockReturnValueOnce(true);
 
   const result = await main(mockEvent, mockContext);
 
@@ -178,7 +177,7 @@ it('throws when booking.cancel fails', async () => {
   mockedGetTimeSpans.mockResolvedValueOnce({ data: getTimeSpansResponse });
   mockedAreAllAttendeesAvailable.mockReturnValueOnce(true);
   search.mockResolvedValueOnce(mockSearchResponse);
-  mockedTimeSlotTaken.mockReturnValueOnce(false);
+  mockedIsTimeSlotTaken.mockReturnValueOnce(false);
   cancel.mockRejectedValueOnce({ status: statusCode, message });
 
   const result = await main(mockEvent, mockContext);
@@ -211,7 +210,7 @@ it('throws when booking.create fails', async () => {
   mockedGetTimeSpans.mockResolvedValueOnce({ data: getTimeSpansResponse });
   mockedAreAllAttendeesAvailable.mockReturnValueOnce(true);
   search.mockResolvedValueOnce(mockSearchResponse);
-  mockedTimeSlotTaken.mockReturnValueOnce(false);
+  mockedIsTimeSlotTaken.mockReturnValueOnce(false);
   cancel.mockResolvedValueOnce(undefined);
   create.mockRejectedValueOnce({ status: statusCode, message });
 
