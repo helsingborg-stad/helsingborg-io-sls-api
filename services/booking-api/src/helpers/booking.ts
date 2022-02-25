@@ -108,7 +108,7 @@ function getHistoricalAttendees(body: BookingBody) {
   );
 }
 
-function getAdministratorDetails(body) {
+function getAdministratorDetails(body: { email: string }) {
   return sendBookingPostRequest<GetHistoricalAttendeesResponse>(
     URI_RESOURCE.GET_ADMINISTRATOR_DETAILS,
     body

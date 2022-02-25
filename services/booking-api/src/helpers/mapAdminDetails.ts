@@ -1,7 +1,7 @@
 import to from 'await-to-js';
 import booking, { GetHistoricalAttendeesAttributes } from './booking';
 
-const emailToDetails = {};
+const emailToDetails: { [key: string]: GetHistoricalAttendeesAttributes } = {};
 
 const getEmailToDetailsMapping = async (
   emails: string[]
@@ -11,9 +11,12 @@ const getEmailToDetailsMapping = async (
       const [, getAdministratorDetailsResponse] = await to(
         booking.getAdministratorDetails({ email })
       );
-      emailToDetails[email] = getAdministratorDetailsResponse?.data?.data?.attributes ?? {
-        Email: email,
-      };
+
+      emailToDetails[email] =
+        getAdministratorDetailsResponse?.data?.data?.attributes ??
+        ({
+          Email: email,
+        } as GetHistoricalAttendeesAttributes);
     }
   });
   await Promise.all(promises);
