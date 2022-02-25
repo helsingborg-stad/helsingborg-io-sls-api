@@ -8,7 +8,7 @@ import { isTimeslotTaken } from '../helpers/isTimeslotTaken';
 import { areAllAttendeesAvailable } from '../helpers/timeSpanHelper';
 import getCreateBookingBody from '../helpers/getCreateBookingBody';
 
-export async function main(event: { body: string }, context: { awsRequestId: string }) {
+export async function main(event: { body: string }, { awsRequestId }: { awsRequestId: string }) {
   const body = JSON.parse(event.body);
   const { requiredAttendees = [], startTime, endTime } = body;
 
@@ -17,7 +17,7 @@ export async function main(event: { body: string }, context: { awsRequestId: str
   if (requiredAttendees.length === 0 || !startTime || !endTime) {
     message =
       'Missing one or more required parameters: "requiredAttendees", "startTime", "endTime"';
-    log.error(message, context.awsRequestId, 'service-booking-api-create-001');
+    log.error(message, awsRequestId, 'service-booking-api-create-001');
     return response.failure({
       status: 403,
       message,
@@ -34,7 +34,7 @@ export async function main(event: { body: string }, context: { awsRequestId: str
   const timeSpanData = timeSpansResult?.data?.data?.attributes;
   if (getTimeSpansError || !timeSpanData) {
     message = `Error finding timeSpan ${startTime} - ${endTime}`;
-    log.error(message, context.awsRequestId, 'service-booking-api-create-002', getTimeSpansError);
+    log.error(message, awsRequestId, 'service-booking-api-create-002', getTimeSpansError);
     return response.failure(getTimeSpansError);
   }
 
@@ -44,7 +44,7 @@ export async function main(event: { body: string }, context: { awsRequestId: str
 
   if (!timeSpansExist || !timeValid) {
     message = 'No timeslot exists in the given interval';
-    log.error(message, context.awsRequestId, 'service-booking-api-create-003');
+    log.error(message, awsRequestId, 'service-booking-api-create-003');
     return response.failure({ message, status: 403 });
   }
 
@@ -53,7 +53,7 @@ export async function main(event: { body: string }, context: { awsRequestId: str
 
   if (searchBookingError) {
     message = `Error finding bookings between ${startTime} - ${endTime}`;
-    log.error(message, context.awsRequestId, 'service-booking-api-create-004', searchBookingError);
+    log.error(message, awsRequestId, 'service-booking-api-create-004', searchBookingError);
     return response.failure(searchBookingError);
   }
 
@@ -62,7 +62,7 @@ export async function main(event: { body: string }, context: { awsRequestId: str
 
   if (bookingExist && timeslotTaken) {
     message = 'Timeslot not available for booking';
-    log.error(message, context.awsRequestId, 'service-booking-api-create-005', searchBookingError);
+    log.error(message, awsRequestId, 'service-booking-api-create-005', searchBookingError);
     return response.failure({ message, status: 403 });
   }
 
@@ -70,7 +70,7 @@ export async function main(event: { body: string }, context: { awsRequestId: str
   const [error, createBookingResponse] = await to(booking.create(createBookingBody));
   if (error) {
     message = 'Could not create new booking';
-    log.error(message, context.awsRequestId, 'service-booking-api-create-006', searchBookingError);
+    log.error(message, awsRequestId, 'service-booking-api-create-006', searchBookingError);
     return response.failure(error);
   }
 
