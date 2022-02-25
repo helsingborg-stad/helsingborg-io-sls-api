@@ -1,7 +1,8 @@
-import booking from '../../helpers/booking';
+import booking from '../../src/helpers/booking';
 let mapAdminDetails;
 
-jest.mock('../../helpers/booking');
+jest.mock('../../src/helpers/booking');
+const { getAdministratorDetails } = jest.mocked(booking);
 
 const mockAD = {
   Email: 'outlook_1@helsingborg.se',
@@ -15,6 +16,8 @@ const mockInput = [mockAD.Email];
 const mockLookupResponse = {
   data: {
     data: {
+      type: 'userdetails',
+      id: 'id',
       attributes: mockAD,
     },
   },
@@ -30,9 +33,6 @@ const mockBadMappings = {
 
 beforeEach(() => {
   jest.resetAllMocks();
-  jest.isolateModules(() => {
-    mapAdminDetails = require('../../helpers/mapAdminDetails').default;
-  });
 });
 
 it('returns AD details when lookup is successful', async () => {
@@ -40,12 +40,12 @@ it('returns AD details when lookup is successful', async () => {
 
   const expectedResult = mockMappings;
 
-  booking.getAdministratorDetails.mockResolvedValueOnce(mockLookupResponse);
+  getAdministratorDetails.mockResolvedValueOnce(mockLookupResponse);
 
   const result = await mapAdminDetails(mockInput);
 
   expect(result).toEqual(expectedResult);
-  expect(booking.getAdministratorDetails).toHaveBeenCalledTimes(1);
+  expect(getAdministratorDetails).toHaveBeenCalledTimes(1);
 });
 
 it('returns fallback when lookup is unsuccessful', async () => {
@@ -53,12 +53,12 @@ it('returns fallback when lookup is unsuccessful', async () => {
 
   const expectedResult = mockBadMappings;
 
-  booking.getAdministratorDetails.mockRejectedValueOnce();
+  getAdministratorDetails.mockRejectedValueOnce(undefined);
 
   const result = await mapAdminDetails(mockInput);
 
   expect(result).toEqual(expectedResult);
-  expect(booking.getAdministratorDetails).toHaveBeenCalledTimes(1);
+  expect(getAdministratorDetails).toHaveBeenCalledTimes(1);
 });
 
 it('caches AD details between calls', async () => {
@@ -66,12 +66,12 @@ it('caches AD details between calls', async () => {
 
   const expectedResult = mockMappings;
 
-  booking.getAdministratorDetails.mockResolvedValueOnce(mockLookupResponse);
+  getAdministratorDetails.mockResolvedValueOnce(mockLookupResponse);
 
   const result1 = await mapAdminDetails(mockInput);
   const result2 = await mapAdminDetails(mockInput);
 
   expect(result1).toEqual(expectedResult);
   expect(result2).toEqual(expectedResult);
-  expect(booking.getAdministratorDetails).toHaveBeenCalledTimes(1);
+  expect(getAdministratorDetails).toHaveBeenCalledTimes(1);
 });
