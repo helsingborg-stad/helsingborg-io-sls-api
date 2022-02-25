@@ -96,9 +96,6 @@ functions:
           method: get
           private: true
           cors: true
-          authorizer:
-            type: CUSTOM
-            authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   getAdministratorDetails:
     handler: src/lambdas/getAdministratorDetails.main
@@ -108,6 +105,3 @@ functions:
           method: get
           private: true
           cors: true
-          authorizer:
-            type: CUSTOM
-            authorizerId: !ImportValue ${self:custom.stage}-authorizerId
