@@ -1,7 +1,8 @@
 import { main } from '../../src/lambdas/getAdministratorDetails';
-import booking from '../../helpers/booking';
+import booking from '../../src/helpers/booking';
 
-jest.mock('../../helpers/booking');
+jest.mock('../../src/helpers/booking');
+const { getAdministratorDetails } = jest.mocked(booking);
 
 const mockHeaders = {
   'Access-Control-Allow-Credentials': true,
@@ -94,12 +95,12 @@ it('retrieves AD details successfully', async () => {
     statusCode: 200,
   };
 
-  booking.getAdministratorDetails.mockResolvedValueOnce(mockDatatorgetResponse);
+  getAdministratorDetails.mockResolvedValueOnce(mockDatatorgetResponse);
 
   const result = await main(mockEvent, mockContext);
 
   expect(result).toEqual(expectedResult);
-  expect(booking.getAdministratorDetails).toHaveBeenCalledTimes(1);
+  expect(getAdministratorDetails).toHaveBeenCalledTimes(1);
 });
 
 it('returns 400 if no email in request', async () => {
@@ -118,7 +119,7 @@ it('returns 400 if no email in request', async () => {
   const result = await main(mockEvent, mockContext);
 
   expect(result).toEqual(expectedResult);
-  expect(booking.getAdministratorDetails).not.toHaveBeenCalled();
+  expect(getAdministratorDetails).not.toHaveBeenCalled();
 });
 
 it('returns 400 if bad email in request', async () => {
@@ -139,7 +140,7 @@ it('returns 400 if bad email in request', async () => {
   const result = await main(mockEvent, mockContext);
 
   expect(result).toEqual(expectedResult);
-  expect(booking.getAdministratorDetails).not.toHaveBeenCalled();
+  expect(getAdministratorDetails).not.toHaveBeenCalled();
 });
 
 it('returns 500 if datatorget request fails', async () => {
@@ -157,7 +158,7 @@ it('returns 500 if datatorget request fails', async () => {
     statusCode: 500,
   };
 
-  booking.getAdministratorDetails.mockRejectedValueOnce({
+  getAdministratorDetails.mockRejectedValueOnce({
     status: 500,
     message: 'Internal server error',
   });
@@ -165,5 +166,5 @@ it('returns 500 if datatorget request fails', async () => {
   const result = await main(mockEvent, mockContext);
 
   expect(result).toEqual(expectedResult);
-  expect(booking.getAdministratorDetails).toHaveBeenCalledTimes(1);
+  expect(getAdministratorDetails).toHaveBeenCalledTimes(1);
 });
