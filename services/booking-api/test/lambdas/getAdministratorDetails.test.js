@@ -1,4 +1,4 @@
-import { main } from '../../lambdas/getAdministratorDetails';
+import { main } from '../../src/lambdas/getAdministratorDetails';
 import booking from '../../helpers/booking';
 
 jest.mock('../../helpers/booking');

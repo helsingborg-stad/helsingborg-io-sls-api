@@ -1,9 +1,9 @@
 import to from 'await-to-js';
 
-import * as response from '../../../libs/response';
-
 import booking from '../helpers/booking';
-import log from '../../../libs/logs';
+
+import * as response from '../libs/response';
+import log from '../libs/logs';
 
 export async function main(event, context) {
   const { email } = event.pathParameters;
@@ -42,6 +42,6 @@ export async function main(event, context) {
     return response.failure(error);
   }
 
-  const { data } = getAdministratorDetailsResponse.data;
+  const { data } = getAdministratorDetailsResponse?.data ?? {};
   return response.success(200, data);
 }
