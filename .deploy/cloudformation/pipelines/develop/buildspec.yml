@@ -29,8 +29,4 @@ phases:
       - git rev-parse HEAD > /root/last-build/last-deployed-commit-sha-$ENV
 cache:
   paths:
-    - node_modules/**/*
-    - /usr/local/share/.config/yarn/**/*
-    - /usr/local/share/.cache/yarn/v6/**/*
     - /root/last-build/**/*
-    - /root/.npm/**/*
