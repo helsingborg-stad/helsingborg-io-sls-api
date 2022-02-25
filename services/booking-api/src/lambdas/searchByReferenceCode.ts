@@ -35,17 +35,18 @@ export async function main(event: { body: string }, context: { awsRequestId: str
   }
 
   const { data } = searchBookingResponse?.data ?? {};
+  const { attributes = [] } = data ?? {};
 
-  const emails = data.attributes
-    .flatMap(booking => booking.Attendees)
-    .map(attendee => attendee.Email);
-  const uniqueEmails = [...new Set(emails)];
+  const emails = attributes.flatMap(booking => booking.Attendees).map(attendee => attendee.Email);
+  const uniqueEmails = [...new Set(emails)] as string[];
 
   const emailToDetails = await getEmailToDetailsMapping(uniqueEmails);
 
-  data.attributes.forEach(booking => {
+  attributes.forEach(booking => {
     booking.Attendees.forEach((attendee, index) => {
-      booking.Attendees[index] = { ...attendee, ...emailToDetails[attendee.Email] };
+      if (attendee.Email) {
+        booking.Attendees[index] = { ...attendee, ...emailToDetails[attendee.Email] };
+      }
     });
   });
 
