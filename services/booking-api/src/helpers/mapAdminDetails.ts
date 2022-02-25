@@ -1,26 +1,29 @@
 import to from 'await-to-js';
 import booking, { GetHistoricalAttendeesAttributes } from './booking';
 
-const emailToDetails: { [key: string]: GetHistoricalAttendeesAttributes } = {};
+const emailToDetailsCollection: { [key: string]: GetHistoricalAttendeesAttributes } = {};
+
+const fetchAdministratorDetails = async (email: string) => {
+  const [, getAdministratorDetailsResponse] = await to(booking.getAdministratorDetails({ email }));
+
+  return (
+    getAdministratorDetailsResponse?.data?.data?.attributes ??
+    ({
+      Email: email,
+    } as GetHistoricalAttendeesAttributes)
+  );
+};
 
 const getEmailToDetailsMapping = async (
   emails: string[]
 ): Promise<Record<string, GetHistoricalAttendeesAttributes>> => {
   const promises = emails.map(async email => {
-    if (!emailToDetails[email]) {
-      const [, getAdministratorDetailsResponse] = await to(
-        booking.getAdministratorDetails({ email })
-      );
-
-      emailToDetails[email] =
-        getAdministratorDetailsResponse?.data?.data?.attributes ??
-        ({
-          Email: email,
-        } as GetHistoricalAttendeesAttributes);
+    if (!emailToDetailsCollection[email]) {
+      emailToDetailsCollection[email] = await fetchAdministratorDetails(email);
     }
   });
   await Promise.all(promises);
-  return emailToDetails;
+  return emailToDetailsCollection;
 };
 
 export default getEmailToDetailsMapping;
