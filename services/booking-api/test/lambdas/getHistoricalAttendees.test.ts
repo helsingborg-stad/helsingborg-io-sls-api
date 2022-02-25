@@ -3,9 +3,11 @@ import booking from '../../src/helpers/booking';
 import helperMapAdminDetails from '../../src/helpers/mapAdminDetails';
 
 jest.mock('../../src/helpers/booking');
+jest.mock('../../src/helpers/mapAdminDetails');
 
 const { getHistoricalAttendees } = jest.mocked(booking);
 const mapAdminDetails = jest.mocked(helperMapAdminDetails);
+
 const mockHeaders = {
   'Access-Control-Allow-Credentials': true,
   'Access-Control-Allow-Origin': '*',

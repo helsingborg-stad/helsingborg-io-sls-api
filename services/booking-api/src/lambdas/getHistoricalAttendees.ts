@@ -57,10 +57,11 @@ export async function main(
   }
 
   const { data } = getHistoricalAttendeesResponse?.data ?? {};
+  const { attributes = [] } = data ?? {};
 
-  const emailToDetails = await getEmailToDetailsMapping(data.attributes);
+  const emailToDetails = await getEmailToDetailsMapping(attributes);
 
-  const newData = { ...data, attributes: data.attributes.map(email => emailToDetails[email]) };
+  const newData = { ...data, attributes: attributes.map(email => emailToDetails[email]) };
 
   return response.success(200, newData);
 }
