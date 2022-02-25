@@ -95,9 +95,9 @@ functions:
       - eventBridge:
           pattern:
             source:
-              - casesApi.getCaseList
+              - usersMs.findUser
             detail-type:
-              - casesApiInvokeSuccess
+              - usersMsFindUserSuccess
       - eventBridge:
           pattern:
             source:

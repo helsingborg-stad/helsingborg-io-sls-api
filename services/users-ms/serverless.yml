@@ -17,6 +17,8 @@ provider:
   stage: dev
   region: eu-north-1
   endpointType: regional
+  eventBridge:
+    useCloudFormation: true
   tracing:
     apiGateway: false
     lambda: true
@@ -61,6 +63,12 @@ functions:
               - usersMs.createUser
             detail-type:
               - usersMsCreateUserSuccess
+      - eventBridge:
+          pattern:
+            source:
+              - casesApi.getCaseList
+            detail-type:
+              - casesApiInvokeSuccess
 
   create:
     handler: src/lambdas/createUser.main
