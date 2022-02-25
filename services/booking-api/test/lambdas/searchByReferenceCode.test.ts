@@ -5,8 +5,8 @@ import { main } from '../../src/lambdas/searchByReferenceCode';
 import booking from '../../src/helpers/booking';
 import helpersMapAdminDetails from '../../src/helpers/mapAdminDetails';
 
-jest.mock('../../helpers/booking');
-jest.mock('../../helpers/mapAdminDetails');
+jest.mock('../../src/helpers/booking');
+jest.mock('../../src/helpers/mapAdminDetails');
 
 const { search, getAdministratorDetails } = jest.mocked(booking);
 const mapAdminDetails = jest.mocked(helpersMapAdminDetails);
