@@ -2,6 +2,7 @@ export interface TimeInterval {
   startTime: string;
   endTime: string;
 }
+
 export interface MSGraphTimeInterval {
   StartTime: string;
   EndTime: string;
@@ -41,6 +42,7 @@ export interface HistoricalAttendeesResponse {
     };
   };
 }
+
 export interface BookingCreateResponse {
   data?: {
     data?: {
@@ -48,6 +50,7 @@ export interface BookingCreateResponse {
     };
   };
 }
+
 export interface BookingError {
   response: {
     status: number;
