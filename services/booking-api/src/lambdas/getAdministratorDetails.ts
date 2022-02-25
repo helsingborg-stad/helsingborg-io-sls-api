@@ -5,7 +5,12 @@ import booking from '../helpers/booking';
 import * as response from '../libs/response';
 import log from '../libs/logs';
 
-export async function main(event, context) {
+export async function main(
+  event: {
+    pathParameters: { email: string };
+  },
+  context: { awsRequestId: string }
+) {
   const { email } = event.pathParameters;
 
   if (!email) {
