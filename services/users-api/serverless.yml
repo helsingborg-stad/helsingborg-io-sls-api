@@ -3,6 +3,7 @@ service: users-api
 plugins:
   - serverless-bundle
   - serverless-apigw-binary
+  - serverless-apigwy-binary
 
 projectDir: ../../
 
@@ -130,7 +131,6 @@ functions:
       - http:
           path: /users/me/attachments/{filename}
           method: get
-          contentHandling: CONVERT_TO_BINARY
           cors: true
           private: true
           authorizer:
