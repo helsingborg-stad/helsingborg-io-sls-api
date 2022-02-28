@@ -37,7 +37,7 @@ export async function main(event, context) {
     );
   }
 
-  const [putEventError] = await to(putUserEvent.exists(userDetail));
+  const [putEventError] = await to(putUserEvent.exists(userItem));
   if (putEventError) {
     return console.error('(users-ms: findUser) putEventError', putEventError);
   }
