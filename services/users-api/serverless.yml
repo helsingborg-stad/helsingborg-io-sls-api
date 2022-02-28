@@ -2,9 +2,7 @@ service: users-api
 
 plugins:
   - serverless-bundle
-  - serverless-offline
   - serverless-apigw-binary
-  - serverless-apigwy-binary
 
 projectDir: ../../
 
@@ -20,15 +18,13 @@ provider:
   stage: dev
   region: eu-north-1
   endpointType: regional
-  logs:
-    restApi: true
   tracing:
-    apiGateway: true
     lambda: true
 
   environment:
     stage: ${self:custom.stage}
     resourcesStage: ${self:custom.resourcesStage}
+
   apiGateway:
     restApiId:
       'Fn::ImportValue': ${self:custom.stage}-ExtApiGatewayRestApiId
@@ -45,7 +41,6 @@ provider:
           Action:
             - dynamodb:Query
             - dynamodb:GetItem
-          # Restrict our IAM role permissions to the specific table for the stage
           Resource:
             - 'Fn::ImportValue': ${self:custom.resourcesStage}-UsersTableArn
 
@@ -62,6 +57,7 @@ provider:
                 - ''
                 - - Fn::ImportValue: ${self:custom.resourcesStage}-AttachmentsBucketArn
                   - '/*'
+
         - Effect: Allow
           Action:
             - kms:Decrypt
@@ -72,18 +68,6 @@ provider:
           Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
 
 functions:
-  getUser:
-    handler: src/lambdas/getUser.main
-    events:
-      - http:
-          path: /users/{personalNumber}
-          method: get
-          cors: true
-          private: true
-          authorizer:
-            type: CUSTOM
-            authorizerId: !ImportValue ${self:custom.stage}-authorizerId
-
   me:
     handler: src/lambdas/getUser.main
     events:
@@ -93,7 +77,7 @@ functions:
           cors: true
           private: true
           authorizer:
-            type: CUSTOM
+            type: TOKEN
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   getAttachmentList:
@@ -107,7 +91,7 @@ functions:
           cors: true
           private: true
           authorizer:
-            type: CUSTOM
+            type: TOKEN
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   uploadAttachment:
@@ -121,7 +105,7 @@ functions:
           cors: true
           private: true
           authorizer:
-            type: CUSTOM
+            type: TOKEN
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   deleteAttachment:
@@ -135,7 +119,7 @@ functions:
           cors: true
           private: true
           authorizer:
-            type: CUSTOM
+            type: TOKEN
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
   getAttachment:
@@ -150,5 +134,5 @@ functions:
           cors: true
           private: true
           authorizer:
-            type: CUSTOM
+            type: TOKEN
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
