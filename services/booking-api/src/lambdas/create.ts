@@ -24,6 +24,15 @@ export async function main(event: { body: string }, { awsRequestId }: { awsReque
     });
   }
 
+  const systemTime = new Date();
+
+  if (systemTime > new Date(startTime)) {
+    return response.failure({
+      status: 403,
+      message: 'Parameter "startTime" cannot be set to a passed value',
+    });
+  }
+
   const getTimeSpansBody = {
     emails: requiredAttendees,
     startTime,

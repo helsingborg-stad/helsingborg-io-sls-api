@@ -47,6 +47,7 @@ const getTimeSpansResponse: GetTimeSpansResponse = {
 };
 
 beforeEach(() => {
+  jest.useFakeTimers().setSystemTime(new Date('2021-05-29T10:00:00'));
   jest.resetAllMocks();
 });
 
@@ -191,6 +192,33 @@ it('returns failure when timespan does not exist', async () => {
 
   expect(getTimeSpans).toHaveBeenCalled();
   expect(mockedAreAllAttendeesAvailable).toHaveBeenCalled();
+  expect(booking.search).not.toHaveBeenCalled();
+  expect(mockedIsTimeSlotTaken).not.toHaveBeenCalled();
+  expect(booking.create).not.toHaveBeenCalled();
+  expect(result).toEqual(expectedResult);
+});
+
+it('returns error if startTime is in the passed', async () => {
+  jest.useFakeTimers().setSystemTime(new Date('2021-05-30T12:00:00'));
+  expect.assertions(6);
+
+  const expectedResult = {
+    body: JSON.stringify({
+      jsonapi: { version: '1.0' },
+      data: {
+        status: '403',
+        code: '403',
+        message: 'Parameter "startTime" cannot be set to a passed value',
+      },
+    }),
+    headers: mockHeaders,
+    statusCode: 403,
+  };
+
+  const result = await main(mockEvent, mockContext);
+
+  expect(getTimeSpans).not.toHaveBeenCalled();
+  expect(mockedAreAllAttendeesAvailable).not.toHaveBeenCalled();
   expect(booking.search).not.toHaveBeenCalled();
   expect(mockedIsTimeSlotTaken).not.toHaveBeenCalled();
   expect(booking.create).not.toHaveBeenCalled();
