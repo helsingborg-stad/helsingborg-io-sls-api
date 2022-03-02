@@ -242,7 +242,9 @@ function getEncryptionAttributes(vivaPerson) {
 
   const encryptionAttributes = {
     type: 'decrypted',
-    symmetricKeyName: `${mainApplicantPersonalNumber}:${casePersonCoApplicant.personalNumber}`,
+    symmetricKeyName: `${mainApplicantPersonalNumber}:${
+      casePersonCoApplicant.personalNumber
+    }:${uuid.v4()}`,
     primes: {
       P: 43,
       G: 10,
