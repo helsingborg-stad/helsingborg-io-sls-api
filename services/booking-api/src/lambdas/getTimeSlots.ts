@@ -10,13 +10,37 @@ import booking from '../helpers/booking';
 
 dayjs.extend(utc);
 
-export async function main(event: { body: string }) {
+export async function main(event: {
+  queryStringParameters: {
+    startTime: string;
+    endTime: string;
+    attendees: string;
+    meetingDuration?: number;
+    meetingBuffer?: number;
+  };
+}) {
   console.log('EVENT: ', JSON.stringify(event, undefined));
-  const body = JSON.parse(event.body);
 
-  const { startTime, endTime, attendees = [], meetingDuration = 60, meetingBuffer = 15 } = body;
+  const {
+    startTime,
+    endTime,
+    meetingDuration = 60,
+    meetingBuffer = 15,
+    attendees,
+  } = event.queryStringParameters;
 
-  if (attendees.length === 0 || !startTime || !endTime) {
+  let parsedAttendees: string[] = [];
+
+  try {
+    parsedAttendees = JSON.parse(attendees);
+  } catch {
+    return response.failure({
+      status: 403,
+      message: 'Value for parameter "attendees" is not valid',
+    });
+  }
+
+  if (parsedAttendees.length === 0 || !startTime || !endTime) {
     return response.failure({
       status: 403,
       message: 'Missing one or more required parameters: "attendees", "startTime", "endTime"',
@@ -24,7 +48,7 @@ export async function main(event: { body: string }) {
   }
 
   const getTimeSpansBody = {
-    emails: attendees,
+    emails: parsedAttendees,
     startTime,
     endTime,
     meetingDurationMinutes: meetingDuration + meetingBuffer,

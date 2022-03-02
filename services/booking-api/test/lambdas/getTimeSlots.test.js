@@ -8,8 +8,8 @@ const { getTimeSpans } = jest.mocked(booking);
 const mockAttendee = 'outlook@helsingborg.se';
 const secondMockAttendee = 'outlook_2@helsingborg.se';
 
-const mockBody = {
-  attendees: [mockAttendee, secondMockAttendee],
+const mockQueryStringParameters = {
+  attendees: JSON.stringify([mockAttendee, secondMockAttendee]),
   startTime: '2021-10-26T08:00:00+01:00',
   endTime: '2021-10-26T10:00:00+01:00',
   meetingDuration: 60,
@@ -22,7 +22,7 @@ const mockHeaders = {
 };
 
 const mockEvent = {
-  body: JSON.stringify(mockBody),
+  queryStringParameters: mockQueryStringParameters,
 };
 
 function createLambdaResponse(lambdaResult, statusCode = 200) {
@@ -170,13 +170,13 @@ it('successfully returns available time slots when fetching multiple time spans'
 it('successfully returns available time with another meetingDuration and meetingBuffer', async () => {
   expect.assertions(1);
 
-  const body = {
-    ...mockBody,
+  const queryStringParameters = {
+    ...mockQueryStringParameters,
     meetingDuration: 15,
     meetingBuffer: 5,
   };
   const event = {
-    body: JSON.stringify(body),
+    queryStringParameters,
   };
 
   getTimeSpans.mockResolvedValueOnce({
@@ -220,15 +220,39 @@ it('successfully returns available time with another meetingDuration and meeting
   expect(result).toEqual(expectedResult);
 });
 
+it('returns failure if attendees is malformed in the request', async () => {
+  expect.assertions(1);
+
+  const queryStringParameters = {
+    ...mockQueryStringParameters,
+    attendees: '',
+  };
+  const event = {
+    queryStringParameters,
+  };
+
+  const expectedError = {
+    status: '403',
+    code: '403',
+    message: 'Value for parameter "attendees" is not valid',
+  };
+
+  const expectedResult = createLambdaResponse(expectedError, 403);
+
+  const result = await main(event);
+
+  expect(result).toEqual(expectedResult);
+});
+
 it('returns failure if no attendees is provided in the request', async () => {
   expect.assertions(1);
 
-  const body = {
-    ...mockBody,
-    attendees: [],
+  const queryStringParameters = {
+    ...mockQueryStringParameters,
+    attendees: '[]',
   };
   const event = {
-    body: JSON.stringify(body),
+    queryStringParameters,
   };
 
   const expectedError = {

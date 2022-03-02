@@ -111,6 +111,6 @@ functions:
     events:
       - http:
           path: booking/getTimeSlots
-          method: post
+          method: get
           private: true
           cors: true
