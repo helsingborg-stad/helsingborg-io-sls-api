@@ -1,10 +1,11 @@
-import { BookingBody } from './types';
+import { BookingBody, BookingRequest } from './types';
 
-export default (body: BookingBody) => {
+export default (body: BookingRequest): BookingBody => {
   const {
-    requiredAttendees,
     startTime,
     endTime,
+    organizationRequiredAttendees = [],
+    externalRequiredAttendees = [],
     optionalAttendees = [],
     subject = '',
     location = '',
@@ -13,7 +14,7 @@ export default (body: BookingBody) => {
   } = body;
 
   return {
-    requiredAttendees,
+    requiredAttendees: [...organizationRequiredAttendees, ...externalRequiredAttendees],
     optionalAttendees,
     startTime,
     endTime,
