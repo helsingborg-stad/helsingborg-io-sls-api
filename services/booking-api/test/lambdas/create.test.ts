@@ -17,7 +17,8 @@ const mockedIsTimeSlotTaken = jest.mocked(isTimeslotTaken);
 const mockedAreAllAttendeesAvailable = jest.mocked(areAllAttendeesAvailable);
 
 const mockBody = {
-  requiredAttendees: ['outlook.user@helsingborg.se'],
+  organizationRequiredAttendees: ['outlook.user@helsingborg.se'],
+  externalRequiredAttendees: ['user@test.se'],
   optionalAttendees: [],
   startTime: '2021-05-30T10:00:00',
   endTime: '2021-05-30T11:00:00',
@@ -95,7 +96,16 @@ it('creates a booking successfully', async () => {
   expect(mockedAreAllAttendeesAvailable).toHaveBeenCalled();
   expect(booking.search).toHaveBeenCalled();
   expect(mockedIsTimeSlotTaken).toHaveBeenCalled();
-  expect(booking.create).toHaveBeenCalledWith(mockBody);
+  expect(booking.create).toHaveBeenCalledWith({
+    requiredAttendees: ['outlook.user@helsingborg.se', 'user@test.se'],
+    optionalAttendees: [],
+    startTime: '2021-05-30T10:00:00',
+    endTime: '2021-05-30T11:00:00',
+    subject: 'economy',
+    body: 'htmltext',
+    location: 'secret location',
+    referenceCode: 'code1234',
+  });
   expect(result).toEqual(expectedResult);
 });
 
@@ -129,7 +139,16 @@ it('throws when booking.create fails', async () => {
   expect(mockedAreAllAttendeesAvailable).toHaveBeenCalled();
   expect(booking.search).toHaveBeenCalled();
   expect(mockedIsTimeSlotTaken).toHaveBeenCalled();
-  expect(booking.create).toHaveBeenCalledWith(mockBody);
+  expect(booking.create).toHaveBeenCalledWith({
+    requiredAttendees: ['outlook.user@helsingborg.se', 'user@test.se'],
+    optionalAttendees: [],
+    startTime: '2021-05-30T10:00:00',
+    endTime: '2021-05-30T11:00:00',
+    subject: 'economy',
+    body: 'htmltext',
+    location: 'secret location',
+    referenceCode: 'code1234',
+  });
   expect(result).toEqual(expectedResult);
 });
 
@@ -143,7 +162,7 @@ it('returns error when required parameters does not exists in event', async () =
   });
 
   const errorMessage =
-    'Missing one or more required parameters: "requiredAttendees", "startTime", "endTime"';
+    'Missing one or more required parameters: "organizationRequiredAttendees", "externalRequiredAttendees", "startTime", "endTime"';
 
   const expectedResult = {
     body: JSON.stringify({
