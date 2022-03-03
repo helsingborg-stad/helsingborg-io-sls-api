@@ -58,15 +58,22 @@ export interface BookingError {
   };
 }
 
-export interface BookingBody {
-  requiredAttendees?: string[];
-  startTime?: string;
-  endTime?: string;
+interface Booking {
+  startTime: string;
+  endTime: string;
   optionalAttendees?: string[];
+  referenceCode?: string;
   subject?: string;
   location?: string;
-  referenceCode?: string;
   body?: string;
+}
+
+export interface BookingRequest extends Booking {
+  organizationRequiredAttendees?: string[];
+  externalRequiredAttendees?: string[];
+}
+export interface BookingBody extends Booking {
+  requiredAttendees?: string[];
 }
 
 export interface GetHistoricalAttendeesAttributes {

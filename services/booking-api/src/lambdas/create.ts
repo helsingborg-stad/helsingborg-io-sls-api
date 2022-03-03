@@ -7,16 +7,27 @@ import booking from '../helpers/booking';
 import { isTimeslotTaken } from '../helpers/isTimeslotTaken';
 import { areAllAttendeesAvailable } from '../helpers/timeSpanHelper';
 import getCreateBookingBody from '../helpers/getCreateBookingBody';
+import { BookingRequest } from '../helpers/types';
 
 export async function main(event: { body: string }, { awsRequestId }: { awsRequestId: string }) {
-  const body = JSON.parse(event.body);
-  const { requiredAttendees = [], startTime, endTime } = body;
+  const body: BookingRequest = JSON.parse(event.body);
+  const {
+    organizationRequiredAttendees = [],
+    externalRequiredAttendees = [],
+    startTime,
+    endTime,
+  } = body;
 
   let message = '';
 
-  if (requiredAttendees.length === 0 || !startTime || !endTime) {
+  if (
+    organizationRequiredAttendees.length === 0 ||
+    externalRequiredAttendees.length === 0 ||
+    !startTime ||
+    !endTime
+  ) {
     message =
-      'Missing one or more required parameters: "requiredAttendees", "startTime", "endTime"';
+      'Missing one or more required parameters: "organizationRequiredAttendees", "externalRequiredAttendees", "startTime", "endTime"';
     log.error(message, awsRequestId, 'service-booking-api-create-001');
     return response.failure({
       status: 403,
@@ -34,7 +45,7 @@ export async function main(event: { body: string }, { awsRequestId }: { awsReque
   }
 
   const getTimeSpansBody = {
-    emails: requiredAttendees,
+    emails: organizationRequiredAttendees,
     startTime,
     endTime,
     meetingDurationMinutes: 0,
