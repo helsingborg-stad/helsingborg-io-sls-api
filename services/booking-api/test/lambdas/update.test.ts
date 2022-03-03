@@ -18,7 +18,8 @@ const mockedAreAllAttendeesAvailable = jest.mocked(areAllAttendeesAvailable);
 const mockContext = { awsRequestId: 'xxxxx' };
 const mockBookingId = '1a2bc3';
 const mockBody = {
-  requiredAttendees: ['outlook.user@helsingborg.se'],
+  organizationRequiredAttendees: ['outlook.user@helsingborg.se'],
+  externalRequiredAttendees: ['user@test.se'],
   optionalAttendees: [],
   startTime: '2021-05-30T10:00:00',
   endTime: '2021-05-30T11:00:00',
@@ -103,7 +104,16 @@ it('updates a booking successfully', async () => {
   expect(booking.search).toHaveBeenCalledWith(mockSearchBody);
   expect(mockedIsTimeSlotTaken).toHaveBeenCalledWith(mockSearchResponse.data.data.attributes);
   expect(booking.cancel).toHaveBeenCalledWith(mockBookingId);
-  expect(booking.create).toHaveBeenCalledWith(mockBody);
+  expect(booking.create).toHaveBeenCalledWith({
+    requiredAttendees: ['outlook.user@helsingborg.se', 'user@test.se'],
+    optionalAttendees: [],
+    startTime: '2021-05-30T10:00:00',
+    endTime: '2021-05-30T11:00:00',
+    subject: 'economy',
+    body: 'htmltext',
+    location: 'secret location',
+    referenceCode: 'code1234',
+  });
   expect(result).toEqual(expectedResult);
 });
 
@@ -255,7 +265,7 @@ it('returns error when required parameters does not exists in event', async () =
         status: '403',
         code: '403',
         message:
-          'Missing one or more required parameters: "requiredAttendees", "startTime", "endTime"',
+          'Missing one or more required parameters: "organizationRequiredAttendees", "externalRequiredAttendees", "startTime", "endTime"',
       },
     }),
     headers: mockHeaders,
