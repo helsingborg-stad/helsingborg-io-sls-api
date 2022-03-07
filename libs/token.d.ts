@@ -1,9 +1,13 @@
+export interface Token {
+  personalNumber: string;
+}
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Takes an http event with an jwt authorization header, and returns the decoded info from it. Does not check if the token is valid, that should be handled by an authorizer.
  * @param {*} httpEvent the event passed to the lambda
  */
-export function decodeToken(httpEvent: any): any;
+export function decodeToken(httpEvent: any): Token;
 /**
  * Asynchronously sign a given payload into a JSON Web Token.
  * @param {obj} jsonToSign the payload of the json web token.
