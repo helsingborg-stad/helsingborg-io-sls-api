@@ -22,11 +22,10 @@ const abstractAWSEvent = {
   },
 };
 
-it('Successful Request', async () => {
+test('successful request should return expected structure', async () => {
   const result = await lambda(abstractAWSEvent, abstractAWSContext, abstractLambdaContext);
 
   expect(result.statusCode).toBe(200);
-
   expect(JSON.parse(result.body)).toEqual({
     jsonapi: {
       version: '1.0',
@@ -41,12 +40,12 @@ it('Successful Request', async () => {
   });
 });
 
-it('Event body is missing', async () => {
+test('event body missing should return status 400', async () => {
   const result = await lambda({}, abstractAWSContext, abstractLambdaContext);
   expect(result.statusCode).toBe(400);
 });
 
-it('FileName is missing in request payload', async () => {
+test('fileName missing should return status 400', async () => {
   const result = await lambda(
     {
       body: JSON.stringify({
@@ -56,10 +55,11 @@ it('FileName is missing in request payload', async () => {
     abstractAWSContext,
     abstractLambdaContext
   );
+
   expect(result.statusCode).toBe(400);
 });
 
-it('MimeType is missing in request payload', async () => {
+test('mimeType missing should return 400', async () => {
   const result = await lambda(
     {
       body: JSON.stringify({
@@ -69,10 +69,11 @@ it('MimeType is missing in request payload', async () => {
     abstractAWSContext,
     abstractLambdaContext
   );
+
   expect(result.statusCode).toBe(400);
 });
 
-it('MimeType is unknown in request payload', async () => {
+test('mimeType unknown should return 400', async () => {
   const result = await lambda(
     {
       body: JSON.stringify({
@@ -83,10 +84,11 @@ it('MimeType is unknown in request payload', async () => {
     abstractAWSContext,
     abstractLambdaContext
   );
+
   expect(result.statusCode).toBe(400);
 });
 
-it('FAILED to retreive signed URL', async () => {
+test('failure to retreive signed URL should return 400', async () => {
   const result = await lambda(abstractAWSEvent, abstractAWSContext, {
     ...abstractLambdaContext,
     getSignedUrl: () =>
@@ -94,5 +96,24 @@ it('FAILED to retreive signed URL', async () => {
         status: 400,
       }),
   });
+
   expect(result.statusCode).toBe(400);
+});
+
+test('signed URL is called with the correct parameters', async () => {
+  const getSignedUrl = jest.fn().mockResolvedValue('');
+
+  await lambda(abstractAWSEvent, abstractAWSContext, {
+    ...abstractLambdaContext,
+    getSignedUrl,
+  });
+
+  expect(getSignedUrl).toHaveBeenCalledWith(
+    undefined,
+    expect.anything(),
+    expect.objectContaining({
+      ContentType: 'image/jpeg',
+      Key: 'my:decoded:token/myfile_00000000-0000-0000-0000-000000000000.jpg',
+    })
+  );
 });
