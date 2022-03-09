@@ -2,7 +2,7 @@
 const { InternalServerError } = require('@helsingborg-stad/npm-api-error-handling/src/errors');
 
 import booking from '../../src/helpers/booking';
-import { BookingBody } from '../../src/helpers/types';
+import { CreateBookingRequestBody } from '../../src/helpers/types';
 import params from '../../src/libs/params';
 import * as request from '../../src/libs/request';
 
@@ -102,7 +102,7 @@ test.each([
     });
     call.mockResolvedValueOnce(undefined);
 
-    await bookingRequest(functionCall as BookingBody & string);
+    await bookingRequest(functionCall as CreateBookingRequestBody & string);
 
     expect(request.call).toHaveBeenCalledWith(requestClient, 'post', endpoint, requestCall);
   }
