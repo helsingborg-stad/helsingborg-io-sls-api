@@ -1,17 +1,12 @@
-import { uuid } from 'uuidv4';
-
 type UUIDGenerator = () => string;
 
-export function getUniqueFileName(
-  fileName: string,
-  separator = '_',
-  uuidGenerator: UUIDGenerator = uuid
-) {
+export function getUniqueFileName(fileName: string, separator = '_', uuidGenerator: UUIDGenerator) {
   const lastIndex = fileName.lastIndexOf('.');
+  const uuid = uuidGenerator();
 
   if (-1 === lastIndex) {
-    return `${fileName}${separator}${uuidGenerator()}`;
+    return `${fileName}${separator}${uuid}`;
   }
-  const [name, ext] = [fileName.slice(0, lastIndex), fileName.slice(lastIndex)];
-  return `${name}${separator}${uuidGenerator()}${ext}`;
+  const [name, extension] = [fileName.slice(0, lastIndex), fileName.slice(lastIndex)];
+  return `${name}${separator}${uuid}${extension}`;
 }

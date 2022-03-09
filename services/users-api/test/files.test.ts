@@ -1,14 +1,23 @@
 import { getUniqueFileName } from '../src/helpers/files';
 
-it('Multiple dots only treating the last one as extension', async () => {
-  expect(getUniqueFileName('my.file.jpg', '_', () => 'my:uuid')).toBe('my.file_my:uuid.jpg');
+const uuid = 'my:uuid';
+
+test('when multiple dots exists in a filename, only the last one as extension', () => {
+  const result = getUniqueFileName('my.file.jpg', '_', () => uuid);
+  expect(result).toBe('my.file_my:uuid.jpg');
 });
-it('Handle filename without extension', async () => {
-  expect(getUniqueFileName('myfile', '_', () => 'my:uuid')).toBe('myfile_my:uuid');
+
+test('filename without extension should be formatted properly', () => {
+  const result = getUniqueFileName('myfile', '_', () => uuid);
+  expect(result).toBe('myfile_my:uuid');
 });
-it('Handle comon case name with extension', async () => {
-  expect(getUniqueFileName('myfile.jpg', '_', () => 'my:uuid')).toBe('myfile_my:uuid.jpg');
+
+test('common filename with extension should be formatted properly', () => {
+  const result = getUniqueFileName('myfile.jpg', '_', () => uuid);
+  expect(result).toBe('myfile_my:uuid.jpg');
 });
-it('Handle empty filename', async () => {
-  expect(getUniqueFileName('', '_', () => 'my:uuid')).toBe('_my:uuid');
+
+test('empty filename should be handled gracefully', () => {
+  const result = getUniqueFileName('', '_', () => uuid);
+  expect(result).toBe('_my:uuid');
 });
