@@ -4,6 +4,7 @@ import * as response from '../libs/response';
 import { BadRequestError } from '@helsingborg-stad/npm-api-error-handling';
 import { decodeToken, Token } from '../libs/token';
 import log from '../libs/logs';
+import { uuid } from 'uuidv4';
 import { getUniqueFileName } from '../helpers/files';
 
 export interface UploadAttachmentRequest {
@@ -13,7 +14,7 @@ export interface UploadAttachmentRequest {
 
 export interface LambdaContext {
   decodeToken: (event: AWSEvent) => Token;
-  getUniqueFileName: (name: string) => string;
+  getUniqueFileName: (name: string, separator: string, uuidGenerator: () => string) => string;
   getSignedUrl: (
     bucketName?: string,
     method?: string,
@@ -47,14 +48,14 @@ export async function main(event: AWSEvent, awsContext: AWSContext) {
  */
 export async function lambda(
   event: AWSEvent,
-  awsContext: AWSContext,
+  { awsRequestId = '' }: AWSContext,
   lambdaContext: LambdaContext
 ) {
   const decodedToken = lambdaContext.decodeToken(event);
 
   if (!event?.body) {
     const errorMessage = 'Body data is missing in request';
-    log.error(errorMessage, awsContext.awsRequestId, 'service-users-api-uploadAttachment-000');
+    log.error(errorMessage, awsRequestId, 'service-users-api-uploadAttachment-000');
     return response.failure(new BadRequestError(errorMessage));
   }
 
@@ -63,7 +64,7 @@ export async function lambda(
   if (!fileName) {
     // Check if fileName exsits in event body
     const errorMessage = 'Could not find key "fileName" in request body';
-    log.error(errorMessage, awsContext.awsRequestId, 'service-users-api-uploadAttachment-001');
+    log.error(errorMessage, awsRequestId, 'service-users-api-uploadAttachment-001');
 
     return response.failure(new BadRequestError(errorMessage));
   }
@@ -71,7 +72,7 @@ export async function lambda(
   if (!mime) {
     // Check if mimeType exists in event body.
     const errorMessage = 'Could not find key "mime" in request body';
-    log.error(errorMessage, awsContext.awsRequestId, 'service-users-api-uploadAttachment-002');
+    log.error(errorMessage, awsRequestId, 'service-users-api-uploadAttachment-002');
 
     return response.failure(new BadRequestError());
   }
@@ -79,13 +80,13 @@ export async function lambda(
   if (!allowedMimes.includes(mime)) {
     // Check if passed mimeType is a fileformat that we allow.
     const errorMessage = `The mimeType ${mime} is not allowed`;
-    log.error(errorMessage, awsContext.awsRequestId, 'service-users-api-uploadAttachment-003');
+    log.error(errorMessage, awsRequestId, 'service-users-api-uploadAttachment-003');
 
     return response.failure(new BadRequestError(errorMessage));
   }
 
   // The path to where we want to upload a file in the s3 bucket.
-  const s3FileName = lambdaContext.getUniqueFileName(fileName);
+  const s3FileName = lambdaContext.getUniqueFileName(fileName, '_', uuid);
   const s3Key = `${decodedToken.personalNumber}/${s3FileName}`;
 
   // TODO: Check if we can set a file size limit in these params.
@@ -102,11 +103,7 @@ export async function lambda(
   );
 
   if (error) {
-    log.error(
-      'Get signed url error',
-      awsContext.awsRequestId,
-      'service-users-api-uploadAttachment-003'
-    );
+    log.error('Get signed url error', awsRequestId, 'service-users-api-uploadAttachment-003');
 
     return response.failure(error);
   }
