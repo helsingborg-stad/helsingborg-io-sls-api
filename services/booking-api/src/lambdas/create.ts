@@ -8,15 +8,18 @@ import { isTimeslotTaken } from '../helpers/isTimeslotTaken';
 import { areAllAttendeesAvailable } from '../helpers/timeSpanHelper';
 import getCreateBookingBody from '../helpers/getCreateBookingBody';
 import { BookingRequest } from '../helpers/types';
+import isDefined from '../helpers/isDefined';
 
 export async function main(event: { body: string }, { awsRequestId }: { awsRequestId: string }) {
-  const body: BookingRequest = JSON.parse(event.body);
+  const bookingRequest: BookingRequest = JSON.parse(event.body);
   const {
     organizationRequiredAttendees = [],
     externalRequiredAttendees = [],
     startTime,
     endTime,
-  } = body;
+    remoteMeeting,
+    subject,
+  } = bookingRequest;
 
   let message = '';
 
@@ -24,10 +27,11 @@ export async function main(event: { body: string }, { awsRequestId }: { awsReque
     organizationRequiredAttendees.length === 0 ||
     externalRequiredAttendees.length === 0 ||
     !startTime ||
-    !endTime
+    !endTime ||
+    !isDefined(subject)
   ) {
     message =
-      'Missing one or more required parameters: "organizationRequiredAttendees", "externalRequiredAttendees", "startTime", "endTime"';
+      'Missing one or more required parameters: "organizationRequiredAttendees", "externalRequiredAttendees", "startTime", "endTime", "subject"';
     log.error(message, awsRequestId, 'service-booking-api-create-001');
     return response.failure({
       status: 403,
@@ -86,11 +90,47 @@ export async function main(event: { body: string }, { awsRequestId }: { awsReque
     return response.failure({ message, status: 403 });
   }
 
-  const createBookingBody = getCreateBookingBody(body);
+  if (remoteMeeting) {
+    const [createRemoteMeetingError, createRemoteMeetingResponse] = await to(
+      booking.createRemoteMeeting({
+        attendees: [...organizationRequiredAttendees, ...externalRequiredAttendees],
+        endTime,
+        startTime,
+        subject,
+      })
+    );
+
+    if (createRemoteMeetingError) {
+      message = 'Could not create remote meeting link';
+      log.error(message, awsRequestId, 'service-booking-api-create-006', searchBookingError);
+      return response.failure(createRemoteMeetingError);
+    }
+
+    bookingRequest.body += `
+      <div style="color:#252424; font-family:'Segoe UI','Helvetica Neue',Helvetica,Arial,sans-serif">
+        <div style="margin-top:24px; margin-bottom:20px">
+          <span style="font-size:24px; color:#252424">Microsoft Teams-möte</span>
+        </div>
+        <div style="margin-bottom:20px">
+          <div style="margin-top:0px; margin-bottom:0px; font-weight:bold">
+            <span style="font-size:14px; color:#252424">Jobba på datorn eller mobilappen</span>
+          </div>
+          <a href="${createRemoteMeetingResponse?.data?.data?.attributes.OnlineMeetingUrl}"
+            target="_blank" rel="noreferrer noopener"
+            style="font-size:14px; font-family:'Segoe UI Semibold','Segoe UI','Helvetica Neue',Helvetica,Arial,sans-serif; text-decoration:underline; color:#6264a7">
+            Klicka här för att ansluta till mötet
+          </a>
+        </div>
+      </div>
+    `;
+  }
+
+  const createBookingBody = getCreateBookingBody(bookingRequest);
+
   const [error, createBookingResponse] = await to(booking.create(createBookingBody));
   if (error) {
     message = 'Could not create new booking';
-    log.error(message, awsRequestId, 'service-booking-api-create-006', searchBookingError);
+    log.error(message, awsRequestId, 'service-booking-api-create-007', searchBookingError);
     return response.failure(error);
   }
 

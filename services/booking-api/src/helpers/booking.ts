@@ -10,14 +10,19 @@ import {
   BookingSearchResponse,
   HistoricalAttendeesResponse,
   BookingError,
-  BookingBody,
+  CreateBookingRequestBody,
   GetHistoricalAttendeesResponse,
   GetTimeSpansResponse,
   GetTimeSpansBody,
+  CreateRemoteMeetingRequestBody,
+  CreateRemoteMeetingResponse,
+  SearchBookingRequestBody,
+  HistoricalAttendeesRequestBody,
 } from './types';
 
 const URI_RESOURCE = {
   CREATE: 'booking/create',
+  CREATE_REMOTE_MEETING: 'teamsMeeting/create',
   CANCEL: 'booking/cancel',
   GET: 'booking/get',
   SEARCH: 'booking/search',
@@ -30,8 +35,15 @@ const METHOD = {
   POST: 'post',
 };
 
-function create(body: BookingBody) {
+function create(body: CreateBookingRequestBody) {
   return sendBookingPostRequest<BookingCreateResponse>(URI_RESOURCE.CREATE, body);
+}
+
+function createRemoteMeeting(body: CreateRemoteMeetingRequestBody) {
+  return sendBookingPostRequest<CreateRemoteMeetingResponse>(
+    URI_RESOURCE.CREATE_REMOTE_MEETING,
+    body
+  );
 }
 
 function cancel(bookingId: string) {
@@ -42,11 +54,11 @@ function get(bookingId: string | undefined) {
   return sendBookingPostRequest<BookingCreateResponse>(URI_RESOURCE.GET, { bookingId });
 }
 
-function search(body: BookingBody) {
+function search(body: SearchBookingRequestBody) {
   return sendBookingPostRequest<BookingSearchResponse>(URI_RESOURCE.SEARCH, body);
 }
 
-function getHistoricalAttendees(body: BookingBody) {
+function getHistoricalAttendees(body: HistoricalAttendeesRequestBody) {
   const requestTimeout = process.env.requestTimeout;
   return sendBookingPostRequest<HistoricalAttendeesResponse>(
     URI_RESOURCE.GET_HISTORICAL_ATTENDEES,
@@ -108,4 +120,5 @@ export default {
   getHistoricalAttendees,
   getAdministratorDetails,
   getTimeSpans,
+  createRemoteMeeting,
 };

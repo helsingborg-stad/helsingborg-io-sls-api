@@ -3,7 +3,7 @@ const messages = require('@helsingborg-stad/npm-api-error-handling/assets/errorM
 
 import { main } from '../../src/lambdas/create';
 import booking from '../../src/helpers/booking';
-import { BookingSearchResponse } from '../../src/helpers/types';
+import { BookingRequest, BookingSearchResponse } from '../../src/helpers/types';
 import { isTimeslotTaken } from '../../src/helpers/isTimeslotTaken';
 import { areAllAttendeesAvailable } from '../../src/helpers/timeSpanHelper';
 import { GetTimeSpansResponse } from './../../src/helpers/types';
@@ -12,11 +12,11 @@ jest.mock('../../src/helpers/booking');
 jest.mock('../../src/helpers/isTimeslotTaken');
 jest.mock('../../src/helpers/timeSpanHelper');
 
-const { search, create, getTimeSpans } = jest.mocked(booking);
+const { search, create, getTimeSpans, createRemoteMeeting } = jest.mocked(booking);
 const mockedIsTimeSlotTaken = jest.mocked(isTimeslotTaken);
 const mockedAreAllAttendeesAvailable = jest.mocked(areAllAttendeesAvailable);
 
-const mockBody = {
+const mockBody: BookingRequest = {
   organizationRequiredAttendees: ['outlook.user@helsingborg.se'],
   externalRequiredAttendees: ['user@test.se'],
   optionalAttendees: [],
@@ -26,6 +26,7 @@ const mockBody = {
   body: 'htmltext',
   location: 'secret location',
   referenceCode: 'code1234',
+  remoteMeeting: false,
 };
 const mockContext = {
   awsRequestId: '123',
@@ -109,6 +110,75 @@ it('creates a booking successfully', async () => {
   expect(result).toEqual(expectedResult);
 });
 
+it('includes a meeting link when remoteMeeting is true', async () => {
+  expect.assertions(1);
+
+  const searchResponseData: BookingSearchResponse['data'] = {
+    data: {
+      attributes: [
+        {
+          BookingId: '123456789',
+          Attendees: [
+            {
+              Type: 'Required',
+              Status: 'Declined',
+            },
+          ],
+        },
+      ],
+    },
+  };
+  const responseData = {
+    jsonapi: { version: '1.0' },
+    data: {
+      attributes: {
+        BookingId: '123456789',
+      },
+    },
+  };
+  const remoteMeetingResponseData = {
+    jsonapi: { version: '1.0' },
+    data: {
+      attributes: {
+        Id: 'string',
+        Subject: 'string',
+        OnlineMeetingUrl: 'remote.meeting.link',
+      },
+    },
+  };
+
+  getTimeSpans.mockResolvedValueOnce(getTimeSpansResponse);
+  mockedAreAllAttendeesAvailable.mockReturnValueOnce(true);
+  search.mockResolvedValueOnce({ data: searchResponseData });
+  mockedIsTimeSlotTaken.mockReturnValueOnce(false);
+  createRemoteMeeting.mockResolvedValueOnce({ data: remoteMeetingResponseData });
+  create.mockResolvedValueOnce({ data: responseData });
+
+  await main({ body: JSON.stringify({ ...mockBody, remoteMeeting: true }) }, mockContext);
+
+  expect(booking.create).toHaveBeenCalledWith(
+    expect.objectContaining({
+      body: expect.stringContaining(`htmltext
+      <div style="color:#252424; font-family:'Segoe UI','Helvetica Neue',Helvetica,Arial,sans-serif">
+        <div style="margin-top:24px; margin-bottom:20px">
+          <span style="font-size:24px; color:#252424">Microsoft Teams-möte</span>
+        </div>
+        <div style="margin-bottom:20px">
+          <div style="margin-top:0px; margin-bottom:0px; font-weight:bold">
+            <span style="font-size:14px; color:#252424">Jobba på datorn eller mobilappen</span>
+          </div>
+          <a href="remote.meeting.link"
+            target="_blank" rel="noreferrer noopener"
+            style="font-size:14px; font-family:'Segoe UI Semibold','Segoe UI','Helvetica Neue',Helvetica,Arial,sans-serif; text-decoration:underline; color:#6264a7">
+            Klicka här för att ansluta till mötet
+          </a>
+        </div>
+      </div>
+    `),
+    })
+  );
+});
+
 it('throws when booking.create fails', async () => {
   expect.assertions(6);
 
@@ -162,7 +232,7 @@ it('returns error when required parameters does not exists in event', async () =
   });
 
   const errorMessage =
-    'Missing one or more required parameters: "organizationRequiredAttendees", "externalRequiredAttendees", "startTime", "endTime"';
+    'Missing one or more required parameters: "organizationRequiredAttendees", "externalRequiredAttendees", "startTime", "endTime", "subject"';
 
   const expectedResult = {
     body: JSON.stringify({

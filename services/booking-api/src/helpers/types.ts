@@ -57,23 +57,58 @@ export interface BookingError {
     statusText: string;
   };
 }
-
-interface Booking {
+export interface BookingRequest {
+  organizationRequiredAttendees: string[];
+  externalRequiredAttendees: string[];
   startTime: string;
   endTime: string;
+  subject: string;
+  body: string;
   optionalAttendees?: string[];
   referenceCode?: string;
-  subject?: string;
   location?: string;
-  body?: string;
+  remoteMeeting?: boolean;
 }
 
-export interface BookingRequest extends Booking {
-  organizationRequiredAttendees?: string[];
-  externalRequiredAttendees?: string[];
+export interface CreateBookingRequestBody {
+  requiredAttendees: string[];
+  startTime: string;
+  endTime: string;
+  optionalAttendees: string[];
+  referenceCode: string;
+  subject: string;
+  location: string;
+  body: string;
 }
-export interface BookingBody extends Booking {
-  requiredAttendees?: string[];
+
+export interface SearchBookingRequestBody {
+  startTime: string;
+  endTime: string;
+}
+
+export interface HistoricalAttendeesRequestBody {
+  startTime: string;
+  endTime: string;
+  referenceCode: string;
+}
+
+export interface CreateRemoteMeetingRequestBody {
+  attendees: string[];
+  subject?: string;
+  startTime: string;
+  endTime: string;
+}
+
+export interface CreateRemoteMeetingResponse {
+  data?: {
+    data?: {
+      attributes: {
+        Id: string;
+        Subject: string;
+        OnlineMeetingUrl: string;
+      };
+    };
+  };
 }
 
 export interface GetHistoricalAttendeesAttributes {
