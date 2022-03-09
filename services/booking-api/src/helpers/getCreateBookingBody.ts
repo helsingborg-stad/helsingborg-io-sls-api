@@ -1,17 +1,17 @@
-import { BookingBody, BookingRequest } from './types';
+import { CreateBookingRequestBody, BookingRequest } from './types';
 
-export default (body: BookingRequest): BookingBody => {
+export default (bookingRequest: BookingRequest): CreateBookingRequestBody => {
   const {
     startTime,
     endTime,
-    organizationRequiredAttendees = [],
-    externalRequiredAttendees = [],
+    organizationRequiredAttendees,
+    externalRequiredAttendees,
+    subject,
+    body,
     optionalAttendees = [],
-    subject = '',
     location = '',
     referenceCode = '',
-    body: calendarBody = '',
-  } = body;
+  } = bookingRequest;
 
   return {
     requiredAttendees: [...organizationRequiredAttendees, ...externalRequiredAttendees],
@@ -21,6 +21,6 @@ export default (body: BookingRequest): BookingBody => {
     subject,
     location,
     referenceCode,
-    body: calendarBody,
+    body,
   };
 };
