@@ -158,23 +158,7 @@ it('includes a meeting link when remoteMeeting is true', async () => {
 
   expect(booking.create).toHaveBeenCalledWith(
     expect.objectContaining({
-      body: expect.stringContaining(`htmltext
-      <div style="color:#252424; font-family:'Segoe UI','Helvetica Neue',Helvetica,Arial,sans-serif">
-        <div style="margin-top:24px; margin-bottom:20px">
-          <span style="font-size:24px; color:#252424">Microsoft Teams-möte</span>
-        </div>
-        <div style="margin-bottom:20px">
-          <div style="margin-top:0px; margin-bottom:0px; font-weight:bold">
-            <span style="font-size:14px; color:#252424">Jobba på datorn eller mobilappen</span>
-          </div>
-          <a href="remote.meeting.link"
-            target="_blank" rel="noreferrer noopener"
-            style="font-size:14px; font-family:'Segoe UI Semibold','Segoe UI','Helvetica Neue',Helvetica,Arial,sans-serif; text-decoration:underline; color:#6264a7">
-            Klicka här för att ansluta till mötet
-          </a>
-        </div>
-      </div>
-    `),
+      body: expect.stringContaining(`href="remote.meeting.link"`),
     })
   );
 });
