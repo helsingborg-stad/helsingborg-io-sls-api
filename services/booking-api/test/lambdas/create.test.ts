@@ -7,6 +7,7 @@ import { BookingRequest, BookingSearchResponse } from '../../src/helpers/types';
 import { isTimeslotTaken } from '../../src/helpers/isTimeslotTaken';
 import { areAllAttendeesAvailable } from '../../src/helpers/timeSpanHelper';
 import { GetTimeSpansResponse } from './../../src/helpers/types';
+import strings from './../../src/helpers/strings';
 
 jest.mock('../../src/helpers/booking');
 jest.mock('../../src/helpers/isTimeslotTaken');
@@ -222,13 +223,14 @@ it('returns error when required parameters does not exists in event', async () =
     body: JSON.stringify({
       jsonapi: { version: '1.0' },
       data: {
-        status: '403',
-        code: '403',
+        status: '400',
+        code: '400',
+        detail: strings.booking.create.missingRequiredParamter,
         message: errorMessage,
       },
     }),
     headers: mockHeaders,
-    statusCode: 403,
+    statusCode: 400,
   };
 
   const result = await main({ body }, mockContext);
@@ -244,13 +246,14 @@ it('returns error when required parameters does not exists in event', async () =
 it('returns failure when timespan does not exist', async () => {
   expect.assertions(6);
 
-  const statusCode = 403;
+  const statusCode = 400;
   const expectedResult = {
     body: JSON.stringify({
       jsonapi: { version: '1.0' },
       data: {
-        status: '403',
-        code: '403',
+        status: '400',
+        code: '400',
+        detail: strings.booking.create.timespanNotExisting,
         message: 'No timeslot exists in the given interval',
       },
     }),
@@ -279,13 +282,14 @@ it('returns error if startTime is in the passed', async () => {
     body: JSON.stringify({
       jsonapi: { version: '1.0' },
       data: {
-        status: '403',
-        code: '403',
+        status: '400',
+        code: '400',
+        detail: strings.booking.create.startTimePassed,
         message: 'Parameter "startTime" cannot be set to a passed value',
       },
     }),
     headers: mockHeaders,
-    statusCode: 403,
+    statusCode: 400,
   };
 
   const result = await main(mockEvent, mockContext);
@@ -317,13 +321,14 @@ it('returns failure when timeslot is already taken', async () => {
     },
   };
 
-  const statusCode = 403;
+  const statusCode = 400;
   const expectedResult = {
     body: JSON.stringify({
       jsonapi: { version: '1.0' },
       data: {
-        status: '403',
-        code: '403',
+        status: '400',
+        code: '400',
+        detail: strings.booking.create.timeslotNotAvailable,
         message: 'Timeslot not available for booking',
       },
     }),
