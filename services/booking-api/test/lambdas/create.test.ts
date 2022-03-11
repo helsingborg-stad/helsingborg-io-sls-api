@@ -3,6 +3,7 @@ const messages = require('@helsingborg-stad/npm-api-error-handling/assets/errorM
 
 import { main } from '../../src/lambdas/create';
 import booking from '../../src/helpers/booking';
+import getMeetingHtmlBody from '../../src/helpers/getMeetingHtmlBody';
 import { BookingRequest, BookingSearchResponse } from '../../src/helpers/types';
 import { isTimeslotTaken } from '../../src/helpers/isTimeslotTaken';
 import { areAllAttendeesAvailable } from '../../src/helpers/timeSpanHelper';
@@ -11,10 +12,12 @@ import { GetTimeSpansResponse } from './../../src/helpers/types';
 jest.mock('../../src/helpers/booking');
 jest.mock('../../src/helpers/isTimeslotTaken');
 jest.mock('../../src/helpers/timeSpanHelper');
+jest.mock('../../src/helpers/getMeetingHtmlBody');
 
 const { search, create, getTimeSpans, createRemoteMeeting } = jest.mocked(booking);
 const mockedIsTimeSlotTaken = jest.mocked(isTimeslotTaken);
 const mockedAreAllAttendeesAvailable = jest.mocked(areAllAttendeesAvailable);
+const mockedGetMeetingHtmlBody = jest.mocked(getMeetingHtmlBody);
 
 const mockBody: BookingRequest = {
   organizationRequiredAttendees: ['outlook.user@helsingborg.se'],
@@ -23,10 +26,15 @@ const mockBody: BookingRequest = {
   startTime: '2021-05-30T10:00:00',
   endTime: '2021-05-30T11:00:00',
   subject: 'economy',
-  body: 'htmltext',
   location: 'secret location',
   referenceCode: 'code1234',
   remoteMeeting: false,
+  formData: {
+    firstname: {
+      value: 'Test',
+      name: 'Förnamn',
+    },
+  },
 };
 const mockContext = {
   awsRequestId: '123',
@@ -54,7 +62,7 @@ beforeEach(() => {
 });
 
 it('creates a booking successfully', async () => {
-  expect.assertions(6);
+  expect.assertions(7);
 
   const searchResponseData: BookingSearchResponse['data'] = {
     data: {
@@ -89,6 +97,7 @@ it('creates a booking successfully', async () => {
   mockedAreAllAttendeesAvailable.mockReturnValueOnce(true);
   search.mockResolvedValueOnce({ data: searchResponseData });
   mockedIsTimeSlotTaken.mockReturnValueOnce(false);
+  mockedGetMeetingHtmlBody.mockReturnValueOnce('html');
   create.mockResolvedValueOnce({ data: responseData });
 
   const result = await main(mockEvent, mockContext);
@@ -97,20 +106,26 @@ it('creates a booking successfully', async () => {
   expect(mockedAreAllAttendeesAvailable).toHaveBeenCalled();
   expect(booking.search).toHaveBeenCalled();
   expect(mockedIsTimeSlotTaken).toHaveBeenCalled();
+  expect(mockedGetMeetingHtmlBody).toHaveBeenCalledWith(
+    {
+      firstname: { name: 'Förnamn', value: 'Test' },
+    },
+    undefined
+  );
   expect(booking.create).toHaveBeenCalledWith({
     requiredAttendees: ['outlook.user@helsingborg.se', 'user@test.se'],
     optionalAttendees: [],
     startTime: '2021-05-30T10:00:00',
     endTime: '2021-05-30T11:00:00',
     subject: 'economy',
-    body: 'htmltext',
+    body: 'html',
     location: 'secret location',
     referenceCode: 'code1234',
   });
   expect(result).toEqual(expectedResult);
 });
 
-it('includes a meeting link when remoteMeeting is true', async () => {
+it('calls "getMeetingHtmlBody" with a meeting link when remoteMeeting is true', async () => {
   expect.assertions(1);
 
   const searchResponseData: BookingSearchResponse['data'] = {
@@ -156,10 +171,11 @@ it('includes a meeting link when remoteMeeting is true', async () => {
 
   await main({ body: JSON.stringify({ ...mockBody, remoteMeeting: true }) }, mockContext);
 
-  expect(booking.create).toHaveBeenCalledWith(
-    expect.objectContaining({
-      body: expect.stringContaining(`href="remote.meeting.link"`),
-    })
+  expect(mockedGetMeetingHtmlBody).toHaveBeenCalledWith(
+    {
+      firstname: { name: 'Förnamn', value: 'Test' },
+    },
+    'remote.meeting.link'
   );
 });
 
@@ -185,6 +201,7 @@ it('throws when booking.create fails', async () => {
   mockedAreAllAttendeesAvailable.mockReturnValueOnce(true);
   search.mockResolvedValueOnce({ data: { data: { attributes: [] } } });
   mockedIsTimeSlotTaken.mockReturnValueOnce(false);
+  mockedGetMeetingHtmlBody.mockReturnValueOnce('html');
   create.mockRejectedValueOnce({ status: statusCode, message });
 
   const result = await main(mockEvent, mockContext);
@@ -199,7 +216,7 @@ it('throws when booking.create fails', async () => {
     startTime: '2021-05-30T10:00:00',
     endTime: '2021-05-30T11:00:00',
     subject: 'economy',
-    body: 'htmltext',
+    body: 'html',
     location: 'secret location',
     referenceCode: 'code1234',
   });

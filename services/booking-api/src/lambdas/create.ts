@@ -9,6 +9,7 @@ import { areAllAttendeesAvailable } from '../helpers/timeSpanHelper';
 import getCreateBookingBody from '../helpers/getCreateBookingBody';
 import { BookingRequest } from '../helpers/types';
 import isDefined from '../helpers/isDefined';
+import getMeetingHtmlBody from '../helpers/getMeetingHtmlBody';
 
 export async function main(event: { body: string }, { awsRequestId }: { awsRequestId: string }) {
   const bookingRequest: BookingRequest = JSON.parse(event.body);
@@ -22,6 +23,7 @@ export async function main(event: { body: string }, { awsRequestId }: { awsReque
   } = bookingRequest;
 
   let message = '';
+  let remoteMeetingLink: string | undefined;
 
   if (
     organizationRequiredAttendees.length === 0 ||
@@ -102,30 +104,15 @@ export async function main(event: { body: string }, { awsRequestId }: { awsReque
 
     if (createRemoteMeetingError) {
       message = 'Could not create remote meeting link';
-      log.error(message, awsRequestId, 'service-booking-api-create-006', searchBookingError);
+      log.error(message, awsRequestId, 'service-booking-api-create-006', createRemoteMeetingError);
       return response.failure(createRemoteMeetingError);
     }
 
-    bookingRequest.body += `
-      <div style="color:#252424; font-family:'Segoe UI','Helvetica Neue',Helvetica,Arial,sans-serif">
-        <div style="margin-top:24px; margin-bottom:20px">
-          <span style="font-size:24px; color:#252424">Microsoft Teams-möte</span>
-        </div>
-        <div style="margin-bottom:20px">
-          <div style="margin-top:0px; margin-bottom:0px; font-weight:bold">
-            <span style="font-size:14px; color:#252424">Jobba på datorn eller mobilappen</span>
-          </div>
-          <a href="${createRemoteMeetingResponse?.data?.data?.attributes.OnlineMeetingUrl}"
-            target="_blank" rel="noreferrer noopener"
-            style="font-size:14px; font-family:'Segoe UI Semibold','Segoe UI','Helvetica Neue',Helvetica,Arial,sans-serif; text-decoration:underline; color:#6264a7">
-            Klicka här för att ansluta till mötet
-          </a>
-        </div>
-      </div>
-    `;
+    remoteMeetingLink = createRemoteMeetingResponse?.data?.data?.attributes.OnlineMeetingUrl;
   }
 
-  const createBookingBody = getCreateBookingBody(bookingRequest);
+  const bookingHtmlBody = getMeetingHtmlBody(bookingRequest.formData, remoteMeetingLink);
+  const createBookingBody = getCreateBookingBody(bookingRequest, bookingHtmlBody);
 
   const [error, createBookingResponse] = await to(booking.create(createBookingBody));
   if (error) {
