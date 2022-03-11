@@ -9,6 +9,7 @@ import { areAllAttendeesAvailable } from '../helpers/timeSpanHelper';
 import getCreateBookingBody from '../helpers/getCreateBookingBody';
 import { BookingRequest } from '../helpers/types';
 import isDefined from '../helpers/isDefined';
+import strings from '../helpers/strings';
 
 export async function main(event: { body: string }, { awsRequestId }: { awsRequestId: string }) {
   const bookingRequest: BookingRequest = JSON.parse(event.body);
@@ -34,8 +35,9 @@ export async function main(event: { body: string }, { awsRequestId }: { awsReque
       'Missing one or more required parameters: "organizationRequiredAttendees", "externalRequiredAttendees", "startTime", "endTime", "subject"';
     log.error(message, awsRequestId, 'service-booking-api-create-001');
     return response.failure({
-      status: 403,
+      status: 400,
       message,
+      detail: strings.booking.create.missingRequiredParamter,
     });
   }
 
@@ -43,8 +45,9 @@ export async function main(event: { body: string }, { awsRequestId }: { awsReque
 
   if (systemTime > new Date(startTime)) {
     return response.failure({
-      status: 403,
+      status: 400,
       message: 'Parameter "startTime" cannot be set to a passed value',
+      detail: strings.booking.create.startTimePassed,
     });
   }
 
@@ -59,7 +62,7 @@ export async function main(event: { body: string }, { awsRequestId }: { awsReque
   if (getTimeSpansError || !timeSpanData) {
     message = `Error finding timeSpan ${startTime} - ${endTime}`;
     log.error(message, awsRequestId, 'service-booking-api-create-002', getTimeSpansError);
-    return response.failure(getTimeSpansError);
+    return response.failure({ status: 400, message });
   }
 
   const timeSpansExist = Object.values(timeSpanData).flat().length > 0;
@@ -69,7 +72,11 @@ export async function main(event: { body: string }, { awsRequestId }: { awsReque
   if (!timeSpansExist || !timeValid) {
     message = 'No timeslot exists in the given interval';
     log.error(message, awsRequestId, 'service-booking-api-create-003');
-    return response.failure({ message, status: 403 });
+    return response.failure({
+      status: 400,
+      message,
+      detail: strings.booking.create.timespanNotExisting,
+    });
   }
 
   const searchBookingBody = { startTime, endTime };
@@ -87,7 +94,11 @@ export async function main(event: { body: string }, { awsRequestId }: { awsReque
   if (bookingExist && timeslotTaken) {
     message = 'Timeslot not available for booking';
     log.error(message, awsRequestId, 'service-booking-api-create-005', searchBookingError);
-    return response.failure({ message, status: 403 });
+    return response.failure({
+      status: 400,
+      message,
+      detail: strings.booking.create.timeslotNotAvailable,
+    });
   }
 
   if (remoteMeeting) {
