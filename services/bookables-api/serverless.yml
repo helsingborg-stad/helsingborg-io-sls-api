@@ -47,7 +47,6 @@ functions:
       - http:
           path: bookables
           method: get
-          private: true
           cors: true
 
   getAdministratorsByEmail:
@@ -56,5 +55,4 @@ functions:
       - http:
           path: bookables/getAdministratorsByEmail/{email}
           method: get
-          private: true
           cors: true
