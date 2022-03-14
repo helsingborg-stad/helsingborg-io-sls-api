@@ -57,17 +57,20 @@ export interface BookingError {
     statusText: string;
   };
 }
+
+export type FormData = Record<string, { value: string | boolean; name?: string }>;
+
 export interface BookingRequest {
   organizationRequiredAttendees: string[];
   externalRequiredAttendees: string[];
   startTime: string;
   endTime: string;
   subject: string;
-  body: string;
+  formData: FormData;
+  remoteMeeting: boolean;
   optionalAttendees?: string[];
   referenceCode?: string;
   location?: string;
-  remoteMeeting?: boolean;
 }
 
 export interface CreateBookingRequestBody {

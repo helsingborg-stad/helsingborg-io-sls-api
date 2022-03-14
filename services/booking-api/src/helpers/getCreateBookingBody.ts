@@ -1,18 +1,19 @@
 import { CreateBookingRequestBody, BookingRequest } from './types';
 
-export default (bookingRequest: BookingRequest): CreateBookingRequestBody => {
+export default (
+  bookingRequest: BookingRequest,
+  bookingHtmlBody: string
+): CreateBookingRequestBody => {
   const {
     startTime,
     endTime,
     organizationRequiredAttendees,
     externalRequiredAttendees,
     subject,
-    body,
     optionalAttendees = [],
     location = '',
     referenceCode = '',
   } = bookingRequest;
-
   return {
     requiredAttendees: [...organizationRequiredAttendees, ...externalRequiredAttendees],
     optionalAttendees,
@@ -21,6 +22,6 @@ export default (bookingRequest: BookingRequest): CreateBookingRequestBody => {
     subject,
     location,
     referenceCode,
-    body,
+    body: bookingHtmlBody,
   };
 };
