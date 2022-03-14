@@ -46,7 +46,6 @@ functions:
       - http:
           path: booking
           method: post
-          private: true
           cors: true
 
   cancelBooking:
@@ -103,7 +102,6 @@ functions:
       - http:
           path: booking/getAdministratorDetails/{email}
           method: get
-          private: true
           cors: true
 
   getTimeSlots:
@@ -112,5 +110,4 @@ functions:
       - http:
           path: booking/getTimeSlots
           method: get
-          private: true
           cors: true
