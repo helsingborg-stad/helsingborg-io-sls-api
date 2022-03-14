@@ -8,6 +8,7 @@ import { isTimeslotTaken } from '../helpers/isTimeslotTaken';
 import { areAllAttendeesAvailable } from '../helpers/timeSpanHelper';
 import getCreateBookingBody from '../helpers/getCreateBookingBody';
 import { BookingRequest } from '../helpers/types';
+import getMeetingHtmlBody from '../helpers/getMeetingHtmlBody';
 
 export async function main(
   event: { pathParameters: Record<string, string>; body: string },
@@ -85,7 +86,9 @@ export async function main(
     return response.failure({ message, status: 500 });
   }
 
-  const createBookingBody = getCreateBookingBody(body);
+  const bookingHtmlBody = getMeetingHtmlBody(body.formData);
+  const createBookingBody = getCreateBookingBody(body, bookingHtmlBody);
+
   const [createError, createBookingResponse] = await to(booking.create(createBookingBody));
   if (createError) {
     message = 'Timeslot creation failed';

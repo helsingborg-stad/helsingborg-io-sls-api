@@ -5,7 +5,7 @@ import { main } from '../../src/lambdas/update';
 import booking from '../../src/helpers/booking';
 import { isTimeslotTaken } from '../../src/helpers/isTimeslotTaken';
 import { areAllAttendeesAvailable } from '../../src/helpers/timeSpanHelper';
-import { GetTimeSpansResponse } from '../../src/helpers/types';
+import { GetTimeSpansResponse, BookingRequest } from '../../src/helpers/types';
 
 jest.mock('../../src/helpers/booking');
 jest.mock('../../src/helpers/isTimeslotTaken');
@@ -17,16 +17,22 @@ const mockedAreAllAttendeesAvailable = jest.mocked(areAllAttendeesAvailable);
 
 const mockContext = { awsRequestId: 'xxxxx' };
 const mockBookingId = '1a2bc3';
-const mockBody = {
+const mockBody: BookingRequest = {
   organizationRequiredAttendees: ['outlook.user@helsingborg.se'],
   externalRequiredAttendees: ['user@test.se'],
   optionalAttendees: [],
   startTime: '2021-05-30T10:00:00',
   endTime: '2021-05-30T11:00:00',
   subject: 'economy',
-  body: 'htmltext',
   location: 'secret location',
   referenceCode: 'code1234',
+  remoteMeeting: false,
+  formData: {
+    firstname: {
+      value: 'Test',
+      name: 'Förnamn',
+    },
+  },
 };
 const mockSearchBody = {
   startTime: mockBody.startTime,
@@ -110,7 +116,7 @@ it('updates a booking successfully', async () => {
     startTime: '2021-05-30T10:00:00',
     endTime: '2021-05-30T11:00:00',
     subject: 'economy',
-    body: 'htmltext',
+    body: expect.stringContaining('<p>Förnamn: Test</p>'),
     location: 'secret location',
     referenceCode: 'code1234',
   });
