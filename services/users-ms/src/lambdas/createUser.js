@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import to from 'await-to-js';
 
-import uuid from 'uuid';
+import { v1 as uuid } from 'uuid';
 import config from '../libs/config';
 import * as dynamoDb from '../libs/dynamoDb';
 
@@ -48,7 +48,7 @@ async function putUserRequest(userDetail) {
   const params = {
     TableName: config.users.tableName,
     Item: {
-      uuid: uuid.v1(),
+      uuid: uuid(),
       createdAt: Date.now(),
       email: null,
       mobilePhone: null,

@@ -4,7 +4,7 @@ import * as response from '../libs/response';
 import { BadRequestError } from '@helsingborg-stad/npm-api-error-handling';
 import { decodeToken, Token } from '../libs/token';
 import log from '../libs/logs';
-import { uuid } from 'uuidv4';
+import { v4 as uuid } from 'uuid';
 import { getUniqueFileName } from '../helpers/files';
 
 export interface UploadAttachmentRequest {

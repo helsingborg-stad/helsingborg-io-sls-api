@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import to from 'await-to-js';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 import config from '../libs/config';
 
@@ -114,7 +114,7 @@ async function createRecurringVivaCase(vivaPerson, user) {
     String(vivaPerson.case.client.pnumber)
   );
 
-  const id = uuid.v4();
+  const id = uuid();
   const PK = `USER#${applicantPersonalNumber}`;
   const SK = `CASE#${id}`;
   const timestampNow = Date.now();
@@ -244,7 +244,7 @@ function getEncryptionAttributes(vivaPerson) {
     type: 'decrypted',
     symmetricKeyName: `${mainApplicantPersonalNumber}:${
       casePersonCoApplicant.personalNumber
-    }:${uuid.v4()}`,
+    }:${uuid()}`,
     primes: {
       P: 43,
       G: 10,

@@ -1,6 +1,6 @@
 import chromium from 'chrome-aws-lambda';
 import to from 'await-to-js';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 import { s3Client } from '../libs/S3';
 import { putEvent } from '../libs/awsEventBridge';
@@ -33,7 +33,7 @@ export async function main(event) {
     console.error(htmlToPdfError);
     return false;
   }
-  const pdfId = uuid.v4();
+  const pdfId = uuid();
   const pdfBucketKey = `pdf/${pdfId}.pdf`;
   const [putPdfError, pdfOutputObject] = await to(
     s3Client

@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import to from 'await-to-js';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 import config from '../libs/config';
 import * as dynamoDb from '../libs/dynamoDb';
@@ -40,7 +40,7 @@ export async function main(event, context) {
   const { statusType, currentFormId, provider, details, forms: initialForms } = validatedEventBody;
   const { personalNumber } = decodedToken;
 
-  const id = uuid.v4();
+  const id = uuid();
 
   const PK = `USER#${personalNumber}`;
   const SK = `CASE#${id}`;

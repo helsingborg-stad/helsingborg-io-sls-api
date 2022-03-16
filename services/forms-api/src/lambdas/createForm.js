@@ -1,5 +1,5 @@
 import to from 'await-to-js';
-import uuid from 'uuid';
+import { v1 as uuid } from 'uuid';
 
 import { buildResponse } from '../libs/response';
 import config from '../libs/config';
@@ -29,7 +29,7 @@ export async function main(event, context) {
     });
   }
 
-  const formId = uuid.v1();
+  const formId = uuid();
   const formPartitionKey = `FORM#${formId}`;
   const Item = {
     id: formId,
