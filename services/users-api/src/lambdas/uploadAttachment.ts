@@ -4,7 +4,7 @@ import * as response from '../libs/response';
 import { BadRequestError } from '@helsingborg-stad/npm-api-error-handling';
 import { decodeToken, Token } from '../libs/token';
 import log from '../libs/logs';
-import { uuid } from 'uuidv4';
+import uuid from 'uuid';
 import { getUniqueFileName } from '../helpers/files';
 
 export interface UploadAttachmentRequest {
@@ -86,7 +86,7 @@ export async function lambda(
   }
 
   // The path to where we want to upload a file in the s3 bucket.
-  const s3FileName = lambdaContext.getUniqueFileName(fileName, '_', uuid);
+  const s3FileName = lambdaContext.getUniqueFileName(fileName, '_', uuid.v4);
   const s3Key = `${decodedToken.personalNumber}/${s3FileName}`;
 
   // TODO: Check if we can set a file size limit in these params.
