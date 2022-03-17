@@ -1,4 +1,4 @@
-export interface BankIdParams {
+export interface BankIdSSMParams {
   bucketName: string;
   passphrase: string;
   caName: string;
