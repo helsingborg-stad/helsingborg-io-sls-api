@@ -174,7 +174,7 @@ async function generateToken(
     secrets.get(secretConfig.name, secretConfig.keyName)
   );
   if (getSecretError) {
-    throwError(getSecretError.code, getSecretError.message);
+    throwError(Number(getSecretError.code), getSecretError.message);
   }
 
   const [signTokenError, token] = await to(
@@ -192,7 +192,7 @@ async function validateToken(secretConfig: SecretsConfig, token: string): Promis
     secrets.get(secretConfig.name, secretConfig.keyName)
   );
   if (getSecretError) {
-    throwError(getSecretError.code, getSecretError.message);
+    throwError(Number(getSecretError.code), getSecretError.message);
   }
   const [verifyTokenError, verifiedToken] = await to<JWTToken, SDKError>(
     verifyToken(token, secret ?? '')
