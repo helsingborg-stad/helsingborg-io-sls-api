@@ -41,6 +41,7 @@ provider:
 
 functions:
   createBooking:
+    timeout: 15
     handler: src/lambdas/create.main
     events:
       - http:
