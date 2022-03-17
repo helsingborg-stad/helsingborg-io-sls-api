@@ -1,12 +1,17 @@
-import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import to from 'await-to-js';
+
+import { AxiosInstance, AxiosError } from 'axios';
+import { InternalServerError } from '@helsingborg-stad/npm-api-error-handling';
+
 import config from '../libs/config';
 import params from '../libs/params';
+import log from '../libs/logs';
+
 import * as request from '../libs/request';
 import * as response from '../libs/response';
+
 import * as bankId from '../helpers/bankId';
-import log from '../libs/logs';
-import { BankIdError, BankIdParams } from 'helpers/types';
+import { BankIdSSMParams } from '../helpers/types';
 
 const SSMParams = params.read(config.bankId.envsKeyName);
 
@@ -18,44 +23,42 @@ interface BankIdCancelResponse {
   data?: Record<string, never>;
 }
 
-export const main = async (event: { body: string }, context: { awsRequestId: string }) => {
+export async function main(event: { body: string }, context: { awsRequestId: string }) {
   const { orderRef } = JSON.parse(event.body);
-  const bankIdSSMparams = await SSMParams;
 
-  const payload = { orderRef };
-
-  const [error, bankIdCancelResponse] = await to(sendBankIdCancelRequest(bankIdSSMparams, payload));
-
-  if (!bankIdCancelResponse) {
+  const [bankIdCancelError, bankIdCancelResponse] = await to(sendBankIdCancelRequest({ orderRef }));
+  if (bankIdCancelError) {
     log.error(
       'Bank Id Cancel response error',
       context.awsRequestId,
       'service-bankid-api-cancel-001',
-      error ?? {}
+      bankIdCancelError ?? {}
     );
-
-    return response.failure(error);
+    return response.failure(new InternalServerError(String(bankIdCancelError)));
   }
-
-  const attributes = bankIdCancelResponse.data ? bankIdCancelResponse.data : {};
 
   return response.success(200, {
     type: 'bankidCancel',
-    attributes,
+    attributes: bankIdCancelResponse?.data,
   });
-};
+}
 
-async function sendBankIdCancelRequest(
-  params: BankIdParams,
-  payload: BankIdCancelLambdaRequest
-): Promise<BankIdCancelResponse | undefined> {
-  const [, bankIdClientResponse] = await to(bankId.client(params));
-  if (!bankIdClientResponse) throwError(503);
+async function sendBankIdCancelRequest(payload: BankIdCancelLambdaRequest) {
+  const bankIdSSMparams: BankIdSSMParams = await SSMParams;
 
-  const [error, bankIdCancelResponse] = await to<BankIdCancelResponse, BankIdError>(
-    request.call(bankIdClientResponse, 'post', bankId.url(params.apiUrl, '/cancel'), payload)
+  const [axiosError, bankIdClient] = await to<AxiosInstance, AxiosError>(
+    bankId.client(bankIdSSMparams)
   );
-  if (!bankIdCancelResponse) throwError(error?.response.status, error?.response.data?.details);
+  if (axiosError) {
+    throw axiosError;
+  }
 
-  return bankIdCancelResponse;
+  const [cancelError, cancelResponse] = await to<BankIdCancelResponse>(
+    request.call(bankIdClient, 'post', bankId.url(bankIdSSMparams.apiUrl, '/cancel'), payload)
+  );
+  if (cancelError) {
+    throw cancelError;
+  }
+
+  return cancelResponse;
 }
