@@ -7,7 +7,8 @@
       "name": "Launch file",
       "skipFiles": ["<node_internals>/**"],
       "program": "${file}",
-      "envFile": "${workspaceFolder}/.env"
+      "envFile": "${workspaceFolder}/.env",
+      "outputCapture": "std"
     }
   ]
 }
