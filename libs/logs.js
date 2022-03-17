@@ -7,6 +7,8 @@ const logger = winston.createLogger({
   exitOnError: false,
 });
 
+let requestId;
+
 const log = {
   log: (level, message, requestId, errorCode, customData = {}) => {
     logger.log(level, message, {
@@ -34,6 +36,59 @@ const log = {
 
   debug: (message, requestId, errorCode, customData = {}) => {
     log.log('debug', message, requestId, errorCode, customData);
+  },
+
+  initialize: (event, context) => {
+    requestId = context.awsRequestId;
+    logger.log('info', 'Lambda initialize', {
+      requestId,
+      customData: {
+        source: event.source,
+        detailType: event['detail-type'],
+        path: event.path,
+        method: event.httpMethod,
+        pathParameters: event.pathParameters,
+        queryStringParameters: event.queryStringParameters,
+      },
+    });
+  },
+
+  finalize: (response, error) => {
+    logger.log('info', 'Lambda finalize', {
+      requestId,
+      customData: {
+        statusCode: response?.statusCode ?? 0,
+        error,
+      },
+    });
+  },
+
+  wrap: lambda => {
+    return (event, context, callback) => {
+      log.initialize(event, context);
+
+      const executor = lambda(event, context, (error, response) => {
+        log.finalize(response, error);
+        callback(error, response);
+      });
+
+      if (!(executor instanceof Promise)) {
+        return undefined;
+      }
+
+      const promise = new Promise((resolve, reject) => {
+        executor
+          .then(response => {
+            log.finalize(response);
+            resolve(response);
+          })
+          .catch(error => {
+            log.finalize(null, error);
+            reject(error);
+          });
+      });
+      return promise;
+    };
   },
 };
 

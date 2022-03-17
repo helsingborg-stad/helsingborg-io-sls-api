@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export default log;
+
+type LambdaHandler = (event: any, context: any, callback?: any) => Promise<any>;
 declare namespace log {
   function log(level: any, message: any, requestId: any, errorCode: any, customData?: any): void;
   function error(message: any, requestId: any, errorCode: any, customData?: any): void;
@@ -7,4 +9,5 @@ declare namespace log {
   function info(message: any, requestId: any, errorCode: any, customData?: any): void;
   function verbose(message: any, requestId: any, errorCode: any, customData?: any): void;
   function debug(message: any, requestId: any, errorCode: any, customData?: any): void;
+  function wrap(lambdaHandler: LambdaHandler): LambdaHandler;
 }
