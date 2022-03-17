@@ -1,18 +1,24 @@
-/* eslint-disable no-console */
-import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import to from 'await-to-js';
+
+import { AxiosInstance, AxiosError } from 'axios';
+import { throwError, InternalServerError } from '@helsingborg-stad/npm-api-error-handling';
+
 import config from '../libs/config';
-import { putEvent } from '../libs/awsEventBridge';
 import params from '../libs/params';
+import log from '../libs/logs';
+import secrets from '../libs/secrets';
+
 import * as request from '../libs/request';
 import * as response from '../libs/response';
-import * as bankId from '../helpers/bankId';
-import secrets from '../libs/secrets';
+
+import { putEvent } from '../libs/awsEventBridge';
 import { signToken } from '../libs/token';
-import log from '../libs/logs';
-import { BankIdError, BankIdParams } from 'helpers/types';
+
+import * as bankId from '../helpers/bankId';
+import { BankIdError, BankIdSSMParams } from '../helpers/types';
 
 const SSMParams = params.read(config.bankId.envsKeyName);
+
 const CONFIG_AUTH_SECRETS_AUTHORIZATION_CODE = config.auth.secrets.authorizationCode;
 
 interface BankIdCollectLambdaRequest {
@@ -30,24 +36,16 @@ interface BankIdCollectResponse {
   };
 }
 
-export const main = async (
+export async function main(
   event: { body: string; headers: Record<string, string> },
   context: { awsRequestId: string }
-) => {
+) {
   const { body, headers } = event;
   const { orderRef } = JSON.parse(body);
 
-  const bankidSSMParams = await SSMParams;
-
-  console.info('🚀 ~ file: collect.js ~ line 21 ~ headers -> User-Agent', headers['User-Agent']);
-
-  const payload: BankIdCollectLambdaRequest = { orderRef };
-
-  const [bankIdCollectRequestError, bankIdCollectResponse] = await to<
-    BankIdCollectResponse | undefined,
-    BankIdError
-  >(sendBankIdCollectRequest(bankidSSMParams, payload));
-
+  const [bankIdCollectRequestError, bankIdCollectResponse] = await to(
+    sendBankIdCollectRequest({ orderRef })
+  );
   if (bankIdCollectRequestError) {
     log.error(
       'Bank Id Collect request error',
@@ -55,8 +53,8 @@ export const main = async (
       'service-bankid-api-collect-001',
       bankIdCollectRequestError
     );
-
-    return response.failure(bankIdCollectRequestError);
+    response.failure(new InternalServerError(String(bankIdCollectRequestError)));
+    return false;
   }
 
   let responseAttributes = {};
@@ -82,11 +80,9 @@ export const main = async (
     );
 
     const personalNumber = bankIdCollectResponse?.data.completionData.user.personalNumber;
-
     const [generateAuthorizationCodeError, authorizationCode] = await to(
       generateAuthorizationCode(personalNumber ?? '')
     );
-
     if (generateAuthorizationCodeError) {
       log.error(
         'Bank Id Authorization code error',
@@ -104,13 +100,11 @@ export const main = async (
     };
   }
 
-  console.info('🚀 ~ file: collect.js ~ line 70 ~ responseAttributes', responseAttributes);
-
   return response.success(200, {
     type: 'bankIdCollect',
     attributes: responseAttributes,
   });
-};
+}
 
 function isBankidCollectStatusComplete(responseData: BankIdCollectResponse['data'] | undefined) {
   return responseData && responseData.status === 'complete';
@@ -152,22 +146,25 @@ async function generateAuthorizationCode(personalNumber: string) {
   return signedToken;
 }
 
-async function sendBankIdCollectRequest(
-  params: BankIdParams,
-  payload: BankIdCollectLambdaRequest
-): Promise<BankIdCollectResponse | undefined> {
-  const [, bankIdClientResponse] = await to(bankId.client(params));
-  if (!bankIdClientResponse) throwError(503);
+async function sendBankIdCollectRequest(payload: BankIdCollectLambdaRequest) {
+  const bankIdSSMparams: BankIdSSMParams = await SSMParams;
 
-  const [error, bankIdCollectResponse] = await to<BankIdCollectResponse, BankIdError>(
-    request.call(bankIdClientResponse, 'post', bankId.url(params.apiUrl, '/collect'), payload)
+  const [axiosError, bankIdClient] = await to<AxiosInstance, AxiosError>(
+    bankId.client(bankIdSSMparams)
   );
-  if (!bankIdCollectResponse) {
-    if (error?.response.data?.details === 'No such order') {
-      throwError(404, error.response.data.details);
-    }
-    throwError(error?.response.status, error?.response.data?.details);
+  if (axiosError) {
+    throw axiosError;
   }
 
-  return bankIdCollectResponse;
+  const [collectError, collectResponse] = await to<BankIdCollectResponse, BankIdError>(
+    request.call(bankIdClient, 'post', bankId.url(bankIdSSMparams.apiUrl, '/collect'), payload)
+  );
+  if (collectError) {
+    if (collectError?.response.data?.details === 'No such order') {
+      throwError(404, collectError.response.data.details);
+    }
+    throwError(collectError?.response.status, collectError?.response.data?.details || '');
+  }
+
+  return collectResponse;
 }

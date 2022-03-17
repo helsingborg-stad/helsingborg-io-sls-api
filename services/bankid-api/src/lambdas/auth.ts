@@ -1,14 +1,17 @@
-/* eslint-disable no-console */
-import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import to from 'await-to-js';
+
+import { AxiosInstance, AxiosError } from 'axios';
+import { InternalServerError } from '@helsingborg-stad/npm-api-error-handling';
+
 import config from '../libs/config';
 import params from '../libs/params';
+import log from '../libs/logs';
+
 import * as request from '../libs/request';
 import * as response from '../libs/response';
+
 import * as bankId from '../helpers/bankId';
-import log from '../libs/logs';
-import { BankIdError, BankIdParams } from 'helpers/types';
-import { AxiosInstance } from 'axios';
+import { BankIdError, BankIdSSMParams } from '../helpers/types';
 
 const SSMParams = params.read(config.bankId.envsKeyName);
 
@@ -29,54 +32,52 @@ interface BankIdAuthResponse {
   };
 }
 
-export const main = async (event: { body: string }, context: { awsRequestId: string }) => {
+export async function main(event: { body: string }, context: { awsRequestId: string }) {
   const { endUserIp, personalNumber } = JSON.parse(event.body);
-  const bankIdSSMparams = await SSMParams;
-
-  const payload: BankIdAuthLambdaRequest = {
-    endUserIp,
-    personalNumber,
-  };
 
   log.info('Bank Id Auth input', context.awsRequestId, 'service-bankid-api-auth-000', {
     endUserIp,
     personalNumber: personalNumber?.slice(2, 9),
   });
 
-  const [error, bankIdAuthResponse] = await to(sendBankIdAuthRequest(bankIdSSMparams, payload));
-  if (!bankIdAuthResponse) {
+  const payload: BankIdAuthLambdaRequest = {
+    endUserIp,
+    personalNumber,
+  };
+
+  const [sendBankIdAuthError, bankIdAuthResponse] = await to(sendBankIdAuthRequest(payload));
+  if (sendBankIdAuthError) {
     log.error(
       'Bank Id Auth response error',
       context.awsRequestId,
       'service-bankid-api-auth-001',
-      error ?? {}
+      sendBankIdAuthError ?? {}
     );
-
-    return response.failure(error);
+    return response.failure(new InternalServerError(String(sendBankIdAuthError)));
   }
-
-  const attributes = bankIdAuthResponse.data ? bankIdAuthResponse.data : {};
 
   return response.success(200, {
     type: 'bankIdAuth',
-    attributes,
+    attributes: bankIdAuthResponse?.data,
   });
-};
+}
 
-async function sendBankIdAuthRequest(
-  params: BankIdParams,
-  payload: BankIdAuthLambdaRequest
-): Promise<BankIdAuthResponse | undefined> {
-  const [, bankIdClientResponse] = await to<AxiosInstance>(bankId.client(params));
-  if (!bankIdClientResponse) throwError(503);
+async function sendBankIdAuthRequest(payload: BankIdAuthLambdaRequest) {
+  const bankIdSSMparams: BankIdSSMParams = await SSMParams;
 
-  const [authError, bankIdAuthResponse]: [BankIdError | null, BankIdAuthResponse | undefined] =
-    await to<BankIdAuthResponse, BankIdError>(
-      request.call(bankIdClientResponse, 'post', bankId.url(params.apiUrl, '/auth'), payload)
-    );
+  const [axiosError, bankIdClient] = await to<AxiosInstance, AxiosError>(
+    bankId.client(bankIdSSMparams)
+  );
+  if (axiosError) {
+    throw axiosError;
+  }
 
-  if (!bankIdAuthResponse)
-    throwError(authError?.response.status, authError?.response.data?.details);
+  const [authError, authResponse] = await to<BankIdAuthResponse, BankIdError>(
+    request.call(bankIdClient, 'post', bankId.url(bankIdSSMparams.apiUrl, '/auth'), payload)
+  );
+  if (authError) {
+    throw authError;
+  }
 
-  return bankIdAuthResponse;
+  return authResponse;
 }

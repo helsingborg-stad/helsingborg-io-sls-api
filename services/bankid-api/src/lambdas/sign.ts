@@ -1,17 +1,23 @@
-import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import to from 'await-to-js';
+
+import { AxiosInstance, AxiosError } from 'axios';
+import { throwError, InternalServerError } from '@helsingborg-stad/npm-api-error-handling';
+
 import config from '../libs/config';
 import params from '../libs/params';
+import log from '../libs/logs';
+
 import * as request from '../libs/request';
-import { failure, success } from '../libs/response';
+import * as response from '../libs/response';
+
 import { validateEventBody } from '../libs/validateEventBody';
 import { validateKeys } from '../libs/validateKeys';
+
 import * as bankId from '../helpers/bankId';
-import log from '../libs/logs';
-import { BankIdError, BankIdParams } from 'helpers/types';
+import { BankIdError, BankIdSSMParams } from 'helpers/types';
 
 const SSMParams = params.read(config.bankId.envsKeyName);
-let valid = true;
+const valid = true;
 
 interface BankIdSignLambdaRequest {
   endUserIp: string;
@@ -28,12 +34,10 @@ interface BankIdSignResponse {
   };
 }
 
-export const main = async (event: { body: string }, context: { awsRequestId: string }) => {
-  const bankidSSMParams = await SSMParams;
+export async function main(event: { body: string }, context: { awsRequestId: string }) {
   const { endUserIp, personalNumber, userVisibleData } = JSON.parse(event.body);
 
   const [validationError] = await to(validateEventBody(event.body, validateTokenEventBody));
-
   if (validationError && !valid) {
     log.error(
       'Validation error',
@@ -41,8 +45,7 @@ export const main = async (event: { body: string }, context: { awsRequestId: str
       'service-bankid-api-sign-001',
       validationError
     );
-
-    return failure(validationError);
+    return response.failure(new InternalServerError(String(validationError)));
   }
 
   const payload: BankIdSignLambdaRequest = {
@@ -53,52 +56,48 @@ export const main = async (event: { body: string }, context: { awsRequestId: str
       : undefined,
   };
 
-  const [error, bankIdSignResponse] = await to<BankIdSignResponse | undefined, BankIdError>(
-    sendBankIdSignRequest(bankidSSMParams, payload)
-  );
-
-  if (!bankIdSignResponse) {
+  const [bankIdSignError, bankIdSignResponse] = await to(sendBankIdSignRequest(payload));
+  if (bankIdSignError) {
     log.error(
       'Bank Id Sign response error',
       context.awsRequestId,
       'service-bankid-api-sign-002',
-      error ?? {}
+      bankIdSignError ?? {}
     );
-
-    return failure(error);
+    return response.failure(new InternalServerError(String(bankIdSignError)));
   }
-  const attributes = bankIdSignResponse.data ? bankIdSignResponse.data : {};
 
-  return success(200, {
+  return response.success(200, {
     type: 'bankIdSign',
-    attributes,
+    attributes: bankIdSignResponse?.data,
   });
-};
-// Not validating personalNumber as it is an optional Parameter
-function validateTokenEventBody(body: string) {
-  let errorStatusCode, errorMessage;
-  valid = true;
-
-  if (!validateKeys(JSON.parse(body), ['endUserIp', 'userVisibleData'])) {
-    valid = false;
-    errorStatusCode = 400;
-    errorMessage = 'Missing JSON body parameter';
-  }
-
-  return [valid, errorStatusCode, errorMessage];
 }
 
-async function sendBankIdSignRequest(
-  params: BankIdParams,
-  payload: BankIdSignLambdaRequest
-): Promise<BankIdSignResponse | undefined> {
-  const [, bankIdClientResponse] = await to(bankId.client(params));
-  if (!bankIdClientResponse) throwError(503);
+function validateTokenEventBody(body: string): [boolean, number, string | undefined] {
+  const isValid = validateKeys(JSON.parse(body), ['endUserIp', 'userVisibleData']);
+  if (isValid) {
+    return [true, 200, undefined];
+  }
 
-  const [error, bankIdSignResponse] = await to<BankIdSignResponse, BankIdError>(
-    request.call(bankIdClientResponse, 'post', bankId.url(params.apiUrl, '/sign'), payload)
+  return [false, 400, 'Missing JSON body parameter'];
+}
+
+async function sendBankIdSignRequest(payload: BankIdSignLambdaRequest) {
+  const bankIdSSMparams: BankIdSSMParams = await SSMParams;
+
+  const [axiosError, bankIdClient] = await to<AxiosInstance, AxiosError>(
+    bankId.client(bankIdSSMparams)
   );
+  if (axiosError) {
+    throw axiosError;
+  }
 
-  if (!bankIdSignResponse) throwError(error?.response.status, error?.response.data?.details);
-  return bankIdSignResponse;
+  const [signError, signResponse] = await to<BankIdSignResponse, BankIdError>(
+    request.call(bankIdClient, 'post', bankId.url(bankIdSSMparams.apiUrl, '/sign'), payload)
+  );
+  if (signError) {
+    throwError(signError?.response.status, signError?.response.data?.details ?? '');
+  }
+
+  return signResponse;
 }
