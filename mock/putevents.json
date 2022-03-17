@@ -33,26 +33,5 @@
     "Resources": ["resourceMock"],
     "DetailType": "casesApiInvokeSuccess",
     "EventBusName": "default"
-  },
-  {
-    "Source": "casesApi.getCaseList",
-    "Detail": "{ \"personalNumber\": \"198602132394\" }",
-    "Resources": ["resourceMock"],
-    "DetailType": "casesApiInvokeSuccess",
-    "EventBusName": "default"
-  },
-  {
-    "Source": "casesApi.getCaseList",
-    "Detail": "{ \"personalNumber\": \"199803312397\" }",
-    "Resources": ["resourceMock"],
-    "DetailType": "casesApiInvokeSuccess",
-    "EventBusName": "default"
-  },
-  {
-    "Source": "casesApi.getCaseList",
-    "Detail": "{ \"personalNumber\": \"199803312397\" }",
-    "Resources": ["resourceMock"],
-    "DetailType": "casesApiInvokeSuccess",
-    "EventBusName": "default"
   }
 ]
