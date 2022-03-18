@@ -74,6 +74,7 @@ const log = {
       method: event.httpMethod,
       pathParameters: event.pathParameters,
       queryStringParameters: event.queryStringParameters,
+      userAgent: event.headers?.['User-Agent'],
     });
   },
 
