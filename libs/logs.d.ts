@@ -1,7 +1,17 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-export default log;
+import {
+  APIGatewayProxyEvent,
+  Context,
+  APIGatewayProxyResult,
+  APIGatewayProxyCallback,
+} from 'aws-lambda';
+
+type LambdaHandler = (
+  event: APIGatewayProxyEvent,
+  context: Context,
+  callback?: APIGatewayProxyCallback
+) => Promise<APIGatewayProxyResult>;
+
 type Primitive = string | number;
-type LambdaHandler = (event: any, context: any, callback?: any) => Promise<unknown>;
 type Level = 'info' | 'error' | 'warn' | 'verbose' | 'debug';
 
 declare namespace log {
@@ -48,5 +58,7 @@ declare namespace log {
     errorCode: Primitive,
     customData?: unknown
   ): void;
-  function wrap(lambdaHandler: LambdaHandler): LambdaHandler;
+  function wrap(lambda: LambdaHandler): LambdaHandler;
 }
+
+export default log;
