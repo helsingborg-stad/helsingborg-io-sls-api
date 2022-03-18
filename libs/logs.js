@@ -7,9 +7,16 @@ const logger = winston.createLogger({
   exitOnError: false,
 });
 
-let requestId;
+let requestId = 'N/A';
 
 const log = {
+  writeLog: (level, message, customData = {}) => {
+    logger.log(level, message, {
+      requestId,
+      customData,
+    });
+  },
+
   log: (level, message, requestId, errorCode, customData = {}) => {
     logger.log(level, message, {
       errorCode,
@@ -18,20 +25,40 @@ const log = {
     });
   },
 
+  writeError: (message, customData = {}) => {
+    log.writeLog('error', message, customData);
+  },
+
   error: (message, requestId, errorCode, customData = {}) => {
     log.log('error', message, requestId, errorCode, customData);
+  },
+
+  writeWarn: (message, customData = {}) => {
+    log.writeLog('warn', message, customData);
   },
 
   warn: (message, requestId, errorCode, customData = {}) => {
     log.log('warn', message, requestId, errorCode, customData);
   },
 
+  writeInfo: (message, customData = {}) => {
+    log.writeLog('info', message, customData);
+  },
+
   info: (message, requestId, errorCode, customData = {}) => {
     log.log('info', message, requestId, errorCode, customData);
   },
 
+  writeVerbose: (message, customData = {}) => {
+    log.writeLog('verbose', message, customData);
+  },
+
   verbose: (message, requestId, errorCode, customData = {}) => {
     log.log('verbose', message, requestId, errorCode, customData);
+  },
+
+  writeDebug: (message, customData = {}) => {
+    log.writeLog('debug', message, customData);
   },
 
   debug: (message, requestId, errorCode, customData = {}) => {
@@ -40,26 +67,20 @@ const log = {
 
   initialize: (event, context) => {
     requestId = context.awsRequestId;
-    logger.log('info', 'Lambda initialize', {
-      requestId,
-      customData: {
-        source: event.source,
-        detailType: event['detail-type'],
-        path: event.path,
-        method: event.httpMethod,
-        pathParameters: event.pathParameters,
-        queryStringParameters: event.queryStringParameters,
-      },
+    log.writeInfo('Lambda initialize', {
+      source: event.source,
+      detailType: event['detail-type'],
+      path: event.path,
+      method: event.httpMethod,
+      pathParameters: event.pathParameters,
+      queryStringParameters: event.queryStringParameters,
     });
   },
 
   finalize: (response, error) => {
-    logger.log('info', 'Lambda finalize', {
-      requestId,
-      customData: {
-        statusCode: response?.statusCode ?? 0,
-        error,
-      },
+    log.writeInfo('Lambda finalize', {
+      statusCode: response?.statusCode ?? 0,
+      error,
     });
   },
 

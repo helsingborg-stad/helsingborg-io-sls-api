@@ -1,13 +1,52 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export default log;
+type Primitive = string | number;
+type LambdaHandler = (event: any, context: any, callback?: any) => Promise<unknown>;
+type Level = 'info' | 'error' | 'warn' | 'verbose' | 'debug';
 
-type LambdaHandler = (event: any, context: any, callback?: any) => Promise<any>;
 declare namespace log {
-  function log(level: any, message: any, requestId: any, errorCode: any, customData?: any): void;
-  function error(message: any, requestId: any, errorCode: any, customData?: any): void;
-  function warn(message: any, requestId: any, errorCode: any, customData?: any): void;
-  function info(message: any, requestId: any, errorCode: any, customData?: any): void;
-  function verbose(message: any, requestId: any, errorCode: any, customData?: any): void;
-  function debug(message: any, requestId: any, errorCode: any, customData?: any): void;
+  function writeLog(level: Level, message: string, customData?: unknown): void;
+  function writeError(message: string, customData?: unknown): void;
+  function writeWarn(message: string, customData?: unknown): void;
+  function writeInfo(message: string, customData?: unknown): void;
+  function writeVerbose(message: string, customData?: unknown): void;
+  function writeDebug(message: string, customData?: unknown): void;
+  function log(
+    level: Level,
+    message: string,
+    requestId: string,
+    errorCode: Primitive,
+    customData?: unknown
+  ): void;
+  function error(
+    message: string,
+    requestId: string,
+    errorCode: Primitive,
+    customData?: unknown
+  ): void;
+  function warn(
+    message: string,
+    requestId: string,
+    errorCode: Primitive,
+    customData?: unknown
+  ): void;
+  function info(
+    message: string,
+    requestId: string,
+    errorCode: Primitive,
+    customData?: unknown
+  ): void;
+  function verbose(
+    message: string,
+    requestId: string,
+    errorCode: Primitive,
+    customData?: unknown
+  ): void;
+  function debug(
+    message: string,
+    requestId: string,
+    errorCode: Primitive,
+    customData?: unknown
+  ): void;
   function wrap(lambdaHandler: LambdaHandler): LambdaHandler;
 }
