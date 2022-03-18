@@ -4,19 +4,16 @@ const messages = require('@helsingborg-stad/npm-api-error-handling/assets/errorM
 import { main } from '../../src/lambdas/create';
 import booking from '../../src/helpers/booking';
 import getMeetingHtmlBody from '../../src/helpers/getMeetingHtmlBody';
-import { BookingRequest, BookingSearchResponse } from '../../src/helpers/types';
-import { isTimeslotTaken } from '../../src/helpers/isTimeslotTaken';
+import { BookingRequest } from '../../src/helpers/types';
 import { areAllAttendeesAvailable } from '../../src/helpers/timeSpanHelper';
 import { GetTimeSpansResponse } from './../../src/helpers/types';
 import strings from './../../src/helpers/strings';
 
 jest.mock('../../src/helpers/booking');
-jest.mock('../../src/helpers/isTimeslotTaken');
 jest.mock('../../src/helpers/timeSpanHelper');
 jest.mock('../../src/helpers/getMeetingHtmlBody');
 
-const { search, create, getTimeSpans, createRemoteMeeting } = jest.mocked(booking);
-const mockedIsTimeSlotTaken = jest.mocked(isTimeslotTaken);
+const { create, getTimeSpans, createRemoteMeeting } = jest.mocked(booking);
 const mockedAreAllAttendeesAvailable = jest.mocked(areAllAttendeesAvailable);
 const mockedGetMeetingHtmlBody = jest.mocked(getMeetingHtmlBody);
 
@@ -63,23 +60,8 @@ beforeEach(() => {
 });
 
 it('creates a booking successfully', async () => {
-  expect.assertions(7);
+  expect.assertions(5);
 
-  const searchResponseData: BookingSearchResponse['data'] = {
-    data: {
-      attributes: [
-        {
-          BookingId: '123456789',
-          Attendees: [
-            {
-              Type: 'Required',
-              Status: 'Declined',
-            },
-          ],
-        },
-      ],
-    },
-  };
   const responseData = {
     jsonapi: { version: '1.0' },
     data: {
@@ -96,8 +78,6 @@ it('creates a booking successfully', async () => {
 
   getTimeSpans.mockResolvedValueOnce(getTimeSpansResponse);
   mockedAreAllAttendeesAvailable.mockReturnValueOnce(true);
-  search.mockResolvedValueOnce({ data: searchResponseData });
-  mockedIsTimeSlotTaken.mockReturnValueOnce(false);
   mockedGetMeetingHtmlBody.mockReturnValueOnce('html');
   create.mockResolvedValueOnce({ data: responseData });
 
@@ -105,8 +85,6 @@ it('creates a booking successfully', async () => {
 
   expect(getTimeSpans).toHaveBeenCalled();
   expect(mockedAreAllAttendeesAvailable).toHaveBeenCalled();
-  expect(booking.search).toHaveBeenCalled();
-  expect(mockedIsTimeSlotTaken).toHaveBeenCalled();
   expect(mockedGetMeetingHtmlBody).toHaveBeenCalledWith(
     {
       firstname: { name: 'Förnamn', value: 'Test' },
@@ -129,21 +107,6 @@ it('creates a booking successfully', async () => {
 it('calls "getMeetingHtmlBody" with a meeting link when remoteMeeting is true', async () => {
   expect.assertions(1);
 
-  const searchResponseData: BookingSearchResponse['data'] = {
-    data: {
-      attributes: [
-        {
-          BookingId: '123456789',
-          Attendees: [
-            {
-              Type: 'Required',
-              Status: 'Declined',
-            },
-          ],
-        },
-      ],
-    },
-  };
   const responseData = {
     jsonapi: { version: '1.0' },
     data: {
@@ -165,8 +128,6 @@ it('calls "getMeetingHtmlBody" with a meeting link when remoteMeeting is true', 
 
   getTimeSpans.mockResolvedValueOnce(getTimeSpansResponse);
   mockedAreAllAttendeesAvailable.mockReturnValueOnce(true);
-  search.mockResolvedValueOnce({ data: searchResponseData });
-  mockedIsTimeSlotTaken.mockReturnValueOnce(false);
   createRemoteMeeting.mockResolvedValueOnce({ data: remoteMeetingResponseData });
   create.mockResolvedValueOnce({ data: responseData });
 
@@ -181,7 +142,7 @@ it('calls "getMeetingHtmlBody" with a meeting link when remoteMeeting is true', 
 });
 
 it('throws when booking.create fails', async () => {
-  expect.assertions(6);
+  expect.assertions(4);
 
   const statusCode = 500;
   const message = messages[statusCode];
@@ -200,8 +161,6 @@ it('throws when booking.create fails', async () => {
 
   getTimeSpans.mockResolvedValueOnce(getTimeSpansResponse);
   mockedAreAllAttendeesAvailable.mockReturnValueOnce(true);
-  search.mockResolvedValueOnce({ data: { data: { attributes: [] } } });
-  mockedIsTimeSlotTaken.mockReturnValueOnce(false);
   mockedGetMeetingHtmlBody.mockReturnValueOnce('html');
   create.mockRejectedValueOnce({ status: statusCode, message });
 
@@ -209,8 +168,6 @@ it('throws when booking.create fails', async () => {
 
   expect(getTimeSpans).toHaveBeenCalled();
   expect(mockedAreAllAttendeesAvailable).toHaveBeenCalled();
-  expect(booking.search).toHaveBeenCalled();
-  expect(mockedIsTimeSlotTaken).toHaveBeenCalled();
   expect(booking.create).toHaveBeenCalledWith({
     requiredAttendees: ['outlook.user@helsingborg.se', 'user@test.se'],
     optionalAttendees: [],
@@ -225,7 +182,7 @@ it('throws when booking.create fails', async () => {
 });
 
 it('returns error when required parameters does not exists in event', async () => {
-  expect.assertions(6);
+  expect.assertions(4);
 
   const body = JSON.stringify({
     startTime: '2021-05-30T10:00:00',
@@ -254,14 +211,12 @@ it('returns error when required parameters does not exists in event', async () =
 
   expect(getTimeSpans).not.toHaveBeenCalled();
   expect(mockedAreAllAttendeesAvailable).not.toHaveBeenCalled();
-  expect(booking.search).not.toHaveBeenCalled();
-  expect(mockedIsTimeSlotTaken).not.toHaveBeenCalled();
   expect(booking.create).not.toHaveBeenCalled();
   expect(result).toEqual(expectedResult);
 });
 
 it('returns failure when timespan does not exist', async () => {
-  expect.assertions(6);
+  expect.assertions(4);
 
   const statusCode = 400;
   const expectedResult = {
@@ -285,15 +240,13 @@ it('returns failure when timespan does not exist', async () => {
 
   expect(getTimeSpans).toHaveBeenCalled();
   expect(mockedAreAllAttendeesAvailable).toHaveBeenCalled();
-  expect(booking.search).not.toHaveBeenCalled();
-  expect(mockedIsTimeSlotTaken).not.toHaveBeenCalled();
   expect(booking.create).not.toHaveBeenCalled();
   expect(result).toEqual(expectedResult);
 });
 
 it('returns error if startTime is in the passed', async () => {
   jest.useFakeTimers().setSystemTime(new Date('2021-05-30T12:00:00'));
-  expect.assertions(6);
+  expect.assertions(4);
 
   const expectedResult = {
     body: JSON.stringify({
@@ -313,57 +266,6 @@ it('returns error if startTime is in the passed', async () => {
 
   expect(getTimeSpans).not.toHaveBeenCalled();
   expect(mockedAreAllAttendeesAvailable).not.toHaveBeenCalled();
-  expect(booking.search).not.toHaveBeenCalled();
-  expect(mockedIsTimeSlotTaken).not.toHaveBeenCalled();
-  expect(booking.create).not.toHaveBeenCalled();
-  expect(result).toEqual(expectedResult);
-});
-
-it('returns failure when timeslot is already taken', async () => {
-  expect.assertions(6);
-
-  const searchResponseData = {
-    data: {
-      attributes: [
-        {
-          BookingId: '123456789',
-          Attendees: [
-            {
-              Type: 'Required',
-              Status: 'Not declined',
-            },
-          ],
-        },
-      ],
-    },
-  };
-
-  const statusCode = 400;
-  const expectedResult = {
-    body: JSON.stringify({
-      jsonapi: { version: '1.0' },
-      data: {
-        status: '400',
-        code: '400',
-        detail: strings.booking.create.timeslotNotAvailable,
-        message: 'Timeslot not available for booking',
-      },
-    }),
-    headers: mockHeaders,
-    statusCode,
-  };
-
-  getTimeSpans.mockResolvedValueOnce(getTimeSpansResponse);
-  mockedAreAllAttendeesAvailable.mockReturnValueOnce(true);
-  search.mockResolvedValueOnce({ data: searchResponseData });
-  mockedIsTimeSlotTaken.mockReturnValueOnce(true);
-
-  const result = await main(mockEvent, mockContext);
-
-  expect(getTimeSpans).toHaveBeenCalled();
-  expect(mockedAreAllAttendeesAvailable).toHaveBeenCalled();
-  expect(booking.search).toHaveBeenCalled();
-  expect(mockedIsTimeSlotTaken).toHaveBeenCalled();
   expect(booking.create).not.toHaveBeenCalled();
   expect(result).toEqual(expectedResult);
 });

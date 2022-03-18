@@ -4,7 +4,6 @@ import * as response from '../libs/response';
 import log from '../libs/logs';
 
 import booking from '../helpers/booking';
-import { isTimeslotTaken } from '../helpers/isTimeslotTaken';
 import { areAllAttendeesAvailable } from '../helpers/timeSpanHelper';
 import getCreateBookingBody from '../helpers/getCreateBookingBody';
 import { BookingRequest } from '../helpers/types';
@@ -59,6 +58,7 @@ export async function main(event: { body: string }, { awsRequestId }: { awsReque
     endTime,
     meetingDurationMinutes: 0,
   };
+
   const [getTimeSpansError, timeSpansResult] = await to(booking.getTimeSpans(getTimeSpansBody));
   const timeSpanData = timeSpansResult?.data?.data?.attributes;
   if (getTimeSpansError || !timeSpanData) {
@@ -78,28 +78,6 @@ export async function main(event: { body: string }, { awsRequestId }: { awsReque
       status: 400,
       message,
       detail: strings.booking.create.timespanNotExisting,
-    });
-  }
-
-  const searchBookingBody = { startTime, endTime };
-  const [searchBookingError, searchResponse] = await to(booking.search(searchBookingBody));
-
-  if (searchBookingError) {
-    message = `Error finding bookings between ${startTime} - ${endTime}`;
-    log.error(message, awsRequestId, 'service-booking-api-create-004', searchBookingError);
-    return response.failure(searchBookingError);
-  }
-
-  const bookingExist = searchResponse?.data?.data?.attributes?.length ?? 0 > 0;
-  const timeslotTaken = isTimeslotTaken(searchResponse?.data?.data?.attributes ?? []);
-
-  if (bookingExist && timeslotTaken) {
-    message = 'Timeslot not available for booking';
-    log.error(message, awsRequestId, 'service-booking-api-create-005', searchBookingError);
-    return response.failure({
-      status: 400,
-      message,
-      detail: strings.booking.create.timeslotNotAvailable,
     });
   }
 
@@ -128,7 +106,7 @@ export async function main(event: { body: string }, { awsRequestId }: { awsReque
   const [error, createBookingResponse] = await to(booking.create(createBookingBody));
   if (error) {
     message = 'Could not create new booking';
-    log.error(message, awsRequestId, 'service-booking-api-create-007', searchBookingError);
+    log.error(message, awsRequestId, 'service-booking-api-create-007', error);
     return response.failure(error);
   }
 
