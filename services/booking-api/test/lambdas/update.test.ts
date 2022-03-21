@@ -3,16 +3,15 @@ const messages = require('@helsingborg-stad/npm-api-error-handling/assets/errorM
 
 import { main } from '../../src/lambdas/update';
 import booking from '../../src/helpers/booking';
-import { isTimeslotTaken } from '../../src/helpers/isTimeslotTaken';
 import { areAllAttendeesAvailable } from '../../src/helpers/timeSpanHelper';
 import { GetTimeSpansResponse, BookingRequest } from '../../src/helpers/types';
+import strings from '../../src/helpers/strings';
 
 jest.mock('../../src/helpers/booking');
 jest.mock('../../src/helpers/isTimeslotTaken');
 jest.mock('../../src/helpers/timeSpanHelper');
 
-const { search, create, cancel, getTimeSpans } = jest.mocked(booking);
-const mockedIsTimeSlotTaken = jest.mocked(isTimeslotTaken);
+const { create, cancel, getTimeSpans } = jest.mocked(booking);
 const mockedAreAllAttendeesAvailable = jest.mocked(areAllAttendeesAvailable);
 
 const mockContext = { awsRequestId: 'xxxxx' };
@@ -34,10 +33,7 @@ const mockBody: BookingRequest = {
     },
   },
 };
-const mockSearchBody = {
-  startTime: mockBody.startTime,
-  endTime: mockBody.endTime,
-};
+
 const mockEvent = {
   pathParameters: {
     id: mockBookingId,
@@ -48,18 +44,6 @@ const mockHeaders = {
   'Access-Control-Allow-Credentials': true,
   'Access-Control-Allow-Origin': '*',
 };
-const mockSearchResponse = {
-  data: {
-    data: {
-      attributes: [
-        {
-          BookingId: '123456789',
-          Attendees: [],
-        },
-      ],
-    },
-  },
-};
 const getTimeSpansResponse: GetTimeSpansResponse = {
   data: {
     data: {
@@ -69,12 +53,14 @@ const getTimeSpansResponse: GetTimeSpansResponse = {
     },
   },
 };
+
 beforeEach(() => {
+  jest.useFakeTimers().setSystemTime(new Date('2021-05-29T10:00:00'));
   jest.resetAllMocks();
 });
 
 it('updates a booking successfully', async () => {
-  expect.assertions(7);
+  expect.assertions(5);
 
   const responseData = {
     data: {
@@ -98,8 +84,6 @@ it('updates a booking successfully', async () => {
 
   getTimeSpans.mockResolvedValueOnce(getTimeSpansResponse);
   mockedAreAllAttendeesAvailable.mockReturnValueOnce(true);
-  search.mockResolvedValueOnce(mockSearchResponse);
-  mockedIsTimeSlotTaken.mockReturnValueOnce(false);
   cancel.mockResolvedValueOnce(undefined);
   create.mockResolvedValueOnce(calendarBookingResponse);
 
@@ -107,8 +91,6 @@ it('updates a booking successfully', async () => {
 
   expect(getTimeSpans).toHaveBeenCalled();
   expect(mockedAreAllAttendeesAvailable).toHaveBeenCalled();
-  expect(booking.search).toHaveBeenCalledWith(mockSearchBody);
-  expect(mockedIsTimeSlotTaken).toHaveBeenCalledWith(mockSearchResponse.data.data.attributes);
   expect(booking.cancel).toHaveBeenCalledWith(mockBookingId);
   expect(booking.create).toHaveBeenCalledWith({
     requiredAttendees: ['outlook.user@helsingborg.se', 'user@test.se'],
@@ -124,18 +106,23 @@ it('updates a booking successfully', async () => {
 });
 
 it('does not update if timespan does not exist', async () => {
-  expect.assertions(7);
+  expect.assertions(6);
 
   const expectedResult = {
     body: JSON.stringify({
       jsonapi: { version: '1.0' },
-      data: { status: '403', code: '403', message: 'No timeslot exists in the given interval' },
+      data: {
+        status: '400',
+        code: '400',
+        detail: strings.booking.create.timespanNotExisting,
+        message: 'No timeslot exists in the given interval',
+      },
     }),
     headers: {
       'Access-Control-Allow-Credentials': true,
       'Access-Control-Allow-Origin': '*',
     },
-    statusCode: 403,
+    statusCode: 400,
   };
 
   getTimeSpans.mockResolvedValueOnce(getTimeSpansResponse);
@@ -146,45 +133,13 @@ it('does not update if timespan does not exist', async () => {
   expect(getTimeSpans).toHaveBeenCalled();
   expect(mockedAreAllAttendeesAvailable).toHaveBeenCalled();
   expect(booking.search).not.toHaveBeenCalled();
-  expect(mockedIsTimeSlotTaken).not.toHaveBeenCalled();
-  expect(booking.cancel).not.toHaveBeenCalled();
-  expect(booking.create).not.toHaveBeenCalled();
-  expect(result).toEqual(expectedResult);
-});
-
-it('does not update if timeslot is taken', async () => {
-  expect.assertions(7);
-
-  const expectedResult = {
-    body: JSON.stringify({
-      jsonapi: { version: '1.0' },
-      data: { status: '403', code: '403', message: 'Timeslot not available for booking' },
-    }),
-    headers: {
-      'Access-Control-Allow-Credentials': true,
-      'Access-Control-Allow-Origin': '*',
-    },
-    statusCode: 403,
-  };
-
-  getTimeSpans.mockResolvedValueOnce(getTimeSpansResponse);
-  mockedAreAllAttendeesAvailable.mockReturnValueOnce(true);
-  search.mockResolvedValueOnce(mockSearchResponse);
-  mockedIsTimeSlotTaken.mockReturnValueOnce(true);
-
-  const result = await main(mockEvent, mockContext);
-
-  expect(getTimeSpans).toHaveBeenCalled();
-  expect(mockedAreAllAttendeesAvailable).toHaveBeenCalled();
-  expect(booking.search).toHaveBeenCalledWith(mockSearchBody);
-  expect(mockedIsTimeSlotTaken).toHaveBeenCalledWith(mockSearchResponse.data.data.attributes);
   expect(booking.cancel).not.toHaveBeenCalled();
   expect(booking.create).not.toHaveBeenCalled();
   expect(result).toEqual(expectedResult);
 });
 
 it('throws when booking.cancel fails', async () => {
-  expect.assertions(7);
+  expect.assertions(5);
 
   const statusCode = 500;
   const message = messages[statusCode];
@@ -203,23 +158,19 @@ it('throws when booking.cancel fails', async () => {
 
   getTimeSpans.mockResolvedValueOnce(getTimeSpansResponse);
   mockedAreAllAttendeesAvailable.mockReturnValueOnce(true);
-  search.mockResolvedValueOnce(mockSearchResponse);
-  mockedIsTimeSlotTaken.mockReturnValueOnce(false);
   cancel.mockRejectedValueOnce({ status: statusCode, message });
 
   const result = await main(mockEvent, mockContext);
 
   expect(getTimeSpans).toHaveBeenCalled();
   expect(mockedAreAllAttendeesAvailable).toHaveBeenCalled();
-  expect(booking.search).toHaveBeenCalledWith(mockSearchBody);
-  expect(mockedIsTimeSlotTaken).toHaveBeenCalledWith(mockSearchResponse.data.data.attributes);
   expect(booking.cancel).toHaveBeenCalledTimes(1);
   expect(booking.create).not.toHaveBeenCalled();
   expect(result).toEqual(expectedResult);
 });
 
 it('throws when booking.create fails', async () => {
-  expect.assertions(7);
+  expect.assertions(5);
 
   const statusCode = 500;
   const message = messages[statusCode];
@@ -238,8 +189,6 @@ it('throws when booking.create fails', async () => {
 
   getTimeSpans.mockResolvedValueOnce(getTimeSpansResponse);
   mockedAreAllAttendeesAvailable.mockReturnValueOnce(true);
-  search.mockResolvedValueOnce(mockSearchResponse);
-  mockedIsTimeSlotTaken.mockReturnValueOnce(false);
   cancel.mockResolvedValueOnce(undefined);
   create.mockRejectedValueOnce({ status: statusCode, message });
 
@@ -247,15 +196,13 @@ it('throws when booking.create fails', async () => {
 
   expect(getTimeSpans).toHaveBeenCalled();
   expect(mockedAreAllAttendeesAvailable).toHaveBeenCalled();
-  expect(booking.search).toHaveBeenCalledWith(mockSearchBody);
-  expect(mockedIsTimeSlotTaken).toHaveBeenCalledWith(mockSearchResponse.data.data.attributes);
   expect(booking.cancel).toHaveBeenCalledTimes(1);
   expect(booking.create).toHaveBeenCalledTimes(1);
   expect(result).toEqual(expectedResult);
 });
 
 it('returns error when required parameters does not exists in event', async () => {
-  expect.assertions(7);
+  expect.assertions(5);
 
   const body = JSON.stringify({
     startTime: '2021-05-30T10:00:00',
@@ -264,26 +211,27 @@ it('returns error when required parameters does not exists in event', async () =
   });
   const event = { ...mockEvent, body };
 
+  const errorMessage =
+    'Missing one or more required parameters: "organizationRequiredAttendees", "externalRequiredAttendees", "startTime", "endTime", "subject"';
+
   const expectedResult = {
     body: JSON.stringify({
       jsonapi: { version: '1.0' },
       data: {
-        status: '403',
-        code: '403',
-        message:
-          'Missing one or more required parameters: "organizationRequiredAttendees", "externalRequiredAttendees", "startTime", "endTime"',
+        status: '400',
+        code: '400',
+        detail: strings.booking.create.missingRequiredParamter,
+        message: errorMessage,
       },
     }),
     headers: mockHeaders,
-    statusCode: 403,
+    statusCode: 400,
   };
 
   const result = await main(event, mockContext);
 
   expect(getTimeSpans).not.toHaveBeenCalled();
   expect(mockedAreAllAttendeesAvailable).not.toHaveBeenCalled();
-  expect(booking.search).not.toHaveBeenCalled();
-  expect(mockedIsTimeSlotTaken).not.toHaveBeenCalled();
   expect(booking.cancel).not.toHaveBeenCalled();
   expect(booking.create).not.toHaveBeenCalled();
   expect(result).toEqual(expectedResult);

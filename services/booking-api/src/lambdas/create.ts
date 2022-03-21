@@ -4,80 +4,35 @@ import * as response from '../libs/response';
 import log from '../libs/logs';
 
 import booking from '../helpers/booking';
-import { areAllAttendeesAvailable } from '../helpers/timeSpanHelper';
 import getCreateBookingBody from '../helpers/getCreateBookingBody';
 import { BookingRequest } from '../helpers/types';
-import isDefined from '../helpers/isDefined';
-import strings from '../helpers/strings';
 import getMeetingHtmlBody from '../helpers/getMeetingHtmlBody';
+import { validateCreateBookingRequest } from '../helpers/validateCreateBookingRequest';
 
 export async function main(event: { body: string }, { awsRequestId }: { awsRequestId: string }) {
   const bookingRequest: BookingRequest = JSON.parse(event.body);
   const {
-    organizationRequiredAttendees = [],
-    externalRequiredAttendees = [],
+    organizationRequiredAttendees,
+    externalRequiredAttendees,
     startTime,
     endTime,
     remoteMeeting,
     subject,
   } = bookingRequest;
 
-  let message = '';
   let remoteMeetingLink: string | undefined;
 
-  if (
-    organizationRequiredAttendees.length === 0 ||
-    externalRequiredAttendees.length === 0 ||
-    !startTime ||
-    !endTime ||
-    !isDefined(subject)
-  ) {
-    message =
-      'Missing one or more required parameters: "organizationRequiredAttendees", "externalRequiredAttendees", "startTime", "endTime", "subject"';
-    log.error(message, awsRequestId, 'service-booking-api-create-001');
+  try {
+    await validateCreateBookingRequest(bookingRequest);
+  } catch (error) {
+    log.error(
+      (error as Record<string, string>).message,
+      awsRequestId,
+      'service-booking-api-create-001'
+    );
     return response.failure({
       status: 400,
-      message,
-      detail: strings.booking.create.missingRequiredParamter,
-    });
-  }
-
-  const systemTime = new Date();
-
-  if (systemTime > new Date(startTime)) {
-    return response.failure({
-      status: 400,
-      message: 'Parameter "startTime" cannot be set to a passed value',
-      detail: strings.booking.create.startTimePassed,
-    });
-  }
-
-  const getTimeSpansBody = {
-    emails: organizationRequiredAttendees,
-    startTime,
-    endTime,
-    meetingDurationMinutes: 0,
-  };
-
-  const [getTimeSpansError, timeSpansResult] = await to(booking.getTimeSpans(getTimeSpansBody));
-  const timeSpanData = timeSpansResult?.data?.data?.attributes;
-  if (getTimeSpansError || !timeSpanData) {
-    message = `Error finding timeSpan ${startTime} - ${endTime}`;
-    log.error(message, awsRequestId, 'service-booking-api-create-002', getTimeSpansError);
-    return response.failure({ status: 400, message });
-  }
-
-  const timeSpansExist = Object.values(timeSpanData).flat().length > 0;
-
-  const timeValid = areAllAttendeesAvailable({ startTime, endTime }, timeSpanData);
-
-  if (!timeSpansExist || !timeValid) {
-    message = 'No timeslot exists in the given interval';
-    log.error(message, awsRequestId, 'service-booking-api-create-003');
-    return response.failure({
-      status: 400,
-      message,
-      detail: strings.booking.create.timespanNotExisting,
+      ...(error as Record<string, string>),
     });
   }
 
@@ -92,8 +47,8 @@ export async function main(event: { body: string }, { awsRequestId }: { awsReque
     );
 
     if (createRemoteMeetingError) {
-      message = 'Could not create remote meeting link';
-      log.error(message, awsRequestId, 'service-booking-api-create-006', createRemoteMeetingError);
+      const message = 'Could not create remote meeting link';
+      log.error(message, awsRequestId, 'service-booking-api-create-002', createRemoteMeetingError);
       return response.failure(createRemoteMeetingError);
     }
 
@@ -105,8 +60,8 @@ export async function main(event: { body: string }, { awsRequestId }: { awsReque
 
   const [error, createBookingResponse] = await to(booking.create(createBookingBody));
   if (error) {
-    message = 'Could not create new booking';
-    log.error(message, awsRequestId, 'service-booking-api-create-007', error);
+    const message = 'Could not create new booking';
+    log.error(message, awsRequestId, 'service-booking-api-create-003', error);
     return response.failure(error);
   }
 
