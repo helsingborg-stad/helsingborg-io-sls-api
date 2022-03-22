@@ -78,6 +78,15 @@ export async function main(event, context) {
     previousCase?.forms || {}
   );
 
+  const persons = [
+    {
+      personalNumber,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      role: 'applicant',
+    },
+  ];
+
   const timestampNow = Date.now();
 
   const Item = {
@@ -88,6 +97,7 @@ export async function main(event, context) {
     currentFormId,
     provider,
     details,
+    persons,
     forms: prePopulatedForms,
     createdAt: timestampNow,
     updatedAt: timestampNow,
@@ -127,16 +137,7 @@ export async function main(event, context) {
 
   return response.success(201, {
     type: 'createCase',
-    attributes: {
-      id: caseItem.Item.id,
-      status: caseItem.Item.status,
-      currentFormId: caseItem.Item.currentFormId,
-      provider: caseItem.Item.provider,
-      details: caseItem.Item.details,
-      forms: caseItem.Item.forms,
-      updatedAt: caseItem.Item.updatedAt,
-      createdAt: caseItem.Item.createdAt,
-    },
+    attributes: caseItem.Item,
   });
 }
 
