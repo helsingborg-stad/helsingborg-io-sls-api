@@ -8,6 +8,7 @@ import * as dynamoDb from '../libs/dynamoDb';
 import * as response from '../libs/response';
 import { decodeToken } from '../libs/token';
 import { getItem, putItem } from '../libs/queries';
+import { CASE_CREATED } from '../libs/constants';
 
 import { populateFormWithPreviousCaseAnswers } from '../libs/formAnswers';
 import caseValidationSchema from '../helpers/schema';
@@ -102,6 +103,7 @@ export async function main(event, context) {
     forms: prePopulatedForms,
     createdAt: timestampNow,
     updatedAt: timestampNow,
+    state: CASE_CREATED,
   };
 
   const putItemParams = {
