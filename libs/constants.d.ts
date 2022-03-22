@@ -19,7 +19,7 @@ export const CASE_PROVIDER_VIVA: 'VIVA';
 /**
  * Service: Ekonomiskt bistånd
  */
-export const NEW_APPLICATION_VIVA = 'new:application:viva';
+export const NEW_APPLICATION_VIVA: 'new:application:viva';
 export const NOT_STARTED_VIVA: 'notStarted:viva';
 export const ACTIVE_COMPLETION_REQUIRED_VIVA: 'active:completionRequired:viva';
 export const ACTIVE_RANDOM_CHECK_REQUIRED_VIVA: 'active:randomCheckRequired:viva';
@@ -28,6 +28,7 @@ export const CLOSED_PARTIALLY_APPROVED_VIVA: 'closed:partiallyApproved:viva';
 export const CLOSED_REJECTED_VIVA: 'closed:rejected:viva';
 export const CLOSED_COMPLETION_REJECTED_VIVA: 'closed:completionRejected:viva';
 export const CLOSED_RANDOM_CHECK_REJECTED_VIVA: 'closed:randomCheckRejected:viva';
+export const CASE_CREATED: 'CASE_CREATED';
 export const VIVA_CASE_CREATED: 'VIVA_CASE_CREATED';
 export const VIVA_APPLICATION_RECEIVED: 'VIVA_APPLICATION_RECEIVED';
 export const VIVA_COMPLETION_REQUIRED: 'VIVA_COMPLETION_REQUIRED';
