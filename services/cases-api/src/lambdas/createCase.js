@@ -13,6 +13,7 @@ import { populateFormWithPreviousCaseAnswers } from '../libs/formAnswers';
 import caseValidationSchema from '../helpers/schema';
 import { getStatusByType } from '../libs/caseStatuses';
 import log from '../libs/logs';
+import { objectWithoutProperties } from '../libs/objects';
 
 export async function main(event, context) {
   const decodedToken = decodeToken(event);
@@ -135,9 +136,11 @@ export async function main(event, context) {
     return response.failure(getItemError.statusCode, getItemError.message);
   }
 
+  const userCaseWithoutKeys = objectWithoutProperties(caseItem.Item, ['PK', 'SK', 'GSI1']);
+
   return response.success(201, {
     type: 'createCase',
-    attributes: caseItem.Item,
+    attributes: userCaseWithoutKeys,
   });
 }
 
