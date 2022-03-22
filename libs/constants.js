@@ -36,6 +36,7 @@ export const CLOSED_COMPLETION_REJECTED_VIVA = 'closed:completionRejected:viva';
 export const CLOSED_RANDOM_CHECK_REJECTED_VIVA = 'closed:randomCheckRejected:viva';
 
 // Case state
+export const CASE_CREATED = 'CASE_CREATED';
 export const VIVA_CASE_CREATED = 'VIVA_CASE_CREATED';
 export const VIVA_APPLICATION_RECEIVED = 'VIVA_APPLICATION_RECEIVED';
 export const VIVA_COMPLETION_REQUIRED = 'VIVA_COMPLETION_REQUIRED';
