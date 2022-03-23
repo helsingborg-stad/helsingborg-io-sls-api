@@ -1,15 +1,4 @@
-import {
-  APIGatewayProxyEvent,
-  Context,
-  APIGatewayProxyResult,
-  APIGatewayProxyCallback,
-} from 'aws-lambda';
-
-type LambdaHandler = (
-  event: APIGatewayProxyEvent,
-  context: Context,
-  callback?: APIGatewayProxyCallback
-) => Promise<APIGatewayProxyResult>;
+import { Handler } from 'aws-lambda';
 
 type Primitive = string | number;
 type Level = 'info' | 'error' | 'warn' | 'verbose' | 'debug';
@@ -21,6 +10,9 @@ declare namespace log {
   function writeInfo(message: string, customData?: unknown): void;
   function writeVerbose(message: string, customData?: unknown): void;
   function writeDebug(message: string, customData?: unknown): void;
+  /**
+   * @deprecated
+   */
   function log(
     level: Level,
     message: string,
@@ -28,37 +20,52 @@ declare namespace log {
     errorCode: Primitive,
     customData?: unknown
   ): void;
+  /**
+   * @deprecated
+   */
   function error(
     message: string,
     requestId: string,
     errorCode: Primitive,
     customData?: unknown
   ): void;
+  /**
+   * @deprecated
+   */
   function warn(
     message: string,
     requestId: string,
     errorCode: Primitive,
     customData?: unknown
   ): void;
+  /**
+   * @deprecated
+   */
   function info(
     message: string,
     requestId: string,
     errorCode: Primitive,
     customData?: unknown
   ): void;
+  /**
+   * @deprecated
+   */
   function verbose(
     message: string,
     requestId: string,
     errorCode: Primitive,
     customData?: unknown
   ): void;
+  /**
+   * @deprecated
+   */
   function debug(
     message: string,
     requestId: string,
     errorCode: Primitive,
     customData?: unknown
   ): void;
-  function wrap(lambda: LambdaHandler): LambdaHandler;
+  function wrap(lambda: Handler): Handler;
 }
 
 export default log;

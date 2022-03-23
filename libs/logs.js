@@ -7,12 +7,11 @@ const logger = winston.createLogger({
   exitOnError: false,
 });
 
-let requestId = 'N/A';
-
 const log = {
+  requestId: 'N/A',
   writeLog: (level, message, customData = {}) => {
     logger.log(level, message, {
-      requestId,
+      requestId: log.requestId,
       customData,
     });
   },
@@ -20,7 +19,7 @@ const log = {
   log: (level, message, requestId, errorCode, customData = {}) => {
     logger.log(level, message, {
       errorCode,
-      requestId,
+      requestId: log.requestId,
       customData,
     });
   },
@@ -66,7 +65,7 @@ const log = {
   },
 
   initialize: (event, context) => {
-    requestId = context.awsRequestId;
+    log.requestId = context.awsRequestId;
     log.writeInfo('Lambda initialize', {
       source: event.source,
       detailType: event['detail-type'],
@@ -95,7 +94,7 @@ const log = {
       });
 
       if (!(executor instanceof Promise)) {
-        return undefined;
+        return;
       }
 
       const promise = new Promise((resolve, reject) => {
