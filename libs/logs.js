@@ -90,7 +90,7 @@ const log = {
 
       const executor = lambda(event, context, (error, response) => {
         log.finalize(response, error);
-        callback(error, response);
+        callback ?? callback(error, response);
       });
 
       if (!(executor instanceof Promise)) {
