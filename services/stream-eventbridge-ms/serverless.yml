@@ -51,7 +51,7 @@ functions:
     events:
       - stream:
           type: dynamodb
-          batchSize: 10
+          batchSize: 1
           startingPosition: LATEST
           arn:
             Fn::ImportValue: ${self:custom.resourcesStage}-CasesTableStreamArn
