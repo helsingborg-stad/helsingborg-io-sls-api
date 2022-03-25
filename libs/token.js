@@ -43,3 +43,12 @@ export async function verifyToken(token, secret) {
     return decoded;
   });
 }
+
+export function extractToken(authorizationToken) {
+  if (!authorizationToken || authorizationToken === '') {
+    throw Error('Invalid token provided');
+  }
+  return authorizationToken.includes('Bearer')
+    ? authorizationToken.slice(authorizationToken.indexOf(' ') + 1)
+    : authorizationToken;
+}

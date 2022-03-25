@@ -1,42 +1,35 @@
-import to from 'await-to-js';
-
 import generateIAMPolicy from '../libs/generateIAMPolicy';
-import { verifyToken } from '../libs/token';
+import { Token, verifyToken } from '../libs/token';
 import config from '../libs/config';
 import secrets from '../libs/secrets';
 import log from '../libs/logs';
+import { extractToken } from '../libs/token';
 
 const CONFIG_AUTH_SECRETS_ACCESS_TOKEN = config.auth.secrets.accessToken;
+export interface LambdaContext {
+  getSecret: (secretName: string, secretKeyName: string) => Promise<string>;
+  verifyToken: (token: string, secret: string) => Promise<Token>;
+}
 
-export async function main(event, context) {
-  const { authorizationToken } = event;
+export interface LambdaEvent {
+  authorizationToken?: string;
+}
+/* istanbul ignore next */
+export const main = log.wrap(async event => {
+  return await lambda(event, {
+    getSecret: secrets.get,
+    verifyToken,
+  });
+});
 
-  if (!authorizationToken) {
-    log.warn('Unauthorized!', context.awsRequestId, 'service-auth-token-authorize-001');
+export async function lambda(event: LambdaEvent, lambdaContext: LambdaContext) {
+  const token = extractToken(event.authorizationToken);
 
-    throw Error('Unauthorized');
-  }
-
-  const token = authorizationToken.includes('Bearer')
-    ? authorizationToken.substr(authorizationToken.indexOf(' ') + 1)
-    : authorizationToken;
-
-  const [getSecretError, secret] = await to(
-    secrets.get(CONFIG_AUTH_SECRETS_ACCESS_TOKEN.name, CONFIG_AUTH_SECRETS_ACCESS_TOKEN.keyName)
+  const secret = await lambdaContext.getSecret(
+    CONFIG_AUTH_SECRETS_ACCESS_TOKEN.name,
+    CONFIG_AUTH_SECRETS_ACCESS_TOKEN.keyName
   );
-  if (getSecretError) {
-    log.warn('Unauthorized!', context.awsRequestId, 'service-auth-token-authorize-002');
+  const decodedToken = await lambdaContext.verifyToken(token, secret);
 
-    throw Error('Unauthorized');
-  }
-
-  const [error, decodedToken] = await to(verifyToken(token, secret));
-  if (error) {
-    log.warn('Unauthorized!', context.awsRequestId, 'service-auth-token-authorize-003');
-
-    throw Error('Unauthorized');
-  }
-
-  const IAMPolicy = generateIAMPolicy(decodedToken.personalNumber, 'Allow', '*');
-  return IAMPolicy;
+  return generateIAMPolicy(decodedToken.personalNumber, 'Allow', '*');
 }

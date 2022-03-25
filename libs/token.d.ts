@@ -20,4 +20,6 @@ export function signToken(jsonToSign: obj, secret: string, expireTimeInMinutes: 
  * @param {string} token a json web token
  * @param {string} secret the secret key to verify the signature in the JSON Web Token.
  */
-export function verifyToken(token: string, secret: string): Promise<any>;
+export function verifyToken<T = Token>(token: string, secret: string): Promise<T>;
+
+export function extractToken(authorizationToken?: string): string;
