@@ -80,7 +80,7 @@ const log = {
   finalize: (response, error) => {
     log.writeInfo('Lambda finalize', {
       statusCode: response?.statusCode ?? 0,
-      error,
+      error: error?.toString(),
     });
   },
 
@@ -97,18 +97,17 @@ const log = {
         return;
       }
 
-      const promise = new Promise((resolve, reject) => {
+      return new Promise((resolve, reject) => {
         executor
           .then(response => {
             log.finalize(response);
             resolve(response);
           })
           .catch(error => {
-            log.finalize(null, error);
             reject(error);
+            log.finalize(null, error);
           });
       });
-      return promise;
     };
   },
 };
