@@ -181,8 +181,6 @@ functions:
               - vivaMs.checkCompletionsStatus
             detail-type:
               - checkCompletionsStatusRequired
-            detail:
-              caseState: [{ 'anything-but': ['COMPLETIONS_REQUIRED'] }]
 
   checkCompletionsDueDate:
     handler: src/lambdas/checkCompletionsDueDate.main
@@ -195,7 +193,7 @@ functions:
             detail-type:
               - checkCompletionSuccess
             detail:
-              caseState: ['COMPLETIONS_REQUIRED']
+              caseState: [{ 'prefix': 'COMPLETIONS' }]
 
   submitCompletion:
     handler: src/lambdas/submitCompletion.main
@@ -212,7 +210,7 @@ functions:
             detail:
               status:
                 type: [{ 'prefix': 'active:submitted' }]
-              state: ['COMPLETIONS_REQUIRED']
+              state: [{ 'prefix': 'COMPLETIONS' }]
 
   syncOfficers:
     handler: src/lambdas/syncOfficers.main
