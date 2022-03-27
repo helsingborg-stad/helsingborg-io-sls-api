@@ -7,25 +7,39 @@ import { getStatusByType } from '../libs/caseStatuses';
 import {
   ACTIVE_COMPLETION_REQUIRED_VIVA,
   ACTIVE_RANDOM_CHECK_REQUIRED_VIVA,
+  COMPLETIONS_RANDOM_SELECT,
+  COMPLETIONS_REQUIRED,
+  COMPLETIONS_PENDING,
 } from '../libs/constants';
 
 import vivaAdapter from './vivaAdapterRequestClient';
 
 function getCompletionFormId(completionForms, completions) {
   const { randomCheckFormId, completionFormId } = completionForms;
-  const { isRandomCheck, isAttachmentPending, requested } = completions;
-  const isRandomCheckRequiredForm =
-    isRandomCheck && !isAttachmentPending && !isAnyRequestedCompletionsReceived(requested);
-  return isRandomCheckRequiredForm ? randomCheckFormId : completionFormId;
+  return isRandomSelect(completions) ? randomCheckFormId : completionFormId;
 }
 
 function getCompletionStatus(completions) {
-  const { isRandomCheck, isAttachmentPending, requested } = completions;
-  const isRandomCheckRequiredStatus =
-    isRandomCheck && !isAttachmentPending && !isAnyRequestedCompletionsReceived(requested);
-  return isRandomCheckRequiredStatus
+  return isRandomSelect(completions)
     ? getStatusByType(ACTIVE_RANDOM_CHECK_REQUIRED_VIVA)
     : getStatusByType(ACTIVE_COMPLETION_REQUIRED_VIVA);
+}
+
+function getCompletionState(completions) {
+  if (isRandomSelect(completions)) {
+    return COMPLETIONS_RANDOM_SELECT;
+  }
+
+  if (completions.isAttachmentPending) {
+    return COMPLETIONS_PENDING;
+  }
+
+  return COMPLETIONS_REQUIRED;
+}
+
+function isRandomSelect(completions) {
+  const { isRandomCheck, isAttachmentPending, requested } = completions;
+  return isRandomCheck && !isAttachmentPending && !isAnyRequestedCompletionsReceived(requested);
 }
 
 function isAnyRequestedCompletionsReceived(requestedList) {
@@ -99,6 +113,7 @@ export default {
   get: {
     formId: getCompletionFormId,
     status: getCompletionStatus,
+    state: getCompletionState,
     caseOnWorkflowId: getCaseOnWorkflowId,
     workflow: {
       completions: getVivaWorkflowCompletions,

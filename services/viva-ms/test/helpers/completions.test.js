@@ -2,23 +2,37 @@ import { getStatusByType } from '../../src/libs/caseStatuses';
 import {
   ACTIVE_COMPLETION_REQUIRED_VIVA,
   ACTIVE_RANDOM_CHECK_REQUIRED_VIVA,
+  COMPLETIONS_RANDOM_SELECT,
+  COMPLETIONS_REQUIRED,
+  COMPLETIONS_PENDING,
 } from '../../src/libs/constants';
 
 function getCompletionFormId(completionForms, completions) {
   const { randomCheckFormId, completionFormId } = completionForms;
-  const { isRandomCheck, isAttachmentPending, requested } = completions;
-  const isRandomCheckRequiredForm =
-    isRandomCheck && !isAttachmentPending && !isAnyRequestedCompletionsReceived(requested);
-  return isRandomCheckRequiredForm ? randomCheckFormId : completionFormId;
+  return isRandomSelect(completions) ? randomCheckFormId : completionFormId;
 }
 
 function getCompletionStatus(completions) {
-  const { isRandomCheck, isAttachmentPending, requested } = completions;
-  const isRandomCheckRequiredStatus =
-    isRandomCheck && !isAttachmentPending && !isAnyRequestedCompletionsReceived(requested);
-  return isRandomCheckRequiredStatus
+  return isRandomSelect(completions)
     ? getStatusByType(ACTIVE_RANDOM_CHECK_REQUIRED_VIVA)
     : getStatusByType(ACTIVE_COMPLETION_REQUIRED_VIVA);
+}
+
+function getCompletionState(completions) {
+  if (isRandomSelect(completions)) {
+    return COMPLETIONS_RANDOM_SELECT;
+  }
+
+  if (completions.isAttachmentPending) {
+    return COMPLETIONS_PENDING;
+  }
+
+  return COMPLETIONS_REQUIRED;
+}
+
+function isRandomSelect(completions) {
+  const { isRandomCheck, isAttachmentPending, requested } = completions;
+  return isRandomCheck && !isAttachmentPending && !isAnyRequestedCompletionsReceived(requested);
 }
 
 function isAnyRequestedCompletionsReceived(requestedList) {
@@ -146,6 +160,12 @@ const completionsAttachmentPendingNotRandomCheck = {
   isRandomCheck: false,
 };
 
+const completionsAttachmentPendingAndRequestedPartialyReceivedNotRandomCheck = {
+  ...completionsRequestedPartialyReceived,
+  isRandomCheck: false,
+  isAttachmentPending: true,
+};
+
 it('Returns form id of form type > recurring random check', () => {
   const results = getCompletionFormId(recurringCompletionsForms, completionsInitialRandomCheck);
   expect(results).toBe('123');
@@ -179,4 +199,21 @@ it('Returns status for recurring completion when requesting completions AND NO a
 it('Returns status for recurring completion when requesting completions AND is pending AND is NOT random check', () => {
   const results = getCompletionStatus(completionsAttachmentPendingNotRandomCheck);
   expect(results).toEqual(expectCompletionStatus);
+});
+
+it('Returns state for recurring random select', () => {
+  const results = getCompletionState(completionsInitialRandomCheck);
+  expect(results).toEqual(COMPLETIONS_RANDOM_SELECT);
+});
+
+it('Returns state for recurring completion pending', () => {
+  const results = getCompletionState(
+    completionsAttachmentPendingAndRequestedPartialyReceivedNotRandomCheck
+  );
+  expect(results).toEqual(COMPLETIONS_PENDING);
+});
+
+it('Returns state for recurring completion required', () => {
+  const results = getCompletionState(completionsDefault);
+  expect(results).toEqual(COMPLETIONS_REQUIRED);
 });

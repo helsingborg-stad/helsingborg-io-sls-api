@@ -6,7 +6,6 @@ import * as dynamoDb from '../libs/dynamoDb';
 import params from '../libs/params';
 import log from '../libs/logs';
 import { getItem as getCase } from '../libs/queries';
-import { COMPLETIONS_REQUIRED } from '../libs/constants';
 
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import completionsHelper from '../helpers/completions';
@@ -42,10 +41,11 @@ export async function main(event, context) {
     return false;
   }
 
+  const { completions } = caseItem.details;
   const caseUpdateAttributes = {
-    newStatus: completionsHelper.get.status(caseItem.details.completions),
-    newState: COMPLETIONS_REQUIRED,
-    newCurrentFormId: completionsHelper.get.formId(vivaCaseSSMParams, caseItem.details.completions),
+    newStatus: completionsHelper.get.status(completions),
+    newState: completionsHelper.get.state(completions),
+    newCurrentFormId: completionsHelper.get.formId(vivaCaseSSMParams, completions),
     newPersons: resetCasePersonsApplicantSignature(caseItem),
   };
   const [updateCaseError, updatedCaseItem] = await to(updateCase(caseKeys, caseUpdateAttributes));
@@ -59,7 +59,7 @@ export async function main(event, context) {
     return false;
   }
 
-  const [putEventError] = await to(putVivaMsEvent.setCaseCompletionsSuccess({ caseKeys }));
+  const [putEventError] = await to(putVivaMsEvent.setCaseCompletionsSuccess(event.detail));
   if (putEventError) {
     log.error(
       'Error put event [setCaseCompletionsSuccess]',
