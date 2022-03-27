@@ -8,25 +8,25 @@ function getCompletionFormId(completionForms, completions) {
   const { randomCheckFormId, completionFormId } = completionForms;
   const { isRandomCheck, isAttachmentPending, requested } = completions;
   const isRandomCheckRequiredForm =
-    isRandomCheck && !isAttachmentPending && !isRequestedCompletionsReceived(requested);
+    isRandomCheck && !isAttachmentPending && !isAnyRequestedCompletionsReceived(requested);
   return isRandomCheckRequiredForm ? randomCheckFormId : completionFormId;
 }
 
 function getCompletionStatus(completions) {
   const { isRandomCheck, isAttachmentPending, requested } = completions;
   const isRandomCheckRequiredStatus =
-    isRandomCheck && !isAttachmentPending && !isRequestedCompletionsReceived(requested);
+    isRandomCheck && !isAttachmentPending && !isAnyRequestedCompletionsReceived(requested);
   return isRandomCheckRequiredStatus
     ? getStatusByType(ACTIVE_RANDOM_CHECK_REQUIRED_VIVA)
     : getStatusByType(ACTIVE_COMPLETION_REQUIRED_VIVA);
 }
 
-function isRequestedCompletionsReceived(requestedList) {
-  return requestedList.reduce((acc, current) => {
+function isAnyRequestedCompletionsReceived(requestedList) {
+  return requestedList.reduce((received, current) => {
     if (current.received) {
       return true;
     }
-    return acc;
+    return received;
   }, undefined);
 }
 
@@ -141,6 +141,11 @@ const completionsDefault = {
   isDueDateExpired: false,
 };
 
+const completionsAttachmentPendingNotRandomCheck = {
+  ...completionsAttachmentPending,
+  isRandomCheck: false,
+};
+
 it('Returns form id of form type > recurring random check', () => {
   const results = getCompletionFormId(recurringCompletionsForms, completionsInitialRandomCheck);
   expect(results).toBe('123');
@@ -156,7 +161,7 @@ it('Returns status for recurring random check', () => {
   expect(results).toEqual(expectedRandomCheckStatus);
 });
 
-it('Returns status for recurring completion', () => {
+it('Returns status for recurring completion when attachment peinding', () => {
   const results = getCompletionStatus(completionsAttachmentPending);
   expect(results).toEqual(expectCompletionStatus);
 });
@@ -166,7 +171,12 @@ it('Returns status for recurring completion when request completions is partialy
   expect(results).toEqual(expectCompletionStatus);
 });
 
-it('Returns status for recurring completion when requesting completions', () => {
+it('Returns status for recurring completion when requesting completions AND NO attachemnt is uploaded', () => {
   const results = getCompletionStatus(completionsDefault);
+  expect(results).toEqual(expectCompletionStatus);
+});
+
+it('Returns status for recurring completion when requesting completions AND is pending AND is NOT random check', () => {
+  const results = getCompletionStatus(completionsAttachmentPendingNotRandomCheck);
   expect(results).toEqual(expectCompletionStatus);
 });
