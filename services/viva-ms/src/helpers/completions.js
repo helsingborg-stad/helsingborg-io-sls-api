@@ -13,13 +13,28 @@ import vivaAdapter from './vivaAdapterRequestClient';
 
 function getCompletionFormId(completionForms, completions) {
   const { randomCheckFormId, completionFormId } = completionForms;
-  return completions.isRandomCheck ? randomCheckFormId : completionFormId;
+  const { isRandomCheck, isAttachmentPending, requested } = completions;
+  const isRandomCheckRequiredForm =
+    isRandomCheck && !isAttachmentPending && !isAnyRequestedCompletionsReceived(requested);
+  return isRandomCheckRequiredForm ? randomCheckFormId : completionFormId;
 }
 
 function getCompletionStatus(completions) {
-  return completions.isRandomCheck
+  const { isRandomCheck, isAttachmentPending, requested } = completions;
+  const isRandomCheckRequiredStatus =
+    isRandomCheck && !isAttachmentPending && !isAnyRequestedCompletionsReceived(requested);
+  return isRandomCheckRequiredStatus
     ? getStatusByType(ACTIVE_RANDOM_CHECK_REQUIRED_VIVA)
     : getStatusByType(ACTIVE_COMPLETION_REQUIRED_VIVA);
+}
+
+function isAnyRequestedCompletionsReceived(requestedList) {
+  return requestedList.reduce((received, current) => {
+    if (current.received) {
+      return true;
+    }
+    return received;
+  }, undefined);
 }
 
 async function getVivaWorkflowCompletions(personalNumber, workflowId) {
