@@ -17,12 +17,12 @@ interface SecretsConfig {
 }
 interface GrantValueTypes {
   secretsConfig: SecretsConfig;
-  token?: string;
+  token: string;
 }
 interface AuthLambdaRequest {
   grant_type: string;
-  refresh_token?: string;
-  code?: string;
+  refresh_token: string;
+  code: string;
 }
 export interface LambdaContext {
   getSecret: (secretName: string, secretKeyName: string) => Promise<string>;
@@ -65,14 +65,13 @@ export async function lambda(event: { body: string }, lambdaContext: LambdaConte
       lambdaContext
     );
 
-    const successResponsePayload = {
+    return response.success(200, {
       type: 'authorizationToken',
       attributes: {
         accessToken,
         refreshToken,
       },
-    };
-    return response.success(200, successResponsePayload);
+    });
   } catch (ex) {
     return response.failure(ex);
   }
@@ -127,7 +126,7 @@ async function generateToken(
 
 async function validateToken(
   secretConfig: SecretsConfig,
-  token = '',
+  token: string,
   lambdaContext: LambdaContext
 ): Promise<Token> {
   const secret = await lambdaContext.getSecret(secretConfig.name, secretConfig.keyName);
