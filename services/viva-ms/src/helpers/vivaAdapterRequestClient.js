@@ -1,15 +1,20 @@
-import * as request from '../libs/request';
-import { to } from 'await-to-js';
-import params from '../libs/params';
-import config from '../libs/config';
-import hash from '../libs/helperHashEncode';
+import to from 'await-to-js';
 
-const VADA_SSM_PARAMS = params.read(config.vada.envsKeyName);
+import config from '../libs/config';
+
+import * as request from '../libs/request';
+import params from '../libs/params';
+import hash from '../libs/helperHashEncode';
 
 const REQUEST_TIMEOUT_IN_MS = 15000;
 
 async function sendVivaAdapterRequest({ endpoint, method, body = undefined }) {
-  const { vadaUrl, xApiKeyToken } = await VADA_SSM_PARAMS;
+  const [paramsReadError, { vadaUrl, xApiKeyToken }] = await to(
+    params.read(config.vada.envsKeyName)
+  );
+  if (paramsReadError) {
+    throw paramsReadError;
+  }
 
   const requestClient = request.requestClient(
     {},
@@ -46,7 +51,12 @@ async function sendVivaAdapterRequest({ endpoint, method, body = undefined }) {
 async function postCompletion(payload) {
   const { personalNumber, workflowId, attachments } = payload;
 
-  const { hashSalt, hashSaltLength } = await VADA_SSM_PARAMS;
+  const [paramsReadError, { hashSalt, hashSaltLength }] = await to(
+    params.read(config.vada.envsKeyName)
+  );
+  if (paramsReadError) {
+    throw paramsReadError;
+  }
 
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
@@ -68,7 +78,12 @@ async function postCompletion(payload) {
 }
 
 async function getLatestWorkflow(personalNumber) {
-  const { hashSalt, hashSaltLength } = await VADA_SSM_PARAMS;
+  const [paramsReadError, { hashSalt, hashSaltLength }] = await to(
+    params.read(config.vada.envsKeyName)
+  );
+  if (paramsReadError) {
+    throw paramsReadError;
+  }
 
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
@@ -88,7 +103,12 @@ async function getLatestWorkflow(personalNumber) {
 async function getWorkflowCompletions(payload) {
   const { personalNumber, workflowId } = payload;
 
-  const { hashSalt, hashSaltLength } = await VADA_SSM_PARAMS;
+  const [paramsReadError, { hashSalt, hashSaltLength }] = await to(
+    params.read(config.vada.envsKeyName)
+  );
+  if (paramsReadError) {
+    throw paramsReadError;
+  }
 
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
@@ -108,7 +128,12 @@ async function getWorkflowCompletions(payload) {
 async function getWorkflow(payload) {
   const { personalNumber, workflowId } = payload;
 
-  const { hashSalt, hashSaltLength } = await VADA_SSM_PARAMS;
+  const [paramsReadError, { hashSalt, hashSaltLength }] = await to(
+    params.read(config.vada.envsKeyName)
+  );
+  if (paramsReadError) {
+    throw paramsReadError;
+  }
 
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
@@ -126,7 +151,12 @@ async function getWorkflow(payload) {
 }
 
 async function getOfficers(personalNumber) {
-  const { hashSalt, hashSaltLength } = await VADA_SSM_PARAMS;
+  const [paramsReadError, { hashSalt, hashSaltLength }] = await to(
+    params.read(config.vada.envsKeyName)
+  );
+  if (paramsReadError) {
+    throw paramsReadError;
+  }
 
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
@@ -145,7 +175,13 @@ async function getOfficers(personalNumber) {
 
 async function postApplication(payload) {
   const { personalNumber, applicationType, answers, rawData, rawDataType, workflowId } = payload;
-  const { hashSalt, hashSaltLength } = await VADA_SSM_PARAMS;
+
+  const [paramsReadError, { hashSalt, hashSaltLength }] = await to(
+    params.read(config.vada.envsKeyName)
+  );
+  if (paramsReadError) {
+    throw paramsReadError;
+  }
 
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
@@ -171,7 +207,12 @@ async function postApplication(payload) {
 }
 
 async function getApplication(personalNumber) {
-  const { hashSalt, hashSaltLength } = await VADA_SSM_PARAMS;
+  const [paramsReadError, { hashSalt, hashSaltLength }] = await to(
+    params.read(config.vada.envsKeyName)
+  );
+  if (paramsReadError) {
+    throw paramsReadError;
+  }
 
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
@@ -189,7 +230,12 @@ async function getApplication(personalNumber) {
 }
 
 async function getPerson(personalNumber) {
-  const { hashSalt, hashSaltLength } = await VADA_SSM_PARAMS;
+  const [paramsReadError, { hashSalt, hashSaltLength }] = await to(
+    params.read(config.vada.envsKeyName)
+  );
+  if (paramsReadError) {
+    throw paramsReadError;
+  }
 
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
@@ -210,7 +256,12 @@ async function getPerson(personalNumber) {
 }
 
 async function getApplicationStatus(personalNumber) {
-  const { hashSalt, hashSaltLength } = await VADA_SSM_PARAMS;
+  const [paramsReadError, { hashSalt, hashSaltLength }] = await to(
+    params.read(config.vada.envsKeyName)
+  );
+  if (paramsReadError) {
+    throw paramsReadError;
+  }
 
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
