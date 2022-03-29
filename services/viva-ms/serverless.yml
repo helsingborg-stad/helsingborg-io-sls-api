@@ -169,6 +169,19 @@ functions:
             detail-type:
               - checkCompletionsStatusRequired
 
+  checkCompletionsDueDate:
+    handler: src/lambdas/checkCompletionsDueDate.main
+    timeout: 15
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - vivaMs.checkCompletionsStatus
+            detail-type:
+              - checkCompletionSuccess
+            detail:
+              caseState: [{ 'prefix': 'COMPLETIONS' }]
+
   submitCompletion:
     handler: src/lambdas/submitCompletion.main
     timeout: 15

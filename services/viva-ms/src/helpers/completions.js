@@ -78,9 +78,23 @@ async function getCaseOnWorkflowId(personalNumber, workflowId) {
   return caseItem;
 }
 
-function isCaseStateCompletions(caseItem) {
-  const { state } = caseItem;
-  return COMPLETIONS_TYPE.reduce((all, type) => state.includes(type) || all, false);
+function getLocaleDate(value) {
+  const LOCALE_OPTION = {
+    timeZone: 'Europe/Stockholm',
+  };
+
+  return new Date(new Date(value).toLocaleDateString('sv-SE', LOCALE_OPTION)).setHours(0, 0, 0, 0);
+}
+
+function notDueDateExpired(date) {
+  const today = getLocaleDate(Date.now());
+  const dueDate = getLocaleDate(date);
+
+  if (today < dueDate) {
+    return true;
+  }
+
+  return false;
 }
 
 export default {
@@ -94,5 +108,5 @@ export default {
       latest: getLatestVivaWorkflowId,
     },
   },
-  isCaseStateCompletions,
+  notDueDateExpired,
 };
