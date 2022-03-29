@@ -134,12 +134,32 @@ const testContitionList = [
   {
     conditionOption: {
       answers: encryptedAnswers,
+      people: peopleAllApplicantsNotSigned,
+      statusType: ACTIVE_COMPLETION_ONGOING,
+      state: COMPLETIONS_REQUIRED,
+    },
+    expectedResult: ACTIVE_COMPLETION_ONGOING,
+    description: `Encrypted answers, all applicants NOT signed, state is ${COMPLETIONS_REQUIRED}, and statusType is ${ACTIVE_COMPLETION_ONGOING}, must result in status type: ${ACTIVE_COMPLETION_ONGOING}`,
+  },
+  {
+    conditionOption: {
+      answers: encryptedAnswers,
       people: peopleApplicantNotSigned,
       statusType: ACTIVE_RANDOM_CHECK_REQUIRED,
       state: COMPLETIONS_RANDOM_SELECT,
     },
     expectedResult: ACTIVE_RANDOM_CHECK_ONGOING,
     description: `Encrypted answers, applicant NOT signed, state is ${COMPLETIONS_RANDOM_SELECT}, must result in status type: ${ACTIVE_RANDOM_CHECK_ONGOING}`,
+  },
+  {
+    conditionOption: {
+      answers: encryptedAnswers,
+      people: peopleApplicantNotSigned,
+      statusType: ACTIVE_RANDOM_CHECK_ONGOING,
+      state: COMPLETIONS_RANDOM_SELECT,
+    },
+    expectedResult: ACTIVE_RANDOM_CHECK_ONGOING,
+    description: `Encrypted answers, applicant NOT signed, state is ${COMPLETIONS_RANDOM_SELECT}, and statusType is ${ACTIVE_RANDOM_CHECK_ONGOING}, must result in status type: ${ACTIVE_RANDOM_CHECK_ONGOING}`,
   },
   {
     conditionOption: {

@@ -1,3 +1,4 @@
+import { COMPLETIONS_RANDOM_SELECT } from '../libs/constants';
 import {
   ACTIVE_ONGOING,
   ACTIVE_SIGNATURE_PENDING,
@@ -9,6 +10,7 @@ import {
   ACTIVE_RANDOM_CHECK_REQUIRED,
   ACTIVE_RANDOM_CHECK_ONGOING,
   ACTIVE_RANDOM_CHECK_SUBMITTED,
+  COMPLETIONS_REQUIRED,
 } from '../libs/constants';
 
 function isSignaturePending({ answers, people }) {
@@ -29,11 +31,9 @@ function isSubmitted({ answers, people }) {
   return answers && !isEncrypted(answers) && hasAllSigned(people);
 }
 
-function isCompletionOngoing({ answers, people, state, statusType }) {
+function isCompletionOngoing({ answers, people, state }) {
   return (
-    isAnswersEncryptedApplicantNotSigend({ answers, people }) &&
-    state.startsWith('COMPLETIONS') &&
-    statusType.startsWith(ACTIVE_COMPLETION_REQUIRED)
+    isAnswersEncryptedApplicantNotSigend({ answers, people }) && state === COMPLETIONS_REQUIRED
   );
 }
 
@@ -47,11 +47,9 @@ function isCompletionSubmitted({ answers, people, state, statusType }) {
   );
 }
 
-function isRandomCheckOngoing({ answers, people, state, statusType }) {
+function isRandomCheckOngoing({ answers, people, state }) {
   return (
-    isAnswersEncryptedApplicantNotSigend({ answers, people }) &&
-    state.startsWith('COMPLETIONS') &&
-    statusType.startsWith(ACTIVE_RANDOM_CHECK_REQUIRED)
+    isAnswersEncryptedApplicantNotSigend({ answers, people }) && state === COMPLETIONS_RANDOM_SELECT
   );
 }
 
