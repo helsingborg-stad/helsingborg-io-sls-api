@@ -9,7 +9,6 @@ import {
   ACTIVE_RANDOM_CHECK_REQUIRED,
   ACTIVE_RANDOM_CHECK_ONGOING,
   ACTIVE_RANDOM_CHECK_SUBMITTED,
-  COMPLETIONS_REQUIRED,
 } from '../libs/constants';
 
 function isSignaturePending({ answers, people }) {
@@ -22,20 +21,18 @@ function isSignatureCompleted({ answers, people }) {
   return answers && isEncrypted(answers) && hasAllSigned(people);
 }
 
-function isOngoing({ answers, people, state }) {
-  return (
-    isAnswersEncryptedApplicantNotSigend({ answers, people }) && state !== COMPLETIONS_REQUIRED
-  );
+function isOngoing({ answers, people }) {
+  return isAnswersEncryptedApplicantNotSigend({ answers, people });
 }
 
-function isSubmitted({ answers, people, state }) {
-  return answers && !isEncrypted(answers) && hasAllSigned(people) && state !== COMPLETIONS_REQUIRED;
+function isSubmitted({ answers, people }) {
+  return answers && !isEncrypted(answers) && hasAllSigned(people);
 }
 
 function isCompletionOngoing({ answers, people, state, statusType }) {
   return (
     isAnswersEncryptedApplicantNotSigend({ answers, people }) &&
-    state === COMPLETIONS_REQUIRED &&
+    state.startsWith('COMPLETIONS') &&
     statusType.startsWith(ACTIVE_COMPLETION_REQUIRED)
   );
 }
@@ -45,7 +42,7 @@ function isCompletionSubmitted({ answers, people, state, statusType }) {
     answers &&
     !isEncrypted(answers) &&
     hasAllSigned(people) &&
-    state === COMPLETIONS_REQUIRED &&
+    state.startsWith('COMPLETIONS') &&
     statusType.startsWith(ACTIVE_COMPLETION_REQUIRED)
   );
 }
@@ -53,7 +50,7 @@ function isCompletionSubmitted({ answers, people, state, statusType }) {
 function isRandomCheckOngoing({ answers, people, state, statusType }) {
   return (
     isAnswersEncryptedApplicantNotSigend({ answers, people }) &&
-    state === COMPLETIONS_REQUIRED &&
+    state.startsWith('COMPLETIONS') &&
     statusType.startsWith(ACTIVE_RANDOM_CHECK_REQUIRED)
   );
 }
@@ -63,7 +60,7 @@ function isRandomCheckSubmitted({ answers, people, state, statusType }) {
     answers &&
     !isEncrypted(answers) &&
     hasAllSigned(people) &&
-    state === COMPLETIONS_REQUIRED &&
+    state.startsWith('COMPLETIONS') &&
     statusType.startsWith(ACTIVE_RANDOM_CHECK_REQUIRED)
   );
 }

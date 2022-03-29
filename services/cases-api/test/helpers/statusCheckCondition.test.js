@@ -12,6 +12,7 @@ import {
   ACTIVE_RANDOM_CHECK_SUBMITTED,
 
   // state
+  COMPLETIONS_RANDOM_SELECT,
   COMPLETIONS_REQUIRED,
 } from '../../../../libs/constants';
 
@@ -135,20 +136,20 @@ const testContitionList = [
       answers: encryptedAnswers,
       people: peopleApplicantNotSigned,
       statusType: ACTIVE_RANDOM_CHECK_REQUIRED,
-      state: COMPLETIONS_REQUIRED,
+      state: COMPLETIONS_RANDOM_SELECT,
     },
     expectedResult: ACTIVE_RANDOM_CHECK_ONGOING,
-    description: `Encrypted answers, applicant NOT signed, state is ${COMPLETIONS_REQUIRED}, must result in status type: ${ACTIVE_RANDOM_CHECK_ONGOING}`,
+    description: `Encrypted answers, applicant NOT signed, state is ${COMPLETIONS_RANDOM_SELECT}, must result in status type: ${ACTIVE_RANDOM_CHECK_ONGOING}`,
   },
   {
     conditionOption: {
       answers: encryptedAnswers,
       people: peopleAllApplicantsNotSigned,
       statusType: ACTIVE_RANDOM_CHECK_REQUIRED,
-      state: COMPLETIONS_REQUIRED,
+      state: COMPLETIONS_RANDOM_SELECT,
     },
     expectedResult: ACTIVE_RANDOM_CHECK_ONGOING,
-    description: `Encrypted answers, all applicants NOT signed, state is ${COMPLETIONS_REQUIRED}, must result in status type: ${ACTIVE_RANDOM_CHECK_ONGOING}`,
+    description: `Encrypted answers, all applicants NOT signed, state is ${COMPLETIONS_RANDOM_SELECT}, must result in status type: ${ACTIVE_RANDOM_CHECK_ONGOING}`,
   },
 
   // submitted
@@ -195,20 +196,20 @@ const testContitionList = [
       answers: decryptedAnswers,
       people: peopleApplicantSigned,
       statusType: ACTIVE_RANDOM_CHECK_REQUIRED,
-      state: COMPLETIONS_REQUIRED,
+      state: COMPLETIONS_RANDOM_SELECT,
     },
     expectedResult: ACTIVE_RANDOM_CHECK_SUBMITTED,
-    description: `Decrypted answers, applicant signed, state is ${COMPLETIONS_REQUIRED}, must result in status type: ${ACTIVE_RANDOM_CHECK_SUBMITTED}`,
+    description: `Decrypted answers, applicant signed, state is ${COMPLETIONS_RANDOM_SELECT}, must result in status type: ${ACTIVE_RANDOM_CHECK_SUBMITTED}`,
   },
   {
     conditionOption: {
       answers: decryptedAnswers,
       people: peopleAllApplicantsSigned,
       statusType: ACTIVE_RANDOM_CHECK_REQUIRED,
-      state: COMPLETIONS_REQUIRED,
+      state: COMPLETIONS_RANDOM_SELECT,
     },
     expectedResult: ACTIVE_RANDOM_CHECK_SUBMITTED,
-    description: `Decrypted answers, all applicants signed, state is ${COMPLETIONS_REQUIRED}, must result in status type: ${ACTIVE_RANDOM_CHECK_SUBMITTED}`,
+    description: `Decrypted answers, all applicants signed, state is ${COMPLETIONS_RANDOM_SELECT}, must result in status type: ${ACTIVE_RANDOM_CHECK_SUBMITTED}`,
   },
 
   // signature
