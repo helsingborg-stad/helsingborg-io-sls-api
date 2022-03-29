@@ -4,10 +4,8 @@ import {
   ACTIVE_SIGNATURE_PENDING,
   ACTIVE_SIGNATURE_COMPLETED,
   ACTIVE_SUBMITTED,
-  ACTIVE_COMPLETION_REQUIRED,
   ACTIVE_COMPLETION_ONGOING,
   ACTIVE_COMPLETION_SUBMITTED,
-  ACTIVE_RANDOM_CHECK_REQUIRED,
   ACTIVE_RANDOM_CHECK_ONGOING,
   ACTIVE_RANDOM_CHECK_SUBMITTED,
   COMPLETIONS_REQUIRED,
@@ -37,14 +35,8 @@ function isCompletionOngoing({ answers, people, state }) {
   );
 }
 
-function isCompletionSubmitted({ answers, people, state, statusType }) {
-  return (
-    answers &&
-    !isEncrypted(answers) &&
-    hasAllSigned(people) &&
-    state.startsWith('COMPLETIONS') &&
-    statusType.startsWith(ACTIVE_COMPLETION_REQUIRED)
-  );
+function isCompletionSubmitted({ answers, people, state }) {
+  return answers && !isEncrypted(answers) && hasAllSigned(people) && state === COMPLETIONS_REQUIRED;
 }
 
 function isRandomCheckOngoing({ answers, people, state }) {
@@ -53,13 +45,9 @@ function isRandomCheckOngoing({ answers, people, state }) {
   );
 }
 
-function isRandomCheckSubmitted({ answers, people, state, statusType }) {
+function isRandomCheckSubmitted({ answers, people, state }) {
   return (
-    answers &&
-    !isEncrypted(answers) &&
-    hasAllSigned(people) &&
-    state.startsWith('COMPLETIONS') &&
-    statusType.startsWith(ACTIVE_RANDOM_CHECK_REQUIRED)
+    answers && !isEncrypted(answers) && hasAllSigned(people) && state === COMPLETIONS_RANDOM_SELECT
   );
 }
 
