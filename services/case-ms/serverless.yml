@@ -20,6 +20,7 @@ provider:
   eventBridge:
     useCloudFormation: true
   tracing:
+    apiGateway: false
     lambda: true
 
   environment:
