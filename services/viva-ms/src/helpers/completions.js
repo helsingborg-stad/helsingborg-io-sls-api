@@ -5,8 +5,10 @@ import config from '../libs/config';
 import * as dynamoDb from '../libs/dynamoDb';
 import { getStatusByType } from '../libs/caseStatuses';
 import {
-  ACTIVE_COMPLETION_REQUIRED_VIVA,
   ACTIVE_RANDOM_CHECK_REQUIRED_VIVA,
+  ACTIVE_RANDOM_CHECK_SUBMITTED,
+  ACTIVE_COMPLETION_REQUIRED_VIVA,
+  ACTIVE_COMPLETION_SUBMITTED,
   COMPLETIONS_RANDOM_SELECT,
   COMPLETIONS_REQUIRED,
   COMPLETIONS_PENDING,
@@ -14,35 +16,47 @@ import {
 
 import vivaAdapter from './vivaAdapterRequestClient';
 
-function getCompletionFormId(completionForms, completions) {
+export function getCompletionFormId(completionForms, completions) {
   const { randomCheckFormId, completionFormId } = completionForms;
   return isRandomSelect(completions) ? randomCheckFormId : completionFormId;
 }
 
-function getCompletionStatus(completions) {
-  return isRandomSelect(completions)
-    ? getStatusByType(ACTIVE_RANDOM_CHECK_REQUIRED_VIVA)
-    : getStatusByType(ACTIVE_COMPLETION_REQUIRED_VIVA);
-}
+export function getCompletionStatus(completions) {
+  const { isRandomCheck, isAttachmentPending, requested } = completions;
 
-function getCompletionState(completions) {
-  if (isRandomSelect(completions)) {
-    return COMPLETIONS_RANDOM_SELECT;
+  if (isRandomCheck && !isAnyRequestedReceived(requested)) {
+    if (isAttachmentPending) {
+      return getStatusByType(ACTIVE_RANDOM_CHECK_SUBMITTED);
+    }
+    return getStatusByType(ACTIVE_RANDOM_CHECK_REQUIRED_VIVA);
   }
 
-  if (completions.isAttachmentPending) {
+  if (isAttachmentPending && isAnyRequestedReceived(requested)) {
+    return getStatusByType(ACTIVE_COMPLETION_SUBMITTED);
+  }
+
+  return getStatusByType(ACTIVE_COMPLETION_REQUIRED_VIVA);
+}
+
+export function getCompletionState(completions) {
+  const { isRandomCheck, isAttachmentPending, requested } = completions;
+  if (isAttachmentPending) {
     return COMPLETIONS_PENDING;
+  }
+
+  if (isRandomCheck && !isAnyRequestedReceived(requested)) {
+    return COMPLETIONS_RANDOM_SELECT;
   }
 
   return COMPLETIONS_REQUIRED;
 }
 
-function isRandomSelect(completions) {
-  const { isRandomCheck, isAttachmentPending, requested } = completions;
-  return isRandomCheck && !isAttachmentPending && !isAnyRequestedCompletionsReceived(requested);
+export function isRandomSelect(completions) {
+  const { isRandomCheck, requested } = completions;
+  return isRandomCheck && !isAnyRequestedReceived(requested);
 }
 
-function isAnyRequestedCompletionsReceived(requestedList) {
+export function isAnyRequestedReceived(requestedList) {
   return requestedList.reduce((received, current) => {
     if (current.received) {
       return true;
