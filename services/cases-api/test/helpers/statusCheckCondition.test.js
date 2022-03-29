@@ -204,6 +204,16 @@ const testContitionList = [
   {
     conditionOption: {
       answers: decryptedAnswers,
+      people: peopleApplicantSigned,
+      statusType: ACTIVE_COMPLETION_ONGOING,
+      state: COMPLETIONS_REQUIRED,
+    },
+    expectedResult: ACTIVE_COMPLETION_SUBMITTED,
+    description: `\tdecrypted answers\n\tapplicant signed\n\tstate is ${ACTIVE_COMPLETION_ONGOING}\n\tstatusType is ${ACTIVE_COMPLETION_ONGOING}\n\texpect status type: ${ACTIVE_COMPLETION_SUBMITTED}`,
+  },
+  {
+    conditionOption: {
+      answers: decryptedAnswers,
       people: peopleAllApplicantsSigned,
       statusType: ACTIVE_COMPLETION_REQUIRED,
       state: COMPLETIONS_REQUIRED,
@@ -220,6 +230,16 @@ const testContitionList = [
     },
     expectedResult: ACTIVE_RANDOM_CHECK_SUBMITTED,
     description: `Decrypted answers, applicant signed, state is ${COMPLETIONS_RANDOM_SELECT}, must result in status type: ${ACTIVE_RANDOM_CHECK_SUBMITTED}`,
+  },
+  {
+    conditionOption: {
+      answers: decryptedAnswers,
+      people: peopleApplicantSigned,
+      statusType: ACTIVE_RANDOM_CHECK_ONGOING,
+      state: COMPLETIONS_RANDOM_SELECT,
+    },
+    expectedResult: ACTIVE_RANDOM_CHECK_SUBMITTED,
+    description: `\tdecrypted answers\n\tapplicant signed\n\tstate is ${COMPLETIONS_RANDOM_SELECT}\n\tstatusType is ${ACTIVE_RANDOM_CHECK_ONGOING}\n\texpect status type ${ACTIVE_RANDOM_CHECK_SUBMITTED}`,
   },
   {
     conditionOption: {
