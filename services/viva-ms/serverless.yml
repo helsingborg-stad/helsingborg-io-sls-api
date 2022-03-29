@@ -181,6 +181,8 @@ functions:
               - vivaMs.checkCompletionsStatus
             detail-type:
               - checkCompletionsStatusRequired
+            detail:
+              caseStatus: [{ 'anything-but': { 'prefix': 'active:ongoing' } }]
 
   checkCompletionsDueDate:
     handler: src/lambdas/checkCompletionsDueDate.main
