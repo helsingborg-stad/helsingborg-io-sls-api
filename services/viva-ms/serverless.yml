@@ -192,8 +192,6 @@ functions:
               - vivaMs.checkCompletionsStatus
             detail-type:
               - checkCompletionSuccess
-            detail:
-              caseState: [{ 'prefix': 'COMPLETIONS' }]
 
   submitCompletion:
     handler: src/lambdas/submitCompletion.main
