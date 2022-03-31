@@ -137,7 +137,9 @@ export default {
     caseOnWorkflowId: getCaseOnWorkflowId,
     workflow: {
       completions: getVivaWorkflowCompletions,
-      latest: getLatestVivaWorkflowId,
+      latest: {
+        id: getLatestVivaWorkflowId,
+      },
     },
   },
   notDueDateExpired,
