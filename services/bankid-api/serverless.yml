@@ -61,6 +61,10 @@ provider:
             - !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${file(../../config.json):${self:custom.stage}.auth.secrets.refreshToken.name}-??????'
             - !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${file(../../config.json):${self:custom.stage}.auth.secrets.authorizationCode.name}-??????'
 
+        - Effect: Allow
+          Action:
+            - kms:Decrypt
+          Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
 functions:
   auth:
     handler: src/lambdas/auth.main
