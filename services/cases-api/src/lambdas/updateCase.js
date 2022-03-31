@@ -14,7 +14,7 @@ import { decodeToken } from '../libs/token';
 import { objectWithoutProperties } from '../libs/objects';
 import { getStatusByType } from '../libs/caseStatuses';
 
-import geStatusTypeOnCondition from '../helpers/statusCheckCondition';
+import getStatusTypeOnCondition from '../helpers/statusCheckCondition';
 import { getUserCase } from '../helpers/dynamoDb';
 import { updateCaseValidationSchema } from '../helpers/schema';
 import log from '../libs/logs';
@@ -79,7 +79,7 @@ export async function main(event, context) {
   const ExpressionAttributeValues = { ':newUpdatedAt': Date.now() };
 
   const updatedPeopleSignature = updatePeopleSignature(personalNumber, userCase.persons, signature);
-  const newCaseStatusType = geStatusTypeOnCondition({
+  const newCaseStatusType = getStatusTypeOnCondition({
     answers,
     people: updatedPeopleSignature,
     state: userCase.state,
