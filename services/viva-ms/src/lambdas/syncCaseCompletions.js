@@ -11,7 +11,7 @@ import completionsHelper from '../helpers/completions';
 export async function main(event, context) {
   const {
     user: { personalNumber },
-    vivaApplicantStatusCodeList,
+    status: vivaApplicantStatusCodeList,
   } = event.detail;
 
   const latestWorkflowId = await getLatestWorkflowId({ personalNumber, context });
