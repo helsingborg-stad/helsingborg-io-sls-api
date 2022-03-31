@@ -191,7 +191,7 @@ functions:
             source:
               - vivaMs.checkCompletionsStatus
             detail-type:
-              - checkCompletionSuccess
+              - 'Completions Due Date Probably Overdue'
 
   submitCompletion:
     handler: src/lambdas/submitCompletion.main

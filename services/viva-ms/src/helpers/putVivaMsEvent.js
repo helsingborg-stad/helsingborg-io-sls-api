@@ -13,9 +13,9 @@ export const eventTypeCollection = {
     source: 'vivaMs.submitApplication',
     detailType: 'applicationReceivedSuccess',
   },
-  checkCompletionSuccess: {
-    source: 'vivaMs.checkCompletion',
-    detailType: 'checkCompletionSuccess',
+  checkCompletionsStatusSuccess: {
+    source: 'vivaMs.checkCompletionsStatus',
+    detailType: 'Completions Due Date Probably Overdue',
   },
   checkCompletionsStatusRequired: {
     source: 'vivaMs.checkCompletionsStatus',
@@ -53,11 +53,13 @@ function putUserEvent(detail, type, typeCollection = eventTypeCollection) {
 }
 
 export default {
+  completions: {
+    success: detail => putUserEvent(detail, 'checkCompletionsStatusSuccess'),
+    required: detail => putUserEvent(detail, 'checkCompletionsStatusRequired'),
+  },
   checkOpenPeriodSuccess: detail => putUserEvent(detail, 'checkOpenPeriodSuccess'),
   personDetailSuccess: detail => putUserEvent(detail, 'personDetailSuccess'),
   applicationReceivedSuccess: detail => putUserEvent(detail, 'applicationReceivedSuccess'),
-  checkCompletionSuccess: detail => putUserEvent(detail, 'checkCompletionSuccess'),
-  checkCompletionsStatusRequired: detail => putUserEvent(detail, 'checkCompletionsStatusRequired'),
   decideCaseStatusSuccess: detail => putUserEvent(detail, 'decideCaseStatusSuccess'),
   syncWorkflowSuccess: detail => putUserEvent(detail, 'syncWorkflowSuccess'),
   htmlGeneratedSuccess: detail => putUserEvent(detail, 'htmlGeneratedSuccess'),

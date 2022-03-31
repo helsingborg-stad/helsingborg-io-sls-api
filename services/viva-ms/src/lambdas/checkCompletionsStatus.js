@@ -21,7 +21,7 @@ export async function main(event, context) {
     VIVA_STATUS_WEB_APPLICATION_ALLOWED,
   ];
   if (validateApplicationStatus(vivaApplicantStatusCodeList, completionStatusCodes)) {
-    const [putEventError] = await to(putVivaMsEvent.checkCompletionsStatusRequired(event.detail));
+    const [putEventError] = await to(putVivaMsEvent.completions.required(event.detail));
     if (putEventError) {
       log.error(
         'Put event [checkCompletionsStatusRequired] failed',
@@ -34,10 +34,10 @@ export async function main(event, context) {
     return true;
   }
 
-  const [putEventError] = await to(putVivaMsEvent.checkCompletionSuccess(event.detail));
+  const [putEventError] = await to(putVivaMsEvent.completions.success(event.detail));
   if (putEventError) {
     log.error(
-      'Put event [checkCompletionSuccess] failed',
+      'Put event [checkCompletionStatusSuccess] failed',
       context.awsRequestId,
       'service-viva-ms-checkCompletionsStatus-020',
       putEventError
