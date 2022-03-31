@@ -58,7 +58,9 @@ export async function main(event, context) {
     newStatus: getStatusByType(ACTIVE_PROCESSING),
     newState: COMPLETIONS_DUE_DATE_PASSED,
   };
-  const [updateCaseError, updatedCaseItem] = await to(updateCase(caseKeys, caseUpdateAttributes));
+  const [updateCaseError, { Attributes: updatedCaseItem }] = await to(
+    updateCase(caseKeys, caseUpdateAttributes)
+  );
   if (updateCaseError) {
     log.error(
       'Failed to update case',
@@ -99,7 +101,8 @@ function updateCase(keys, caseUpdateAttributes) {
       ':completionsRequested': [],
       ':completionsDueDate': null,
     },
-    ReturnValues: 'UPDATED_NEW',
+    ProjectionExpression: 'id',
+    ReturnValues: 'ALL_NEW',
   };
 
   return dynamoDb.call('update', updateParams);
