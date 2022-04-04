@@ -187,7 +187,7 @@ describe('Completions random select (getCompletionState)', () => {
     },
   ])('$description', ({ conditionOption, expectedResult }) => {
     const results = getCompletionState(conditionOption);
-    expect(results).toEqual(expectedResult);
+    expect(results).toBe(expectedResult);
   });
 });
 
@@ -213,7 +213,7 @@ describe('Completions random select, requested received (getCompletionState)', (
     },
   ])('$description', ({ conditionOption, expectedResult }) => {
     const results = getCompletionState(conditionOption);
-    expect(results).toEqual(expectedResult);
+    expect(results).toBe(expectedResult);
   });
 });
 
@@ -239,7 +239,7 @@ describe('Completions requesting (getCompletionState)', () => {
     },
   ])('$description', ({ conditionOption, expectedResult }) => {
     const results = getCompletionState(conditionOption);
-    expect(results).toEqual(expectedResult);
+    expect(results).toBe(expectedResult);
   });
 });
 
@@ -265,6 +265,6 @@ describe('Completions requested received (getCompletionState)', () => {
     },
   ])('$description', ({ conditionOption, expectedResult }) => {
     const results = getCompletionState(conditionOption);
-    expect(results).toEqual(expectedResult);
+    expect(results).toBe(expectedResult);
   });
 });
