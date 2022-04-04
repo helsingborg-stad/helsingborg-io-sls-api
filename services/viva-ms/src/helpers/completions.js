@@ -110,17 +110,17 @@ async function getCaseOnWorkflowId(personalNumber, workflowId) {
   return caseItem;
 }
 
-function getLocaleDate(date) {
+function getLocaleDate(timestamp) {
   return new Date(
-    new Date(date).toLocaleDateString('sv-SE', {
+    new Date(timestamp).toLocaleDateString('sv-SE', {
       timeZone: 'Europe/Stockholm',
     })
   ).setHours(0, 0, 0, 0);
 }
 
-function isDueDateExpired(date) {
+function isDueDateExpired(timestamp) {
   const today = getLocaleDate(Date.now());
-  const dueDate = getLocaleDate(date);
+  const dueDate = getLocaleDate(timestamp);
   return today > dueDate;
 }
 
