@@ -44,13 +44,7 @@ export async function main(event, context) {
     return false;
   }
 
-  if (completionsHelper.notDueDateExpired(caseItem.details.completions.dueDate)) {
-    log.info(
-      'Completions due date is NOT expired',
-      context.awsRequestId,
-      'service-viva-ms-checkCompletionsDueDate-020',
-      caseItem.id
-    );
+  if (!completionsHelper.isDueDateExpired(caseItem.details.completions.dueDate)) {
     return true;
   }
 

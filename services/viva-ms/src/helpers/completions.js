@@ -118,15 +118,10 @@ function getLocaleDate(value) {
   return new Date(new Date(value).toLocaleDateString('sv-SE', LOCALE_OPTION)).setHours(0, 0, 0, 0);
 }
 
-function notDueDateExpired(date) {
+function isDueDateExpired(date) {
   const today = getLocaleDate(Date.now());
   const dueDate = getLocaleDate(date);
-
-  if (today < dueDate) {
-    return true;
-  }
-
-  return false;
+  return today > dueDate;
 }
 
 export default {
@@ -142,5 +137,5 @@ export default {
       },
     },
   },
-  notDueDateExpired,
+  isDueDateExpired,
 };
