@@ -14,18 +14,44 @@ export async function main(event, context) {
     status: vivaApplicantStatusCodeList,
   } = event.detail;
 
-  const latestWorkflowId = await getLatestWorkflowId({ personalNumber, context });
-  const workflowCompletions = await getWorkflowCompletions({
-    personalNumber,
-    latestWorkflowId,
-    context,
-  });
+  const [getLatestWorkflowIdError, latestWorkflowId] = await to(
+    completionsHelper.get.workflow.latest.id(personalNumber)
+  );
+  if (getLatestWorkflowIdError) {
+    log.error(
+      'Error getting the latest Viva workflow',
+      context.awsRequestId,
+      'service-viva-ms-syncCaseCompletions-010',
+      getLatestWorkflowIdError
+    );
+    return false;
+  }
 
-  const userCase = await getUserCase({
-    personalNumber,
-    latestWorkflowId,
-    context,
-  });
+  const [getWorkflowCompletionsError, workflowCompletions] = await to(
+    completionsHelper.get.workflow.completions(personalNumber, latestWorkflowId)
+  );
+  if (getWorkflowCompletionsError) {
+    log.error(
+      'Error getting Viva workflow completions',
+      context.awsRequestId,
+      'service-viva-ms-syncCaseCompletions-015',
+      getWorkflowCompletionsError
+    );
+    return false;
+  }
+
+  const [getCaseError, userCase] = await to(
+    completionsHelper.get.caseOnWorkflowId(personalNumber, latestWorkflowId)
+  );
+  if (getCaseError) {
+    log.error(
+      'Get case from cases table failed',
+      context.awsRequestId,
+      'service-viva-ms-syncCaseCompletions-020',
+      getCaseError
+    );
+    return false;
+  }
 
   const caseKeys = {
     PK: userCase.PK,
@@ -71,59 +97,6 @@ export async function main(event, context) {
   );
 
   return true;
-}
-
-async function getLatestWorkflowId(params) {
-  const { personalNumber, context } = params;
-  const [getLatestWorkflowIdError, latestWorkflowId] = await to(
-    completionsHelper.get.workflow.latest.id(personalNumber)
-  );
-  if (getLatestWorkflowIdError) {
-    log.error(
-      'Error getting the latest Viva workflow',
-      context.awsRequestId,
-      'service-viva-ms-syncCaseCompletions-010',
-      getLatestWorkflowIdError
-    );
-    return false;
-  }
-  return latestWorkflowId;
-}
-
-async function getWorkflowCompletions(params) {
-  const { personalNumber, latestWorkflowId, context } = params;
-  const [getWorkflowCompletionsError, workflowCompletions] = await to(
-    completionsHelper.get.workflow.completions(personalNumber, latestWorkflowId)
-  );
-  if (getWorkflowCompletionsError) {
-    log.error(
-      'Error getting Viva workflow completions',
-      context.awsRequestId,
-      'service-viva-ms-syncCaseCompletions-015',
-      getWorkflowCompletionsError
-    );
-    return false;
-  }
-
-  return workflowCompletions;
-}
-
-async function getUserCase(params) {
-  const { personalNumber, latestWorkflowId, context } = params;
-  const [getCaseError, userCase] = await to(
-    completionsHelper.get.caseOnWorkflowId(personalNumber, latestWorkflowId)
-  );
-  if (getCaseError) {
-    log.error(
-      'Get case from cases table failed',
-      context.awsRequestId,
-      'service-viva-ms-syncCaseCompletions-020',
-      getCaseError
-    );
-    return false;
-  }
-
-  return userCase;
 }
 
 function updateCaseCompletions(keys, newWorkflowCompletions) {
