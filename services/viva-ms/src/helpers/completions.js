@@ -5,29 +5,61 @@ import config from '../libs/config';
 import * as dynamoDb from '../libs/dynamoDb';
 import { getStatusByType } from '../libs/caseStatuses';
 import {
-  VIVA_COMPLETION_REQUIRED,
-  VIVA_RANDOM_CHECK_REQUIRED,
-  ACTIVE_COMPLETION_REQUIRED_VIVA,
+  // status type
   ACTIVE_RANDOM_CHECK_REQUIRED_VIVA,
+  ACTIVE_RANDOM_CHECK_SUBMITTED,
+  ACTIVE_COMPLETION_REQUIRED_VIVA,
+  ACTIVE_COMPLETION_SUBMITTED,
+
+  // state
+  VIVA_RANDOM_CHECK_REQUIRED,
+  VIVA_COMPLETION_REQUIRED,
+  COMPLETIONS_PENDING,
 } from '../libs/constants';
 
 import vivaAdapter from './vivaAdapterRequestClient';
 
-const COMPLETIONS_TYPE = ['RANDOM_CHECK', 'COMPLETION'];
-
-function getCompletionFormId(completionForms, completions) {
+export function getCompletionFormId(completionForms, completions) {
   const { randomCheckFormId, completionFormId } = completionForms;
-  return completions.isRandomCheck ? randomCheckFormId : completionFormId;
+  return isRandomCheck(completions) ? randomCheckFormId : completionFormId;
 }
 
-function getCompletionStatus(completions) {
-  return completions.isRandomCheck
-    ? getStatusByType(ACTIVE_RANDOM_CHECK_REQUIRED_VIVA)
-    : getStatusByType(ACTIVE_COMPLETION_REQUIRED_VIVA);
+export function getCompletionStatus(completions) {
+  const { isRandomCheck, isAttachmentPending, requested } = completions;
+
+  if (isRandomCheck && !isAnyRequestedReceived(requested)) {
+    if (isAttachmentPending) {
+      return getStatusByType(ACTIVE_RANDOM_CHECK_SUBMITTED);
+    }
+    return getStatusByType(ACTIVE_RANDOM_CHECK_REQUIRED_VIVA);
+  }
+
+  if (isAttachmentPending && isAnyRequestedReceived(requested)) {
+    return getStatusByType(ACTIVE_COMPLETION_SUBMITTED);
+  }
+
+  return getStatusByType(ACTIVE_COMPLETION_REQUIRED_VIVA);
 }
 
-function getCompletionState(completions) {
-  return completions.isRandomCheck ? VIVA_RANDOM_CHECK_REQUIRED : VIVA_COMPLETION_REQUIRED;
+export function getCompletionState(completions) {
+  const { isRandomCheck, isAttachmentPending, requested } = completions;
+  if (isAttachmentPending) {
+    return COMPLETIONS_PENDING;
+  }
+
+  if (isRandomCheck && !isAnyRequestedReceived(requested)) {
+    return VIVA_RANDOM_CHECK_REQUIRED;
+  }
+
+  return VIVA_COMPLETION_REQUIRED;
+}
+export function isRandomCheck(completions) {
+  const { isRandomCheck, requested } = completions;
+  return isRandomCheck && !isAnyRequestedReceived(requested);
+}
+
+export function isAnyRequestedReceived(requestedList) {
+  return requestedList.some(item => item.received);
 }
 
 async function getVivaWorkflowCompletions(personalNumber, workflowId) {
@@ -78,9 +110,18 @@ async function getCaseOnWorkflowId(personalNumber, workflowId) {
   return caseItem;
 }
 
-function isCaseStateCompletions(caseItem) {
-  const { state } = caseItem;
-  return COMPLETIONS_TYPE.reduce((all, type) => state.includes(type) || all, false);
+function getLocaleDate(timestamp) {
+  return new Date(
+    new Date(timestamp).toLocaleDateString('sv-SE', {
+      timeZone: 'Europe/Stockholm',
+    })
+  ).setHours(0, 0, 0, 0);
+}
+
+function isDueDateExpired(timestamp) {
+  const today = getLocaleDate(Date.now());
+  const dueDate = getLocaleDate(timestamp);
+  return today > dueDate;
 }
 
 export default {
@@ -91,8 +132,10 @@ export default {
     caseOnWorkflowId: getCaseOnWorkflowId,
     workflow: {
       completions: getVivaWorkflowCompletions,
-      latest: getLatestVivaWorkflowId,
+      latest: {
+        id: getLatestVivaWorkflowId,
+      },
     },
   },
-  isCaseStateCompletions,
+  isDueDateExpired,
 };

@@ -6,6 +6,8 @@ export const ACTIVE_SIGNATURE_PENDING: 'active:signature:pending';
 export const ACTIVE_SUBMITTED: 'active:submitted';
 export const ACTIVE_PROCESSING: 'active:processing';
 export const CLOSED: 'closed';
+export const ACTIVE_COMPLETION_REQUIRED: 'active:completionRequired';
+export const ACTIVE_RANDOM_CHECK_REQUIRED: 'active:randomCheckRequired';
 export const ACTIVE_COMPLETION_ONGOING: 'active:ongoing:completion';
 export const ACTIVE_RANDOM_CHECK_ONGOING: 'active:ongoing:randomCheck';
 export const ACTIVE_COMPLETION_SUBMITTED: 'active:submitted:completion';
@@ -15,6 +17,8 @@ export const PDF_GENERATED: 'PDF_GENERATED';
 export const PDF_NOT_GENERATED: 'PDF_NOT_GENERATED';
 export const COMPLETION_REQUIRED: 'COMPLETION_REQUIRED';
 export const RANDOM_CHECK_REQUIRED: 'RANDOM_CHECK_REQUIRED';
+export const COMPLETIONS_PENDING: 'COMPLETIONS_PENDING';
+export const COMPLETIONS_DUE_DATE_PASSED: 'COMPLETIONS_DUE_DATE_PASSED';
 export const CASE_PROVIDER_VIVA: 'VIVA';
 /**
  * Service: Ekonomiskt bistånd

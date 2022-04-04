@@ -147,8 +147,8 @@ functions:
           arn: !ImportValue ${self:custom.stage}-VivaSubmissionQueueArn
           batchSize: 1
 
-  checkCompletionsStatus:
-    handler: src/lambdas/checkCompletionsStatus.main
+  syncCaseCompletions:
+    handler: src/lambdas/syncCaseCompletions.main
     timeout: 15
     events:
       - eventBridge:
@@ -157,6 +157,17 @@ functions:
               - vivaMs.applicationStatus
             detail-type:
               - applicationStatusSuccess
+
+  checkCompletionsStatus:
+    handler: src/lambdas/checkCompletionsStatus.main
+    timeout: 15
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - vivaMs.syncCaseCompletions
+            detail-type:
+              - syncSuccess
 
   setCaseCompletions:
     handler: src/lambdas/setCaseCompletions.main
@@ -168,6 +179,19 @@ functions:
               - vivaMs.checkCompletionsStatus
             detail-type:
               - checkCompletionsStatusRequired
+            detail:
+              caseStatusType: [{ 'anything-but': { 'prefix': 'active:ongoing' } }]
+
+  checkCompletionsDueDate:
+    handler: src/lambdas/checkCompletionsDueDate.main
+    timeout: 15
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - vivaMs.checkCompletionsStatus
+            detail-type:
+              - 'Completions Due Date Probably Overdue'
 
   submitCompletion:
     handler: src/lambdas/submitCompletion.main

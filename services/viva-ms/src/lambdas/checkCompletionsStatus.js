@@ -12,7 +12,7 @@ import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import validateApplicationStatus from '../helpers/validateApplicationStatus';
 
 export async function main(event, context) {
-  const { user, status } = event.detail;
+  const { vivaApplicantStatusCodeList } = event.detail;
 
   const completionStatusCodes = [
     VIVA_STATUS_COMPLETION,
@@ -20,22 +20,26 @@ export async function main(event, context) {
     VIVA_STATUS_WEB_APPLICATION_ACTIVE,
     VIVA_STATUS_WEB_APPLICATION_ALLOWED,
   ];
-  if (!validateApplicationStatus(status, completionStatusCodes)) {
-    log.info(
-      `No completions found, status code: ${VIVA_STATUS_COMPLETION}`,
-      context.awsRequestId,
-      'service-viva-ms-checkCompletionsStatus-001',
-      status
-    );
+  if (validateApplicationStatus(vivaApplicantStatusCodeList, completionStatusCodes)) {
+    const [putEventError] = await to(putVivaMsEvent.completions.required(event.detail));
+    if (putEventError) {
+      log.error(
+        'Put event [checkCompletionsStatusRequired] failed',
+        context.awsRequestId,
+        'service-viva-ms-checkCompletionsStatus-010',
+        putEventError
+      );
+      return false;
+    }
     return true;
   }
 
-  const [putEventError] = await to(putVivaMsEvent.checkCompletionsStatusRequired({ user }));
+  const [putEventError] = await to(putVivaMsEvent.completions.success(event.detail));
   if (putEventError) {
     log.error(
-      'Put event [checkCompletionsStatusRequired] failed',
+      'Put event [checkCompletionStatusSuccess] failed',
       context.awsRequestId,
-      'service-viva-ms-checkCompletionsStatus-002',
+      'service-viva-ms-checkCompletionsStatus-020',
       putEventError
     );
     return false;

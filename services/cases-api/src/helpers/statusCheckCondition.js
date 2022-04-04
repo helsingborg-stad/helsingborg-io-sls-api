@@ -88,7 +88,7 @@ function isEncrypted(answers) {
   return keys.length === 1 && keys.includes('encryptedAnswers');
 }
 
-export default function geStatusTypeOnCondition(conditionOption) {
+export default function getStatusTypeOnCondition(conditionOption) {
   const statusCheckList = [
     {
       type: ACTIVE_SIGNATURE_PENDING,
