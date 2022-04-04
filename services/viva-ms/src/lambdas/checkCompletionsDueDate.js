@@ -2,7 +2,6 @@ import to from 'await-to-js';
 
 import config from '../libs/config';
 import log from '../libs/logs';
-
 import * as dynamoDb from '../libs/dynamoDb';
 import { getStatusByType } from '../libs/caseStatuses';
 import { ACTIVE_PROCESSING, COMPLETIONS_DUE_DATE_PASSED } from '../libs/constants';
