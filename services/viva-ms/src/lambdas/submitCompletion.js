@@ -175,6 +175,7 @@ async function answersToAttachmentList(personalNumber, answerList) {
       if (getFileError) {
         // Throwing the error for a single file would prevent all files from being retrived, since the loop would exit.
         // So instead we log the error and continue the loop iteration.
+        // eslint-disable-next-line no-console
         console.error(s3FileKey, getFileError);
         continue;
       }
