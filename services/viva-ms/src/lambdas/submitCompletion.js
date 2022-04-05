@@ -130,11 +130,17 @@ export async function main(event, context) {
     return false;
   }
 
-  for (const attachment of attachmentList) {
-    await S3.deleteFile(process.env.BUCKET_NAME, attachment.id);
-  }
+  await deleteAttachments(attachmentList);
 
   return true;
+}
+
+function deleteAttachments(attachmentList) {
+  const promises = [];
+  for (let x = 0; x < attachmentList.length; x++) {
+    promises.push(S3.deleteFile(process.env.BUCKET_NAME, attachmentList[x].id));
+  }
+  return Promise.all(promises);
 }
 
 function getAttachmentCategory(tags, attachmentCategories = ['expenses', 'incomes', 'completion']) {
