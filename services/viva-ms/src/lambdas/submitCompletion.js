@@ -136,11 +136,7 @@ export async function main(event, context) {
 }
 
 function deleteAttachments(attachmentList) {
-  const promises = [];
-  for (let x = 0; x < attachmentList.length; x++) {
-    promises.push(S3.deleteFile(process.env.BUCKET_NAME, attachmentList[x].id));
-  }
-  return Promise.all(promises);
+  return Promise.all(attachmentList.map(({ id }) => S3.deleteFile(process.env.BUCKET_NAME, id)));
 }
 
 function getAttachmentCategory(tags, attachmentCategories = ['expenses', 'incomes', 'completion']) {
