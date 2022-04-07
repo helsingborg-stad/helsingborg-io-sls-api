@@ -1,6 +1,7 @@
-export const NEW_APPLICATION = 'new:application';
+export const NEW_APPLICATION = 'newApplication';
 export const NOT_STARTED = 'notStarted';
 export const ACTIVE_ONGOING = 'active:ongoing';
+export const ACTIVE_ONGOING_NEW_APPLICATION = 'active:ongoing:newApplication';
 export const ACTIVE_SIGNATURE_COMPLETED = 'active:signature:completed';
 export const ACTIVE_SIGNATURE_PENDING = 'active:signature:pending';
 export const ACTIVE_SUBMITTED = 'active:submitted';
@@ -29,7 +30,7 @@ export const CASE_PROVIDER_VIVA = 'VIVA';
  */
 
 // Case status type
-export const NEW_APPLICATION_VIVA = 'new:application:viva';
+export const NEW_APPLICATION_VIVA = 'newApplication:viva';
 export const NOT_STARTED_VIVA = 'notStarted:viva';
 export const ACTIVE_COMPLETION_REQUIRED_VIVA = 'active:completionRequired:viva';
 export const ACTIVE_RANDOM_CHECK_REQUIRED_VIVA = 'active:randomCheckRequired:viva';

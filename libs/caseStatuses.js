@@ -1,6 +1,7 @@
 import {
   NEW_APPLICATION,
   NOT_STARTED,
+  ACTIVE_ONGOING_NEW_APPLICATION,
   ACTIVE_ONGOING,
   ACTIVE_SIGNATURE_COMPLETED,
   ACTIVE_SIGNATURE_PENDING,
@@ -26,7 +27,7 @@ const statuses = [
   {
     type: NEW_APPLICATION,
     name: 'Nyansökan',
-    description: 'Ansökan öppen.',
+    description: 'Nyansökan är redo att påbörja.',
   },
   {
     type: NOT_STARTED,
@@ -38,6 +39,12 @@ const statuses = [
     name: 'Pågående',
     description:
       'Du har påbörjat en ansökan. Du kan öppna din ansökan och fortsätta där du slutade.',
+  },
+  {
+    type: ACTIVE_ONGOING_NEW_APPLICATION,
+    name: 'Pågående nyansökan',
+    description:
+      'Du har påbörjat en nyansökan. Du kan öppna din nyansökan och fortsätta där du slutade.',
   },
   {
     type: ACTIVE_SIGNATURE_COMPLETED,
