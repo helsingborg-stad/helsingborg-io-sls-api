@@ -27,6 +27,7 @@ export const CASE_PROVIDER_VIVA: 'VIVA';
 export const NEW_APPLICATION_VIVA: 'newApplication:viva';
 export const NOT_STARTED_VIVA: 'notStarted:viva';
 export const ACTIVE_COMPLETION_REQUIRED_VIVA: 'active:completionRequired:viva';
+export const ACTIVE_ONGOING_NEW_APPLICATION: 'active:ongoing:newApplication';
 export const ACTIVE_RANDOM_CHECK_REQUIRED_VIVA: 'active:randomCheckRequired:viva';
 export const CLOSED_APPROVED_VIVA: 'closed:approved:viva';
 export const CLOSED_PARTIALLY_APPROVED_VIVA: 'closed:partiallyApproved:viva';
