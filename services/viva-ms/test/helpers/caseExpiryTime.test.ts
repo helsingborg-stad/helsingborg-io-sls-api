@@ -92,13 +92,13 @@ it.each([
     input: CLOSED_COMPLETION_REJECTED_VIVA,
     expectedResult: SIX_MONTHS_IN_HOURS,
   },
-])('Retruns $expectedResult for status type $input', ({ input, expectedResult }) => {
+])('Returns $expectedResult for status type $input', ({ input, expectedResult }) => {
   const result = caseExpiry.getHoursOnStatusType(input);
   expect(result).toBe(expectedResult);
 });
 
 it('throws if status type not found in map', () => {
-  const noneExistingStatusType = 'No existing type';
+  const noneExistingStatusType = 'None existing type';
 
   expect(() => caseExpiry.getHoursOnStatusType(noneExistingStatusType)).toThrow(
     `Expiry time not set for status: ${noneExistingStatusType}`
