@@ -37,3 +37,21 @@ export function updateVivaCaseState(caseItem) {
   };
   return dynamoDb.call('update', updateParams);
 }
+
+export function updateCaseExpirationTime(caseUpdateParams) {
+  const { caseKeys, newExpirationTime } = caseUpdateParams;
+  const updateParams = {
+    TableName: config.cases.tableName,
+    Key: {
+      PK: caseKeys.PK,
+      SK: caseKeys.SK,
+    },
+    UpdateExpression: 'SET expirationTime = :newExpirationTime',
+    ExpressionAttributeValues: {
+      ':newExpirationTime': newExpirationTime,
+    },
+    ReturnValues: 'NONE',
+  };
+
+  return dynamoDb.call('update', updateParams);
+}
