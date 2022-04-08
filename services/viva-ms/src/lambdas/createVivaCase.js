@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import to from 'await-to-js';
 import uuid from 'uuid';
 
@@ -18,6 +17,8 @@ import {
   NOT_STARTED_VIVA,
 } from '../libs/constants';
 
+import { getCaseListOnPeriod } from '../helpers/dynamoDb';
+import createCaseHelper from '../helpers/createCase';
 import populateFormWithVivaChildren from '../helpers/populateForm';
 
 export async function main(event, context) {
@@ -81,23 +82,9 @@ export async function main(event, context) {
   return true;
 }
 
-function getCaseListOnPeriod(vivaPerson) {
-  const personalNumber = stripNonNumericalCharacters(String(vivaPerson.case.client.pnumber));
-  const { startDate, endDate } = getPeriodInMilliseconds(vivaPerson);
-
-  const casesQueryParams = {
-    TableName: config.cases.tableName,
-    KeyConditionExpression: 'PK = :pk',
-    FilterExpression:
-      'details.period.startDate = :periodStartDate AND details.period.endDate = :periodEndDate',
-    ExpressionAttributeValues: {
-      ':pk': `USER#${personalNumber}`,
-      ':periodStartDate': startDate,
-      ':periodEndDate': endDate,
-    },
-  };
-
-  return dynamoDB.call('query', casesQueryParams);
+async function createNewVivaCase(user) {
+  const { newApplicationFormId, newApplicationCompletionFormId, newApplicationRandomCheckFormId } =
+    await params.read(config.cases.providers.viva.envsKeyName);
 }
 
 async function createRecurringVivaCase(vivaPerson, user) {
@@ -110,7 +97,7 @@ async function createRecurringVivaCase(vivaPerson, user) {
 
   const { recurringFormId, completionFormId, randomCheckFormId } = vivaCaseSSMParams;
 
-  const applicantPersonalNumber = stripNonNumericalCharacters(
+  const applicantPersonalNumber = createCaseHelper.stripNonNumericalCharacters(
     String(vivaPerson.case.client.pnumber)
   );
 
@@ -120,7 +107,7 @@ async function createRecurringVivaCase(vivaPerson, user) {
   const timestampNow = Date.now();
   const initialStatus = getStatusByType(NOT_STARTED_VIVA);
   const workflowId = vivaPerson.application?.workflowid || null;
-  const period = getPeriodInMilliseconds(vivaPerson);
+  const period = createCaseHelper.getPeriodInMilliseconds(vivaPerson);
 
   const expirationTime = millisecondsToSeconds(getFutureTimestamp(TWELVE_HOURS));
 
@@ -144,11 +131,11 @@ async function createRecurringVivaCase(vivaPerson, user) {
     },
   };
 
-  let casePersonList = getCasePersonList(vivaPerson);
+  let casePersonList = createCaseHelper.getCasePersonList(vivaPerson);
   const vivaChildrenList = getVivaChildren(casePersonList);
   caseItemPutParams.Item['persons'] = casePersonList;
 
-  const casePersonCoApplicant = getUserOnRole(casePersonList, 'coApplicant');
+  const casePersonCoApplicant = createCaseHelper.getUserOnRole(casePersonList, 'coApplicant');
   if (casePersonCoApplicant) {
     caseItemPutParams.Item['GSI1'] = `USER#${casePersonCoApplicant.personalNumber}`;
   }
@@ -228,15 +215,15 @@ function getInitialFormAttributes(formIdList, vivaPerson) {
 }
 
 function getEncryptionAttributes(vivaPerson) {
-  const casePersonList = getCasePersonList(vivaPerson);
-  const casePersonCoApplicant = getUserOnRole(casePersonList, 'coApplicant');
+  const casePersonList = createCaseHelper.getCasePersonList(vivaPerson);
+  const casePersonCoApplicant = createCaseHelper.getUserOnRole(casePersonList, 'coApplicant');
 
   if (!casePersonCoApplicant) {
     const applicantEncryptionAttributes = { type: 'decrypted' };
     return applicantEncryptionAttributes;
   }
 
-  const mainApplicantPersonalNumber = stripNonNumericalCharacters(
+  const mainApplicantPersonalNumber = createCaseHelper.stripNonNumericalCharacters(
     String(vivaPerson.case.client.pnumber)
   );
 
@@ -256,56 +243,6 @@ function getEncryptionAttributes(vivaPerson) {
   };
 
   return encryptionAttributes;
-}
-
-function getUserOnRole(userList, role) {
-  const user = userList.find(user => user.role == role);
-  return user;
-}
-
-function getCasePersonList(vivaPerson) {
-  const person = vivaPerson.case.persons?.person;
-  const client = vivaPerson.case.client;
-  client['type'] = 'client';
-
-  const vivaPersonList = [];
-  vivaPersonList.push(client);
-
-  if (Array.isArray(person)) {
-    vivaPersonList.push(...person);
-  } else if (person != undefined) {
-    vivaPersonList.push(person);
-  }
-
-  const APPLICANT = 'applicant';
-  const CO_APPLICANT = 'coApplicant';
-  const CHILDREN = 'children';
-
-  const roleType = {
-    client: APPLICANT,
-    partner: CO_APPLICANT,
-    child: CHILDREN,
-  };
-
-  const casePersonList = vivaPersonList.map(vivaPerson => {
-    const { pnumber, fname: firstName, lname: lastName, type } = vivaPerson;
-    const personalNumber = stripNonNumericalCharacters(String(pnumber));
-
-    const person = {
-      personalNumber,
-      firstName,
-      lastName,
-      role: roleType[type] || 'unknown',
-    };
-
-    if ([APPLICANT, CO_APPLICANT].includes(person.role)) {
-      person['hasSigned'] = false;
-    }
-
-    return person;
-  });
-
-  return casePersonList;
 }
 
 async function getFormTemplates(formIdList) {
@@ -363,18 +300,4 @@ async function getLastUpdatedCase(PK) {
 
   const sortedCases = queryResponse.Items.sort((a, b) => b.updatedAt - a.updatedAt);
   return sortedCases?.[0] || {};
-}
-
-function stripNonNumericalCharacters(string) {
-  const matchNonNumericalCharactersRegex = /\D/g;
-  return string.replace(matchNonNumericalCharactersRegex, '');
-}
-
-function getPeriodInMilliseconds(vivaPerson) {
-  const period = {
-    startDate: Date.parse(vivaPerson.application.period.start),
-    endDate: Date.parse(vivaPerson.application.period.end),
-  };
-
-  return period;
 }

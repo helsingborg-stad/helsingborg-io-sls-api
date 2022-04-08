@@ -2,6 +2,8 @@ import * as dynamoDb from '../libs/dynamoDb';
 import config from '../libs/config';
 import { CASE_HTML_GENERATED } from '../libs/constants';
 
+import caseHelper from './createCase';
+
 export function getClosedUserCases(partitionKey) {
   const queryParams = {
     TableName: config.cases.tableName,
@@ -54,4 +56,23 @@ export function updateCaseExpirationTime(caseUpdateParams) {
   };
 
   return dynamoDb.call('update', updateParams);
+}
+
+export function getCaseListOnPeriod(vivaPerson) {
+  const personalNumber = caseHelper.stripNonNumericalCharacters(vivaPerson.case.client.pnumber);
+  const { startDate, endDate } = caseHelper.getPeriodInMilliseconds(vivaPerson);
+
+  const casesQueryParams = {
+    TableName: config.cases.tableName,
+    KeyConditionExpression: 'PK = :pk',
+    FilterExpression:
+      'details.period.startDate = :periodStartDate AND details.period.endDate = :periodEndDate',
+    ExpressionAttributeValues: {
+      ':pk': `USER#${personalNumber}`,
+      ':periodStartDate': startDate,
+      ':periodEndDate': endDate,
+    },
+  };
+
+  return dynamoDb.call('query', casesQueryParams);
 }
