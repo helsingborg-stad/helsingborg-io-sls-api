@@ -47,7 +47,7 @@ function getCasePersonList(vivaCase: VivaMyPagesPersonCase): CasePerson[] {
       personalNumber: stripNonNumericalCharacters(pnumber),
       firstName: fname,
       lastName: lname,
-      role: roleType[type] || 'unknown',
+      role: roleType[type] ?? 'unknown',
     };
 
     const isApplicant = [APPLICANT, CO_APPLICANT].includes(person.role);
