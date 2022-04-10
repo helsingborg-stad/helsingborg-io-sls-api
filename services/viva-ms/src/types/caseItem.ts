@@ -21,7 +21,7 @@ export interface CaseItem {
   state: string;
   expirationTime: number;
   createdAt: number;
-  updatedAt: number | null;
+  updatedAt: number;
   status: CaseStatus;
   forms?: {
     [key: string]: CaseForm;
