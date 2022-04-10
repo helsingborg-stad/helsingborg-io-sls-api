@@ -47,11 +47,13 @@ export interface CasePeriod {
   endDate: number;
 }
 
+export type CasePersonRole = 'applicant' | 'coApplicant' | 'children' | 'unknown';
+
 export interface CasePerson {
   personalNumber: string;
   firstName: string;
   lastName: string;
-  role: 'applicant' | 'coApplicant' | 'children' | 'unknown';
+  role: CasePersonRole;
   hasSigned?: boolean;
 }
 

@@ -3,7 +3,7 @@ import {
   VivaMyPagesPersonCase,
   VivaPerson,
 } from '../types/vivaMyPages';
-import { CasePeriod, CasePerson, CasePersonRoleType } from '../types/caseItem';
+import { CasePeriod, CasePerson, CasePersonRoleType, CasePersonRole } from '../types/caseItem';
 
 const APPLICANT = 'applicant';
 const CO_APPLICANT = 'coApplicant';
@@ -59,8 +59,8 @@ function getCasePersonList(vivaCase: VivaMyPagesPersonCase): CasePerson[] {
   return casePersonList;
 }
 
-function getUserOnRole(personList, role: string) {
-  const user = personList.find(user => user.role == role);
+function getUserOnRole(personList: CasePerson[], role: CasePersonRole) {
+  const user = personList.find(user => user.role === role);
   return user;
 }
 
