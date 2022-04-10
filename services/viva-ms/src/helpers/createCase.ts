@@ -9,9 +9,9 @@ const APPLICANT = 'applicant';
 const CO_APPLICANT = 'coApplicant';
 const CHILDREN = 'children';
 
-function stripNonNumericalCharacters(valueIncludingChars: string): number {
+function stripNonNumericalCharacters(valueIncludingChars: string) {
   const matchNonNumericalCharactersRegex = /\D/g;
-  return +valueIncludingChars.replace(matchNonNumericalCharactersRegex, '');
+  return valueIncludingChars.replace(matchNonNumericalCharactersRegex, '');
 }
 
 function getPeriodInMilliseconds(vivaApplication: VivaMyPagesPersonApplication): CasePeriod {
