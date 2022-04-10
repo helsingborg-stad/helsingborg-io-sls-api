@@ -23,9 +23,7 @@ export interface CaseItem {
   createdAt: number;
   updatedAt: number;
   status: CaseStatus;
-  forms?: {
-    [key: string]: CaseForm;
-  };
+  forms?: Record<string, CaseForm>;
   GSI1?: string;
   provider: string;
   persons: CasePerson[];
@@ -87,7 +85,5 @@ export interface CaseFormEncryption {
   type: string;
   symmetricKeyName?: string;
   primes?: unknown;
-  publicKeys?: {
-    [personalNumber: number]: unknown | null;
-  };
+  publicKeys?: Record<string, number | null>;
 }
