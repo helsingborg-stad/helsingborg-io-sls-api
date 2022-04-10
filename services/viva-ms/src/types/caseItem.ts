@@ -26,6 +26,7 @@ export interface CaseItem {
   forms?: {
     [key: string]: CaseForm;
   };
+  GSI1?: string;
   provider: string;
   persons: CasePerson[];
   details: {
