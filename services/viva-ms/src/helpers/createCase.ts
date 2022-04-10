@@ -63,9 +63,8 @@ function getUserOnRole(personList: CasePerson[], role: CasePersonRole) {
   return personList.find(user => user.role === role);
 }
 
-function getVivaChildren(casePersonList) {
-  const childrenList = casePersonList.filter(person => person.role === 'children');
-  return childrenList;
+function getVivaChildren(casePersonList: CasePerson[]) {
+  return casePersonList.filter(person => person.role === 'children');
 }
 
 export default {
