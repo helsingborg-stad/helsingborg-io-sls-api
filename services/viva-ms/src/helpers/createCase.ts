@@ -60,8 +60,7 @@ function getCasePersonList(vivaCase: VivaMyPagesPersonCase): CasePerson[] {
 }
 
 function getUserOnRole(personList: CasePerson[], role: CasePersonRole) {
-  const user = personList.find(user => user.role === role);
-  return user;
+  return personList.find(user => user.role === role);
 }
 
 function getVivaChildren(casePersonList) {
