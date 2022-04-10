@@ -1,57 +1,57 @@
-import { VivaMyPages, VivaMyPagesPersonCase } from '../types/vivaMyPages';
-import { CasePeriod } from '../types/caseItem';
+import {
+  VivaMyPagesPersonApplication,
+  VivaMyPagesPersonCase,
+  VivaPerson,
+} from '../types/vivaMyPages';
+import { CasePeriod, CasePerson, CasePersonRoleType } from '../types/caseItem';
+
+const APPLICANT = 'applicant';
+const CO_APPLICANT = 'coApplicant';
+const CHILDREN = 'children';
 
 function stripNonNumericalCharacters(valueIncludingChars: string): number {
   const matchNonNumericalCharactersRegex = /\D/g;
   return +valueIncludingChars.replace(matchNonNumericalCharactersRegex, '');
 }
 
-function getPeriodInMilliseconds(person: VivaMyPages): CasePeriod {
-  const userCasePperiod: CasePeriod = {
-    startDate: Date.parse(person.application.period.start),
-    endDate: Date.parse(person.application.period.end),
+function getPeriodInMilliseconds(vivaApplication: VivaMyPagesPersonApplication): CasePeriod {
+  return {
+    startDate: Date.parse(vivaApplication.period.start),
+    endDate: Date.parse(vivaApplication.period.end),
   };
-  return userCasePperiod;
 }
 
-function getCasePersonList(person: VivaPerson) {
-  const personItem = person.case.persons?.person;
-  const client: VivaPersonClient = person.case.client;
-  client['type'] = 'client';
+function getCasePersonList(vivaCase: VivaMyPagesPersonCase): CasePerson[] {
+  const vivaPersons = vivaCase.persons;
+  const vivaClient = vivaCase.client;
+  vivaClient.type = 'client';
 
-  const vivaPersonList = [];
-  vivaPersonList.push(client);
+  const personList: VivaPerson[] = [];
+  personList.push(vivaClient);
 
-  if (Array.isArray(personItem)) {
-    vivaPersonList.push(...personItem);
-  } else if (personItem != undefined) {
-    vivaPersonList.push(personItem);
+  if (Array.isArray(vivaPersons)) {
+    personList.push(...vivaPersons);
+  } else if (vivaPersons != undefined) {
+    personList.push(vivaPersons);
   }
 
-  const APPLICANT = 'applicant';
-  const CO_APPLICANT = 'coApplicant';
-  const CHILDREN = 'children';
-
-  const roleType = {
+  const roleType: CasePersonRoleType = {
     client: APPLICANT,
     partner: CO_APPLICANT,
     child: CHILDREN,
   };
 
-  const casePersonList = vivaPersonList.map(personItem => {
-    const { pnumber, fname: firstName, lname: lastName, type } = personItem;
-    const personalNumber = stripNonNumericalCharacters(String(pnumber));
-
-    const person = {
-      personalNumber,
-      firstName,
-      lastName,
+  const casePersonList = personList.map(vivaPerson => {
+    const { pnumber, fname, lname, type } = vivaPerson;
+    const person: CasePerson = {
+      personalNumber: stripNonNumericalCharacters(pnumber),
+      firstName: fname,
+      lastName: lname,
       role: roleType[type] || 'unknown',
     };
 
-    if ([APPLICANT, CO_APPLICANT].includes(person.role)) {
-      person['hasSigned'] = false;
-    }
+    const isApplicant = [APPLICANT, CO_APPLICANT].includes(person.role);
+    person.hasSigned = false && isApplicant;
 
     return person;
   });
@@ -59,9 +59,14 @@ function getCasePersonList(person: VivaPerson) {
   return casePersonList;
 }
 
-function getUserOnRole(userList, role: string) {
-  const user = userList.find(user => user.role == role);
+function getUserOnRole(personList, role: string) {
+  const user = personList.find(user => user.role == role);
   return user;
+}
+
+function getVivaChildren(casePersonList) {
+  const childrenList = casePersonList.filter(person => person.role === 'children');
+  return childrenList;
 }
 
 export default {
@@ -69,4 +74,5 @@ export default {
   getPeriodInMilliseconds,
   getCasePersonList,
   getUserOnRole,
+  getVivaChildren,
 };

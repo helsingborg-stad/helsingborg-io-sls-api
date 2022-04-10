@@ -1,6 +1,7 @@
+import to from 'await-to-js';
 import * as dynamoDb from '../libs/dynamoDb';
 import config from '../libs/config';
-import { CASE_HTML_GENERATED } from '../libs/constants';
+import { CASE_HTML_GENERATED, CASE_PROVIDER_VIVA } from '../libs/constants';
 
 import caseHelper from './createCase';
 
@@ -60,7 +61,7 @@ export function updateCaseExpirationTime(caseUpdateParams) {
 
 export function getCaseListOnPeriod(vivaPerson) {
   const personalNumber = caseHelper.stripNonNumericalCharacters(vivaPerson.case.client.pnumber);
-  const { startDate, endDate } = caseHelper.getPeriodInMilliseconds(vivaPerson);
+  const { startDate, endDate } = caseHelper.getPeriodInMilliseconds(vivaPerson.application);
 
   const casesQueryParams = {
     TableName: config.cases.tableName,
@@ -75,4 +76,61 @@ export function getCaseListOnPeriod(vivaPerson) {
   };
 
   return dynamoDb.call('query', casesQueryParams);
+}
+
+export async function getLastUpdatedCase(PK) {
+  const queryParams = {
+    TableName: config.cases.tableName,
+    KeyConditionExpression: 'PK = :pk',
+    FilterExpression: 'begins_with(#status.#type, :statusTypeClosed) and #provider = :provider',
+    ExpressionAttributeNames: {
+      '#status': 'status',
+      '#type': 'type',
+      '#provider': 'provider',
+    },
+    ExpressionAttributeValues: {
+      ':pk': PK,
+      ':statusTypeClosed': 'closed',
+      ':provider': CASE_PROVIDER_VIVA,
+    },
+  };
+
+  const [queryError, queryResponse] = await to(dynamoDb.call('query', queryParams));
+  if (queryError) {
+    throw queryError;
+  }
+
+  const sortedCases = queryResponse.Items.sort((a, b) => b.updatedAt - a.updatedAt);
+  return sortedCases?.[0] || {};
+}
+
+export async function getFormTemplates(formIdList) {
+  const [getError, rawForms] = await to(
+    Promise.all(
+      formIdList.map(formId => {
+        const formGetParams = {
+          TableName: config.forms.tableName,
+          Key: {
+            PK: `FORM#${formId}`,
+          },
+        };
+        return dynamoDb.call('get', formGetParams);
+      })
+    )
+  );
+  if (getError) {
+    throw getError;
+  }
+
+  const forms = rawForms.map(rawForm => rawForm.Item);
+
+  const formsMap = forms.reduce(
+    (formsMap, form) => ({
+      ...formsMap,
+      [form.id]: form,
+    }),
+    {}
+  );
+
+  return formsMap;
 }
