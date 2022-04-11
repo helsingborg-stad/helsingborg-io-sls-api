@@ -10,14 +10,15 @@ import {
   CaseForm,
   CasePeriod,
   CasePerson,
-  CasePersonRoleType,
   CasePersonRole,
   CaseFormEncryption,
 } from '../types/caseItem';
 
-const APPLICANT = 'applicant';
-const CO_APPLICANT = 'coApplicant';
-const CHILDREN = 'children';
+export interface CasePersonRoleType {
+  readonly client: CasePersonRole.Applicant;
+  readonly partner: CasePersonRole.CoApplicant;
+  readonly child: CasePersonRole.Children;
+}
 
 function stripNonNumericalCharacters(valueIncludingChars: string) {
   const matchNonNumericalCharactersRegex = /\D/g;
@@ -46,9 +47,9 @@ function getCasePersonList(vivaCase: VivaMyPagesPersonCase): CasePerson[] {
   }
 
   const roleType: CasePersonRoleType = {
-    client: APPLICANT,
-    partner: CO_APPLICANT,
-    child: CHILDREN,
+    client: CasePersonRole.Applicant,
+    partner: CasePersonRole.CoApplicant,
+    child: CasePersonRole.Children,
   };
 
   const casePersonList = personList.map(vivaPerson => {
@@ -57,10 +58,12 @@ function getCasePersonList(vivaCase: VivaMyPagesPersonCase): CasePerson[] {
       personalNumber: stripNonNumericalCharacters(pnumber),
       firstName: fname,
       lastName: lname,
-      role: roleType[type] ?? 'unknown',
+      role: roleType[type] ?? CasePersonRole.Unknown,
     };
 
-    const isApplicant = [APPLICANT, CO_APPLICANT].includes(person.role);
+    const isApplicant = [CasePersonRole.Applicant, CasePersonRole.CoApplicant].includes(
+      person.role
+    );
     person.hasSigned = false && isApplicant;
 
     return person;
@@ -69,11 +72,11 @@ function getCasePersonList(vivaCase: VivaMyPagesPersonCase): CasePerson[] {
   return casePersonList;
 }
 
-function getUserOnRole(personList: CasePerson[], role: CasePersonRole) {
+function getUserOnRole(personList: CasePerson[], role: CasePersonRole): CasePerson | undefined {
   return personList.find(user => user.role === role);
 }
 
-function getVivaChildren(casePersonList: CasePerson[]) {
+function getVivaChildren(casePersonList: CasePerson[]): CasePerson[] {
   return casePersonList.filter(person => person.role === 'children');
 }
 
@@ -106,7 +109,7 @@ function getInitialFormAttributes(
 
 function getEncryptionAttributes(vivaPerson: VivaMyPages): CaseFormEncryption {
   const casePersonList = getCasePersonList(vivaPerson.case);
-  const casePersonCoApplicant = getUserOnRole(casePersonList, 'coApplicant');
+  const casePersonCoApplicant = getUserOnRole(casePersonList, CasePersonRole.CoApplicant);
 
   if (!casePersonCoApplicant) {
     const applicantEncryptionAttributes = { type: 'decrypted' };

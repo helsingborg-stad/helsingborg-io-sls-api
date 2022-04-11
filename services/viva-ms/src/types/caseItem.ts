@@ -27,12 +27,14 @@ export interface CaseItem {
   GSI1?: string;
   provider: string;
   persons: CasePerson[];
-  details: {
-    workflowId: string | null;
-    period: CasePeriod;
-    readonly workflow?: unknown;
-  };
+  details: CaseDetails;
   currentFormId: string;
+}
+
+export interface CaseDetails {
+  workflowId: string | null;
+  period: CasePeriod;
+  readonly workflow?: unknown;
 }
 
 export interface CaseStatus {
@@ -46,7 +48,12 @@ export interface CasePeriod {
   endDate: number;
 }
 
-export type CasePersonRole = 'applicant' | 'coApplicant' | 'children' | 'unknown';
+export enum CasePersonRole {
+  Applicant = 'applicant',
+  CoApplicant = 'coApplicant',
+  Children = 'children',
+  Unknown = 'unknown',
+}
 
 export interface CasePerson {
   personalNumber: string;
@@ -54,12 +61,6 @@ export interface CasePerson {
   lastName: string;
   role: CasePersonRole;
   hasSigned?: boolean;
-}
-
-export interface CasePersonRoleType {
-  readonly client: 'applicant';
-  readonly partner: 'coApplicant';
-  readonly child: 'children';
 }
 
 export interface CaseForm {

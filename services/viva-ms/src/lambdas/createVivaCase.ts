@@ -19,7 +19,7 @@ import {
 import { getCaseListOnPeriod, getLastUpdatedCase, getFormTemplates } from '../helpers/dynamoDb';
 import createCaseHelper from '../helpers/createCase';
 import populateFormWithVivaChildren from '../helpers/populateForm';
-import { CaseUser, CaseItem, CaseForm } from '../types/caseItem';
+import { CaseUser, CaseItem, CaseForm, CasePersonRole } from '../types/caseItem';
 import { VivaMyPages } from '../types/vivaMyPages';
 
 interface DynamoDbQueryOutput {
@@ -139,7 +139,7 @@ async function createRecurringCase(vivaPerson: VivaMyPages, user: CaseUser) {
   const initialFormList = createCaseHelper.getInitialFormAttributes(formIdList, vivaPerson);
 
   const extendedCasePersonList = casePersonList.map(person => {
-    if (person.role === 'applicant' && person.personalNumber === user.personalNumber) {
+    if (person.role === CasePersonRole.Applicant && person.personalNumber === user.personalNumber) {
       return { ...user, ...person };
     }
     return person;
