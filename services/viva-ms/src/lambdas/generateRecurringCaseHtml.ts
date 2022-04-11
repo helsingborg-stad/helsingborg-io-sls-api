@@ -52,7 +52,7 @@ export async function main(event, context) {
     );
     return false;
   }
-  const { Items: closedCaseList } = closedUserCases;
+  const { Items: closedCaseList } = closedUserCases as any;
 
   const { recurringFormId } = vivaCaseSSMParams;
   let changedAnswerValues = caseItem.forms[recurringFormId].answers;
