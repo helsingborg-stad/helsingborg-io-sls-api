@@ -1,5 +1,12 @@
 [
   {
+    "Source": "bankId.collect",
+    "Detail": "{ \"user\": { \"personalNumber\": \"197607012395\" } }",
+    "Resources": ["Grundansökan Fredrik Nobel"],
+    "DetailType": "BankIdCollectComplete",
+    "EventBusName": "default"
+  },
+  {
     "Source": "OFFbankId.collect",
     "Detail": "{ \"user\": { \"personalNumber\": \"198602132394\" } }",
     "Resources": ["resourceMock"],
@@ -28,7 +35,7 @@
     "EventBusName": "default"
   },
   {
-    "Source": "casesApi.getCaseList",
+    "Source": "OFFcasesApi.getCaseList",
     "Detail": "{ \"personalNumber\": \"198602132394\" }",
     "Resources": ["resourceMock"],
     "DetailType": "casesApiInvokeSuccess",
