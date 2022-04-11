@@ -91,11 +91,6 @@ export async function main(event: AWSEvent, context: AWSContext) {
   return true;
 }
 
-// async function createNewVivaCase(user) {
-//   const { newApplicationFormId, newApplicationCompletionFormId, newApplicationRandomCheckFormId } =
-//     await params.read(config.cases.providers.viva.envsKeyName);
-// }
-
 async function createRecurringCase(vivaPerson: VivaMyPages, user: CaseUser) {
   const [paramsReadError, vivaCaseSSMParams] = await to(
     params.read(config.cases.providers.viva.envsKeyName)
