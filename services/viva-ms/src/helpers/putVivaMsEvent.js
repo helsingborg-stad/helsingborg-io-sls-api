@@ -1,6 +1,10 @@
 import { putEvent } from '../libs/awsEventBridge';
 
 export const eventTypeCollection = {
+  checkOpenNewApplicationSuccess: {
+    source: 'vivaMs.personApplicationStatus',
+    detailType: 'checkOpenNewApplicationSuccess',
+  },
   checkOpenPeriodSuccess: {
     source: 'vivaMs.personApplicationStatus',
     detailType: 'checkOpenPeriodSuccess',
@@ -66,4 +70,5 @@ export default {
   applicationStatusSuccess: detail => putUserEvent(detail, 'applicationStatusSuccess'),
   setCaseCompletionsSuccess: detail => putUserEvent(detail, 'setCaseCompletionsSuccess'),
   syncCaseCompletionsSuccess: detail => putUserEvent(detail, 'syncCaseCompletionsSuccess'),
+  checkOpenNewApplicationSuccess: detail => putUserEvent(detail, 'checkOpenNewApplicationSuccess'),
 };

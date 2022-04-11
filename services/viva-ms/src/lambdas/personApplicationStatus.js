@@ -36,7 +36,7 @@ export async function main(event, context) {
 
   const newApplicationOpenStatusCodes = [VIVA_STATUS_NEW_APPLICATION_OPEN];
   if (validateApplicationStatus(status, newApplicationOpenStatusCodes)) {
-    const [putEventError] = await to(putVivaMsEvent.checkOpenNewApplicationSuccess({ user }));
+    const [putEventError] = await to(putVivaMsEvent.checkOpenNewApplicationSuccess(event.detail));
     if (putEventError) {
       log.error(
         'Put event [checkOpenNewApplicationSuccess] failed',
