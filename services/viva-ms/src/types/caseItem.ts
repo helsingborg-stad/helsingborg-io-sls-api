@@ -1,17 +1,17 @@
 export interface CaseUser {
   readonly personalNumber: string;
-  readonly firstName: string;
-  readonly lastName: string;
-  readonly civilStatus: string;
-  readonly mobilePhone: string;
-  readonly email: string;
-  readonly address: {
-    readonly city: string;
-    readonly street: string;
-    readonly postalCode: string;
+  readonly firstName?: string;
+  readonly lastName?: string;
+  readonly civilStatus?: string;
+  readonly mobilePhone?: string;
+  readonly email?: string;
+  readonly address?: {
+    readonly city?: string;
+    readonly street?: string;
+    readonly postalCode?: string;
   };
-  readonly uuid: string;
-  readonly createdAt: number;
+  readonly uuid?: string;
+  readonly createdAt?: number;
 }
 
 export interface CaseItem {
@@ -27,7 +27,7 @@ export interface CaseItem {
   GSI1?: string;
   provider: string;
   persons: CasePerson[];
-  details: CaseDetails;
+  details: CaseDetails | null;
   currentFormId: string;
 }
 
