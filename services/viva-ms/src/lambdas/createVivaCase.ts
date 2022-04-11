@@ -69,8 +69,9 @@ export async function main(event: AWSEvent, context: AWSContext) {
     return true;
   }
 
-  const [createRecurringVivaCaseError, createdVivaCase]: [Error | null, DynamoDbQueryOutput] =
-    await to(createRecurringCase(vivaPersonDetail, clientUser));
+  const [createRecurringVivaCaseError, createdVivaCase] = await to(
+    createRecurringCase(vivaPersonDetail, clientUser)
+  );
   if (createRecurringVivaCaseError) {
     log.error(
       'Failed to create recurring Viva case',
@@ -130,7 +131,10 @@ async function createRecurringCase(vivaPerson: VivaMyPages, user: CaseUser) {
     currentFormId: recurringFormId,
   };
 
-  const casePersonCoApplicant = createCaseHelper.getUserOnRole(casePersonList, 'coApplicant');
+  const casePersonCoApplicant = createCaseHelper.getUserOnRole(
+    casePersonList,
+    CasePersonRole.CoApplicant
+  );
   if (casePersonCoApplicant) {
     newCaseItem.GSI1 = `USER#${casePersonCoApplicant.personalNumber}`;
   }
