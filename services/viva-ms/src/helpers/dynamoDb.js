@@ -1,6 +1,6 @@
 import * as dynamoDb from '../libs/dynamoDb';
 import config from '../libs/config';
-import { CASE_HTML_GENERATED } from '../libs/constants';
+import { CASE_HTML_GENERATED, VIVA_APPLICATION_RECEIVED } from '../libs/constants';
 
 export function getClosedUserCases(partitionKey) {
   const queryParams = {
@@ -54,4 +54,27 @@ export function updateCaseExpirationTime(caseUpdateParams) {
   };
 
   return dynamoDb.call('update', updateParams);
+}
+
+export function updateVivaCase(caseKeys, workflowId) {
+  const params = {
+    TableName: config.cases.tableName,
+    Key: {
+      PK: caseKeys.PK,
+      SK: caseKeys.SK,
+    },
+    UpdateExpression: 'SET #state = :newState, #details.#workflowId = :newWorkflowId',
+    ExpressionAttributeNames: {
+      '#state': 'state',
+      '#details': 'details',
+      '#workflowId': 'workflowId',
+    },
+    ExpressionAttributeValues: {
+      ':newWorkflowId': workflowId,
+      ':newState': VIVA_APPLICATION_RECEIVED,
+    },
+    ReturnValues: 'UPDATED_NEW',
+  };
+
+  return dynamoDb.call('update', params);
 }

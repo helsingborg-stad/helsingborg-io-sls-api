@@ -1,32 +1,66 @@
-/* eslint-disable no-console */
-import AWS from 'aws-sdk';
 import to from 'await-to-js';
+import AWS from 'aws-sdk';
 
-import config from '../libs/config';
-
-import * as dynamoDb from '../libs/dynamoDb';
-import log from '../libs/logs';
 import params from '../libs/params';
-import { VIVA_APPLICATION_RECEIVED } from '../libs/constants';
+import config from '../libs/config';
+import log from '../libs/logs';
 
-import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
+import putVivaMsEvent from '../helpers/putVivaMsEvent';
+import { updateVivaCase } from '../helpers/dynamoDb';
+
+import { CaseItem } from '../types/caseItem';
 
 const dynamoDbConverter = AWS.DynamoDB.Converter;
 class TraceException extends Error {
-  constructor(message, requestId, customData) {
+  private level: string;
+  private requestId: string;
+  private customData: Record<string, unknown> | undefined;
+
+  constructor(message: string, requestId: string, customData?: Record<string, unknown>) {
     super(message);
     this.level = 'error';
     this.requestId = requestId;
     this.customData = customData;
   }
 }
-const destructRecord = record => {
+const destructRecord = (record: SQSRecord): Case => {
   const body = JSON.parse(record.body);
-  return dynamoDbConverter.unmarshall(body.detail.dynamodb.NewImage);
+  return dynamoDbConverter.unmarshall(body.detail.dynamodb.NewImage) as Case;
 };
 
-export async function main(event, context) {
+interface VivaPostError {
+  status: string;
+  vadaResponse: {
+    error?: {
+      details?: {
+        errorCode?: string;
+        errorMessage?: string;
+      };
+    };
+  };
+}
+
+interface LambdaContext {
+  awsRequestId: string;
+}
+
+type Case = Pick<CaseItem, 'PK' | 'SK' | 'forms' | 'currentFormId' | 'details' | 'pdf'>;
+
+interface SQSRecord {
+  body: string;
+  messageId: string;
+  attributes: {
+    ApproximateReceiveCount: number;
+    ApproximateFirstReceiveTimestamp: number;
+    VisibilityTimeout: number;
+  };
+}
+
+interface LambdaEvent {
+  Records: SQSRecord[];
+}
+export async function main(event: LambdaEvent, context: LambdaContext) {
   if (event.Records.length !== 1) {
     throw new TraceException(
       `Lambda received (${event.Records.length}) but expected only one.`,
@@ -43,7 +77,8 @@ export async function main(event, context) {
     );
   }
   const [record] = event.Records;
-  const caseItem = destructRecord(record);
+  const body = JSON.parse(record.body);
+  const caseItem = destructRecord(body);
   const { PK, SK, pdf: pdfBinaryBuffer } = caseItem;
 
   log.info('Processing record', context.awsRequestId, undefined, {
@@ -54,11 +89,11 @@ export async function main(event, context) {
     caseId: SK,
   });
 
-  const { recurringFormId } = vivaCaseSSMParams;
+  const { recurringFormId, newApplicationFormId } = vivaCaseSSMParams;
 
-  if (caseItem.currentFormId !== recurringFormId) {
+  if (![recurringFormId, newApplicationFormId].includes(caseItem.currentFormId)) {
     log.info(
-      'Current form is not an recurring form',
+      'Current form is not a recurring or newApplication form',
       context.awsRequestId,
       'service-viva-ms-submitApplication-002'
     );
@@ -66,10 +101,11 @@ export async function main(event, context) {
   }
 
   const personalNumber = PK.substring(5);
+  const applicationType = recurringFormId === caseItem.currentFormId ? 'recurrent' : 'new';
 
-  const [vivaPostError, vivaApplicationResponse] = await to(
+  const [vivaPostError, vivaApplicationResponse] = await to<Record<string, unknown>, VivaPostError>(
     vivaAdapter.application.post({
-      applicationType: 'recurrent',
+      applicationType,
       personalNumber,
       workflowId: caseItem.details?.workflowId || '',
       answers: caseItem.forms[recurringFormId].answers,
@@ -102,7 +138,7 @@ export async function main(event, context) {
     );
   }
 
-  if (notApplicationReceived(vivaApplicationResponse)) {
+  if (vivaApplicationResponse?.status !== 'OK') {
     throw new TraceException('Viva application receive failed', context.awsRequestId, {
       vivaResponse: { ...vivaApplicationResponse },
     });
@@ -117,13 +153,17 @@ export async function main(event, context) {
   }
 
   const caseKeys = { PK, SK };
-  const [updateError] = await to(updateVivaCase(caseKeys, vivaApplicationResponse.id));
+  const [updateError] = await to<null, Record<string, unknown>>(
+    updateVivaCase(caseKeys, vivaApplicationResponse.id)
+  );
   if (updateError) {
     throw new TraceException('Failed to update Viva case', context.awsRequestId, updateError);
   }
 
   const clientUser = { personalNumber };
-  const [putEventError] = await to(putVivaMsEvent.applicationReceivedSuccess(clientUser));
+  const [putEventError] = await to<null, Record<string, unknown>>(
+    putVivaMsEvent.applicationReceivedSuccess(clientUser)
+  );
   if (putEventError) {
     throw new TraceException(
       'Put event ´applicationReceivedSuccess´ failed',
@@ -136,35 +176,4 @@ export async function main(event, context) {
     caseId: SK,
   });
   return true;
-}
-
-function notApplicationReceived(response) {
-  if (response?.status !== 'OK') {
-    return true;
-  }
-
-  return false;
-}
-
-function updateVivaCase(caseKeys, workflowId) {
-  const params = {
-    TableName: config.cases.tableName,
-    Key: {
-      PK: caseKeys.PK,
-      SK: caseKeys.SK,
-    },
-    UpdateExpression: 'SET #state = :newState, #details.#workflowId = :newWorkflowId',
-    ExpressionAttributeNames: {
-      '#state': 'state',
-      '#details': 'details',
-      '#workflowId': 'workflowId',
-    },
-    ExpressionAttributeValues: {
-      ':newWorkflowId': workflowId,
-      ':newState': VIVA_APPLICATION_RECEIVED,
-    },
-    ReturnValues: 'UPDATED_NEW',
-  };
-
-  return dynamoDb.call('update', params);
 }
