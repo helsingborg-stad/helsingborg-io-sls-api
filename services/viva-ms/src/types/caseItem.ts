@@ -1,4 +1,7 @@
-export type EncryptionType = 'decrypted' | 'privateAesKey';
+export enum EncryptionType {
+  Decrypted = 'decrypted',
+  PrivateAesKey = 'privateAesKey',
+}
 
 export interface Form {
   answers: Record<string, string> | unknown[];
