@@ -181,6 +181,11 @@ functions:
               - checkCompletionsStatusRequired
             detail:
               caseStatusType: [{ 'anything-but': { 'prefix': 'active:ongoing' } }]
+              caseState:
+                [
+                  { 'anything-but': 'VIVA_RANDOM_CHECK_RECEIVED' },
+                  { 'anything-but': 'VIVA_COMPLETION_RECEIVED' },
+                ]
 
   checkCompletionsDueDate:
     handler: src/lambdas/checkCompletionsDueDate.main
