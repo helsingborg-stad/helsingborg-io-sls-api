@@ -34,7 +34,7 @@ export function getCompletionStatus(completions) {
     return getStatusByType(ACTIVE_RANDOM_CHECK_REQUIRED_VIVA);
   }
 
-  if (isAttachmentPending && isAnyRequestedReceived(requested)) {
+  if (isAttachmentPending) {
     return getStatusByType(ACTIVE_COMPLETION_SUBMITTED);
   }
 
