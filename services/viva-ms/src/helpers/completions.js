@@ -119,9 +119,13 @@ function getLocaleDate(timestamp) {
 }
 
 function isDueDateExpired(timestamp) {
+  if (timestamp == undefined) {
+    return false;
+  }
+
   const today = getLocaleDate(Date.now());
   const dueDate = getLocaleDate(timestamp);
-  return today > dueDate;
+  return today >= dueDate;
 }
 
 export default {
