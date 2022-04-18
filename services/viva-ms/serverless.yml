@@ -197,6 +197,8 @@ functions:
               - vivaMs.checkCompletionsStatus
             detail-type:
               - 'Completions Due Date Probably Overdue'
+            detail:
+              caseStatusType: [{ 'anything-but': { 'prefix': 'active:processing' } }]
 
   submitCompletion:
     handler: src/lambdas/submitCompletion.main
