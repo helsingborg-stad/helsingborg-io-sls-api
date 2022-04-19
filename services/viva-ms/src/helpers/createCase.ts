@@ -20,6 +20,12 @@ export interface CasePersonRoleType {
   readonly child: CasePersonRole.Children;
 }
 
+const ROLE_TYPE: CasePersonRoleType = {
+  client: CasePersonRole.Applicant,
+  partner: CasePersonRole.CoApplicant,
+  child: CasePersonRole.Children,
+};
+
 function stripNonNumericalCharacters(valueIncludingChars: string) {
   const matchNonNumericalCharactersRegex = /\D/g;
   return valueIncludingChars.replace(matchNonNumericalCharactersRegex, '');
@@ -37,8 +43,7 @@ function getCasePersonList(vivaCase: VivaMyPagesPersonCase): CasePerson[] {
   const vivaClient = vivaCase.client;
   vivaClient.type = 'client';
 
-  const personList: VivaPerson[] = [];
-  personList.push(vivaClient);
+  const personList: VivaPerson[] = [vivaClient];
 
   if (Array.isArray(vivaPersons)) {
     personList.push(...vivaPersons);
@@ -46,30 +51,26 @@ function getCasePersonList(vivaCase: VivaMyPagesPersonCase): CasePerson[] {
     personList.push(vivaPersons);
   }
 
-  const roleType: CasePersonRoleType = {
-    client: CasePersonRole.Applicant,
-    partner: CasePersonRole.CoApplicant,
-    child: CasePersonRole.Children,
+  return personList.map(createCasePerson);
+}
+
+function createCasePerson(vivaPerson: VivaPerson): CasePerson {
+  const { pnumber, fname, lname, type } = vivaPerson;
+  const role = ROLE_TYPE[type] ?? CasePersonRole.Unknown;
+  const isApplicant = [CasePersonRole.Applicant, CasePersonRole.CoApplicant].includes(role);
+
+  const person: CasePerson = {
+    personalNumber: stripNonNumericalCharacters(pnumber),
+    firstName: fname,
+    lastName: lname,
+    role,
   };
 
-  const casePersonList = personList.map(vivaPerson => {
-    const { pnumber, fname, lname, type } = vivaPerson;
-    const person: CasePerson = {
-      personalNumber: stripNonNumericalCharacters(pnumber),
-      firstName: fname,
-      lastName: lname,
-      role: roleType[type] ?? CasePersonRole.Unknown,
-    };
+  if (isApplicant) {
+    person.hasSigned = false;
+  }
 
-    const isApplicant = [CasePersonRole.Applicant, CasePersonRole.CoApplicant].includes(
-      person.role
-    );
-    person.hasSigned = false && isApplicant;
-
-    return person;
-  });
-
-  return casePersonList;
+  return person;
 }
 
 function getUserByRole(personList: CasePerson[], role: CasePersonRole): CasePerson | undefined {
