@@ -16,8 +16,9 @@ import {
   NEW_APPLICATION_VIVA,
 } from '../libs/constants';
 
-import { CaseUser, CaseItem, CaseStatus } from '../types/caseItem';
-import { VivaApplicationStatus } from '../types/vivaMyPages';
+import createCaseHelper from '../helpers/createCase';
+import { CaseUser, CaseItem, CaseStatus, CasePerson, CasePersonRole } from '../types/caseItem';
+import { VivaApplicationStatus, VivaMyPagesPersonCase } from '../types/vivaMyPages';
 
 export interface AWSEvent {
   detail: {
@@ -72,28 +73,45 @@ export async function lambda(event: AWSEvent, context: AWSContext, lambdaContext
   return true;
 }
 
-async function createNewVivaCase(user: CaseUser) {
+async function createNewVivaCase(user: CaseUser): Promise<CaseItem> {
   const { newApplicationFormId } = await params.read(config.cases.providers.viva.envsKeyName);
+
+  const formIdList = [newApplicationFormId];
+  const initialFormEncryption = createCaseHelper.getFormEncryptionAttributes();
+  const initialFormList = createCaseHelper.getInitialFormAttributes(formIdList, initialFormEncryption);
 
   const id = uuid.v4();
   const PK = `USER#${user.personalNumber}`;
+  const SK = `CASE#${id}`;
   const timestampNow = Date.now();
+  const expirationTime = millisecondsToSeconds(getFutureTimestamp(TWELVE_HOURS));
   const initialStatus: CaseStatus = getStatusByType(NEW_APPLICATION_VIVA);
+  const initialCasePerson: CasePerson = getInitCasePerson(user);
 
-  const caseItem: CaseItem = {
+  return {
     id,
     PK,
-    SK: `CASE#${id}`,
+    SK,
     state: VIVA_CASE_CREATED,
-    expirationTime: millisecondsToSeconds(getFutureTimestamp(TWELVE_HOURS)),
+    expirationTime,
     createdAt: timestampNow,
     updatedAt: 0,
     status: initialStatus,
+    forms: initialFormList,
     provider: CASE_PROVIDER_VIVA,
-    persons: [],
+    persons: [initialCasePerson],
     details: null,
     currentFormId: newApplicationFormId,
   };
+}
 
-  return caseItem;
+function getInitCasePerson(user: CaseUser): CasePerson {
+  const { personalNumber, firstName, lastName } = user;
+  return {
+    personalNumber,
+    firstName,
+    lastName,
+    role: CasePersonRole.Applicant,
+    hasSigned: false,
+  };
 }
