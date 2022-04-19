@@ -91,6 +91,4 @@ export interface CaseFormAnswerField {
 export interface CaseFormEncryption {
   type: string;
   symmetricKeyName?: string;
-  primes?: unknown;
-  publicKeys?: Record<string, number | null>;
 }

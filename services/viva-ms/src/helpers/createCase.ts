@@ -1,7 +1,6 @@
 import uuid from 'uuid';
 
 import {
-  VivaMyPages,
   VivaMyPagesPersonApplication,
   VivaMyPagesPersonCase,
   VivaPerson,
@@ -83,9 +82,8 @@ function getVivaChildren(casePersonList: CasePerson[]): CasePerson[] {
 
 function getInitialFormAttributes(
   formIdList: string[],
-  vivaPerson: VivaMyPages
+  encryption: CaseFormEncryption
 ): Record<string, CaseForm> {
-  const encryption = getEncryptionAttributes(vivaPerson);
   const initialFormAttributes: CaseForm = {
     answers: [],
     encryption,
@@ -97,44 +95,18 @@ function getInitialFormAttributes(
     },
   };
 
-  const [recurringFormId, completionFormId, randomCheckFormId] = formIdList;
-
-  const initialFormList = {
-    [recurringFormId]: initialFormAttributes,
-    [completionFormId]: initialFormAttributes,
-    [randomCheckFormId]: initialFormAttributes,
-  };
-
-  return initialFormList;
+  return formIdList.reduce((allFormIds, currentFormId) => ({ ...allFormIds, [currentFormId]: initialFormAttributes }), {});
 }
 
-function getEncryptionAttributes(vivaPerson: VivaMyPages): CaseFormEncryption {
-  const casePersonList = getCasePersonList(vivaPerson.case);
-  const casePersonCoApplicant = getUserByRole(casePersonList, CasePersonRole.CoApplicant);
-
-  if (!casePersonCoApplicant) {
-    const applicantEncryptionAttributes = { type: 'decrypted' };
-    return applicantEncryptionAttributes;
+function getFormEncryptionAttributes(casePerson?: CasePerson): CaseFormEncryption {
+  if (casePerson == undefined) {
+    return { type: 'decrypted' };
   }
 
-  const mainApplicantPersonalNumber = stripNonNumericalCharacters(vivaPerson.case.client.pnumber);
-
-  const encryptionAttributes = {
+  return {
     type: 'decrypted',
-    symmetricKeyName: `${mainApplicantPersonalNumber}:${
-      casePersonCoApplicant.personalNumber
-    }:${uuid.v4()}`,
-    primes: {
-      P: 43,
-      G: 10,
-    },
-    publicKeys: {
-      [mainApplicantPersonalNumber]: null,
-      [casePersonCoApplicant.personalNumber]: null,
-    },
+    symmetricKeyName: uuid.v4(),
   };
-
-  return encryptionAttributes;
 }
 
 export default {
@@ -144,4 +116,5 @@ export default {
   getUserByRole,
   getVivaChildren,
   getInitialFormAttributes,
+  getFormEncryptionAttributes,
 };
