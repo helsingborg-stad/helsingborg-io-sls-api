@@ -131,7 +131,7 @@ async function createRecurringCase(vivaPerson: VivaMyPages, user: CaseUser) {
     currentFormId: recurringFormId,
   };
 
-  const casePersonCoApplicant = createCaseHelper.getUserOnRole(
+  const casePersonCoApplicant = createCaseHelper.getUserByRole(
     casePersonList,
     CasePersonRole.CoApplicant
   );

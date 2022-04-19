@@ -72,7 +72,7 @@ function getCasePersonList(vivaCase: VivaMyPagesPersonCase): CasePerson[] {
   return casePersonList;
 }
 
-function getUserOnRole(personList: CasePerson[], role: CasePersonRole): CasePerson | undefined {
+function getUserByRole(personList: CasePerson[], role: CasePersonRole): CasePerson | undefined {
   return personList.find(user => user.role === role);
 }
 
@@ -109,7 +109,7 @@ function getInitialFormAttributes(
 
 function getEncryptionAttributes(vivaPerson: VivaMyPages): CaseFormEncryption {
   const casePersonList = getCasePersonList(vivaPerson.case);
-  const casePersonCoApplicant = getUserOnRole(casePersonList, CasePersonRole.CoApplicant);
+  const casePersonCoApplicant = getUserByRole(casePersonList, CasePersonRole.CoApplicant);
 
   if (!casePersonCoApplicant) {
     const applicantEncryptionAttributes = { type: 'decrypted' };
@@ -140,7 +140,7 @@ export default {
   stripNonNumericalCharacters,
   getPeriodInMilliseconds,
   getCasePersonList,
-  getUserOnRole,
+  getUserByRole,
   getVivaChildren,
   getInitialFormAttributes,
 };
