@@ -23,7 +23,7 @@ export interface CaseItem {
   createdAt: number;
   updatedAt: number;
   status: CaseStatus;
-  forms?: Record<string, CaseForm>;
+  forms: Record<string, CaseForm> | null;
   GSI1?: string;
   provider: string;
   persons: CasePerson[];
