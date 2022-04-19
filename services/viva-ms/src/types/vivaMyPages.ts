@@ -11,10 +11,12 @@ export interface VivaMyPagesPersonCase {
 
 export interface VivaMyPagesPersonApplication {
   readonly workflowid?: string;
-  readonly period: {
-    readonly start: string;
-    readonly end: string;
-  };
+  readonly period: VivaMyPagesApplicationPeriod;
+}
+
+export interface VivaMyPagesApplicationPeriod {
+  readonly start: string;
+  readonly end: string;
 }
 
 export interface VivaClient {
