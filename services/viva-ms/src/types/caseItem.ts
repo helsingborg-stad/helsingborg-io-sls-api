@@ -66,12 +66,14 @@ export interface CasePerson {
 export interface CaseForm {
   answers: CaseFormAnswer[];
   encryption: CaseFormEncryption;
-  currentPosition: {
-    currentMainStep: number;
-    currentMainStepIndex: number;
-    index: number;
-    level: number;
-  };
+  currentPosition: CaseFormCurrentPosition;
+}
+
+export interface CaseFormCurrentPosition {
+  currentMainStep: number;
+  currentMainStepIndex: number;
+  index: number;
+  level: number;
 }
 
 export interface CaseFormAnswer {
