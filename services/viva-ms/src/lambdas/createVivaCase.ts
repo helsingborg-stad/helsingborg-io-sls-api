@@ -64,7 +64,7 @@ export async function main(event: AWSEvent, context: AWSContext) {
     return false;
   }
 
-  if (caseList?.Items && caseList.Items[0]) {
+  if (caseList?.Items?.[0]) {
     log.info('Case with specified period already exists', context.awsRequestId, null);
     return true;
   }
