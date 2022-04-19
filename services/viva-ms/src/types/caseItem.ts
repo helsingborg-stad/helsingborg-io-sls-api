@@ -77,11 +77,13 @@ export interface CaseFormCurrentPosition {
 }
 
 export interface CaseFormAnswer {
-  field: {
-    id: string;
-    tags: string[];
-  };
+  field: CaseFormAnswerField;
   value: string;
+}
+
+export interface CaseFormAnswerField {
+  id: string;
+  tags: string[];
 }
 
 export interface CaseFormEncryption {
