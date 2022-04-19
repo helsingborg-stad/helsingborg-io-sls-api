@@ -18,7 +18,7 @@ import {
 
 import createCaseHelper from '../helpers/createCase';
 import { CaseUser, CaseItem, CaseStatus, CasePerson, CasePersonRole } from '../types/caseItem';
-import { VivaApplicationStatus, VivaMyPagesPersonCase } from '../types/vivaMyPages';
+import { VivaApplicationStatus } from '../types/vivaMyPages';
 
 export interface AWSEvent {
   detail: {
