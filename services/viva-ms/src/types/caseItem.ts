@@ -5,13 +5,15 @@ export interface CaseUser {
   readonly civilStatus?: string;
   readonly mobilePhone?: string;
   readonly email?: string;
-  readonly address?: {
-    readonly city?: string;
-    readonly street?: string;
-    readonly postalCode?: string;
-  };
+  readonly address?: CaseUserAddress;
   readonly uuid?: string;
   readonly createdAt?: number;
+}
+
+export interface CaseUserAddress {
+  readonly city?: string;
+  readonly street?: string;
+  readonly postalCode?: string;
 }
 
 export interface CaseItem {
