@@ -59,9 +59,8 @@ export function updateCaseExpirationTime(caseUpdateParams) {
   return dynamoDb.call('update', updateParams);
 }
 
-export function getCaseListOnPeriod(vivaPerson) {
-  const personalNumber = caseHelper.stripNonNumericalCharacters(vivaPerson.case.client.pnumber);
-  const { startDate, endDate } = caseHelper.getPeriodInMilliseconds(vivaPerson.application);
+export function getCaseListByPeriod(personalNumber, { startDate, endDate }) {
+  const personalNumberVerified = caseHelper.stripNonNumericalCharacters(personalNumber);
 
   const casesQueryParams = {
     TableName: config.cases.tableName,
@@ -69,7 +68,7 @@ export function getCaseListOnPeriod(vivaPerson) {
     FilterExpression:
       'details.period.startDate = :periodStartDate AND details.period.endDate = :periodEndDate',
     ExpressionAttributeValues: {
-      ':pk': `USER#${personalNumber}`,
+      ':pk': `USER#${personalNumberVerified}`,
       ':periodStartDate': startDate,
       ':periodEndDate': endDate,
     },

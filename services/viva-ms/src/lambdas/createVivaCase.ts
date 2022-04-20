@@ -16,10 +16,10 @@ import {
   NOT_STARTED_VIVA,
 } from '../libs/constants';
 
-import { getCaseListOnPeriod, getLastUpdatedCase, getFormTemplates } from '../helpers/dynamoDb';
+import { getCaseListByPeriod, getLastUpdatedCase, getFormTemplates } from '../helpers/dynamoDb';
 import createCaseHelper from '../helpers/createCase';
 import populateFormWithVivaChildren from '../helpers/populateForm';
-import { CaseUser, CaseItem, CaseForm, CasePersonRole } from '../types/caseItem';
+import { CaseUser, CaseItem, CaseForm, CasePersonRole, CasePeriod } from '../types/caseItem';
 import { VivaMyPages } from '../types/vivaMyPages';
 
 interface DynamoDbQueryOutput {
@@ -42,23 +42,16 @@ interface AWSContext {
 export async function main(event: AWSEvent, context: AWSContext) {
   const { clientUser, vivaPersonDetail } = event.detail;
 
-  if (clientUser == undefined) {
-    log.error(
-      'Event detail attribute ´clientUser´ is undefined',
-      context.awsRequestId,
-      'service-viva-ms-createVivaCase-001',
-      event.detail
-    );
-    return false;
-  }
-
+  const casePeriod: CasePeriod = createCaseHelper.getPeriodInMilliseconds(
+    vivaPersonDetail.application
+  );
   const [getCaseListOnPeriodError, caseList]: [Error | null, DynamoDbQueryOutput | undefined] =
-    await to(getCaseListOnPeriod(vivaPersonDetail));
+    await to(getCaseListByPeriod(clientUser.personalNumber, casePeriod));
   if (getCaseListOnPeriodError) {
     log.error(
       'Failed to query cases table',
       context.awsRequestId,
-      'service-viva-ms-createVivaCase-003',
+      'service-viva-ms-createVivaCase-001',
       getCaseListOnPeriodError
     );
     return false;
@@ -76,7 +69,7 @@ export async function main(event: AWSEvent, context: AWSContext) {
     log.error(
       'Failed to create recurring Viva case',
       context.awsRequestId,
-      'service-viva-ms-createVivaCase-004',
+      'service-viva-ms-createVivaCase-002',
       createRecurringVivaCaseError
     );
     return false;
@@ -85,7 +78,7 @@ export async function main(event: AWSEvent, context: AWSContext) {
   log.info(
     'Viva case created successfully',
     context.awsRequestId,
-    'service-viva-ms-createVivaCase-005',
+    'service-viva-ms-createVivaCase-003',
     createdVivaCase
   );
 
