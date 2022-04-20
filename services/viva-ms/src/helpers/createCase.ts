@@ -12,6 +12,7 @@ import {
   CasePersonRole,
   CaseUser,
   CaseFormEncryption,
+  EncryptionType,
 } from '../types/caseItem';
 
 export interface CasePersonRoleType {
@@ -113,14 +114,10 @@ function getInitialFormAttributes(
   );
 }
 
-function getFormEncryptionAttributes(casePerson?: CasePerson): CaseFormEncryption {
-  if (casePerson == undefined) {
-    return { type: 'decrypted' };
-  }
-
+function getFormEncryptionAttributes(isCoApplicant?: CasePerson): CaseFormEncryption {
   return {
-    type: 'decrypted',
-    symmetricKeyName: uuid.v4(),
+    type: EncryptionType.Decrypted,
+    ...(isCoApplicant ?? { symmetricKeyName: uuid.v4() }),
   };
 }
 

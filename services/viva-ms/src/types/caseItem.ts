@@ -88,7 +88,11 @@ export interface CaseFormAnswerField {
   tags: string[];
 }
 
+export enum EncryptionType {
+  Decrypted = 'decrypted',
+}
+
 export interface CaseFormEncryption {
-  type: string;
+  type: EncryptionType.Decrypted;
   symmetricKeyName?: string;
 }
