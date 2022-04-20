@@ -1,9 +1,10 @@
 import to from 'await-to-js';
 import uuid from 'uuid';
-import { GetItemOutput } from 'aws-sdk/clients/dynamodb';
+import { GetItemOutput, QueryOutput } from 'aws-sdk/clients/dynamodb';
 
 import config from '../libs/config';
 
+import * as dynamoDb from '../libs/dynamoDb';
 import params from '../libs/params';
 import log from '../libs/logs';
 import { putItem } from '../libs/queries';
@@ -51,6 +52,11 @@ export async function lambda(
 ): Promise<boolean> {
   const { user } = event.detail;
   const { newApplicationFormId } = await params.read(config.cases.providers.viva.envsKeyName);
+
+  const [, queryResponse] = await to(getUserCaseList(user.personalNumber));
+  if (queryResponse?.Count) {
+    return true;
+  }
 
   const formIdList = [newApplicationFormId];
   const initialFormEncryption = createCaseHelper.getFormEncryptionAttributes();
@@ -107,4 +113,16 @@ export async function lambda(
   );
 
   return true;
+}
+
+function getUserCaseList(personalNumber: string): Promise<QueryOutput> {
+  const queryParams = {
+    TableName: config.cases.tableName,
+    KeyConditionExpression: 'PK = :pk',
+    ExpressionAttributeValues: {
+      ':pk': `USER#${personalNumber}`,
+    },
+  };
+
+  return dynamoDb.call('query', queryParams);
 }
