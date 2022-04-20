@@ -107,13 +107,13 @@ export async function getFormTemplates(formIdList) {
   const [getError, rawForms] = await to(
     Promise.all(
       formIdList.map(formId => {
-        const formGetParams = {
+        const getFormParams = {
           TableName: config.forms.tableName,
           Key: {
             PK: `FORM#${formId}`,
           },
         };
-        return dynamoDb.call('get', formGetParams);
+        return dynamoDb.call('get', getFormParams);
       })
     )
   );
