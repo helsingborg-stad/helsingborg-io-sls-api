@@ -142,7 +142,10 @@ async function createRecurringCase(vivaPerson: VivaMyPages, user: CaseUser) {
 
   const formIdList = [recurringFormId, completionFormId, randomCheckFormId];
   const initialFormEncryption = createCaseHelper.getFormEncryptionAttributes(casePersonCoApplicant);
-  const initialFormList = createCaseHelper.getInitialFormAttributes(formIdList, initialFormEncryption);
+  const initialFormList = createCaseHelper.getInitialFormAttributes(
+    formIdList,
+    initialFormEncryption
+  );
 
   const extendedCasePersonList = casePersonList.map(person => {
     if (person.role === CasePersonRole.Applicant && person.personalNumber === user.personalNumber) {
