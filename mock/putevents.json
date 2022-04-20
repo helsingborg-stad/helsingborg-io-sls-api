@@ -1,8 +1,8 @@
 [
   {
     "Source": "bankId.collect",
-    "Detail": "{ \"user\": { \"personalNumber\": \"197607012395\" } }",
-    "Resources": ["Grundansökan Fredrik Nobel"],
+    "Detail": "{ \"user\": { \"personalNumber\": \"198603052385\" } }",
+    "Resources": ["Grundansökan"],
     "DetailType": "BankIdCollectComplete",
     "EventBusName": "default"
   },
