@@ -108,6 +108,7 @@ async function createRecurringCase(vivaPerson: VivaMyPages, user: CaseUser) {
 
   const id = uuid.v4();
   const PK = `USER#${applicantPersonalNumber}`;
+  const SK = `CASE#${id}`;
   const timestampNow = Date.now();
   const initialStatus = getStatusByType(NOT_STARTED_VIVA);
   const workflowId = vivaPerson.application?.workflowid ?? null;
@@ -116,7 +117,7 @@ async function createRecurringCase(vivaPerson: VivaMyPages, user: CaseUser) {
   const newCaseItem: CaseItem = {
     id,
     PK,
-    SK: `CASE#${id}`,
+    SK,
     state: VIVA_CASE_CREATED,
     expirationTime: millisecondsToSeconds(getFutureTimestamp(TWELVE_HOURS)),
     createdAt: timestampNow,
