@@ -10,6 +10,7 @@ import {
   CasePeriod,
   CasePerson,
   CasePersonRole,
+  CaseUser,
   CaseFormEncryption,
 } from '../types/caseItem';
 
@@ -50,10 +51,10 @@ function getCasePersonList(vivaCase: VivaMyPagesPersonCase): CasePerson[] {
     personList.push(vivaPersons);
   }
 
-  return personList.map(createCasePerson);
+  return personList.map(mapperCasePersonFromVivaPerson);
 }
 
-function createCasePerson(vivaPerson: VivaPerson): CasePerson {
+function mapperCasePersonFromVivaPerson(vivaPerson: VivaPerson): CasePerson {
   const { pnumber, fname, lname, type } = vivaPerson;
   const role = ROLE_TYPE[type] ?? CasePersonRole.Unknown;
   const isApplicant = [CasePersonRole.Applicant, CasePersonRole.CoApplicant].includes(role);
@@ -70,6 +71,17 @@ function createCasePerson(vivaPerson: VivaPerson): CasePerson {
   }
 
   return person;
+}
+
+function createCaseApplicantPerson(user: CaseUser): CasePerson {
+  const { personalNumber, firstName, lastName } = user;
+  return {
+    personalNumber,
+    firstName,
+    lastName,
+    role: CasePersonRole.Applicant,
+    hasSigned: false,
+  };
 }
 
 function getUserByRole(personList: CasePerson[], role: CasePersonRole): CasePerson | undefined {
@@ -95,7 +107,10 @@ function getInitialFormAttributes(
     },
   };
 
-  return formIdList.reduce((allFormIds, currentFormId) => ({ ...allFormIds, [currentFormId]: initialFormAttributes }), {});
+  return formIdList.reduce(
+    (allFormIds, currentFormId) => ({ ...allFormIds, [currentFormId]: initialFormAttributes }),
+    {}
+  );
 }
 
 function getFormEncryptionAttributes(casePerson?: CasePerson): CaseFormEncryption {
@@ -117,4 +132,5 @@ export default {
   getVivaChildren,
   getInitialFormAttributes,
   getFormEncryptionAttributes,
+  createCaseApplicantPerson,
 };
