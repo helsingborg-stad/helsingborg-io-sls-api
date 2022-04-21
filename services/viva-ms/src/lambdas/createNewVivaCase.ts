@@ -59,7 +59,8 @@ export async function lambda(
   }
 
   const formIdList = [newApplicationFormId];
-  const initialFormEncryption = createCaseHelper.getFormEncryptionAttributes();
+  const isCoApplicant = false;
+  const initialFormEncryption = createCaseHelper.getFormEncryptionAttributes(isCoApplicant);
   const initialFormList = createCaseHelper.getInitialFormAttributes(
     formIdList,
     initialFormEncryption
