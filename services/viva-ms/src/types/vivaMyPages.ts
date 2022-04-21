@@ -11,8 +11,16 @@ export interface VivaMyPages {
 
 export interface VivaMyPagesPersonCase {
   readonly client: VivaClient;
-  readonly officers: VivaOfficer | VivaOfficer[];
-  readonly persons: VivaPerson | VivaPerson[] | null;
+  readonly officers: VivaOfficersOfficer;
+  readonly persons: VivaPersonsPerson | null;
+}
+
+export interface VivaOfficersOfficer {
+  readonly officer: VivaOfficer[] | VivaOfficer;
+}
+
+export interface VivaPersonsPerson {
+  readonly person: VivaPerson[] | VivaPerson;
 }
 
 export interface VivaMyPagesPersonApplication {
