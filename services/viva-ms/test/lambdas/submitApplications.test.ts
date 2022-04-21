@@ -104,14 +104,11 @@ test.each([
   async ({ currentFormId, expectedResult }) => {
     event.caseItem.currentFormId = currentFormId;
 
-    const postVivaApplicationMock = jest
-      .fn()
-      .mockResolvedValueOnce({ status: 'OK', id: postVivaResponseId });
-    context.postVivaApplication = postVivaApplicationMock;
+    const postVivaApplicationSpy = jest.spyOn(context, 'postVivaApplication');
 
     await submitApplication(event, context);
 
-    expect(postVivaApplicationMock).toHaveBeenCalledWith(
+    expect(postVivaApplicationSpy).toHaveBeenCalledWith(
       expect.objectContaining({ applicationType: expectedResult })
     );
   }
@@ -124,12 +121,11 @@ it('throws if `updateVivaCase` fails', async () => {
 });
 
 it('calls `updateVivaCase` with correct parameters', async () => {
-  const updateVivaCaseMock = jest.fn().mockResolvedValueOnce({});
-  context.updateVivaCase = updateVivaCaseMock;
+  const updateVivaCaseSpy = jest.spyOn(context, 'updateVivaCase');
 
   await submitApplication(event, context);
 
-  expect(updateVivaCaseMock).toHaveBeenCalledWith({ PK, SK }, postVivaResponseId);
+  expect(updateVivaCaseSpy).toHaveBeenCalledWith({ PK, SK }, postVivaResponseId);
 });
 
 it('throws if `putSuccessEvent` fails', async () => {
