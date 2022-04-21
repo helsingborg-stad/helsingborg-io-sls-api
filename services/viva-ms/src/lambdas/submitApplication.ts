@@ -1,6 +1,5 @@
 import to from 'await-to-js';
-import AWS from 'aws-sdk';
-import { SQSEvent, SQSRecord, Context } from 'aws-lambda';
+import { SQSEvent, Context } from 'aws-lambda';
 
 import params from '../libs/params';
 import config from '../libs/config';
@@ -8,18 +7,13 @@ import log from '../libs/logs';
 
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
-import { updateVivaCase } from '../helpers/dynamoDb';
+import { updateVivaCase, destructRecord } from '../helpers/dynamoDb';
 import { validateSQSEvent } from '../helpers/validateSQSEvent';
 import { TraceException } from '../helpers/TraceException';
 
 import { CaseItem } from '../types/caseItem';
 
 type Case = Pick<CaseItem, 'PK' | 'SK' | 'forms' | 'currentFormId' | 'details' | 'pdf'>;
-
-const destructRecord = (record: SQSRecord): Case => {
-  const body = JSON.parse(record.body);
-  return AWS.DynamoDB.Converter.unmarshall(body.detail.dynamodb.NewImage) as Case;
-};
 
 export function main(runtimeEvent: SQSEvent, runtimeContext: Context) {
   validateSQSEvent(runtimeEvent, runtimeContext);

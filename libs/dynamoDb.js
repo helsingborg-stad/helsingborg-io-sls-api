@@ -8,3 +8,7 @@ export function call(action, params) {
     TableName: `${config.resourcesStage}-${params.TableName}`,
   }).promise();
 }
+
+export function unmarshall() {
+  return AWS.DynamoDB.Converter.unmarshall;
+}
