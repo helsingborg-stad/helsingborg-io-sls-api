@@ -43,7 +43,7 @@ export function main(event: SQSEvent, context: Context) {
     putSuccessEvent: putVivaMsEvent.applicationReceivedSuccess,
   };
 
-  return submitApplication(lambdaEvent, lambdaContext);
+  return lambda(lambdaEvent, lambdaContext);
 }
 
 interface VivaPostError {
@@ -74,7 +74,7 @@ export interface LambdaEvent {
   caseItem: Case;
   messageId: string;
 }
-export async function submitApplication(event: LambdaEvent, context: LambdaContext) {
+export async function lambda(event: LambdaEvent, context: LambdaContext) {
   const { caseItem, messageId } = event;
   const { requestId, readParams, updateVivaCase, postVivaApplication, putSuccessEvent } = context;
 
