@@ -4,6 +4,7 @@ import {
   VivaMyPagesPersonApplication,
   VivaMyPagesPersonCase,
   VivaPerson,
+  VivaPersonType,
 } from '../types/vivaMyPages';
 import {
   CaseForm,
@@ -40,16 +41,16 @@ function getPeriodInMilliseconds(vivaApplication: VivaMyPagesPersonApplication):
 }
 
 function getCasePersonList(vivaCase: VivaMyPagesPersonCase): CasePerson[] {
-  const vivaPersons = vivaCase.persons;
+  const vivaPerson = vivaCase.persons?.person;
   const vivaClient = vivaCase.client;
-  vivaClient.type = 'client';
+  vivaClient.type = VivaPersonType.Client;
 
-  const personList: VivaPerson[] = [vivaClient];
+  const personList: VivaPerson[] = [vivaClient as VivaPerson];
 
-  if (Array.isArray(vivaPersons)) {
-    personList.push(...vivaPersons);
-  } else if (vivaPersons != undefined) {
-    personList.push(vivaPersons);
+  if (Array.isArray(vivaPerson)) {
+    personList.push(...vivaPerson);
+  } else if (vivaPerson != undefined) {
+    personList.push(vivaPerson);
   }
 
   return personList.map(mapperCasePersonFromVivaPerson);

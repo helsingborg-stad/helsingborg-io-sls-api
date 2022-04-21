@@ -1,3 +1,9 @@
+export enum VivaPersonType {
+  Client = 'client',
+  Partner = 'partner',
+  Child = 'child',
+}
+
 export interface VivaMyPages {
   readonly case: VivaMyPagesPersonCase;
   readonly application: VivaMyPagesPersonApplication;
@@ -23,14 +29,14 @@ export interface VivaClient {
   readonly pnumber: string;
   readonly fname: string;
   readonly lname: string;
-  type: 'client';
+  type?: VivaPersonType.Client;
 }
 
 export interface VivaPerson {
   readonly pnumber: string;
   readonly fname: string;
   readonly lname: string;
-  readonly type: 'client' | 'partner' | 'child';
+  readonly type: VivaPersonType;
   readonly startdate?: string | null;
   readonly startend?: string | null;
   readonly days?: string | null;
