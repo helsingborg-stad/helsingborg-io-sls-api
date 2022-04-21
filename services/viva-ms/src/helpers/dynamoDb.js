@@ -78,3 +78,8 @@ export function updateVivaCase(caseKeys, workflowId) {
 
   return dynamoDb.call('update', params);
 }
+
+export function destructRecord(record) {
+  const body = JSON.parse(record.body);
+  return dynamoDb.unmarshall(body.detail.dynamodb.NewImage);
+}
