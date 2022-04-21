@@ -25,7 +25,11 @@ fi
 
 for SERVICE_PATH in $(find . -name "serverless.yml" -not -path "*/node_modules/*" -type f -exec dirname {} \;); do
     if [[ -f "$SERVICE_PATH/package.json" && "$INPUT_YARN_INSTALL" != "n" ]]; then
-        echo $(cd $SERVICE_PATH;yarn install)
+        pushd $SERVICE_PATH
+        yarn install
+        popd
     fi
-    echo $(cd $SERVICE_PATH;sls deploy)
+    pushd $SERVICE_PATH
+    sls deploy
+    popd
 done
