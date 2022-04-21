@@ -77,6 +77,32 @@ const workflowDecisionRejected = {
   },
 };
 
+const workflowDecisionList = {
+  decision: [
+    {
+      decisions: {
+        decision: {
+          typecode: '02',
+        },
+      },
+      createddatetime: '2022-02-17T08:34:02+01:00',
+    },
+    {
+      decisions: {
+        decision: [
+          {
+            typecode: '03',
+          },
+          {
+            typecode: '01',
+          },
+        ],
+      },
+      createddatetime: '2022-02-18T10:13:04+01:00',
+    },
+  ],
+};
+
 const workflowPayment = {
   payments: {
     payment: {},
@@ -113,6 +139,13 @@ const workflowCalculationANDDecisionRejected = {
   ...workflow,
   ...workflowCalculation,
   ...workflowDecisionRejected,
+};
+
+const workflowDecisionWithListStructure = {
+  ...workflow,
+  ...workflowCalculation,
+  ...workflowDecisionList,
+  ...workflowPayment,
 };
 
 it('Before the Viva administrator processes the application the case status must be unchanged', () => {
@@ -168,4 +201,9 @@ it(`Calculation AND decision(partially approved) AND payment exists in the Viva 
 it(`Calculation AND decision(rejected) exists in the Viva workflow collection, then status type must be ${CLOSED_REJECTED_VIVA}`, () => {
   const results = decideNewCaseStatus(workflowCalculationANDDecisionRejected);
   expect(results).toBe(CLOSED_REJECTED_VIVA);
+});
+
+it('Decision is an list of decisions, then handle the latest by date', () => {
+  const results = decideNewCaseStatus(workflowDecisionWithListStructure);
+  expect(results).toBe(CLOSED_PARTIALLY_APPROVED_VIVA);
 });

@@ -6,7 +6,7 @@ import {
 } from '../libs/constants';
 
 export default function decideNewCaseStatus(workflowAttributes) {
-  const decisionList = makeArray(workflowAttributes.decision?.decisions?.decision);
+  const decisionList = getLatestDecision(workflowAttributes.decision);
   const paymentList = makeArray(workflowAttributes.payments?.payment);
   const calculation = workflowAttributes.calculations?.calculation;
 
@@ -22,6 +22,17 @@ export default function decideNewCaseStatus(workflowAttributes) {
   }
 
   return undefined;
+}
+
+function getLatestDecision(decision) {
+  if (Array.isArray(decision)) {
+    const latest = decision.sort((a, b) => {
+      return new Date(b.createddatetime) - new Date(a.createddatetime);
+    })[0];
+    return makeArray(latest?.decisions?.decision);
+  }
+
+  return makeArray(decision?.decisions?.decision);
 }
 
 function getDecisionTypeCode(decisionList) {
