@@ -1,8 +1,4 @@
-import {
-  submitApplication,
-  FunctionContext,
-  FunctionEvent,
-} from '../../src/lambdas/submitApplication';
+import { submitApplication, LambdaContext, LambdaEvent } from '../../src/lambdas/submitApplication';
 
 import { EncryptionType } from '../../src/types/caseItem';
 
@@ -28,8 +24,8 @@ const details = {
   workflowId: 'workflowId',
 };
 
-let event: FunctionEvent;
-let context: FunctionContext;
+let event: LambdaEvent;
+let context: LambdaContext;
 beforeEach(() => {
   context = {
     requestId: 'requestId',

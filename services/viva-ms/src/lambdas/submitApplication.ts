@@ -15,15 +15,15 @@ import { CaseItem } from '../types/caseItem';
 
 type Case = Pick<CaseItem, 'PK' | 'SK' | 'forms' | 'currentFormId' | 'details' | 'pdf'>;
 
-export function main(runtimeEvent: SQSEvent, runtimeContext: Context) {
-  validateSQSEvent(runtimeEvent, runtimeContext);
+export function main(event: SQSEvent, context: Context) {
+  validateSQSEvent(event, context);
 
-  const [record] = runtimeEvent.Records;
+  const [record] = event.Records;
   const { messageId, attributes } = record;
   const { ApproximateReceiveCount: receiveCount, ApproximateFirstReceiveTimestamp: firstReceived } =
     attributes;
 
-  const { awsRequestId: requestId } = runtimeContext;
+  const { awsRequestId: requestId } = context;
 
   const caseItem = destructRecord(record);
 
@@ -34,8 +34,8 @@ export function main(runtimeEvent: SQSEvent, runtimeContext: Context) {
     caseId: caseItem.SK,
   });
 
-  const event = { caseItem, receiveCount, firstReceived, messageId };
-  const context = {
+  const lambdaEvent = { caseItem, receiveCount, firstReceived, messageId };
+  const lambdaContext = {
     requestId,
     readParams: params.read,
     updateVivaCase,
@@ -43,7 +43,7 @@ export function main(runtimeEvent: SQSEvent, runtimeContext: Context) {
     putSuccessEvent: putVivaMsEvent.applicationReceivedSuccess,
   };
 
-  return submitApplication(event, context);
+  return submitApplication(lambdaEvent, lambdaContext);
 }
 
 interface VivaPostError {
@@ -62,7 +62,7 @@ interface ParamsReadResponse {
   recurringFormId: string;
   newApplicationFormId: string;
 }
-export interface FunctionContext {
+export interface LambdaContext {
   requestId: string;
   readParams: (envsKeyName: string) => Promise<ParamsReadResponse>;
   updateVivaCase: (params: { PK: string; SK: string }, workflowId: string) => Promise<null>;
@@ -70,11 +70,11 @@ export interface FunctionContext {
   putSuccessEvent: (params: { personalNumber: string }) => Promise<null>;
 }
 
-export interface FunctionEvent {
+export interface LambdaEvent {
   caseItem: Case;
   messageId: string;
 }
-export async function submitApplication(event: FunctionEvent, context: FunctionContext) {
+export async function submitApplication(event: LambdaEvent, context: LambdaContext) {
   const { caseItem, messageId } = event;
   const { requestId, readParams, updateVivaCase, postVivaApplication, putSuccessEvent } = context;
 
