@@ -1,5 +1,12 @@
 [
   {
+    "Source": "bankId.collect",
+    "Detail": "{ \"user\": { \"personalNumber\": \"198603052385\" } }",
+    "Resources": ["Grundansökan"],
+    "DetailType": "BankIdCollectComplete",
+    "EventBusName": "default"
+  },
+  {
     "Source": "OFFbankId.collect",
     "Detail": "{ \"user\": { \"personalNumber\": \"198602132394\" } }",
     "Resources": ["resourceMock"],
@@ -28,7 +35,7 @@
     "EventBusName": "default"
   },
   {
-    "Source": "casesApi.getCaseList",
+    "Source": "OFFcasesApi.getCaseList",
     "Detail": "{ \"personalNumber\": \"198602132394\" }",
     "Resources": ["resourceMock"],
     "DetailType": "casesApiInvokeSuccess",
