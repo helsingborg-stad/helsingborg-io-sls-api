@@ -66,6 +66,7 @@ export const EMPTY_EXPENSE_POST = {
   currency: 'kr',
 };
 
+export const VIVA_STATUS_NEW_APPLICATION_OPEN = 1;
 export const VIVA_STATUS_APPLICATION_PERIOD_OPEN = 1;
 export const VIVA_STATUS_COMPLETION = 64;
 export const VIVA_STATUS_CASE_EXISTS = 128;
