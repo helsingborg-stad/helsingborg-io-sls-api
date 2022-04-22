@@ -127,6 +127,18 @@ functions:
             detail-type:
               - checkOpenPeriodSuccess
 
+  createNewVivaCase:
+    handler: src/lambdas/createNewVivaCase.main
+    reservedConcurrency: 1
+    timeout: 15
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - vivaMs.personApplicationStatus
+            detail-type:
+              - checkOpenNewApplicationSuccess
+
   createVivaCase:
     handler: src/lambdas/createVivaCase.main
     reservedConcurrency: 1

@@ -57,3 +57,4 @@ env.yml
 
 # typescript
 dist
+/tmp
