@@ -34,7 +34,7 @@ export function getCompletionStatus(completions) {
     return getStatusByType(ACTIVE_RANDOM_CHECK_REQUIRED_VIVA);
   }
 
-  if (isAttachmentPending && isAnyRequestedReceived(requested)) {
+  if (isAttachmentPending) {
     return getStatusByType(ACTIVE_COMPLETION_SUBMITTED);
   }
 
@@ -119,9 +119,13 @@ function getLocaleDate(timestamp) {
 }
 
 function isDueDateExpired(timestamp) {
+  if (timestamp == undefined) {
+    return false;
+  }
+
   const today = getLocaleDate(Date.now());
   const dueDate = getLocaleDate(timestamp);
-  return today > dueDate;
+  return today >= dueDate;
 }
 
 export default {

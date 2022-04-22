@@ -165,6 +165,23 @@ describe('Completions requested received (getCompletionStatus)', () => {
   });
 });
 
+describe('Completions requested (getCompletionStatus)', () => {
+  test.each([
+    {
+      conditionOption: {
+        requested: [...requestedAllFalseList],
+        isRandomCheck: false,
+        isAttachmentPending: true,
+      },
+      expectedResult: getStatusByType(ACTIVE_COMPLETION_SUBMITTED),
+      description: `set status to ${ACTIVE_COMPLETION_SUBMITTED} when state is COMPLETIONS_PENDING`,
+    },
+  ])('$description', ({ conditionOption, expectedResult }) => {
+    const results = getCompletionStatus(conditionOption);
+    expect(results).toEqual(expectedResult);
+  });
+});
+
 describe('Completions random select (getCompletionState)', () => {
   test.each([
     {
