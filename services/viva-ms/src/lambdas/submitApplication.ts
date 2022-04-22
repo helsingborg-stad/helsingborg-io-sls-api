@@ -49,7 +49,7 @@ export function main(runtimeEvent: SQSEvent, runtimeContext: Context) {
     putSuccessEvent: putVivaMsEvent.applicationReceivedSuccess,
   };
 
-  return submitApplication(event, context);
+  return lambda(event, context);
 }
 
 interface VivaPostError {
@@ -68,7 +68,7 @@ interface ParamsReadResponse {
   recurringFormId: string;
   newApplicationFormId: string;
 }
-export interface FunctionContext {
+export interface LambdaContext {
   requestId: string;
   readParams: (envsKeyName: string) => Promise<ParamsReadResponse>;
   updateVivaCase: (params: { PK: string; SK: string }, workflowId: string) => Promise<null>;
@@ -76,15 +76,15 @@ export interface FunctionContext {
   putSuccessEvent: (params: { personalNumber: string }) => Promise<null>;
 }
 
-export interface FunctionEvent {
+export interface LambdaEvent {
   caseItem: Case;
   messageId: string;
 }
-export async function submitApplication(event: FunctionEvent, context: FunctionContext) {
+export async function lambda(event: LambdaEvent, context: LambdaContext) {
   const { caseItem, messageId } = event;
   const { requestId, readParams, updateVivaCase, postVivaApplication, putSuccessEvent } = context;
 
-  const { PK, SK, pdf, currentFormId, details, forms } = caseItem;
+  const { PK, SK, pdf, details, forms, currentFormId } = caseItem;
 
   const [paramsReadError, vivaCaseSSMParams] = await to(
     readParams(config.cases.providers.viva.envsKeyName)
@@ -118,8 +118,8 @@ export async function submitApplication(event: FunctionEvent, context: FunctionC
       applicationType,
       personalNumber,
       workflowId: details?.workflowId || '',
-      answers: forms[formId].answers,
-      rawData: pdf.toString(),
+      answers: forms?.[formId].answers ?? [],
+      rawData: pdf?.toString(),
       rawDataType: 'pdf',
     })
   );

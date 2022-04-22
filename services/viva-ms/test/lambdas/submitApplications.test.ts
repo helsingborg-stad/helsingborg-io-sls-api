@@ -12,7 +12,7 @@ const form = {
   encryption: {
     type: EncryptionType.Decrypted,
   },
-  answers: [1],
+  answers: [],
   currentPosition: {
     currentMainStep: 0,
     currentMainStepIndex: 0,
@@ -22,6 +22,10 @@ const form = {
 };
 const details = {
   workflowId: 'workflowId',
+  period: {
+    startDate: 123,
+    endDate: 456,
+  },
 };
 
 let event: LambdaEvent;
