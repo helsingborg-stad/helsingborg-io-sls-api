@@ -1,7 +1,3 @@
-#!/usr/bin/env python3
-
-# Helper script to verify discrepancies for event-bridge rules between remote (aws) and local definitions
-
 import json
 import subprocess
 import glob
@@ -31,7 +27,7 @@ def run_cmd(cmd):
     return result.stdout.decode("utf-8")
 
 
-def get_aws_rules(startToken: str = None) -> list[dict]:
+def get_aws_rules(startToken: str = None) -> "list[dict]":
     '''
     Get the list of rules in AWS. May recursively call itself to aggregate
     a list to handle pagination.
@@ -51,7 +47,7 @@ def get_aws_rules(startToken: str = None) -> list[dict]:
     return rules
 
 
-def parse_local_rules(ymlPath: str) -> list[str]:
+def parse_local_rules(ymlPath: str) -> "list[str]":
     '''
     Parse a local serverless.yml file and extract its event-bridge rules.
 
@@ -75,20 +71,22 @@ def parse_local_rules(ymlPath: str) -> list[str]:
     return []
 
 
-def get_local_rules() -> list[str]:
+def get_local_rules() -> "list[str]":
     ymlFiles = glob.glob(
-        "../services/**/serverless.yml")
+        "../../services/**/serverless.yml")
 
     print(f"found {len(ymlFiles)} local serverless.yml files")
     return [rule for ymlPath in ymlFiles for rule in parse_local_rules(ymlPath)]
 
 
+# Helper script to verify discrepancies for event-bridge rules between remote (aws) and local definitions
 if __name__ == "__main__":
     existing_rules = get_aws_rules()
     existing_rule_names = [rule["Name"] for rule in existing_rules]
 
     local_rules = get_local_rules()
 
+    print()
     print(
         f"remote rules={len(existing_rule_names)}, local rules={len(local_rules)}")
     print()
