@@ -8,7 +8,6 @@ import * as dynamoDb from '../libs/dynamoDb';
 import params from '../libs/params';
 import log from '../libs/logs';
 import { putItem } from '../libs/queries';
-import { populateFormWithPreviousCaseAnswers } from '../libs/formAnswers';
 import { getStatusByType } from '../libs/caseStatuses';
 import { getFutureTimestamp, millisecondsToSeconds } from '../libs/timestampHelper';
 import {
@@ -18,16 +17,8 @@ import {
   NEW_APPLICATION_VIVA,
 } from '../libs/constants';
 
-import { getFormTemplates } from '../helpers/dynamoDb';
 import createCaseHelper from '../helpers/createCase';
-import {
-  CaseUser,
-  CaseItem,
-  CaseForm,
-  CaseStatus,
-  CasePersonRole,
-  CasePerson,
-} from '../types/caseItem';
+import { CaseUser, CaseItem, CaseStatus, CasePerson } from '../types/caseItem';
 import { VivaApplicationStatus } from '../types/vivaMyPages';
 
 export interface AWSEvent {
@@ -83,7 +74,7 @@ export async function lambda(
   const initialStatus: CaseStatus = getStatusByType(NEW_APPLICATION_VIVA);
   const initialPersonList: CasePerson[] = [createCaseHelper.createCaseApplicantPerson(user)];
 
-  const newVivaCaseItem: CaseItem = {
+  const newVivaCaseItem = {
     id,
     PK,
     SK,
@@ -92,36 +83,12 @@ export async function lambda(
     createdAt: timestampNow,
     updatedAt: 0,
     status: initialStatus,
-    forms: null,
+    forms: initialFormList,
     provider: CASE_PROVIDER_VIVA,
     persons: initialPersonList,
-    details: {
-      workflowId: null,
-      period: {
-        startDate: 0,
-        endDate: 0,
-      },
-    },
+    details: null,
     currentFormId: newApplicationFormId,
   };
-
-  const extendedCasePersonList = initialPersonList.map(person => {
-    if (person.role === CasePersonRole.Applicant && person.personalNumber === user.personalNumber) {
-      return { ...user, ...person };
-    }
-    return person;
-  });
-
-  const [, formTemplates] = await to(getFormTemplates(formIdList));
-
-  const prePopulatedForms: Record<string, CaseForm> = populateFormWithPreviousCaseAnswers(
-    initialFormList,
-    extendedCasePersonList,
-    formTemplates,
-    {}
-  );
-
-  newVivaCaseItem.forms = prePopulatedForms;
 
   const [putItemError, createdCaseItem] = await to(
     lambdaContext.putItem({
