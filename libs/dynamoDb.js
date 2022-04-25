@@ -9,6 +9,6 @@ export function call(action, params) {
   }).promise();
 }
 
-export function unmarshall(input) {
-  return AWS.DynamoDB.Converter.unmarshall(input);
+export function unmarshall(record) {
+  return AWS.DynamoDB.Converter.unmarshall(record);
 }
