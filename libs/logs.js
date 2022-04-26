@@ -85,29 +85,17 @@ const log = {
   },
 
   wrap: lambda => {
-    return (event, context, callback) => {
+    return async (event, context) => {
       log.initialize(event, context);
 
-      const executor = lambda(event, context, (error, response) => {
-        log.finalize(response, error);
-        callback ?? callback(error, response);
-      });
-
-      if (!(executor instanceof Promise)) {
-        return;
+      try {
+        const response = await lambda(event, context);
+        log.finalize(response);
+        return response;
+      } catch (error) {
+        log.finalize(null, error);
+        throw error;
       }
-
-      return new Promise((resolve, reject) => {
-        executor
-          .then(response => {
-            log.finalize(response);
-            resolve(response);
-          })
-          .catch(error => {
-            reject(error);
-            log.finalize(null, error);
-          });
-      });
     };
   },
 };
