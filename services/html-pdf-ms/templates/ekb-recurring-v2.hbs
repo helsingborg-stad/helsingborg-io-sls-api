@@ -18,7 +18,6 @@
 
 	<body>
 		<header>
-			{{log 'type 1' type}}
 			{{#if (eq type "EKB_RECURRING")}}
 				<div>
 					<h1>Ansökan gäller för perioden</h1>
@@ -87,7 +86,6 @@
 							{{{this.occupation}}}
 						</td>
 					</tr>
-					{{log 'type' ../type}}
 					{{#if (eq ../type "EKB_NEW")}}
 						<tr>
 							<td>Medborgarskap</td>
