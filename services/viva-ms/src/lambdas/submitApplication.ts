@@ -42,7 +42,7 @@ export interface LambdaEvent {
   messageId: string;
 }
 
-type Case = Pick<CaseItem, 'PK' | 'SK' | 'forms' | 'currentFormId' | 'details' | 'pdf'>;
+type Case = Pick<CaseItem, 'PK' | 'SK' | 'forms' | 'currentFormId' | 'details' | 'pdf' | 'id'>;
 
 export function main(event: SQSEvent, context: Context) {
   validateSQSEvent(event, context);
@@ -60,7 +60,7 @@ export function main(event: SQSEvent, context: Context) {
     messageId,
     receiveCount,
     firstReceived,
-    caseId: caseItem.SK,
+    caseId: caseItem.id,
   });
 
   const lambdaEvent = { caseItem, receiveCount, firstReceived, messageId };
@@ -79,7 +79,7 @@ export async function lambda(event: LambdaEvent, context: LambdaContext) {
   const { caseItem, messageId } = event;
   const { requestId, readParams, updateVivaCase, postVivaApplication, putSuccessEvent } = context;
 
-  const { PK, SK, pdf, currentFormId, details, forms } = caseItem;
+  const { PK, SK, pdf, currentFormId, details, forms, id } = caseItem;
 
   const [paramsReadError, vivaCaseSSMParams] = await to(
     readParams(config.cases.providers.viva.envsKeyName)
@@ -125,7 +125,7 @@ export async function lambda(event: LambdaEvent, context: LambdaContext) {
       httpStatusCode: vivaPostError.status,
       vivaErrorCode: vivaPostError.vadaResponse?.error?.details?.errorCode ?? 'N/A',
       vivaErrorMessage: vivaPostError.vadaResponse?.error?.details?.errorMessage ?? 'N/A',
-      caseId: SK,
+      caseId: id,
     };
     if (error.vivaErrorCode === '1014') {
       log.warn('Failed to submit Viva application. Will NOT be retried.', requestId, null, error);

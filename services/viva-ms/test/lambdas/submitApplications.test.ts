@@ -6,6 +6,7 @@ const newApplicationFormId = 'newApplicationFormId';
 const recurrentFormId = 'recurrentFormId';
 const PK = 'mockPK';
 const SK = 'mockSK';
+const id = 'mockCaseId';
 const postVivaResponseId = 'mockPostResponseId';
 
 const form = {
@@ -42,6 +43,7 @@ beforeEach(() => {
   event = {
     messageId: 'messageId',
     caseItem: {
+      id,
       PK,
       SK,
       currentFormId: newApplicationFormId,
