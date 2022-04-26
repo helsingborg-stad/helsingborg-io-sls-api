@@ -1,5 +1,5 @@
 import axios, { AxiosError, Method } from 'axios';
-
+import https from 'https';
 interface RequestConfig<T = unknown> {
   method?: Method;
   data?: T;
@@ -12,23 +12,29 @@ interface HttpError {
   message: string;
 }
 
-type ErrorProvider = (error: HttpError) => HttpError;
+type ErrorTransform = (error: HttpError) => HttpError;
 
-function defaultErrorProvider(e: AxiosError): HttpError {
+const defaultErrorTransform: ErrorTransform = (error: HttpError) => {
+  return error;
+};
+
+function errorExtractor(e: AxiosError): HttpError {
   return {
     status: e.response?.status ?? 500,
     message: e.response?.statusText ?? e.message,
   };
 }
 
-export async function fetch<T = unknown, R = unknown>(
+export async function fetch<Response = unknown, Request = unknown>(
   url: string,
-  config: RequestConfig<R> = {},
-  customErrorHandler?: ErrorProvider
-): Promise<T> {
+  config: RequestConfig<Request> = {},
+  errorTransform: ErrorTransform = defaultErrorTransform,
+  options: https.AgentOptions = {}
+): Promise<Response> {
   try {
     const aggregatedConfig = {
       ...config,
+      httpsAgent: new https.Agent({ ...options }),
       headers: {
         'Content-Type': 'application/json',
         ...config.headers,
@@ -38,11 +44,6 @@ export async function fetch<T = unknown, R = unknown>(
     };
     return (await axios(url, aggregatedConfig)).data;
   } catch (e) {
-    const result = defaultErrorProvider(e as AxiosError);
-
-    if (!customErrorHandler) {
-      throw result;
-    }
-    throw customErrorHandler(result);
+    throw errorTransform(errorExtractor(e as AxiosError));
   }
 }
