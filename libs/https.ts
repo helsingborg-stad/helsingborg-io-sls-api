@@ -25,7 +25,7 @@ function errorExtractor(e: AxiosError): HttpError {
   };
 }
 
-export async function fetch<Response = unknown, Request = unknown>(
+async function request<Response = unknown, Request = unknown>(
   url: string,
   config: RequestConfig<Request> = {},
   errorTransform: ErrorTransform = defaultErrorTransform,
@@ -47,3 +47,7 @@ export async function fetch<Response = unknown, Request = unknown>(
     throw errorTransform(errorExtractor(e as AxiosError));
   }
 }
+
+export default {
+  request,
+};
