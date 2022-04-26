@@ -86,9 +86,8 @@ const log = {
 
   wrap: lambda => {
     return async (event, context) => {
-      log.initialize(event, context);
-
       try {
+        log.initialize(event, context);
         const response = await lambda(event, context);
         log.finalize(response);
         return response;
