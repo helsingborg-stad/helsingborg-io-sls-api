@@ -13,6 +13,35 @@ import { TraceException } from '../helpers/TraceException';
 
 import { CaseItem } from '../types/caseItem';
 
+interface VivaPostError {
+  status: string;
+  vadaResponse: {
+    error?: {
+      details?: {
+        errorCode?: string;
+        errorMessage?: string;
+      };
+    };
+  };
+}
+
+interface ParamsReadResponse {
+  recurringFormId: string;
+  newApplicationFormId: string;
+}
+export interface LambdaContext {
+  requestId: string;
+  readParams: (envsKeyName: string) => Promise<ParamsReadResponse>;
+  updateVivaCase: (params: { PK: string; SK: string }, workflowId: string) => Promise<null>;
+  postVivaApplication: (params: Record<string, unknown>) => Promise<Record<string, unknown>>;
+  putSuccessEvent: (params: { personalNumber: string }) => Promise<null>;
+}
+
+export interface LambdaEvent {
+  caseItem: Case;
+  messageId: string;
+}
+
 type Case = Pick<CaseItem, 'PK' | 'SK' | 'forms' | 'currentFormId' | 'details' | 'pdf'>;
 
 export function main(event: SQSEvent, context: Context) {
@@ -46,34 +75,6 @@ export function main(event: SQSEvent, context: Context) {
   return lambda(lambdaEvent, lambdaContext);
 }
 
-interface VivaPostError {
-  status: string;
-  vadaResponse: {
-    error?: {
-      details?: {
-        errorCode?: string;
-        errorMessage?: string;
-      };
-    };
-  };
-}
-
-interface ParamsReadResponse {
-  recurringFormId: string;
-  newApplicationFormId: string;
-}
-export interface LambdaContext {
-  requestId: string;
-  readParams: (envsKeyName: string) => Promise<ParamsReadResponse>;
-  updateVivaCase: (params: { PK: string; SK: string }, workflowId: string) => Promise<null>;
-  postVivaApplication: (params: Record<string, unknown>) => Promise<Record<string, unknown>>;
-  putSuccessEvent: (params: { personalNumber: string }) => Promise<null>;
-}
-
-export interface LambdaEvent {
-  caseItem: Case;
-  messageId: string;
-}
 export async function lambda(event: LambdaEvent, context: LambdaContext) {
   const { caseItem, messageId } = event;
   const { requestId, readParams, updateVivaCase, postVivaApplication, putSuccessEvent } = context;
