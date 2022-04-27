@@ -1,6 +1,6 @@
 import { Handler } from 'aws-lambda';
 
-type Primitive = string | number;
+type Primitive = string | number | null | undefined;
 type Level = 'info' | 'error' | 'warn' | 'verbose' | 'debug';
 
 declare namespace log {
