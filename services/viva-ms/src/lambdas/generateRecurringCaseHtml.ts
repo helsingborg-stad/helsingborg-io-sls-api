@@ -10,6 +10,16 @@ import createRecurringCaseTemplate from '../helpers/createRecurringCaseTemplate'
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import { getClosedUserCases, updateVivaCaseState } from '../helpers/dynamoDb';
 
+interface CaseItem {
+  updatedAt: number;
+  forms: Record<
+    string,
+    {
+      answers: unknown;
+    }
+  >;
+}
+
 export async function main(event, context) {
   const { caseKeys } = event.detail;
 
@@ -52,10 +62,11 @@ export async function main(event, context) {
     );
     return false;
   }
-  const { Items: closedCaseList } = closedUserCases;
+
+  const { Items: closedCaseList } = closedUserCases as { Items: CaseItem[] };
 
   const { recurringFormId } = vivaCaseSSMParams;
-  let changedAnswerValues = caseItem.forms[recurringFormId].answers;
+  let changedAnswerValues = caseItem.forms[recurringFormId]?.answers ?? [];
   if (closedCaseList.length > 0) {
     const [closedCase] = closedCaseList.sort((caseA, caseB) => caseB.updatedAt - caseA.updatedAt);
 
