@@ -7,12 +7,41 @@ import log from '../libs/logs';
 
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import completionsHelper from '../helpers/completions';
+import validateApplicationStatus from '../helpers/validateApplicationStatus';
+import { VIVA_STATUS_NEW_APPLICATION_OPEN } from '../helpers/constants';
 
-export async function main(event, context) {
+import { CaseUser, CaseItem } from '../types/caseItem';
+import { VivaApplicationStatus } from '../types/vivaMyPages';
+
+interface UpdateCaseCompletionsResponse {
+  Attributes: CaseItem;
+}
+
+interface LambdaContext {
+  awsRequestId: string;
+}
+
+interface LambdaEvent {
+  detail: {
+    user: CaseUser;
+    status: VivaApplicationStatus[];
+  };
+}
+export async function main(event: LambdaEvent, context: LambdaContext) {
   const {
     user: { personalNumber },
     status: vivaApplicantStatusCodeList,
   } = event.detail;
+
+  if (validateApplicationStatus(vivaApplicantStatusCodeList, [VIVA_STATUS_NEW_APPLICATION_OPEN])) {
+    log.info(
+      'Status belongs to a new application, stopping execution',
+      context.awsRequestId,
+      'service-viva-ms-syncCaseCompletions-005',
+      undefined
+    );
+    return false;
+  }
 
   const [getLatestWorkflowIdError, latestWorkflowId] = await to(
     completionsHelper.get.workflow.latest.id(personalNumber)
@@ -57,7 +86,7 @@ export async function main(event, context) {
     PK: userCase.PK,
     SK: userCase.SK,
   };
-  const [updateCaseError, { Attributes: updatedCase }] = await to(
+  const [updateCaseError, updateCaseCompletionsResponse] = await to(
     updateCaseCompletions(caseKeys, workflowCompletions)
   );
   if (updateCaseError) {
@@ -69,6 +98,9 @@ export async function main(event, context) {
     );
     return false;
   }
+
+  const { Attributes: updatedCase } =
+    updateCaseCompletionsResponse as UpdateCaseCompletionsResponse;
 
   const [putEventError] = await to(
     putVivaMsEvent.syncCaseCompletionsSuccess({
