@@ -66,9 +66,18 @@ When you deploy the service, serverless will output the generated url in the ter
 
 ### BANKID AUTH
 
-#### Request Type
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Frontend
+    participant Lambda
+    participant BankId
 
-`POST`
+    Frontend->>+Lambda: POST {personalNumber, endUserIp}
+    Lambda->>+BankId: POST {personalNumber, endUserIp}
+    BankId-->>-Lambda: {orderRef, autoStartToken}
+    Lambda-->>-Frontend: {orderRef, autoStartToken}
+```
 
 #### Endpoint
 
@@ -102,9 +111,28 @@ When you deploy the service, serverless will output the generated url in the ter
 
 ### BANKID COLLECT
 
-#### Request Type
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Frontend
+    participant Lambda
+    participant BankId
+    participant EventBridge
 
-`POST`
+    Frontend->>Lambda: POST {orderRef}
+    Lambda->>BankId: POST {orderRef}
+    BankId-->>Lambda: {status, completionData}
+  alt status != completed
+    Lambda-->>Frontend: {status}
+  end
+  alt isMittHelsingborgApp = true
+    Lambda->>Lambda: Generate JWT token
+    Lambda->>EventBridge: {BankIdCollectComplete}
+    Lambda-->>Frontend: {status, jwtToken}
+  else isMittHelsingborgApp = false
+    Lambda-->>Frontend: {status, personalNumber}
+  end
+```
 
 #### Endpoint
 
@@ -119,7 +147,9 @@ When you deploy the service, serverless will output the generated url in the ter
 ```
 
 #### Expected JSON Response
+
 While pending:
+
 ```
 {
   "jsonapi": {
@@ -135,7 +165,9 @@ While pending:
   }
 }
 ```
+
 After completed login:
+
 ```
 {
   "jsonapi": {
@@ -167,9 +199,18 @@ After completed login:
 
 ### BANKID CANCEL
 
-#### Request Type
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Frontend
+    participant Lambda
+    participant BankId
 
-`POST`
+    Frontend->>Lambda: POST {orderRef}
+    Lambda->>BankId: POST {orderRef}
+    BankId-->>Lambda: {}
+    Lambda-->>Frontend: {}
+```
 
 #### Endpoint
 
@@ -202,9 +243,18 @@ After completed login:
 
 ### BANKID SIGN
 
-#### Request Type
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Frontend
+    participant Lambda
+    participant BankId
 
-`POST`
+    Frontend->>+Lambda: POST {personalNumber, endUserIp, userVisibleData}
+    Lambda->>+BankId: POST {personalNumber, endUserIp, userVisibleData}
+    BankId-->>-Lambda: {orderRef, autoStartToken}
+    Lambda-->>-Frontend: {orderRef, autoStartToken}
+```
 
 #### Endpoint
 
