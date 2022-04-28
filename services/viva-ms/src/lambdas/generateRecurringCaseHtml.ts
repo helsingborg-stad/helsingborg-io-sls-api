@@ -66,7 +66,7 @@ export async function main(event, context) {
   const { Items: closedCaseList } = closedUserCases as { Items: CaseItem[] };
 
   const { recurringFormId } = vivaCaseSSMParams;
-  let changedAnswerValues = caseItem.forms[recurringFormId]?.answers ?? [];
+  let changedAnswerValues = caseItem.forms[caseItem.currentFormId]?.answers ?? [];
   if (closedCaseList.length > 0) {
     const [closedCase] = closedCaseList.sort((caseA, caseB) => caseB.updatedAt - caseA.updatedAt);
 
