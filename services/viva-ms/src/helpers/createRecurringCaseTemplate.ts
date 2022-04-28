@@ -360,7 +360,7 @@ function getFinancials(answers) {
 }
 
 export default function createRecurringCaseTemplate(caseItem, answers) {
-  const period = formatPeriodDates(caseItem.details.period);
+  const period = formatPeriodDates(caseItem.details?.period);
   const financials = getFinancials(answers);
   const persons = createPersons(caseItem.persons, answers);
   const children = createChildren(answers);
