@@ -40,7 +40,7 @@ export async function main(event: LambdaEvent, context: LambdaContext) {
       'service-viva-ms-syncCaseCompletions-005',
       undefined
     );
-    return false;
+    return true;
   }
 
   const [getLatestWorkflowIdError, latestWorkflowId] = await to(
