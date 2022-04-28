@@ -139,11 +139,9 @@ export function updateVivaCase(caseKeys, workflowId) {
       PK: caseKeys.PK,
       SK: caseKeys.SK,
     },
-    UpdateExpression: 'SET #state = :newState, #details.#workflowId = :newWorkflowId',
+    UpdateExpression: 'SET #state = :newState, details.workflowId = :newWorkflowId',
     ExpressionAttributeNames: {
       '#state': 'state',
-      '#details': 'details',
-      '#workflowId': 'workflowId',
     },
     ExpressionAttributeValues: {
       ':newWorkflowId': workflowId,
