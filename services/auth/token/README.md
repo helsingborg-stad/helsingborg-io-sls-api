@@ -86,14 +86,10 @@ sequenceDiagram
     Secrets-->>-Lambda: {Secret key}
     Lambda->>+JWT: Decode token {Secret key, Authorization code or refresh token}
     JWT-->>-Lambda: {PersonalNumber}
-    Lambda->>+Secrets: Get secret key for generating access token
-      Secrets-->>-Lambda: {Secret key}
-    Lambda->>JWT: Sign token {Secret key, personalNumber, expiryTime}
-    JWT-->>Lambda: {accessToken}
-    Lambda->>+Secrets: Get secret key for generating refresh token
-    Secrets-->>-Lambda: {Secret key}
-    Lambda->>JWT: Sign token {Secret key, personalNumber, expiryTime}
-    JWT-->>Lambda: {refreshToken}
+    Lambda->>+Secrets: Get individual secret keys for generating access and refresh tokens
+      Secrets-->>-Lambda: {Secret keys}
+    Lambda->>+JWT: Sign tokens individually {Secret key, personalNumber, expiryTime}
+    JWT-->>-Lambda: {accessToken, refreshToken}
     Lambda-->>-Frontend: {accessToken, refreshToken}
 
 ```
