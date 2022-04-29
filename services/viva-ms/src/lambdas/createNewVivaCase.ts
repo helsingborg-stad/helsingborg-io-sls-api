@@ -95,7 +95,13 @@ export async function lambda(
     forms: null,
     provider: CASE_PROVIDER_VIVA,
     persons: initialPersonList,
-    details: null,
+    details: {
+      workflowId: null,
+      period: {
+        startDate: 0,
+        endDate: 0,
+      },
+    },
     currentFormId: newApplicationFormId,
   };
 
