@@ -10,10 +10,12 @@ import {
   ACTIVE_RANDOM_CHECK_SUBMITTED,
   ACTIVE_COMPLETION_REQUIRED_VIVA,
   ACTIVE_COMPLETION_SUBMITTED,
+  ACTIVE_SUBMITTED,
 
   // state
   VIVA_RANDOM_CHECK_REQUIRED,
   VIVA_COMPLETION_REQUIRED,
+  VIVA_APPLICATION_RECEIVED,
   COMPLETIONS_PENDING,
 } from '../libs/constants';
 
@@ -25,9 +27,13 @@ export function getCompletionFormId(completionForms, completions) {
 }
 
 export function getCompletionStatus(completions) {
-  const { isRandomCheck, isAttachmentPending, requested } = completions;
+  const { isCompleted, isAttachmentPending } = completions;
 
-  if (isRandomCheck && !isAnyRequestedReceived(requested)) {
+  if (isCompleted) {
+    return getStatusByType(ACTIVE_SUBMITTED);
+  }
+
+  if (isRandomCheck(completions)) {
     if (isAttachmentPending) {
       return getStatusByType(ACTIVE_RANDOM_CHECK_SUBMITTED);
     }
@@ -42,12 +48,17 @@ export function getCompletionStatus(completions) {
 }
 
 export function getCompletionState(completions) {
-  const { isRandomCheck, isAttachmentPending, requested } = completions;
+  const { requested, isAttachmentPending, isCompleted } = completions;
+
+  if (isCompleted || !requested.length) {
+    return VIVA_APPLICATION_RECEIVED;
+  }
+
   if (isAttachmentPending) {
     return COMPLETIONS_PENDING;
   }
 
-  if (isRandomCheck && !isAnyRequestedReceived(requested)) {
+  if (isRandomCheck(completions)) {
     return VIVA_RANDOM_CHECK_REQUIRED;
   }
 
