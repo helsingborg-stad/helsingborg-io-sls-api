@@ -1,4 +1,3 @@
-/* eslint-disable jest/no-commented-out-tests */
 import { getStatusByType } from '../../src/libs/caseStatuses';
 import {
   // status type
@@ -6,10 +5,12 @@ import {
   ACTIVE_RANDOM_CHECK_SUBMITTED,
   ACTIVE_COMPLETION_REQUIRED_VIVA,
   ACTIVE_COMPLETION_SUBMITTED,
+  ACTIVE_SUBMITTED,
 
   // state
   VIVA_RANDOM_CHECK_REQUIRED,
   VIVA_COMPLETION_REQUIRED,
+  VIVA_APPLICATION_RECEIVED,
   COMPLETIONS_PENDING,
 } from '../../src/libs/constants';
 import {
@@ -52,6 +53,8 @@ const requestedSomeTrueList = [
     received: false,
   },
 ];
+
+const requestedEmpty = [];
 
 describe('Completions form (getCompletionFormId)', () => {
   test.each([
@@ -139,7 +142,7 @@ describe('Completions random select (getCompletionStatus)', () => {
   });
 });
 
-describe('Completions requested received (getCompletionStatus)', () => {
+describe('Completions some requested received (getCompletionStatus)', () => {
   test.each([
     {
       conditionOption: {
@@ -165,7 +168,7 @@ describe('Completions requested received (getCompletionStatus)', () => {
   });
 });
 
-describe('Completions requested (getCompletionStatus)', () => {
+describe('Completions request all (getCompletionStatus)', () => {
   test.each([
     {
       conditionOption: {
@@ -174,7 +177,63 @@ describe('Completions requested (getCompletionStatus)', () => {
         isAttachmentPending: true,
       },
       expectedResult: getStatusByType(ACTIVE_COMPLETION_SUBMITTED),
-      description: `set status to ${ACTIVE_COMPLETION_SUBMITTED} when state is COMPLETIONS_PENDING`,
+      description: `set status to ${ACTIVE_COMPLETION_SUBMITTED} when attachment pending`,
+    },
+    {
+      conditionOption: {
+        requested: [...requestedAllFalseList],
+        isRandomCheck: true,
+        isAttachmentPending: true,
+      },
+      expectedResult: getStatusByType(ACTIVE_RANDOM_CHECK_SUBMITTED),
+      description: `set status to ${ACTIVE_RANDOM_CHECK_SUBMITTED} when attachment pending and is random check`,
+    },
+  ])('$description', ({ conditionOption, expectedResult }) => {
+    const results = getCompletionStatus(conditionOption);
+    expect(results).toEqual(expectedResult);
+  });
+});
+
+describe('Completions completed (getCompletionStatus)', () => {
+  test.each([
+    {
+      conditionOption: {
+        requested: [...requestedEmpty],
+        dueDate: null,
+        isRandomCheck: false,
+        isAttachmentPending: false,
+        receiveDate: null,
+        isCompleted: true,
+        isDueDateExpired: false,
+      },
+      expectedResult: getStatusByType(ACTIVE_SUBMITTED),
+      description: `set status to ${ACTIVE_SUBMITTED} if completed and requested is empty`,
+    },
+    {
+      conditionOption: {
+        requested: [...requestedSomeTrueList],
+        dueDate: null,
+        isRandomCheck: false,
+        isAttachmentPending: false,
+        receiveDate: null,
+        isCompleted: true,
+        isDueDateExpired: false,
+      },
+      expectedResult: getStatusByType(ACTIVE_SUBMITTED),
+      description: `set status to ${ACTIVE_SUBMITTED} if completed and some requested is true`,
+    },
+    {
+      conditionOption: {
+        requested: [...requestedAllFalseList],
+        dueDate: null,
+        isRandomCheck: false,
+        isAttachmentPending: false,
+        receiveDate: null,
+        isCompleted: true,
+        isDueDateExpired: false,
+      },
+      expectedResult: getStatusByType(ACTIVE_SUBMITTED),
+      description: `set status to ${ACTIVE_SUBMITTED} if completed and all requested is false`,
     },
   ])('$description', ({ conditionOption, expectedResult }) => {
     const results = getCompletionStatus(conditionOption);
@@ -260,6 +319,53 @@ describe('Completions requesting (getCompletionState)', () => {
   });
 });
 
+describe('Completions completed (getCompletionState)', () => {
+  test.each([
+    {
+      conditionOption: {
+        requested: [...requestedEmpty],
+        dueDate: null,
+        isRandomCheck: false,
+        isAttachmentPending: false,
+        receiveDate: null,
+        isCompleted: true,
+        isDueDateExpired: false,
+      },
+      expectedResult: VIVA_APPLICATION_RECEIVED,
+      description: `set state to ${VIVA_APPLICATION_RECEIVED} if completed and requested is empty`,
+    },
+    {
+      conditionOption: {
+        requested: [...requestedSomeTrueList],
+        dueDate: null,
+        isRandomCheck: false,
+        isAttachmentPending: false,
+        receiveDate: null,
+        isCompleted: true,
+        isDueDateExpired: false,
+      },
+      expectedResult: VIVA_APPLICATION_RECEIVED,
+      description: `set state to ${VIVA_APPLICATION_RECEIVED} if completed and some requested is true`,
+    },
+    {
+      conditionOption: {
+        requested: [...requestedAllFalseList],
+        dueDate: null,
+        isRandomCheck: false,
+        isAttachmentPending: false,
+        receiveDate: null,
+        isCompleted: true,
+        isDueDateExpired: false,
+      },
+      expectedResult: VIVA_APPLICATION_RECEIVED,
+      description: `set state to ${VIVA_APPLICATION_RECEIVED} if completed and all requested is false`,
+    },
+  ])('$description', ({ conditionOption, expectedResult }) => {
+    const results = getCompletionState(conditionOption);
+    expect(results).toBe(expectedResult);
+  });
+});
+
 describe('Completions requested received (getCompletionState)', () => {
   test.each([
     {
@@ -274,11 +380,29 @@ describe('Completions requested received (getCompletionState)', () => {
     {
       conditionOption: {
         requested: [...requestedSomeTrueList],
+        isRandomCheck: true,
+        isAttachmentPending: false,
+      },
+      expectedResult: VIVA_COMPLETION_REQUIRED,
+      description: `set state to ${VIVA_COMPLETION_REQUIRED} the first time and is random check`,
+    },
+    {
+      conditionOption: {
+        requested: [...requestedSomeTrueList],
         isRandomCheck: false,
         isAttachmentPending: true,
       },
       expectedResult: COMPLETIONS_PENDING,
       description: `set state to ${COMPLETIONS_PENDING} when uploaded attachments`,
+    },
+    {
+      conditionOption: {
+        requested: [...requestedSomeTrueList],
+        isRandomCheck: true,
+        isAttachmentPending: true,
+      },
+      expectedResult: COMPLETIONS_PENDING,
+      description: `set state to ${COMPLETIONS_PENDING} when uploaded attachments and is random check`,
     },
   ])('$description', ({ conditionOption, expectedResult }) => {
     const results = getCompletionState(conditionOption);
