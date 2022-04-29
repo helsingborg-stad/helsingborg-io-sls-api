@@ -5,6 +5,7 @@ import config from '../libs/config';
 
 import * as dynamoDb from '../libs/dynamoDb';
 import log from '../libs/logs';
+import { VIVA_APPLICATION_RECEIVED } from '../libs/constants';
 import { getStatusByType } from '../libs/caseStatuses';
 
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
@@ -23,14 +24,19 @@ export async function main(event, context) {
   );
   if (updateCaseStatusError) {
     log.error(
-      'Could not update case status',
+      `Could not update status for case with id: ${caseKeys.SK}`,
       context.awsRequestId,
       'service-viva-ms-decideCaseStatus-001',
       updateCaseStatusError
     );
   }
 
-  log.info('New case status updated successfully', context.awsRequestId, null, newCaseStatus);
+  log.info(
+    `Status updated successfully for case with id: ${caseKeys.SK}`,
+    context.awsRequestId,
+    null,
+    newCaseStatus
+  );
 
   const [putEventError] = await to(putVivaMsEvent.decideCaseStatusSuccess({ caseKeys }));
   if (putEventError) {
@@ -52,9 +58,12 @@ async function updateCaseStatus(caseKeys, newStatus) {
   const params = {
     TableName,
     Key: caseKeys,
-    UpdateExpression: 'SET #status = :newStatusType',
-    ExpressionAttributeNames: { '#status': 'status' },
-    ExpressionAttributeValues: { ':newStatusType': newStatus },
+    UpdateExpression: 'SET #status = :newStatusType, #state = :newState',
+    ExpressionAttributeNames: { '#status': 'status', '#state': 'state' },
+    ExpressionAttributeValues: {
+      ':newStatusType': newStatus,
+      ':newState': VIVA_APPLICATION_RECEIVED,
+    },
     ReturnValues: 'UPDATED_NEW',
   };
 

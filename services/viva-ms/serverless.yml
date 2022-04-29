@@ -199,6 +199,7 @@ functions:
               - 'Completions Due Date Probably Overdue'
             detail:
               caseStatusType: [{ 'anything-but': { 'prefix': 'active:processing' } }]
+              state: [{ 'anything-but': 'VIVA_APPLICATION_RECEIVED' }]
 
   submitCompletion:
     handler: src/lambdas/submitCompletion.main
