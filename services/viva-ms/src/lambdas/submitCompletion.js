@@ -9,6 +9,7 @@ import { getItem as getStoredUserCase } from '../libs/queries';
 import params from '../libs/params';
 import S3 from '../libs/S3';
 import { VIVA_COMPLETION_RECEIVED, VIVA_RANDOM_CHECK_RECEIVED } from '../libs/constants';
+import caseHelper from '../helpers/createCase';
 
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
@@ -110,8 +111,16 @@ export async function main(event, context) {
     return false;
   }
 
+  const isCoApplicant = false;
+  const initialCompletionFormEncryption = caseHelper.getFormEncryptionAttributes(isCoApplicant);
+  const initialCompletionFormList = caseHelper.getInitialFormAttributes(
+    [currentFormId],
+    initialCompletionFormEncryption
+  );
+  const newState = getReceivedState(currentFormId, randomCheckFormId);
+  const resetedCompletionForm = initialCompletionFormList[0];
   const [updateError] = await to(
-    updateCaseState(caseKeys, getReceivedState(currentFormId, randomCheckFormId))
+    updateCase(caseKeys, { currentFormId, resetedCompletionForm, newState })
   );
   if (updateError) {
     log.error(
@@ -190,16 +199,22 @@ function getReceivedState(currentFormId, randomCheckFormId) {
     : VIVA_COMPLETION_RECEIVED;
 }
 
-function updateCaseState(caseKeys, newState) {
+function updateCase(caseKeys, { currentFormId, resetedCompletionForm, newState }) {
   const updateParams = {
     TableName: config.cases.tableName,
     Key: {
       PK: caseKeys.PK,
       SK: caseKeys.SK,
     },
-    UpdateExpression: 'SET #state = :newState',
-    ExpressionAttributeNames: { '#state': 'state' },
-    ExpressionAttributeValues: { ':newState': newState },
+    UpdateExpression: 'SET #state = :newState, forms.#formId = :resetedCompletionForm',
+    ExpressionAttributeNames: {
+      '#state': 'state',
+      '#formId': currentFormId,
+    },
+    ExpressionAttributeValues: {
+      ':newState': newState,
+      ':resetedCompletionForm': resetedCompletionForm,
+    },
     ReturnValues: 'NONE',
   };
 
