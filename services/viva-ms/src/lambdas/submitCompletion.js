@@ -113,14 +113,14 @@ export async function main(event, context) {
 
   const isCoApplicant = false;
   const initialCompletionFormEncryption = caseHelper.getFormEncryptionAttributes(isCoApplicant);
-  const initialCompletionFormList = caseHelper.getInitialFormAttributes(
+  const initialCompletionForm = caseHelper.getInitialFormAttributes(
     [currentFormId],
     initialCompletionFormEncryption
   );
+  console.log('initialCompletionForm', initialCompletionForm);
   const newState = getReceivedState(currentFormId, randomCheckFormId);
-  const resetedCompletionForm = initialCompletionFormList[0];
   const [updateError] = await to(
-    updateCase(caseKeys, { currentFormId, resetedCompletionForm, newState })
+    updateCase(caseKeys, { currentFormId, initialCompletionForm, newState })
   );
   if (updateError) {
     log.error(
@@ -199,7 +199,7 @@ function getReceivedState(currentFormId, randomCheckFormId) {
     : VIVA_COMPLETION_RECEIVED;
 }
 
-function updateCase(caseKeys, { currentFormId, resetedCompletionForm, newState }) {
+function updateCase(caseKeys, { currentFormId, initialCompletionForm, newState }) {
   const updateParams = {
     TableName: config.cases.tableName,
     Key: {
@@ -213,7 +213,7 @@ function updateCase(caseKeys, { currentFormId, resetedCompletionForm, newState }
     },
     ExpressionAttributeValues: {
       ':newState': newState,
-      ':resetedCompletionForm': resetedCompletionForm,
+      ':resetedCompletionForm': initialCompletionForm[currentFormId],
     },
     ReturnValues: 'NONE',
   };

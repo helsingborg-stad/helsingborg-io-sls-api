@@ -1,8 +1,8 @@
 [
   {
     "Source": "bankId.collect",
-    "Detail": "{ \"user\": { \"personalNumber\": \"198603052385\" } }",
-    "Resources": ["Grundansökan"],
+    "Detail": "{ \"user\": { \"personalNumber\": \"198602132394\" } }",
+    "Resources": ["COMPLETION"],
     "DetailType": "BankIdCollectComplete",
     "EventBusName": "default"
   },
