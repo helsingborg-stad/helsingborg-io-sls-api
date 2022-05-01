@@ -117,7 +117,6 @@ export async function main(event, context) {
     [currentFormId],
     initialCompletionFormEncryption
   );
-  console.log('initialCompletionForm', initialCompletionForm);
   const newState = getReceivedState(currentFormId, randomCheckFormId);
   const [updateError] = await to(
     updateCase(caseKeys, { currentFormId, initialCompletionForm, newState })
