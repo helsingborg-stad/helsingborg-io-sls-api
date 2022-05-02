@@ -54,8 +54,6 @@ const requestedSomeTrueList = [
   },
 ];
 
-const requestedEmpty = [];
-
 describe('Completions form (getCompletionFormId)', () => {
   test.each([
     {
@@ -198,7 +196,7 @@ describe('Completions completed (getCompletionStatus)', () => {
   test.each([
     {
       conditionOption: {
-        requested: [...requestedEmpty],
+        requested: [],
         dueDate: null,
         isRandomCheck: false,
         isAttachmentPending: false,
@@ -323,7 +321,7 @@ describe('Completions completed (getCompletionState)', () => {
   test.each([
     {
       conditionOption: {
-        requested: [...requestedEmpty],
+        requested: [],
         dueDate: null,
         isRandomCheck: false,
         isAttachmentPending: false,

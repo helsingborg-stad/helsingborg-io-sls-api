@@ -50,7 +50,9 @@ export function getCompletionStatus(completions) {
 export function getCompletionState(completions) {
   const { requested, isAttachmentPending, isCompleted } = completions;
 
-  if (isCompleted || !requested.length) {
+  const isRequestedEmpty = requested?.length === 0;
+
+  if (isCompleted || isRequestedEmpty) {
     return VIVA_APPLICATION_RECEIVED;
   }
 
