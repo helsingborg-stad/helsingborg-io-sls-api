@@ -31,6 +31,7 @@ export interface CaseItem {
   persons: CasePerson[];
   details: CaseDetails | null;
   currentFormId: string;
+  pdf?: Buffer;
 }
 
 export interface CaseDetails {
