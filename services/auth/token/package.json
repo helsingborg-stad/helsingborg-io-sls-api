@@ -1,0 +1,11 @@
+{
+  "name": "token",
+  "version": "0.0.1",
+  "description": "",
+  "main": "",
+  "scripts": {
+    "test": "cd ../../../ && node node_modules/.bin/jest auth/token"
+  },
+  "author": "Helsingborg Stad",
+  "license": "MIT"
+}

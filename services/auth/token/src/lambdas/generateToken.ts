@@ -51,19 +51,20 @@ export async function lambda(event: { body: string }, lambdaContext: LambdaConte
       lambdaContext
     );
 
-    const accessToken = await generateToken(
-      CONFIG_AUTH_SECRETS.accessToken,
-      decodedGrantToken.personalNumber,
-      ACCESS_TOKEN_EXPIRES_IN_MINUTES,
-      lambdaContext
-    );
-
-    const refreshToken = await generateToken(
-      CONFIG_AUTH_SECRETS.refreshToken,
-      decodedGrantToken.personalNumber,
-      REFRESH_TOKEN_EXPIRES_IN_MINUTES,
-      lambdaContext
-    );
+    const [accessToken, refreshToken] = await Promise.all([
+      generateToken(
+        CONFIG_AUTH_SECRETS.accessToken,
+        decodedGrantToken.personalNumber,
+        ACCESS_TOKEN_EXPIRES_IN_MINUTES,
+        lambdaContext
+      ),
+      generateToken(
+        CONFIG_AUTH_SECRETS.refreshToken,
+        decodedGrantToken.personalNumber,
+        REFRESH_TOKEN_EXPIRES_IN_MINUTES,
+        lambdaContext
+      ),
+    ]);
 
     return response.success(200, {
       type: 'authorizationToken',

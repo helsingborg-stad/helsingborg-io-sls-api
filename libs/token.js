@@ -45,7 +45,7 @@ export async function verifyToken(token, secret) {
 }
 
 export function extractToken(authorizationToken) {
-  if (!authorizationToken || authorizationToken === '') {
+  if (!authorizationToken) {
     throw Error('Invalid token provided');
   }
   return authorizationToken.includes('Bearer')

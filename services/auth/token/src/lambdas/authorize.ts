@@ -6,12 +6,12 @@ import log from '../libs/logs';
 import { extractToken } from '../libs/token';
 
 const CONFIG_AUTH_SECRETS_ACCESS_TOKEN = config.auth.secrets.accessToken;
-export interface LambdaContext {
+export interface Dependencies {
   getSecret: (secretName: string, secretKeyName: string) => Promise<string>;
   verifyToken: (token: string, secret: string) => Promise<Token>;
 }
 
-export interface LambdaEvent {
+export interface LambdaRequest {
   authorizationToken?: string;
 }
 /* istanbul ignore next */
@@ -22,7 +22,7 @@ export const main = log.wrap(async event => {
   });
 });
 
-export async function lambda(event: LambdaEvent, lambdaContext: LambdaContext) {
+export async function lambda(event: LambdaRequest, lambdaContext: Dependencies) {
   const token = extractToken(event.authorizationToken);
 
   const secret = await lambdaContext.getSecret(
