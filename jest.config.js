@@ -7,6 +7,7 @@ module.exports = {
       babelConfig: 'babel.config.js',
     },
   },
+  coveragePathIgnorePatterns: ['/libs/'],
   coverageThreshold: {
     global: {
       branches: 80,
