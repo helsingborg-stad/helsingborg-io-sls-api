@@ -15,9 +15,7 @@ interface HttpError {
 
 type ErrorTransform = (error: HttpError) => HttpError;
 
-const defaultErrorTransform: ErrorTransform = (error: HttpError) => {
-  return error;
-};
+const defaultErrorTransform: ErrorTransform = (error: HttpError) => error;
 
 function errorExtractor(error: AxiosError): HttpError {
   return {
