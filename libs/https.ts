@@ -19,10 +19,10 @@ const defaultErrorTransform: ErrorTransform = (error: HttpError) => {
   return error;
 };
 
-function errorExtractor(e: AxiosError): HttpError {
+function errorExtractor(error: AxiosError): HttpError {
   return {
-    status: e.response?.status ?? 500,
-    message: e.response?.statusText ?? e.message,
+    status: error.response?.status ?? 500,
+    message: error.response?.statusText ?? error.message,
   };
 }
 
@@ -42,8 +42,8 @@ async function request<Response = unknown, Request = unknown>(
       },
     };
     return (await axios(url, aggregatedConfig)).data;
-  } catch (e) {
-    throw errorTransform(errorExtractor(e as AxiosError));
+  } catch (error) {
+    throw errorTransform(errorExtractor(error as AxiosError));
   }
 }
 
