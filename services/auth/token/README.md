@@ -77,7 +77,7 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant Frontend
-    participant Lambda
+    participant Lambda as Generate Token Lambda
     participant Secrets as AWS SecretManager
     participant JWT
 
