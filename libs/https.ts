@@ -1,5 +1,6 @@
 import axios, { AxiosError, Method } from 'axios';
 import https from 'https';
+
 interface RequestConfig<T = unknown> {
   method?: Method;
   data?: T;
