@@ -1,5 +1,6 @@
 import axios, { AxiosError, Method } from 'axios';
 import https from 'https';
+
 interface RequestConfig<T = unknown> {
   method?: Method;
   data?: T;
@@ -14,14 +15,12 @@ interface HttpError {
 
 type ErrorTransform = (error: HttpError) => HttpError;
 
-const defaultErrorTransform: ErrorTransform = (error: HttpError) => {
-  return error;
-};
+const defaultErrorTransform: ErrorTransform = (error: HttpError) => error;
 
-function errorExtractor(e: AxiosError): HttpError {
+function errorExtractor(error: AxiosError): HttpError {
   return {
-    status: e.response?.status ?? 500,
-    message: e.response?.statusText ?? e.message,
+    status: error.response?.status ?? 500,
+    message: error.response?.statusText ?? error.message,
   };
 }
 
@@ -39,12 +38,10 @@ async function request<Response = unknown, Request = unknown>(
         'Content-Type': 'application/json',
         ...config.headers,
       },
-      maxContentLength: Infinity,
-      maxBodyLength: Infinity,
     };
     return (await axios(url, aggregatedConfig)).data;
-  } catch (e) {
-    throw errorTransform(errorExtractor(e as AxiosError));
+  } catch (error) {
+    throw errorTransform(errorExtractor(error as AxiosError));
   }
 }
 
