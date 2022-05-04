@@ -2,7 +2,7 @@ import { getStatusByType } from '../../src/libs/caseStatuses';
 import {
   // status type
   ACTIVE_RANDOM_CHECK_REQUIRED_VIVA,
-  ACTIVE_RANDOM_CHECK_SUBMITTED,
+  ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA,
   ACTIVE_COMPLETION_REQUIRED_VIVA,
   ACTIVE_COMPLETION_SUBMITTED,
   ACTIVE_SUBMITTED,
@@ -122,8 +122,8 @@ describe('Completions random select (getCompletionStatus)', () => {
         isRandomCheck: true,
         isAttachmentPending: true,
       },
-      expectedResult: getStatusByType(ACTIVE_RANDOM_CHECK_SUBMITTED),
-      description: `submitted with attachments, expect ${ACTIVE_RANDOM_CHECK_SUBMITTED}`,
+      expectedResult: getStatusByType(ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA),
+      description: `submitted with attachments, expect ${ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA}`,
     },
     {
       conditionOption: {
@@ -183,8 +183,8 @@ describe('Completions request all (getCompletionStatus)', () => {
         isRandomCheck: true,
         isAttachmentPending: true,
       },
-      expectedResult: getStatusByType(ACTIVE_RANDOM_CHECK_SUBMITTED),
-      description: `set status to ${ACTIVE_RANDOM_CHECK_SUBMITTED} when attachment pending and is random check`,
+      expectedResult: getStatusByType(ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA),
+      description: `set status to ${ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA} when attachment pending and is random check`,
     },
   ])('$description', ({ conditionOption, expectedResult }) => {
     const results = getCompletionStatus(conditionOption);
@@ -357,6 +357,19 @@ describe('Completions completed (getCompletionState)', () => {
       },
       expectedResult: VIVA_APPLICATION_RECEIVED,
       description: `set state to ${VIVA_APPLICATION_RECEIVED} if completed and all requested is false`,
+    },
+    {
+      conditionOption: {
+        requested: [],
+        dueDate: 123,
+        isRandomCheck: true,
+        isAttachmentPending: true,
+        receiveDate: 123,
+        isCompleted: true,
+        oisDueDateExpired: true,
+      },
+      expectedResult: VIVA_APPLICATION_RECEIVED,
+      description: `set state to ${VIVA_APPLICATION_RECEIVED} if completed regardless of other completions attribute state`,
     },
   ])('$description', ({ conditionOption, expectedResult }) => {
     const results = getCompletionState(conditionOption);

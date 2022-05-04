@@ -7,7 +7,7 @@ import { getStatusByType } from '../libs/caseStatuses';
 import {
   // status type
   ACTIVE_RANDOM_CHECK_REQUIRED_VIVA,
-  ACTIVE_RANDOM_CHECK_SUBMITTED,
+  ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA,
   ACTIVE_COMPLETION_REQUIRED_VIVA,
   ACTIVE_COMPLETION_SUBMITTED,
   ACTIVE_SUBMITTED,
@@ -35,7 +35,7 @@ export function getCompletionStatus(completions) {
 
   if (isRandomCheck(completions)) {
     if (isAttachmentPending) {
-      return getStatusByType(ACTIVE_RANDOM_CHECK_SUBMITTED);
+      return getStatusByType(ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA);
     }
     return getStatusByType(ACTIVE_RANDOM_CHECK_REQUIRED_VIVA);
   }
@@ -48,11 +48,9 @@ export function getCompletionStatus(completions) {
 }
 
 export function getCompletionState(completions) {
-  const { requested, isAttachmentPending, isCompleted } = completions;
+  const { isAttachmentPending, isCompleted } = completions;
 
-  const isRequestedEmpty = requested?.length === 0;
-
-  if (isCompleted || isRequestedEmpty) {
+  if (isCompleted) {
     return VIVA_APPLICATION_RECEIVED;
   }
 
