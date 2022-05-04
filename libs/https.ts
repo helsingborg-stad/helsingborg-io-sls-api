@@ -39,8 +39,6 @@ async function request<Response = unknown, Request = unknown>(
         'Content-Type': 'application/json',
         ...config.headers,
       },
-      maxContentLength: Infinity,
-      maxBodyLength: Infinity,
     };
     return (await axios(url, aggregatedConfig)).data;
   } catch (e) {
