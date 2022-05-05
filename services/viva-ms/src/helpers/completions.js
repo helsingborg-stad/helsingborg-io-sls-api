@@ -16,7 +16,6 @@ import {
   VIVA_RANDOM_CHECK_REQUIRED,
   VIVA_COMPLETION_REQUIRED,
   VIVA_APPLICATION_RECEIVED,
-  COMPLETIONS_PENDING,
 } from '../libs/constants';
 
 import vivaAdapter from './vivaAdapterRequestClient';
@@ -48,14 +47,8 @@ export function getCompletionStatus(completions) {
 }
 
 export function getCompletionState(completions) {
-  const { isAttachmentPending, isCompleted } = completions;
-
-  if (isCompleted) {
+  if (completions.isCompleted) {
     return VIVA_APPLICATION_RECEIVED;
-  }
-
-  if (isAttachmentPending) {
-    return COMPLETIONS_PENDING;
   }
 
   if (isRandomCheck(completions)) {
