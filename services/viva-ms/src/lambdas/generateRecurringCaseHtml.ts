@@ -1,20 +1,21 @@
 import to from 'await-to-js';
-import handlebars from '../helpers/htmlTemplate';
-import config from '../libs/config';
-import log from '../libs/logs';
-import { getItem } from '../libs/queries';
-import params from '../libs/params';
-import S3 from '../libs/S3';
 import {
   GetObjectOutput as S3GetObjectOutput,
   PutObjectOutput as S3PutObjectOutput,
 } from 'aws-sdk/clients/s3';
+import { AWSError } from 'aws-sdk/lib/error';
+import { PromiseResult } from 'aws-sdk/lib/request';
 
+import config from '../libs/config';
+import log from '../libs/logs';
+import params from '../libs/params';
+import S3 from '../libs/S3';
+import { getItem } from '../libs/queries';
+
+import handlebars from '../helpers/htmlTemplate';
 import createRecurringCaseTemplate from '../helpers/createRecurringCaseTemplate';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import { getClosedUserCases, updateVivaCaseState } from '../helpers/dynamoDb';
-import { AWSError } from 'aws-sdk/lib/error';
-import { PromiseResult } from 'aws-sdk/lib/request';
 
 interface CaseItem {
   id: string;
