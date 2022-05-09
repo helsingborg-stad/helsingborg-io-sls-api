@@ -6,8 +6,7 @@ export function success(statusCode = 200, body) {
 
 export function failure(error, stackTrace) {
   const errorBody = {
-    status: error.status.toString(),
-    code: error.status.toString(),
+    code: error.status,
     title: error.name,
     detail: error.detail,
     message: error.message,
@@ -16,7 +15,7 @@ export function failure(error, stackTrace) {
   const addStackTrace = ['dev'].includes(config.stage);
   if (addStackTrace || stackTrace) errorBody.stack = error.stack;
 
-  return buildResponse(error.status, errorBody);
+  return buildResponse(errorBody.code, errorBody);
 }
 
 export function buildResponse(statusCode, body) {

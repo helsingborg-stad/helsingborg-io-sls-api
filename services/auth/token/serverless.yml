@@ -18,8 +18,11 @@ provider:
   stage: dev
   region: eu-north-1
   endpointType: regional
+<<<<<<< HEAD
   tracing:
     lambda: true
+=======
+>>>>>>> f51c00b1 (feat: apis for visma idp integration)
   apiGateway:
     restApiId:
       'Fn::ImportValue': ${self:custom.stage}-ExtApiGatewayRestApiId
@@ -43,6 +46,12 @@ provider:
             - !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${file(../../../config.json):${self:custom.stage}.auth.secrets.accessToken.name}-??????'
             - !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${file(../../../config.json):${self:custom.stage}.auth.secrets.refreshToken.name}-??????'
             - !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${file(../../../config.json):${self:custom.stage}.auth.secrets.authorizationCode.name}-??????'
+        - Effect: Allow
+          Action:
+            - SSM:GetParameter*
+          Resource:
+            - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${file(../../../config.json):${self:custom.stage}.visma.envsKeyName}'
+
 functions:
   authorizer:
     handler: src/lambdas/authorize.main
@@ -52,6 +61,15 @@ functions:
     events:
       - http:
           path: auth/token
+          method: post
+          cors: true
+          private: true
+
+  session:
+    handler: src/lambdas/session.main
+    events:
+      - http:
+          path: auth/session
           method: post
           cors: true
           private: true

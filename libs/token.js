@@ -15,19 +15,17 @@ export function decodeToken(httpEvent) {
   return decodedToken;
 }
 
-/**
- * Asynchronously sign a given payload into a JSON Web Token.
- * @param {obj} jsonToSign the payload of the json web token.
- * @param {string} secret the secret key to sign the JSON Web Token.
- * @param {number} expireTimeInSeconds the expire time for the token in seconds.
- */
-export async function signToken(jsonToSign, secret, expireTimeInMinutes) {
-  // Add expiration time to JWT token.
-  // The format is in seconds since Jan 1, 1970, not milliseconds, to match the default iat format of JWT.
-  jsonToSign.exp = parseInt(Date.now() / 1000) + expireTimeInMinutes * 60;
-
-  const token = jwt.sign(jsonToSign, secret);
-  return token;
+export async function signToken(jsonToSign, secret, expireDate) {
+  return jwt.sign(
+    {
+      exp: expireDate,
+      ...jsonToSign,
+    },
+    secret
+  );
+}
+export function getExpireDate(expireTimeInMinutes, baseDate = Date.now()) {
+  return parseInt(baseDate / 1000) + expireTimeInMinutes * 60;
 }
 
 /**

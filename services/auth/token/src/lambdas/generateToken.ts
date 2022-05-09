@@ -2,7 +2,7 @@ import to from 'await-to-js';
 import config from '../libs/config';
 import secrets from '../libs/secrets';
 import * as response from '../libs/response';
-import { signToken, verifyToken } from '../libs/token';
+import { signToken, verifyToken, getExpireDate } from '../libs/token';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import tokenValidationSchema from '../helpers/schema';
 import log from '../libs/logs';
@@ -178,7 +178,7 @@ async function generateToken(
   }
 
   const [signTokenError, token] = await to(
-    signToken({ personalNumber }, secret ?? '', expiresInMinutes)
+    signToken({ personalNumber }, secret ?? '', getExpireDate(expiresInMinutes))
   );
   if (signTokenError) {
     throwError(401, signTokenError.message);

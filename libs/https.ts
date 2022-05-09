@@ -5,6 +5,7 @@ interface RequestConfig<T = unknown> {
   method?: Method;
   data?: T;
   headers?: Record<string, unknown>;
+  params?: Record<string, unknown>;
   timeout?: number;
 }
 

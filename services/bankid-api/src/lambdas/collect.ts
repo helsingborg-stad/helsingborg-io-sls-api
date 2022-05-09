@@ -12,7 +12,7 @@ import * as request from '../libs/request';
 import * as response from '../libs/response';
 
 import { putEvent } from '../libs/awsEventBridge';
-import { signToken } from '../libs/token';
+import { signToken, getExpireDate } from '../libs/token';
 
 import * as bankId from '../helpers/bankId';
 import { BankIdError, BankIdSSMParams } from '../helpers/types';
@@ -137,7 +137,11 @@ async function generateAuthorizationCode(personalNumber: string) {
 
   const tokenExpireTimeInMinutes = 5;
   const [signTokenError, signedToken] = await to(
-    signToken(signTokenPayload, auhtorizationCodeSecret ?? '', tokenExpireTimeInMinutes)
+    signToken(
+      signTokenPayload,
+      auhtorizationCodeSecret ?? '',
+      getExpireDate(tokenExpireTimeInMinutes)
+    )
   );
   if (signTokenError) {
     throwError(500, signTokenError.message);

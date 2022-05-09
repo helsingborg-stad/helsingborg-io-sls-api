@@ -19,6 +19,9 @@
     "bankId": {
       "envsKeyName": "/bankidEnvs/dev"
     },
+    "visma": {
+      "envsKeyName": "/vismaEnvs/dev"
+    },
     "users": {
       "tableName": "users"
     },
@@ -65,6 +68,9 @@
     },
     "bankId": {
       "envsKeyName": "/bankidEnvs/test"
+    },
+    "visma": {
+      "envsKeyName": "/vismaEnvs/test"
     },
     "users": {
       "tableName": "users"
@@ -113,6 +119,9 @@
     "bankId": {
       "envsKeyName": "/bankidEnvs/stage"
     },
+    "visma": {
+      "envsKeyName": "/vismaEnvs/stage"
+    },
     "users": {
       "tableName": "users"
     },
@@ -160,6 +169,9 @@
     "bankId": {
       "envsKeyName": "/bankidEnvs/release"
     },
+    "visma": {
+      "envsKeyName": "/vismaEnvs/release"
+    },
     "users": {
       "tableName": "users"
     },
@@ -206,6 +218,9 @@
     },
     "bankId": {
       "envsKeyName": "/bankidEnvs/prod"
+    },
+    "visma": {
+      "envsKeyName": "/vismaEnvs/prod"
     },
     "users": {
       "tableName": "users"

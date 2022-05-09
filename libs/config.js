@@ -26,6 +26,9 @@ const stageConfigs = {
     datatorget: {
       envsKeyName: '/datatorgetEnvs/dev',
     },
+    visma: {
+      envsKeyName: '/vismaEnvs/dev',
+    },
     users: {
       tableName: 'users',
     },
@@ -78,6 +81,9 @@ const stageConfigs = {
     },
     datatorget: {
       envsKeyName: '/datatorgetEnvs/test',
+    },
+    visma: {
+      envsKeyName: '/vismaEnvs/test',
     },
     users: {
       tableName: 'users',
@@ -132,6 +138,9 @@ const stageConfigs = {
     datatorget: {
       envsKeyName: '/datatorgetEnvs/stage',
     },
+    visma: {
+      envsKeyName: '/vismaEnvs/stage',
+    },
     users: {
       tableName: 'users',
     },
@@ -185,6 +194,9 @@ const stageConfigs = {
     datatorget: {
       envsKeyName: '/datatorgetEnvs/prod',
     },
+    visma: {
+      envsKeyName: '/vismaEnvs/prod',
+    },
     users: {
       tableName: 'users',
     },
@@ -237,6 +249,9 @@ const stageConfigs = {
     },
     datatorget: {
       envsKeyName: '/datatorgetEnvs/release',
+    },
+    visma: {
+      envsKeyName: '/vismaEnvs/release',
     },
     users: {
       tableName: 'users',

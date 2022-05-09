@@ -8,13 +8,11 @@ export interface Token {
  * @param {*} httpEvent the event passed to the lambda
  */
 export function decodeToken(httpEvent: any): Token;
-/**
- * Asynchronously sign a given payload into a JSON Web Token.
- * @param {obj} jsonToSign the payload of the json web token.
- * @param {string} secret the secret key to sign the JSON Web Token.
- * @param {number} expireTimeInSeconds the expire time for the token in seconds.
- */
-export function signToken(jsonToSign: obj, secret: string, expireTimeInMinutes: any): Promise<any>;
+
+export function signToken(jsonToSign: obj, secret: string, expiryDate: number): Promise<any>;
+
+export function getExpireDate(expireTimeInMinutes: number, baseDate: date = Date.now()): number;
+
 /**
  * Asynchronously verify given token using a secret or a public key to get a decoded JSON Web Token
  * @param {string} token a json web token

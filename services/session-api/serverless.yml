@@ -1,0 +1,61 @@
+service: session-api
+
+plugins:
+  - serverless-bundle
+
+projectDir: ../../
+
+custom: ${file(../../serverless.common.yml):custom}
+
+package:
+  individually: true
+
+provider:
+  lambdaHashingVersion: 20201221
+  name: aws
+  runtime: nodejs14.x
+  stage: dev
+  region: eu-north-1
+  endpointType: regional
+  tracing:
+    lambda: true
+  apiGateway:
+    restApiId:
+      'Fn::ImportValue': ${self:custom.stage}-ExtApiGatewayRestApiId
+    restApiRootResourceId:
+      'Fn::ImportValue': ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
+    restApiResources:
+      auth:
+        'Fn::ImportValue': ${self:custom.stage}-ExtApiGatewayResourceAuth
+
+  environment:
+    stage: ${self:custom.stage}
+    resourcesStage: ${self:custom.resourcesStage}
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - SSM:GetParameter*
+          Resource:
+            - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${file(../../config.json):${self:custom.stage}.visma.envsKeyName}'
+
+functions:
+  login:
+    handler: src/lambdas/login.main
+    events:
+      - http:
+          path: auth/login
+          method: post
+          private: true
+          cors: true
+
+  logout:
+    handler: src/lambdas/logout.main
+    events:
+      - http:
+          path: auth/logout
+          method: post
+          private: true
+          cors: true
