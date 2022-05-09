@@ -122,7 +122,7 @@ const statuses = [
   },
   {
     type: ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA,
-    name: 'Inskickad',
+    name: 'Underlag för stickprov inskickad',
     description:
       'Stickprovskontroll är inskickad. Du kan fortsätta att skicka in fler underlag till och med förfallodagen för stickprovskontrollen',
   },
