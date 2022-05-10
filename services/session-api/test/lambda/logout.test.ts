@@ -1,4 +1,4 @@
-import { login, Dependencies } from '../../src/lambdas/login';
+import { logout, Dependencies } from '../../src/lambdas/logout';
 
 const dependencies: Dependencies = {
   readParams: <T>() => {
@@ -10,8 +10,7 @@ const dependencies: Dependencies = {
   },
   httpsRequest: <T>() => {
     return Promise.resolve({
-      redirectUrl: '<https://redirect.se>',
-      sessionId: '<1234567890>',
+      sessiondeleted: '<sessionDeleted>',
     } as unknown as T);
   },
   createResponse: (statusCode, body) => ({
@@ -24,7 +23,7 @@ const dependencies: Dependencies = {
   }),
 };
 it('should throw on invalid payload', async () => {
-  const result = await login(
+  const result = await logout(
     {
       body: JSON.stringify({}),
     },
@@ -33,18 +32,18 @@ it('should throw on invalid payload', async () => {
   expect(result.statusCode).toBe(400);
 });
 
-it('should return a sessionid', async () => {
-  await login(
+it('should return a sessionDeleted', async () => {
+  await logout(
     {
       body: JSON.stringify({
-        callbackUrl: '<callbackUrl>',
+        sessionId: '<sessionId>',
       }),
     },
     {
       ...dependencies,
       createResponse: (statusCode, body) => {
         expect(body).toEqual({
-          sessionId: '<1234567890>',
+          sessionDeleted: '<sessionDeleted>',
         });
         return dependencies.createResponse(statusCode, body);
       },

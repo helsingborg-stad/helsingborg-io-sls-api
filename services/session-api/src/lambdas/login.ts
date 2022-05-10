@@ -30,12 +30,14 @@ export interface VismaSSMParams {
 export interface Dependencies {
   readParams: typeof params.read;
   httpsRequest: typeof https.request;
+  createResponse: typeof response.success;
 }
 
 export const main = log.wrap(async event => {
   return login(event, {
     readParams: params.read,
     httpsRequest: https.request,
+    createResponse: response.success,
   });
 });
 
@@ -74,7 +76,7 @@ export async function login(event: Event, dependencies: Dependencies) {
         message: 'Bad request',
       })
     );
-    return response.success(200, {
+    return dependencies.createResponse(200, {
       redirectUrl: result.redirectUrl,
     });
   } catch (ex) {

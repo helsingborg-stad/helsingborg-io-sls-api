@@ -14,8 +14,7 @@ export interface LambdaRequest {
 }
 
 export interface VismaResponse {
-  redirectUrl: string;
-  sessionId: string;
+  sessiondeleted: string;
 }
 
 export interface VismaSSMParams {
@@ -27,12 +26,14 @@ export interface VismaSSMParams {
 export interface Dependencies {
   readParams: typeof params.read;
   httpsRequest: typeof https.request;
+  createResponse: typeof response.success;
 }
 
 export const main = log.wrap(async event => {
   return logout(event, {
     readParams: params.read,
     httpsRequest: https.request,
+    createResponse: response.success,
   });
 });
 
@@ -71,7 +72,9 @@ export async function logout(event: Event, dependencies: Dependencies) {
         message: 'Session not found',
       })
     );
-    return response.success(200, result);
+    return dependencies.createResponse(200, {
+      sessionDeleted: result.sessiondeleted,
+    });
   } catch (ex) {
     return response.failure(ex);
   }
