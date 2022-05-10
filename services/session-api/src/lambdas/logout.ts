@@ -29,6 +29,7 @@ export interface Dependencies {
   createResponse: typeof response.success;
 }
 
+/* istanbul ignore next */
 export const main = log.wrap(async event => {
   return logout(event, {
     readParams: params.read,
@@ -75,7 +76,7 @@ export async function logout(event: Event, dependencies: Dependencies) {
     return dependencies.createResponse(200, {
       sessionDeleted: result.sessiondeleted,
     });
-  } catch (ex) {
-    return response.failure(ex);
+  } catch (error) {
+    return response.failure(error);
   }
 }

@@ -33,6 +33,7 @@ export interface Dependencies {
   createResponse: typeof response.success;
 }
 
+/* istanbul ignore next */
 export const main = log.wrap(async event => {
   return login(event, {
     readParams: params.read,
@@ -79,7 +80,7 @@ export async function login(event: Event, dependencies: Dependencies) {
     return dependencies.createResponse(200, {
       redirectUrl: result.redirectUrl,
     });
-  } catch (ex) {
-    return response.failure(ex);
+  } catch (error) {
+    return response.failure(error);
   }
 }
