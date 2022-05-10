@@ -25,12 +25,14 @@ export interface VismaSSMParams {
 }
 
 export interface Dependencies {
-  dependency: (value: string) => string;
+  readParams: typeof params.read;
+  httpsRequest: typeof https.request;
 }
 
 export const main = log.wrap(async event => {
   return logout(event, {
-    dependency: value => value,
+    readParams: params.read,
+    httpsRequest: https.request,
   });
 });
 
@@ -52,9 +54,9 @@ export async function logout(event: Event, dependencies: Dependencies) {
   try {
     const data = validateRequest(event);
 
-    const values: VismaSSMParams = await params.read(config.visma.envsKeyName);
+    const values = await dependencies.readParams<VismaSSMParams>(config.visma.envsKeyName);
 
-    const result = await https.request<VismaResponse>(
+    const result = await dependencies.httpsRequest<VismaResponse>(
       `${values.baseUrl}/json1.1/Logout`,
       {
         method: 'POST',

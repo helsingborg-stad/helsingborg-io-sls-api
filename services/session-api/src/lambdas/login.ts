@@ -21,7 +21,6 @@ export interface VismaResponse {
   redirectUrl: string;
   sessionId: string;
 }
-
 export interface VismaSSMParams {
   customerKey: string;
   serviceKey: string;
@@ -29,12 +28,14 @@ export interface VismaSSMParams {
 }
 
 export interface Dependencies {
-  readParam: (name: string) => Promise<VismaSSMParams>;
+  readParams: typeof params.read;
+  httpsRequest: typeof https.request;
 }
 
 export const main = log.wrap(async event => {
   return login(event, {
-    readParam: params.read,
+    readParams: params.read,
+    httpsRequest: https.request,
   });
 });
 
@@ -56,9 +57,9 @@ export async function login(event: Event, dependencies: Dependencies) {
   try {
     const data = validateRequest(event);
 
-    const values = await params.read<VismaSSMParams>(config.visma.envsKeyName);
+    const values = await dependencies.readParams<VismaSSMParams>(config.visma.envsKeyName);
 
-    const result = await https.request<VismaResponse>(
+    const result = await dependencies.httpsRequest<VismaResponse>(
       `${values.baseUrl}/json1.1/Login`,
       {
         method: 'POST',
