@@ -251,6 +251,26 @@ const testContitionList = [
     expectedResult: ACTIVE_RANDOM_CHECK_SUBMITTED,
     description: `Decrypted answers, all applicants signed, state is ${RANDOM_CHECK_REQUIRED}, must result in status type: ${ACTIVE_RANDOM_CHECK_SUBMITTED}`,
   },
+  {
+    conditionOption: {
+      answers: [],
+      people: peopleApplicantNotSigned,
+      statusType: ANYTHING,
+      state: RANDOM_CHECK_REQUIRED,
+    },
+    expectedResult: ACTIVE_RANDOM_CHECK_SUBMITTED,
+    description: `\tempty form\n\tstate is ${RANDOM_CHECK_REQUIRED}\n\tstatusType is ${ANYTHING}\n\texpect status type ${ACTIVE_RANDOM_CHECK_SUBMITTED}`,
+  },
+  {
+    conditionOption: {
+      answers: [],
+      people: peopleApplicantNotSigned,
+      statusType: ANYTHING,
+      state: COMPLETION_REQUIRED,
+    },
+    expectedResult: ACTIVE_COMPLETION_SUBMITTED,
+    description: `\tempty form\n\tstate is ${COMPLETION_REQUIRED}\n\tstatusType is ${ANYTHING}\n\texpect status type ${ACTIVE_COMPLETION_SUBMITTED}`,
+  },
 
   // signature
   {
