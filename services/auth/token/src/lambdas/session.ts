@@ -40,12 +40,23 @@ export interface VismaSSMParams {
 }
 
 export interface Dependencies {
-  dependency: (value: string) => string;
+  readParams: typeof params.read;
+  readSecrets: typeof secrets.get;
+  httpsRequest: typeof https.request;
+  createResponse: typeof response.success;
+  getExpireDate: typeof getExpireDate;
+  signToken: typeof signToken;
 }
 
+/* istanbul ignore next */
 export const main = log.wrap(async event => {
   return session(event, {
-    dependency: value => value,
+    readParams: params.read,
+    readSecrets: secrets.get,
+    httpsRequest: https.request,
+    createResponse: response.success,
+    getExpireDate,
+    signToken,
   });
 });
 
@@ -68,11 +79,14 @@ export async function session(event: Event, dependencies: Dependencies) {
     const data = validateRequest(event);
 
     const [values, secret] = await Promise.all([
-      params.read<VismaSSMParams>(config.visma.envsKeyName),
-      secrets.get(CONFIG_AUTH_SECRETS_ACCESS_TOKEN.name, CONFIG_AUTH_SECRETS_ACCESS_TOKEN.keyName),
+      dependencies.readParams<VismaSSMParams>(config.visma.envsKeyName),
+      dependencies.readSecrets(
+        CONFIG_AUTH_SECRETS_ACCESS_TOKEN.name,
+        CONFIG_AUTH_SECRETS_ACCESS_TOKEN.keyName
+      ),
     ]);
 
-    const result = await https.request<VismaResponse>(
+    const result = await dependencies.httpsRequest<VismaResponse>(
       `${values.baseUrl}/json1.1/GetSession`,
       {
         method: 'POST',
@@ -94,9 +108,9 @@ export async function session(event: Event, dependencies: Dependencies) {
         message: result.errorObject.message,
       };
     }
-    const timestamp = getExpireDate(SESSION_TOKEN_EXPIRES_IN_MINUTES);
+    const timestamp = dependencies.getExpireDate(SESSION_TOKEN_EXPIRES_IN_MINUTES);
 
-    const sessionToken = await signToken(
+    const sessionToken = await dependencies.signToken(
       {
         sessionId: result.sessionId,
         serialNumber: result.userAttributes.serialNumber,
@@ -105,7 +119,7 @@ export async function session(event: Event, dependencies: Dependencies) {
       timestamp
     );
 
-    return response.success(200, {
+    return dependencies.createResponse(200, {
       timestamp,
       sessionToken,
     } as LambdaResponse);
