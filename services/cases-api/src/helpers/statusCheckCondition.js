@@ -11,49 +11,49 @@ import {
   RANDOM_CHECK_REQUIRED,
 } from '../libs/constants';
 
-function isSignaturePending({ answers, people }) {
+function isSignaturePending({ answers = [], people }) {
   const isCoApplicantSignPending = !isCoApplicantSigned(people);
-  return answers && isEncrypted(answers) && isApplicantSigned(people) && isCoApplicantSignPending;
+  return isEncrypted(answers) && isApplicantSigned(people) && isCoApplicantSignPending;
 }
 
-function isSignatureCompleted({ answers, people }) {
-  return answers && isEncrypted(answers) && everyApplicantSigned(people);
+function isSignatureCompleted({ answers = [], people }) {
+  return isEncrypted(answers) && everyApplicantSigned(people);
 }
 
-function isOngoing({ answers, people }) {
+function isOngoing({ answers = [], people }) {
   return isAnswersEncryptedApplicantNotSigend({ answers, people });
 }
 
-function isSubmitted({ answers, people }) {
+function isSubmitted({ answers = [], people }) {
   const isAnswersDecrypted = !isEncrypted(answers);
   return isAnswersDecrypted && everyApplicantSigned(people);
 }
 
-function isCompletionOngoing({ answers, people, state }) {
+function isCompletionOngoing({ answers = [], people, state }) {
   return (
     isAnswersEncryptedApplicantNotSigend({ answers, people }) && state.includes(COMPLETION_REQUIRED)
   );
 }
 
-function isCompletionSubmitted({ answers, state }) {
+function isCompletionSubmitted({ answers = [], state }) {
   const isAnswersDecrypted = !isEncrypted(answers);
   return isAnswersDecrypted && state.includes(COMPLETION_REQUIRED);
 }
 
-function isRandomCheckOngoing({ answers, people, state }) {
+function isRandomCheckOngoing({ answers = [], people, state }) {
   return (
     isAnswersEncryptedApplicantNotSigend({ answers, people }) &&
     state.includes(RANDOM_CHECK_REQUIRED)
   );
 }
 
-function isRandomCheckSubmitted({ answers, state }) {
+function isRandomCheckSubmitted({ answers = [], state }) {
   const isAnswersDecrypted = !isEncrypted(answers);
   return isAnswersDecrypted && state.includes(RANDOM_CHECK_REQUIRED);
 }
 
-function isAnswersEncryptedApplicantNotSigend({ answers, people }) {
-  return answers && isEncrypted(answers) && !isApplicantSigned(people);
+function isAnswersEncryptedApplicantNotSigend({ answers = [], people }) {
+  return isEncrypted(answers) && !isApplicantSigned(people);
 }
 
 function everyApplicantSigned(people) {
@@ -73,7 +73,7 @@ function isCoApplicantSigned(people) {
 }
 
 function isEncrypted(answers) {
-  if (Array.isArray(answers)) {
+  if (!answers || Array.isArray(answers)) {
     // decrypted answers should allways be submitted as an flat array,
     // if they are we assume the value to be decrypted and return false.
     return false;
