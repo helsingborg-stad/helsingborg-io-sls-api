@@ -116,7 +116,7 @@ or
 }
 ```
 
-#### Excpected response
+#### Expected response
 
 ```json
 {
@@ -129,6 +129,60 @@ or
       "accessToken": "<accessToken>",
       "refreshToken": "<refreshToken>"
     }
+  }
+}
+```
+
+### Create session
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Frontend
+    participant Lambda as Session Lambda
+    participant Params as AWS parameter store
+    participant Secrets as AWS SecretManager
+    participant Visma as Visma IDP
+    participant JWT
+
+    Frontend->>+Lambda: {sessionId}
+    Lambda->>+Params: {keyName}
+    Params-->>-Lambda: {customerKey, serviceKey}
+    Lambda->>+Secrets: {name, keyName}
+    Secrets-->>-Lambda: {secretKey}
+    Lambda->>+Visma: {customerKey, serviceKey, sessionId}
+    Visma-->>-Lambda: {personalNumber}
+    Lambda->>+JWT: {personalNumber, timestamp, sessionId}
+    JWT-->>-Lambda: {signedToken}
+    Lambda-->-Frontend: {signedToken, timestamp}
+```
+
+#### Request type
+
+`POST`
+
+#### Endpoint
+
+`/auth/session`
+
+#### JSON payload
+
+```json
+{
+  "sessionId": "665D2CF00D7BAD485029F195688D41A50B8831E9F4"
+}
+```
+
+#### Expected response
+
+```json
+{
+  "jsonapi": {
+    "version": "1.0"
+  },
+  "data": {
+    "timestamp": 1652173418,
+    "sessionToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NTIxNzM0MTgsInNlc3Npb25JZCI6IkQ5RENDNTk1MzVBREFERTQ2QkNCRTEyNDVCMUJEODNFODNGODhFMEE2QyIsInNlcmlhbE51bWJlciI6IjE5ODYwMzA2MjM4NCIsImlhdCI6MTY1MjE3MjIxOH0.wuFSnhP63NTiGCEvW75c9ewh56FtDaO9jPGQZtLe5fQ"
   }
 }
 ```

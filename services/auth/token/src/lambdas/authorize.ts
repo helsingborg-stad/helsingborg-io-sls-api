@@ -30,7 +30,7 @@ export async function main(event, context) {
     throw Error('Unauthorized');
   }
 
-  const [error, decodedToken] = await to(verifyToken(token, secret));
+  const [error, decodedToken] = await to(verifyToken(token, secret ?? ''));
   if (error) {
     log.warn('Unauthorized!', context.awsRequestId, 'service-auth-token-authorize-003');
 
