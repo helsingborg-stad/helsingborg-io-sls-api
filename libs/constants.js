@@ -9,10 +9,11 @@ export const ACTIVE_PROCESSING = 'active:processing';
 export const CLOSED = 'closed';
 
 export const ACTIVE_COMPLETION_REQUIRED = 'active:completionRequired';
-export const ACTIVE_RANDOM_CHECK_REQUIRED = 'active:randomCheckRequired';
 export const ACTIVE_COMPLETION_ONGOING = 'active:ongoing:completion';
-export const ACTIVE_RANDOM_CHECK_ONGOING = 'active:ongoing:randomCheck';
 export const ACTIVE_COMPLETION_SUBMITTED = 'active:submitted:completion';
+
+export const ACTIVE_RANDOM_CHECK_REQUIRED = 'active:randomCheckRequired';
+export const ACTIVE_RANDOM_CHECK_ONGOING = 'active:ongoing:randomCheck';
 export const ACTIVE_RANDOM_CHECK_SUBMITTED = 'active:submitted:randomCheck';
 
 export const CASE_HTML_GENERATED = 'CASE_HTML_GENERATED';
@@ -32,8 +33,13 @@ export const CASE_PROVIDER_VIVA = 'VIVA';
 // Case status type
 export const NEW_APPLICATION_VIVA = 'newApplication:viva';
 export const NOT_STARTED_VIVA = 'notStarted:viva';
+
 export const ACTIVE_COMPLETION_REQUIRED_VIVA = 'active:completionRequired:viva';
+export const ACTIVE_COMPLETION_SUBMITTED_VIVA = 'active:submitted:completion:viva'; 
+
 export const ACTIVE_RANDOM_CHECK_REQUIRED_VIVA = 'active:randomCheckRequired:viva';
+export const ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA = 'active:submitted:randomCheck:viva';
+
 export const CLOSED_APPROVED_VIVA = 'closed:approved:viva';
 export const CLOSED_PARTIALLY_APPROVED_VIVA = 'closed:partiallyApproved:viva';
 export const CLOSED_REJECTED_VIVA = 'closed:rejected:viva';
@@ -43,9 +49,12 @@ export const CLOSED_RANDOM_CHECK_REJECTED_VIVA = 'closed:randomCheckRejected:viv
 // Case state
 export const CASE_CREATED = 'CASE_CREATED';
 export const VIVA_CASE_CREATED = 'VIVA_CASE_CREATED';
+
 export const VIVA_APPLICATION_RECEIVED = 'VIVA_APPLICATION_RECEIVED';
+
 export const VIVA_COMPLETION_REQUIRED = 'VIVA_COMPLETION_REQUIRED';
 export const VIVA_COMPLETION_RECEIVED = 'VIVA_COMPLETION_RECEIVED';
+
 export const VIVA_RANDOM_CHECK_REQUIRED = 'VIVA_RANDOM_CHECK_REQUIRED';
 export const VIVA_RANDOM_CHECK_RECEIVED = 'VIVA_RANDOM_CHECK_RECEIVED';
 
