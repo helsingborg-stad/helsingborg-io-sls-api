@@ -35,9 +35,9 @@ provider:
       statements:
         - Effect: Allow
           Action:
-            - ssm:GetParameter
+            - SSM:GetParameter*
           Resource:
-            - !Sub arn:aws:ssm:${self:provider.region}:${AWS::AccountId}:parameter/versionEnvs/${self:provider.stage}
+            - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${file(../../config.json):${self:custom.stage}.version.envsKeyName}'
 
 functions:
   get:
