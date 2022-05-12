@@ -120,7 +120,7 @@ const statuses = [
     type: ACTIVE_COMPLETION_SUBMITTED_VIVA,
     name: 'Komplettering inskickad',
     description:
-      'Du har skickat in #ATTACHMENT_UPLOADED_COUNT för komplettering.\n\nDu kan skicka in fler fram till: #COMPLETION_DUEDATE',
+      'Du har skickat in #ATTACHMENT_UPLOADED_COUNT bilder/filer för komplettering.\n\nDu kan skicka in fler fram till: #COMPLETION_DUEDATE',
     detailedDescription:
       'Du har kompletterat med #ATTACHMENT_UPLOADED_COUNT bilder/filer. Har du fler bilder att skicka in startar du formuläret och laddar upp kompletterande bilder och signerar med BankID.\n\nDu kan fortsätta skicka in bilder fram till att senaste datumet för inskickning har passerat.\n\nDu kan skicka in fler fram till: #COMPLETION_DUEDATE\n\n#COMPLETIONS_REQUESTED',
   },
@@ -134,7 +134,7 @@ const statuses = [
     type: ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA,
     name: 'Stickprovskontroll inskickad',
     description:
-      'Du har skickat in #ATTACHMENT_UPLOADED_COUNT för stickprovskontrollen.\n\nDu kan skicka in fler fram till: #COMPLETION_DUEDATE',
+      'Du har skickat in #ATTACHMENT_UPLOADED_COUNT bilder/filer för stickprovskontrollen.\n\nDu kan skicka in fler fram till: #COMPLETION_DUEDATE',
     detailedDescription:
       'Du har skickat in #ATTACHMENT_UPLOADED_COUNT för stickprovskontrollen. Har du fler bilder att skicka in startar du formuläret och laddar upp kompletterande bilder på rätt sida och signerar med BankID.\n\nDu kan fortsätta skicka in bilder fram till att senaste datumet för inskickning har passerat.\n\nDu kan skicka in fler fram till: #COMPLETION_DUEDATE\n\n#COMPLETIONS_REQUESTED',
   },
