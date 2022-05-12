@@ -15,6 +15,7 @@ import {
   NEW_APPLICATION_VIVA,
   NOT_STARTED_VIVA,
   ACTIVE_COMPLETION_REQUIRED_VIVA,
+  ACTIVE_COMPLETION_SUBMITTED_VIVA,
   ACTIVE_RANDOM_CHECK_REQUIRED_VIVA,
   ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA,
   CLOSED_APPROVED_VIVA,
@@ -111,8 +112,17 @@ const statuses = [
   {
     type: ACTIVE_COMPLETION_REQUIRED_VIVA,
     name: 'Ansökan behöver kompletteras',
+    description: '',
+    detailDescription:
+      'Du har skickat in en ansökan för #MONTH_NAME. För att vi ska kunna behandla din ansökan finns det uppgifter som du behöver komplettera.\n\nSkicka in senast: #COMPLETION_DUEDATE.\n\n#COMPLETIONS_REQUESTED',
+  },
+  {
+    type: ACTIVE_COMPLETION_SUBMITTED_VIVA,
+    name: 'Komplettering inskickad',
     description:
-      'Du har skickat in en ansökan för #MONTH_NAME. För att vi ska kunna behandla din ansökan finns det uppgifter som du behöver komplettera.\n\nKomplettering ska ha skickats in till oss senast #COMPLETION_DUEDATE.',
+      'Du har skickat in #ATTACHMENT_UPLOADED_COUNT  för komplettering.\n\nDu kan skicka in fler fram till: #COMPLETION_DUEDATE',
+    detailDescription:
+      'Du har kompletterat med #ATTACHMENT_UPLOADED_COUNT bilder/filer. Har du fler bilder att skicka in startar du formuläret och laddar upp kompletterande bilder och signerar med BankID.\n\nDu kan fortsätta skicka in bilder fram till att senaste datumet för inskickning har passerat.\n\nDu kan skicka in fler fram till: #COMPLETION_DUEDATE\n\n#COMPLETIONS_REQUESTED',
   },
   {
     type: ACTIVE_RANDOM_CHECK_REQUIRED_VIVA,
@@ -122,9 +132,11 @@ const statuses = [
   },
   {
     type: ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA,
-    name: 'Underlag för stickprov inskickad',
+    name: 'Stickprovskontroll inskickad',
     description:
-      'Stickprovskontroll är inskickad. Du kan fortsätta att skicka in fler underlag till och med förfallodagen för stickprovskontrollen',
+      'Du har skickat in #ATTACHMENT_UPLOADED_COUNT för stickprovskontrollen.\n\nDu kan skicka in fler fram till: #COMPLETION_DUEDATE',
+    detailDescription:
+      'Du har skickat in #ATTACHMENT_UPLOADED_COUNT för stickprovskontrollen. Har du fler bilder att skicka in startar du formuläret och laddar upp kompletterande bilder på rätt sida och signerar med BankID.\n\nDu kan fortsätta skicka in bilder fram till att senaste datumet för inskickning har passerat.\n\nDu kan skicka in fler fram till: #COMPLETION_DUEDATE\n\n#COMPLETIONS_REQUESTED',
   },
   {
     type: CLOSED_APPROVED_VIVA,

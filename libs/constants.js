@@ -21,7 +21,6 @@ export const PDF_GENERATED = 'PDF_GENERATED';
 export const PDF_NOT_GENERATED = 'PDF_NOT_GENERATED';
 export const COMPLETION_REQUIRED = 'COMPLETION_REQUIRED';
 export const RANDOM_CHECK_REQUIRED = 'RANDOM_CHECK_REQUIRED';
-export const COMPLETIONS_PENDING = 'COMPLETIONS_PENDING';
 export const COMPLETIONS_DUE_DATE_PASSED = 'COMPLETIONS_DUE_DATE_PASSED';
 
 export const CASE_PROVIDER_VIVA = 'VIVA';
@@ -35,7 +34,7 @@ export const NEW_APPLICATION_VIVA = 'newApplication:viva';
 export const NOT_STARTED_VIVA = 'notStarted:viva';
 
 export const ACTIVE_COMPLETION_REQUIRED_VIVA = 'active:completionRequired:viva';
-export const ACTIVE_COMPLETION_SUBMITTED_VIVA = 'active:submitted:completion:viva'; 
+export const ACTIVE_COMPLETION_SUBMITTED_VIVA = 'active:submitted:completion:viva';
 
 export const ACTIVE_RANDOM_CHECK_REQUIRED_VIVA = 'active:randomCheckRequired:viva';
 export const ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA = 'active:submitted:randomCheck:viva';
