@@ -4,7 +4,7 @@ import {
   ACTIVE_RANDOM_CHECK_REQUIRED_VIVA,
   ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA,
   ACTIVE_COMPLETION_REQUIRED_VIVA,
-  ACTIVE_COMPLETION_SUBMITTED,
+  ACTIVE_COMPLETION_SUBMITTED_VIVA,
   ACTIVE_SUBMITTED,
 
   // state
@@ -147,8 +147,8 @@ describe('None requested received (getCompletionStatus)', () => {
         isRandomCheck: false,
         isAttachmentPending: true,
       },
-      expectedResult: getStatusByType(ACTIVE_COMPLETION_SUBMITTED),
-      description: `set status to ${ACTIVE_COMPLETION_SUBMITTED} when attachment pending`,
+      expectedResult: getStatusByType(ACTIVE_COMPLETION_SUBMITTED_VIVA),
+      description: `set status to ${ACTIVE_COMPLETION_SUBMITTED_VIVA} when attachment pending`,
     },
     {
       conditionOption: {
@@ -173,8 +173,8 @@ describe('Requested received (getCompletionStatus)', () => {
         isRandomCheck: false,
         isAttachmentPending: true,
       },
-      expectedResult: getStatusByType(ACTIVE_COMPLETION_SUBMITTED),
-      description: `submitted with attachments, expect ${ACTIVE_COMPLETION_SUBMITTED}`,
+      expectedResult: getStatusByType(ACTIVE_COMPLETION_SUBMITTED_VIVA),
+      description: `submitted with attachments, expect ${ACTIVE_COMPLETION_SUBMITTED_VIVA}`,
     },
     {
       conditionOption: {
