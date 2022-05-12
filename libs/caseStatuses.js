@@ -18,6 +18,7 @@ import {
   ACTIVE_COMPLETION_SUBMITTED_VIVA,
   ACTIVE_RANDOM_CHECK_REQUIRED_VIVA,
   ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA,
+  ACTIVE_PROCESSING_COMPLETIONS_DUE_DATE_PASSED_VIVA,
   CLOSED_APPROVED_VIVA,
   CLOSED_PARTIALLY_APPROVED_VIVA,
   CLOSED_REJECTED_VIVA,
@@ -137,6 +138,12 @@ const statuses = [
       'Du har skickat in #ATTACHMENT_UPLOADED_COUNT bilder/filer för stickprovskontrollen.\n\nDu kan skicka in fler fram till: #COMPLETION_DUEDATE',
     detailedDescription:
       'Du har skickat in #ATTACHMENT_UPLOADED_COUNT för stickprovskontrollen. Har du fler bilder att skicka in startar du formuläret och laddar upp kompletterande bilder på rätt sida och signerar med BankID.\n\nDu kan fortsätta skicka in bilder fram till att senaste datumet för inskickning har passerat.\n\nDu kan skicka in fler fram till: #COMPLETION_DUEDATE',
+  },
+  {
+    type: ACTIVE_PROCESSING_COMPLETIONS_DUE_DATE_PASSED_VIVA,
+    name: 'Ansökan behandlas',
+    description:
+      'Tiden för att lämna in bilder har gått ut. Din komplettering är mottagen och handläggs.',
   },
   {
     type: CLOSED_APPROVED_VIVA,
