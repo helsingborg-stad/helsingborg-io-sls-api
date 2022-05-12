@@ -112,7 +112,7 @@ const statuses = [
   {
     type: ACTIVE_COMPLETION_REQUIRED_VIVA,
     name: 'Ansökan behöver kompletteras',
-    description: '',
+    description: 'Skicka in senast: #COMPLETION_DUEDATE.',
     detailedDescription:
       'Du har skickat in en ansökan för #MONTH_NAME. För att vi ska kunna behandla din ansökan finns det uppgifter som du behöver komplettera.\n\nSkicka in senast: #COMPLETION_DUEDATE.',
   },
