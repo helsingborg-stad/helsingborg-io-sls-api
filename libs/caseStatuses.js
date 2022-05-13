@@ -129,7 +129,7 @@ const statuses = [
     type: ACTIVE_RANDOM_CHECK_REQUIRED_VIVA,
     name: 'Stickprovskontroll',
     description:
-      'Du måste komplettera din ansökan med bilder som visar dina utgifter och inkomster. Vi behöver din komplettering inom 4 dagar för att kunna betala ut pengar för perioden.',
+      'Du måste komplettera din ansökan med bilder som visar dina utgifter och inkomster. Vi behöver din komplettering inom 3 dagar för att kunna betala ut pengar för perioden.',
   },
   {
     type: ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA,
