@@ -3,16 +3,13 @@ import config from '../libs/config';
 import params from '../libs/params';
 import log from '../libs/logs';
 import * as response from '../libs/response';
-import { BadRequestError } from '@helsingborg-stad/npm-api-error-handling';
 import secrets from '../libs/secrets';
 import { signToken, getExpireDate } from '../libs/token';
+import { AWSProxyEvent } from '../libs/aws-sdk';
+import { parseJson } from '../libs/json';
 
 const SESSION_TOKEN_EXPIRES_IN_MINUTES = 20;
 const CONFIG_AUTH_SECRETS_ACCESS_TOKEN = config.auth.secrets.accessToken;
-
-interface Event {
-  body: string;
-}
 
 export interface LambdaRequest {
   sessionId: string;
@@ -60,24 +57,23 @@ export const main = log.wrap(async event => {
   });
 });
 
-function validateRequest(data: Event): LambdaRequest {
-  let result: LambdaRequest;
+export async function session(event: AWSProxyEvent, dependencies: Dependencies) {
   try {
-    result = JSON.parse(data?.body);
+    /**
+     * ======================================================
+     * Parse input data
+     * ======================================================
+     */
+    const data = parseJson<LambdaRequest>(event.body);
 
-    if (result?.sessionId) {
-      return result;
-    }
-  } catch {
-    // Fall through
-  }
-  throw new BadRequestError();
-}
-
-export async function session(event: Event, dependencies: Dependencies) {
-  try {
-    const data = validateRequest(event);
-
+    /**
+     * ======================================================
+     * Read parameters from AWS System manager and Secrets
+     * ======================================================
+     * These parameters contains the secret keys and the URL of the
+     * Visma service and is needed to authorize the calling account.
+     * The value used for JWT token generation is stored in Secrets.
+     */
     const [values, secret] = await Promise.all([
       dependencies.readParams<VismaSSMParams>(config.visma.envsKeyName),
       dependencies.readSecrets(
@@ -86,6 +82,13 @@ export async function session(event: Event, dependencies: Dependencies) {
       ),
     ]);
 
+    /**
+     * ======================================================
+     * Perform GetSession with Visma Rest API
+     * ======================================================
+     * This request will return the session created from a
+     * succesful login.
+     */
     const result = await dependencies.httpsRequest<VismaResponse>(
       `${values.baseUrl}/json1.1/GetSession`,
       {
@@ -95,19 +98,27 @@ export async function session(event: Event, dependencies: Dependencies) {
           serviceKey: values.serviceKey,
           sessionId: data.sessionId,
         },
-      },
-      () => ({
-        status: 401,
-        message: 'Authentication failed',
-      })
+      }
     );
-
+    /**
+     * ======================================================
+     * Handle response errors from Visma
+     * ======================================================
+     * Certain errors are embedded in the 200 response
+     */
     if (result.errorObject) {
       throw {
         status: 404,
         message: result.errorObject.message,
       };
     }
+    /**
+     * ======================================================
+     * Generate a JWT-Token
+     * ======================================================
+     * The token can be used to call API's or otherwise verify
+     * the identity of the user
+     */
     const timestamp = dependencies.getExpireDate(SESSION_TOKEN_EXPIRES_IN_MINUTES);
 
     const sessionToken = await dependencies.signToken(
@@ -119,11 +130,26 @@ export async function session(event: Event, dependencies: Dependencies) {
       timestamp
     );
 
+    /**
+     * ======================================================
+     * Prepare successful response
+     * ======================================================
+     * The response contains a timestamp that has the same expirytime
+     * as the embedded JWT token to be used for cookie invalidation
+     */
     return dependencies.createResponse(200, {
       timestamp,
       sessionToken,
     } as LambdaResponse);
   } catch (error) {
-    return response.failure(error);
+    /**
+     * ======================================================
+     * Report error back to client
+     * ======================================================
+     */
+    return response.failure({
+      status: 401,
+      message: 'Authentication failed',
+    });
   }
 }

@@ -6,7 +6,7 @@ export function success(statusCode = 200, body) {
 
 export function failure(error, stackTrace) {
   const errorBody = {
-    code: error.status,
+    code: error.status ?? error.statusCode,
     title: error.name,
     detail: error.detail,
     message: error.message,
