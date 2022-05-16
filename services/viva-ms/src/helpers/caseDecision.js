@@ -6,18 +6,17 @@ import {
 } from '../libs/constants';
 
 export default function decideNewCaseStatus(workflowAttributes) {
-  const decisionList = getLatestDecision(workflowAttributes.decision);
+  const islocked = !!workflowAttributes.application?.islocked;
   const paymentList = makeArray(workflowAttributes.payments?.payment);
-  const calculation = workflowAttributes.calculations?.calculation;
-
+  const decisionList = getLatestDecision(workflowAttributes.decision);
   const decisionTypeCode = getDecisionTypeCode(decisionList);
 
   if (decisionTypeCode) {
-    const caseStatus = getCaseStatusType(decisionTypeCode, paymentList);
-    return caseStatus;
+    const hasPayment = paymentList.length > 0;
+    return getCaseStatusType(decisionTypeCode, hasPayment);
   }
 
-  if (calculation) {
+  if (islocked) {
     return ACTIVE_PROCESSING;
   }
 
@@ -43,8 +42,8 @@ function getDecisionTypeCode(decisionList) {
   return decisionList.reduce((typeCode, decision) => typeCode | parseInt(decision.typecode, 10), 0);
 }
 
-function getCaseStatusType(decisionTypeCode, paymentList) {
-  if (decisionTypeCode === 1 && paymentList.length > 0) {
+function getCaseStatusType(decisionTypeCode, hasPayment) {
+  if (decisionTypeCode === 1 && hasPayment) {
     return CLOSED_APPROVED_VIVA;
   }
 
@@ -52,7 +51,7 @@ function getCaseStatusType(decisionTypeCode, paymentList) {
     return CLOSED_REJECTED_VIVA;
   }
 
-  if (decisionTypeCode === 3 && paymentList.length > 0) {
+  if (decisionTypeCode === 3 && hasPayment) {
     return CLOSED_PARTIALLY_APPROVED_VIVA;
   }
 
