@@ -9,7 +9,7 @@ import {
   ACTIVE_RANDOM_CHECK_REQUIRED_VIVA,
   ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA,
   ACTIVE_COMPLETION_REQUIRED_VIVA,
-  ACTIVE_COMPLETION_SUBMITTED,
+  ACTIVE_COMPLETION_SUBMITTED_VIVA,
   ACTIVE_SUBMITTED,
 
   // state
@@ -40,7 +40,7 @@ export function getCompletionStatus(completions) {
   }
 
   if (isAttachmentPending) {
-    return getStatusByType(ACTIVE_COMPLETION_SUBMITTED);
+    return getStatusByType(ACTIVE_COMPLETION_SUBMITTED_VIVA);
   }
 
   return getStatusByType(ACTIVE_COMPLETION_REQUIRED_VIVA);
