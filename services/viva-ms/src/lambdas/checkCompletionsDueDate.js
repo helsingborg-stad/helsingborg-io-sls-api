@@ -4,7 +4,10 @@ import config from '../libs/config';
 import log from '../libs/logs';
 import * as dynamoDb from '../libs/dynamoDb';
 import { getStatusByType } from '../libs/caseStatuses';
-import { ACTIVE_PROCESSING, COMPLETIONS_DUE_DATE_PASSED } from '../libs/constants';
+import {
+  COMPLETIONS_DUE_DATE_PASSED,
+  ACTIVE_PROCESSING_COMPLETIONS_DUE_DATE_PASSED_VIVA,
+} from '../libs/constants';
 import { getItem as getCase } from '../libs/queries';
 
 import {
@@ -48,7 +51,7 @@ export async function main(event, context) {
   }
 
   const caseUpdateAttributes = {
-    newStatus: getStatusByType(ACTIVE_PROCESSING),
+    newStatus: getStatusByType(ACTIVE_PROCESSING_COMPLETIONS_DUE_DATE_PASSED_VIVA),
     newState: COMPLETIONS_DUE_DATE_PASSED,
   };
   const [updateCaseError, { Attributes: updatedCaseItem }] = await to(
