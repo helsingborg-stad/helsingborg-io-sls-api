@@ -3,11 +3,8 @@ import config from '../libs/config';
 import params from '../libs/params';
 import log from '../libs/logs';
 import * as response from '../libs/response';
-import { BadRequestError } from '@helsingborg-stad/npm-api-error-handling';
-
-interface Event {
-  body: string;
-}
+import { parseJson } from '../libs/json';
+import { AWSProxyEvent } from '../libs/aws-sdk';
 
 export interface LambdaRequest {
   sessionId: string;
@@ -38,26 +35,31 @@ export const main = log.wrap(async event => {
   });
 });
 
-function validateRequest(data: Event): LambdaRequest {
-  let result: LambdaRequest;
+export async function logout(event: AWSProxyEvent, dependencies: Dependencies) {
   try {
-    result = JSON.parse(data?.body);
+    /**
+     * ======================================================
+     * Parse input data
+     * ======================================================
+     */
+    const data = parseJson<LambdaRequest>(event.body);
 
-    if (result?.sessionId) {
-      return result;
-    }
-  } catch {
-    // Fall through
-  }
-  throw new BadRequestError();
-}
-
-export async function logout(event: Event, dependencies: Dependencies) {
-  try {
-    const data = validateRequest(event);
-
+    /**
+     * ======================================================
+     * Read parameters from AWS System manager
+     * ======================================================
+     * These parameters contains the secret keys and the URL of the
+     * Visma service and is needed to authorize the calling account.
+     */
     const values = await dependencies.readParams<VismaSSMParams>(config.visma.envsKeyName);
 
+    /**
+     * ======================================================
+     * Perform logout with Visma Rest API
+     * ======================================================
+     * This request will prepare a session that the user need
+     * to authenticate towards.
+     */
     const result = await dependencies.httpsRequest<VismaResponse>(
       `${values.baseUrl}/json1.1/Logout`,
       {
@@ -67,16 +69,27 @@ export async function logout(event: Event, dependencies: Dependencies) {
           serviceKey: values.serviceKey,
           sessionId: data.sessionId,
         },
-      },
-      () => ({
-        status: 404,
-        message: 'Session not found',
-      })
+      }
     );
+    /**
+     * ======================================================
+     * Prepare successful response
+     * ======================================================
+     */
     return dependencies.createResponse(200, {
       sessionDeleted: result.sessiondeleted,
     });
-  } catch (error) {
-    return response.failure(error);
+  } catch {
+    /**
+     * ======================================================
+     * Report error back to client
+     * ======================================================
+     * Any errors will be returned as Http status 404 to not
+     * reveal any specifics about the issue occured.
+     */
+    return response.failure({
+      status: 404,
+      message: 'Session not found',
+    });
   }
 }
