@@ -29,12 +29,13 @@ it('should throw on invalid payload', async () => {
     },
     {
       ...dependencies,
-      httpsRequest: () => {
-        throw {
-          status: 502,
-          message: '<message>',
-        };
-      },
+      httpsRequest: <T>() =>
+        Promise.resolve({
+          errorObject: {
+            code: -1,
+            message: '<message>',
+          },
+        } as unknown as T),
     }
   );
   expect(result.statusCode).toBe(404);

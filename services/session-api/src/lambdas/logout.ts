@@ -12,6 +12,10 @@ export interface LambdaRequest {
 
 export interface VismaResponse {
   sessiondeleted: string;
+  errorObject?: {
+    code: string;
+    message: string;
+  };
 }
 
 export interface VismaSSMParams {
@@ -71,6 +75,15 @@ export async function logout(event: AWSProxyEvent, dependencies: Dependencies) {
         },
       }
     );
+    /**
+     * ======================================================
+     * Handle response errors from Visma
+     * ======================================================
+     * Certain errors are embedded in the 200 response
+     */
+    if (result.errorObject) {
+      throw Error();
+    }
     /**
      * ======================================================
      * Prepare successful response
