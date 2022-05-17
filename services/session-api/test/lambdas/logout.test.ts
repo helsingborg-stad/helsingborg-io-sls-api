@@ -30,11 +30,9 @@ it('should throw on invalid payload', async () => {
     {
       ...dependencies,
       httpsRequest: <T>() =>
-        Promise.resolve({
-          errorObject: {
-            code: -1,
-            message: '<message>',
-          },
+        Promise.reject({
+          status: 502,
+          message: '<message>',
         } as unknown as T),
     }
   );
