@@ -107,10 +107,7 @@ export async function session(event: AWSProxyEvent, dependencies: Dependencies) 
      * Certain errors are embedded in the 200 response
      */
     if (result.errorObject) {
-      throw {
-        status: 404,
-        message: result.errorObject.message,
-      };
+      throw Error();
     }
     /**
      * ======================================================

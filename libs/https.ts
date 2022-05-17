@@ -1,5 +1,6 @@
 import axios, { AxiosError, Method } from 'axios';
 import https from 'https';
+import { AxiosErrorHandler } from './errorHandlers';
 
 interface RequestConfig<T = unknown> {
   method?: Method;
@@ -9,26 +10,11 @@ interface RequestConfig<T = unknown> {
   timeout?: number;
 }
 
-interface HttpError {
-  status: number;
-  message: string;
-}
-
-type ErrorTransform = (error: HttpError) => HttpError;
-
-const defaultErrorTransform: ErrorTransform = (error: HttpError) => error;
-
-function errorExtractor(error: AxiosError): HttpError {
-  return {
-    status: error.response?.status ?? 500,
-    message: error.response?.statusText ?? error.message,
-  };
-}
-
 async function request<Response = unknown, Request = unknown>(
   url: string,
   config: RequestConfig<Request> = {},
-  errorTransform: ErrorTransform = defaultErrorTransform,
+  errorTransform: (error: AxiosErrorHandler) => AxiosErrorHandler = (error: AxiosErrorHandler) =>
+    error,
   options: https.AgentOptions = {}
 ): Promise<Response> {
   try {
@@ -42,7 +28,7 @@ async function request<Response = unknown, Request = unknown>(
     };
     return (await axios(url, aggregatedConfig)).data;
   } catch (error) {
-    throw errorTransform(errorExtractor(error as AxiosError));
+    throw errorTransform(new AxiosErrorHandler(error as AxiosError));
   }
 }
 

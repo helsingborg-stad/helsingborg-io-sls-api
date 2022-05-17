@@ -17,6 +17,10 @@ export interface LambdaResponse {
 export interface VismaResponse {
   redirectUrl: string;
   sessionId: string;
+  errorObject?: {
+    code: string;
+    message: string;
+  };
 }
 export interface VismaSSMParams {
   customerKey: string;
@@ -75,6 +79,16 @@ export async function login(event: AWSProxyEvent, dependencies: Dependencies) {
         },
       }
     );
+
+    /**
+     * ======================================================
+     * Handle response errors from Visma
+     * ======================================================
+     * Certain errors are embedded in the 200 response
+     */
+    if (result.errorObject) {
+      throw Error();
+    }
     /**
      * ======================================================
      * Prepare successful response
