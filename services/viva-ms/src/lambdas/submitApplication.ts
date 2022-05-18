@@ -12,6 +12,7 @@ import { validateSQSEvent } from '../helpers/validateSQSEvent';
 import { TraceException } from '../helpers/TraceException';
 
 import { CaseItem } from '../types/caseItem';
+import { VivaApplicationType } from '../types/vivaMyPages';
 
 interface VivaPostError {
   status: string;
@@ -105,7 +106,7 @@ export async function lambda(event: LambdaEvent, context: LambdaContext) {
   const personalNumber = PK.substring(5);
 
   const isRecurringForm = recurringFormId === currentFormId;
-  const applicationType = isRecurringForm ? 'recurrent' : 'new';
+  const applicationType = isRecurringForm ? VivaApplicationType.Recurring : VivaApplicationType.New;
   const formId = isRecurringForm ? recurringFormId : newApplicationFormId;
 
   const [vivaPostError, vivaApplicationResponse] = await to<Record<string, unknown>, VivaPostError>(

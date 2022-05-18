@@ -4,6 +4,11 @@ export enum VivaPersonType {
   Child = 'child',
 }
 
+export enum VivaApplicationType {
+  New = 'new',
+  Recurring = 'recurring',
+}
+
 export interface VivaMyPages {
   readonly case: VivaMyPagesPersonCase;
   readonly application: VivaMyPagesPersonApplication;
