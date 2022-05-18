@@ -80,7 +80,13 @@ export async function logout(event: AWSProxyEvent, dependencies: Dependencies) {
     return dependencies.createResponse(200, {
       sessionDeleted: result.sessiondeleted,
     });
-  } catch {
+  } catch (error) {
+    /**
+     * ======================================================
+     * Write originating error to log
+     * ======================================================
+     */
+    log.writeError(`${error}`);
     /**
      * ======================================================
      * Report error back to client

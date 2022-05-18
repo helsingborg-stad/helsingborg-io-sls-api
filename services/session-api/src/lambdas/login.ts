@@ -87,7 +87,7 @@ export async function login(event: AWSProxyEvent, dependencies: Dependencies) {
      * Certain errors are embedded in the 200 response
      */
     if (result.errorObject) {
-      throw Error();
+      throw Error(result.errorObject.message);
     }
     /**
      * ======================================================
@@ -99,7 +99,13 @@ export async function login(event: AWSProxyEvent, dependencies: Dependencies) {
     return dependencies.createResponse(200, {
       redirectUrl: result.redirectUrl,
     });
-  } catch {
+  } catch (error) {
+    /**
+     * ======================================================
+     * Write originating error to log
+     * ======================================================
+     */
+    log.writeError(`${error}`);
     /**
      * ======================================================
      * Report error back to client

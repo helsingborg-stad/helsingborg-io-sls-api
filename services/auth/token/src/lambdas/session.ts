@@ -141,6 +141,12 @@ export async function session(event: AWSProxyEvent, dependencies: Dependencies) 
   } catch (error) {
     /**
      * ======================================================
+     * Write originating error to log
+     * ======================================================
+     */
+    log.writeError(`${error}`);
+    /**
+     * ======================================================
      * Report error back to client
      * ======================================================
      */
