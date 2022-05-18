@@ -5,6 +5,7 @@ import {
 } from '../../src/lambdas/submitApplication';
 
 import { EncryptionType } from '../../src/types/caseItem';
+import { VivaApplicationType } from '../../src/types/vivaMyPages';
 
 const newApplicationFormId = 'newApplicationFormId';
 const recurrentFormId = 'recurrentFormId';
@@ -98,8 +99,8 @@ it('throws if `postVivaApplication` is successful but `status` is not `OK`', asy
 });
 
 test.each([
-  { currentFormId: newApplicationFormId, expectedResult: 'new' },
-  { currentFormId: recurrentFormId, expectedResult: 'recurrent' },
+  { currentFormId: newApplicationFormId, expectedResult: VivaApplicationType.New },
+  { currentFormId: recurrentFormId, expectedResult: VivaApplicationType.Recurring },
 ])(
   'calls `postVivaApplication` with $expectedResult `applicationType` for formId $currentFormId',
   async ({ currentFormId, expectedResult }) => {
