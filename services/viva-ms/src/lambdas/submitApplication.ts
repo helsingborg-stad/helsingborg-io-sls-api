@@ -1,13 +1,15 @@
 import to from 'await-to-js';
 import { SQSEvent, Context } from 'aws-lambda';
 
+import * as dynamoDb from '../libs/dynamoDb';
 import params from '../libs/params';
 import config from '../libs/config';
 import log from '../libs/logs';
+import { VIVA_APPLICATION_RECEIVED } from '../libs/constants';
 
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
-import { updateVivaCase, destructRecord } from '../helpers/dynamoDb';
+import { destructRecord } from '../helpers/dynamoDb';
 import { validateSQSEvent } from '../helpers/validateSQSEvent';
 import { TraceException } from '../helpers/TraceException';
 
@@ -30,76 +32,61 @@ interface ParamsReadResponse {
   recurringFormId: string;
   newApplicationFormId: string;
 }
-export interface LambdaContext {
+
+export interface Dependencies {
   requestId: string;
   readParams: (envsKeyName: string) => Promise<ParamsReadResponse>;
-  updateVivaCase: (params: { PK: string; SK: string }, workflowId: string) => Promise<null>;
+  updateVivaCase: (params: CaseKeys, workflowId: string) => Promise<null>;
   postVivaApplication: (params: Record<string, unknown>) => Promise<Record<string, unknown>>;
   putSuccessEvent: (params: { personalNumber: string }) => Promise<null>;
 }
 
-export interface LambdaEvent {
+export interface LambdaRequest {
   caseItem: Case;
   messageId: string;
 }
 
+export type LambdaResponse = boolean;
+
+type CaseKeys = Pick<CaseItem, 'PK' | 'SK'>;
 type Case = Pick<CaseItem, 'PK' | 'SK' | 'forms' | 'currentFormId' | 'details' | 'pdf' | 'id'>;
 
-export function main(event: SQSEvent, context: Context) {
-  validateSQSEvent(event, context);
-
-  const [record] = event.Records;
-  const { messageId, attributes } = record;
-  const { ApproximateReceiveCount: receiveCount, ApproximateFirstReceiveTimestamp: firstReceived } =
-    attributes;
-
-  const { awsRequestId: requestId } = context;
-
-  const caseItem = destructRecord(record);
-
-  log.info('Processing record', requestId, undefined, {
-    messageId,
-    receiveCount,
-    firstReceived,
-    caseId: caseItem.id,
-  });
-
-  const lambdaEvent = { caseItem, receiveCount, firstReceived, messageId };
-  const lambdaContext = {
-    requestId,
-    readParams: params.read,
-    updateVivaCase,
-    postVivaApplication: vivaAdapter.application.post,
-    putSuccessEvent: putVivaMsEvent.applicationReceivedSuccess,
+export function updateVivaCase(caseKeys: CaseKeys, workflowId: string): Promise<null> {
+  const params = {
+    TableName: config.cases.tableName,
+    Key: {
+      PK: caseKeys.PK,
+      SK: caseKeys.SK,
+    },
+    UpdateExpression: 'SET #state = :newState, details.workflowId = :newWorkflowId',
+    ExpressionAttributeNames: {
+      '#state': 'state',
+    },
+    ExpressionAttributeValues: {
+      ':newWorkflowId': workflowId,
+      ':newState': VIVA_APPLICATION_RECEIVED,
+    },
+    ReturnValues: 'NONE',
   };
 
-  return lambda(lambdaEvent, lambdaContext);
+  return dynamoDb.call('update', params);
 }
 
-export async function lambda(event: LambdaEvent, context: LambdaContext) {
-  const { caseItem, messageId } = event;
-  const { requestId, readParams, updateVivaCase, postVivaApplication, putSuccessEvent } = context;
+export async function submitApplication(
+  input: LambdaRequest,
+  dependencies: Dependencies
+): Promise<LambdaResponse> {
+  const { caseItem, messageId } = input;
+  const { requestId, readParams, updateVivaCase, postVivaApplication, putSuccessEvent } =
+    dependencies;
 
   const { PK, SK, pdf, currentFormId, details, forms, id } = caseItem;
 
-  const [paramsReadError, vivaCaseSSMParams] = await to(
-    readParams(config.cases.providers.viva.envsKeyName)
-  );
-  if (paramsReadError) {
-    throw new TraceException(
-      'Read ssm params ´config.cases.providers.viva.envsKeyName´ failed',
-      requestId
-    );
-  }
-
-  const { recurringFormId, newApplicationFormId } = vivaCaseSSMParams as ParamsReadResponse;
+  const vivaCaseSSMParams = await readParams(config.cases.providers.viva.envsKeyName);
+  const { recurringFormId, newApplicationFormId } = vivaCaseSSMParams;
 
   if (![recurringFormId, newApplicationFormId].includes(currentFormId)) {
-    log.info(
-      'Current form is not a recurring or newApplication form',
-      requestId,
-      'service-viva-ms-submitApplication-002'
-    );
+    log.writeInfo('Current form is not a recurring or newApplication form', currentFormId);
     return true;
   }
 
@@ -119,49 +106,73 @@ export async function lambda(event: LambdaEvent, context: LambdaContext) {
       rawDataType: 'pdf',
     })
   );
-
   if (vivaPostError) {
-    const error = {
+    const postError = {
       messageId,
-      httpStatusCode: vivaPostError.status,
-      vivaErrorCode: vivaPostError.vadaResponse?.error?.details?.errorCode ?? 'N/A',
-      vivaErrorMessage: vivaPostError.vadaResponse?.error?.details?.errorMessage ?? 'N/A',
       caseId: id,
+      httpStatusCode: vivaPostError.status,
+      ...(vivaPostError.vadaResponse?.error?.details?.errorCode && {
+        vivaErrorCode: vivaPostError.vadaResponse.error.details.errorCode,
+      }),
+      ...(vivaPostError.vadaResponse?.error?.details?.errorCode && {
+        vivaErrorMessage: vivaPostError.vadaResponse.error.details.errorMessage,
+      }),
     };
-    if (error.vivaErrorCode === '1014') {
-      log.warn('Failed to submit Viva application. Will NOT be retried.', requestId, null, error);
+    if (postError.vivaErrorCode === '1014') {
+      log.writeWarn('Failed to submit Viva application. Will NOT retry.', postError);
       return true;
     }
+
     throw new TraceException(
       'Failed to submit Viva application. Will be retried.',
       requestId,
-      error
+      postError
     );
   }
 
   if (vivaApplicationResponse?.status !== 'OK') {
-    throw new TraceException('Viva application receive failed', requestId, {
+    log.writeError('Viva response status NOT ok!', vivaApplicationResponse?.status);
+    throw new TraceException('Viva application receive failed. Will be retried.', requestId, {
       vivaResponse: { ...vivaApplicationResponse },
     });
   }
 
-  const caseKeys = { PK, SK };
-  const [updateError] = await to<null, Record<string, unknown>>(
-    updateVivaCase(caseKeys, vivaApplicationResponse.id as string)
-  );
-  if (updateError) {
-    throw new TraceException('Failed to update Viva case', requestId, updateError);
-  }
+  const vivaWorkflowId = vivaApplicationResponse.id as string;
+  await updateVivaCase({ PK, SK }, vivaWorkflowId);
 
   const clientUser = { personalNumber };
-  const [putEventError] = await to<null, Record<string, unknown>>(putSuccessEvent(clientUser));
-  if (putEventError) {
-    throw new TraceException(
-      'Put event ´applicationReceivedSuccess´ failed',
-      requestId,
-      putEventError
-    );
-  }
-  log.info('Record processed SUCCESSFULLY', requestId, undefined, { messageId, caseId: SK });
+  await putSuccessEvent(clientUser);
+
+  log.writeInfo('Record processed SUCCESSFULLY', { messageId, caseId: SK });
   return true;
 }
+
+export const main = log.wrap(async (event: SQSEvent, context: Context) => {
+  validateSQSEvent(event, context);
+
+  const [record] = event.Records;
+  const { messageId, attributes } = record;
+  const { ApproximateReceiveCount: receiveCount, ApproximateFirstReceiveTimestamp: firstReceived } =
+    attributes;
+
+  const { awsRequestId: requestId } = context;
+
+  const caseItem = destructRecord(record);
+
+  log.writeInfo('Processing record', {
+    messageId,
+    receiveCount,
+    firstReceived,
+    caseId: caseItem.id,
+  });
+
+  const lambdaEvent = { caseItem, receiveCount, firstReceived, messageId };
+
+  return submitApplication(lambdaEvent, {
+    requestId,
+    readParams: params.read,
+    updateVivaCase,
+    postVivaApplication: vivaAdapter.application.post,
+    putSuccessEvent: putVivaMsEvent.applicationReceivedSuccess,
+  });
+});
