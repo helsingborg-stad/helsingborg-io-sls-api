@@ -1,3 +1,9 @@
+export enum VivaAttachmentCategory {
+  Expenses = 'expenses',
+  Incomes = 'incomes',
+  Completion = 'completion',
+}
+
 export enum VivaPersonType {
   Client = 'client',
   Partner = 'partner',

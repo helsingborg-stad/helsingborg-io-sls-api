@@ -84,6 +84,15 @@ export interface CaseFormAnswer {
   value: string;
 }
 
+export interface CaseFormAnswerAttachment {
+  field: CaseFormAnswerField;
+  value: AnswerAttachment[];
+}
+
+export interface AnswerAttachment {
+  uploadedFileName: string;
+}
+
 export interface CaseFormAnswerField {
   id: string;
   tags: string[];
