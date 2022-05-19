@@ -7,6 +7,7 @@ import { cases } from '../libs/query';
 
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import completionsHelper from '../helpers/completions';
+import resetPersonSignature from '../helpers/resetPersonSignature';
 
 import { CaseItem } from '../types/caseItem';
 
@@ -45,7 +46,7 @@ export async function setCaseCompletions(event: LambdaRequest, dependencies: Dep
   const { caseKeys } = event.detail;
   const { log, getCase, readParams, putSuccessEvent } = dependencies;
 
-  const caseItem = await getCase({ PK: caseKeys.PK, SK: caseKeys.SK });
+  const caseItem = await getCase(caseKeys);
 
   const vivaCaseSSMParams = await readParams(config.cases.providers.viva.envsKeyName);
 
@@ -55,7 +56,7 @@ export async function setCaseCompletions(event: LambdaRequest, dependencies: Dep
     newStatus: completionsHelper.get.status(completions),
     newState: completionsHelper.get.state(completions),
     newCurrentFormId: completionsHelper.get.formId(vivaCaseSSMParams, completions),
-    newPersons: resetCasePersonsApplicantSignature(caseItem),
+    newPersons: caseItem.persons.map(resetPersonSignature),
   };
 
   await updateCase(caseKeys, caseUpdateAttributes);
@@ -94,14 +95,4 @@ function updateCase(keys, caseUpdateAttributes) {
   };
 
   return dynamoDb.call('update', updateParams);
-}
-
-function resetCasePersonsApplicantSignature(caseItem) {
-  const { persons = [] } = caseItem;
-  return persons.map(person => {
-    if (person.role === 'applicant' && person.hasSigned) {
-      person.hasSigned = false;
-    }
-    return person;
-  });
 }
