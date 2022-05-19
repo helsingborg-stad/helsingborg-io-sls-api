@@ -22,11 +22,13 @@ interface RequestedCaseCompletions {
 }
 
 export interface CaseCompletions {
-  requested: RequestedCaseCompletions[];
-  attachmentUploaded: string[];
-  randomCheck: boolean;
-  completed: boolean;
-  dueDate: number;
+  requested?: RequestedCaseCompletions[];
+  attachmentUploaded?: string[];
+  completed?: boolean;
+  dueDate?: number;
+  isCompleted?: boolean;
+  isAttachmentPending?: boolean;
+  isRandomCheck?: boolean;
 }
 
 export interface CaseItem {
@@ -51,7 +53,7 @@ export interface CaseDetails {
   workflowId: string | null;
   period: CasePeriod;
   readonly workflow?: unknown;
-  completions: CaseCompletions;
+  completions?: CaseCompletions;
 }
 
 export interface CaseStatus {
