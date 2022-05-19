@@ -81,7 +81,7 @@ export interface CaseFormCurrentPosition {
 
 export interface CaseFormAnswer {
   field: CaseFormAnswerField;
-  value: string;
+  value: AnswerAttachment[] | string;
 }
 
 export interface CaseFormAnswerAttachment {
