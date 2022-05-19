@@ -13,34 +13,37 @@ import { CaseItem } from '../types/caseItem';
 import { SSMParameters } from '../types/ssmParameters';
 
 type CaseKeys = Pick<CaseItem, 'PK' | 'SK'>;
+type Case = Pick<CaseItem, 'details' | 'persons' | 'currentFormId' | 'id'>;
 
 interface LambdaDetails {
   caseKeys: CaseKeys;
 }
 
-interface LambdaRequest {
+export interface LambdaRequest {
   detail: LambdaDetails;
 }
 
-interface Dependencies {
-  log: typeof log;
-  getCase: (keys: { PK: string; SK?: string }) => Promise<CaseItem>;
+export interface Dependencies {
+  writeInfo: typeof log.writeInfo;
+  getCase: (keys: { PK: string; SK?: string }) => Promise<Case>;
   readParams: (envsKeyName: string) => Promise<SSMParameters>;
   putSuccessEvent: (params: LambdaDetails) => Promise<null>;
+  updateCase: (keys: CaseKeys, caseUpdateAttributes: unknown) => Promise<void>;
 }
 
 export const main = log.wrap(async event => {
   return setCaseCompletions(event, {
-    log,
+    writeInfo: log.writeInfo,
     getCase: cases.get,
     readParams: params.read,
     putSuccessEvent: putVivaMsEvent.setCaseCompletionsSuccess,
+    updateCase: updateCaseCompletionStatus,
   });
 });
 
 export async function setCaseCompletions(event: LambdaRequest, dependencies: Dependencies) {
   const { caseKeys } = event.detail;
-  const { log, getCase, readParams, putSuccessEvent } = dependencies;
+  const { writeInfo, getCase, readParams, putSuccessEvent, updateCase } = dependencies;
 
   const caseItem = await getCase(caseKeys);
 
@@ -55,9 +58,9 @@ export async function setCaseCompletions(event: LambdaRequest, dependencies: Dep
   const completions = caseItem?.details?.completions;
   const persons = caseItem.persons ?? [];
 
-  const isNewApplication = [newApplicationFormId].includes(caseItem.currentFormId);
+  const isNewApplication = caseItem.currentFormId === newApplicationFormId;
 
-  const forms = {
+  const formIds = {
     randomCheckFormId: isNewApplication ? newApplicationRandomCheckFormId : randomCheckFormId,
     completionFormId: isNewApplication ? newApplicationCompletionFormId : completionFormId,
   };
@@ -65,14 +68,14 @@ export async function setCaseCompletions(event: LambdaRequest, dependencies: Dep
   const caseUpdateAttributes = {
     newStatus: completionsHelper.get.status(completions),
     newState: completionsHelper.get.state(completions),
-    newCurrentFormId: completionsHelper.get.formId(forms, completions),
+    newCurrentFormId: completionsHelper.get.formId(formIds, completions),
     newPersons: persons.map(resetPersonSignature),
   };
 
-  await updateCaseCompletionStatus(caseKeys, caseUpdateAttributes);
+  await updateCase(caseKeys, caseUpdateAttributes);
   await putSuccessEvent(event.detail);
 
-  log.writeInfo('Successfully updated case', caseItem.id);
+  writeInfo('Successfully updated case', caseItem.id);
 
   return true;
 }
