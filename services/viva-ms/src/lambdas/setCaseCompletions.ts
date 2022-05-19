@@ -1,81 +1,67 @@
-import to from 'await-to-js';
-
 import config from '../libs/config';
 
 import * as dynamoDb from '../libs/dynamoDb';
 import params from '../libs/params';
 import log from '../libs/logs';
-import { getItem as getCase } from '../libs/queries';
+import { cases } from '../libs/query';
 
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import completionsHelper from '../helpers/completions';
 
-export async function main(event, context) {
+import { CaseItem } from '../types/caseItem';
+
+type CaseKeys = Pick<CaseItem, 'PK' | 'SK'>;
+
+interface ParamsReadResponse {
+  randomCheckFormId: string;
+  completionFormId: string;
+}
+
+interface LambdaDetails {
+  caseKeys: CaseKeys;
+}
+
+interface LambdaRequest {
+  detail: LambdaDetails;
+}
+
+interface Dependencies {
+  log: typeof log;
+  getCase: (keys: { PK: string; SK?: string }) => Promise<CaseItem>;
+  readParams: (envsKeyName: string) => Promise<ParamsReadResponse>;
+  putSuccessEvent: (params: LambdaDetails) => Promise<null>;
+}
+
+export const main = log.wrap(async event => {
+  return setCaseCompletions(event, {
+    log,
+    getCase: cases.get,
+    readParams: params.read,
+    putSuccessEvent: putVivaMsEvent.setCaseCompletionsSuccess,
+  });
+});
+
+export async function setCaseCompletions(event: LambdaRequest, dependencies: Dependencies) {
   const { caseKeys } = event.detail;
+  const { log, getCase, readParams, putSuccessEvent } = dependencies;
 
-  const [getCaseError, { Item: caseItem }] = await getCase(
-    config.cases.tableName,
-    caseKeys.PK,
-    caseKeys.SK
-  );
-  if (getCaseError) {
-    log.error(
-      'Get case failed',
-      context.awsRequestId,
-      'service-viva-ms-setCaseCompletions-025',
-      getCaseError
-    );
-    return false;
-  }
+  const caseItem = await getCase({ PK: caseKeys.PK, SK: caseKeys.SK });
 
-  const [paramsReadError, vivaCaseSSMParams] = await to(
-    params.read(config.cases.providers.viva.envsKeyName)
-  );
-  if (paramsReadError) {
-    log.error(
-      'Read ssm params [config.cases.providers.viva.envsKeyName] failed',
-      context.awsRequestId,
-      'service-viva-ms-setCaseCompletions-020',
-      paramsReadError
-    );
-    return false;
-  }
+  const vivaCaseSSMParams = await readParams(config.cases.providers.viva.envsKeyName);
 
-  const { completions } = caseItem.details;
+  const completions = caseItem?.details?.completions;
+
   const caseUpdateAttributes = {
     newStatus: completionsHelper.get.status(completions),
     newState: completionsHelper.get.state(completions),
     newCurrentFormId: completionsHelper.get.formId(vivaCaseSSMParams, completions),
     newPersons: resetCasePersonsApplicantSignature(caseItem),
   };
-  const [updateCaseError, updatedCaseItem] = await to(updateCase(caseKeys, caseUpdateAttributes));
-  if (updateCaseError) {
-    log.error(
-      'Update case completion attributes failed',
-      context.awsRequestId,
-      'service-viva-ms-setCaseCompletions-030',
-      updateCaseError
-    );
-    return false;
-  }
 
-  const [putEventError] = await to(putVivaMsEvent.setCaseCompletionsSuccess(event.detail));
-  if (putEventError) {
-    log.error(
-      'Error put event [setCaseCompletionsSuccess]',
-      context.awsRequestId,
-      'service-viva-ms-setCaseCompletions-040',
-      putEventError
-    );
-    return false;
-  }
+  await updateCase(caseKeys, caseUpdateAttributes);
+  await putSuccessEvent(event.detail);
 
-  log.info(
-    'Successfully updated case',
-    context.awsRequestId,
-    'service-viva-ms-setCaseCompletions-050',
-    updatedCaseItem.id
-  );
+  log.writeInfo('Successfully updated case', caseItem.id);
 
   return true;
 }
