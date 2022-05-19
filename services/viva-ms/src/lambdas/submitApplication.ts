@@ -13,8 +13,8 @@ import { destructRecord } from '../helpers/dynamoDb';
 import { validateSQSEvent } from '../helpers/validateSQSEvent';
 import { TraceException } from '../helpers/TraceException';
 
-import { CaseItem } from '../types/caseItem';
 import { VivaApplicationType } from '../types/vivaMyPages';
+import type { CaseItem } from '../types/caseItem';
 
 interface VivaPostError {
   status: string;
@@ -51,12 +51,12 @@ export type LambdaResponse = boolean;
 type CaseKeys = Pick<CaseItem, 'PK' | 'SK'>;
 type Case = Pick<CaseItem, 'PK' | 'SK' | 'forms' | 'currentFormId' | 'details' | 'pdf' | 'id'>;
 
-export function updateVivaCase(caseKeys: CaseKeys, workflowId: string): Promise<null> {
+export function updateVivaCase(keys: CaseKeys, workflowId: string): Promise<null> {
   const params = {
     TableName: config.cases.tableName,
     Key: {
-      PK: caseKeys.PK,
-      SK: caseKeys.SK,
+      PK: keys.PK,
+      SK: keys.SK,
     },
     UpdateExpression: 'SET #state = :newState, details.workflowId = :newWorkflowId',
     ExpressionAttributeNames: {
@@ -81,9 +81,9 @@ export async function submitApplication(
     dependencies;
 
   const { PK, SK, pdf, currentFormId, details, forms, id } = caseItem;
-
-  const vivaCaseSSMParams = await readParams(config.cases.providers.viva.envsKeyName);
-  const { recurringFormId, newApplicationFormId } = vivaCaseSSMParams;
+  const { recurringFormId, newApplicationFormId } = await readParams(
+    config.cases.providers.viva.envsKeyName
+  );
 
   if (![recurringFormId, newApplicationFormId].includes(currentFormId)) {
     log.writeInfo('Current form is not a recurring or newApplication form', currentFormId);
@@ -114,7 +114,7 @@ export async function submitApplication(
       ...(vivaPostError.vadaResponse?.error?.details?.errorCode && {
         vivaErrorCode: vivaPostError.vadaResponse.error.details.errorCode,
       }),
-      ...(vivaPostError.vadaResponse?.error?.details?.errorCode && {
+      ...(vivaPostError.vadaResponse?.error?.details?.errorMessage && {
         vivaErrorMessage: vivaPostError.vadaResponse.error.details.errorMessage,
       }),
     };
