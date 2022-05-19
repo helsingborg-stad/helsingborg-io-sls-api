@@ -2,7 +2,7 @@ import to from 'await-to-js';
 import S3 from '../libs/S3';
 import log from '../libs/logs';
 import { VivaAttachmentCategory } from '../types/vivaMyPages';
-import { CaseFormAnswerAttachment } from '../types/caseItem';
+import type { CaseFormAnswer, CaseFormAnswerAttachment } from '../types/caseItem';
 
 export enum RequiredTags {
   Viva = 'viva',
@@ -30,40 +30,37 @@ function getAttachmentCategory(
     VivaAttachmentCategory.Incomes,
     VivaAttachmentCategory.Completion,
   ]
-): VivaAttachmentCategory | undefined {
-  const vivaAttachmentCatagoryTags: RequiredTags[] = [
+): VivaAttachmentCategory {
+  const vivaAttachmentCategoryTags: RequiredTags[] = [
     RequiredTags.Viva,
     RequiredTags.Attachment,
     RequiredTags.Category,
   ];
-  const hasVivaAttachmentCatagory = vivaAttachmentCatagoryTags.every(tag => tags.includes(tag));
+  const hasAttachmentCategoryTag = vivaAttachmentCategoryTags.every(tag => tags.includes(tag));
 
-  if (hasVivaAttachmentCatagory) {
-    return attachmentCategories.reduce(
-      (allCategories: VivaAttachmentCategory | undefined, category) => {
-        if (tags.includes(category)) {
-          return category;
-        }
-        return allCategories;
-      },
-      undefined
-    );
+  if (!hasAttachmentCategoryTag) {
+    return VivaAttachmentCategory.Unknown;
   }
 
-  return undefined;
+  return attachmentCategories.reduce((allCategories, category) => {
+    if (tags.includes(category)) {
+      return category;
+    }
+    return allCategories;
+  }, VivaAttachmentCategory.Unknown);
 }
 
 async function createAttachmentFromAnswers(
   personalNumber: PersonalNumber,
-  answerList: CaseFormAnswerAttachment[]
+  answerList: CaseFormAnswer[]
 ): Promise<CaseAttachment[]> {
   const attachmentList: CaseAttachment[] = [];
 
   for (const answer of answerList) {
-    const attachmentCategory = getAttachmentCategory(answer.field.tags);
-    if (!attachmentCategory) {
+    if (!isAnswerAttachment(answer)) {
       continue;
     }
+    const attachmentCategory = getAttachmentCategory(answer.field.tags);
 
     for (const valueItem of answer.value) {
       const s3FileKey = createFileKey(personalNumber, valueItem.uploadedFileName);
@@ -88,6 +85,10 @@ async function createAttachmentFromAnswers(
   }
 
   return attachmentList;
+}
+
+function isAnswerAttachment(answer: CaseFormAnswer): answer is CaseFormAnswerAttachment {
+  return Array.isArray(answer.value);
 }
 
 export default {
