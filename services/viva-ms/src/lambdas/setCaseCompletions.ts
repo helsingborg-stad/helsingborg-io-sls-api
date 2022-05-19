@@ -8,6 +8,7 @@ import { cases } from '../libs/query';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import completionsHelper from '../helpers/completions';
 import resetPersonSignature from '../helpers/resetPersonSignature';
+import { updateCaseCompletionStatus } from '../helpers/dynamoDb';
 
 import { CaseItem } from '../types/caseItem';
 
@@ -51,48 +52,19 @@ export async function setCaseCompletions(event: LambdaRequest, dependencies: Dep
   const vivaCaseSSMParams = await readParams(config.cases.providers.viva.envsKeyName);
 
   const completions = caseItem?.details?.completions;
+  const persons = caseItem.persons ?? [];
 
   const caseUpdateAttributes = {
     newStatus: completionsHelper.get.status(completions),
     newState: completionsHelper.get.state(completions),
     newCurrentFormId: completionsHelper.get.formId(vivaCaseSSMParams, completions),
-    newPersons: caseItem.persons.map(resetPersonSignature),
+    newPersons: persons.map(resetPersonSignature),
   };
 
-  await updateCase(caseKeys, caseUpdateAttributes);
+  await updateCaseCompletionStatus(caseKeys, caseUpdateAttributes);
   await putSuccessEvent(event.detail);
 
   log.writeInfo('Successfully updated case', caseItem.id);
 
   return true;
-}
-
-function updateCase(keys, caseUpdateAttributes) {
-  const { newStatus, newState, newCurrentFormId, newPersons } = caseUpdateAttributes;
-
-  const updateParams = {
-    TableName: config.cases.tableName,
-    Key: {
-      PK: keys.PK,
-      SK: keys.SK,
-    },
-    UpdateExpression:
-      'SET #currentFormId = :newCurrentFormId, #status = :newStatus, #persons = :newPersons, #state = :newState',
-    ExpressionAttributeNames: {
-      '#currentFormId': 'currentFormId',
-      '#status': 'status',
-      '#persons': 'persons',
-      '#state': 'state',
-    },
-    ExpressionAttributeValues: {
-      ':newCurrentFormId': newCurrentFormId,
-      ':newPersons': newPersons,
-      ':newStatus': newStatus,
-      ':newState': newState,
-    },
-    ProjectionExpression: 'id',
-    ReturnValues: 'ALL_NEW',
-  };
-
-  return dynamoDb.call('update', updateParams);
 }
