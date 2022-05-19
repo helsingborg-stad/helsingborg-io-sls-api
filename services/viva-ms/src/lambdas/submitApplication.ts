@@ -9,6 +9,7 @@ import { VIVA_APPLICATION_RECEIVED } from '../libs/constants';
 
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
+import attachment from '../helpers/attachment';
 import { destructRecord } from '../helpers/dynamoDb';
 import { validateSQSEvent } from '../helpers/validateSQSEvent';
 import { TraceException } from '../helpers/TraceException';
@@ -95,13 +96,17 @@ export async function submitApplication(
   const isRecurringForm = recurringFormId === currentFormId;
   const applicationType = isRecurringForm ? VivaApplicationType.Recurring : VivaApplicationType.New;
   const formId = isRecurringForm ? recurringFormId : newApplicationFormId;
+  const answers = forms?.[formId].answers ?? [];
+  const workflowId = details?.workflowId ?? '';
+  const attachments = await attachment.createFromAnswers(personalNumber, answers);
 
   const [vivaPostError, vivaApplicationResponse] = await to<Record<string, unknown>, VivaPostError>(
     postVivaApplication({
       applicationType,
       personalNumber,
-      workflowId: details?.workflowId || '',
-      answers: forms?.[formId].answers ?? [],
+      workflowId,
+      answers,
+      attachments,
       rawData: pdf?.toString(),
       rawDataType: 'pdf',
     })
