@@ -135,7 +135,15 @@ async function getOfficers(personalNumber) {
 }
 
 async function postApplication(payload) {
-  const { personalNumber, applicationType, answers, rawData, rawDataType, workflowId } = payload;
+  const {
+    personalNumber,
+    applicationType,
+    answers,
+    rawData,
+    rawDataType,
+    workflowId,
+    attachments,
+  } = payload;
   const { hashSalt, hashSaltLength } = await getVivaSsmParams();
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
@@ -149,6 +157,7 @@ async function postApplication(payload) {
       rawData,
       rawDataType,
       workflowId,
+      attachments,
     },
   };
 
