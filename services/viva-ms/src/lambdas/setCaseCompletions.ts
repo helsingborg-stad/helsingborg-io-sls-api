@@ -24,7 +24,6 @@ export interface LambdaRequest {
 }
 
 export interface Dependencies {
-  writeInfo: typeof log.writeInfo;
   getCase: (keys: CaseKeys) => Promise<UserCase>;
   readParams: (envsKeyName: string) => Promise<SSMParameters>;
   putSuccessEvent: (params: LambdaDetails) => Promise<null>;
@@ -33,7 +32,6 @@ export interface Dependencies {
 
 export const main = log.wrap(async event => {
   return setCaseCompletions(event, {
-    writeInfo: log.writeInfo,
     getCase: cases.get,
     readParams: params.read,
     putSuccessEvent: putVivaMsEvent.setCaseCompletionsSuccess,
@@ -43,7 +41,7 @@ export const main = log.wrap(async event => {
 
 export async function setCaseCompletions(event: LambdaRequest, dependencies: Dependencies) {
   const { caseKeys } = event.detail;
-  const { writeInfo, getCase, readParams, putSuccessEvent, updateCase } = dependencies;
+  const { getCase, readParams, putSuccessEvent, updateCase } = dependencies;
 
   const caseItem = await getCase(caseKeys);
 
@@ -74,8 +72,6 @@ export async function setCaseCompletions(event: LambdaRequest, dependencies: Dep
 
   await updateCase(caseKeys, caseUpdateAttributes);
   await putSuccessEvent(event.detail);
-
-  writeInfo('Successfully updated case', caseItem.id);
 
   return true;
 }

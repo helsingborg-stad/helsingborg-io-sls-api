@@ -105,7 +105,6 @@ test.each([
 
     const updateCaseMock = jest.fn();
     const dependencies: Dependencies = {
-      writeInfo: jest.fn(),
       getCase: () => Promise.resolve(caseItem),
       putSuccessEvent: () => Promise.resolve(null),
       readParams: () => Promise.resolve(ssmParameters),
