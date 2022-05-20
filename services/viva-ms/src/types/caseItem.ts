@@ -22,13 +22,13 @@ interface RequestedCaseCompletions {
 }
 
 export interface CaseCompletions {
-  requested?: RequestedCaseCompletions[];
-  attachmentUploaded?: string[];
-  completed?: boolean;
-  dueDate?: number;
-  isCompleted?: boolean;
-  isAttachmentPending?: boolean;
-  isRandomCheck?: boolean;
+  readonly requested: RequestedCaseCompletions[];
+  readonly attachmentUploaded: string[];
+  readonly completed: boolean;
+  readonly dueDate: number | null;
+  readonly isCompleted: boolean;
+  readonly isAttachmentPending: boolean;
+  readonly isRandomCheck: boolean;
 }
 
 export interface CaseItem {
