@@ -25,7 +25,7 @@ export interface LambdaRequest {
 
 export interface Dependencies {
   writeInfo: typeof log.writeInfo;
-  getCase: (keys: { PK: string; SK?: string }) => Promise<Case>;
+  getCase: (keys: CaseKeys) => Promise<Case>;
   readParams: (envsKeyName: string) => Promise<SSMParameters>;
   putSuccessEvent: (params: LambdaDetails) => Promise<null>;
   updateCase: (keys: CaseKeys, caseUpdateAttributes: unknown) => Promise<void>;
