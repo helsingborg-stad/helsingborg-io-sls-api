@@ -13,7 +13,7 @@ import { CaseItem } from '../types/caseItem';
 import { SSMParameters } from '../types/ssmParameters';
 
 type CaseKeys = Pick<CaseItem, 'PK' | 'SK'>;
-type Case = Pick<CaseItem, 'details' | 'persons' | 'currentFormId' | 'id'>;
+type UserCase = Pick<CaseItem, 'details' | 'persons' | 'currentFormId' | 'id'>;
 
 interface LambdaDetails {
   caseKeys: CaseKeys;
@@ -25,7 +25,7 @@ export interface LambdaRequest {
 
 export interface Dependencies {
   writeInfo: typeof log.writeInfo;
-  getCase: (keys: CaseKeys) => Promise<Case>;
+  getCase: (keys: CaseKeys) => Promise<UserCase>;
   readParams: (envsKeyName: string) => Promise<SSMParameters>;
   putSuccessEvent: (params: LambdaDetails) => Promise<null>;
   updateCase: (keys: CaseKeys, caseUpdateAttributes: unknown) => Promise<void>;
