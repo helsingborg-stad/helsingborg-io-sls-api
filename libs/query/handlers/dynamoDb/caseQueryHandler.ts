@@ -6,6 +6,7 @@ import type { CaseQueryHandler } from '../../cases/types';
 
 export const caseQuaryHandler: CaseQueryHandler = {
   async get(keys: { PK: string; SK: string }) {
-    return dynamoQueryHandler.get(config.cases.tableName, keys);
+    const casesTableName = `${config.resourceStage}-${config.cases.tableName}`;
+    return dynamoQueryHandler.get(casesTableName, keys);
   },
 };
