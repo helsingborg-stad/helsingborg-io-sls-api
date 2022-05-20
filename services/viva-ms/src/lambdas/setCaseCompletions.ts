@@ -10,7 +10,7 @@ import resetPersonSignature from '../helpers/resetPersonSignature';
 import { updateCaseCompletionStatus } from '../helpers/dynamoDb';
 
 import { CaseItem } from '../types/caseItem';
-import { SSMParameters } from '../types/ssmParameters';
+import { VivaParametersResponse } from '../types/ssmParameters';
 
 type CaseKeys = Pick<CaseItem, 'PK' | 'SK'>;
 type UserCase = Pick<CaseItem, 'details' | 'persons' | 'currentFormId' | 'id'>;
@@ -25,7 +25,7 @@ export interface LambdaRequest {
 
 export interface Dependencies {
   getCase: (keys: CaseKeys) => Promise<UserCase>;
-  readParams: (envsKeyName: string) => Promise<SSMParameters>;
+  readParams: (envsKeyName: string) => Promise<VivaParametersResponse>;
   putSuccessEvent: (params: LambdaDetails) => Promise<null>;
   updateCase: (keys: CaseKeys, caseUpdateAttributes: unknown) => Promise<void>;
 }

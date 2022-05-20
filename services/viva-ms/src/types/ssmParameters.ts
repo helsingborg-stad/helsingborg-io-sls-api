@@ -1,4 +1,4 @@
-export interface SSMParameters {
+export interface VivaParametersResponse {
   recurringFormId: string;
   randomCheckFormId: string;
   completionFormId: string;
