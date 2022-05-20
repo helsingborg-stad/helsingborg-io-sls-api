@@ -43,6 +43,11 @@ const getCaseItem = (
     completions: {
       isRandomCheck,
       requested,
+      attachmentUploaded: [],
+      completed: false,
+      dueDate: null,
+      isCompleted: false,
+      isAttachmentPending: false,
     },
   },
 });
