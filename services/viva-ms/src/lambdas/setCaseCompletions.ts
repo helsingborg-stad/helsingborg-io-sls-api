@@ -30,15 +30,6 @@ export interface Dependencies {
   updateCase: (keys: CaseKeys, caseUpdateAttributes: unknown) => Promise<void>;
 }
 
-export const main = log.wrap(async event => {
-  return setCaseCompletions(event, {
-    getCase: cases.get,
-    readParams: params.read,
-    putSuccessEvent: putVivaMsEvent.setCaseCompletionsSuccess,
-    updateCase: updateCaseCompletionStatus,
-  });
-});
-
 export async function setCaseCompletions(event: LambdaRequest, dependencies: Dependencies) {
   const { caseKeys } = event.detail;
   const { getCase, readParams, putSuccessEvent, updateCase } = dependencies;
@@ -75,3 +66,12 @@ export async function setCaseCompletions(event: LambdaRequest, dependencies: Dep
 
   return true;
 }
+
+export const main = log.wrap(async event => {
+  return setCaseCompletions(event, {
+    getCase: cases.get,
+    readParams: params.read,
+    putSuccessEvent: putVivaMsEvent.setCaseCompletionsSuccess,
+    updateCase: updateCaseCompletionStatus,
+  });
+});
