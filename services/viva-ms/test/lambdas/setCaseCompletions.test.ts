@@ -20,7 +20,7 @@ const caseKeys = {
   SK: 'SK',
 };
 
-const event: LambdaRequest = {
+const input: LambdaRequest = {
   detail: {
     caseKeys,
   },
@@ -116,7 +116,7 @@ test.each([
       updateCase: updateCaseMock,
     };
 
-    const result = await setCaseCompletions(event, dependencies);
+    const result = await setCaseCompletions(input, dependencies);
 
     expect(result).toBe(true);
     expect(updateCaseMock).toHaveBeenCalledWith(

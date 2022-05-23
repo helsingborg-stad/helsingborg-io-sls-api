@@ -30,8 +30,8 @@ export interface Dependencies {
   updateCase: (keys: CaseKeys, caseUpdateAttributes: unknown) => Promise<void>;
 }
 
-export async function setCaseCompletions(event: LambdaRequest, dependencies: Dependencies) {
-  const { caseKeys } = event.detail;
+export async function setCaseCompletions(input: LambdaRequest, dependencies: Dependencies) {
+  const { caseKeys } = input.detail;
   const { getCase, readParams, putSuccessEvent, updateCase } = dependencies;
 
   const caseItem = await getCase(caseKeys);
@@ -62,7 +62,7 @@ export async function setCaseCompletions(event: LambdaRequest, dependencies: Dep
   };
 
   await updateCase(caseKeys, caseUpdateAttributes);
-  await putSuccessEvent(event.detail);
+  await putSuccessEvent(input.detail);
 
   return true;
 }
