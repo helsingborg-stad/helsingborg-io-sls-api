@@ -19,7 +19,7 @@ export interface CaseAttachment {
   fileBase64: string;
 }
 
-function createFileKey(keyPrefix: PersonalNumber, filename: string): string {
+function createS3Key(keyPrefix: PersonalNumber, filename: string): string {
   return `${keyPrefix}/${filename}`;
 }
 
@@ -50,41 +50,42 @@ function getAttachmentCategory(
   }, VivaAttachmentCategory.Unknown);
 }
 
+function getFulfilledCallback(
+  previous: CaseAttachment[],
+  current: PromiseSettledResult<CaseAttachment>
+) {
+  if (current.status !== 'fulfilled') {
+    log.writeWarn('Could not get file with id: ', current.reason.id);
+    return [...previous];
+  }
+  return [...previous, current.value];
+}
+
 async function createAttachmentFromAnswers(
   personalNumber: PersonalNumber,
   answerList: CaseFormAnswer[]
 ): Promise<CaseAttachment[]> {
-  const attachmentList: CaseAttachment[] = [];
+  const answerAttachmentList = answerList.filter(isAnswerAttachment);
 
-  for (const answer of answerList) {
-    if (!isAnswerAttachment(answer)) {
-      continue;
-    }
+  const attachmentPromiseList = answerAttachmentList.flatMap(answer => {
     const attachmentCategory = getAttachmentCategory(answer.field.tags);
 
-    for (const valueItem of answer.value) {
-      const s3FileKey = createFileKey(personalNumber, valueItem.uploadedFileName);
+    return answer.value.map(async attachment => {
+      const s3AttachmentFileKey = createS3Key(personalNumber, attachment.uploadedFileName);
+      const file = await S3.getFile(process.env.BUCKET_NAME, s3AttachmentFileKey);
 
-      const [getFileError, file] = await to(S3.getFile(process.env.BUCKET_NAME, s3FileKey));
-      if (getFileError) {
-        // Throwing the error for a single file would prevent all files from being retrived, since the loop would exit.
-        // Instead we log the error and continue the loop iteration.
-        log.writeError(getFileError.message, s3FileKey);
-        continue;
-      }
-
-      const attachment: CaseAttachment = {
-        id: s3FileKey,
-        name: valueItem.uploadedFileName,
+      const caseAttachment: CaseAttachment = {
+        id: s3AttachmentFileKey,
+        name: attachment.uploadedFileName,
         category: attachmentCategory,
         fileBase64: file.Body.toString('base64'),
       };
+      return caseAttachment;
+    });
+  });
 
-      attachmentList.push(attachment);
-    }
-  }
-
-  return attachmentList;
+  const attachmentPromiseResultList = await Promise.allSettled(attachmentPromiseList);
+  return attachmentPromiseResultList.reduce(getFulfilledCallback, []);
 }
 
 function isAnswerAttachment(answer: CaseFormAnswer): answer is CaseFormAnswerAttachment {
