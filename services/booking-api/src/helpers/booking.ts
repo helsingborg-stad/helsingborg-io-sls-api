@@ -59,11 +59,9 @@ function search(body: SearchBookingRequestBody) {
 }
 
 function getHistoricalAttendees(body: HistoricalAttendeesRequestBody) {
-  const requestTimeout = process.env.requestTimeout;
   return sendBookingPostRequest<HistoricalAttendeesResponse>(
     URI_RESOURCE.GET_HISTORICAL_ATTENDEES,
-    body,
-    Number(requestTimeout)
+    body
   );
 }
 
@@ -78,17 +76,13 @@ function getTimeSpans(body: GetTimeSpansBody) {
   return sendBookingPostRequest<GetTimeSpansResponse>(URI_RESOURCE.GET_TIME_SPANS, body);
 }
 
-async function sendBookingPostRequest<T>(
-  path: string,
-  body: unknown,
-  requestTimeout: number | undefined = undefined
-): Promise<T> {
+async function sendBookingPostRequest<T>(path: string, body: unknown): Promise<T> {
   const { datatorgetEndpoint, apiKey } = await getSsmParameters();
 
   const requestClient = request.requestClient(
     { rejectUnauthorized: false },
     { 'X-ApiKey': apiKey },
-    requestTimeout
+    Number(process.env.requestTimeout)
   );
 
   const url = `${datatorgetEndpoint}/${path}`;
