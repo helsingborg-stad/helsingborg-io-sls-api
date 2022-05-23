@@ -1,4 +1,3 @@
-import to from 'await-to-js';
 import S3 from '../libs/S3';
 import log from '../libs/logs';
 import { VivaAttachmentCategory } from '../types/vivaMyPages';
@@ -55,8 +54,8 @@ function getFulfilledCallback(
   current: PromiseSettledResult<CaseAttachment>
 ) {
   if (current.status !== 'fulfilled') {
-    log.writeWarn('Could not get file with id: ', current.reason.id);
-    return [...previous];
+    log.writeWarn(`Could not get file with id: ${current.reason.id}`, current.reason);
+    return previous;
   }
   return [...previous, current.value];
 }
@@ -93,6 +92,5 @@ function isAnswerAttachment(answer: CaseFormAnswer): answer is CaseFormAnswerAtt
 }
 
 export default {
-  getCategory: getAttachmentCategory,
   createFromAnswers: createAttachmentFromAnswers,
 };
