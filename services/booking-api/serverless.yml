@@ -18,6 +18,7 @@ provider:
   stage: dev
   region: eu-north-1
   endpointType: regional
+  timeout: 15
   tracing:
     lambda: true
   apiGateway:
@@ -29,7 +30,7 @@ provider:
   environment:
     stage: ${self:custom.stage}
     resourcesStage: ${self:custom.resourcesStage}
-
+    requestTimeout: 15000
   iam:
     role:
       statements:
@@ -41,7 +42,6 @@ provider:
 
 functions:
   createBooking:
-    timeout: 15
     handler: src/lambdas/create.main
     events:
       - http:
@@ -87,9 +87,6 @@ functions:
 
   getHistoricalAttendees:
     handler: src/lambdas/getHistoricalAttendees.main
-    timeout: 12 # time in seconds
-    environment:
-      requestTimeout: 10000 # 10 seconds in ms
     events:
       - http:
           path: booking/getHistoricalAttendees/{referenceCode}
