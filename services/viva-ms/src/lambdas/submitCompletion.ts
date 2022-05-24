@@ -1,5 +1,3 @@
-import to from 'await-to-js';
-
 import { VIVA_COMPLETION_RECEIVED, VIVA_RANDOM_CHECK_RECEIVED } from '../libs/constants';
 import { getItem as getStoredUserCase } from '../libs/queries';
 import * as dynamoDb from '../libs/dynamoDb';
@@ -70,14 +68,6 @@ interface Dependencies {
   updateCase: (params: UpdateCaseParameters) => Promise<UpdateCaseResponse>;
 }
 
-function notCompletionReceived(response: PostCompletionResponse) {
-  if (response?.status !== 'OK') {
-    return true;
-  }
-
-  return false;
-}
-
 function getReceivedState(currentFormId: string, randomCheckFormId: string) {
   return currentFormId === randomCheckFormId
     ? VIVA_RANDOM_CHECK_RECEIVED
@@ -141,7 +131,9 @@ export async function submitCompletion(input: LambdaRequest, dependencies: Depen
     attachments: attachmentList ?? [],
   });
 
-  if (notCompletionReceived(postCompletionResponse)) {
+  const isCompletionReceived = postCompletionResponse?.status.toLowerCase() !== 'ok';
+
+  if (!isCompletionReceived) {
     log.writeError('Viva completion receive failed', postCompletionResponse);
     return false;
   }
