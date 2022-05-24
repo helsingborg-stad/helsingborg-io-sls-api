@@ -58,8 +58,10 @@ export enum CasePersonRole {
   Unknown = 'unknown',
 }
 
+export type PersonalNumber = string;
+
 export interface CasePerson {
-  personalNumber: string;
+  personalNumber: PersonalNumber;
   firstName: string;
   lastName: string;
   role: CasePersonRole;

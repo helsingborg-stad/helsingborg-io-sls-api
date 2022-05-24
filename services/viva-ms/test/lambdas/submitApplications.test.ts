@@ -35,7 +35,7 @@ const details = {
   },
 };
 
-let event: LambdaRequest;
+let input: LambdaRequest;
 let context: Dependencies;
 beforeEach(() => {
   context = {
@@ -46,7 +46,7 @@ beforeEach(() => {
     updateVivaCase: () => Promise.resolve(null),
   };
 
-  event = {
+  input = {
     messageId: 'messageId',
     caseItem: {
       id,
@@ -64,15 +64,15 @@ beforeEach(() => {
 });
 
 it('successfully submits application', async () => {
-  const result = await submitApplication(event, context);
+  const result = await submitApplication(input, context);
 
   expect(result).toBe(true);
 });
 
 it('returns true if `currentFormId` does not match `newApplicationFormId` or `recurringFormId`', async () => {
-  event.caseItem.currentFormId = 'No matching form id';
+  input.caseItem.currentFormId = 'No matching form id';
 
-  const result = await submitApplication(event, context);
+  const result = await submitApplication(input, context);
 
   expect(result).toBe(true);
 });
@@ -81,7 +81,7 @@ it('returns true if `postVivaApplication` returns `1014` error code', async () =
   context.postVivaApplication = () =>
     Promise.reject({ vadaResponse: { error: { details: { errorCode: '1014' } } } });
 
-  const result = await submitApplication(event, context);
+  const result = await submitApplication(input, context);
 
   expect(result).toBe(true);
 });
@@ -89,13 +89,13 @@ it('returns true if `postVivaApplication` returns `1014` error code', async () =
 it('throws if `postVivaApplication` fails', async () => {
   context.postVivaApplication = () => Promise.reject({});
 
-  await expect(submitApplication(event, context)).rejects.toThrow();
+  await expect(submitApplication(input, context)).rejects.toThrow();
 });
 
 it('throws if `postVivaApplication` is successful but `status` is not `OK`', async () => {
   context.postVivaApplication = () => Promise.resolve({ status: 'NOT_OK' });
 
-  await expect(submitApplication(event, context)).rejects.toThrow();
+  await expect(submitApplication(input, context)).rejects.toThrow();
 });
 
 test.each([
@@ -104,11 +104,11 @@ test.each([
 ])(
   'calls `postVivaApplication` with $expectedResult `applicationType` for formId $currentFormId',
   async ({ currentFormId, expectedResult }) => {
-    event.caseItem.currentFormId = currentFormId;
+    input.caseItem.currentFormId = currentFormId;
 
     const postVivaApplicationSpy = jest.spyOn(context, 'postVivaApplication');
 
-    await submitApplication(event, context);
+    await submitApplication(input, context);
 
     expect(postVivaApplicationSpy).toHaveBeenCalledWith(
       expect.objectContaining({ applicationType: expectedResult })
@@ -119,7 +119,7 @@ test.each([
 it('calls `updateVivaCase` with correct parameters', async () => {
   const updateVivaCaseSpy = jest.spyOn(context, 'updateVivaCase');
 
-  await submitApplication(event, context);
+  await submitApplication(input, context);
 
   expect(updateVivaCaseSpy).toHaveBeenCalledWith({ PK, SK }, postVivaResponseId);
 });

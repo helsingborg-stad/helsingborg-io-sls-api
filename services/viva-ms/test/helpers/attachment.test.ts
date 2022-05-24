@@ -3,7 +3,7 @@ import attachment from '../../src/helpers/attachment';
 
 jest.mock('../../src/libs/S3');
 
-it('should return list with attachment object', async () => {
+it('returns a list of attachment objects', async () => {
   jest
     .spyOn(S3.default, 'getFile')
     .mockResolvedValueOnce({
@@ -19,7 +19,7 @@ it('should return list with attachment object', async () => {
       Body: 'Some body hereA0',
     });
 
-  const answerListHappyPath = [
+  const answerList = [
     {
       field: {
         id: '123',
@@ -45,16 +45,9 @@ it('should return list with attachment object', async () => {
         },
       ],
     },
-    {
-      field: {
-        id: '456',
-        tags: [],
-      },
-      value: 'String value, THIS IS NOT AN ATTACHMENT',
-    },
   ];
 
-  const result = await attachment.createFromAnswers('199492921234', answerListHappyPath);
+  const result = await attachment.createFromAnswers('199492921234', answerList);
 
   expect(result).toEqual([
     {
@@ -78,13 +71,13 @@ it('should return list with attachment object', async () => {
   ]);
 });
 
-it("should fail when S3 can't retrive get the attachment file", async () => {
+it("writes a log message to AWS Cloud Watch when S3 can't retrive get the attachment file", async () => {
   jest.spyOn(S3.default, 'getFile').mockRejectedValueOnce({
     Body: 'BASE64 empty',
     id: '999',
   });
 
-  const answerListFailing = [
+  const answerList = [
     {
       field: {
         id: '999',
@@ -98,13 +91,13 @@ it("should fail when S3 can't retrive get the attachment file", async () => {
     },
   ];
 
-  const result = await attachment.createFromAnswers('199492921234', answerListFailing);
+  const result = await attachment.createFromAnswers('199492921234', answerList);
 
   expect(result).toEqual([]);
 });
 
 it('should return empty array if answer value is of type string', async () => {
-  const answerListWithStringValue = [
+  const answerList = [
     {
       field: {
         id: '99',
@@ -114,7 +107,7 @@ it('should return empty array if answer value is of type string', async () => {
     },
   ];
 
-  const result = await attachment.createFromAnswers('199492921234', answerListWithStringValue);
+  const result = await attachment.createFromAnswers('199492921234', answerList);
 
   expect(result).toEqual([]);
 });

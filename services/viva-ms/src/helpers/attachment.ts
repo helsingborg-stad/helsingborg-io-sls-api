@@ -1,15 +1,13 @@
 import S3 from '../libs/S3';
 import log from '../libs/logs';
 import { VivaAttachmentCategory } from '../types/vivaMyPages';
-import type { CaseFormAnswer, CaseFormAnswerAttachment } from '../types/caseItem';
+import type { PersonalNumber, CaseFormAnswer, CaseFormAnswerAttachment } from '../types/caseItem';
 
 export enum RequiredTags {
   Viva = 'viva',
   Attachment = 'attachment',
   Category = 'category',
 }
-
-export type PersonalNumber = string;
 
 export interface CaseAttachment {
   id: string;
@@ -49,15 +47,16 @@ function getAttachmentCategory(
   }, VivaAttachmentCategory.Unknown);
 }
 
-function getFulfilledCallback(
-  previous: CaseAttachment[],
-  current: PromiseSettledResult<CaseAttachment>
-) {
+function getFulfilled(previous: CaseAttachment[], current: PromiseSettledResult<CaseAttachment>) {
   if (current.status !== 'fulfilled') {
     log.writeWarn(`Could not get file with id: ${current.reason.id}`, current.reason);
     return previous;
   }
   return [...previous, current.value];
+}
+
+function isAnswerAttachment(answer: CaseFormAnswer): answer is CaseFormAnswerAttachment {
+  return Array.isArray(answer.value);
 }
 
 async function createAttachmentFromAnswers(
@@ -84,11 +83,7 @@ async function createAttachmentFromAnswers(
   });
 
   const attachmentPromiseResultList = await Promise.allSettled(attachmentPromiseList);
-  return attachmentPromiseResultList.reduce(getFulfilledCallback, []);
-}
-
-function isAnswerAttachment(answer: CaseFormAnswer): answer is CaseFormAnswerAttachment {
-  return Array.isArray(answer.value);
+  return attachmentPromiseResultList.reduce(getFulfilled, []);
 }
 
 export default {
