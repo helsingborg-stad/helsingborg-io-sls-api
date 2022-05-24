@@ -60,14 +60,19 @@ export async function lambda(
   lambdaContext: LambdaContext
 ): Promise<boolean> {
   const { user } = event.detail;
-  const { newApplicationFormId } = await params.read(config.cases.providers.viva.envsKeyName);
+  const { newApplicationFormId, newApplicationCompletionFormId, newApplicationRandomCheckFormId } =
+    await params.read(config.cases.providers.viva.envsKeyName);
 
   const [, queryResponse] = await to(getUserCaseList(user.personalNumber));
   if (queryResponse?.Count) {
     return true;
   }
 
-  const formIdList = [newApplicationFormId];
+  const formIdList = [
+    newApplicationFormId,
+    newApplicationCompletionFormId,
+    newApplicationRandomCheckFormId,
+  ];
   const isCoApplicant = false;
   const initialFormEncryption = createCaseHelper.getFormEncryptionAttributes(isCoApplicant);
   const initialFormList = createCaseHelper.getInitialFormAttributes(
