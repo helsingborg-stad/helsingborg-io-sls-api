@@ -157,3 +157,33 @@ export function destructRecord(record) {
   const body = JSON.parse(record.body);
   return dynamoDb.unmarshall(body.detail.dynamodb.NewImage);
 }
+
+export function updateCaseCompletionStatus(keys, caseUpdateAttributes) {
+  const { newStatus, newState, newCurrentFormId, newPersons } = caseUpdateAttributes;
+
+  const updateParams = {
+    TableName: config.cases.tableName,
+    Key: {
+      PK: keys.PK,
+      SK: keys.SK,
+    },
+    UpdateExpression:
+      'SET #currentFormId = :newCurrentFormId, #status = :newStatus, #persons = :newPersons, #state = :newState',
+    ExpressionAttributeNames: {
+      '#currentFormId': 'currentFormId',
+      '#status': 'status',
+      '#persons': 'persons',
+      '#state': 'state',
+    },
+    ExpressionAttributeValues: {
+      ':newCurrentFormId': newCurrentFormId,
+      ':newPersons': newPersons,
+      ':newStatus': newStatus,
+      ':newState': newState,
+    },
+    ProjectionExpression: 'id',
+    ReturnValues: 'ALL_NEW',
+  };
+
+  return dynamoDb.call('update', updateParams);
+}

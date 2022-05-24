@@ -16,6 +16,21 @@ export interface CaseUserAddress {
   readonly postalCode?: string;
 }
 
+interface RequestedCaseCompletions {
+  description: string;
+  received: boolean;
+}
+
+export interface CaseCompletions {
+  readonly requested: RequestedCaseCompletions[];
+  readonly attachmentUploaded: string[];
+  readonly completed: boolean;
+  readonly dueDate: number | null;
+  readonly isCompleted: boolean;
+  readonly isAttachmentPending: boolean;
+  readonly isRandomCheck: boolean;
+}
+
 export interface CaseItem {
   id: string;
   PK: string;
@@ -38,6 +53,7 @@ export interface CaseDetails {
   workflowId: string | null;
   period: CasePeriod;
   readonly workflow?: unknown;
+  completions?: CaseCompletions;
 }
 
 export interface CaseStatus {
