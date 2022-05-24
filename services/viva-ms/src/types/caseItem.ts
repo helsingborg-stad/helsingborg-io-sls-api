@@ -74,8 +74,10 @@ export enum CasePersonRole {
   Unknown = 'unknown',
 }
 
+export type PersonalNumber = string;
+
 export interface CasePerson {
-  personalNumber: string;
+  personalNumber: PersonalNumber;
   firstName: string;
   lastName: string;
   role: CasePersonRole;
@@ -97,7 +99,16 @@ export interface CaseFormCurrentPosition {
 
 export interface CaseFormAnswer {
   field: CaseFormAnswerField;
-  value: string;
+  value: AnswerAttachment[] | string;
+}
+
+export interface CaseFormAnswerAttachment {
+  field: CaseFormAnswerField;
+  value: AnswerAttachment[];
+}
+
+export interface AnswerAttachment {
+  uploadedFileName: string;
 }
 
 export interface CaseFormAnswerField {

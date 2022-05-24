@@ -6,7 +6,7 @@ import * as request from '../libs/request';
 import params from '../libs/params';
 import hash from '../libs/helperHashEncode';
 
-const REQUEST_TIMEOUT_IN_MS = 15000;
+const REQUEST_TIMEOUT_IN_MS = 30000;
 
 async function sendVivaAdapterRequest({ endpoint, method, body = undefined }) {
   const { vadaUrl, xApiKeyToken } = await getVivaSsmParams();
@@ -135,7 +135,15 @@ async function getOfficers(personalNumber) {
 }
 
 async function postApplication(payload) {
-  const { personalNumber, applicationType, answers, rawData, rawDataType, workflowId } = payload;
+  const {
+    personalNumber,
+    applicationType,
+    answers,
+    rawData,
+    rawDataType,
+    workflowId,
+    attachments,
+  } = payload;
   const { hashSalt, hashSaltLength } = await getVivaSsmParams();
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
@@ -149,6 +157,7 @@ async function postApplication(payload) {
       rawData,
       rawDataType,
       workflowId,
+      attachments,
     },
   };
 

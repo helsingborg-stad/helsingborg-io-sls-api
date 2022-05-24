@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import to from 'await-to-js';
 
 import config from '../libs/config';
@@ -7,10 +6,10 @@ import * as dynamoDb from '../libs/dynamoDb';
 import log from '../libs/logs';
 import { getItem as getStoredUserCase } from '../libs/queries';
 import params from '../libs/params';
-import S3 from '../libs/S3';
 import { VIVA_COMPLETION_RECEIVED, VIVA_RANDOM_CHECK_RECEIVED } from '../libs/constants';
-import caseHelper from '../helpers/createCase';
 
+import caseHelper from '../helpers/createCase';
+import attachment from '../helpers/attachment';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
 export async function main(event, context) {
@@ -72,7 +71,7 @@ export async function main(event, context) {
   const caseAnswers = caseItem.forms[currentFormId].answers;
 
   const [attachmentListError, attachmentList] = await to(
-    answersToAttachmentList(personalNumber, caseAnswers)
+    attachment.createFromAnswers(personalNumber, caseAnswers)
   );
   if (attachmentListError) {
     log.error(
@@ -132,56 +131,6 @@ export async function main(event, context) {
   }
 
   return true;
-}
-
-function getAttachmentCategory(tags, attachmentCategories = ['expenses', 'incomes', 'completion']) {
-  if (tags && tags.includes('viva') && tags.includes('attachment') && tags.includes('category')) {
-    return attachmentCategories.reduce((acc, curr) => {
-      if (tags.includes(curr)) {
-        return curr;
-      }
-      return acc;
-    }, undefined);
-  }
-  return undefined;
-}
-
-function generateFileKey(keyPrefix, filename) {
-  return `${keyPrefix}/${filename}`;
-}
-
-async function answersToAttachmentList(personalNumber, answerList) {
-  const attachmentList = [];
-
-  for (const answer of answerList) {
-    const attachmentCategory = getAttachmentCategory(answer.field.tags);
-    if (!attachmentCategory) {
-      continue;
-    }
-
-    for (const valueItem of answer.value) {
-      const s3FileKey = generateFileKey(personalNumber, valueItem.uploadedFileName);
-
-      const [getFileError, file] = await to(S3.getFile(process.env.BUCKET_NAME, s3FileKey));
-      if (getFileError) {
-        // Throwing the error for a single file would prevent all files from being retrived, since the loop would exit.
-        // So instead we log the error and continue the loop iteration.
-        console.error(s3FileKey, getFileError);
-        continue;
-      }
-
-      const attachment = {
-        id: s3FileKey,
-        name: valueItem.uploadedFileName,
-        category: attachmentCategory,
-        fileBase64: file.Body.toString('base64'),
-      };
-
-      attachmentList.push(attachment);
-    }
-  }
-
-  return attachmentList;
 }
 
 function notCompletionReceived(response) {
