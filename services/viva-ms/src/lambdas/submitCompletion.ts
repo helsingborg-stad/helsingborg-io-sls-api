@@ -2,28 +2,28 @@ import to from 'await-to-js';
 
 import { VIVA_COMPLETION_RECEIVED, VIVA_RANDOM_CHECK_RECEIVED } from '../libs/constants';
 import { getItem as getStoredUserCase } from '../libs/queries';
+import * as dynamoDb from '../libs/dynamoDb';
 import params from '../libs/params';
 import config from '../libs/config';
 import log from '../libs/logs';
-import S3 from '../libs/S3';
 
-import vivaAdapter from '../helpers/vivaAdapterRequestClient';
-import { updateCaseState } from '../helpers/dynamoDb';
 import caseHelper from '../helpers/createCase';
+import attachment from '../helpers/attachment';
+import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
-import { CaseItem, CaseFormAnswer, UploadedFile, CaseForm } from '../types/caseItem';
+import { CaseItem, CaseForm } from '../types/caseItem';
+import { CaseAttachment } from '../helpers/attachment';
 
-interface PostCompletionResponse {
-  response: {
-    status: string;
-  };
+interface LambdaDetails {
+  caseKeys: CaseKeys;
 }
 
-interface S3Attachment {
-  id: string;
-  name: string;
-  category: string;
-  fileBase64: unknown;
+export interface LambdaRequest {
+  detail: LambdaDetails;
+}
+
+interface PostCompletionResponse {
+  status: string;
 }
 
 interface GetStoredUserCaseResponse {
@@ -33,6 +33,22 @@ interface GetStoredUserCaseResponse {
 interface ReadParamsResponse {
   randomCheckFormId: string;
   completionFormId: string;
+}
+
+interface CaseKeys {
+  PK: string;
+  SK: string;
+}
+
+interface UpdateCaseResponse {
+  Attributes: unknown;
+}
+
+interface UpdateCaseParameters {
+  caseKeys: CaseKeys;
+  newState: string;
+  currentFormId: string;
+  initialCompletionForm: Record<string, CaseForm>;
 }
 
 interface Dependencies {
@@ -49,90 +65,81 @@ interface Dependencies {
   }: {
     personalNumber: string;
     workflowId: string | null | undefined;
-    attachments: S3Attachment[];
+    attachments: CaseAttachment[];
   }) => Promise<PostCompletionResponse>;
-  updateCaseState: (
-    caseKeys: { PK: string; SK: string },
-    params: {
-      currentFormId: string;
-      initialCompletionForm: Record<string, CaseForm>;
-      newState: string;
-    }
-  ) => Promise<void>;
+  updateCase: (params: UpdateCaseParameters) => Promise<UpdateCaseResponse>;
 }
 
-export const main = log.wrap(async event => {
-  return lambda(event, {
-    getStoredUserCase,
-    readParams: params.read,
-    postCompletion: vivaAdapter.completion.post,
-    updateCaseState,
-  });
-});
+function notCompletionReceived(response: PostCompletionResponse) {
+  if (response?.status !== 'OK') {
+    return true;
+  }
 
-export async function lambda(event, dependencies: Dependencies) {
-  const { caseKeys } = event.detail;
-  const { getStoredUserCase, readParams, postCompletion, updateCaseState } = dependencies;
+  return false;
+}
 
-  const [getCaseItemError, { Item: caseItem }] = await getStoredUserCase(
+function getReceivedState(currentFormId: string, randomCheckFormId: string) {
+  return currentFormId === randomCheckFormId
+    ? VIVA_RANDOM_CHECK_RECEIVED
+    : VIVA_COMPLETION_RECEIVED;
+}
+
+async function updateCase(params: UpdateCaseParameters): Promise<UpdateCaseResponse> {
+  const { caseKeys, currentFormId, initialCompletionForm, newState } = params;
+  const updateParams = {
+    TableName: config.cases.tableName,
+    Key: {
+      PK: caseKeys.PK,
+      SK: caseKeys.SK,
+    },
+    UpdateExpression: 'SET #state = :newState, forms.#formId = :resetedCompletionForm',
+    ExpressionAttributeNames: {
+      '#state': 'state',
+      '#formId': currentFormId,
+    },
+    ExpressionAttributeValues: {
+      ':newState': newState,
+      ':resetedCompletionForm': initialCompletionForm[currentFormId],
+    },
+    ReturnValues: 'NONE',
+  };
+
+  return dynamoDb.call('update', updateParams);
+}
+
+export async function submitCompletion(input: LambdaRequest, dependencies: Dependencies) {
+  const { caseKeys } = input.detail;
+  const { getStoredUserCase, readParams, postCompletion, updateCase } = dependencies;
+
+  const [, { Item: caseItem }] = await getStoredUserCase(
     config.cases.tableName,
     caseKeys.PK,
     caseKeys.SK
   );
-  if (getCaseItemError) {
-    log.writeError('Error getting stored case from the cases table', getCaseItemError);
-    return false;
-  }
 
   if (!caseItem) {
-    log.writeError(
-      `Requested case item with SK: ${caseKeys.SK}, was not found in the cases table`,
-      caseKeys.SK
-    );
+    log.writeWarn(`Requested case item with SK: ${caseKeys.SK}, was not found in the cases table`);
     return true;
   }
 
-  const [paramsReadError, vivaCaseSSMParams] = await to(
-    readParams(config.cases.providers.viva.envsKeyName)
-  );
-  if (paramsReadError) {
-    log.writeError(
-      'Read ssm params ´config.cases.providers.viva.envsKeyName´ failed',
-      paramsReadError
-    );
-    return false;
-  }
+  const vivaCaseSSMParams = await readParams(config.cases.providers.viva.envsKeyName);
 
   const { currentFormId } = caseItem;
-  const { randomCheckFormId, completionFormId } = vivaCaseSSMParams as ReadParamsResponse;
+  const { randomCheckFormId, completionFormId } = vivaCaseSSMParams;
   const notCompletionForm = ![randomCheckFormId, completionFormId].includes(currentFormId);
   if (notCompletionForm) {
-    log.writeError('Current form is not an completion/random check form', currentFormId);
     return true;
   }
 
-  const personalNumber = caseItem.PK.substr(5);
+  const personalNumber = caseItem.PK.substring(5);
   const caseAnswers = caseItem.forms?.[currentFormId].answers ?? [];
+  const attachmentList = await attachment.createFromAnswers(personalNumber, caseAnswers);
 
-  const [attachmentListError, attachmentList] = await to(
-    answersToAttachmentList(personalNumber, caseAnswers)
-  );
-  if (attachmentListError) {
-    log.writeError('Attachment list error', attachmentListError);
-    return false;
-  }
-
-  const [postCompletionError, postCompletionResponse] = await to(
-    postCompletion({
-      personalNumber,
-      workflowId: caseItem.details?.workflowId,
-      attachments: attachmentList ?? [],
-    })
-  );
-  if (postCompletionError) {
-    log.writeError('Failed to submit Viva completion application', postCompletionError);
-    return false;
-  }
+  const postCompletionResponse = await postCompletion({
+    personalNumber,
+    workflowId: caseItem.details?.workflowId,
+    attachments: attachmentList ?? [],
+  });
 
   if (notCompletionReceived(postCompletionResponse)) {
     log.writeError('Viva completion receive failed', postCompletionResponse);
@@ -145,81 +152,23 @@ export async function lambda(event, dependencies: Dependencies) {
     [currentFormId],
     initialCompletionFormEncryption
   );
-  const newState = getReceivedState(currentFormId, randomCheckFormId);
-  const [updateError] = await to(
-    updateCaseState(caseKeys, { currentFormId, initialCompletionForm, newState })
-  );
-  if (updateError) {
-    log.writeError('Failed to update Viva case', updateError);
-    return false;
-  }
+
+  const updateCaseParams: UpdateCaseParameters = {
+    caseKeys,
+    currentFormId,
+    initialCompletionForm,
+    newState: getReceivedState(currentFormId, randomCheckFormId),
+  };
+  await updateCase(updateCaseParams);
 
   return true;
 }
 
-function getAttachmentCategory(
-  tags: string[],
-  attachmentCategories = ['expenses', 'incomes', 'completion']
-) {
-  if (tags && tags.includes('viva') && tags.includes('attachment') && tags.includes('category')) {
-    return attachmentCategories.reduce((acc, curr) => {
-      if (tags.includes(curr)) {
-        return curr;
-      }
-      return acc;
-    });
-  }
-  return undefined;
-}
-
-function generateFileKey(keyPrefix, filename) {
-  return `${keyPrefix}/${filename}`;
-}
-
-async function answersToAttachmentList(personalNumber: string, answerList: CaseFormAnswer[]) {
-  const attachmentList: S3Attachment[] = [];
-
-  for (const answer of answerList) {
-    const attachmentCategory = getAttachmentCategory(answer.field.tags);
-    if (!attachmentCategory) {
-      continue;
-    }
-
-    for (const valueItem of answer.value as UploadedFile[]) {
-      const s3FileKey = generateFileKey(personalNumber, valueItem.uploadedFileName);
-
-      const [getFileError, file] = await to(S3.getFile(process.env.BUCKET_NAME, s3FileKey));
-      if (getFileError) {
-        // Throwing the error for a single file would prevent all files from being retrived, since the loop would exit.
-        // So instead we log the error and continue the loop iteration.
-        log.writeError(`Could not get file with key: ${s3FileKey}`, getFileError);
-        continue;
-      }
-
-      const attachment = {
-        id: s3FileKey,
-        name: valueItem.uploadedFileName,
-        category: attachmentCategory,
-        fileBase64: file.Body.toString('base64'),
-      };
-
-      attachmentList.push(attachment);
-    }
-  }
-
-  return attachmentList;
-}
-
-function notCompletionReceived(response) {
-  if (response?.status !== 'OK') {
-    return true;
-  }
-
-  return false;
-}
-
-function getReceivedState(currentFormId, randomCheckFormId) {
-  return currentFormId === randomCheckFormId
-    ? VIVA_RANDOM_CHECK_RECEIVED
-    : VIVA_COMPLETION_RECEIVED;
-}
+export const main = log.wrap(async event => {
+  return submitCompletion(event, {
+    getStoredUserCase,
+    readParams: params.read,
+    postCompletion: vivaAdapter.completion.post,
+    updateCase,
+  });
+});
