@@ -1,7 +1,11 @@
 import to from 'await-to-js';
 import * as dynamoDb from '../libs/dynamoDb';
 import config from '../libs/config';
-import { CASE_HTML_GENERATED, CASE_PROVIDER_VIVA } from '../libs/constants';
+import {
+  CASE_HTML_GENERATED,
+  CASE_PROVIDER_VIVA,
+  VIVA_APPLICATION_RECEIVED,
+} from '../libs/constants';
 
 import caseHelper from './createCase';
 
@@ -132,37 +136,50 @@ export async function getFormTemplates(formIdList) {
   );
 }
 
-export function destructRecord(record) {
-  const body = JSON.parse(record.body);
-  return dynamoDb.unmarshall(body.detail.dynamodb.NewImage);
-}
-
-export function updateCaseCompletionStatus(keys, caseUpdateAttributes) {
-  const { newStatus, newState, newCurrentFormId, newPersons } = caseUpdateAttributes;
-
-  const updateParams = {
+export function updateVivaCase(caseKeys, workflowId) {
+  const params = {
     TableName: config.cases.tableName,
     Key: {
-      PK: keys.PK,
-      SK: keys.SK,
+      PK: caseKeys.PK,
+      SK: caseKeys.SK,
     },
-    UpdateExpression:
-      'SET #currentFormId = :newCurrentFormId, #status = :newStatus, #persons = :newPersons, #state = :newState',
+    UpdateExpression: 'SET #state = :newState, details.workflowId = :newWorkflowId',
     ExpressionAttributeNames: {
-      '#currentFormId': 'currentFormId',
-      '#status': 'status',
-      '#persons': 'persons',
       '#state': 'state',
     },
     ExpressionAttributeValues: {
-      ':newCurrentFormId': newCurrentFormId,
-      ':newPersons': newPersons,
-      ':newStatus': newStatus,
-      ':newState': newState,
+      ':newWorkflowId': workflowId,
+      ':newState': VIVA_APPLICATION_RECEIVED,
     },
-    ProjectionExpression: 'id',
-    ReturnValues: 'ALL_NEW',
+    ReturnValues: 'UPDATED_NEW',
+  };
+
+  return dynamoDb.call('update', params);
+}
+
+export function updateCaseState(caseKeys, { currentFormId, initialCompletionForm, newState }) {
+  const updateParams = {
+    TableName: config.cases.tableName,
+    Key: {
+      PK: caseKeys.PK,
+      SK: caseKeys.SK,
+    },
+    UpdateExpression: 'SET #state = :newState, forms.#formId = :resetedCompletionForm',
+    ExpressionAttributeNames: {
+      '#state': 'state',
+      '#formId': currentFormId,
+    },
+    ExpressionAttributeValues: {
+      ':newState': newState,
+      ':resetedCompletionForm': initialCompletionForm[currentFormId],
+    },
+    ReturnValues: 'NONE',
   };
 
   return dynamoDb.call('update', updateParams);
+}
+
+export function destructRecord(record) {
+  const body = JSON.parse(record.body);
+  return dynamoDb.unmarshall(body.detail.dynamodb.NewImage);
 }
