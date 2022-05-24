@@ -3,7 +3,7 @@ import attachment from '../../src/helpers/attachment';
 
 jest.mock('../../src/libs/S3');
 
-it('returns a list of attachment objects', async () => {
+it('return a list of attachment objects', async () => {
   jest
     .spyOn(S3.default, 'getFile')
     .mockResolvedValueOnce({
@@ -71,7 +71,7 @@ it('returns a list of attachment objects', async () => {
   ]);
 });
 
-it("writes a log message to AWS Cloud Watch when S3 can't retrive get the attachment file", async () => {
+it("return empty array when attachment file can't be retrived", async () => {
   jest.spyOn(S3.default, 'getFile').mockRejectedValueOnce({
     Body: 'BASE64 empty',
     id: '999',
@@ -96,7 +96,7 @@ it("writes a log message to AWS Cloud Watch when S3 can't retrive get the attach
   expect(result).toEqual([]);
 });
 
-it('should return empty array if answer value is of type string', async () => {
+it('return empty array if answer value is of type string', async () => {
   const answerList = [
     {
       field: {
@@ -112,7 +112,7 @@ it('should return empty array if answer value is of type string', async () => {
   expect(result).toEqual([]);
 });
 
-it('should return list of attachment where category is set to expenses', async () => {
+it('return list of attachment where category is set to expenses', async () => {
   jest
     .spyOn(S3.default, 'getFile')
     .mockResolvedValueOnce({
