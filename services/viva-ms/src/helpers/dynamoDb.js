@@ -157,23 +157,31 @@ export function updateVivaCase(caseKeys, workflowId) {
   return dynamoDb.call('update', params);
 }
 
-export function updateCaseState(caseKeys, { currentFormId, initialCompletionForm, newState }) {
+export function updateCaseCompletionStatus(keys, caseUpdateAttributes) {
+  const { newStatus, newState, newCurrentFormId, newPersons } = caseUpdateAttributes;
+
   const updateParams = {
     TableName: config.cases.tableName,
     Key: {
-      PK: caseKeys.PK,
-      SK: caseKeys.SK,
+      PK: keys.PK,
+      SK: keys.SK,
     },
-    UpdateExpression: 'SET #state = :newState, forms.#formId = :resetedCompletionForm',
+    UpdateExpression:
+      'SET #currentFormId = :newCurrentFormId, #status = :newStatus, #persons = :newPersons, #state = :newState',
     ExpressionAttributeNames: {
+      '#currentFormId': 'currentFormId',
+      '#status': 'status',
+      '#persons': 'persons',
       '#state': 'state',
-      '#formId': currentFormId,
     },
     ExpressionAttributeValues: {
+      ':newCurrentFormId': newCurrentFormId,
+      ':newPersons': newPersons,
+      ':newStatus': newStatus,
       ':newState': newState,
-      ':resetedCompletionForm': initialCompletionForm[currentFormId],
     },
-    ReturnValues: 'NONE',
+    ProjectionExpression: 'id',
+    ReturnValues: 'ALL_NEW',
   };
 
   return dynamoDb.call('update', updateParams);
