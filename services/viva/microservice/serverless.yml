@@ -1,4 +1,8 @@
+org: dannil76
+console: true
 service: viva-ms
+
+frameworkVersion: '3'
 
 plugins:
   - serverless-bundle
@@ -11,15 +15,12 @@ package:
   individually: true
 
 provider:
-  lambdaHashingVersion: 20201221
   name: aws
   runtime: nodejs16.x
   stage: dev
   region: eu-north-1
   endpointType: regional
   versionFunctions: false
-  eventBridge:
-    useCloudFormation: true
   tracing:
     apiGateway: false
     lambda: true
