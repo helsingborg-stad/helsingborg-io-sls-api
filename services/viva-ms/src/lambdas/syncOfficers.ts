@@ -6,8 +6,11 @@ import config from '../libs/config';
 import log from '../libs/logs';
 
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
+import officers from '../helpers/officers';
 
 import { VivaOfficer } from '../types/vivaMyPages';
+
+const allowedOfficerTitles = ['socialsekreterare'];
 
 async function sendUpdateRequest(keys, newAdministrators) {
   const TableName = config.cases.tableName;
@@ -21,31 +24,6 @@ async function sendUpdateRequest(keys, newAdministrators) {
   };
 
   return dynamoDb.call('update', dynamoDbParams);
-}
-
-function parseVivaOfficers(vivaOfficer: VivaOfficer | VivaOfficer[]): ParsedVivaOfficer[] {
-  let vivaOfficers: VivaOfficer[] = [];
-
-  if (Array.isArray(vivaOfficer)) {
-    vivaOfficers = [...vivaOfficer];
-  } else {
-    // vivaOfficer is an object when viva applicant has only one officer
-    vivaOfficers.push(vivaOfficer);
-  }
-
-  const vivaAdministrators = vivaOfficers.map(officer => {
-    const { name: complexName, title, mail: email, phone } = officer;
-    const name = complexName.replace(/^CN=(.+)\/OU.*$/, `$1`);
-
-    return {
-      name,
-      title,
-      email,
-      phone,
-    };
-  });
-
-  return vivaAdministrators;
 }
 
 const dynamoDbConverter = AWS.DynamoDB.Converter;
@@ -98,13 +76,16 @@ export async function syncOfficers(input: LambdaRequest, dependencies: Dependenc
   const getOfficersResult = await getOfficers(personalNumber);
 
   const { officer } = getOfficersResult;
-  const vivaAdministrators = parseVivaOfficers(officer);
+  const parsedVivaOfficers = officers.parseVivaOfficers(officer);
+  const filteredVivaOfficers = parsedVivaOfficers.filter(officer =>
+    officers.filterVivaOfficerByTitle(officer, allowedOfficerTitles)
+  );
 
-  if (deepEqual(vivaAdministrators, administrators)) {
+  if (deepEqual(filteredVivaOfficers, administrators)) {
     return false;
   }
 
-  await updateCaseOfficers({ PK, SK }, vivaAdministrators);
+  await updateCaseOfficers({ PK, SK }, filteredVivaOfficers);
 
   return true;
 }
