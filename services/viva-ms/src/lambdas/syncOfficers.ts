@@ -1,11 +1,11 @@
 import AWS from 'aws-sdk';
 import deepEqual from 'deep-equal';
 
-import config from '../libs/config';
 import * as dynamoDb from '../libs/dynamoDb';
+import config from '../libs/config';
+import log from '../libs/logs';
 
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
-import log from '../libs/logs';
 
 import { VivaOfficer } from '../types/vivaMyPages';
 
