@@ -134,12 +134,12 @@ export async function createNewVivaCase(
     currentFormId: newApplicationFormId,
   };
 
-  const createdCaseItem = (await createCase({
+  await createCase({
     TableName: config.cases.tableName,
     Item: newVivaCaseItem,
-  })) as CaseItem;
+  });
 
-  log.writeInfo(`New case with id: ${createdCaseItem.id} successfully created`);
+  log.writeInfo(`New case with id: ${newVivaCaseItem.id} successfully created`);
 
   return true;
 }

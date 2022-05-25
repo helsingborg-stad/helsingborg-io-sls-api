@@ -103,21 +103,25 @@ export async function getLastUpdatedCase(PK) {
   return sortedCases?.[0] || {};
 }
 
-export async function getFormTemplates(formIdList) {
-  const [getError, formTemplateList] = await to(
-    Promise.all(
-      formIdList.map(formId => {
-        const getFormParams = {
-          TableName: config.forms.tableName,
-          Key: { PK: `FORM#${formId}` },
-        };
-        return dynamoDb.call('get', getFormParams);
-      })
-    )
-  );
-  if (getError) {
-    throw getError;
+async function getAlways(params) {
+  const result = await dynamoDb.call('get', params);
+
+  if (!result.Item) {
+    throw new Error(`unable to get item ${params.TableName} ${JSON.stringify(params.Key)}`);
   }
+  return result;
+}
+
+export async function getFormTemplates(formIdList) {
+  const formTemplateList = await Promise.all(
+    formIdList.map(formId => {
+      const getFormParams = {
+        TableName: config.forms.tableName,
+        Key: { PK: `FORM#${formId}` },
+      };
+      return getAlways(getFormParams);
+    })
+  );
 
   return formTemplateList.reduce(
     (accumulatedFormList, currentForm) => ({
