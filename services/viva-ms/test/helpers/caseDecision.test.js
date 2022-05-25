@@ -23,7 +23,7 @@ const workflow = {
     completiondescription: null,
     completionduedate: null,
     islockedwithoutcompletionreceived: null,
-    islocked: '2022-02-02T15:42:22+01:00',
+    islocked: null,
   },
 };
 
@@ -154,7 +154,16 @@ it('Before the Viva administrator processes the application the case status must
 });
 
 it(`Calculation exists in the Viva workflow collection, then status type must be ${ACTIVE_PROCESSING}`, () => {
-  const results = decideNewCaseStatus(workflowCalculation);
+  const workflowLockedWithCalculations = {
+    ...workflow,
+    application: {
+      islocked: '123',
+    },
+    calculations: {
+      calculation: {},
+    },
+  };
+  const results = decideNewCaseStatus(workflowLockedWithCalculations);
   expect(results).toBe(ACTIVE_PROCESSING);
 });
 
@@ -184,6 +193,7 @@ it(`Calculation AND decision(approved) exists in the Viva workflow collection, t
 });
 
 it(`Calculation AND payment exists in the Viva workflow collection, then status type must be ${ACTIVE_PROCESSING}`, () => {
+  workflowCalculationANDPayment.application.islocked = '123';
   const results = decideNewCaseStatus(workflowCalculationANDPayment);
   expect(results).toBe(ACTIVE_PROCESSING);
 });
