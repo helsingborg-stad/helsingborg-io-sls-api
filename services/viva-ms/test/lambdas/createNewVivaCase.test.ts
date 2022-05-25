@@ -24,6 +24,19 @@ const readParametersResponse = {
   newApplicationCompletionFormId: '6',
 };
 
+const defaultFormProperties = {
+  answers: [],
+  currentPosition: {
+    currentMainStep: 1,
+    currentMainStepIndex: 0,
+    index: 0,
+    level: 0,
+  },
+  encryption: {
+    type: EncryptionType.Decrypted,
+  },
+};
+
 it('successfully creates a new application case', async () => {
   const expectedParameters = {
     PK: `USER#${user.personalNumber}`,
@@ -36,18 +49,9 @@ it('successfully creates a new application case', async () => {
       workflowId: null,
     },
     forms: {
-      [readParametersResponse.newApplicationFormId]: {
-        answers: [],
-        currentPosition: {
-          currentMainStep: 1,
-          currentMainStepIndex: 0,
-          index: 0,
-          level: 0,
-        },
-        encryption: {
-          type: EncryptionType.Decrypted,
-        },
-      },
+      [readParametersResponse.newApplicationFormId]: defaultFormProperties,
+      [readParametersResponse.newApplicationCompletionFormId]: defaultFormProperties,
+      [readParametersResponse.newApplicationRandomCheckFormId]: defaultFormProperties,
     },
     persons: [
       {
