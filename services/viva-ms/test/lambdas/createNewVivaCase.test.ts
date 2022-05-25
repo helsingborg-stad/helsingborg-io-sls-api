@@ -72,7 +72,7 @@ it('successfully creates a new application case', async () => {
       createCase: createCaseMock,
       readParams: () => Promise.resolve(readParametersResponse),
       getTemplates: () => Promise.resolve({}),
-      getUserCases: () => Promise.resolve({ Count: 0 }),
+      getUserCasesCount: () => Promise.resolve({ Count: 0 }),
     }
   );
 
@@ -93,7 +93,7 @@ it('stops execution when user cases exists', async () => {
       createCase: createCaseMock,
       readParams: () => Promise.resolve(readParametersResponse),
       getTemplates: () => Promise.resolve({}),
-      getUserCases: () => Promise.resolve({ Count: 1 }),
+      getUserCasesCount: () => Promise.resolve({ Count: 1 }),
     }
   );
 

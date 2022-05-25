@@ -42,17 +42,18 @@ export interface LambdaRequest {
 export interface Dependencies {
   createCase: typeof putItem;
   readParams: (envsKeyName: string) => Promise<VivaParametersResponse>;
-  getUserCases: (personalNumber: string) => Promise<GetUserCaseListResponse>;
+  getUserCasesCount: (personalNumber: string) => Promise<GetUserCaseListResponse>;
   getTemplates: typeof getFormTemplates;
 }
 
-function getUserCaseList(personalNumber: string): Promise<GetUserCaseListResponse> {
+function getUserCasesCount(personalNumber: string): Promise<GetUserCaseListResponse> {
   const queryParams = {
     TableName: config.cases.tableName,
     KeyConditionExpression: 'PK = :pk',
     ExpressionAttributeValues: {
       ':pk': `USER#${personalNumber}`,
     },
+    Select: 'COUNT',
   };
 
   return dynamoDb.call('query', queryParams);
@@ -63,9 +64,9 @@ export async function createNewVivaCase(
   dependencies: Dependencies
 ): Promise<boolean> {
   const { user } = input.detail;
-  const { readParams, getTemplates, getUserCases, createCase } = dependencies;
+  const { readParams, getTemplates, getUserCasesCount, createCase } = dependencies;
 
-  const { Count = 0 } = await getUserCases(user.personalNumber);
+  const { Count } = await getUserCasesCount(user.personalNumber);
 
   if (Count > 0) {
     return true;
@@ -147,7 +148,7 @@ export const main = log.wrap(event => {
   return createNewVivaCase(event, {
     createCase: putItem,
     readParams: params.read,
-    getUserCases: getUserCaseList,
+    getUserCasesCount,
     getTemplates: getFormTemplates,
   });
 });
