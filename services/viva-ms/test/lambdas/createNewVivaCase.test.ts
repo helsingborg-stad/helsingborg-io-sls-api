@@ -37,6 +37,12 @@ const defaultFormProperties = {
   },
 };
 
+const lambdaInput = {
+  detail: {
+    user,
+  },
+};
+
 it('successfully creates a new application case', async () => {
   const expectedParameters = {
     PK: `USER#${user.personalNumber}`,
@@ -70,15 +76,12 @@ it('successfully creates a new application case', async () => {
 
   const createCaseMock = jest.fn().mockResolvedValueOnce({ id: '123' });
 
-  const result = await createNewVivaCase(
-    { detail: { user } },
-    {
-      createCase: createCaseMock,
-      readParams: () => Promise.resolve(readParametersResponse),
-      getTemplates: () => Promise.resolve({}),
-      getUserCasesCount: () => Promise.resolve({ Count: 0 }),
-    }
-  );
+  const result = await createNewVivaCase(lambdaInput, {
+    createCase: createCaseMock,
+    readParams: () => Promise.resolve(readParametersResponse),
+    getTemplates: () => Promise.resolve({}),
+    getUserCasesCount: () => Promise.resolve({ Count: 0 }),
+  });
 
   expect(result).toBe(true);
   expect(createCaseMock).toHaveBeenCalledWith(
@@ -91,15 +94,12 @@ it('successfully creates a new application case', async () => {
 it('stops execution when user cases exists', async () => {
   const createCaseMock = jest.fn().mockResolvedValueOnce(undefined);
 
-  const result = await createNewVivaCase(
-    { detail: { user } },
-    {
-      createCase: createCaseMock,
-      readParams: () => Promise.resolve(readParametersResponse),
-      getTemplates: () => Promise.resolve({}),
-      getUserCasesCount: () => Promise.resolve({ Count: 1 }),
-    }
-  );
+  const result = await createNewVivaCase(lambdaInput, {
+    createCase: createCaseMock,
+    readParams: () => Promise.resolve(readParametersResponse),
+    getTemplates: () => Promise.resolve({}),
+    getUserCasesCount: () => Promise.resolve({ Count: 1 }),
+  });
 
   expect(result).toBe(true);
   expect(createCaseMock).toHaveBeenCalledTimes(0);
