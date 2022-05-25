@@ -103,6 +103,14 @@ export async function getLastUpdatedCase(PK) {
   return sortedCases?.[0] || {};
 }
 
+async function getAlways(params) {
+  const res = await dynamoDb.call('get', params);
+  if (!res.Item) {
+    throw new Error(`unable to get item ${params.TableName} ${JSON.stringify(params.Key)}`);
+  }
+  return res;
+}
+
 export async function getFormTemplates(formIdList) {
   const [getError, formTemplateList] = await to(
     Promise.all(
@@ -111,7 +119,7 @@ export async function getFormTemplates(formIdList) {
           TableName: config.forms.tableName,
           Key: { PK: `FORM#${formId}` },
         };
-        return dynamoDb.call('get', getFormParams);
+        return getAlways(getFormParams);
       })
     )
   );
