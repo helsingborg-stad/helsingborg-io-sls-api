@@ -154,29 +154,16 @@ it('Before the Viva administrator processes the application the case status must
 });
 
 it(`Calculation exists in the Viva workflow collection, then status type must be ${ACTIVE_PROCESSING}`, () => {
-  const workflow = {
-    workflowid: 'EA2F293CA4763D1AC12587DD004F4ADE',
+  const workflowLockedWithCalculations = {
+    ...workflow,
     application: {
-      receiveddate: '2022-02-02T15:26:05+01:00',
-      periodstartdate: '2022-01-01',
-      periodenddate: '2022-01-31',
-      otherperiod: null,
-      requestingcompletion: null,
-      completiondate: null,
-      completionreceiveddate: null,
-      completionsreceived: null,
-      completionsuploaded: null,
-      completions: null,
-      completiondescription: null,
-      completionduedate: null,
-      islockedwithoutcompletionreceived: null,
       islocked: '123',
     },
     calculations: {
       calculation: {},
     },
   };
-  const results = decideNewCaseStatus(workflow);
+  const results = decideNewCaseStatus(workflowLockedWithCalculations);
   expect(results).toBe(ACTIVE_PROCESSING);
 });
 
