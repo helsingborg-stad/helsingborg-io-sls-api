@@ -80,7 +80,8 @@ const log = {
   finalize: (response, error) => {
     log.writeInfo('Lambda finalize', {
       statusCode: response?.statusCode ?? 0,
-      error: error?.toString(),
+      errorMessage: error?.toString(),
+      errorStack: error?.stack,
     });
   },
 
