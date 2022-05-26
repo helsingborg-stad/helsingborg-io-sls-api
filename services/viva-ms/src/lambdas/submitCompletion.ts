@@ -15,6 +15,8 @@ import { EventDetailCaseKeys } from '../types/eventDetail';
 
 interface LambdaDetail {
   caseKeys: EventDetailCaseKeys;
+  status: Record<string, unknown>;
+  state: string;
 }
 
 export interface LambdaRequest {
