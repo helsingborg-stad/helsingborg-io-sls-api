@@ -8,64 +8,58 @@ import log from '../libs/logs';
 import caseHelper from '../helpers/createCase';
 import attachment from '../helpers/attachment';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
-
-import { CaseItem, CaseForm } from '../types/caseItem';
 import { CaseAttachment } from '../helpers/attachment';
 
-interface LambdaDetails {
-  caseKeys: CaseKeys;
+import { CaseItem, CaseForm } from '../types/caseItem';
+import { EventDetailCaseKeys } from '../types/eventDetail';
+
+interface LambdaDetail {
+  caseKeys: EventDetailCaseKeys;
 }
 
 export interface LambdaRequest {
-  detail: LambdaDetails;
+  detail: LambdaDetail;
 }
 
 interface PostCompletionResponse {
   status: string;
 }
 
-interface GetStoredUserCaseResponse {
-  Item: CaseItem;
+interface PostCompletionRequest {
+  personalNumber: string;
+  workflowId: string | null | undefined;
+  attachments: CaseAttachment[];
 }
 
-interface ReadParamsResponse {
+interface GetStoredUserCaseResponse {
+  Item: CaseItem | null;
+}
+
+interface SSMParamsReadResponse {
   randomCheckFormId: string;
   completionFormId: string;
 }
 
-interface CaseKeys {
-  PK: string;
-  SK: string;
-}
-
-interface UpdateCaseResponse {
+export interface UpdateCaseResponse {
   Attributes: unknown;
 }
 
 interface UpdateCaseParameters {
-  caseKeys: CaseKeys;
-  newState: string;
+  caseKeys: EventDetailCaseKeys;
+  newState: typeof VIVA_COMPLETION_RECEIVED | typeof VIVA_RANDOM_CHECK_RECEIVED;
   currentFormId: string;
   initialCompletionForm: Record<string, CaseForm>;
 }
 
-interface Dependencies {
+export interface Dependencies {
   getStoredUserCase: (
     TableName: string,
     PK: string,
     SK: string
-  ) => Promise<[Error, GetStoredUserCaseResponse]>;
-  readParams: (name: string) => Promise<ReadParamsResponse>;
-  postCompletion: ({
-    personalNumber,
-    workflowId,
-    attachments,
-  }: {
-    personalNumber: string;
-    workflowId: string | null | undefined;
-    attachments: CaseAttachment[];
-  }) => Promise<PostCompletionResponse>;
-  updateCase: (params: UpdateCaseParameters) => Promise<UpdateCaseResponse>;
+  ) => Promise<[Error | null, GetStoredUserCaseResponse]>;
+  readParams: (name: string) => Promise<SSMParamsReadResponse>;
+  postCompletion: (payload: PostCompletionRequest) => Promise<PostCompletionResponse>;
+  updateCase: (params: UpdateCaseParameters) => Promise<UpdateCaseResponse | null>;
 }
 
 function getReceivedState(currentFormId: string, randomCheckFormId: string) {
@@ -74,7 +68,7 @@ function getReceivedState(currentFormId: string, randomCheckFormId: string) {
     : VIVA_COMPLETION_RECEIVED;
 }
 
-async function updateCase(params: UpdateCaseParameters): Promise<UpdateCaseResponse> {
+function updateCase(params: UpdateCaseParameters): Promise<UpdateCaseResponse> {
   const { caseKeys, currentFormId, initialCompletionForm, newState } = params;
   const updateParams = {
     TableName: config.cases.tableName,
@@ -112,10 +106,10 @@ export async function submitCompletion(input: LambdaRequest, dependencies: Depen
     return true;
   }
 
-  const vivaCaseSSMParams = await readParams(config.cases.providers.viva.envsKeyName);
-
   const { currentFormId } = caseItem;
-  const { randomCheckFormId, completionFormId } = vivaCaseSSMParams;
+  const { randomCheckFormId, completionFormId } = await readParams(
+    config.cases.providers.viva.envsKeyName
+  );
   const notCompletionForm = ![randomCheckFormId, completionFormId].includes(currentFormId);
   if (notCompletionForm) {
     return true;
