@@ -1,5 +1,6 @@
 import { submitCompletion, LambdaRequest, Dependencies } from '../../src/lambdas/submitCompletion';
-import type { CaseItem, EncryptionType } from '../../src/types/caseItem';
+import { EncryptionType } from '../../src/types/caseItem';
+import type { CaseItem } from '../../src/types/caseItem';
 
 const randomCheckFormId = 'randomCheckFormId';
 const completionFormId = 'completionFormId';
