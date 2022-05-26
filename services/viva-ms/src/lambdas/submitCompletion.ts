@@ -10,21 +10,21 @@ import attachment from '../helpers/attachment';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 import { CaseAttachment } from '../helpers/attachment';
 
-import { CaseItem, CaseForm } from '../types/caseItem';
-import { EventDetailCaseKeys } from '../types/eventDetail';
+import type { CaseItem, CaseForm } from '../types/caseItem';
+import type { EventDetailCaseKeys } from '../types/eventDetail';
 
 interface LambdaDetail {
-  caseKeys: EventDetailCaseKeys;
-  status: Record<string, unknown>;
-  state: string;
+  readonly caseKeys: EventDetailCaseKeys;
+  readonly status?: Record<string, unknown>;
+  readonly state?: string;
 }
 
 export interface LambdaRequest {
-  detail: LambdaDetail;
+  readonly detail: LambdaDetail;
 }
 
 interface PostCompletionResponse {
-  status: string;
+  readonly status: string;
 }
 
 interface PostCompletionRequest {
@@ -34,16 +34,16 @@ interface PostCompletionRequest {
 }
 
 interface GetStoredUserCaseResponse {
-  Item: CaseItem | null;
+  readonly Item: CaseItem | null;
 }
 
 interface SSMParamsReadResponse {
-  randomCheckFormId: string;
-  completionFormId: string;
+  readonly randomCheckFormId: string;
+  readonly completionFormId: string;
 }
 
 export interface UpdateCaseResponse {
-  Attributes: unknown;
+  readonly Attributes: unknown;
 }
 
 interface UpdateCaseParameters {
