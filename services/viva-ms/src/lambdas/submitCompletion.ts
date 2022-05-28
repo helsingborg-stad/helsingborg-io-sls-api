@@ -118,7 +118,7 @@ export async function submitCompletion(input: LambdaRequest, dependencies: Depen
   }
 
   const personalNumber = caseItem.PK.substring(5);
-  const caseAnswers = caseItem.forms?.[currentFormId].answers ?? [];
+  const caseAnswers = caseItem.forms?.[currentFormId]?.answers ?? [];
   const attachmentList = await attachment.createFromAnswers(personalNumber, caseAnswers);
 
   const postCompletionResponse = await postCompletion({
