@@ -112,8 +112,8 @@ export async function submitCompletion(input: LambdaRequest, dependencies: Depen
   const { randomCheckFormId, completionFormId } = await readParams(
     config.cases.providers.viva.envsKeyName
   );
-  const notCompletionForm = ![randomCheckFormId, completionFormId].includes(currentFormId);
-  if (notCompletionForm) {
+  const isCompletionForm = [randomCheckFormId, completionFormId].includes(currentFormId);
+  if (!isCompletionForm) {
     return true;
   }
 
@@ -127,8 +127,7 @@ export async function submitCompletion(input: LambdaRequest, dependencies: Depen
     attachments: attachmentList ?? [],
   });
 
-  const isCompletionReceived = postCompletionResponse?.status.toLowerCase() !== 'ok';
-
+  const isCompletionReceived = postCompletionResponse?.status.toLowerCase() === 'ok';
   if (!isCompletionReceived) {
     log.writeError('Viva completion receive failed', postCompletionResponse);
     return false;
