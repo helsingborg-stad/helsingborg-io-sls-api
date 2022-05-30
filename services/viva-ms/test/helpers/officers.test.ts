@@ -51,27 +51,3 @@ describe('parseVivaOfficers', () => {
     expect(result).toEqual(expectedResult);
   });
 });
-
-describe('filterVivaOfficerByType', () => {
-  it('return true for allowed officer type', () => {
-    const allowedTypes = ['officer'];
-
-    const result = officers.filterVivaOfficerByType(
-      getAdministratorObject({ type: 'officer' }),
-      allowedTypes
-    );
-
-    expect(result).toBe(true);
-  });
-
-  it('return false for un allowed officer type', () => {
-    const allowedTypes = ['officer'];
-
-    const result = officers.filterVivaOfficerByType(
-      getAdministratorObject({ type: 'not allowed' }),
-      allowedTypes
-    );
-
-    expect(result).toBe(false);
-  });
-});

@@ -9,12 +9,12 @@ import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 import officers from '../helpers/officers';
 
 import { CaseAdministrator } from '../types/caseItem';
-import { VivaOfficer, VivaOfficerType } from '../types/vivaMyPages';
+import { VivaOfficer } from '../types/vivaMyPages';
 import { CaseItem } from '../types/caseItem';
 
 type CaseKeys = Pick<CaseItem, 'SK' | 'PK'>;
 
-const allowedOfficerTypes: VivaOfficerType[] = ['officer'];
+const allowedOfficerTypes = ['officer'];
 
 async function sendUpdateRequest(keys: CaseKeys, newAdministrators: CaseAdministrator[]) {
   const TableName = config.cases.tableName;
@@ -67,8 +67,8 @@ export async function syncOfficers(input: LambdaRequest, dependencies: Dependenc
 
   const { officer } = getOfficersResult;
   const parsedVivaOfficers = officers.parseVivaOfficers(officer);
-  const filteredVivaOfficers = parsedVivaOfficers.filter(officer =>
-    officers.filterVivaOfficerByType(officer, allowedOfficerTypes)
+  const filteredVivaOfficers = parsedVivaOfficers.filter(({ type }) =>
+    allowedOfficerTypes.includes(type)
   );
 
   if (deepEqual(parsedVivaOfficers, administrators)) {

@@ -27,11 +27,6 @@ function parseVivaOfficers(vivaOfficer: VivaOfficer | VivaOfficer[]): CaseAdmini
   return vivaAdministrators;
 }
 
-function filterVivaOfficerByType(vivaOfficer: CaseAdministrator, officerTypes: string[]) {
-  return officerTypes.includes(vivaOfficer.type.toLowerCase());
-}
-
 export default {
   parseVivaOfficers,
-  filterVivaOfficerByType,
 };
