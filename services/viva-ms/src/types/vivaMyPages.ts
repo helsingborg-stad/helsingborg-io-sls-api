@@ -1,3 +1,5 @@
+export type VivaOfficerType = 'officer' | 'assistant';
+
 export enum VivaAttachmentCategory {
   Expenses = 'expenses',
   Incomes = 'incomes',
