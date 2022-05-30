@@ -3,16 +3,17 @@ import { syncOfficers } from '../../src/lambdas/syncOfficers';
 
 import { VivaOfficer, VivaOfficerType } from '../../src/types/vivaMyPages';
 
-const defaultOfficers: VivaOfficer[] = [
-  {
+function makeVivaOfficer(partialVivaOfficer: Partial<VivaOfficer> = {}) {
+  return {
     mail: 'mail@test.com',
     name: 'testName',
     title: 'Socialsekreterare',
     type: VivaOfficerType.Officer,
     phone: null,
     typeenclair: '',
-  },
-];
+    ...partialVivaOfficer,
+  };
+}
 
 const PK = 'USER#199001011234';
 const SK = 'CASE#11111111-2222-3333-4444-555555555555';
@@ -51,7 +52,7 @@ it('successfully updates case with new officers', async () => {
   };
 
   const result = await syncOfficers(lambdaInput, {
-    getVivaOfficers: () => Promise.resolve({ officer: defaultOfficers }),
+    getVivaOfficers: () => Promise.resolve({ officer: [makeVivaOfficer()] }),
     updateCaseAdministrators: updateCaseOfficersMock,
   });
 
@@ -71,7 +72,7 @@ it('returns null if `NewImage` property is undefined', async () => {
       },
     },
     {
-      getVivaOfficers: () => Promise.resolve({ officer: defaultOfficers }),
+      getVivaOfficers: () => Promise.resolve({ officer: [makeVivaOfficer()] }),
       updateCaseAdministrators: updateCaseOfficersMock,
     }
   );
@@ -88,13 +89,6 @@ it('updates the case with only allowed officers', async () => {
       title: 'Socialsekreterare',
       phone: null,
       type: VivaOfficerType.Officer,
-    },
-  ];
-  const fetchedOfficers = [
-    ...defaultOfficers,
-    {
-      ...defaultOfficers[0],
-      type: 'Not Allowed type',
     },
   ];
   const lambdaInput = {
@@ -121,7 +115,10 @@ it('updates the case with only allowed officers', async () => {
   const updateCaseOfficersMock = jest.fn().mockResolvedValueOnce(undefined);
 
   const result = await syncOfficers(lambdaInput, {
-    getVivaOfficers: () => Promise.resolve({ officer: fetchedOfficers }),
+    getVivaOfficers: () =>
+      Promise.resolve({
+        officer: [makeVivaOfficer(), makeVivaOfficer({ type: 'Not allowed type' })],
+      }),
     updateCaseAdministrators: updateCaseOfficersMock,
   });
 
@@ -174,7 +171,7 @@ it('does not update case if officers are the same in viva as in the case', async
   const updateCaseOfficersMock = jest.fn().mockResolvedValueOnce(undefined);
 
   const result = await syncOfficers(lambdaInput, {
-    getVivaOfficers: () => Promise.resolve({ officer: defaultOfficers }),
+    getVivaOfficers: () => Promise.resolve({ officer: [makeVivaOfficer()] }),
     updateCaseAdministrators: updateCaseOfficersMock,
   });
 
