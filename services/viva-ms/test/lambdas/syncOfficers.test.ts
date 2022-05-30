@@ -19,7 +19,7 @@ const PK = 'USER#199001011234';
 const SK = 'CASE#11111111-2222-3333-4444-555555555555';
 
 it('successfully updates case with new officers', async () => {
-  const expectedOfficers: CaseAdministrator[] = [
+  const expectedCaseAdministrators: CaseAdministrator[] = [
     {
       email: 'mail@test.com',
       name: 'testName',
@@ -57,7 +57,7 @@ it('successfully updates case with new officers', async () => {
   });
 
   expect(result).toBe(true);
-  expect(updateCaseOfficersMock).toHaveBeenCalledWith({ PK, SK }, expectedOfficers);
+  expect(updateCaseOfficersMock).toHaveBeenCalledWith({ PK, SK }, expectedCaseAdministrators);
 });
 
 it('returns null if `NewImage` property is undefined', async () => {
@@ -82,7 +82,7 @@ it('returns null if `NewImage` property is undefined', async () => {
 });
 
 it('updates the case with only allowed officers', async () => {
-  const expectedOfficers: CaseAdministrator[] = [
+  const expectedCaseAdministrators: CaseAdministrator[] = [
     {
       email: 'mail@test.com',
       name: 'testName',
@@ -123,7 +123,7 @@ it('updates the case with only allowed officers', async () => {
   });
 
   expect(result).toBe(true);
-  expect(updateCaseOfficersMock).toHaveBeenCalledWith({ PK, SK }, expectedOfficers);
+  expect(updateCaseOfficersMock).toHaveBeenCalledWith({ PK, SK }, expectedCaseAdministrators);
 });
 
 it('does not update case if officers are the same in viva as in the case', async () => {
