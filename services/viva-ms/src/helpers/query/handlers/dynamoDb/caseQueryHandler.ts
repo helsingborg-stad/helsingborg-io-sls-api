@@ -1,6 +1,6 @@
 import { dynamoQueryHandler } from './queryHandler';
 
-import config from '../../../config';
+import config from '../../../../libs/config';
 
 import type { CaseQueryHandler } from '../../cases/types';
 
