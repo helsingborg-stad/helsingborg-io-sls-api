@@ -1,13 +1,7 @@
+import { CaseAdministrator } from '../types/caseItem';
 import { VivaOfficer } from '../types/vivaMyPages';
 
-interface ParsedVivaOfficer {
-  name: string;
-  title: string;
-  email: string;
-  phone: string | null;
-}
-
-function parseVivaOfficers(vivaOfficer: VivaOfficer | VivaOfficer[]): ParsedVivaOfficer[] {
+function parseVivaOfficers(vivaOfficer: VivaOfficer | VivaOfficer[]): CaseAdministrator[] {
   let vivaOfficers: VivaOfficer[] = [];
 
   if (Array.isArray(vivaOfficer)) {
@@ -18,7 +12,7 @@ function parseVivaOfficers(vivaOfficer: VivaOfficer | VivaOfficer[]): ParsedViva
   }
 
   const vivaAdministrators = vivaOfficers.map(officer => {
-    const { name: complexName, title, mail: email, phone } = officer;
+    const { name: complexName, title, mail: email, phone, type } = officer;
     const name = complexName.replace(/^CN=(.+)\/OU.*$/, `$1`);
 
     return {
@@ -26,17 +20,18 @@ function parseVivaOfficers(vivaOfficer: VivaOfficer | VivaOfficer[]): ParsedViva
       title,
       email,
       phone,
+      type,
     };
   });
 
   return vivaAdministrators;
 }
 
-function filterVivaOfficerByTitle(vivaOfficer: ParsedVivaOfficer, allowedTitles: string[]) {
-  return allowedTitles.includes(vivaOfficer.title.toLowerCase());
+function filterVivaOfficerByType(vivaOfficer: CaseAdministrator, officerTypes: string[]) {
+  return officerTypes.includes(vivaOfficer.type.toLowerCase());
 }
 
 export default {
   parseVivaOfficers,
-  filterVivaOfficerByTitle,
+  filterVivaOfficerByType,
 };
