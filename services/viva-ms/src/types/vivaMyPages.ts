@@ -1,3 +1,8 @@
+export enum VivaOfficerType {
+  Officer = 'officer',
+  Assistant = 'assistant',
+}
+
 export enum VivaAttachmentCategory {
   Expenses = 'expenses',
   Incomes = 'incomes',

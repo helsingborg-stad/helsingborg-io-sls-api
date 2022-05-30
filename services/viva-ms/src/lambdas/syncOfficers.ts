@@ -9,12 +9,12 @@ import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 import officers from '../helpers/officers';
 
 import { CaseAdministrator } from '../types/caseItem';
-import { VivaOfficer } from '../types/vivaMyPages';
+import { VivaOfficer, VivaOfficerType } from '../types/vivaMyPages';
 import { CaseItem } from '../types/caseItem';
 
 type CaseKeys = Pick<CaseItem, 'SK' | 'PK'>;
 
-const allowedOfficerTypes = ['officer'];
+const allowedOfficerTypes: string[] = [VivaOfficerType.Officer];
 
 async function sendUpdateRequest(keys: CaseKeys, newAdministrators: CaseAdministrator[]) {
   const TableName = config.cases.tableName;

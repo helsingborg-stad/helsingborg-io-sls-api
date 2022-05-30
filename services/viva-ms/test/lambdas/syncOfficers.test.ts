@@ -1,14 +1,14 @@
 import { CaseAdministrator } from '../../src/types/caseItem';
 import { syncOfficers } from '../../src/lambdas/syncOfficers';
 
-import { VivaOfficer } from '../../src/types/vivaMyPages';
+import { VivaOfficer, VivaOfficerType } from '../../src/types/vivaMyPages';
 
 const defaultOfficers: VivaOfficer[] = [
   {
     mail: 'mail@test.com',
     name: 'testName',
     title: 'Socialsekreterare',
-    type: 'officer',
+    type: VivaOfficerType.Officer,
     phone: null,
     typeenclair: '',
   },
@@ -24,7 +24,7 @@ it('successfully updates case with new officers', async () => {
       name: 'testName',
       title: 'Socialsekreterare',
       phone: null,
-      type: 'officer',
+      type: VivaOfficerType.Officer,
     },
   ];
   const updateCaseOfficersMock = jest.fn().mockResolvedValueOnce(undefined);
@@ -87,7 +87,7 @@ it('updates the case with only allowed officers', async () => {
       name: 'testName',
       title: 'Socialsekreterare',
       phone: null,
-      type: 'officer',
+      type: VivaOfficerType.Officer,
     },
   ];
   const fetchedOfficers = [
@@ -150,7 +150,7 @@ it('does not update case if officers are the same in viva as in the case', async
                         S: 'testName',
                       },
                       type: {
-                        S: 'officer',
+                        S: VivaOfficerType.Officer,
                       },
                       title: {
                         S: 'Socialsekreterare',
