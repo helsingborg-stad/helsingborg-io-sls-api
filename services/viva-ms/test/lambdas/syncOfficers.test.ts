@@ -6,7 +6,7 @@ import { VivaOfficer, VivaOfficerType } from '../../src/types/vivaMyPages';
 function makeVivaOfficer(partialVivaOfficer: Partial<VivaOfficer> = {}) {
   return {
     mail: 'mail@test.com',
-    name: 'testName',
+    name: 'CN=Karl Karlsson/OU=extern/O=ASDF',
     title: 'Socialsekreterare',
     type: VivaOfficerType.Officer,
     phone: null,
@@ -22,7 +22,7 @@ it('successfully updates case with new officers', async () => {
   const expectedCaseAdministrators: CaseAdministrator[] = [
     {
       email: 'mail@test.com',
-      name: 'testName',
+      name: 'Karl Karlsson',
       title: 'Socialsekreterare',
       phone: null,
       type: VivaOfficerType.Officer,
@@ -85,7 +85,7 @@ it('updates the case with only allowed officers', async () => {
   const expectedCaseAdministrators: CaseAdministrator[] = [
     {
       email: 'mail@test.com',
-      name: 'testName',
+      name: 'Karl Karlsson',
       title: 'Socialsekreterare',
       phone: null,
       type: VivaOfficerType.Officer,
@@ -144,7 +144,7 @@ it('does not update case if officers are the same in viva as in the case', async
                   {
                     M: {
                       name: {
-                        S: 'testName',
+                        S: 'Karl Karlsson',
                       },
                       type: {
                         S: VivaOfficerType.Officer,
