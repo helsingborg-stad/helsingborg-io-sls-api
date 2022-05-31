@@ -66,7 +66,7 @@ export async function syncOfficers(input: LambdaRequest, dependencies: Dependenc
   const { officer } = getOfficersResult;
   const parsedVivaOfficers = officers.parseVivaOfficers(officer);
   const filteredVivaOfficers = parsedVivaOfficers.filter(({ type }) =>
-    allowedOfficerTypes.includes(type)
+    allowedOfficerTypes.includes(type.toLowerCase())
   );
 
   if (deepEqual(parsedVivaOfficers, administrators)) {
