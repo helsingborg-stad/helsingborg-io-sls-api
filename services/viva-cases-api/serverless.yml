@@ -23,15 +23,15 @@ provider:
   tracing:
     lambda: true
 
+  environment:
+    stage: ${self:custom.stage}
+    resourcesStage: ${self:custom.resourcesStage}
+
   apiGateway:
     restApiId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiId
     restApiRootResourceId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
     restApiResources:
-      version: !ImportValue ${self:custom.stage}-ExtApiGatewayResourceVersion
-
-  environment:
-    stage: ${self:custom.stage}
-    resourcesStage: ${self:custom.resourcesStage}
+      viva-cases: !ImportValue ${self:custom.stage}-ExtApiGatewayResourceVersion
 
   iam:
     role:
@@ -58,7 +58,6 @@ provider:
         - Effect: Allow
           Action:
             - kms:Decrypt
-            - kms:GenerateDataKey
           Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
 
 functions:
@@ -67,10 +66,10 @@ functions:
     timeout: 15
     events:
       - http:
-          path: viva-cases/{caseId}/persons
+          path: /viva-cases/{caseId}/persons
           method: post
-          private: true
           cors: true
+          private: true
           authorizer:
             type: TOKEN
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
