@@ -58,22 +58,22 @@ export async function syncOfficers(input: LambdaRequest, dependencies: Dependenc
   const unMarshalledCaseData = dynamoDb.unmarshall(input.detail.dynamodb.NewImage);
 
   const { PK, SK, details } = unMarshalledCaseData as CaseItem;
-  const administrators = details?.administrators ?? [];
+  const caseAdministrators = details?.administrators ?? [];
 
   const personalNumber = PK.substring(5);
-  const getOfficersResult = await getVivaOfficers(personalNumber);
+  const getVivaOfficersResult = await getVivaOfficers(personalNumber);
 
-  const { officer } = getOfficersResult;
+  const { officer } = getVivaOfficersResult;
   const parsedVivaOfficers = officers.parseVivaOfficers(officer);
-  const filteredVivaOfficers = parsedVivaOfficers.filter(({ type }) =>
+  const vivaOfficers = parsedVivaOfficers.filter(({ type }) =>
     allowedOfficerTypes.includes(type.toLowerCase())
   );
 
-  if (deepEqual(parsedVivaOfficers, administrators)) {
+  if (deepEqual(parsedVivaOfficers, caseAdministrators)) {
     return false;
   }
 
-  await updateCaseAdministrators({ PK, SK }, filteredVivaOfficers);
+  await updateCaseAdministrators({ PK, SK }, vivaOfficers);
 
   return true;
 }
