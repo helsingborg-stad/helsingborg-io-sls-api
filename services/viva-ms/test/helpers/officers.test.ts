@@ -4,7 +4,7 @@ import { CaseAdministrator } from '../../src/types/caseItem';
 
 function getAdministratorObject({
   email = 'email',
-  name = 'name',
+  name = 'Karl Karlsson',
   type = 'type',
   title = 'title',
   phone = null,
@@ -25,7 +25,7 @@ describe('parseVivaOfficers', () => {
     const result = officers.parseVivaOfficers([
       {
         mail: 'email',
-        name: 'name',
+        name: 'CN=Karl Karlsson/OU=extern/O=ASDF',
         phone: null,
         title: 'title',
         type: 'type',
@@ -41,7 +41,7 @@ describe('parseVivaOfficers', () => {
 
     const result = officers.parseVivaOfficers({
       mail: 'email',
-      name: 'name',
+      name: 'Karl Karlsson',
       phone: null,
       title: 'title',
       type: 'type',
