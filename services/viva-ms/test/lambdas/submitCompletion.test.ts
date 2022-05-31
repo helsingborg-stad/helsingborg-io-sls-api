@@ -55,7 +55,7 @@ function createDependencies(
   partialDependencies: Partial<Dependencies> = {}
 ): Dependencies {
   return {
-    getStoredUserCase: () => Promise.resolve([null, { Item: caseToUse }]),
+    getCase: () => Promise.resolve(caseToUse),
     readParams: () => Promise.resolve({ randomCheckFormId, completionFormId }),
     postCompletion: () => Promise.resolve({ status: 'OK' }),
     updateCase: () => Promise.resolve(),

@@ -1,5 +1,5 @@
 import { VIVA_COMPLETION_RECEIVED, VIVA_RANDOM_CHECK_RECEIVED } from '../libs/constants';
-import { getItem as getStoredUserCase } from '../libs/queries';
+import { cases } from '../helpers/query';
 import * as dynamoDb from '../libs/dynamoDb';
 import params from '../libs/params';
 import config from '../libs/config';
@@ -33,10 +33,6 @@ interface PostCompletionRequest {
   attachments: CaseAttachment[];
 }
 
-interface GetStoredUserCaseResponse {
-  readonly Item: CaseItem | null;
-}
-
 interface SSMParamsReadResponse {
   readonly randomCheckFormId: string;
   readonly completionFormId: string;
@@ -50,11 +46,7 @@ interface UpdateCaseParameters {
 }
 
 export interface Dependencies {
-  getStoredUserCase: (
-    TableName: string,
-    PK: string,
-    SK: string
-  ) => Promise<[Error | null, GetStoredUserCaseResponse]>;
+  getCase: (keys: EventDetailCaseKeys) => Promise<CaseItem>;
   readParams: (name: string) => Promise<SSMParamsReadResponse>;
   postCompletion: (payload: PostCompletionRequest) => Promise<PostCompletionResponse>;
   updateCase: (params: UpdateCaseParameters) => Promise<void>;
@@ -95,15 +87,9 @@ async function updateCase(params: UpdateCaseParameters): Promise<void> {
 
 export async function submitCompletion(input: LambdaRequest, dependencies: Dependencies) {
   const { caseKeys } = input.detail;
-  const { getStoredUserCase, readParams, postCompletion, updateCase, getAttachments } =
-    dependencies;
+  const { getCase, readParams, postCompletion, updateCase, getAttachments } = dependencies;
 
-  const [, { Item: caseItem }] = await getStoredUserCase(
-    config.cases.tableName,
-    caseKeys.PK,
-    caseKeys.SK
-  );
-
+  const caseItem = await getCase(caseKeys);
   if (!caseItem) {
     log.writeWarn(`Requested case item with SK: ${caseKeys.SK}, was not found in the cases table`);
     return true;
@@ -155,7 +141,7 @@ export async function submitCompletion(input: LambdaRequest, dependencies: Depen
 
 export const main = log.wrap(async event => {
   return submitCompletion(event, {
-    getStoredUserCase,
+    getCase: cases.get,
     readParams: params.read,
     postCompletion: vivaAdapter.completion.post,
     updateCase,
