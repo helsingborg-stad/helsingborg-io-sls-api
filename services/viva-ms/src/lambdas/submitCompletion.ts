@@ -29,7 +29,7 @@ interface PostCompletionResponse {
 
 interface PostCompletionRequest {
   personalNumber: string;
-  workflowId: string | null | undefined;
+  workflowId: string;
   attachments: CaseAttachment[];
 }
 
@@ -40,10 +40,6 @@ interface GetStoredUserCaseResponse {
 interface SSMParamsReadResponse {
   readonly randomCheckFormId: string;
   readonly completionFormId: string;
-}
-
-export interface UpdateCaseResponse {
-  readonly Attributes: unknown;
 }
 
 interface UpdateCaseParameters {
@@ -125,10 +121,11 @@ export async function submitCompletion(input: LambdaRequest, dependencies: Depen
   const personalNumber = caseItem.PK.substring(5);
   const caseAnswers = caseItem.forms?.[currentFormId].answers ?? [];
   const attachments = await getAttachments(personalNumber, caseAnswers);
+  const workflowId = caseItem.details.workflowId ?? '';
 
   const postCompletionResponse = await postCompletion({
     personalNumber,
-    workflowId: caseItem.details.workflowId,
+    workflowId,
     attachments,
   });
 

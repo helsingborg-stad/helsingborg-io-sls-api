@@ -8,28 +8,6 @@ const randomCheckFormId = 'randomCheckFormId';
 const completionFormId = 'completionFormId';
 const PK = 'USER#199492921234';
 const SK = 'CASE#123';
-const postVivaResponseId = 'mockPostResponseId';
-
-const attachments: CaseAttachment[] = [
-  {
-    id: '199492921234/uploadedFileNameA_0.png',
-    name: 'uploadedFileNameA_0.png',
-    category: VivaAttachmentCategory.Incomes,
-    fileBase64: 'Some body here',
-  },
-];
-
-function createInput(partialInput: Partial<LambdaRequest> = {}): LambdaRequest {
-  return {
-    detail: {
-      caseKeys: {
-        PK,
-        SK,
-      },
-    },
-    ...partialInput,
-  };
-}
 
 function createCase(partialCase: Partial<CaseItem> = {}): CaseItem {
   return {
@@ -60,6 +38,18 @@ function createCase(partialCase: Partial<CaseItem> = {}): CaseItem {
   };
 }
 
+function createInput(partialInput: Partial<LambdaRequest> = {}): LambdaRequest {
+  return {
+    detail: {
+      caseKeys: {
+        PK,
+        SK,
+      },
+    },
+    ...partialInput,
+  };
+}
+
 function createDependencies(
   caseToUse: CaseItem,
   partialDependencies: Partial<Dependencies> = {}
@@ -67,61 +57,38 @@ function createDependencies(
   return {
     getStoredUserCase: () => Promise.resolve([null, { Item: caseToUse }]),
     readParams: () => Promise.resolve({ randomCheckFormId, completionFormId }),
-    postCompletion: () => Promise.resolve({ status: 'OK', id: postVivaResponseId }),
+    postCompletion: () => Promise.resolve({ status: 'OK' }),
     updateCase: () => Promise.resolve(),
-    getAttachments: () => Promise.resolve(attachments),
+    getAttachments: () => Promise.resolve([]),
     ...partialDependencies,
   };
 }
 
 it('successfully submits completions', async () => {
-  const myCase = createCase();
-  const input = createInput();
-  const dependencies = createDependencies(myCase);
-
-  const result = await submitCompletion(input, dependencies);
+  const result = await submitCompletion(createInput(), createDependencies(createCase()));
   expect(result).toBe(true);
 });
 
 it('returns true if `currentFormId` does not match `randomCheckFormId` or `completionFormId`', async () => {
-  const myCase = createCase();
-  const input = createInput();
-  myCase.currentFormId = 'No matching form id';
-  const dependencies = createDependencies(myCase);
-
-  const result = await submitCompletion(input, dependencies);
+  const result = await submitCompletion(
+    createInput(),
+    createDependencies(createCase({ currentFormId: 'No matching form id' }))
+  );
   expect(result).toBe(true);
 });
 
 it('returns false if VADA `postCompletionResponse` is successful but `status` is ERROR`', async () => {
-  const myCase = createCase();
-  const input = createInput();
-  const dependencies = createDependencies(myCase, {
-    postCompletion: () => Promise.resolve({ status: 'ERROR', id: postVivaResponseId }),
-  });
-
-  const result = await submitCompletion(input, dependencies);
+  const result = await submitCompletion(
+    createInput(),
+    createDependencies(createCase({ currentFormId: randomCheckFormId }), {
+      postCompletion: () => Promise.resolve({ status: 'ERROR' }),
+    })
+  );
   expect(result).toBe(false);
 });
 
 it('calls postCompletion with form answer containing attachment', async () => {
-  const myCase = createCase();
-  const input = createInput();
-  const myAnswers = [
-    {
-      field: {
-        id: '123',
-        tags: ['viva', 'attachment', 'category', 'incomes'],
-      },
-      value: [
-        {
-          uploadedFileName: 'uploadedFileNameA_0.png',
-        },
-      ],
-    },
-  ];
-
-  const initForm: CaseForm = {
+  const form: CaseForm = {
     answers: [],
     currentPosition: {
       currentMainStep: 1,
@@ -134,21 +101,33 @@ it('calls postCompletion with form answer containing attachment', async () => {
     },
   };
 
-  myCase.forms = { [completionFormId]: initForm };
-  myCase.forms.completionFormId.answers = myAnswers;
-  const dependencies = createDependencies(myCase);
+  const attachments: CaseAttachment[] = [
+    {
+      id: '199492921234/uploadedFileNameA_0.png',
+      name: 'uploadedFileNameA_0.png',
+      category: VivaAttachmentCategory.Incomes,
+      fileBase64: 'Some body here',
+    },
+  ];
+
+  const dependencies = createDependencies(
+    createCase({
+      forms: {
+        [randomCheckFormId]: form,
+      },
+      currentFormId: randomCheckFormId,
+    }),
+    { getAttachments: () => Promise.resolve(attachments) }
+  );
 
   const postCompletionSpy = jest.spyOn(dependencies, 'postCompletion');
-  await submitCompletion(input, dependencies);
+  await submitCompletion(createInput(), dependencies);
 
   expect(postCompletionSpy).toHaveBeenCalledWith(expect.objectContaining({ attachments }));
 });
 
-it('calls `updateCase` with correct parameters for formId: completionFormId', async () => {
-  const myCase = createCase();
-  const input = createInput();
-  const dependencies = createDependencies(myCase);
-  const initForm: CaseForm = {
+it('calls `updateCase` with correct parameters for form id: completionFormId', async () => {
+  const form: CaseForm = {
     answers: [],
     currentPosition: {
       currentMainStep: 1,
@@ -167,15 +146,15 @@ it('calls `updateCase` with correct parameters for formId: completionFormId', as
       SK,
     },
     newState: 'VIVA_COMPLETION_RECEIVED',
-    currentFormId: myCase.currentFormId,
+    currentFormId: completionFormId,
     initialCompletionForm: {
-      [myCase.currentFormId]: initForm,
+      [completionFormId]: form,
     },
   };
 
+  const dependencies = createDependencies(createCase({ currentFormId: completionFormId }));
   const updateCaseSpy = jest.spyOn(dependencies, 'updateCase');
-
-  await submitCompletion(input, dependencies);
+  await submitCompletion(createInput(), dependencies);
 
   expect(updateCaseSpy).toHaveBeenCalledWith(updateCaseParams);
 });
