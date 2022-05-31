@@ -69,7 +69,7 @@ export async function syncOfficers(input: LambdaRequest, dependencies: Dependenc
     allowedOfficerTypes.includes(type.toLowerCase())
   );
 
-  if (deepEqual(parsedVivaOfficers, caseAdministrators)) {
+  if (deepEqual(vivaOfficers, caseAdministrators)) {
     return false;
   }
 
