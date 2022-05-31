@@ -10,7 +10,7 @@ import attachment from '../helpers/attachment';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 import { CaseAttachment } from '../helpers/attachment';
 
-import type { CaseItem, CaseForm } from '../types/caseItem';
+import type { CaseItem, CaseForm, CaseFormAnswer } from '../types/caseItem';
 import type { EventDetailCaseKeys } from '../types/eventDetail';
 
 interface LambdaDetail {
@@ -61,7 +61,11 @@ export interface Dependencies {
   ) => Promise<[Error | null, GetStoredUserCaseResponse]>;
   readParams: (name: string) => Promise<SSMParamsReadResponse>;
   postCompletion: (payload: PostCompletionRequest) => Promise<PostCompletionResponse>;
-  updateCase: (params: UpdateCaseParameters) => Promise<UpdateCaseResponse | null>;
+  updateCase: (params: UpdateCaseParameters) => Promise<void>;
+  getAttachments: (
+    personalNumber: string,
+    answerList: CaseFormAnswer[]
+  ) => Promise<CaseAttachment[]>;
 }
 
 function getReceivedState(currentFormId: string, randomCheckFormId: string) {
@@ -70,7 +74,7 @@ function getReceivedState(currentFormId: string, randomCheckFormId: string) {
     : VIVA_COMPLETION_RECEIVED;
 }
 
-function updateCase(params: UpdateCaseParameters): Promise<UpdateCaseResponse> {
+async function updateCase(params: UpdateCaseParameters): Promise<void> {
   const { caseKeys, currentFormId, initialCompletionForm, newState } = params;
   const updateParams = {
     TableName: config.cases.tableName,
@@ -90,12 +94,13 @@ function updateCase(params: UpdateCaseParameters): Promise<UpdateCaseResponse> {
     ReturnValues: 'NONE',
   };
 
-  return dynamoDb.call('update', updateParams);
+  await dynamoDb.call('update', updateParams);
 }
 
 export async function submitCompletion(input: LambdaRequest, dependencies: Dependencies) {
   const { caseKeys } = input.detail;
-  const { getStoredUserCase, readParams, postCompletion, updateCase } = dependencies;
+  const { getStoredUserCase, readParams, postCompletion, updateCase, getAttachments } =
+    dependencies;
 
   const [, { Item: caseItem }] = await getStoredUserCase(
     config.cases.tableName,
@@ -118,13 +123,13 @@ export async function submitCompletion(input: LambdaRequest, dependencies: Depen
   }
 
   const personalNumber = caseItem.PK.substring(5);
-  const caseAnswers = caseItem.forms?.[currentFormId]?.answers ?? [];
-  const attachmentList = await attachment.createFromAnswers(personalNumber, caseAnswers);
+  const caseAnswers = caseItem.forms?.[currentFormId].answers ?? [];
+  const attachments = await getAttachments(personalNumber, caseAnswers);
 
   const postCompletionResponse = await postCompletion({
     personalNumber,
-    workflowId: caseItem.details?.workflowId,
-    attachments: attachmentList ?? [],
+    workflowId: caseItem.details.workflowId,
+    attachments,
   });
 
   const isCompletionReceived = postCompletionResponse?.status.toLowerCase() === 'ok';
@@ -157,5 +162,6 @@ export const main = log.wrap(async event => {
     readParams: params.read,
     postCompletion: vivaAdapter.completion.post,
     updateCase,
+    getAttachments: attachment.createFromAnswers,
   });
 });
