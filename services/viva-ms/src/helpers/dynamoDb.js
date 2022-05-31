@@ -1,7 +1,11 @@
 import to from 'await-to-js';
 import * as dynamoDb from '../libs/dynamoDb';
 import config from '../libs/config';
-import { CASE_HTML_GENERATED, CASE_PROVIDER_VIVA } from '../libs/constants';
+import {
+  CASE_HTML_GENERATED,
+  CASE_PROVIDER_VIVA,
+  VIVA_APPLICATION_RECEIVED,
+} from '../libs/constants';
 
 import caseHelper from './createCase';
 
@@ -132,9 +136,25 @@ export async function getFormTemplates(formIdList) {
   );
 }
 
-export function destructRecord(record) {
-  const body = JSON.parse(record.body);
-  return dynamoDb.unmarshall(body.detail.dynamodb.NewImage);
+export function updateVivaCase(caseKeys, workflowId) {
+  const params = {
+    TableName: config.cases.tableName,
+    Key: {
+      PK: caseKeys.PK,
+      SK: caseKeys.SK,
+    },
+    UpdateExpression: 'SET #state = :newState, details.workflowId = :newWorkflowId',
+    ExpressionAttributeNames: {
+      '#state': 'state',
+    },
+    ExpressionAttributeValues: {
+      ':newWorkflowId': workflowId,
+      ':newState': VIVA_APPLICATION_RECEIVED,
+    },
+    ReturnValues: 'UPDATED_NEW',
+  };
+
+  return dynamoDb.call('update', params);
 }
 
 export function updateCaseCompletionStatus(keys, caseUpdateAttributes) {
@@ -165,4 +185,9 @@ export function updateCaseCompletionStatus(keys, caseUpdateAttributes) {
   };
 
   return dynamoDb.call('update', updateParams);
+}
+
+export function destructRecord(record) {
+  const body = JSON.parse(record.body);
+  return dynamoDb.unmarshall(body.detail.dynamodb.NewImage);
 }

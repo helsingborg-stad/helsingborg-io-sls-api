@@ -44,7 +44,7 @@ export interface CaseItem {
   GSI1?: string;
   provider: string;
   persons: CasePerson[];
-  details: CaseDetails | null;
+  details: CaseDetails;
   currentFormId: string;
   pdf?: Buffer;
 }
