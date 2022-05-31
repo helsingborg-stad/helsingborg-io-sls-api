@@ -30,8 +30,6 @@ async function sendUpdateRequest(keys: CaseKeys, newAdministrators: CaseAdminist
   return dynamoDb.call('update', dynamoDbParams);
 }
 
-const dynamoDbConverter = AWS.DynamoDB.Converter;
-
 export interface Dependencies {
   getVivaOfficers: (personalNumber: string) => Promise<{ officer: VivaOfficer | VivaOfficer[] }>;
   updateCaseAdministrators: (
@@ -57,7 +55,7 @@ export async function syncOfficers(input: LambdaRequest, dependencies: Dependenc
 
   const { getVivaOfficers, updateCaseAdministrators } = dependencies;
 
-  const unMarshalledCaseData = dynamoDbConverter.unmarshall(input.detail.dynamodb.NewImage);
+  const unMarshalledCaseData = dynamoDb.unmarshall(input.detail.dynamodb.NewImage);
 
   const { PK, SK, details } = unMarshalledCaseData as CaseItem;
   const administrators = details?.administrators ?? [];
