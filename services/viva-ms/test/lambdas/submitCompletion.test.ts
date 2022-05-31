@@ -152,9 +152,13 @@ it('calls `updateCase` with correct parameters for form id: completionFormId', a
     },
   };
 
-  const dependencies = createDependencies(createCase({ currentFormId: completionFormId }));
-  const updateCaseSpy = jest.spyOn(dependencies, 'updateCase');
+  const updateCaseMock = jest.fn();
+
+  const dependencies = createDependencies(createCase({ currentFormId: completionFormId }), {
+    updateCase: updateCaseMock,
+  });
+
   await submitCompletion(createInput(), dependencies);
 
-  expect(updateCaseSpy).toHaveBeenCalledWith(updateCaseParams);
+  expect(updateCaseMock).toHaveBeenCalledWith(updateCaseParams);
 });
