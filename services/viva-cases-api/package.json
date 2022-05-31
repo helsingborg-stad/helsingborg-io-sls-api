@@ -1,0 +1,12 @@
+{
+  "name": "viva-cases-api",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "cd ../../ && node node_modules/.bin/jest viva-cases-api"
+  },
+  "keywords": [],
+  "author": "Helsingborg Stad",
+  "license": "MIT"
+}

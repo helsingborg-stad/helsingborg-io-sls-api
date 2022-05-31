@@ -1,0 +1,76 @@
+service: viva-cases-api
+
+plugins:
+  - serverless-bundle
+  - serverless-add-api-key
+
+projectDir: ../../
+
+custom: ${file(../../serverless.common.yml):custom}
+
+package:
+  individually: true
+
+provider:
+  lambdaHashingVersion: 20201221
+  name: aws
+  runtime: nodejs14.x
+  stage: dev
+  region: eu-north-1
+  endpointType: regional
+  eventBridge:
+    useCloudFormation: true
+  tracing:
+    lambda: true
+
+  apiGateway:
+    restApiId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiId
+    restApiRootResourceId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
+    restApiResources:
+      version: !ImportValue ${self:custom.stage}-ExtApiGatewayResourceVersion
+
+  environment:
+    stage: ${self:custom.stage}
+    resourcesStage: ${self:custom.resourcesStage}
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - SSM:GetParameter*
+          Resource:
+            - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${file(../../config.json):${self:custom.stage}.vada.envsKeyName}'
+            - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${file(../../config.json):${self:custom.stage}.cases.providers.viva.envsKeyName}'
+
+        - Effect: Allow
+          Action:
+            - events:PutEvents
+          Resource: '*'
+
+        - Effect: Allow
+          Action:
+            - dynamodb:UpdateItem
+            - dynamodb:GetItem
+          Resource:
+            - 'Fn::ImportValue': ${self:custom.resourcesStage}-CasesTableArn
+
+        - Effect: Allow
+          Action:
+            - kms:Decrypt
+            - kms:GenerateDataKey
+          Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
+
+functions:
+  addCasePerson:
+    handler: src/lambdas/addCasePerson.main
+    timeout: 15
+    events:
+      - http:
+          path: viva-cases/{caseId}/persons
+          method: post
+          private: true
+          cors: true
+          authorizer:
+            type: TOKEN
+            authorizerId: !ImportValue ${self:custom.stage}-authorizerId
