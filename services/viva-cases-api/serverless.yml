@@ -2,7 +2,6 @@ service: viva-cases-api
 
 plugins:
   - serverless-bundle
-  - serverless-add-api-key
 
 projectDir: ../../
 
