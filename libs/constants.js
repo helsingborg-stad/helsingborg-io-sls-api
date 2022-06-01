@@ -39,6 +39,9 @@ export const ACTIVE_COMPLETION_SUBMITTED_VIVA = 'active:submitted:completion:viv
 export const ACTIVE_RANDOM_CHECK_REQUIRED_VIVA = 'active:randomCheckRequired:viva';
 export const ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA = 'active:submitted:randomCheck:viva';
 
+export const ACTIVE_NEW_APPLICATION_RANDOM_CHECK_VIVA =
+  'active:newApplication:randomCheckRequired:viva';
+
 export const ACTIVE_PROCESSING_COMPLETIONS_DUE_DATE_PASSED_VIVA =
   'active:processing:completionsDueDatePassed:viva';
 
