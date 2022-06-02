@@ -1,21 +1,15 @@
 // import to from 'await-to-js';
 // import { BadRequestError } from '@helsingborg-stad/npm-api-error-handling';
-import config from 'libs/config';
-import * as response from 'libs/response';
-import * as dynamoDb from 'libs/dynamoDb';
-import { decodeToken, Token } from 'libs/token';
-import log from 'libs/logs';
-
-import type { EventDetailCaseKeys } from 'types/eventDetail';
-
-interface LambdaDetail {
-  readonly caseKeys: EventDetailCaseKeys;
-  readonly status?: Record<string, unknown>;
-  readonly state?: string;
-}
+import config from '../libs/config';
+import * as response from '../libs/response';
+import * as dynamoDb from '../libs/dynamoDb';
+import { decodeToken, Token } from '../libs/token';
+import log from '../libs/logs';
 
 export interface LambdaRequest {
-  body: string;
+  body: {
+    message: string;
+  };
   headers: {
     Authorization: string;
   };
@@ -28,7 +22,7 @@ interface LambdaResponse {
   };
 }
 
-interface httpEvent {
+interface HttpEvent {
   headers: {
     Authorization: string;
   };
@@ -43,7 +37,7 @@ interface UpdateCaseParameters {
 }
 
 export interface Dependencies {
-  decodeToken: (params: httpEvent) => Token;
+  decodeToken: (params: HttpEvent) => Token;
   updateCaseAddPerson: (params: UpdateCaseParameters) => Promise<void>;
 }
 
@@ -79,8 +73,10 @@ async function updateCaseAddPerson(params: UpdateCaseParameters): Promise<void> 
 }
 
 export async function addCasePerson(input: LambdaRequest, dependencies: Dependencies) {
-  const requestBody = JSON.parse(input.body);
-  const user = dependencies.decodeToken(input);
+  console.log(dependencies);
+  console.log(input);
+  // const requestBody = JSON.parse(input.body);
+  // const user = dependencies.decodeToken(input);
 
   const responseBody: LambdaResponse = {
     type: 'addCasePerson',
