@@ -8,7 +8,8 @@
       "skipFiles": ["<node_internals>/**"],
       "program": "${file}",
       "envFile": "${workspaceFolder}/.env",
-      "outputCapture": "std"
+      "outputCapture": "std",
+      "preLaunchTask": "ts-build"
     }
   ]
 }
