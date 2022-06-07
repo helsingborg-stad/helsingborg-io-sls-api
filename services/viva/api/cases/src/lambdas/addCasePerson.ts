@@ -6,7 +6,8 @@ import { decodeToken, Token } from '../libs/token';
 import * as response from '../libs/response';
 import * as dynamoDb from '../libs/dynamoDb';
 
-import type { CaseItem } from '../types/caseItem';
+import { CasePersonRole } from '../types/caseItem';
+import type { CaseItem, CasePerson } from '../types/caseItem';
 
 interface AddCasePersonRequest {
   personalNumber: string;
@@ -25,7 +26,7 @@ export interface LambdaRequest {
 interface LambdaResponse {
   type: string;
   attributes: {
-    caseId: string;
+    caseItem: CaseItem;
   };
 }
 
@@ -48,24 +49,23 @@ export interface Dependencies {
 
 function updateCaseAddPerson(params: UpdateCaseParameters): Promise<UpdateCaseAddPersonResponse> {
   const { caseKeys, personalNumber } = params;
+  const coApplicant: CasePerson = {
+    personalNumber,
+    firstName: 'Some first name',
+    lastName: 'Some last name',
+    role: CasePersonRole.CoApplicant,
+    hasSigned: false,
+  };
+
   const updateParams = {
     TableName: config.cases.tableName,
     Key: {
       PK: caseKeys.PK,
       SK: caseKeys.SK,
     },
-    UpdateExpression:
-      'SET #persons = list_append(if_not_exists(#persons, :checkPerson), :personalNumber)',
-    ExpressionAttributeNames: {
-      '#persons': 'persons',
-    },
+    UpdateExpression: 'SET persons = list_append(persons, :personalNumber), GSI1 = :personalNumber',
     ExpressionAttributeValues: {
-      ':personalNumber': {
-        L: [{ S: personalNumber }],
-      },
-      ':checkPerson': {
-        L: [{ S: personalNumber }],
-      },
+      ':personalNumber': [coApplicant],
     },
     ReturnValues: 'ALL_NEW',
   };
@@ -95,7 +95,7 @@ export async function addCasePerson(input: LambdaRequest, dependencies: Dependen
   const responseBody: LambdaResponse = {
     type: 'addCasePerson',
     attributes: {
-      caseId: updateCaseResult.Item.id,
+      caseItem: updateCaseResult.Item,
     },
   };
 

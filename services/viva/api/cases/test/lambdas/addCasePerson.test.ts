@@ -84,7 +84,7 @@ it('successfully add person to case', async () => {
     data: {
       type: 'addCasePerson',
       attributes: {
-        caseId: caseItem.id,
+        caseItem: caseItem,
       },
     },
   });
