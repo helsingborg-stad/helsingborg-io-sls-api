@@ -14,7 +14,7 @@ const caseKeys = {
 const caseItem: CaseItem = {
   PK,
   SK,
-  id: '123',
+  id: 'CASE#123',
   createdAt: 0,
   currentFormId: '123',
   details: {
@@ -37,13 +37,23 @@ const caseItem: CaseItem = {
   persons: [],
 };
 
+const coApplicant = {
+  personalNumber: '199701031212',
+  firstName: 'Svenne',
+  lastName: 'Banan',
+  hasSigned: false,
+  role: 'coApplicant',
+};
+
 function createInput(partialInput: Partial<LambdaRequest> = {}): LambdaRequest {
   return {
     body: JSON.stringify({
-      personalNumber,
+      personalNumber: '199701031212',
+      firstName: 'Svenne',
+      lastName: 'Banan',
     }),
     pathParameters: {
-      id: '123',
+      caseId: '123',
     },
     headers: {
       Authorization: `Bearer ${personalNumber}`,
@@ -73,7 +83,7 @@ it('successfully add person to case', async () => {
 
   expect(updateCaseAddPersonMock).toHaveBeenCalledWith({
     caseKeys,
-    personalNumber,
+    coApplicant,
   });
 
   expect(result.statusCode).toBe(200);

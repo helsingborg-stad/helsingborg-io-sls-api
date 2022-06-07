@@ -1,4 +1,3 @@
-// import to from 'await-to-js';
 // import { BadRequestError } from '@helsingborg-stad/npm-api-error-handling';
 import config from '../libs/config';
 import log from '../libs/logs';
@@ -11,12 +10,14 @@ import type { CaseItem, CasePerson } from '../types/caseItem';
 
 interface AddCasePersonRequest {
   personalNumber: string;
+  firstName: string;
+  lastName: string;
 }
 
 export interface LambdaRequest {
   body: string;
   pathParameters: {
-    id: string;
+    caseId: string;
   };
   headers: {
     Authorization: string;
@@ -34,12 +35,14 @@ interface UpdateCaseAddPersonResponse {
   Item: CaseItem;
 }
 
+interface CaseKeys {
+  PK: string;
+  SK: string;
+}
+
 interface UpdateCaseParameters {
-  caseKeys: {
-    PK: string;
-    SK: string;
-  };
-  personalNumber: string;
+  caseKeys: CaseKeys;
+  coApplicant: CasePerson;
 }
 
 export interface Dependencies {
@@ -48,14 +51,7 @@ export interface Dependencies {
 }
 
 function updateCaseAddPerson(params: UpdateCaseParameters): Promise<UpdateCaseAddPersonResponse> {
-  const { caseKeys, personalNumber } = params;
-  const coApplicant: CasePerson = {
-    personalNumber,
-    firstName: 'Some first name',
-    lastName: 'Some last name',
-    role: CasePersonRole.CoApplicant,
-    hasSigned: false,
-  };
+  const { caseKeys, coApplicant } = params;
 
   const updateParams = {
     TableName: config.cases.tableName,
@@ -67,7 +63,7 @@ function updateCaseAddPerson(params: UpdateCaseParameters): Promise<UpdateCaseAd
       'SET persons = list_append(persons, :personalNumber), GSI1 = :personalNumberGSI1',
     ExpressionAttributeValues: {
       ':personalNumber': [coApplicant],
-      ':personalNumberGSI1': personalNumber,
+      ':personalNumberGSI1': coApplicant.personalNumber,
     },
     ReturnValues: 'ALL_NEW',
   };
@@ -78,16 +74,23 @@ function updateCaseAddPerson(params: UpdateCaseParameters): Promise<UpdateCaseAd
 export async function addCasePerson(input: LambdaRequest, dependencies: Dependencies) {
   const decodedToken = dependencies.decodeToken(input);
   const requestBody = JSON.parse(input.body) as AddCasePersonRequest;
-  const { id: caseId } = input.pathParameters;
 
-  const caseKeys = {
+  const caseKeys: CaseKeys = {
     PK: `USER#${decodedToken.personalNumber}`,
-    SK: `CASE#${caseId}`,
+    SK: `CASE#${input.pathParameters.caseId}`,
+  };
+
+  const coApplicant: CasePerson = {
+    personalNumber: requestBody.personalNumber,
+    firstName: requestBody.firstName,
+    lastName: requestBody.lastName,
+    role: CasePersonRole.CoApplicant,
+    hasSigned: false,
   };
 
   const updateCaseResult = await dependencies.updateCaseAddPerson({
     caseKeys,
-    personalNumber: requestBody.personalNumber,
+    coApplicant,
   });
 
   const responseBody: LambdaResponse = {

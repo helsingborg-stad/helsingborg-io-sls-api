@@ -65,7 +65,7 @@ functions:
     timeout: 15
     events:
       - http:
-          path: /viva-cases/{id}/persons
+          path: /viva-cases/{caseId}/persons
           method: put
           cors: true
           private: true
