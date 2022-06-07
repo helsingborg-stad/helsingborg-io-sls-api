@@ -63,9 +63,11 @@ function updateCaseAddPerson(params: UpdateCaseParameters): Promise<UpdateCaseAd
       PK: caseKeys.PK,
       SK: caseKeys.SK,
     },
-    UpdateExpression: 'SET persons = list_append(persons, :personalNumber), GSI1 = :personalNumber',
+    UpdateExpression:
+      'SET persons = list_append(persons, :personalNumber), GSI1 = :personalNumberGSI1',
     ExpressionAttributeValues: {
       ':personalNumber': [coApplicant],
+      ':personalNumberGSI1': personalNumber,
     },
     ReturnValues: 'ALL_NEW',
   };
@@ -75,22 +77,18 @@ function updateCaseAddPerson(params: UpdateCaseParameters): Promise<UpdateCaseAd
 
 export async function addCasePerson(input: LambdaRequest, dependencies: Dependencies) {
   const decodedToken = dependencies.decodeToken(input);
-  console.log('decodedToken:', decodedToken);
-
-  const { id } = input.pathParameters;
-  console.log('pathParameters id:', id);
-
   const requestBody = JSON.parse(input.body) as AddCasePersonRequest;
-  console.log('requestBody:', requestBody);
+  const { id: caseId } = input.pathParameters;
 
-  const personalNumber = '199801011212';
   const caseKeys = {
-    PK: `USER#${personalNumber}`,
-    SK: 'CASE#123',
+    PK: `USER#${decodedToken.personalNumber}`,
+    SK: `CASE#${caseId}`,
   };
 
-  const updateCaseResult = await dependencies.updateCaseAddPerson({ caseKeys, personalNumber });
-  console.log('updateCaseResult:', updateCaseResult);
+  const updateCaseResult = await dependencies.updateCaseAddPerson({
+    caseKeys,
+    personalNumber: requestBody.personalNumber,
+  });
 
   const responseBody: LambdaResponse = {
     type: 'addCasePerson',
