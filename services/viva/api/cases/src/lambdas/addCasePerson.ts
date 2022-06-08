@@ -10,6 +10,8 @@ import type { CaseItem, CasePerson } from '../types/caseItem';
 
 interface AddCasePersonRequest {
   personalNumber: string;
+  firstName?: string;
+  lastName?: string;
 }
 
 export interface LambdaRequest {
@@ -80,8 +82,8 @@ export async function addCasePerson(input: LambdaRequest, dependencies: Dependen
 
   const coApplicant: CasePerson = {
     personalNumber: requestBody.personalNumber,
-    firstName: '',
-    lastName: '',
+    firstName: requestBody?.firstName ?? '',
+    lastName: requestBody?.lastName ?? '',
     role: CasePersonRole.CoApplicant,
     hasSigned: false,
   };
