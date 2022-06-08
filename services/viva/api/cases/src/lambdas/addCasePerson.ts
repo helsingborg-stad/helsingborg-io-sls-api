@@ -1,9 +1,14 @@
-// import { BadRequestError } from '@helsingborg-stad/npm-api-error-handling';
+import to from 'await-to-js';
+import { BadRequestError, ForbiddenError } from '@helsingborg-stad/npm-api-error-handling';
 import config from '../libs/config';
 import log from '../libs/logs';
 import { decodeToken, Token } from '../libs/token';
 import * as response from '../libs/response';
 import * as dynamoDb from '../libs/dynamoDb';
+
+import { VIVA_STATUS_NEW_APPLICATION_OPEN } from '../helpers/constants';
+import validateApplicationStatus from '../helpers/validateApplicationStatus';
+import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
 import { CasePersonRole } from '../types/caseItem';
 import type { CaseItem, CasePerson } from '../types/caseItem';
@@ -48,6 +53,8 @@ interface UpdateCaseParameters {
 export interface Dependencies {
   decodeToken: (params: LambdaRequest) => Token;
   updateCaseAddPerson: (params: UpdateCaseParameters) => Promise<UpdateCaseAddPersonResponse>;
+  coApplicantStatus: (personalNumber: string) => Promise<[Error, number[]]>;
+  validateCoApplicantStatus: (statusList: string[], requiredCodeList: string[]) => unknown;
 }
 
 function updateCaseAddPerson(params: UpdateCaseParameters): Promise<UpdateCaseAddPersonResponse> {
@@ -72,9 +79,21 @@ function updateCaseAddPerson(params: UpdateCaseParameters): Promise<UpdateCaseAd
 }
 
 export async function addCasePerson(input: LambdaRequest, dependencies: Dependencies) {
-  const decodedToken = dependencies.decodeToken(input);
   const requestBody = JSON.parse(input.body) as AddCasePersonRequest;
 
+  const [coApplicantStatusError, statusList] = await to(
+    dependencies.coApplicantStatus(requestBody.personalNumber)
+  );
+  if (coApplicantStatusError) {
+    return response.failure(new BadRequestError(coApplicantStatusError.message));
+  }
+
+  const coApplicantAllowedStatusCode = [VIVA_STATUS_NEW_APPLICATION_OPEN];
+  if (!dependencies.validateCoApplicantStatus(statusList, coApplicantAllowedStatusCode)) {
+    return response.failure(new ForbiddenError());
+  }
+
+  const decodedToken = dependencies.decodeToken(input);
   const caseKeys: CaseKeys = {
     PK: `USER#${decodedToken.personalNumber}`,
     SK: `CASE#${input.pathParameters.caseId}`,
@@ -107,5 +126,7 @@ export const main = log.wrap(async event => {
   return addCasePerson(event, {
     decodeToken,
     updateCaseAddPerson,
+    coApplicantStatus: vivaAdapter.application.status,
+    validateCoApplicantStatus: validateApplicationStatus,
   });
 });
