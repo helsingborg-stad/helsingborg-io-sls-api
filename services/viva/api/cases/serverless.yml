@@ -30,7 +30,7 @@ provider:
     restApiId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiId
     restApiRootResourceId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
     restApiResources:
-      viva-cases: !ImportValue ${self:custom.stage}-ExtApiGatewayResourceVersion
+      viva-cases: !ImportValue ${self:custom.stage}-ExtApiGatewayResourceVivaCases
 
   iam:
     role:
