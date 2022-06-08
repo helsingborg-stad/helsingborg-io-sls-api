@@ -40,7 +40,7 @@ export interface CaseItem {
   createdAt: number;
   updatedAt: number;
   status: CaseStatus;
-  forms: Record<string, CaseForm> | null;
+  forms: Record<string, CaseForm>;
   GSI1?: string;
   provider: string;
   persons: CasePerson[];
@@ -107,9 +107,11 @@ export interface CaseFormCurrentPosition {
   numberOfMainSteps: number;
 }
 
+export type CaseFormAnswerValue = AnswerAttachment[] | string | boolean | number;
+
 export interface CaseFormAnswer {
   field: CaseFormAnswerField;
-  value: AnswerAttachment[] | string;
+  value: CaseFormAnswerValue;
 }
 
 export interface CaseFormAnswerAttachment {
@@ -134,3 +136,55 @@ export interface CaseFormEncryption {
   type: EncryptionType.Decrypted;
   symmetricKeyName?: string;
 }
+
+// TOOD: probably should not be here
+export type ValidTags =
+  | 'applicant'
+  | 'coapplicant'
+  | 'children'
+  | 'description'
+  | 'email'
+  | 'firstName'
+  | 'lastName'
+  | 'occupation'
+  | 'personalNumber'
+  | 'phonenumber'
+  | 'citizenship'
+  | 'notes'
+  | 'note'
+  | 'fulltime'
+  | 'parttime'
+  | 'unemployed'
+  | 'parentalleave'
+  | 'studies'
+  | 'sickleave'
+  | 'otheroccupation'
+  | 'type'
+  | 'date'
+  | 'housing'
+  | 'school'
+  | 'address'
+  | 'postalCode'
+  | 'postalAddress'
+  | 'numberPeopleLiving'
+  | 'value'
+  | 'rent'
+  | 'debtRent'
+  | 'ownRoom'
+  | 'ownerContractApproved'
+  | 'layout'
+  | 'homelessDescription'
+  | 'otherLivingDescription'
+  | 'aid'
+  | 'unemployment'
+  | 'insurance'
+  | 'csn'
+  | 'pension'
+  | 'expenses'
+  | 'boende'
+  | 'electricity'
+  | 'homeinsurance'
+  | 'internet'
+  | 'childcare'
+  | 'annat'
+  | 'amount';

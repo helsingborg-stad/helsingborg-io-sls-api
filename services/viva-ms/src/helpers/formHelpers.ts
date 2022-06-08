@@ -1,3 +1,5 @@
+import type { CaseFormAnswer, CaseFormAnswerValue, ValidTags } from '../types/caseItem';
+
 function getTagIfIncludes(tags, string) {
   return tags.find(tag => tag.includes(string));
 }
@@ -17,16 +19,20 @@ function getAttributeFromDotNotation(source, position) {
   return attributes[position];
 }
 
-function filterByFieldIdIncludes(answers, shouldInclude) {
+function filterByFieldIdIncludes(answers: CaseFormAnswer[], shouldInclude: string) {
   return answers.filter(answer => fieldIdIncludes(answer.field.id, shouldInclude));
 }
 
-function filterByTags(answers, tags) {
-  let checkTags = tags;
-  if (typeof tags === 'string') {
-    checkTags = [tags];
-  }
-  return answers.filter(answer => checkTags.every(tag => answer.field.tags.includes(tag)));
+function filterByTags(answers: CaseFormAnswer[], tags: ValidTags[]): CaseFormAnswer[] {
+  return answers.filter(answer => tags.every(tag => answer.field.tags.includes(tag)));
+}
+
+function getFirstAnswerValueByTags<T extends CaseFormAnswerValue>(
+  answers: CaseFormAnswer[],
+  tags: ValidTags[]
+): T | undefined {
+  const answer = answers.find(answer => tags.every(tag => answer.field.tags.includes(tag)));
+  return answer?.value as T;
 }
 
 export default {
@@ -36,4 +42,5 @@ export default {
   getAttributeFromDotNotation,
   filterByTags,
   filterByFieldIdIncludes,
+  getFirstAnswerValueByTags,
 };

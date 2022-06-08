@@ -13,31 +13,12 @@ import S3 from '../libs/S3';
 import { getItem } from '../libs/queries';
 
 import handlebars from '../helpers/htmlTemplate';
-import createRecurringCaseTemplate from '../helpers/createRecurringCaseTemplate';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import { getClosedUserCases, updateVivaCaseState } from '../helpers/dynamoDb';
 
-interface CaseItem {
-  id: string;
-  PK: string;
-  SK: string;
-  updatedAt: number;
-  forms: Record<
-    string,
-    {
-      answers: unknown;
-    }
-  >;
-  currentFormId: string;
-}
-
-interface FormAnswer {
-  field: {
-    id: string;
-    tags: string[];
-  };
-  value: unknown;
-}
+import type { CaseFormAnswer, CaseItem } from '../types/caseItem';
+import type { Template } from '../helpers/createCaseTemplate';
+import createCaseTemplate from '../helpers/createCaseTemplate';
 export interface LambdaRequest {
   detail: {
     caseKeys: {
@@ -49,13 +30,22 @@ export interface LambdaRequest {
 
 export type LambdaResponse = boolean;
 
+interface VivaCaseSSMParams {
+  recurringFormId: string;
+  completionFormId: string;
+  randomCheckFormId: string;
+  newApplicationFormId: string;
+  newApplicationCompletionFormId: string;
+  newApplicationRandomCheckFormId: string;
+}
+
 export interface Dependencies {
   getStoredUserCase: (
     TableName: string,
     PK: string,
     SK: string
   ) => Promise<[Error, { Item: CaseItem }]>;
-  readParams: (id: string) => Promise<{ recurringFormId: string }>;
+  readParams: (id: string) => Promise<VivaCaseSSMParams>;
   getClosedUserCases: (PK: string) => Promise<{ Items: CaseItem[] }>;
   getFile: (bucket: string, key: string) => Promise<PromiseResult<S3GetObjectOutput, AWSError>>;
   storeFile: (
@@ -65,12 +55,13 @@ export interface Dependencies {
   ) => Promise<PromiseResult<S3PutObjectOutput, AWSError>>;
   updateVivaCaseState: (caseItem: CaseItem) => Promise<void>;
   putHtmlGeneratedSuccessEvent: (detail: unknown) => Promise<void>;
+  caseTemplateFunc: (caseItem: CaseItem, answers: CaseFormAnswer[]) => Template;
 }
 
 function getChangedCaseAnswerValues(
-  currentAnswerList: FormAnswer[],
-  previousAnswerList: FormAnswer[]
-): FormAnswer[] {
+  currentAnswerList: CaseFormAnswer[],
+  previousAnswerList: CaseFormAnswer[]
+): CaseFormAnswer[] {
   return currentAnswerList.map(currentAnswer => {
     const tags = [...currentAnswer.field.tags];
 
@@ -145,13 +136,13 @@ export async function generateRecurringCaseHtml(
   const { Items: closedCaseList } = closedUserCases;
 
   const { recurringFormId } = vivaCaseSSMParams;
-  let changedAnswerValues = caseItem.forms[caseItem.currentFormId]?.answers ?? [];
+  let changedAnswerValues: CaseFormAnswer[] = caseItem.forms[caseItem.currentFormId]?.answers ?? [];
   if (closedCaseList.length > 0) {
     const [closedCase] = closedCaseList.sort((caseA, caseB) => caseB.updatedAt - caseA.updatedAt);
 
     changedAnswerValues = getChangedCaseAnswerValues(
-      caseItem.forms[recurringFormId].answers as FormAnswer[],
-      closedCase.forms[recurringFormId].answers as FormAnswer[]
+      caseItem.forms[recurringFormId].answers as CaseFormAnswer[],
+      closedCase.forms[recurringFormId].answers as CaseFormAnswer[]
     );
   }
 
@@ -168,7 +159,7 @@ export async function generateRecurringCaseHtml(
   const handlebarsTemplateFileBody = hbsTemplateS3Object.Body?.toString();
   const template = handlebars.compile(handlebarsTemplateFileBody);
 
-  const caseTemplateData = createRecurringCaseTemplate(caseItem, changedAnswerValues);
+  const caseTemplateData = dependencies.caseTemplateFunc(caseItem, changedAnswerValues);
   const html = template(caseTemplateData);
 
   const caseHtmlKey = `html/case-${caseItem.id}.html`;
@@ -209,5 +200,8 @@ export const main = log.wrap(async event => {
     storeFile: S3.storeFile,
     updateVivaCaseState,
     putHtmlGeneratedSuccessEvent: putVivaMsEvent.htmlGeneratedSuccess,
+    caseTemplateFunc: createCaseTemplate,
   });
+});
+
 });

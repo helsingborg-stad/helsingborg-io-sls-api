@@ -4,7 +4,7 @@ export function formatTimestampToDate(timestamp) {
 }
 
 export default function formatPeriodDates(period) {
-  if (!period) return {};
+  if (!period) return undefined;
   const endDate = formatTimestampToDate(period.endDate);
   const startDate = formatTimestampToDate(period.startDate);
   return {
