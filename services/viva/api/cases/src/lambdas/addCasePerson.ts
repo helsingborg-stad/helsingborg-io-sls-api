@@ -1,4 +1,3 @@
-import to from 'await-to-js';
 import { BadRequestError, ForbiddenError } from '@helsingborg-stad/npm-api-error-handling';
 import config from '../libs/config';
 import log from '../libs/logs';
@@ -37,7 +36,7 @@ interface LambdaResponse {
 }
 
 interface UpdateCaseAddPersonResponse {
-  Item: CaseItem;
+  Attributes: CaseItem;
 }
 
 interface CaseKeys {
@@ -53,8 +52,8 @@ interface UpdateCaseParameters {
 export interface Dependencies {
   decodeToken: (params: LambdaRequest) => Token;
   updateCaseAddPerson: (params: UpdateCaseParameters) => Promise<UpdateCaseAddPersonResponse>;
-  coApplicantStatus: (personalNumber: string) => Promise<[Error, number[]]>;
-  validateCoApplicantStatus: (statusList: string[], requiredCodeList: string[]) => unknown;
+  coApplicantStatus: (personalNumber: string) => Promise<unknown>;
+  validateCoApplicantStatus: (statusList: unknown, requiredCodeList: unknown) => unknown;
 }
 
 function updateCaseAddPerson(params: UpdateCaseParameters): Promise<UpdateCaseAddPersonResponse> {
@@ -81,16 +80,15 @@ function updateCaseAddPerson(params: UpdateCaseParameters): Promise<UpdateCaseAd
 export async function addCasePerson(input: LambdaRequest, dependencies: Dependencies) {
   const requestBody = JSON.parse(input.body) as AddCasePersonRequest;
 
-  const [coApplicantStatusError, statusList] = await to(
-    dependencies.coApplicantStatus(requestBody.personalNumber)
-  );
-  if (coApplicantStatusError) {
-    return response.failure(new BadRequestError(coApplicantStatusError.message));
+  const statusList = await dependencies.coApplicantStatus(requestBody.personalNumber);
+  if (!statusList) {
+    return response.failure(new BadRequestError());
   }
 
   const coApplicantAllowedStatusCode = [VIVA_STATUS_NEW_APPLICATION_OPEN];
   if (!dependencies.validateCoApplicantStatus(statusList, coApplicantAllowedStatusCode)) {
-    return response.failure(new ForbiddenError());
+    const message = process.env.message || '';
+    return response.failure(new ForbiddenError(message));
   }
 
   const decodedToken = dependencies.decodeToken(input);
@@ -115,7 +113,7 @@ export async function addCasePerson(input: LambdaRequest, dependencies: Dependen
   const responseBody: LambdaResponse = {
     type: 'addCasePerson',
     attributes: {
-      caseItem: updateCaseResult.Item,
+      caseItem: updateCaseResult.Attributes,
     },
   };
 

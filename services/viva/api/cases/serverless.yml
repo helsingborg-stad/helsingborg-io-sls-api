@@ -62,6 +62,8 @@ provider:
 functions:
   addCasePerson:
     handler: src/lambdas/addCasePerson.main
+    environment:
+      message: ''
     timeout: 15
     events:
       - http:
