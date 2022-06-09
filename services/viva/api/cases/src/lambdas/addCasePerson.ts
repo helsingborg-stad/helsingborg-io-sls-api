@@ -53,7 +53,7 @@ export interface Dependencies {
   decodeToken: (params: LambdaRequest) => Token;
   updateCaseAddPerson: (params: UpdateCaseParameters) => Promise<UpdateCaseAddPersonResponse>;
   coApplicantStatus: (personalNumber: string) => Promise<unknown>;
-  validateCoApplicantStatus: (statusList: unknown, requiredCodeList: unknown) => unknown;
+  validateCoApplicantStatus: (statusList: unknown, requiredCodeList: unknown) => boolean;
 }
 
 function updateCaseAddPerson(params: UpdateCaseParameters): Promise<UpdateCaseAddPersonResponse> {

@@ -1,6 +1,7 @@
 import type { Token } from '../../src/libs/token';
 import type { LambdaRequest, Dependencies } from '../../src/lambdas/addCasePerson';
 import { addCasePerson } from '../../src/lambdas/addCasePerson';
+import { CasePersonRole } from '../../src/types/caseItem';
 import type { CaseItem } from '../../src/types/caseItem';
 
 const personalNumber = '199801011212';
@@ -9,6 +10,14 @@ const PK = `USER#${personalNumber}`;
 const caseKeys = {
   PK,
   SK,
+};
+
+const coApplicant = {
+  personalNumber: '199701031212',
+  firstName: 'Svenne',
+  lastName: 'Banan',
+  hasSigned: false,
+  role: CasePersonRole.CoApplicant,
 };
 
 const caseItem: CaseItem = {
@@ -34,15 +43,7 @@ const caseItem: CaseItem = {
   },
   forms: null,
   provider: '',
-  persons: [],
-};
-
-const coApplicant = {
-  personalNumber: '199701031212',
-  firstName: 'Svenne',
-  lastName: 'Banan',
-  hasSigned: false,
-  role: 'coApplicant',
+  persons: [coApplicant],
 };
 
 function createInput(partialInput: Partial<LambdaRequest> = {}): LambdaRequest {
@@ -68,18 +69,27 @@ function createDependencies(
 ): Dependencies {
   return {
     decodeToken: () => tokenToUse,
-    updateCaseAddPerson: () => Promise.resolve({ Item: caseItem }),
+    updateCaseAddPerson: () => Promise.resolve({ Attributes: caseItem }),
+    coApplicantStatus: () =>
+      Promise.resolve([
+        {
+          code: 1,
+          description: 'You can apply',
+        },
+      ]),
+    validateCoApplicantStatus: () => true,
     ...partialDependencies,
   };
 }
 
 it('successfully add person to case', async () => {
-  const updateCaseAddPersonMock = jest.fn().mockResolvedValueOnce({ Item: caseItem });
+  const updateCaseAddPersonMock = jest.fn().mockResolvedValueOnce({ Attributes: caseItem });
   const input = createInput();
-  const result = await addCasePerson(
-    input,
-    createDependencies({ personalNumber }, { updateCaseAddPerson: updateCaseAddPersonMock })
+  const dependencies = createDependencies(
+    { personalNumber },
+    { updateCaseAddPerson: updateCaseAddPersonMock }
   );
+  const result = await addCasePerson(input, dependencies);
 
   expect(updateCaseAddPersonMock).toHaveBeenCalledWith({
     caseKeys,
