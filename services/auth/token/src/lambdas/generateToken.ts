@@ -9,8 +9,8 @@ import log from '../libs/logs';
 import Joi from 'joi';
 
 const CONFIG_AUTH_SECRETS = config.auth.secrets;
-const ACCESS_TOKEN_EXPIRES_IN_MINUTES = 20;
-const REFRESH_TOKEN_EXPIRES_IN_MINUTES = 30;
+const ACCESS_TOKEN_EXPIRES_IN_MINUTES = 60;
+const REFRESH_TOKEN_EXPIRES_IN_MINUTES = 70;
 
 interface SecretsConfig {
   name: string;
