@@ -10,7 +10,7 @@ import Joi from 'joi';
 
 const CONFIG_AUTH_SECRETS = config.auth.secrets;
 const ACCESS_TOKEN_EXPIRES_IN_MINUTES = 60;
-const REFRESH_TOKEN_EXPIRES_IN_MINUTES = 70;
+const REFRESH_TOKEN_EXPIRES_IN_MINUTES = 24 * 60; // Hours * 60 minutes
 
 interface SecretsConfig {
   name: string;
