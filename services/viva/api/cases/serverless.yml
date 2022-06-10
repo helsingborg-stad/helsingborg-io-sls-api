@@ -63,7 +63,8 @@ functions:
   addCasePerson:
     handler: src/lambdas/addCasePerson.main
     environment:
-      message: ''
+      badRequestMessage: ''
+      forbiddenMessage: ''
     timeout: 15
     events:
       - http:

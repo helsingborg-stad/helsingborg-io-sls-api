@@ -49,11 +49,16 @@ interface UpdateCaseParameters {
   coApplicant: CasePerson;
 }
 
+interface UserCaseExistsResponse {
+  Count: number;
+}
+
 export interface Dependencies {
   decodeToken: (params: LambdaRequest) => Token;
   updateCaseAddPerson: (params: UpdateCaseParameters) => Promise<UpdateCaseAddPersonResponse>;
   coApplicantStatus: (personalNumber: string) => Promise<unknown>;
   validateCoApplicantStatus: (statusList: unknown, requiredCodeList: unknown) => boolean;
+  getUserCasesCount: (personalNumber: string, caseId: string) => Promise<UserCaseExistsResponse>;
 }
 
 function updateCaseAddPerson(params: UpdateCaseParameters): Promise<UpdateCaseAddPersonResponse> {
@@ -77,35 +82,55 @@ function updateCaseAddPerson(params: UpdateCaseParameters): Promise<UpdateCaseAd
   return dynamoDb.call('update', updateParams);
 }
 
-export async function addCasePerson(input: LambdaRequest, dependencies: Dependencies) {
-  const requestBody = JSON.parse(input.body) as AddCasePersonRequest;
+function getUserCasesCount(
+  personalNumber: string,
+  caseId: string
+): Promise<UserCaseExistsResponse> {
+  const queryParams = {
+    TableName: config.cases.tableName,
+    KeyConditionExpression: 'PK = :pk, SK = :sk',
+    ExpressionAttributeValues: {
+      ':pk': `USER#${personalNumber}`,
+      ':sk': `CASE#${caseId}`,
+    },
+    Select: 'COUNT',
+  };
 
-  const statusList = await dependencies.coApplicantStatus(requestBody.personalNumber);
-  if (!statusList) {
-    return response.failure(new BadRequestError());
+  return dynamoDb.call('query', queryParams);
+}
+
+export async function addCasePerson(input: LambdaRequest, dependencies: Dependencies) {
+  const { decodeToken, coApplicantStatus, validateCoApplicantStatus, updateCaseAddPerson } =
+    dependencies;
+  const coApplicantRequestBody = JSON.parse(input.body) as AddCasePersonRequest;
+  const applicant = decodeToken(input);
+
+  if (applicant.personalNumber === coApplicantRequestBody.personalNumber) {
+    const message = process.env.badRequestMessage ?? '';
+    return response.failure(new BadRequestError(message));
   }
 
+  const statusList = await coApplicantStatus(coApplicantRequestBody.personalNumber);
   const coApplicantAllowedStatusCode = [VIVA_STATUS_NEW_APPLICATION_OPEN];
-  if (!dependencies.validateCoApplicantStatus(statusList, coApplicantAllowedStatusCode)) {
-    const message = process.env.message ?? '';
+  if (!validateCoApplicantStatus(statusList, coApplicantAllowedStatusCode)) {
+    const message = process.env.forbiddenMessage ?? '';
     return response.failure(new ForbiddenError(message));
   }
 
-  const decodedToken = dependencies.decodeToken(input);
   const caseKeys: CaseKeys = {
-    PK: `USER#${decodedToken.personalNumber}`,
+    PK: `USER#${applicant.personalNumber}`,
     SK: `CASE#${input.pathParameters.caseId}`,
   };
 
   const coApplicant: CasePerson = {
-    personalNumber: requestBody.personalNumber,
-    firstName: requestBody.firstName,
-    lastName: requestBody.lastName,
+    personalNumber: coApplicantRequestBody.personalNumber,
+    firstName: coApplicantRequestBody.firstName,
+    lastName: coApplicantRequestBody.lastName,
     role: CasePersonRole.CoApplicant,
     hasSigned: false,
   };
 
-  const updateCaseResult = await dependencies.updateCaseAddPerson({
+  const updateCaseResult = await updateCaseAddPerson({
     caseKeys,
     coApplicant,
   });
@@ -126,5 +151,6 @@ export const main = log.wrap(async event => {
     updateCaseAddPerson,
     coApplicantStatus: vivaAdapter.application.status,
     validateCoApplicantStatus: validateApplicationStatus,
+    getUserCasesCount,
   });
 });

@@ -78,6 +78,7 @@ function createDependencies(
         },
       ]),
     validateCoApplicantStatus: () => true,
+    getUserCasesCount: () => Promise.resolve({ Count: 1 }),
     ...partialDependencies,
   };
 }
