@@ -1,0 +1,114 @@
+name: Styling and Linting
+on: [pull_request, workflow_dispatch]
+
+jobs:
+  styling:
+    name: Check - Style
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Inject access token in .npmrc
+        run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
+
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - name: cache yarn
+        uses: actions/cache@v2
+        id: yarn-cache
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-dev-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-dev-
+
+      - name: yarn install
+        run: yarn install
+
+      - name: style check
+        if: ${{ github.base_ref }}
+        env:
+          GIT_BASE_REF: ${{ github.base_ref }}
+        run: |
+          file_list=$(
+            git diff --name-only --diff-filter=d origin/$GIT_BASE_REF HEAD \
+            | egrep -i '\.([jt]sx?|json|md|ya?ml|s?css)$' \
+            | egrep -v "^package.json$" || true
+          )
+          if [[ -n $file_list ]]
+          then
+              yarn prettier --check $file_list
+          else
+              echo "no files to style-check"
+          fi
+  linting:
+    name: Check - Lint
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Inject access token in .npmrc
+        run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
+
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - name: cache yarn
+        uses: actions/cache@v2
+        id: yarn-cache
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-dev-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-dev-
+
+      - name: yarn install
+        run: yarn install
+
+      - name: lint check
+        if: ${{ github.base_ref }}
+        env:
+          GIT_BASE_REF: ${{ github.base_ref }}
+        run: |
+          sometest=$(git diff --name-only --diff-filter=d origin/$GIT_BASE_REF HEAD)
+          file_list=$(git diff --name-only --diff-filter=d origin/$GIT_BASE_REF HEAD | egrep -i '\.([jt]sx?)$' || true)
+          echo "files"
+          echo $file_list
+          if [[ -n $file_list ]]
+          then
+              yarn eslint --max-warnings 0 $file_list
+          else
+              echo "no files to lint"
+          fi
+  testing:
+    name: Run tests
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Inject access token in .npmrc
+        run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
+
+      - name: yarn install
+        run: yarn install
+
+      - name: run tests
+        run: yarn test
