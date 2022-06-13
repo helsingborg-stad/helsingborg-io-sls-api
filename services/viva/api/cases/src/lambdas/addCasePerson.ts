@@ -58,7 +58,7 @@ export interface Dependencies {
   updateCaseAddPerson: (params: UpdateCaseParameters) => Promise<UpdateCaseAddPersonResponse>;
   coApplicantStatus: (personalNumber: string) => Promise<unknown>;
   validateCoApplicantStatus: (statusList: unknown, requiredCodeList: unknown) => boolean;
-  getUserCasesCount: (personalNumber: string, caseId: string) => Promise<UserCaseExistsResponse>;
+  getUserCasesCount: (personalNumber: string) => Promise<UserCaseExistsResponse>;
 }
 
 function updateCaseAddPerson(params: UpdateCaseParameters): Promise<UpdateCaseAddPersonResponse> {
@@ -82,16 +82,13 @@ function updateCaseAddPerson(params: UpdateCaseParameters): Promise<UpdateCaseAd
   return dynamoDb.call('update', updateParams);
 }
 
-function getUserCasesCount(
-  personalNumber: string,
-  caseId: string
-): Promise<UserCaseExistsResponse> {
+function getUserCasesCount(personalNumber: string): Promise<UserCaseExistsResponse> {
   const queryParams = {
     TableName: config.cases.tableName,
-    KeyConditionExpression: 'PK = :pk, SK = :sk',
+    KeyConditionExpression: 'PK = :pk',
     ExpressionAttributeValues: {
       ':pk': `USER#${personalNumber}`,
-      ':sk': `CASE#${caseId}`,
+      ':sk': 'CASE#',
     },
     Select: 'COUNT',
   };
@@ -100,11 +97,22 @@ function getUserCasesCount(
 }
 
 export async function addCasePerson(input: LambdaRequest, dependencies: Dependencies) {
-  const { decodeToken, coApplicantStatus, validateCoApplicantStatus, updateCaseAddPerson } =
-    dependencies;
-  const coApplicantRequestBody = JSON.parse(input.body) as AddCasePersonRequest;
-  const applicant = decodeToken(input);
+  const {
+    decodeToken,
+    readParams,
+    coApplicantStatus,
+    validateCoApplicantStatus,
+    updateCaseAddPerson,
+    getUserCasesCount,
+  } = dependencies;
 
+  const applicant = decodeToken(input);
+  const { Count } = await getUserCasesCount(applicant.personalNumber);
+  if (Count > 0) {
+    return true;
+  }
+
+  const coApplicantRequestBody = JSON.parse(input.body) as AddCasePersonRequest;
   if (applicant.personalNumber === coApplicantRequestBody.personalNumber) {
     const message = process.env.badRequestMessage ?? '';
     return response.failure(new BadRequestError(message));
