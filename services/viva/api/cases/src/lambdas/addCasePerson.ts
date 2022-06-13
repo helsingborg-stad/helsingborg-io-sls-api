@@ -58,7 +58,6 @@ export interface Dependencies {
   updateCaseAddPerson: (params: UpdateCaseParameters) => Promise<UpdateCaseAddPersonResponse>;
   coApplicantStatus: (personalNumber: string) => Promise<unknown>;
   validateCoApplicantStatus: (statusList: unknown, requiredCodeList: unknown) => boolean;
-  getUserCasesCount: (personalNumber: string) => Promise<UserCaseExistsResponse>;
 }
 
 function updateCaseAddPerson(params: UpdateCaseParameters): Promise<UpdateCaseAddPersonResponse> {
@@ -82,20 +81,6 @@ function updateCaseAddPerson(params: UpdateCaseParameters): Promise<UpdateCaseAd
   return dynamoDb.call('update', updateParams);
 }
 
-function getUserCasesCount(personalNumber: string): Promise<UserCaseExistsResponse> {
-  const queryParams = {
-    TableName: config.cases.tableName,
-    KeyConditionExpression: 'PK = :pk',
-    ExpressionAttributeValues: {
-      ':pk': `USER#${personalNumber}`,
-      ':sk': 'CASE#',
-    },
-    Select: 'COUNT',
-  };
-
-  return dynamoDb.call('query', queryParams);
-}
-
 export async function addCasePerson(input: LambdaRequest, dependencies: Dependencies) {
   const {
     decodeToken,
@@ -103,7 +88,6 @@ export async function addCasePerson(input: LambdaRequest, dependencies: Dependen
     coApplicantStatus,
     validateCoApplicantStatus,
     updateCaseAddPerson,
-    getUserCasesCount,
   } = dependencies;
 
   const applicant = decodeToken(input);
@@ -159,6 +143,5 @@ export const main = log.wrap(async event => {
     updateCaseAddPerson,
     coApplicantStatus: vivaAdapter.application.status,
     validateCoApplicantStatus: validateApplicationStatus,
-    getUserCasesCount,
   });
 });
