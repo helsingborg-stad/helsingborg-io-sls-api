@@ -89,7 +89,9 @@ export async function addCasePerson(input: LambdaRequest, dependencies: Dependen
   const applicant = decodeToken(input);
   const coApplicantRequestBody = JSON.parse(input.body) as AddCasePersonRequest;
 
-  if (applicant.personalNumber === coApplicantRequestBody.personalNumber) {
+  const isApplicantAndCoApplicantTheSamePerson =
+    applicant.personalNumber === coApplicantRequestBody.personalNumber;
+  if (isApplicantAndCoApplicantTheSamePerson) {
     const message = process.env.badRequestMessage ?? '';
     return response.failure(new BadRequestError(message));
   }
