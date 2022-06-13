@@ -1,16 +1,22 @@
+/* eslint-disable no-console */
 import { BadRequestError, ForbiddenError } from '@helsingborg-stad/npm-api-error-handling';
 import config from '../libs/config';
 import log from '../libs/logs';
 import { decodeToken, Token } from '../libs/token';
+import { populateFormWithPreviousCaseAnswers } from '../libs/formAnswers';
 import * as response from '../libs/response';
 import * as dynamoDb from '../libs/dynamoDb';
 
+import { cases } from '../helpers/query';
+import { getFormTemplates } from '../helpers/dynamoDb';
 import { VIVA_STATUS_NEW_APPLICATION_OPEN } from '../helpers/constants';
 import validateApplicationStatus from '../helpers/validateApplicationStatus';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
 import { CasePersonRole } from '../types/caseItem';
-import type { CaseItem, CasePerson } from '../types/caseItem';
+import type { CaseItem, CasePerson, CaseForm } from '../types/caseItem';
+
+type CaseKeys = Pick<CaseItem, 'PK' | 'SK'>;
 
 interface AddCasePersonRequest {
   personalNumber: string;
@@ -39,11 +45,6 @@ interface UpdateCaseAddPersonResponse {
   Attributes: CaseItem;
 }
 
-interface CaseKeys {
-  PK: string;
-  SK: string;
-}
-
 interface UpdateCaseParameters {
   caseKeys: CaseKeys;
   coApplicant: CasePerson;
@@ -52,8 +53,10 @@ interface UpdateCaseParameters {
 export interface Dependencies {
   decodeToken: (params: LambdaRequest) => Token;
   updateCaseAddPerson: (params: UpdateCaseParameters) => Promise<UpdateCaseAddPersonResponse>;
+  getFormTemplates: typeof getFormTemplates;
   coApplicantStatus: (personalNumber: string) => Promise<unknown>;
   validateCoApplicantStatus: (statusList: unknown, requiredCodeList: unknown) => boolean;
+  getCase: (keys: CaseKeys) => Promise<CaseItem>;
 }
 
 function updateCaseAddPerson(params: UpdateCaseParameters): Promise<UpdateCaseAddPersonResponse> {
@@ -79,8 +82,9 @@ function updateCaseAddPerson(params: UpdateCaseParameters): Promise<UpdateCaseAd
 
 export async function addCasePerson(input: LambdaRequest, dependencies: Dependencies) {
   const {
+    getCase,
     decodeToken,
-    readParams,
+    getFormTemplates,
     coApplicantStatus,
     validateCoApplicantStatus,
     updateCaseAddPerson,
@@ -108,6 +112,12 @@ export async function addCasePerson(input: LambdaRequest, dependencies: Dependen
     SK: `CASE#${input.pathParameters.caseId}`,
   };
 
+  const caseItem = await getCase(caseKeys);
+
+  const caseForm = {
+    [caseItem.currentFormId]: caseItem.forms?.[caseItem.currentFormId],
+  } as Record<string, CaseForm>;
+
   const coApplicant: CasePerson = {
     personalNumber: coApplicantRequestBody.personalNumber,
     firstName: coApplicantRequestBody.firstName,
@@ -115,6 +125,17 @@ export async function addCasePerson(input: LambdaRequest, dependencies: Dependen
     role: CasePersonRole.CoApplicant,
     hasSigned: false,
   };
+
+  const formTemplates = await getFormTemplates([caseItem.currentFormId]);
+
+  const prePopulatedForm: Record<string, CaseForm> = populateFormWithPreviousCaseAnswers(
+    caseForm,
+    [coApplicant],
+    formTemplates,
+    {}
+  );
+
+  console.log('prePopulatedForm', prePopulatedForm);
 
   const updateCaseResult = await updateCaseAddPerson({
     caseKeys,
@@ -135,7 +156,9 @@ export const main = log.wrap(async event => {
   return addCasePerson(event, {
     decodeToken,
     updateCaseAddPerson,
+    getFormTemplates,
     coApplicantStatus: vivaAdapter.application.status,
     validateCoApplicantStatus: validateApplicationStatus,
+    getCase: cases.get,
   });
 });
