@@ -49,10 +49,6 @@ interface UpdateCaseParameters {
   coApplicant: CasePerson;
 }
 
-interface UserCaseExistsResponse {
-  Count: number;
-}
-
 export interface Dependencies {
   decodeToken: (params: LambdaRequest) => Token;
   updateCaseAddPerson: (params: UpdateCaseParameters) => Promise<UpdateCaseAddPersonResponse>;
@@ -91,12 +87,8 @@ export async function addCasePerson(input: LambdaRequest, dependencies: Dependen
   } = dependencies;
 
   const applicant = decodeToken(input);
-  const { Count } = await getUserCasesCount(applicant.personalNumber);
-  if (Count > 0) {
-    return true;
-  }
-
   const coApplicantRequestBody = JSON.parse(input.body) as AddCasePersonRequest;
+
   if (applicant.personalNumber === coApplicantRequestBody.personalNumber) {
     const message = process.env.badRequestMessage ?? '';
     return response.failure(new BadRequestError(message));
