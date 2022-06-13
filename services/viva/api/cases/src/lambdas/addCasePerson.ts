@@ -52,14 +52,14 @@ interface UpdateCaseParameters {
 
 export interface Dependencies {
   decodeToken: (params: LambdaRequest) => Token;
-  updateCaseAddPerson: (params: UpdateCaseParameters) => Promise<UpdateCaseAddPersonResponse>;
+  updateCase: (params: UpdateCaseParameters) => Promise<UpdateCaseAddPersonResponse>;
   getFormTemplates: typeof getFormTemplates;
   coApplicantStatus: (personalNumber: string) => Promise<unknown>;
   validateCoApplicantStatus: (statusList: unknown, requiredCodeList: unknown) => boolean;
   getCase: (keys: CaseKeys) => Promise<CaseItem>;
 }
 
-function updateCaseAddPerson(params: UpdateCaseParameters): Promise<UpdateCaseAddPersonResponse> {
+function updateCase(params: UpdateCaseParameters): Promise<UpdateCaseAddPersonResponse> {
   const { caseKeys, coApplicant } = params;
 
   const updateParams = {
@@ -87,7 +87,7 @@ export async function addCasePerson(input: LambdaRequest, dependencies: Dependen
     getFormTemplates,
     coApplicantStatus,
     validateCoApplicantStatus,
-    updateCaseAddPerson,
+    updateCase,
   } = dependencies;
 
   const applicant = decodeToken(input);
@@ -137,7 +137,7 @@ export async function addCasePerson(input: LambdaRequest, dependencies: Dependen
 
   console.log('prePopulatedForm', prePopulatedForm);
 
-  const updateCaseResult = await updateCaseAddPerson({
+  const updateCaseResult = await updateCase({
     caseKeys,
     coApplicant,
   });
@@ -155,7 +155,7 @@ export async function addCasePerson(input: LambdaRequest, dependencies: Dependen
 export const main = log.wrap(async event => {
   return addCasePerson(event, {
     decodeToken,
-    updateCaseAddPerson,
+    updateCase,
     getFormTemplates,
     coApplicantStatus: vivaAdapter.application.status,
     validateCoApplicantStatus: validateApplicationStatus,
