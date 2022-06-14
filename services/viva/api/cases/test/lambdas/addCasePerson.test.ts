@@ -95,6 +95,7 @@ function createDependencies(
     coApplicantStatus: () => Promise.resolve(),
     validateCoApplicantStatus: () => true,
     getCase: () => Promise.resolve(caseItemToUse),
+    populateForm: () => ({}),
     ...partialDependencies,
   };
 }

@@ -54,10 +54,11 @@ interface UpdateCaseParameters {
 export interface Dependencies {
   decodeToken: (params: LambdaRequest) => Token;
   updateCase: (params: UpdateCaseParameters) => Promise<UpdateCaseAddPersonResponse>;
-  getFormTemplates: typeof getFormTemplates;
   coApplicantStatus: (personalNumber: string) => Promise<unknown>;
   validateCoApplicantStatus: (statusList: unknown, requiredCodeList: unknown) => boolean;
   getCase: (keys: CaseKeys) => Promise<CaseItem>;
+  getFormTemplates: typeof getFormTemplates;
+  populateForm: typeof populateFormWithPreviousCaseAnswers;
 }
 
 function updateCase(params: UpdateCaseParameters): Promise<UpdateCaseAddPersonResponse> {
@@ -164,5 +165,6 @@ export const main = log.wrap(async event => {
     coApplicantStatus: vivaAdapter.application.status,
     validateCoApplicantStatus: validateApplicationStatus,
     getCase: cases.get,
+    populateForm: populateFormWithPreviousCaseAnswers,
   });
 });
