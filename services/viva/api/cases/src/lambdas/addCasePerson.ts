@@ -48,6 +48,7 @@ interface UpdateCaseAddPersonResponse {
 interface UpdateCaseParameters {
   caseKeys: CaseKeys;
   coApplicant: CasePerson;
+  form: Record<string, CaseForm>;
 }
 
 export interface Dependencies {
@@ -60,7 +61,8 @@ export interface Dependencies {
 }
 
 function updateCase(params: UpdateCaseParameters): Promise<UpdateCaseAddPersonResponse> {
-  const { caseKeys, coApplicant } = params;
+  const { caseKeys, coApplicant, form } = params;
+  const newApplicationFormId = Object.keys(form)[0];
 
   const updateParams = {
     TableName: config.cases.tableName,
@@ -69,10 +71,14 @@ function updateCase(params: UpdateCaseParameters): Promise<UpdateCaseAddPersonRe
       SK: caseKeys.SK,
     },
     UpdateExpression:
-      'SET persons = list_append(persons, :personalNumber), GSI1 = :personalNumberGSI1',
+      'SET forms.#newApplicationFormId = :newForm, persons = list_append(persons, :personalNumber), GSI1 = :personalNumberGSI1',
+    ExpressionAttributeNames: {
+      '#newApplicationFormId': newApplicationFormId,
+    },
     ExpressionAttributeValues: {
       ':personalNumber': [coApplicant],
       ':personalNumberGSI1': coApplicant.personalNumber,
+      ':newForm': form[newApplicationFormId],
     },
     ReturnValues: 'ALL_NEW',
   };
@@ -128,18 +134,13 @@ export async function addCasePerson(input: LambdaRequest, dependencies: Dependen
 
   const formTemplates = await getFormTemplates([caseItem.currentFormId]);
 
-  const prePopulatedForm: Record<string, CaseForm> = populateFormWithPreviousCaseAnswers(
-    caseForm,
-    [coApplicant],
-    formTemplates,
-    {}
-  );
-
-  console.log('prePopulatedForm', prePopulatedForm);
+  const prePopulatedFormWithCoApplicant: Record<string, CaseForm> =
+    populateFormWithPreviousCaseAnswers(caseForm, [coApplicant], formTemplates, {});
 
   const updateCaseResult = await updateCase({
     caseKeys,
     coApplicant,
+    form: prePopulatedFormWithCoApplicant,
   });
 
   const responseBody: LambdaResponse = {
