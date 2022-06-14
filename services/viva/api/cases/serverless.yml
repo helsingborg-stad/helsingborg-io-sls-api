@@ -56,6 +56,12 @@ provider:
 
         - Effect: Allow
           Action:
+            - dynamodb:GetItem
+          Resource:
+            - 'Fn::ImportValue': ${self:custom.resourcesStage}-FormsTableArn
+
+        - Effect: Allow
+          Action:
             - kms:Decrypt
           Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
 
