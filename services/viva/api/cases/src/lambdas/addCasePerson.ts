@@ -62,7 +62,7 @@ export interface Dependencies {
 
 function updateCase(params: UpdateCaseParameters): Promise<UpdateCaseAddPersonResponse> {
   const { caseKeys, coApplicant, form } = params;
-  const newApplicationFormId = Object.keys(form)[0];
+  const [newApplicationFormId] = Object.keys(form);
 
   const updateParams = {
     TableName: config.cases.tableName,
