@@ -71,12 +71,12 @@ function updateCase(params: UpdateCaseParameters): Promise<UpdateCaseAddPersonRe
       SK: caseKeys.SK,
     },
     UpdateExpression:
-      'SET forms.#newApplicationFormId = :newForm, persons = list_append(persons, :personalNumber), GSI1 = :personalNumberGSI1',
+      'SET forms.#newApplicationFormId = :newForm, persons = list_append(persons, :coApplicant), GSI1 = :personalNumberGSI1',
     ExpressionAttributeNames: {
       '#newApplicationFormId': newApplicationFormId,
     },
     ExpressionAttributeValues: {
-      ':personalNumber': [coApplicant],
+      ':coApplicant': [coApplicant],
       ':personalNumberGSI1': coApplicant.personalNumber,
       ':newForm': form[newApplicationFormId],
     },
