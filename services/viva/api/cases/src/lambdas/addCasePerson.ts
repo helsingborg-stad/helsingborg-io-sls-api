@@ -95,6 +95,7 @@ export async function addCasePerson(input: LambdaRequest, dependencies: Dependen
     coApplicantStatus,
     validateCoApplicantStatus,
     updateCase,
+    populateForm,
   } = dependencies;
 
   const applicant = decodeToken(input);
@@ -138,13 +139,17 @@ export async function addCasePerson(input: LambdaRequest, dependencies: Dependen
     CaseForm
   >;
 
-  const prePopulatedFormWithCoApplicant: Record<string, CaseForm> =
-    populateFormWithPreviousCaseAnswers(caseForm, [coApplicant], formTemplates, {});
+  const formWithCoApplicant: Record<string, CaseForm> = populateForm(
+    caseForm,
+    [coApplicant],
+    formTemplates,
+    {}
+  );
 
   const updateCaseResult = await updateCase({
     caseKeys,
     coApplicant,
-    form: prePopulatedFormWithCoApplicant,
+    form: formWithCoApplicant,
   });
 
   const responseBody: LambdaResponse = {
