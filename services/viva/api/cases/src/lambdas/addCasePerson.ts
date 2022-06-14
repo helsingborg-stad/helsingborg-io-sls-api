@@ -132,7 +132,10 @@ export async function addCasePerson(input: LambdaRequest, dependencies: Dependen
     hasSigned: false,
   };
 
-  const formTemplates = await getFormTemplates([caseItem.currentFormId]);
+  const formTemplates = (await getFormTemplates([caseItem.currentFormId])) as Record<
+    string,
+    CaseForm
+  >;
 
   const prePopulatedFormWithCoApplicant: Record<string, CaseForm> =
     populateFormWithPreviousCaseAnswers(caseForm, [coApplicant], formTemplates, {});
