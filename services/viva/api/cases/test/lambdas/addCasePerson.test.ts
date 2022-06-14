@@ -1,16 +1,13 @@
 import type { Token } from '../../src/libs/token';
-import type { LambdaRequest, Dependencies } from '../../src/lambdas/addCasePerson';
 import { addCasePerson } from '../../src/lambdas/addCasePerson';
-import { CasePersonRole } from '../../src/types/caseItem';
-import type { CaseItem } from '../../src/types/caseItem';
+import { CasePersonRole, EncryptionType } from '../../src/types/caseItem';
+import type { CaseItem, CaseForm } from '../../src/types/caseItem';
+import type { LambdaRequest, Dependencies } from '../../src/lambdas/addCasePerson';
 
 const personalNumber = '199801011212';
 const SK = 'CASE#123';
 const PK = `USER#${personalNumber}`;
-const caseKeys = {
-  PK,
-  SK,
-};
+const caseKeys = { PK, SK };
 
 const coApplicant = {
   personalNumber: '199701031212',
@@ -20,12 +17,33 @@ const coApplicant = {
   role: CasePersonRole.CoApplicant,
 };
 
+const form: CaseForm = {
+  answers: [
+    {
+      field: {
+        id: 'some id 123',
+        tags: [],
+      },
+      value: 'Some value abc',
+    },
+  ],
+  currentPosition: {
+    currentMainStep: 0,
+    currentMainStepIndex: 0,
+    index: 0,
+    level: 0,
+  },
+  encryption: {
+    type: EncryptionType.Decrypted,
+  },
+};
+
 const caseItem: CaseItem = {
   PK,
   SK,
-  id: 'CASE#123',
+  id: '123',
   createdAt: 0,
-  currentFormId: '123',
+  currentFormId: '123abc',
   details: {
     period: {
       startDate: 0,
@@ -41,8 +59,10 @@ const caseItem: CaseItem = {
     name: '',
     description: '',
   },
-  forms: null,
-  provider: '',
+  forms: {
+    '123abc': form,
+  },
+  provider: 'VIVA',
   persons: [coApplicant],
 };
 
@@ -69,32 +89,25 @@ function createDependencies(
 ): Dependencies {
   return {
     decodeToken: () => tokenToUse,
-    updateCaseAddPerson: () => Promise.resolve({ Attributes: caseItem }),
-    coApplicantStatus: () =>
-      Promise.resolve([
-        {
-          code: 1,
-          description: 'You can apply',
-        },
-      ]),
+    updateCase: () => Promise.resolve({ Attributes: caseItem }),
+    getFormTemplates: () => Promise.resolve(),
+    coApplicantStatus: () => Promise.resolve(),
     validateCoApplicantStatus: () => true,
-    getUserCasesCount: () => Promise.resolve({ Count: 1 }),
+    getCase: () => Promise.resolve({ ...caseItem }),
     ...partialDependencies,
   };
 }
 
 it('successfully add person to case', async () => {
-  const updateCaseAddPersonMock = jest.fn().mockResolvedValueOnce({ Attributes: caseItem });
+  const updateCaseMock = jest.fn().mockResolvedValueOnce({ Attributes: caseItem });
   const input = createInput();
-  const dependencies = createDependencies(
-    { personalNumber },
-    { updateCaseAddPerson: updateCaseAddPersonMock }
-  );
+  const dependencies = createDependencies({ personalNumber }, { updateCase: updateCaseMock });
   const result = await addCasePerson(input, dependencies);
 
-  expect(updateCaseAddPersonMock).toHaveBeenCalledWith({
+  expect(updateCaseMock).toHaveBeenCalledWith({
     caseKeys,
     coApplicant,
+    form: { '123abc': form },
   });
 
   expect(result.statusCode).toBe(200);
