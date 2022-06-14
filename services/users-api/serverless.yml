@@ -104,7 +104,7 @@ functions:
           method: post
           cors: true
           private: true
-          responce:
+          response:
             contentHandling: CONVERT_TO_BINARY
           authorizer:
             type: TOKEN
