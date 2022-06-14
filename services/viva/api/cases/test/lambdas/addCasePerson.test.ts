@@ -89,7 +89,7 @@ function createDependencies(
 ): Dependencies {
   return {
     decodeToken: () => tokenToUse,
-    updateCase: () => Promise.resolve({ Attributes: caseItem }),
+    updateCase: () => Promise.resolve({ Attributes: { ...caseItem } }),
     getFormTemplates: () => Promise.resolve(),
     coApplicantStatus: () => Promise.resolve(),
     validateCoApplicantStatus: () => true,
