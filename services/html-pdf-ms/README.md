@@ -1,4 +1,4 @@
-<h1> HELSINGBORG IO SLS HTML TO PDF MICRO SERVICE</h1>
+<h1>HELSINGBORG IO SLS HTML TO PDF MICRO SERVICE</h1>
 
 ## Purpose
 
@@ -11,8 +11,10 @@ Read the global requirements for this repo, can be found [here](https://github.c
 ## Deployment
 
 ### Prerequistes
+
 In order for this service to function correctly, you have to setup a couple of other resources from the helsingborg-io-resrouces repo.
-- Deploy the pdf storage bucket from the helsingborg-io-sls-resources repo. 
+
+- Deploy the pdf storage bucket from the helsingborg-io-sls-resources repo.
 
 - Deploy the chorme-aws-lambda layer from the helsingborg-to-sls-resource repo. This is needed in order lambdas to access and use puppeteer.
 
@@ -25,4 +27,3 @@ Deploy command:
 ```bash
 $ sls deploy -v
 ```
-
