@@ -16,7 +16,7 @@ import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 import { CasePersonRole } from '../types/caseItem';
 import type { CaseItem, CasePerson, CaseForm } from '../types/caseItem';
 
-export type CaseKeys = Pick<CaseItem, 'PK' | 'SK'>;
+type CaseKeys = Pick<CaseItem, 'PK' | 'SK'>;
 
 interface AddCasePersonRequest {
   personalNumber: string;
