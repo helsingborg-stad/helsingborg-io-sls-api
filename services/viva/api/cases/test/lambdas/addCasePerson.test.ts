@@ -85,15 +85,16 @@ function createInput(partialInput: Partial<LambdaRequest> = {}): LambdaRequest {
 
 function createDependencies(
   tokenToUse: Token,
+  caseItemToUse: CaseItem,
   partialDependencies: Partial<Dependencies> = {}
 ): Dependencies {
   return {
     decodeToken: () => tokenToUse,
-    updateCase: () => Promise.resolve({ Attributes: { ...caseItem } }),
+    updateCase: () => Promise.resolve({ Attributes: caseItemToUse }),
     getFormTemplates: () => Promise.resolve(),
     coApplicantStatus: () => Promise.resolve(),
     validateCoApplicantStatus: () => true,
-    getCase: () => Promise.resolve({ ...caseItem }),
+    getCase: () => Promise.resolve(caseItemToUse),
     ...partialDependencies,
   };
 }
@@ -101,7 +102,11 @@ function createDependencies(
 it('successfully add person to case', async () => {
   const updateCaseMock = jest.fn().mockResolvedValueOnce({ Attributes: caseItem });
   const input = createInput();
-  const dependencies = createDependencies({ personalNumber }, { updateCase: updateCaseMock });
+  const dependencies = createDependencies(
+    { personalNumber },
+    { ...caseItem },
+    { updateCase: updateCaseMock }
+  );
   const result = await addCasePerson(input, dependencies);
 
   expect(updateCaseMock).toHaveBeenCalledWith({
