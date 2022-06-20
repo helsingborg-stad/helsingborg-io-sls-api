@@ -14,6 +14,7 @@ const caseRecurringForm = {
     index: 0,
     level: 0,
     currentMainStep: 1,
+    numberOfMainSteps: 0,
   },
 };
 
@@ -151,6 +152,7 @@ const expectedPopulatedFormWithChildren = {
     index: 0,
     level: 0,
     currentMainStep: 1,
+    numberOfMainSteps: 0,
   },
 };
 

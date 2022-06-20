@@ -95,6 +95,7 @@ it('calls postCompletion with form answer containing attachment', async () => {
       currentMainStepIndex: 0,
       index: 0,
       level: 0,
+      numberOfMainSteps: 0,
     },
     encryption: {
       type: EncryptionType.Decrypted,
@@ -134,6 +135,7 @@ it('calls `updateCase` with correct parameters for form id: completionFormId', a
       currentMainStepIndex: 0,
       index: 0,
       level: 0,
+      numberOfMainSteps: 0,
     },
     encryption: {
       type: EncryptionType.Decrypted,

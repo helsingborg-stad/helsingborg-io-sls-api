@@ -31,6 +31,7 @@ const defaultFormProperties = {
     currentMainStepIndex: 0,
     index: 0,
     level: 0,
+    numberOfMainSteps: 0,
   },
   encryption: {
     type: EncryptionType.Decrypted,

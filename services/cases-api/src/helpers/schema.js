@@ -36,6 +36,7 @@ const formCurrentPosition = Joi.object({
   level: Joi.number().required(),
   currentMainStep: Joi.number().required(),
   currentMainStepIndex: Joi.number().required(),
+  numberOfMainSteps: Joi.number().default(0),
 });
 
 const signature = Joi.object({
