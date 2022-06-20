@@ -1,14 +1,16 @@
 import type { CaseFormAnswer, CaseItem } from './../types/caseItem';
-import { Child, createChildren } from './caseTemplate/children';
-import { createTemplatePersons, TemplatePerson } from './caseTemplate/persons';
-import { createHousing, Housing } from './caseTemplate/housing';
-import { Financials, createFinancials } from './caseTemplate/financials';
+import type { Child } from './caseTemplate/children';
+import { createChildren } from './caseTemplate/children';
+import type { Financials } from './caseTemplate/financials';
+import { createFinancials } from './caseTemplate/financials';
+import type { Housing } from './caseTemplate/housing';
+import { createHousing } from './caseTemplate/housing';
+import type { Note } from './caseTemplate/notes';
+import { createNotes } from './caseTemplate/notes';
+import type { TemplatePerson } from './caseTemplate/persons';
+import { createTemplatePersons } from './caseTemplate/persons';
 import { formatTimestampToDate } from './formatPeriodDates';
 
-interface Note {
-  title: string;
-  text: string;
-}
 export interface Template {
   period?: {
     startDate: string;
@@ -31,6 +33,7 @@ export default function createCaseTemplate(
     children: createChildren(answers),
     housing: createHousing(answers),
     financials: createFinancials(answers),
+    notes: createNotes(answers),
     updatedAt: formatTimestampToDate(caseItem.updatedAt),
-  } as Template;
+  };
 }
