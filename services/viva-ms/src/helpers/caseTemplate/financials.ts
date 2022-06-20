@@ -40,15 +40,6 @@ const friendlyAidNames: Record<ValidAids, string> = {
   pension: 'Pensionsmyndigheten',
 };
 
-function createGovernmentAids(answers: CaseFormAnswer[]): string[] {
-  const aidAnswers = formHelpers.filterByTags(answers, ['aid']);
-  const validAids = Object.values(ValidAids) as ValidTags[];
-
-  const checkedAids = filterCheckedTags(aidAnswers, validAids);
-  const friendlyNames = checkedAids.map(aidTag => friendlyAidNames[aidTag as ValidAids]);
-  return friendlyNames;
-}
-
 enum ValidHousingCategories {
   boende = 'boende',
   electricity = 'electricity',
@@ -63,6 +54,15 @@ const friendlyHousingCategoryNames: Record<ValidHousingCategories, string> = {
   internet: 'Internet/bredband',
 };
 
+function createGovernmentAids(answers: CaseFormAnswer[]): string[] {
+  const aidAnswers = formHelpers.filterByTags(answers, ['aid']);
+  const validAids = Object.values(ValidAids) as ValidTags[];
+
+  const checkedAids = filterCheckedTags(aidAnswers, validAids);
+  const friendlyNames = checkedAids.map(aidTag => friendlyAidNames[aidTag as ValidAids]);
+  return friendlyNames;
+}
+
 function makeHousingEntryTitle(category: string, answer: CaseFormAnswer): string {
   const categoryTitle = friendlyHousingCategoryNames[category];
   const monthTag = answer.field.tags.filter(tag => tag.startsWith('month'))[0];
@@ -74,7 +74,9 @@ function makeHousingEntryTitle(category: string, answer: CaseFormAnswer): string
   return categoryTitle;
 }
 
-function reduceAnswersByHousingCategories(residentIncomeAnswers: CaseFormAnswer[]) {
+function reduceAnswersByHousingCategories(
+  residentIncomeAnswers: CaseFormAnswer[]
+): FinancialEntry[] {
   const categories = Object.values(ValidHousingCategories) as ValidTags[];
 
   const answersGroupedByCategory = categories.map(category => ({
