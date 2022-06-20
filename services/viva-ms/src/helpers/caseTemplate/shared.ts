@@ -1,5 +1,11 @@
 import clone from 'lodash.clone';
-import type { CaseFormAnswer, CasePersonRole, ValidTags } from '../../types/caseItem';
+import type {
+  CaseFormAnswer,
+  CaseFormAnswerValue,
+  CasePersonRole,
+  ValidTags,
+} from '../../types/caseItem';
+import { formatTimestampToDate } from '../formatPeriodDates';
 
 export interface Human {
   role: CasePersonRole;
@@ -61,4 +67,11 @@ export function filterCheckedTags(answers: CaseFormAnswer[], tags: ValidTags[]):
         return hasTag && isChecked;
       })
   );
+}
+
+export function toDateString(maybeDateNumber?: CaseFormAnswerValue): string {
+  if (typeof maybeDateNumber === 'number') {
+    return formatTimestampToDate(maybeDateNumber);
+  }
+  return '';
 }

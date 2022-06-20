@@ -1,5 +1,6 @@
 import type { CaseFormAnswer } from '../../types/caseItem';
 import formHelpers from '../formHelpers';
+import { toDateString } from './shared';
 
 export enum ValidOccupation {
   fulltime = 'fulltime',
@@ -14,36 +15,31 @@ export enum ValidOccupation {
 export interface Occupation {
   type: ValidOccupation;
   name: string;
-  description: string;
+  description?: string;
 }
 
-type DescriptionMapperFunc = (occupationType: ValidOccupation, answers: CaseFormAnswer[]) => string;
+type DescriptionMapperFunc = (
+  occupationType: ValidOccupation,
+  answers: CaseFormAnswer[]
+) => string | undefined;
 
 const DescriptionMapperFuncs: Record<string, DescriptionMapperFunc> = {
-  fromDescription(occupationType: ValidOccupation, answers: CaseFormAnswer[]): string {
-    return (
-      formHelpers.getFirstAnswerValueByTags(answers, [
-        'occupation',
-        'description',
-        occupationType,
-      ]) ?? ''
-    );
+  fromDescription(occupationType: ValidOccupation, answers: CaseFormAnswer[]): string | undefined {
+    return formHelpers.getFirstAnswerValueByTags(answers, [
+      'occupation',
+      'description',
+      occupationType,
+    ]);
   },
 
-  fromDate(occupationType: ValidOccupation, answers: CaseFormAnswer[]): string {
+  fromDate(occupationType: ValidOccupation, answers: CaseFormAnswer[]): string | undefined {
     const maybeDateNumber = formHelpers.getFirstAnswerValueByTags(answers, [
       'occupation',
       'date',
       occupationType,
     ]);
 
-    if (typeof maybeDateNumber === 'number') {
-      // TODO (STOPPA I PR!): dubbelkolla att datum är i UTC ms, och hitta bättre formattering
-      const date = new Date(maybeDateNumber);
-      const dateStr = date.toISOString();
-      return dateStr;
-    }
-    return '';
+    return toDateString(maybeDateNumber);
   },
 };
 

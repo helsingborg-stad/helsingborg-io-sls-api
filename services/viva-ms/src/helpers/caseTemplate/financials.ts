@@ -1,4 +1,4 @@
-import type { CaseFormAnswer, ValidTags } from '../../types/caseItem';
+import type { CaseFormAnswer, CaseFormAnswerValue, ValidTags } from '../../types/caseItem';
 import formHelpers from '../formHelpers';
 import {
   filterCheckedTags,
@@ -49,22 +49,22 @@ function createGovernmentAids(answers: CaseFormAnswer[]): string[] {
   return friendlyNames;
 }
 
-enum ValidHousingExpensesCategories {
+enum ValidHousingCategories {
   boende = 'boende',
   electricity = 'electricity',
   homeinsurance = 'homeinsurance',
   internet = 'internet',
 }
 
-const friendlyHousingExpensesCategoryNames: Record<ValidHousingExpensesCategories, string> = {
+const friendlyHousingCategoryNames: Record<ValidHousingCategories, string> = {
   boende: 'Hyra/avgift',
   electricity: 'El',
   homeinsurance: 'Hemförsäkring',
-  internet: 'Internet',
+  internet: 'Internet/bredband',
 };
 
-function makeHousingExpenseTitle(category: string, answer: CaseFormAnswer): string {
-  const categoryTitle = friendlyHousingExpensesCategoryNames[category];
+function makeHousingEntryTitle(category: string, answer: CaseFormAnswer): string {
+  const categoryTitle = friendlyHousingCategoryNames[category];
   const monthTag = answer.field.tags.filter(tag => tag.startsWith('month'))[0];
 
   if (monthTag) {
@@ -74,23 +74,27 @@ function makeHousingExpenseTitle(category: string, answer: CaseFormAnswer): stri
   return categoryTitle;
 }
 
-function createHousingExpenses(answers: CaseFormAnswer[]): FinancialEntry[] {
-  const categories = Object.values(ValidHousingExpensesCategories) as ValidTags[];
+function reduceAnswersByHousingCategories(residentIncomeAnswers: CaseFormAnswer[]) {
+  const categories = Object.values(ValidHousingCategories) as ValidTags[];
 
   const answersGroupedByCategory = categories.map(category => ({
     category,
-    answers: formHelpers.filterByTags(answers, [category]),
+    answers: formHelpers.filterByTags(residentIncomeAnswers, [category]),
   }));
 
   const financialEntries = answersGroupedByCategory.reduce((acc, categoryAnswers) => {
     const entries: FinancialEntry[] = categoryAnswers.answers.map(answer => ({
-      title: makeHousingExpenseTitle(categoryAnswers.category, answer),
+      title: makeHousingEntryTitle(categoryAnswers.category, answer),
       value: parseFloat(answer.value as string),
     }));
     return [...acc, ...entries];
   }, [] as FinancialEntry[]);
 
   return financialEntries;
+}
+
+function createHousingExpenses(answers: CaseFormAnswer[]): FinancialEntry[] {
+  return reduceAnswersByHousingCategories(answers);
 }
 
 function getChildcareExpense(answers: CaseFormAnswer[]): FinancialEntry | undefined {
@@ -127,12 +131,62 @@ function createExpenses(answers: CaseFormAnswer[]): Expenses {
   return {
     housing: createHousingExpenses(relevantAnswers),
     children: getChildrenExpenses(relevantAnswers),
-  } as Expenses;
+  };
+}
+
+function getResidentIncomes(answers: CaseFormAnswer[]): FinancialEntry[] {
+  const residentIncomeAnswers = formHelpers.filterByTags(answers, ['incomes', 'resident']);
+
+  return reduceAnswersByHousingCategories(residentIncomeAnswers);
+}
+
+export function makeFinancialEntryIfValid(
+  title: string,
+  value: CaseFormAnswerValue | undefined
+): FinancialEntry | undefined {
+  return value
+    ? {
+        title,
+        value: parseFloat(value as string),
+      }
+    : undefined;
+}
+
+function mapOtherAsset(answers: CaseFormAnswer[]): FinancialEntry {
+  return {
+    title: formHelpers.getFirstAnswerValueByTags(answers, ['description']) ?? 'Övrig tillgång',
+    value: parseFloat(formHelpers.getFirstAnswerValueByTags(answers, ['amount']) as string),
+  };
+}
+
+function getAssets(answers: CaseFormAnswer[]): FinancialEntry[] {
+  const relevantAnswers = formHelpers.filterByTags(answers, ['assets']);
+  const vehicleAssetValue = formHelpers.getFirstAnswerValueByTags(relevantAnswers, [
+    'fordon',
+    'amount',
+  ]);
+  const housingAssetValue = formHelpers.getFirstAnswerValueByTags(relevantAnswers, [
+    'fastighet',
+    'amount',
+  ]);
+
+  const otherAssetAnswers = formHelpers.filterByTags(relevantAnswers, ['övrig']);
+  const groupedOtherAssetAnswers = groupAnswersByGroupTag(otherAssetAnswers);
+
+  const consolidated = [
+    makeFinancialEntryIfValid('Fordon', vehicleAssetValue),
+    makeFinancialEntryIfValid('Eget hus, lägenhet eller fastighet', housingAssetValue),
+    ...groupedOtherAssetAnswers.map(mapOtherAsset),
+  ];
+
+  return filterValid(consolidated);
 }
 
 export function createFinancials(answers: CaseFormAnswer[]): Financials {
   return {
     governmentAids: createGovernmentAids(answers),
     expenses: createExpenses(answers),
+    residentIncomes: getResidentIncomes(answers),
+    assets: getAssets(answers),
   } as Financials;
 }
