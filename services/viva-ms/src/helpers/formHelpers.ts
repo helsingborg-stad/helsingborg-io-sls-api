@@ -1,4 +1,5 @@
-import type { CaseFormAnswer, CaseFormAnswerValue, ValidTags } from '../types/caseItem';
+import type { CaseFormAnswer, CaseFormAnswerValue } from '../types/caseItem';
+import type { ValidTags } from './caseTemplate/shared';
 
 function getTagIfIncludes(tags, string) {
   return tags.find(tag => tag.includes(string));

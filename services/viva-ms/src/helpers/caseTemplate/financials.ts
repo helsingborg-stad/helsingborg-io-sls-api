@@ -1,13 +1,13 @@
-import type { CaseFormAnswer, CaseFormAnswerValue, ValidTags } from '../../types/caseItem';
+import type { CaseFormAnswer, CaseFormAnswerValue } from '../../types/caseItem';
 import formHelpers from '../formHelpers';
+import type { ValidTags } from './shared';
 import {
   filterCheckedTags,
-  parseRelativeMonth,
-  groupAnswersByGroupTag,
   filterValid,
+  groupAnswersByGroupTag,
+  parseRelativeMonth,
 } from './shared';
 
-// TODO: move
 export interface FinancialEntry {
   title: string;
   value: number;

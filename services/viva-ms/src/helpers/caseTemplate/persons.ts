@@ -1,15 +1,11 @@
 import deepMerge from 'lodash.merge';
-import type {
-  CaseFormAnswer,
-  CaseFormAnswerValue,
-  CasePerson,
-  ValidTags,
-} from '../../types/caseItem';
+import type { CaseFormAnswer, CasePerson } from '../../types/caseItem';
 import { CasePersonRole } from '../../types/caseItem';
 import formHelpers from '../formHelpers';
 import { FinancialEntry, makeFinancialEntryIfValid } from './financials';
 import type { Occupation } from './occupation';
 import { createOccupations } from './occupation';
+import type { ValidTags } from './shared';
 import { filterValid, groupAnswersByGroupTag, Human, toDateString } from './shared';
 
 export interface TemplatePerson extends Partial<Human> {
@@ -107,10 +103,6 @@ function getIncomes(answers: CaseFormAnswer[]): FinancialEntry[] {
   return filterValid([...salaries, ...otherIncomes, foreignPension]);
 }
 
-function makeIfValid<T, V>(value: V | null | undefined, out: T): T | undefined {
-  return value ? out : undefined;
-}
-
 function mapMedicine(answers: CaseFormAnswer[]): FinancialEntry {
   const description = formHelpers.getFirstAnswerValueByTags<string>(answers, ['description']);
   return {
@@ -188,7 +180,12 @@ export function createTemplatePersons(
   const allPersonAnswers = allRoleAnswers.map(roleAnswers =>
     pairPersonToRoleAnswers(persons, roleAnswers)
   );
-  return allPersonAnswers.map(({ person, answers, role }) =>
+
+  const personAnswersWithAnyAnswers = allPersonAnswers.filter(
+    personAnswers => personAnswers.answers.length > 0
+  );
+
+  return personAnswersWithAnyAnswers.map(({ person, answers, role }) =>
     createTemplatePerson(person, role, answers)
   );
 }

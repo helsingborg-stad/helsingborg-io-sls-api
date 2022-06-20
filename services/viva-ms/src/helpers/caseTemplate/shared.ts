@@ -1,11 +1,91 @@
 import clone from 'lodash.clone';
-import type {
-  CaseFormAnswer,
-  CaseFormAnswerValue,
-  CasePersonRole,
-  ValidTags,
-} from '../../types/caseItem';
+import type { CaseFormAnswer, CaseFormAnswerValue, CasePersonRole } from '../../types/caseItem';
 import { formatTimestampToDate } from '../formatPeriodDates';
+
+type SharedTags =
+  | 'type'
+  | 'description'
+  | 'amount'
+  | 'children'
+  | 'expenses'
+  | 'incomes'
+  | 'firstName'
+  | 'lastName'
+  | 'personalNumber'
+  | 'housing';
+
+type PersonTags =
+  | 'citizenship'
+  | 'date'
+  | 'description'
+  | 'amount'
+  | 'date'
+  | 'foreignPension'
+  | 'applicant'
+  | 'coapplicant'
+  | 'lon'
+  | 'other'
+  | 'akassa'
+  | 'medicin'
+  | 'tandvard'
+  | 'annat'
+  | 'phonenumber'
+  | 'email';
+
+type OccupationTags =
+  | 'occupation'
+  | 'date'
+  | 'fulltime'
+  | 'parttime'
+  | 'unemployed'
+  | 'parentalleave'
+  | 'studies'
+  | 'sickleave'
+  | 'otheroccupation';
+
+type NoteTags = 'message';
+
+type HousingTags =
+  | 'address'
+  | 'postalCode'
+  | 'postalAddress'
+  | 'numberPeopleLiving'
+  | 'value'
+  | 'rent'
+  | 'debtRent'
+  | 'ownRoom'
+  | 'ownerContractApproved'
+  | 'layout'
+  | 'homelessDescription'
+  | 'otherLivingDescription';
+
+type ChildTags = 'school';
+
+type FinancialTags =
+  | 'boende'
+  | 'electricity'
+  | 'homeinsurance'
+  | 'internet'
+  | 'unemployment'
+  | 'insurance'
+  | 'csn'
+  | 'pension'
+  | 'aid'
+  | 'childcare'
+  | 'resident'
+  | 'assets'
+  | 'fordon'
+  | 'fastighet'
+  | 'övrig';
+
+export type ValidTags =
+  | SharedTags
+  | PersonTags
+  | OccupationTags
+  | NoteTags
+  | HousingTags
+  | ChildTags
+  | FinancialTags;
 
 export interface Human {
   role: CasePersonRole;
