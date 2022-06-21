@@ -3,22 +3,20 @@ import {
   GetObjectOutput as S3GetObjectOutput,
   PutObjectOutput as S3PutObjectOutput,
 } from 'aws-sdk/clients/s3';
-import { AWSError } from 'aws-sdk/lib/error';
-import { PromiseResult } from 'aws-sdk/lib/request';
-
+import type { AWSError } from 'aws-sdk/lib/error';
+import type { PromiseResult } from 'aws-sdk/lib/request';
+import type { Template } from '../helpers/createCaseTemplate';
+import createCaseTemplate from '../helpers/createCaseTemplate';
+import createRecurringCaseTemplate from '../helpers/createRecurringCaseTemplate';
+import { getClosedUserCases, updateVivaCaseState } from '../helpers/dynamoDb';
+import handlebars from '../helpers/htmlTemplate';
+import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import config from '../libs/config';
 import log from '../libs/logs';
 import params from '../libs/params';
-import S3 from '../libs/S3';
 import { getItem } from '../libs/queries';
-
-import handlebars from '../helpers/htmlTemplate';
-import putVivaMsEvent from '../helpers/putVivaMsEvent';
-import { getClosedUserCases, updateVivaCaseState } from '../helpers/dynamoDb';
-
+import S3 from '../libs/S3';
 import type { CaseFormAnswer, CaseItem } from '../types/caseItem';
-import type { Template } from '../helpers/createCaseTemplate';
-import createCaseTemplate from '../helpers/createCaseTemplate';
 export interface LambdaRequest {
   detail: {
     caseKeys: {
@@ -39,6 +37,8 @@ interface VivaCaseSSMParams {
   newApplicationRandomCheckFormId: string;
 }
 
+type CaseTemplateDataFunction = (caseItem: CaseItem, answers: CaseFormAnswer[]) => Template;
+
 export interface Dependencies {
   getStoredUserCase: (
     TableName: string,
@@ -55,7 +55,11 @@ export interface Dependencies {
   ) => Promise<PromiseResult<S3PutObjectOutput, AWSError>>;
   updateVivaCaseState: (caseItem: CaseItem) => Promise<void>;
   putHtmlGeneratedSuccessEvent: (detail: unknown) => Promise<void>;
-  caseTemplateFunc: (caseItem: CaseItem, answers: CaseFormAnswer[]) => Template;
+  getCaseTemplateFunc: (
+    caseItem: CaseItem,
+    answers: CaseFormAnswer[],
+    newApplicationFormId: string
+  ) => CaseTemplateDataFunction;
 }
 
 function getChangedCaseAnswerValues(
@@ -91,6 +95,20 @@ function validateRequest(data: LambdaRequest): boolean {
 function printErrorAndReturn(msg: string, customData?: unknown): false {
   log.writeError(msg, customData);
   return false;
+}
+
+function getCaseTemplateFuncBasedOnCaseForm(
+  caseItem: CaseItem,
+  answers: CaseFormAnswer[],
+  newApplicationFormId: string
+): CaseTemplateDataFunction {
+  const formId = caseItem.currentFormId;
+
+  if (formId === newApplicationFormId) {
+    return createCaseTemplate;
+  }
+
+  return createRecurringCaseTemplate as unknown as CaseTemplateDataFunction;
 }
 
 export async function generateRecurringCaseHtml(
@@ -135,7 +153,7 @@ export async function generateRecurringCaseHtml(
 
   const { Items: closedCaseList } = closedUserCases;
 
-  const { recurringFormId } = vivaCaseSSMParams;
+  const { recurringFormId, newApplicationFormId } = vivaCaseSSMParams;
   let changedAnswerValues: CaseFormAnswer[] = caseItem.forms[caseItem.currentFormId]?.answers ?? [];
   if (closedCaseList.length > 0) {
     const [closedCase] = closedCaseList.sort((caseA, caseB) => caseB.updatedAt - caseA.updatedAt);
@@ -159,7 +177,12 @@ export async function generateRecurringCaseHtml(
   const handlebarsTemplateFileBody = hbsTemplateS3Object.Body?.toString();
   const template = handlebars.compile(handlebarsTemplateFileBody);
 
-  const caseTemplateData = dependencies.caseTemplateFunc(caseItem, changedAnswerValues);
+  const caseTemplateDataFunc = dependencies.getCaseTemplateFunc(
+    caseItem,
+    changedAnswerValues,
+    newApplicationFormId
+  );
+  const caseTemplateData = caseTemplateDataFunc(caseItem, changedAnswerValues);
   const html = template(caseTemplateData);
 
   const caseHtmlKey = `html/case-${caseItem.id}.html`;
@@ -200,7 +223,7 @@ export const main = log.wrap(async event => {
     storeFile: S3.storeFile,
     updateVivaCaseState,
     putHtmlGeneratedSuccessEvent: putVivaMsEvent.htmlGeneratedSuccess,
-    caseTemplateFunc: createCaseTemplate,
+    getCaseTemplateFunc: getCaseTemplateFuncBasedOnCaseForm,
   });
 });
 

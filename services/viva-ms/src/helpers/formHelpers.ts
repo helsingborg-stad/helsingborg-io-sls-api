@@ -24,8 +24,9 @@ function filterByFieldIdIncludes(answers: CaseFormAnswer[], shouldInclude: strin
   return answers.filter(answer => fieldIdIncludes(answer.field.id, shouldInclude));
 }
 
-function filterByTags(answers: CaseFormAnswer[], tags: ValidTags[]): CaseFormAnswer[] {
-  return answers.filter(answer => tags.every(tag => answer.field.tags.includes(tag)));
+function filterByTags(answers: CaseFormAnswer[], tags: ValidTags | ValidTags[]): CaseFormAnswer[] {
+  const tagsArray = Array.isArray(tags) ? tags : [tags];
+  return answers.filter(answer => tagsArray.every(tag => answer.field.tags.includes(tag)));
 }
 
 function getFirstAnswerValueByTags<T extends CaseFormAnswerValue>(
