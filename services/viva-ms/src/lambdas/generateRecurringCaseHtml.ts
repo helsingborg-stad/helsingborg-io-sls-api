@@ -228,5 +228,3 @@ export const main = log.wrap(async event => {
     getCaseTemplateFunc: getCaseTemplateFuncBasedOnCaseForm,
   });
 });
-
-});
