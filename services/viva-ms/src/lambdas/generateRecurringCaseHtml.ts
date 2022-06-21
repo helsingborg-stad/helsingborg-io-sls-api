@@ -164,10 +164,12 @@ export async function generateRecurringCaseHtml(
     );
   }
 
+  const isNewCase = caseItem.currentFormId === newApplicationFormId;
+
   const [s3GetObjectError, hbsTemplateS3Object] = await to(
     dependencies.getFile(
       process.env.PDF_STORAGE_BUCKET_NAME ?? '',
-      'templates/ekb-recurring-v2.hbs'
+      isNewCase ? 'templates/ekb-recurring-v3.hbs' : 'templates/ekb-recurring-v2.hbs'
     )
   );
   if (!hbsTemplateS3Object || s3GetObjectError) {
