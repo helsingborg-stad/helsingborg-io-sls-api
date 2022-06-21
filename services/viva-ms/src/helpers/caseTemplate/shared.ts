@@ -3,80 +3,81 @@ import type { CaseFormAnswer, CaseFormAnswerValue, CasePersonRole } from '../../
 import { formatTimestampToDate } from '../formatPeriodDates';
 
 type SharedTags =
-  | 'type'
-  | 'description'
   | 'amount'
+  | 'changed'
   | 'children'
+  | 'description'
   | 'expenses'
-  | 'incomes'
   | 'firstName'
+  | 'housing'
+  | 'incomes'
   | 'lastName'
   | 'personalNumber'
-  | 'housing';
+  | 'type';
 
 type PersonTags =
+  | 'akassa'
+  | 'amount'
+  | 'annat'
+  | 'applicant'
   | 'citizenship'
+  | 'coapplicant'
+  | 'date'
   | 'date'
   | 'description'
-  | 'amount'
-  | 'date'
+  | 'email'
   | 'foreignPension'
-  | 'applicant'
-  | 'coapplicant'
   | 'lon'
-  | 'other'
-  | 'akassa'
   | 'medicin'
-  | 'tandvard'
-  | 'annat'
+  | 'other'
   | 'phonenumber'
-  | 'email';
+  | 'tandvard';
 
 type OccupationTags =
-  | 'occupation'
   | 'date'
   | 'fulltime'
-  | 'parttime'
-  | 'unemployed'
+  | 'occupation'
+  | 'otheroccupation'
   | 'parentalleave'
-  | 'studies'
+  | 'parttime'
   | 'sickleave'
-  | 'otheroccupation';
+  | 'studies'
+  | 'unemployed';
 
 type NoteTags = 'message';
 
 type HousingTags =
   | 'address'
-  | 'postalCode'
-  | 'postalAddress'
-  | 'numberPeopleLiving'
-  | 'value'
-  | 'rent'
   | 'debtRent'
-  | 'ownRoom'
-  | 'ownerContractApproved'
-  | 'layout'
   | 'homelessDescription'
-  | 'otherLivingDescription';
+  | 'layout'
+  | 'numberPeopleLiving'
+  | 'otherLivingDescription'
+  | 'ownerContractApproved'
+  | 'ownRoom'
+  | 'postalAddress'
+  | 'postalCode'
+  | 'rent'
+  | 'value';
 
 type ChildTags = 'school';
 
 type FinancialTags =
-  | 'boende'
-  | 'electricity'
-  | 'homeinsurance'
-  | 'internet'
-  | 'unemployment'
-  | 'insurance'
-  | 'csn'
-  | 'pension'
   | 'aid'
-  | 'childcare'
-  | 'resident'
   | 'assets'
-  | 'fordon'
+  | 'boende'
+  | 'childcare'
+  | 'csn'
+  | 'electricity'
   | 'fastighet'
-  | 'övrig';
+  | 'fordon'
+  | 'homeinsurance'
+  | 'insurance'
+  | 'internet'
+  | 'övrig'
+  | 'pension'
+  | 'resident'
+  | 'unemployment';
 
 export type ValidTags =
   | SharedTags
