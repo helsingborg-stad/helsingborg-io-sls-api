@@ -5,8 +5,8 @@ import formHelpers from '../formHelpers';
 import { FinancialEntry, makeFinancialEntryIfValid } from './financials';
 import type { Occupation } from './occupation';
 import { createOccupations } from './occupation';
-import type { ValidTags } from './shared';
-import { filterValid, groupAnswersByGroupTag, Human, toDateString } from './shared';
+import { mapToCommonValue, ValidTags } from './shared';
+import { filterValid, groupAnswersByGroupTag, Human } from './shared';
 
 export interface TemplatePerson extends Partial<Human> {
   phone?: string;
@@ -65,17 +65,15 @@ function getCitizenship(answers: CaseFormAnswer[]): string {
 
 function mapSalary(answers: CaseFormAnswer[], index: number): FinancialEntry {
   return {
+    ...mapToCommonValue(answers),
     title: `Lön ${index + 1}`,
-    value: parseInt(formHelpers.getFirstAnswerValueByTags(answers, ['amount']) as string),
-    date: toDateString(formHelpers.getFirstAnswerValueByTags(answers, ['date'])),
   };
 }
 
 function mapOtherIncome(answers: CaseFormAnswer[]): FinancialEntry {
   return {
+    ...mapToCommonValue(answers),
     title: formHelpers.getFirstAnswerValueByTags(answers, ['description']) ?? 'Annan inkomst',
-    value: parseInt(formHelpers.getFirstAnswerValueByTags(answers, ['amount']) as string),
-    date: toDateString(formHelpers.getFirstAnswerValueByTags(answers, ['date'])) || undefined,
   };
 }
 
@@ -83,8 +81,8 @@ function getForeignPension(answers: CaseFormAnswer[]): FinancialEntry | undefine
   const foreignPensionAnswer = formHelpers.getFirstAnswerValueByTags(answers, ['foreignPension']);
   return foreignPensionAnswer
     ? <FinancialEntry>{
+        ...mapToCommonValue(answers),
         title: 'Utländsk pension',
-        value: parseInt(foreignPensionAnswer as string),
       }
     : undefined;
 }
@@ -106,25 +104,23 @@ function getIncomes(answers: CaseFormAnswer[]): FinancialEntry[] {
 function mapMedicine(answers: CaseFormAnswer[]): FinancialEntry {
   const description = formHelpers.getFirstAnswerValueByTags<string>(answers, ['description']);
   return {
+    ...mapToCommonValue(answers),
     title: description ?? 'Medicin',
-    value: parseFloat(formHelpers.getFirstAnswerValueByTags(answers, ['amount']) as string),
-    date: toDateString(formHelpers.getFirstAnswerValueByTags(answers, ['date'])),
   };
 }
 
 function mapDental(answers: CaseFormAnswer[]): FinancialEntry {
   return {
+    ...mapToCommonValue(answers),
     title: 'Tandvård',
-    value: parseFloat(formHelpers.getFirstAnswerValueByTags(answers, ['amount']) as string),
-    date: toDateString(formHelpers.getFirstAnswerValueByTags(answers, ['date'])),
   };
 }
 
 function mapOtherExpense(answers: CaseFormAnswer[]): FinancialEntry {
   const description = formHelpers.getFirstAnswerValueByTags<string>(answers, ['description']);
   return {
+    ...mapToCommonValue(answers),
     title: description ?? 'Övrig utgift',
-    value: parseFloat(formHelpers.getFirstAnswerValueByTags(answers, ['amount']) as string),
   };
 }
 

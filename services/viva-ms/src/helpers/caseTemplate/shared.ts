@@ -1,6 +1,7 @@
 import clone from 'lodash.clone';
 import type { CaseFormAnswer, CaseFormAnswerValue, CasePersonRole } from '../../types/caseItem';
 import { formatTimestampToDate } from '../formatPeriodDates';
+import formHelpers from '../formHelpers';
 
 type SharedTags =
   | 'amount'
@@ -95,6 +96,13 @@ export interface Human {
   lastName: string;
 }
 
+export interface CommonValue {
+  type?: string;
+  description?: string;
+  date?: string;
+  value: number;
+}
+
 export function groupAnswersByGroupTag(answers: CaseFormAnswer[]): CaseFormAnswer[][] {
   const extractRegex = /^group:.*:(\d+)$/;
 
@@ -113,6 +121,18 @@ export function groupAnswersByGroupTag(answers: CaseFormAnswer[]): CaseFormAnswe
   }, [] as CaseFormAnswer[][]);
 
   return groupedAnswers;
+}
+
+export function mapToCommonValue(answers: CaseFormAnswer[]): CommonValue {
+  const value =
+    formHelpers.getFirstAnswerValueByTags(answers, ['value']) ??
+    formHelpers.getFirstAnswerValueByTags(answers, ['amount']);
+  return {
+    type: formHelpers.getFirstAnswerValueByTags(answers, ['type']),
+    description: formHelpers.getFirstAnswerValueByTags(answers, ['description']),
+    value: parseFloat(value as string),
+    date: toDateString(formHelpers.getFirstAnswerValueByTags(answers, ['date'])),
+  };
 }
 
 export function filterValid<T>(list: (T | undefined | null)[]): T[] {
