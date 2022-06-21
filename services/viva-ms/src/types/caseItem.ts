@@ -1,3 +1,5 @@
+import { ValidTags } from '../helpers/caseTemplate/shared';
+
 export interface CaseUser {
   readonly personalNumber: string;
   readonly firstName: string;
@@ -125,7 +127,7 @@ export interface AnswerAttachment {
 
 export interface CaseFormAnswerField {
   id: string;
-  tags: string[];
+  tags: ValidTags[];
 }
 
 export enum EncryptionType {
