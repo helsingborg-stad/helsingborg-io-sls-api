@@ -55,7 +55,7 @@ export interface Dependencies {
   decodeToken: (params: LambdaRequest) => Token;
   updateCase: (params: UpdateCaseParameters) => Promise<UpdateCaseAddPersonResponse>;
   coApplicantStatus: (personalNumber: string) => Promise<unknown>;
-  validateCoApplicantStatus: (statusList: unknown, requiredCodeList: unknown) => boolean;
+  validateCoApplicantStatus: typeof validateApplicationStatus;
   getCase: (keys: CaseKeys) => Promise<CaseItem>;
   getFormTemplates: typeof getFormTemplates;
   populateForm: typeof populateFormWithPreviousCaseAnswers;
