@@ -41,7 +41,10 @@ function getCheckedOtherAdultsLivingDescriptions(answers: CaseFormAnswer[]): str
       potentialLivingType,
     ]);
     if (checkValue === true) {
-      return [...list, friendlyOtherAdultsLivingDescriptions[potentialLivingType]];
+      return [
+        ...list,
+        friendlyOtherAdultsLivingDescriptions[potentialLivingType as ValidOtherAdultsLivingTypes],
+      ];
     }
     return list;
   }, [] as string[]);
