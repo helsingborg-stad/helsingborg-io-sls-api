@@ -15,6 +15,7 @@ import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
 import { CasePersonRole } from '../types/caseItem';
 import type { CaseItem, CasePerson, CaseForm } from '../types/caseItem';
+import type { VivaApplicationStatus } from '../types/vivaMyPages';
 
 type CaseKeys = Pick<CaseItem, 'PK' | 'SK'>;
 
@@ -108,7 +109,10 @@ export async function addCasePerson(input: LambdaRequest, dependencies: Dependen
     return response.failure(new BadRequestError(message));
   }
 
-  const statusList = await coApplicantStatus(coApplicantRequestBody.personalNumber);
+  const statusList = (await coApplicantStatus(
+    coApplicantRequestBody.personalNumber
+  )) as VivaApplicationStatus[];
+
   const coApplicantAllowedStatusCode = [VIVA_STATUS_NEW_APPLICATION_OPEN];
   if (!validateCoApplicantStatus(statusList, coApplicantAllowedStatusCode)) {
     const message = process.env.forbiddenMessage ?? '';
