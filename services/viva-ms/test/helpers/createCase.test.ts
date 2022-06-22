@@ -9,7 +9,14 @@ import {
   VivaPersonsPerson,
   VivaPersonType,
 } from '../../src/types/vivaMyPages';
-import { CasePerson, CasePeriod } from '../../src/types/caseItem';
+import {
+  CasePerson,
+  CasePeriod,
+  CaseFormEncryption,
+  EncryptionType,
+} from '../../src/types/caseItem';
+
+import { DEFAULT_CURRENT_POSITION } from '../../src/helpers/constants';
 
 const vivaApplication: VivaMyPagesPersonApplication = {
   workflowid: '123',
@@ -124,5 +131,29 @@ describe('getCasePersonList', () => {
         hasSigned: false,
       },
     ]);
+  });
+});
+
+describe('getInitialFormAttributes', () => {
+  it('returns initial form attributes', () => {
+    const formIds = ['1', '2'];
+
+    const caseEncryption: CaseFormEncryption = {
+      type: EncryptionType.Decrypted,
+      symmetricKeyName: 'symmetricKeyName',
+    };
+
+    const expectedDefaultValue = {
+      encryption: caseEncryption,
+      answers: [],
+      currentPosition: DEFAULT_CURRENT_POSITION,
+    };
+
+    const result = caseHelper.getInitialFormAttributes(formIds, caseEncryption);
+
+    expect(result).toEqual({
+      [formIds[0]]: expectedDefaultValue,
+      [formIds[1]]: expectedDefaultValue,
+    });
   });
 });
