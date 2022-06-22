@@ -119,7 +119,7 @@ it('successfully add person to case', async () => {
   expect(updateCaseMock).toHaveBeenCalledWith({
     caseKeys,
     coApplicant,
-    form: { '123abc': { ...form } },
+    form: {},
   });
 
   expect(result.statusCode).toBe(200);
