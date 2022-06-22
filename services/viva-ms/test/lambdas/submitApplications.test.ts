@@ -7,6 +7,8 @@ import {
 import { EncryptionType } from '../../src/types/caseItem';
 import { VivaApplicationType } from '../../src/types/vivaMyPages';
 
+import { DEFAULT_CURRENT_POSITION } from '../../src/helpers/constants';
+
 const newApplicationFormId = 'newApplicationFormId';
 const recurrentFormId = 'recurrentFormId';
 const PK = 'mockPK';
@@ -16,13 +18,7 @@ const postVivaResponseId = 'mockPostResponseId';
 
 const form = {
   answers: [],
-  currentPosition: {
-    currentMainStep: 0,
-    currentMainStepIndex: 0,
-    index: 0,
-    level: 0,
-    numberOfMainSteps: 0,
-  },
+  currentPosition: DEFAULT_CURRENT_POSITION,
   encryption: {
     type: EncryptionType.Decrypted,
   },
