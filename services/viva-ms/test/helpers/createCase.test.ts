@@ -68,55 +68,61 @@ const vivaCaseWithPersonList: VivaMyPagesPersonCase = {
   persons: vivaPersonList,
 };
 
-it('Results in a string without any non numeric characters', () => {
-  const someStringIncludingNonNumericChars = '19660201-1212';
-  const result = caseHelper.stripNonNumericalCharacters(someStringIncludingNonNumericChars);
-  expect(result).toBe('196602011212');
-});
-
-it('Returns an CasePeriod object with UTC timestamps', () => {
-  const result: CasePeriod = caseHelper.getPeriodInMilliseconds(vivaApplication);
-  expect(result).toEqual({
-    endDate: 1643587200000,
-    startDate: 1640995200000,
+describe('stripNonNumericalCharacters', () => {
+  it('Results in a string without any non numeric characters', () => {
+    const someStringIncludingNonNumericChars = '19660201-1212';
+    const result = caseHelper.stripNonNumericalCharacters(someStringIncludingNonNumericChars);
+    expect(result).toBe('196602011212');
   });
 });
 
-it('Returns an list with CasePerson objects', () => {
-  const result: CasePerson[] = caseHelper.getCasePersonList(vivaCaseWithPersonList);
-  expect(result).toEqual([
-    {
-      personalNumber: '198602132394',
-      firstName: 'Bror',
-      lastName: 'Christiansson',
-      role: 'applicant',
-      hasSigned: false,
-    },
-    {
-      personalNumber: '197904123241',
-      firstName: 'Ulla',
-      lastName: 'Christiansson',
-      role: 'coApplicant',
-      hasSigned: false,
-    },
-    {
-      personalNumber: '200002014233',
-      firstName: 'Lisa',
-      lastName: 'Nilsson',
-      role: 'children',
-    },
-  ]);
+describe('getPeriodInMilliseconds', () => {
+  it('Returns an CasePeriod object with UTC timestamps', () => {
+    const result: CasePeriod = caseHelper.getPeriodInMilliseconds(vivaApplication);
+    expect(result).toEqual({
+      endDate: 1643587200000,
+      startDate: 1640995200000,
+    });
+  });
 });
 
-it('Returns an list with the client only as a single CasePerson object', () => {
-  const result: CasePerson[] = caseHelper.getCasePersonList(vivaCaseClientOnly);
-  expect(result).toEqual([
-    {
-      personalNumber: '198602132394',
-      firstName: 'Bror',
-      lastName: 'Christiansson',
-      role: 'applicant',
-      hasSigned: false,
-    },
-  ]);
+describe('getCasePersonList', () => {
+  it('Returns an list with CasePerson objects', () => {
+    const result: CasePerson[] = caseHelper.getCasePersonList(vivaCaseWithPersonList);
+    expect(result).toEqual([
+      {
+        personalNumber: '198602132394',
+        firstName: 'Bror',
+        lastName: 'Christiansson',
+        role: 'applicant',
+        hasSigned: false,
+      },
+      {
+        personalNumber: '197904123241',
+        firstName: 'Ulla',
+        lastName: 'Christiansson',
+        role: 'coApplicant',
+        hasSigned: false,
+      },
+      {
+        personalNumber: '200002014233',
+        firstName: 'Lisa',
+        lastName: 'Nilsson',
+        role: 'children',
+      },
+    ]);
+  });
+
+  it('Returns an list with the client only as a single CasePerson object', () => {
+    const result: CasePerson[] = caseHelper.getCasePersonList(vivaCaseClientOnly);
+    expect(result).toEqual([
+      {
+        personalNumber: '198602132394',
+        firstName: 'Bror',
+        lastName: 'Christiansson',
+        role: 'applicant',
+        hasSigned: false,
+      },
+    ]);
+  });
 });
