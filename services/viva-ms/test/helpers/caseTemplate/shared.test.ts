@@ -1,12 +1,11 @@
+import type { CommonValue, ValidTags } from '../../../src/helpers/caseTemplate/shared';
 import {
-  CommonValue,
   filterCheckedTags,
   filterValid,
   getMonthNameFromDate,
   mapToCommonValue,
   parseRelativeMonth,
   toDateString,
-  ValidTags,
 } from '../../../src/helpers/caseTemplate/shared';
 import { CaseFormAnswer, CaseFormAnswerValue } from '../../../src/types/caseItem';
 
