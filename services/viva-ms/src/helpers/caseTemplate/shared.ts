@@ -14,7 +14,8 @@ type SharedTags =
   | 'incomes'
   | 'lastName'
   | 'personalNumber'
-  | 'type';
+  | 'type'
+  | `group:${string}:${number}`;
 
 type PersonTags =
   | 'akassa'

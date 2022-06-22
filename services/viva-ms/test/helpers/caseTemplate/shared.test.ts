@@ -1,4 +1,8 @@
-import type { CommonValue, ValidTags } from '../../../src/helpers/caseTemplate/shared';
+import {
+  CommonValue,
+  groupAnswersByGroupTag,
+  ValidTags,
+} from '../../../src/helpers/caseTemplate/shared';
 import {
   filterCheckedTags,
   filterValid,
@@ -9,9 +13,53 @@ import {
 } from '../../../src/helpers/caseTemplate/shared';
 import { CaseFormAnswer, CaseFormAnswerValue } from '../../../src/types/caseItem';
 
+function makeAnswer(tags: ValidTags | ValidTags[], value: CaseFormAnswerValue): CaseFormAnswer {
+  const tagsToUse = Array.isArray(tags) ? tags : [tags];
+  return {
+    field: { id: '', tags: tagsToUse },
+    value,
+  };
+}
+
 describe('Case Template - shared', () => {
   describe('groupAnswersByGroupTag', () => {
-    //
+    it('groups answers', () => {
+      const firstGroupAnswers: CaseFormAnswer[] = [
+        makeAnswer('group:test:0', 1337),
+        makeAnswer('group:test2:0', 'Hello'),
+        makeAnswer('group:test3:0', true),
+      ];
+      const secondGroupAnswers: CaseFormAnswer[] = [
+        makeAnswer('group:test:1', 1234),
+        makeAnswer('group:test2:1', 'World'),
+        makeAnswer('group:test3:1', false),
+      ];
+      const allAnswers = [...firstGroupAnswers, ...secondGroupAnswers];
+
+      const result = groupAnswersByGroupTag(allAnswers);
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual(expect.arrayContaining(firstGroupAnswers));
+      expect(result[0]).toHaveLength(firstGroupAnswers.length);
+      expect(result[1]).toEqual(expect.arrayContaining(secondGroupAnswers));
+      expect(result[1]).toHaveLength(secondGroupAnswers.length);
+    });
+
+    it('ignores non-group answers', () => {
+      const ignoredAnswer = makeAnswer('aid', 'ignore this');
+      const answers: CaseFormAnswer[] = [
+        makeAnswer('group:test:0', 1337),
+        makeAnswer('group:test2:0', 'Hello'),
+        makeAnswer('group:test3:0', true),
+        ignoredAnswer,
+      ];
+
+      const result = groupAnswersByGroupTag(answers);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toHaveLength(answers.length - 1);
+      expect(result).not.toContain(ignoredAnswer);
+    });
   });
 
   describe('filterValid', () => {
@@ -35,26 +83,11 @@ describe('Case Template - shared', () => {
       };
 
       const answers: CaseFormAnswer[] = [
-        {
-          field: { id: '', tags: ['type'] },
-          value: expected.type,
-        },
-        {
-          field: { id: '', tags: ['description'] },
-          value: expected.description,
-        },
-        {
-          field: { id: '', tags: ['date'] },
-          value: 1655028000000,
-        },
-        {
-          field: { id: '', tags: ['value'] },
-          value: expected.value,
-        },
-        {
-          field: { id: '', tags: ['annat'] },
-          value: 'NOT INCLUDED',
-        },
+        makeAnswer('type', expected.type),
+        makeAnswer('description', expected.description),
+        makeAnswer('date', 1655028000000),
+        makeAnswer('value', expected.value),
+        makeAnswer('annat', 'NOT INCLUDED'),
       ];
 
       const result = mapToCommonValue(answers);
@@ -63,20 +96,8 @@ describe('Case Template - shared', () => {
     });
 
     it.each<[string, CaseFormAnswer]>([
-      [
-        'value',
-        {
-          field: { id: '', tags: ['value'] },
-          value: 1337,
-        },
-      ],
-      [
-        'amount',
-        {
-          field: { id: '', tags: ['amount'] },
-          value: 1338,
-        },
-      ],
+      ['value', makeAnswer('value', 1337)],
+      ['amount', makeAnswer('amount', 1338)],
     ])('it maps %s to value', (_, answer) => {
       const expectedValue = answer.value;
 
@@ -92,22 +113,10 @@ describe('Case Template - shared', () => {
       };
 
       const answers: CaseFormAnswer[] = [
-        {
-          field: { id: '', tags: ['type'] },
-          value: 'A',
-        },
-        {
-          field: { id: '', tags: ['type'] },
-          value: 'B',
-        },
-        {
-          field: { id: '', tags: ['value'] },
-          value: 0,
-        },
-        {
-          field: { id: '', tags: ['value'] },
-          value: 404,
-        },
+        makeAnswer('type', 'A'),
+        makeAnswer('type', 'B'),
+        makeAnswer('value', 0),
+        makeAnswer('value', 404),
       ];
 
       const result = mapToCommonValue(answers);
@@ -141,34 +150,13 @@ describe('Case Template - shared', () => {
     it('filters', () => {
       const expected: ValidTags[] = ['unemployment', 'insurance', 'csn', 'pension'];
       const answers: CaseFormAnswer[] = [
-        {
-          field: { id: '', tags: ['unemployment'] },
-          value: true,
-        },
-        {
-          field: { id: '', tags: ['insurance'] },
-          value: true,
-        },
-        {
-          field: { id: '', tags: ['csn'] },
-          value: true,
-        },
-        {
-          field: { id: '', tags: ['pension'] },
-          value: true,
-        },
-        {
-          field: { id: '', tags: ['address'] },
-          value: false,
-        },
-        {
-          field: { id: '', tags: ['aid'] },
-          value: 'invalid',
-        },
-        {
-          field: { id: '', tags: ['akassa'] },
-          value: 1234,
-        },
+        makeAnswer('unemployment', true),
+        makeAnswer('insurance', true),
+        makeAnswer('csn', true),
+        makeAnswer('pension', true),
+        makeAnswer('address', false),
+        makeAnswer('aid', 'invalid'),
+        makeAnswer('akassa', 1234),
       ];
 
       const result = filterCheckedTags(answers, expected);
