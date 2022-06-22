@@ -1,21 +1,21 @@
 import type { CaseFormAnswer, CaseFormAnswerValue } from '../types/caseItem';
 import type { ValidTags } from './caseTemplate/shared';
 
-function getTagIfIncludes(tags, string) {
+function getTagIfIncludes(tags: ValidTags[], string: string) {
   return tags.find(tag => tag.includes(string));
 }
 
-function fieldIdIncludes(fieldId, string) {
+function fieldIdIncludes(fieldId: string, string: string) {
   return fieldId.includes(string);
 }
 
-function getAttributeFromAnswerFieldId(fieldId) {
+function getAttributeFromAnswerFieldId(fieldId: string) {
   const splittedId = fieldId.split('.');
   const attribute = splittedId[splittedId.length - 1];
   return attribute;
 }
 
-function getAttributeFromDotNotation(source, position) {
+function getAttributeFromDotNotation(source: string, position: 1) {
   const attributes = source.split('.');
   return attributes[position];
 }
