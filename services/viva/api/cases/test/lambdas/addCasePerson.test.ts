@@ -1,6 +1,6 @@
 import type { Token } from '../../src/libs/token';
 import { addCasePerson } from '../../src/lambdas/addCasePerson';
-import { CasePersonRole, EncryptionType } from '../../src/types/caseItem';
+import { CasePerson, CasePersonRole, EncryptionType } from '../../src/types/caseItem';
 import type { CaseItem, CaseForm } from '../../src/types/caseItem';
 import type { LambdaRequest, Dependencies } from '../../src/lambdas/addCasePerson';
 
@@ -9,7 +9,7 @@ const SK = 'CASE#123';
 const PK = `USER#${personalNumber}`;
 const caseKeys = { PK, SK };
 
-const coApplicant = {
+const coApplicant: CasePerson = {
   personalNumber: '199701031212',
   firstName: 'Svenne',
   lastName: 'Banan',
@@ -101,19 +101,25 @@ function createDependencies(
 }
 
 it('successfully add person to case', async () => {
-  const updateCaseMock = jest.fn().mockResolvedValueOnce({ Attributes: caseItem });
+  const updateCaseMock = jest.fn().mockResolvedValueOnce({ Attributes: { ...caseItem } });
+  const getFormTemplatesMock = jest.fn().mockResolvedValueOnce({});
+
   const input = createInput();
   const dependencies = createDependencies(
     { personalNumber },
     { ...caseItem },
-    { updateCase: updateCaseMock }
+    {
+      updateCase: updateCaseMock,
+      getFormTemplates: getFormTemplatesMock,
+    }
   );
   const result = await addCasePerson(input, dependencies);
 
+  expect(getFormTemplatesMock).toHaveBeenCalledWith(['123abc']);
   expect(updateCaseMock).toHaveBeenCalledWith({
     caseKeys,
     coApplicant,
-    form: { '123abc': form },
+    form: { '123abc': { ...form } },
   });
 
   expect(result.statusCode).toBe(200);
@@ -124,8 +130,36 @@ it('successfully add person to case', async () => {
     data: {
       type: 'addCasePerson',
       attributes: {
-        caseItem: caseItem,
+        caseItem: { ...caseItem },
       },
     },
   });
+});
+
+it('return BadRequestError if co-applicant is the same person', async () => {
+  const input = createInput({
+    body: JSON.stringify({
+      personalNumber,
+      firstName: 'Olle',
+      lastName: 'Cola',
+    }),
+  });
+  const dependencies = createDependencies({ personalNumber }, { ...caseItem });
+  const result = await addCasePerson(input, dependencies);
+
+  expect(result.statusCode).toBe(400);
+});
+
+it('return ForbiddenError if status code is not allowed', async () => {
+  const input = createInput();
+  const dependencies = createDependencies(
+    { personalNumber },
+    { ...caseItem },
+    {
+      validateCoApplicantStatus: () => false,
+    }
+  );
+  const result = await addCasePerson(input, dependencies);
+
+  expect(result.statusCode).toBe(403);
 });
