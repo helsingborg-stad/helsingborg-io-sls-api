@@ -50,6 +50,28 @@ describe('Case Template - shared', () => {
       expect(result[0]).toHaveLength(answers.length - 1);
       expect(result).not.toContain(ignoredAnswer);
     });
+
+    it('handles out-of-order/missing indices', () => {
+      const firstGroupAnswers: CaseFormAnswer[] = [
+        makeAnswer('group:test:5', 1337),
+        makeAnswer('group:test2:5', 'Hello'),
+        makeAnswer('group:test3:5', true),
+      ];
+      const secondGroupAnswers: CaseFormAnswer[] = [
+        makeAnswer('group:test:3', 1234),
+        makeAnswer('group:test2:3', 'World'),
+        makeAnswer('group:test3:3', false),
+      ];
+      const allAnswers = [...firstGroupAnswers, ...secondGroupAnswers];
+
+      const result = groupAnswersByGroupTag(allAnswers);
+
+      expect(result).toHaveLength(6);
+      expect(result[5]).toEqual(expect.arrayContaining(firstGroupAnswers));
+      expect(result[5]).toHaveLength(firstGroupAnswers.length);
+      expect(result[3]).toEqual(expect.arrayContaining(secondGroupAnswers));
+      expect(result[3]).toHaveLength(secondGroupAnswers.length);
+    });
   });
 
   describe('filterValid', () => {
