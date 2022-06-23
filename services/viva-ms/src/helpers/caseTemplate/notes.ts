@@ -1,5 +1,5 @@
 import type { CaseFormAnswer } from '../../types/caseItem';
-import formHelpers from '../formHelpers';
+import * as formHelpers from '../formHelpers';
 import { filterValid } from './shared';
 
 export interface Note {

@@ -1,6 +1,6 @@
 import type { CaseFormAnswer } from '../../types/caseItem';
 import { CasePersonRole } from '../../types/caseItem';
-import formHelpers from '../formHelpers';
+import * as formHelpers from '../formHelpers';
 import type { Human } from './shared';
 import { groupAnswersByGroupTag } from './shared';
 

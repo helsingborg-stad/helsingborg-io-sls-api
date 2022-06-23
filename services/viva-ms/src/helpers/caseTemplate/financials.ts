@@ -1,5 +1,5 @@
 import type { CaseFormAnswer, CaseFormAnswerValue } from '../../types/caseItem';
-import formHelpers from '../formHelpers';
+import * as formHelpers from '../formHelpers';
 import type { ValidTags } from './shared';
 import {
   filterCheckedTags,

@@ -1,7 +1,7 @@
 import deepMerge from 'lodash.merge';
 import type { CaseFormAnswer, CasePerson } from '../../types/caseItem';
 import { CasePersonRole } from '../../types/caseItem';
-import formHelpers from '../formHelpers';
+import * as formHelpers from '../formHelpers';
 import { FinancialEntry, makeFinancialEntryIfValid } from './financials';
 import type { Occupation } from './occupation';
 import { createOccupations } from './occupation';

@@ -1,48 +1,44 @@
 import type { CaseFormAnswer, CaseFormAnswerValue } from '../types/caseItem';
 import type { ValidTags } from './caseTemplate/shared';
 
-function getTagIfIncludes(tags: ValidTags[], string: string) {
+export function getTagIfIncludes(tags: ValidTags[], string: string): ValidTags | undefined {
   return tags.find(tag => tag.includes(string));
 }
 
-function fieldIdIncludes(fieldId: string, string: string) {
+export function fieldIdIncludes(fieldId: string, string: string): boolean {
   return fieldId.includes(string);
 }
 
-function getAttributeFromAnswerFieldId(fieldId: string) {
+export function getAttributeFromAnswerFieldId(fieldId: string): string {
   const splittedId = fieldId.split('.');
   const attribute = splittedId[splittedId.length - 1];
   return attribute;
 }
 
-function getAttributeFromDotNotation(source: string, position: 1) {
+export function getAttributeFromDotNotation(source: string, position: 1): string {
   const attributes = source.split('.');
   return attributes[position];
 }
 
-function filterByFieldIdIncludes(answers: CaseFormAnswer[], shouldInclude: string) {
+export function filterByFieldIdIncludes(
+  answers: CaseFormAnswer[],
+  shouldInclude: string
+): CaseFormAnswer[] {
   return answers.filter(answer => fieldIdIncludes(answer.field.id, shouldInclude));
 }
 
-function filterByTags(answers: CaseFormAnswer[], tags: ValidTags | ValidTags[]): CaseFormAnswer[] {
+export function filterByTags(
+  answers: CaseFormAnswer[],
+  tags: ValidTags | ValidTags[]
+): CaseFormAnswer[] {
   const tagsArray = Array.isArray(tags) ? tags : [tags];
   return answers.filter(answer => tagsArray.every(tag => answer.field.tags.includes(tag)));
 }
 
-function getFirstAnswerValueByTags<T extends CaseFormAnswerValue>(
+export function getFirstAnswerValueByTags<T extends CaseFormAnswerValue>(
   answers: CaseFormAnswer[],
   tags: ValidTags[]
 ): T | undefined {
   const answer = answers.find(answer => tags.every(tag => answer.field.tags.includes(tag)));
   return answer?.value as T;
 }
-
-export default {
-  getTagIfIncludes,
-  fieldIdIncludes,
-  getAttributeFromAnswerFieldId,
-  getAttributeFromDotNotation,
-  filterByTags,
-  filterByFieldIdIncludes,
-  getFirstAnswerValueByTags,
-};

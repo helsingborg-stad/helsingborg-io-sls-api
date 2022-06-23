@@ -1,7 +1,9 @@
 import clone from 'lodash.clone';
-import type { CaseFormAnswer, CaseFormAnswerValue, CasePersonRole } from '../../types/caseItem';
+
 import { formatTimestampToDate } from '../formatPeriodDates';
-import formHelpers from '../formHelpers';
+import * as formHelpers from '../formHelpers';
+
+import type { CaseFormAnswer, CaseFormAnswerValue, CasePersonRole } from '../../types/caseItem';
 
 type SharedTags =
   | 'amount'
