@@ -1,25 +1,15 @@
-import {
-  CommonValue,
-  groupAnswersByGroupTag,
-  ValidTags,
-} from '../../../src/helpers/caseTemplate/shared';
+import type { CommonValue, ValidTags } from '../../../src/helpers/caseTemplate/shared';
 import {
   filterCheckedTags,
   filterValid,
   getMonthNameFromDate,
+  groupAnswersByGroupTag,
   mapToCommonValue,
   parseRelativeMonth,
   toDateString,
 } from '../../../src/helpers/caseTemplate/shared';
 import { CaseFormAnswer, CaseFormAnswerValue } from '../../../src/types/caseItem';
-
-function makeAnswer(tags: ValidTags | ValidTags[], value: CaseFormAnswerValue): CaseFormAnswer {
-  const tagsToUse = Array.isArray(tags) ? tags : [tags];
-  return {
-    field: { id: '', tags: tagsToUse },
-    value,
-  };
-}
+import { makeAnswer } from './testHelpers';
 
 describe('Case Template - shared', () => {
   describe('groupAnswersByGroupTag', () => {
