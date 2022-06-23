@@ -142,8 +142,8 @@ export function filterValid<T>(list: (T | undefined | null)[]): T[] {
   return list.filter(Boolean) as T[];
 }
 
-export function getMonthNameFromDate(date: Date): string {
-  return date.toLocaleDateString('sv-se', { month: 'long' });
+export function getMonthNameFromDate(date: Date, locale: string): string {
+  return date.toLocaleDateString(locale, { month: 'long' });
 }
 
 export function parseRelativeMonth(month: string): string {
@@ -161,11 +161,11 @@ export function parseRelativeMonth(month: string): string {
       const newMonth = thisMonth + actualValue;
       const newDate = new Date();
       newDate.setMonth(newMonth);
-      return getMonthNameFromDate(newDate);
+      return getMonthNameFromDate(newDate, 'sv-se');
     }
   }
 
-  return getMonthNameFromDate(thisDate);
+  return getMonthNameFromDate(thisDate, 'sv-se');
 }
 
 export function filterCheckedTags(answers: CaseFormAnswer[], tags: ValidTags[]): ValidTags[] {

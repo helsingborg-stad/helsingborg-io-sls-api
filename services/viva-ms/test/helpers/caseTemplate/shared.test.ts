@@ -115,6 +115,16 @@ describe('Case Template - shared', () => {
     });
   });
 
+  describe('getMonthNameFromDate', () => {
+    it('gets (Swedish) month name', () => {
+      const date = new Date(1199142000);
+
+      const monthName = getMonthNameFromDate(date, 'sv-se');
+
+      expect(monthName).toBe('januari');
+    });
+  });
+
   describe('parseRelativeMonth', () => {
     function getDateWithMonthOffset(offset: number): Date {
       const newDate = new Date();
@@ -123,12 +133,12 @@ describe('Case Template - shared', () => {
     }
 
     it.each([
-      ['month', getMonthNameFromDate(getDateWithMonthOffset(0))],
-      ['month-1', getMonthNameFromDate(getDateWithMonthOffset(-1))],
-      ['month+1', getMonthNameFromDate(getDateWithMonthOffset(1))],
-      ['month+10', getMonthNameFromDate(getDateWithMonthOffset(10))],
-      ['<invalid>', getMonthNameFromDate(getDateWithMonthOffset(0))],
-      ['month+<invalid>', getMonthNameFromDate(getDateWithMonthOffset(0))],
+      ['month', getMonthNameFromDate(getDateWithMonthOffset(0), 'sv-se')],
+      ['month-1', getMonthNameFromDate(getDateWithMonthOffset(-1), 'sv-se')],
+      ['month+1', getMonthNameFromDate(getDateWithMonthOffset(1), 'sv-se')],
+      ['month+10', getMonthNameFromDate(getDateWithMonthOffset(10), 'sv-se')],
+      ['<invalid>', getMonthNameFromDate(getDateWithMonthOffset(0), 'sv-se')],
+      ['month+<invalid>', getMonthNameFromDate(getDateWithMonthOffset(0), 'sv-se')],
     ])('parses %s as %s', (month, expected) => {
       const result = parseRelativeMonth(month);
 
