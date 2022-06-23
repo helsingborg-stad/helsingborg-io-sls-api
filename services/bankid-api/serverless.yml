@@ -19,6 +19,7 @@ provider:
   endpointType: regional
   tracing:
     lambda: true
+
   apiGateway:
     restApiId:
       'Fn::ImportValue': ${self:custom.stage}-ExtApiGatewayRestApiId
@@ -43,6 +44,7 @@ provider:
                 - ''
                 - - Fn::ImportValue: ${self:custom.stage}-CertificatesBucketArn
                   - '/*'
+
         - Effect: Allow
           Action:
             - events:PutEvents
@@ -53,6 +55,7 @@ provider:
             - SSM:GetParameter*
           Resource:
             - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${file(../../config.json):${self:custom.stage}.bankId.envsKeyName}'
+
         - Effect: Allow
           Action:
             - secretsmanager:GetSecretValue
@@ -65,6 +68,7 @@ provider:
           Action:
             - kms:Decrypt
           Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
+
 functions:
   auth:
     handler: src/lambdas/auth.main

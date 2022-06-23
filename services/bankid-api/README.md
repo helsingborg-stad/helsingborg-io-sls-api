@@ -22,11 +22,11 @@ The workflow to perform a login is as follows: you make an authentication reques
 
 ```
 {
-    "apiUrl": "https://something/rp/v5", //BankId Root URL
-    "passphrase": "yourPassPhrase", //Bankid Passphrase
-    "bucketName": "example-bucketname-1i52eggtf17ir", //Bucket name reference
-    "caName": "bankid.ca",  //Filename of your .ca file
-    "pfxName": "FPTestcert2.pfx" //Filename of your .pfx file
+    "apiUrl": "[BankId Root URL]",
+    "passphrase": "[Bankid Passphrase]",
+    "bucketName": "[AWS S3 bucket name",
+    "caName": "[some.ca file]",
+    "pfxName": "[some.pfx file]"
 }
 ```
 
@@ -41,30 +41,20 @@ A setup of AWS paramterstore on aws. This can be created from the resource api. 
 ### Installation
 
 ```bash
-$ npm install
+yarn install
 ```
-
-### Run Local
-
-```bash
-$ sls offline
-```
-
-When you deploy the service, serverless will output the generated url in the terminal that the service can be accessed from.
 
 ### Deploy and Run on AWS
 
-Deploy command:
-
 ```bash
-$ sls deploy -v
+sls deploy --verbose
 ```
 
 When you deploy the service, serverless will output the generated url in the terminal that the service can be accessed from.
 
-## API
+# BankID API
 
-### BANKID AUTH
+## AUTH
 
 ```mermaid
 sequenceDiagram
@@ -79,11 +69,11 @@ sequenceDiagram
     Lambda-->>-Frontend: {orderRef, autoStartToken}
 ```
 
-#### Endpoint
+### Endpoint
 
 `/bankid/auth`
 
-#### JSON PAYLOAD
+### JSON payload
 
 ```
   {
@@ -92,7 +82,7 @@ sequenceDiagram
   }
 ```
 
-#### Excpected Response
+### Excpected response
 
 ```
 {
@@ -109,7 +99,9 @@ sequenceDiagram
 }
 ```
 
-### BANKID COLLECT
+---
+
+## COLLECT
 
 ```mermaid
 sequenceDiagram
@@ -134,11 +126,11 @@ sequenceDiagram
   end
 ```
 
-#### Endpoint
+### Endpoint
 
 `/bankid/collect`
 
-#### JSON Payload
+### JSON payload
 
 ```
 {
@@ -146,9 +138,9 @@ sequenceDiagram
 }
 ```
 
-#### Expected JSON Response
+### Expected response
 
-While pending:
+Pending:
 
 ```
 {
@@ -166,7 +158,7 @@ While pending:
 }
 ```
 
-After completed login:
+Completed auth:
 
 ```
 {
@@ -197,7 +189,9 @@ After completed login:
 }
 ```
 
-### BANKID CANCEL
+---
+
+## CANCEL
 
 ```mermaid
 sequenceDiagram
@@ -212,11 +206,11 @@ sequenceDiagram
     Lambda-->>Frontend: {}
 ```
 
-#### Endpoint
+### Endpoint
 
 `/bankid/cancel`
 
-#### JSON Payload
+### JSON payload
 
 ```
 {
@@ -224,7 +218,7 @@ sequenceDiagram
 }
 ```
 
-#### Expected JSON Response
+### Expected response
 
 ```
 {
@@ -241,7 +235,9 @@ sequenceDiagram
 }
 ```
 
-### BANKID SIGN
+---
+
+## SIGN
 
 ```mermaid
 sequenceDiagram
@@ -256,11 +252,11 @@ sequenceDiagram
     Lambda-->>-Frontend: {orderRef, autoStartToken}
 ```
 
-#### Endpoint
+### Endpoint
 
 `/bankid/sign`
 
-#### JSON Payload
+### JSON payload
 
 ```
 {
@@ -270,7 +266,7 @@ sequenceDiagram
 }
 ```
 
-#### Expected JSON Response
+### Expected response
 
 ```
 {
