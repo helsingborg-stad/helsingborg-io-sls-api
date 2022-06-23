@@ -1,5 +1,6 @@
 import type { Token } from '../../src/libs/token';
 import { addCasePerson } from '../../src/lambdas/addCasePerson';
+import { DEFAULT_CURRENT_POSITION } from '../../src/helpers/constants';
 import { CasePerson, CasePersonRole, EncryptionType } from '../../src/types/caseItem';
 import type { CaseItem, CaseForm } from '../../src/types/caseItem';
 import type { LambdaRequest, Dependencies } from '../../src/lambdas/addCasePerson';
@@ -8,6 +9,10 @@ const personalNumber = '199801011212';
 const SK = 'CASE#123';
 const PK = `USER#${personalNumber}`;
 const caseKeys = { PK, SK };
+
+const mockToken: Token = {
+  personalNumber,
+};
 
 const coApplicant: CasePerson = {
   personalNumber: '199701031212',
@@ -27,12 +32,7 @@ const form: CaseForm = {
       value: 'Some value abc',
     },
   ],
-  currentPosition: {
-    currentMainStep: 0,
-    currentMainStepIndex: 0,
-    index: 0,
-    level: 0,
-  },
+  currentPosition: DEFAULT_CURRENT_POSITION,
   encryption: {
     type: EncryptionType.Decrypted,
   },
@@ -83,18 +83,14 @@ function createInput(partialInput: Partial<LambdaRequest> = {}): LambdaRequest {
   };
 }
 
-function createDependencies(
-  tokenToUse: Token,
-  caseItemToUse: CaseItem,
-  partialDependencies: Partial<Dependencies> = {}
-): Dependencies {
+function createDependencies(partialDependencies: Partial<Dependencies> = {}): Dependencies {
   return {
-    decodeToken: () => tokenToUse,
-    updateCase: () => Promise.resolve({ Attributes: caseItemToUse }),
+    decodeToken: () => mockToken,
+    updateCase: () => Promise.resolve({ Attributes: caseItem }),
     getFormTemplates: () => Promise.resolve(),
     coApplicantStatus: () => Promise.resolve(),
     validateCoApplicantStatus: () => true,
-    getCase: () => Promise.resolve(caseItemToUse),
+    getCase: () => Promise.resolve(caseItem),
     populateForm: () => ({}),
     ...partialDependencies,
   };
@@ -105,14 +101,10 @@ it('successfully add person to case', async () => {
   const getFormTemplatesMock = jest.fn().mockResolvedValueOnce({});
 
   const input = createInput();
-  const dependencies = createDependencies(
-    { personalNumber },
-    { ...caseItem },
-    {
-      updateCase: updateCaseMock,
-      getFormTemplates: getFormTemplatesMock,
-    }
-  );
+  const dependencies = createDependencies({
+    updateCase: updateCaseMock,
+    getFormTemplates: getFormTemplatesMock,
+  });
   const result = await addCasePerson(input, dependencies);
 
   expect(getFormTemplatesMock).toHaveBeenCalledWith(['123abc']);
@@ -144,7 +136,7 @@ it('return BadRequestError if co-applicant is the same person', async () => {
       lastName: 'Cola',
     }),
   });
-  const dependencies = createDependencies({ personalNumber }, { ...caseItem });
+  const dependencies = createDependencies();
   const result = await addCasePerson(input, dependencies);
 
   expect(result.statusCode).toBe(400);
@@ -152,13 +144,9 @@ it('return BadRequestError if co-applicant is the same person', async () => {
 
 it('return ForbiddenError if status code is not allowed', async () => {
   const input = createInput();
-  const dependencies = createDependencies(
-    { personalNumber },
-    { ...caseItem },
-    {
-      validateCoApplicantStatus: () => false,
-    }
-  );
+  const dependencies = createDependencies({
+    validateCoApplicantStatus: () => false,
+  });
   const result = await addCasePerson(input, dependencies);
 
   expect(result.statusCode).toBe(403);

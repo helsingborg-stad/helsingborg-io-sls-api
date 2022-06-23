@@ -1,5 +1,5 @@
-/* eslint-disable no-console */
 import { BadRequestError, ForbiddenError } from '@helsingborg-stad/npm-api-error-handling';
+
 import config from '../libs/config';
 import log from '../libs/logs';
 import { decodeToken, Token } from '../libs/token';
