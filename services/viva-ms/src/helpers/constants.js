@@ -72,3 +72,11 @@ export const VIVA_STATUS_COMPLETION = 64;
 export const VIVA_STATUS_CASE_EXISTS = 128;
 export const VIVA_STATUS_WEB_APPLICATION_ACTIVE = 256;
 export const VIVA_STATUS_WEB_APPLICATION_ALLOWED = 512;
+
+export const DEFAULT_CURRENT_POSITION = {
+  currentMainStep: 1,
+  currentMainStepIndex: 0,
+  index: 0,
+  level: 0,
+  numberOfMainSteps: 0,
+};

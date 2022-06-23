@@ -4,17 +4,16 @@ import populateFormWithVivaChildren, {
 } from '../../src/helpers/populateForm';
 import formTemplate from '../mock/formTemplate.json';
 
+import { DEFAULT_CURRENT_POSITION } from '../../src/helpers/constants';
+
+import { EncryptionType } from '../../src/types/caseItem';
+
 const caseRecurringForm = {
   answers: [],
   encryption: {
-    type: 'decrypted',
+    type: EncryptionType.Decrypted,
   },
-  currentPosition: {
-    currentMainStepIndex: 0,
-    index: 0,
-    level: 0,
-    currentMainStep: 1,
-  },
+  currentPosition: DEFAULT_CURRENT_POSITION,
 };
 
 const repeaterInputFields = [
@@ -144,14 +143,9 @@ const expectedPopulatedFormWithChildren = {
     },
   ],
   encryption: {
-    type: 'decrypted',
+    type: EncryptionType.Decrypted,
   },
-  currentPosition: {
-    currentMainStepIndex: 0,
-    index: 0,
-    level: 0,
-    currentMainStep: 1,
-  },
+  currentPosition: DEFAULT_CURRENT_POSITION,
 };
 
 describe('populateChildrenAnswers', () => {

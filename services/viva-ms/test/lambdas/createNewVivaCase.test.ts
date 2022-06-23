@@ -9,6 +9,8 @@ import { getStatusByType } from '../../src/libs/caseStatuses';
 
 import { EncryptionType, CasePersonRole } from '../../src/types/caseItem';
 
+import { DEFAULT_CURRENT_POSITION } from '../../src/helpers/constants';
+
 const user = {
   firstName: 'First',
   lastName: 'LastName',
@@ -26,12 +28,7 @@ const readParametersResponse = {
 
 const defaultFormProperties = {
   answers: [],
-  currentPosition: {
-    currentMainStep: 1,
-    currentMainStepIndex: 0,
-    index: 0,
-    level: 0,
-  },
+  currentPosition: DEFAULT_CURRENT_POSITION,
   encryption: {
     type: EncryptionType.Decrypted,
   },

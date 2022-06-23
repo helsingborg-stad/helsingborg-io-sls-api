@@ -4,6 +4,8 @@ import { VivaAttachmentCategory } from '../../src/types/vivaMyPages';
 import type { CaseItem, CaseForm } from '../../src/types/caseItem';
 import type { CaseAttachment } from '../../src/helpers/attachment';
 
+import { DEFAULT_CURRENT_POSITION } from '../../src/helpers/constants';
+
 const randomCheckFormId = 'randomCheckFormId';
 const completionFormId = 'completionFormId';
 const PK = 'USER#199492921234';
@@ -90,12 +92,7 @@ it('returns false if VADA `postCompletionResponse` is successful but `status` is
 it('calls postCompletion with form answer containing attachment', async () => {
   const form: CaseForm = {
     answers: [],
-    currentPosition: {
-      currentMainStep: 1,
-      currentMainStepIndex: 0,
-      index: 0,
-      level: 0,
-    },
+    currentPosition: DEFAULT_CURRENT_POSITION,
     encryption: {
       type: EncryptionType.Decrypted,
     },
@@ -129,12 +126,7 @@ it('calls postCompletion with form answer containing attachment', async () => {
 it('calls `updateCase` with correct parameters for form id: completionFormId', async () => {
   const form: CaseForm = {
     answers: [],
-    currentPosition: {
-      currentMainStep: 1,
-      currentMainStepIndex: 0,
-      index: 0,
-      level: 0,
-    },
+    currentPosition: DEFAULT_CURRENT_POSITION,
     encryption: {
       type: EncryptionType.Decrypted,
     },

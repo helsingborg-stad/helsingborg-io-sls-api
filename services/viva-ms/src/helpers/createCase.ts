@@ -16,6 +16,8 @@ import {
   EncryptionType,
 } from '../types/caseItem';
 
+import { DEFAULT_CURRENT_POSITION } from './constants';
+
 export interface CasePersonRoleType {
   readonly client: CasePersonRole.Applicant;
   readonly partner: CasePersonRole.CoApplicant;
@@ -99,14 +101,9 @@ function getInitialFormAttributes(
   encryption: CaseFormEncryption
 ): Record<string, CaseForm> {
   const initialFormAttributes: CaseForm = {
-    answers: [],
     encryption,
-    currentPosition: {
-      currentMainStep: 1,
-      currentMainStepIndex: 0,
-      index: 0,
-      level: 0,
-    },
+    answers: [],
+    currentPosition: DEFAULT_CURRENT_POSITION,
   };
 
   return formIdList.reduce(

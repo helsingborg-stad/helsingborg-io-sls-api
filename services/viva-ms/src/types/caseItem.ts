@@ -104,6 +104,7 @@ export interface CaseFormCurrentPosition {
   currentMainStepIndex: number;
   index: number;
   level: number;
+  numberOfMainSteps: number;
 }
 
 export interface CaseFormAnswer {
