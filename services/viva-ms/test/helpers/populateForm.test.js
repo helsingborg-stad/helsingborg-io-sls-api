@@ -6,10 +6,12 @@ import formTemplate from '../mock/formTemplate.json';
 
 import { DEFAULT_CURRENT_POSITION } from '../../src/helpers/constants';
 
+import { EncryptionType } from '../../src/types/caseItem';
+
 const caseRecurringForm = {
   answers: [],
   encryption: {
-    type: 'decrypted',
+    type: EncryptionType.Decrypted,
   },
   currentPosition: DEFAULT_CURRENT_POSITION,
 };
@@ -141,7 +143,7 @@ const expectedPopulatedFormWithChildren = {
     },
   ],
   encryption: {
-    type: 'decrypted',
+    type: EncryptionType.Decrypted,
   },
   currentPosition: DEFAULT_CURRENT_POSITION,
 };
