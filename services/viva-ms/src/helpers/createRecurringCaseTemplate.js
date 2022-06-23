@@ -6,7 +6,7 @@ import {
   EMPTY_INCOME_POST,
 } from './constants';
 import formatPeriodDates, { formatTimestampToDate } from './formatPeriodDates';
-import formHelpers from './formHelpers';
+import * as formHelpers from './formHelpers';
 import { encode } from 'html-entities';
 
 function formatAnswerValue(answer) {
