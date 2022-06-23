@@ -12,10 +12,6 @@ import { createTemplatePersons } from './caseTemplate/persons';
 import { formatTimestampToDate } from './formatPeriodDates';
 
 export interface Template {
-  period?: {
-    startDate: string;
-    endDate: string;
-  };
   updatedAt: string;
   notes: Note[];
   persons: TemplatePerson[];
