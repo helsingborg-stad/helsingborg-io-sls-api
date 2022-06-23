@@ -35,7 +35,7 @@ function createPartialCasePersonFromAnswers(answers: CaseFormAnswer[]): Partial<
 }
 
 function pairAnswersByRoles(answers: CaseFormAnswer[]): RoleAnswers[] {
-  const roleTagPairsToUse: { role: CasePersonRole; tag: ValidTags }[] = [
+  const roleTagPairs: { role: CasePersonRole; tag: ValidTags }[] = [
     {
       role: CasePersonRole.Applicant,
       tag: 'applicant',
@@ -46,7 +46,7 @@ function pairAnswersByRoles(answers: CaseFormAnswer[]): RoleAnswers[] {
     },
   ];
 
-  return roleTagPairsToUse.map(pair => ({
+  return roleTagPairs.map(pair => ({
     role: pair.role,
     answers: formHelpers.filterByTags(answers, [pair.tag]),
   }));

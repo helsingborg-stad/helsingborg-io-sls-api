@@ -55,7 +55,7 @@ export interface Dependencies {
   ) => Promise<PromiseResult<S3PutObjectOutput, AWSError>>;
   updateVivaCaseState: (caseItem: CaseItem) => Promise<void>;
   putHtmlGeneratedSuccessEvent: (detail: unknown) => Promise<void>;
-  getCaseTemplateFunc: (
+  getCaseTemplateFunction: (
     caseItem: CaseItem,
     answers: CaseFormAnswer[],
     newApplicationFormId: string
@@ -97,7 +97,7 @@ function printErrorAndReturn(msg: string, customData?: unknown): false {
   return false;
 }
 
-function getCaseTemplateFuncBasedOnCaseForm(
+function getCaseTemplateFunction(
   caseItem: CaseItem,
   answers: CaseFormAnswer[],
   newApplicationFormId: string
@@ -179,12 +179,12 @@ export async function generateRecurringCaseHtml(
   const handlebarsTemplateFileBody = hbsTemplateS3Object.Body?.toString();
   const template = handlebars.compile(handlebarsTemplateFileBody);
 
-  const caseTemplateDataFunc = dependencies.getCaseTemplateFunc(
+  const caseTemplateDataFunction = dependencies.getCaseTemplateFunction(
     caseItem,
     changedAnswerValues,
     newApplicationFormId
   );
-  const caseTemplateData = caseTemplateDataFunc(caseItem, changedAnswerValues);
+  const caseTemplateData = caseTemplateDataFunction(caseItem, changedAnswerValues);
   const html = template(caseTemplateData);
 
   const caseHtmlKey = `html/case-${caseItem.id}.html`;
@@ -225,6 +225,6 @@ export const main = log.wrap(async event => {
     storeFile: S3.storeFile,
     updateVivaCaseState,
     putHtmlGeneratedSuccessEvent: putVivaMsEvent.htmlGeneratedSuccess,
-    getCaseTemplateFunc: getCaseTemplateFuncBasedOnCaseForm,
+    getCaseTemplateFunction: getCaseTemplateFunction,
   });
 });

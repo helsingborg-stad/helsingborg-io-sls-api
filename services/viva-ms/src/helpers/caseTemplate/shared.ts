@@ -107,12 +107,12 @@ export interface CommonValue {
 }
 
 export function groupAnswersByGroupTag(answers: CaseFormAnswer[]): CaseFormAnswer[][] {
-  const extractRegex = /^group:.*:(\d+)$/;
+  const extractGroupIndexRegex = /^group:.*:(\d+)$/;
 
   const groupedAnswers: CaseFormAnswer[][] = answers.reduce((acc, answer) => {
     const groupTag = answer.field.tags.find(tag => tag.startsWith('group:'));
     if (groupTag) {
-      const match = groupTag.match(extractRegex);
+      const match = groupTag.match(extractGroupIndexRegex);
       if (match) {
         const index = parseInt(match[1]);
         const accCopy = clone(acc);

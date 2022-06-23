@@ -18,12 +18,12 @@ export interface Occupation {
   description?: string;
 }
 
-type DescriptionMapperFunc = (
+type DescriptionMapperFunction = (
   occupationType: ValidOccupation,
   answers: CaseFormAnswer[]
 ) => string | undefined;
 
-const DescriptionMapperFuncs: Record<string, DescriptionMapperFunc> = {
+const descriptionMapperFunctions: Record<string, DescriptionMapperFunction> = {
   fromDescription(occupationType: ValidOccupation, answers: CaseFormAnswer[]): string | undefined {
     return formHelpers.getFirstAnswerValueByTags(answers, [
       'occupation',
@@ -32,7 +32,7 @@ const DescriptionMapperFuncs: Record<string, DescriptionMapperFunc> = {
     ]);
   },
 
-  fromDate(occupationType: ValidOccupation, answers: CaseFormAnswer[]): string | undefined {
+  fromDate(occupationType: ValidOccupation, answers: CaseFormAnswer[]): string {
     const maybeDateNumber = formHelpers.getFirstAnswerValueByTags(answers, [
       'occupation',
       'date',
@@ -43,14 +43,14 @@ const DescriptionMapperFuncs: Record<string, DescriptionMapperFunc> = {
   },
 };
 
-const descriptionMap: Record<ValidOccupation, DescriptionMapperFunc> = {
-  fulltime: DescriptionMapperFuncs.fromDescription,
-  otheroccupation: DescriptionMapperFuncs.fromDescription,
-  parttime: DescriptionMapperFuncs.fromDescription,
-  studies: DescriptionMapperFuncs.fromDescription,
-  unemployed: DescriptionMapperFuncs.fromDescription,
-  parentalleave: DescriptionMapperFuncs.fromDate,
-  sickleave: DescriptionMapperFuncs.fromDate,
+const descriptionMap: Record<ValidOccupation, DescriptionMapperFunction> = {
+  fulltime: descriptionMapperFunctions.fromDescription,
+  otheroccupation: descriptionMapperFunctions.fromDescription,
+  parttime: descriptionMapperFunctions.fromDescription,
+  studies: descriptionMapperFunctions.fromDescription,
+  unemployed: descriptionMapperFunctions.fromDescription,
+  parentalleave: descriptionMapperFunctions.fromDate,
+  sickleave: descriptionMapperFunctions.fromDate,
 };
 
 const friendlyNames: Record<ValidOccupation, string> = {
