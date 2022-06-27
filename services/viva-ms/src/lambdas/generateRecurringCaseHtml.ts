@@ -58,6 +58,9 @@ export interface Dependencies {
   ) => CaseTemplateDataFunction;
 }
 
+const S3_HANDLEBAR_TEMPLATE_V3 = 'templates/ekb-recurring-v3.hbs';
+const S3_HANDLEBAR_TEMPLATE_V2_DEPRECATED = 'templates/ekb-recurring-v2.hbs';
+
 function getChangedCaseAnswerValues(
   currentAnswerList: CaseFormAnswer[],
   previousAnswerList: CaseFormAnswer[]
@@ -165,7 +168,7 @@ export async function generateRecurringCaseHtml(
   const [s3GetObjectError, hbsTemplateS3Object] = await to(
     dependencies.getFile(
       process.env.PDF_STORAGE_BUCKET_NAME ?? '',
-      isNewCase ? 'templates/ekb-recurring-v3.hbs' : 'templates/ekb-recurring-v2.hbs'
+      isNewCase ? S3_HANDLEBAR_TEMPLATE_V3 : S3_HANDLEBAR_TEMPLATE_V2_DEPRECATED
     )
   );
   if (!hbsTemplateS3Object || s3GetObjectError) {
