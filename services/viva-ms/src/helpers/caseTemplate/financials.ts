@@ -69,7 +69,7 @@ function makeHousingEntryTitle(category: string, answer: CaseFormAnswer): string
   const monthTag = answer.field.tags.filter(tag => tag.startsWith('month'))[0];
 
   if (monthTag) {
-    const monthName = parseRelativeMonth(monthTag);
+    const monthName = parseRelativeMonth(monthTag, new Date());
     return `${categoryTitle} ${monthName}`;
   }
   return categoryTitle;

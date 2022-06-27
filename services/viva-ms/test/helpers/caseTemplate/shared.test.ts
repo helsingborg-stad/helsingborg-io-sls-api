@@ -149,20 +149,45 @@ describe('Case Template - shared', () => {
 
   describe('parseRelativeMonth', () => {
     function getDateWithMonthOffset(offset: number): Date {
-      const newDate = new Date();
+      const newDate = new Date(1655028000000);
       newDate.setMonth(newDate.getMonth() + offset);
       return newDate;
     }
 
     it.each([
-      ['month', getMonthNameFromDate(getDateWithMonthOffset(0), 'sv-se')],
-      ['month-1', getMonthNameFromDate(getDateWithMonthOffset(-1), 'sv-se')],
-      ['month+1', getMonthNameFromDate(getDateWithMonthOffset(1), 'sv-se')],
-      ['month+10', getMonthNameFromDate(getDateWithMonthOffset(10), 'sv-se')],
-      ['<invalid>', getMonthNameFromDate(getDateWithMonthOffset(0), 'sv-se')],
-      ['month+<invalid>', getMonthNameFromDate(getDateWithMonthOffset(0), 'sv-se')],
-    ])('parses %s as %s', (month, expected) => {
-      const result = parseRelativeMonth(month);
+      [
+        'month',
+        getDateWithMonthOffset(0),
+        getMonthNameFromDate(getDateWithMonthOffset(0), 'sv-se'),
+      ],
+      [
+        'month-1',
+        getDateWithMonthOffset(0),
+        getMonthNameFromDate(getDateWithMonthOffset(-1), 'sv-se'),
+      ],
+      [
+        'month+1',
+        getDateWithMonthOffset(0),
+        getMonthNameFromDate(getDateWithMonthOffset(1), 'sv-se'),
+      ],
+      [
+        'month+10',
+        getDateWithMonthOffset(0),
+        getMonthNameFromDate(getDateWithMonthOffset(10), 'sv-se'),
+      ],
+      [
+        '<invalid>',
+        getDateWithMonthOffset(0),
+        getMonthNameFromDate(getDateWithMonthOffset(0), 'sv-se'),
+      ],
+      [
+        'month+<invalid>',
+        getDateWithMonthOffset(0),
+        getMonthNameFromDate(getDateWithMonthOffset(0), 'sv-se'),
+      ],
+      ['month-1', new Date(1659218400000), 'juni'],
+    ])('parses %s %s as %s', (month, relativeDate, expected) => {
+      const result = parseRelativeMonth(month, relativeDate);
 
       expect(result).toBe(expected);
     });

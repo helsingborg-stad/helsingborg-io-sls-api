@@ -146,12 +146,13 @@ export function getMonthNameFromDate(date: Date, locale: string): string {
   return date.toLocaleDateString(locale, { month: 'long' });
 }
 
-export function parseRelativeMonth(month: string): string {
+export function parseRelativeMonth(month: string, relativeTo: Date): string {
   const monthRegex = /^month([-+]\d+)?$/;
   const match = month.match(monthRegex);
   const modifier = match?.[1];
 
-  const thisDate = new Date();
+  const thisDate = new Date(relativeTo.getTime());
+  thisDate.setDate(1);
   const thisMonth = thisDate.getMonth();
 
   if (modifier) {
@@ -159,7 +160,8 @@ export function parseRelativeMonth(month: string): string {
     if (!isNaN(value)) {
       const actualValue = modifier[0] === '-' ? -value : value;
       const newMonth = thisMonth + actualValue;
-      const newDate = new Date();
+      const newDate = new Date(relativeTo.getTime());
+      newDate.setDate(1);
       newDate.setMonth(newMonth);
       return getMonthNameFromDate(newDate, 'sv-se');
     }
