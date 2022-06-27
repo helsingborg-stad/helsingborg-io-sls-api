@@ -116,7 +116,7 @@ async function createRecurringCase(vivaPerson: VivaMyPages, user: CaseUser) {
     createdAt: timestampNow,
     updatedAt: 0,
     status: initialStatus,
-    forms: null,
+    forms: {},
     provider: CASE_PROVIDER_VIVA,
     persons: casePersonList,
     details: {
