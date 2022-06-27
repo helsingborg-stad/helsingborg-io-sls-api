@@ -1,6 +1,7 @@
-import type { CaseFormAnswer } from '../../types/caseItem';
 import * as formHelpers from '../formHelpers';
 import { toDateString } from './shared';
+
+import type { CaseFormAnswer } from '../../types/caseItem';
 
 export enum ValidOccupation {
   fulltime = 'fulltime',

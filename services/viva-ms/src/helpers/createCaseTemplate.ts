@@ -1,15 +1,16 @@
-import type { CaseFormAnswer, CaseItem } from './../types/caseItem';
-import type { Child } from './caseTemplate/children';
-import { createChildren } from './caseTemplate/children';
-import type { Financials } from './caseTemplate/financials';
-import { createFinancials } from './caseTemplate/financials';
-import type { Housing } from './caseTemplate/housing';
-import { createHousing } from './caseTemplate/housing';
-import type { Note } from './caseTemplate/notes';
-import { createNotes } from './caseTemplate/notes';
-import type { TemplatePerson } from './caseTemplate/persons';
 import { createTemplatePersons } from './caseTemplate/persons';
+import { createFinancials } from './caseTemplate/financials';
 import { formatTimestampToDate } from './formatPeriodDates';
+import { createChildren } from './caseTemplate/children';
+import { createHousing } from './caseTemplate/housing';
+import { createNotes } from './caseTemplate/notes';
+
+import type { CaseFormAnswer, CaseItem } from './../types/caseItem';
+import type { TemplatePerson } from './caseTemplate/persons';
+import type { Financials } from './caseTemplate/financials';
+import type { Housing } from './caseTemplate/housing';
+import type { Child } from './caseTemplate/children';
+import type { Note } from './caseTemplate/notes';
 
 export interface Template {
   updatedAt: string;

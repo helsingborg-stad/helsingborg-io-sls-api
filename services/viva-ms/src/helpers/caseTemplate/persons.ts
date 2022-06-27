@@ -1,12 +1,15 @@
 import deepMerge from 'lodash.merge';
+
+import { filterValid, groupAnswersByGroupTag, Human } from './shared';
+import { mapToCommonValue, ValidTags } from './shared';
+import * as formHelpers from '../formHelpers';
+
+import { FinancialEntry, makeFinancialEntryIfValid } from './financials';
+import { createOccupations } from './occupation';
+
 import type { CaseFormAnswer, CasePerson } from '../../types/caseItem';
 import { CasePersonRole } from '../../types/caseItem';
-import * as formHelpers from '../formHelpers';
-import { FinancialEntry, makeFinancialEntryIfValid } from './financials';
 import type { Occupation } from './occupation';
-import { createOccupations } from './occupation';
-import { mapToCommonValue, ValidTags } from './shared';
-import { filterValid, groupAnswersByGroupTag, Human } from './shared';
 
 export interface TemplatePerson extends Partial<Human> {
   phone?: string;

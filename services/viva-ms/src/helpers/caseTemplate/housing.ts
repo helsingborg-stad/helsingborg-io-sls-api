@@ -1,5 +1,6 @@
-import type { CaseFormAnswer } from '../../types/caseItem';
 import * as formHelpers from '../formHelpers';
+
+import type { CaseFormAnswer } from '../../types/caseItem';
 import type { ValidTags } from './shared';
 
 export interface Housing {

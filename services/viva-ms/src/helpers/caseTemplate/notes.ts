@@ -1,6 +1,7 @@
-import type { CaseFormAnswer } from '../../types/caseItem';
 import * as formHelpers from '../formHelpers';
 import { filterValid } from './shared';
+
+import type { CaseFormAnswer } from '../../types/caseItem';
 
 export interface Note {
   title: string;

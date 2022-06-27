@@ -1,8 +1,9 @@
+import { groupAnswersByGroupTag } from './shared';
+import * as formHelpers from '../formHelpers';
+
 import type { CaseFormAnswer } from '../../types/caseItem';
 import { CasePersonRole } from '../../types/caseItem';
-import * as formHelpers from '../formHelpers';
 import type { Human } from './shared';
-import { groupAnswersByGroupTag } from './shared';
 
 export interface Child extends Human {
   housing: string;

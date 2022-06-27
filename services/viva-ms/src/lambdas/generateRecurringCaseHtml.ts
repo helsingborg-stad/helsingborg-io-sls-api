@@ -3,20 +3,24 @@ import {
   GetObjectOutput as S3GetObjectOutput,
   PutObjectOutput as S3PutObjectOutput,
 } from 'aws-sdk/clients/s3';
-import type { AWSError } from 'aws-sdk/lib/error';
-import type { PromiseResult } from 'aws-sdk/lib/request';
-import type { Template } from '../helpers/createCaseTemplate';
-import createCaseTemplate from '../helpers/createCaseTemplate';
+
+import { getItem } from '../libs/queries';
+import config from '../libs/config';
+import params from '../libs/params';
+import log from '../libs/logs';
+import S3 from '../libs/S3';
+
 import createRecurringCaseTemplate from '../helpers/createRecurringCaseTemplate';
 import { getClosedUserCases, updateVivaCaseState } from '../helpers/dynamoDb';
-import handlebars from '../helpers/htmlTemplate';
+import createCaseTemplate from '../helpers/createCaseTemplate';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
-import config from '../libs/config';
-import log from '../libs/logs';
-import params from '../libs/params';
-import { getItem } from '../libs/queries';
-import S3 from '../libs/S3';
+import handlebars from '../helpers/htmlTemplate';
+
 import type { CaseFormAnswer, CaseItem } from '../types/caseItem';
+import type { PromiseResult } from 'aws-sdk/lib/request';
+import type { Template } from '../helpers/createCaseTemplate';
+import type { AWSError } from 'aws-sdk/lib/error';
+
 export interface LambdaRequest {
   detail: {
     caseKeys: {
