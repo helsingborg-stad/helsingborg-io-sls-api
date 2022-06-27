@@ -5,8 +5,8 @@ export function formatTimestampToDate(timestamp: number) {
 
 export default function formatPeriodDates(
   period: { startDate: number; endDate: number } | undefined
-) {
-  if (!period) return undefined;
+): { startDate: string; endDate: string } | undefined {
+  if (!period || !period.startDate || !period.endDate) return undefined;
   const endDate = formatTimestampToDate(period.endDate);
   const startDate = formatTimestampToDate(period.startDate);
   return {
