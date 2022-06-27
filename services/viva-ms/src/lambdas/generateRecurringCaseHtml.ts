@@ -16,6 +16,7 @@ import createCaseTemplate from '../helpers/createCaseTemplate';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import handlebars from '../helpers/htmlTemplate';
 
+import type { VivaParametersResponse } from '../types/ssmParameters';
 import type { CaseFormAnswer, CaseItem } from '../types/caseItem';
 import type { PromiseResult } from 'aws-sdk/lib/request';
 import type { Template } from '../helpers/createCaseTemplate';
@@ -32,15 +33,6 @@ export interface LambdaRequest {
 
 export type LambdaResponse = boolean;
 
-interface VivaCaseSSMParams {
-  recurringFormId: string;
-  completionFormId: string;
-  randomCheckFormId: string;
-  newApplicationFormId: string;
-  newApplicationCompletionFormId: string;
-  newApplicationRandomCheckFormId: string;
-}
-
 type CaseTemplateDataFunction = (caseItem: CaseItem, answers: CaseFormAnswer[]) => Template;
 
 export interface Dependencies {
@@ -49,7 +41,7 @@ export interface Dependencies {
     PK: string,
     SK: string
   ) => Promise<[Error, { Item: CaseItem }]>;
-  readParams: (id: string) => Promise<VivaCaseSSMParams>;
+  readParams: (id: string) => Promise<VivaParametersResponse>;
   getClosedUserCases: (PK: string) => Promise<{ Items: CaseItem[] }>;
   getFile: (bucket: string, key: string) => Promise<PromiseResult<S3GetObjectOutput, AWSError>>;
   storeFile: (
