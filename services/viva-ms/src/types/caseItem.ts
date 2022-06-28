@@ -1,3 +1,5 @@
+import { ValidTags } from '../helpers/caseTemplate/shared';
+
 export interface CaseUser {
   readonly personalNumber: string;
   readonly firstName: string;
@@ -40,7 +42,7 @@ export interface CaseItem {
   createdAt: number;
   updatedAt: number;
   status: CaseStatus;
-  forms: Record<string, CaseForm> | null;
+  forms: Record<string, CaseForm>;
   GSI1?: string;
   provider: string;
   persons: CasePerson[];
@@ -107,9 +109,11 @@ export interface CaseFormCurrentPosition {
   numberOfMainSteps: number;
 }
 
+export type CaseFormAnswerValue = AnswerAttachment[] | string | boolean | number;
+
 export interface CaseFormAnswer {
   field: CaseFormAnswerField;
-  value: AnswerAttachment[] | string;
+  value: CaseFormAnswerValue;
 }
 
 export interface CaseFormAnswerAttachment {
@@ -123,7 +127,7 @@ export interface AnswerAttachment {
 
 export interface CaseFormAnswerField {
   id: string;
-  tags: string[];
+  tags: ValidTags[];
 }
 
 export enum EncryptionType {
