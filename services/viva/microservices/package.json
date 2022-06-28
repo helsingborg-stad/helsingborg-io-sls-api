@@ -1,10 +1,10 @@
 {
-  "name": "viva-cases-api",
+  "name": "viva-ms",
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "cd ../../ && node node_modules/.bin/jest viva-cases-api"
+    "test": "cd ../../../ && node node_modules/.bin/jest viva/microservices"
   },
   "keywords": [],
   "author": "Helsingborg Stad",
