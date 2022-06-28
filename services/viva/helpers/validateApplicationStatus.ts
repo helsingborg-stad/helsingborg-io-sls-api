@@ -1,4 +1,9 @@
-export default function validateApplicationStatus(statusList, requiredCodeList) {
+import { VivaApplicationStatus } from '../types/vivaMyPages';
+
+export default function validateApplicationStatus(
+  statusList: VivaApplicationStatus[],
+  requiredCodeList: number[]
+): boolean {
   if (!Array.isArray(statusList)) {
     return false;
   }

@@ -2,7 +2,7 @@ import config from '../libs/config';
 
 import params from '../libs/params';
 import log from '../libs/logs';
-import { cases } from '../../src/helpers/query';
+import { cases } from '../helpers/query';
 
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import completionsHelper from '../helpers/completions';

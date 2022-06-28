@@ -25,7 +25,7 @@ function createCase(partialCase: Partial<CaseItem> = {}): CaseItem {
       name: 'myStatusName',
       description: 'myStatusDescription',
     },
-    forms: null,
+    forms: {},
     provider: 'VIVA',
     persons: [],
     details: {

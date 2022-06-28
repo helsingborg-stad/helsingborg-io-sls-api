@@ -18,6 +18,13 @@ module.exports = {
   },
   rules: {
     'no-console': 1,
+    'default-param-last': 1,
+    'func-style': ['warn', 'declaration'],
+    'max-params': ['warn', 3],
+    'no-else-return': ['warn', { allowElseIf: false }],
+    'no-negated-condition': 1,
+    'no-return-await': 1,
+    'no-unneeded-ternary': 1,
   },
   plugins: ['jest'],
   overrides: [
