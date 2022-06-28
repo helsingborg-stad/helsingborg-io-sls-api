@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "cd ../../../ && node node_modules/.bin/jest viva/microservices"
+    "test": "cd ../../../ && node node_modules/.bin/jest viva/microservice"
   },
   "keywords": [],
   "author": "Helsingborg Stad",
