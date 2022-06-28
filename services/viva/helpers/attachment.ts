@@ -3,7 +3,7 @@ import log from '../libs/logs';
 import { VivaAttachmentCategory } from '../types/vivaMyPages';
 import type { PersonalNumber, CaseFormAnswer, CaseFormAnswerAttachment } from '../types/caseItem';
 
-export enum RequiredTags {
+export enum ValidAttachmentCategoryTag {
   Viva = 'viva',
   Attachment = 'attachment',
   Category = 'category',
@@ -28,10 +28,10 @@ function getAttachmentCategory(
     VivaAttachmentCategory.Completion,
   ]
 ): VivaAttachmentCategory {
-  const vivaAttachmentCategoryTags: RequiredTags[] = [
-    RequiredTags.Viva,
-    RequiredTags.Attachment,
-    RequiredTags.Category,
+  const vivaAttachmentCategoryTags: ValidAttachmentCategoryTag[] = [
+    ValidAttachmentCategoryTag.Viva,
+    ValidAttachmentCategoryTag.Attachment,
+    ValidAttachmentCategoryTag.Category,
   ];
   const hasAttachmentCategoryTag = vivaAttachmentCategoryTags.every(tag => tags.includes(tag));
 

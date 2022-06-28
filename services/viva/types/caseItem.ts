@@ -127,7 +127,7 @@ export interface AnswerAttachment {
 
 export interface CaseFormAnswerField {
   id: string;
-  tags: ValidTags[];
+  tags: ValidTags[] | string[];
 }
 
 export enum EncryptionType {
