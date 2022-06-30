@@ -18,11 +18,6 @@ provider:
   stage: dev
   region: eu-north-1
   endpointType: regional
-<<<<<<< HEAD
-  tracing:
-    lambda: true
-=======
->>>>>>> f51c00b1 (feat: apis for visma idp integration)
   apiGateway:
     restApiId:
       'Fn::ImportValue': ${self:custom.stage}-ExtApiGatewayRestApiId
