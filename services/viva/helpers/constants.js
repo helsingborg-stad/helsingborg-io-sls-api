@@ -36,6 +36,8 @@ export const TAG_NAME = {
   firstName: 'firstName',
   lastName: 'lastName',
   personalNumber: 'personalNumber',
+  fromAddress: 'fromAddress',
+  toAddress: 'toAddress',
 };
 
 export const PERSON_ROLE = {

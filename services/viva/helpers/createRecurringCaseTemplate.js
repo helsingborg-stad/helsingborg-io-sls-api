@@ -198,6 +198,8 @@ function createFinancialPosts({ answers, filterTags = [], initialPost = {} }) {
     const hasAmountTag = tags.includes(TAG_NAME.amount);
     const hasDescriptionTag = tags.includes(TAG_NAME.description);
     const hasDateTag = tags.includes(TAG_NAME.date);
+    const hasFromAddressTag = tags.includes(TAG_NAME.fromAddress);
+    const hasFromToTag = tags.includes(TAG_NAME.toAddress);
 
     post = {
       ...(post ?? initialPost),
@@ -207,14 +209,15 @@ function createFinancialPosts({ answers, filterTags = [], initialPost = {} }) {
       ...(hasDateTag && { date: formatTimestampToDate(answer.value) }),
       ...(group && { group }),
       ...(vivaPostType && { title: vivaPostType }),
+      ...(hasFromAddressTag && { fromAddress: answer.value }),
+      ...(hasFromToTag && { toAddress: answer.value }),
     };
 
     if (index >= 0) {
       posts[index] = post;
       return posts;
-    } else {
-      return [...posts, post];
     }
+    return [...posts, post];
   }, []);
 }
 

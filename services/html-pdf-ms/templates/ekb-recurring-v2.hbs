@@ -12,7 +12,8 @@
 			justify-content: flex-end; } header { display: flex; justify-content:
 			space-between; align-items: center; } header h1 { font-size: 24px;
 			font-weight: normal; } header p { font-size: 24px; font-weight: bold; }
-			span.red { color: red;} span.black { color: black;}
+			span.red { color: red;} span.black { color: black;} span.address { padding: 0; display: 
+			inline; font-style: italic; }
 		</style>
 	</head>
 
@@ -278,6 +279,13 @@
 								<td>
 									{{this.title}}
 									{{this.description}}
+									{{#if this.fromAddress}}
+										<br />
+										<span class="address">{{this.fromAddress}}</span>
+									{{/if}}
+									{{#if this.toAddress}}
+										<span class="address"> - {{this.toAddress}}</span>
+									{{/if}}
 								</td>
 								<td>
 									<span>
@@ -307,6 +315,13 @@
 								<td>
 									{{this.title}}
 									{{this.description}}
+									{{#if this.fromAddress}}
+										<br />
+										<span class="address">{{this.fromAddress}}</span>
+									{{/if}}
+									{{#if this.toAddress}}
+										<span class="address"> - {{this.toAddress}}</span>
+									{{/if}}
 								</td>
 								<td>
 									<span>
