@@ -84,8 +84,8 @@ function getForeignPension(answers: CaseFormAnswer[]): FinancialEntry | undefine
   const foreignPensionAnswer = formHelpers.getFirstAnswerValueByTags(answers, ['foreignPension']);
   return foreignPensionAnswer
     ? <FinancialEntry>{
-        ...mapToCommonValue(answers),
         title: 'Utländsk pension',
+        value: foreignPensionAnswer,
       }
     : undefined;
 }
