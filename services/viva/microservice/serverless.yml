@@ -154,6 +154,8 @@ functions:
   submitApplication:
     handler: src/lambdas/submitApplication.main
     timeout: 15
+    environment:
+      BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-AttachmentsBucketName
     events:
       - sqs:
           arn: !ImportValue ${self:custom.stage}-VivaSubmissionQueueArn
