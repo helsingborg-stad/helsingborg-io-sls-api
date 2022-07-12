@@ -1,7 +1,7 @@
 service: status-api
 
 plugins:
-  - serverless-bundle
+  - serverless-esbuild
   - serverless-add-api-key
 
 projectDir: ../../
