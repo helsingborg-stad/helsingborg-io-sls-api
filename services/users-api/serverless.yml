@@ -1,7 +1,7 @@
 service: users-api
 
 plugins:
-  - serverless-bundle
+  - serverless-esbuild
   - serverless-apigw-binary
 
 projectDir: ../../
