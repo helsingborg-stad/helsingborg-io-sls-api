@@ -1,7 +1,7 @@
 service: navet-ms
 
 plugins:
-  - serverless-bundle
+  - serverless-esbuild
 
 projectDir: ../../
 
