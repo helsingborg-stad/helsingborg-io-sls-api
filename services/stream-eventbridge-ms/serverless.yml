@@ -1,7 +1,7 @@
 service: stream-eventbridge-ms
 
 plugins:
-  - serverless-bundle
+  - serverless-esbuild
 
 projectDir: ../../
 
