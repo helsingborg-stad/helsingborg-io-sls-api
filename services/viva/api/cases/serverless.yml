@@ -1,7 +1,7 @@
 service: viva-cases-api
 
 plugins:
-  - serverless-bundle
+  - serverless-esbuild
 
 projectDir: ../../../../
 
