@@ -1,7 +1,7 @@
 service: bankid-api
 
 plugins:
-  - serverless-bundle
+  - serverless-esbuild
 
 projectDir: ../../
 
