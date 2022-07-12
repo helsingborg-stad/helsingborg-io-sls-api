@@ -1,7 +1,7 @@
 service: authorizer
 
 plugins:
-  - serverless-bundle
+  - serverless-esbuild
   - serverless-add-api-key
 
 projectDir: ../../../

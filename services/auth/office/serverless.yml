@@ -1,7 +1,7 @@
 service: office-auth
 
 plugins:
-  - serverless-bundle
+  - serverless-esbuild
   - serverless-add-api-key
 
 projectDir: ../../../
