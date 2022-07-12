@@ -1,7 +1,7 @@
 service: bookables-api
 
 plugins:
-  - serverless-bundle
+  - serverless-esbuild
   - serverless-add-api-key
 
 projectDir: ../../
