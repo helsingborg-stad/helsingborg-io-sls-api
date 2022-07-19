@@ -1,44 +1,40 @@
-/* eslint-disable no-console */
-import to from 'await-to-js';
-import { InternalServerError, UnauthorizedError } from '@helsingborg-stad/npm-api-error-handling';
-
-import config from '../libs/config';
-import params from '../libs/params';
-import {
-  getPersonPostSoapRequestPayload,
-  getErrorMessageFromXML,
-  getPersonPostCollection,
-} from '../helpers/parser';
-import getNavetRequestClient from '../helpers/client';
 import { putEvent } from '../libs/awsEventBridge';
-import * as request from '../libs/request';
 
 import log from '../libs/logs';
 
-const NAVET_PARAMS = params.read(config.navet.envsKeyName);
+import { requestNavetUser, getNavetPersonPost } from '../helpers/navet';
 
-export async function main(event, context) {
-  const { user } = event.detail;
+import type { NavetUser, CaseUser } from '../helpers/types';
 
-  const [requestNavetUserError, navetUser] = await to(requestNavetUser(user.personalNumber));
-  if (requestNavetUserError) {
-    log.error(
-      'Navet request user error',
-      context.awsRequestId,
-      'service-navet-ms-pollUser-001',
-      requestNavetUserError
-    );
-    return;
-  }
+export interface LambdaDetail {
+  readonly user: CaseUser;
+}
 
+export interface Input {
+  readonly detail: LambdaDetail;
+}
+
+export interface Dependencies {
+  requestNavetUserXml: (personalNumber: string) => Promise<string>;
+  getParsedNavetPersonPost: (xml: string) => Promise<NavetUser>;
+}
+
+export async function pollUser(input: Input, dependencies: Dependencies) {
+  const { user } = input.detail;
+
+  const { requestNavetUserXml, getParsedNavetPersonPost } = dependencies;
+
+  const navetXmlResponse = await requestNavetUserXml(user.personalNumber);
+  const navetUser = await getParsedNavetPersonPost(navetXmlResponse);
   const eventDetail = getNavetPollEventDetail(navetUser);
+
   await putEvent(eventDetail, 'navetMsPollUserSuccess', 'navetMs.pollUser');
 
   return true;
 }
 
-function getNavetPollEventDetail(navetUser) {
-  const eventDetail = {
+function getNavetPollEventDetail(navetUser: NavetUser): CaseUser {
+  return {
     personalNumber: navetUser.PersonId.PersonNr,
     firstName: navetUser.Namn.Fornamn,
     lastName: navetUser.Namn.Efternamn,
@@ -49,74 +45,11 @@ function getNavetPollEventDetail(navetUser) {
     },
     civilStatus: navetUser.Civilstand.CivilstandKod,
   };
-
-  return eventDetail;
 }
 
-async function requestNavetUser(personalNumber) {
-  const ssmParams = await NAVET_PARAMS;
-
-  const [getNavetClientError, navetRequestClient] = await to(getNavetRequestClient(ssmParams));
-  if (getNavetClientError) {
-    throw getNavetClientError;
-  }
-
-  const personPostSoapRequestPayload = getPersonPostSoapRequestPayload({
-    personalNumber,
-    orderNumber: ssmParams.orderNr,
-    organisationNumber: ssmParams.orgNr,
-    xmlEnvUrl: ssmParams.personpostXmlEnvUrl,
+export const main = log.wrap(async event => {
+  return pollUser(event, {
+    requestNavetUserXml: requestNavetUser,
+    getParsedNavetPersonPost: getNavetPersonPost,
   });
-
-  const [postNavetClientError, navetUser] = await to(
-    request.call(
-      navetRequestClient,
-      'post',
-      ssmParams.personpostXmlEndpoint,
-      personPostSoapRequestPayload
-    )
-  );
-  if (postNavetClientError) {
-    if (postNavetClientError.response) {
-      const [, navetResponseXmlErrorMessage] = await to(
-        getErrorMessageFromXML(postNavetClientError.response.data)
-      );
-
-      throw navetResponseXmlErrorMessage;
-    }
-
-    throw postNavetClientError;
-  }
-
-  return await getNavetPersonPost(navetUser);
-}
-
-async function getNavetPersonPost(navetUser) {
-  const [getPersonPostError, navetPerson] = await to(getPersonPostCollection(navetUser.data));
-  if (getPersonPostError) {
-    throw getPersonPostError;
-  }
-
-  const { Folkbokforingspost } = navetPerson;
-  if (Folkbokforingspost.Personpost === undefined) {
-    throw new InternalServerError();
-  }
-
-  if (isPersonConfidential(navetPerson)) {
-    throw new UnauthorizedError();
-  }
-
-  return Folkbokforingspost.Personpost;
-}
-
-function isPersonConfidential(navetPerson) {
-  const {
-    Folkbokforingspost: { Sekretessmarkering, SkyddadFolkbokforing },
-  } = navetPerson;
-
-  if (Sekretessmarkering === 'J' || SkyddadFolkbokforing === 'J') {
-    return true;
-  }
-
-  return false;
-}
+});
