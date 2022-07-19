@@ -29,50 +29,33 @@ export function getPersonPostSoapRequestPayload({
 </soapenv:Envelope>`;
 }
 
-// export function getPersonPostCollection(xml: string) {
-//   return new Promise((resolve, reject) => {
-//     try {
-//       const xmlPersonPostArray = xml.split('Folkbokforingsposter>');
-
-//       if (xmlPersonPostArray.length < 2) {
-//         throw new ResourceNotFoundError();
-//       }
-//       const [, xmlPersonPost] = xmlPersonPostArray;
-//       const [xmlPersonPostElement] = xmlPersonPost.split('</ns0:');
-
-//       const options = {
-//         trim: true,
-//         explicitArray: false,
-//       };
-
-//       parser.parseString(xmlPersonPostElement, options, (error, result) => {
-//         if (error) {
-//           throw error;
-//         }
-
-//         resolve(result);
-//       });
-//     } catch (error) {
-//       reject(error);
-//     }
-//   });
-// }
-
 export function getPersonPostCollection(xml: string): Promise<NavetUserResponse> {
-  const xmlPersonPostArray = xml.split('Folkbokforingsposter>');
+  return new Promise((resolve, reject) => {
+    try {
+      const xmlPersonPostArray = xml.split('Folkbokforingsposter>');
 
-  if (xmlPersonPostArray.length < 2) {
-    throw new ResourceNotFoundError();
-  }
-  const [, xmlPersonPost] = xmlPersonPostArray;
-  const [xmlPersonPostElement] = xmlPersonPost.split('</ns0:');
+      if (xmlPersonPostArray.length < 2) {
+        throw new ResourceNotFoundError();
+      }
+      const [, xmlPersonPost] = xmlPersonPostArray;
+      const [xmlPersonPostElement] = xmlPersonPost.split('</ns0:');
 
-  const options = {
-    trim: true,
-    explicitArray: false,
-  };
+      const options = {
+        trim: true,
+        explicitArray: false,
+      };
 
-  return parser.parseStringPromise(xmlPersonPostElement, options);
+      parser.parseString(xmlPersonPostElement, options, (error, result) => {
+        if (error) {
+          throw error;
+        }
+
+        resolve(result);
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
 }
 
 export function getErrorMessageFromXML(xml: string): string {
