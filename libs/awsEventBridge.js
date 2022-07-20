@@ -1,4 +1,6 @@
-import AWS from 'aws-sdk';
+// import AWS from 'aws-sdk';
+import Xray from 'aws-xray-sdk';
+const AWS = Xray.captureAWS(require('aws-sdk'));
 
 const eventBridge = new AWS.EventBridge();
 
