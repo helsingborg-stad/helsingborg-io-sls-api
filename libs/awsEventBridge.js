@@ -1,7 +1,7 @@
 import AWS from 'aws-sdk';
 import Xray from 'aws-xray-sdk';
-const XrayEnhancedAWS = Xray.captureAWS(AWS);
 
+const XrayEnhancedAWS = Xray.captureAWS(AWS);
 const eventBridge = new XrayEnhancedAWS.EventBridge();
 
 function putEventRequest(Detail, DetailType, Source) {
