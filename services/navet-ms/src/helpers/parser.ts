@@ -1,12 +1,21 @@
 import parser from 'xml2js';
 import { ResourceNotFoundError } from '@helsingborg-stad/npm-api-error-handling';
 
-export const getPersonPostSoapRequestPayload = ({
+import type { NavetUserResponse } from './types';
+
+interface Input {
+  personalNumber: string;
+  orderNumber: string;
+  organisationNumber: string;
+  xmlEnvUrl: string;
+}
+export function getPersonPostSoapRequestPayload({
   personalNumber,
   orderNumber,
   organisationNumber,
   xmlEnvUrl,
-}) => `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v1="${xmlEnvUrl}">
+}: Input): string {
+  return `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v1="${xmlEnvUrl}">
   <soapenv:Header/>
   <soapenv:Body>
     <v1:PersonpostRequest>
@@ -18,9 +27,10 @@ export const getPersonPostSoapRequestPayload = ({
     </v1:PersonpostRequest>
   </soapenv:Body>
 </soapenv:Envelope>`;
+}
 
-export const getPersonPostCollection = xml =>
-  new Promise((resolve, reject) => {
+export function getPersonPostCollection(xml: string): Promise<NavetUserResponse> {
+  return new Promise((resolve, reject) => {
     try {
       const xmlPersonPostArray = xml.split('Folkbokforingsposter>');
 
@@ -46,14 +56,10 @@ export const getPersonPostCollection = xml =>
       reject(error);
     }
   });
+}
 
-export const getErrorMessageFromXML = xml =>
-  new Promise((resolve, reject) => {
-    try {
-      const parsedOnce = xml.split('<faultstring>');
-      const parsedTwice = parsedOnce[1].split('</faultstring>');
-      resolve(parsedTwice[0]);
-    } catch (error) {
-      reject(error);
-    }
-  });
+export function getErrorMessageFromXML(xml: string): string {
+  const parsedOnce = xml?.split('<faultstring>');
+  const parsedTwice = parsedOnce[1]?.split('</faultstring>');
+  return parsedTwice[0] ?? '';
+}
