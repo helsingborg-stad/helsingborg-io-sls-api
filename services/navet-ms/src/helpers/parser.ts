@@ -59,7 +59,7 @@ export function getPersonPostCollection(xml: string): Promise<NavetUserResponse>
 }
 
 export function getErrorMessageFromXML(xml: string): string {
-  const parsedOnce = xml.split('<faultstring>');
-  const parsedTwice = parsedOnce[1].split('</faultstring>');
+  const parsedOnce = xml?.split('<faultstring>');
+  const parsedTwice = parsedOnce[1]?.split('</faultstring>');
   return parsedTwice[0] ?? '';
 }
