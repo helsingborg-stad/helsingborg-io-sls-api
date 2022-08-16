@@ -27,6 +27,7 @@ interface LambdaEvent {
     status: VivaApplicationStatus[];
   };
 }
+
 export async function main(event: LambdaEvent, context: LambdaContext) {
   const {
     user: { personalNumber },
