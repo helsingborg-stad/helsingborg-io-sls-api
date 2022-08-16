@@ -1,7 +1,8 @@
 custom:
   bundle:
+    esbuild: true
     packager: yarn
-    disableForkTsChecker: false
+    disableForkTsChecker: true
     forceExclude:
       - chrome-aws-lambda
   # Our stage is based on what is passed in when running serverless
