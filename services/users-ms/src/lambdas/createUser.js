@@ -1,60 +1,42 @@
-/* eslint-disable no-console */
-import to from 'await-to-js';
-
 import uuid from 'uuid';
+
 import config from '../libs/config';
 import * as dynamoDb from '../libs/dynamoDb';
 
 import putUserEvent from '../helpers/putUserEvent';
 import log from '../libs/logs';
 
-export async function main(event, context) {
+export async function main(event) {
   const userDetail = event.detail;
 
-  const [putUserRequestError] = await to(putUserRequest(userDetail));
-  if (putUserRequestError) {
-    log.error(
-      'putUserRequestError',
-      context.awsRequestId,
-      'service-viva-ms-createUser-001',
-      putUserRequestError
-    );
-
-    return;
-  }
-
-  const [putEventError] = await to(putUserEvent.createSuccess(userDetail));
-  if (putEventError) {
-    log.error(
-      'putEventError',
-      context.awsRequestId,
-      'service-viva-ms-createUser-002',
-      putEventError
-    );
-
-    return;
-  }
-
-  log.info(
-    'User was successfully created in the users table.',
-    context.awsRequestId,
-    'service-viva-ms-createUser-003'
+  const checkFirstTimeLoginUserDetailKeys = ['personalNumber', 'firstName', 'lastName'].every(
+    property =>
+      // eslint-disable-next-line no-prototype-builtins
+      userDetail.hasOwnProperty(property)
   );
+
+  if (checkFirstTimeLoginUserDetailKeys) {
+    await addUserToDynamoDb(userDetail);
+    await putUserEvent.createSuccess(userDetail);
+    log.writeInfo('User successfully added to the users table');
+  }
 
   return true;
 }
 
-async function putUserRequest(userDetail) {
-  const params = {
+async function addUserToDynamoDb(userDetail) {
+  const putParams = {
     TableName: config.users.tableName,
     Item: {
       uuid: uuid.v1(),
       createdAt: Date.now(),
       email: null,
       mobilePhone: null,
+      address: null,
+      civilStatus: null,
       ...userDetail,
     },
   };
 
-  return dynamoDb.call('put', params);
+  return dynamoDb.call('put', putParams);
 }
