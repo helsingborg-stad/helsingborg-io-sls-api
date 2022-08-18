@@ -1,4 +1,4 @@
-import AWS from './aws-sdk';
+import AWS from 'aws-sdk';
 import config from './config';
 export const docClient = new AWS.DynamoDB.DocumentClient();
 

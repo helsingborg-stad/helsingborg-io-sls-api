@@ -1,4 +1,4 @@
-import AWS from './aws-sdk';
+import AWS from 'aws-sdk';
 
 const S3 = new AWS.S3();
 
