@@ -53,7 +53,7 @@ export async function main(
       'service-bankid-api-collect-001',
       bankIdCollectRequestError
     );
-    response.failure(new InternalServerError(String(bankIdCollectRequestError)));
+    response.failure(new InternalServerError(bankIdCollectRequestError.message));
     return false;
   }
 
