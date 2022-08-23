@@ -55,7 +55,7 @@ function getFulfilled(previous: CaseAttachment[], current: PromiseSettledResult<
   return [...previous, current.value];
 }
 
-function isAnswerAttachment(answer: CaseFormAnswer): answer is CaseFormAnswerAttachment {
+function isAnswerAttachmentFilter(answer: CaseFormAnswer): answer is CaseFormAnswerAttachment {
   return Array.isArray(answer.value);
 }
 
@@ -63,7 +63,7 @@ async function createAttachmentFromAnswers(
   personalNumber: PersonalNumber,
   answerList: CaseFormAnswer[]
 ): Promise<CaseAttachment[]> {
-  const answerAttachmentList = answerList.filter(isAnswerAttachment);
+  const answerAttachmentList = answerList.filter(isAnswerAttachmentFilter);
 
   const attachmentPromiseList = answerAttachmentList.flatMap(answer => {
     const attachmentCategory = getAttachmentCategory(answer.field.tags);
@@ -88,4 +88,5 @@ async function createAttachmentFromAnswers(
 
 export default {
   createFromAnswers: createAttachmentFromAnswers,
+  isAnswerAttachment: isAnswerAttachmentFilter,
 };

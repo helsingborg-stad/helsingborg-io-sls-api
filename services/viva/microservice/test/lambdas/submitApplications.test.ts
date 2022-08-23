@@ -41,6 +41,8 @@ beforeEach(() => {
     putSuccessEvent: () => Promise.resolve(null),
     readParams: () => Promise.resolve({ newApplicationFormId, recurringFormId: recurrentFormId }),
     updateVivaCase: () => Promise.resolve(null),
+    attachmentFromAnswers: () => Promise.resolve([]),
+    isAnswerAttachment: () => true,
   };
 
   input = {
