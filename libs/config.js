@@ -23,9 +23,6 @@ const stageConfigs = {
     bankId: {
       envsKeyName: '/bankidEnvs/dev',
     },
-    datatorget: {
-      envsKeyName: '/datatorgetEnvs/dev',
-    },
     users: {
       tableName: 'users',
     },
@@ -39,9 +36,6 @@ const stageConfigs = {
           envsKeyName: '/vivaCaseEnvs/dev',
         },
       },
-    },
-    bookables: {
-      envsKeyName: '/bookablesEnvs/dev',
     },
     vada: {
       envsKeyName: '/vadaEnvs/dev',
@@ -76,9 +70,6 @@ const stageConfigs = {
     bankId: {
       envsKeyName: '/bankidEnvs/test',
     },
-    datatorget: {
-      envsKeyName: '/datatorgetEnvs/test',
-    },
     users: {
       tableName: 'users',
     },
@@ -92,9 +83,6 @@ const stageConfigs = {
           envsKeyName: '/vivaCaseEnvs/test',
         },
       },
-    },
-    bookables: {
-      envsKeyName: '/bookablesEnvs/test',
     },
     vada: {
       envsKeyName: '/vadaEnvs/test',
@@ -129,9 +117,6 @@ const stageConfigs = {
     bankId: {
       envsKeyName: '/bankidEnvs/stage',
     },
-    datatorget: {
-      envsKeyName: '/datatorgetEnvs/stage',
-    },
     users: {
       tableName: 'users',
     },
@@ -145,9 +130,6 @@ const stageConfigs = {
           envsKeyName: '/vivaCaseEnvs/stage',
         },
       },
-    },
-    bookables: {
-      envsKeyName: '/bookablesEnvs/stage',
     },
     vada: {
       envsKeyName: '/vadaEnvs/stage',
@@ -182,9 +164,6 @@ const stageConfigs = {
     bankId: {
       envsKeyName: '/bankidEnvs/prod',
     },
-    datatorget: {
-      envsKeyName: '/datatorgetEnvs/prod',
-    },
     users: {
       tableName: 'users',
     },
@@ -198,9 +177,6 @@ const stageConfigs = {
           envsKeyName: '/vivaCaseEnvs/prod',
         },
       },
-    },
-    bookables: {
-      envsKeyName: '/bookablesEnvs/prod',
     },
     vada: {
       envsKeyName: '/vadaEnvs/prod',
@@ -235,9 +211,6 @@ const stageConfigs = {
     bankId: {
       envsKeyName: '/bankidEnvs/release',
     },
-    datatorget: {
-      envsKeyName: '/datatorgetEnvs/release',
-    },
     users: {
       tableName: 'users',
     },
@@ -251,9 +224,6 @@ const stageConfigs = {
           envsKeyName: '/vivaCaseEnvs/release',
         },
       },
-    },
-    bookables: {
-      envsKeyName: '/bookablesEnvs/release',
     },
     vada: {
       envsKeyName: '/vadaEnvs/release',
