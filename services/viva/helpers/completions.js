@@ -1,5 +1,3 @@
-import to from 'await-to-js';
-
 import config from '../libs/config';
 
 import * as dynamoDb from '../libs/dynamoDb';
@@ -57,6 +55,7 @@ export function getCompletionState(completions) {
 
   return VIVA_COMPLETION_REQUIRED;
 }
+
 export function isRandomCheck(completions) {
   const { isRandomCheck, requested } = completions;
   return isRandomCheck && !isAnyRequestedReceived(requested);
@@ -67,24 +66,15 @@ export function isAnyRequestedReceived(requestedList) {
 }
 
 async function getVivaWorkflowCompletions(personalNumber, workflowId) {
-  const [getWorkflowCompletionsError, getCompletionsResponse] = await to(
-    vivaAdapter.workflow.getCompletions({ personalNumber, workflowId })
-  );
-  if (getWorkflowCompletionsError) {
-    throw getWorkflowCompletionsError;
-  }
-
+  const getCompletionsResponse = await vivaAdapter.workflow.getCompletions({
+    personalNumber,
+    workflowId,
+  });
   return getCompletionsResponse.attributes;
 }
 
 async function getLatestVivaWorkflowId(personalNumber) {
-  const [getLatestError, getLatestResponse] = await to(
-    vivaAdapter.workflow.getLatest(personalNumber)
-  );
-  if (getLatestError) {
-    throw getLatestError;
-  }
-
+  const getLatestResponse = await vivaAdapter.workflow.getLatest(personalNumber);
   return getLatestResponse.attributes.workflowid;
 }
 
@@ -101,10 +91,7 @@ async function getCaseOnWorkflowId(personalNumber, workflowId) {
     },
   };
 
-  const [queryError, queryResponse] = await to(dynamoDb.call('query', queryParams));
-  if (queryError) {
-    throw queryError;
-  }
+  const queryResponse = await dynamoDb.call('query', queryParams);
 
   const caseItem = queryResponse.Items[0];
   if (!caseItem) {
