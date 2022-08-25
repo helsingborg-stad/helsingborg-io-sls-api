@@ -1,6 +1,8 @@
 import { VIVA_COMPLETION_RECEIVED, VIVA_RANDOM_CHECK_RECEIVED } from '../libs/constants';
 import { cases } from '../helpers/query';
+
 import * as dynamoDb from '../libs/dynamoDb';
+import S3 from '../libs/S3';
 import params from '../libs/params';
 import config from '../libs/config';
 import log from '../libs/logs';
@@ -54,6 +56,7 @@ export interface Dependencies {
     personalNumber: string,
     answerList: CaseFormAnswer[]
   ) => Promise<CaseAttachment[]>;
+  deleteAttachments: (attachments: CaseAttachment[]) => Promise<void>;
 }
 
 function getReceivedState(currentFormId: string, randomCheckFormId: string) {
@@ -85,9 +88,16 @@ async function updateCase(params: UpdateCaseParameters): Promise<void> {
   await dynamoDb.call('update', updateParams);
 }
 
+async function deleteS3Attachments(attachments: CaseAttachment[]) {
+  const keys = attachments.map(({ id }) => ({ Key: id }));
+
+  return S3.deleteFiles(process.env.BUCKET_NAME as string, keys);
+}
+
 export async function submitCompletion(input: LambdaRequest, dependencies: Dependencies) {
   const { caseKeys } = input.detail;
-  const { getCase, readParams, postCompletion, updateCase, getAttachments } = dependencies;
+  const { getCase, readParams, postCompletion, updateCase, getAttachments, deleteAttachments } =
+    dependencies;
 
   const caseItem = await getCase(caseKeys);
   if (!caseItem) {
@@ -134,7 +144,9 @@ export async function submitCompletion(input: LambdaRequest, dependencies: Depen
     initialCompletionForm,
     newState: getReceivedState(currentFormId, randomCheckFormId),
   };
+
   await updateCase(updateCaseParams);
+  await deleteAttachments(attachments);
 
   return true;
 }
@@ -146,5 +158,6 @@ export const main = log.wrap(async event => {
     postCompletion: vivaAdapter.completion.post,
     updateCase,
     getAttachments: attachment.createFromAnswers,
+    deleteAttachments: deleteS3Attachments,
   });
 });
