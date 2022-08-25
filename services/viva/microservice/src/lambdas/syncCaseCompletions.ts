@@ -10,12 +10,8 @@ import completionsHelper from '../helpers/completions';
 import validateApplicationStatus from '../helpers/validateApplicationStatus';
 import { VIVA_STATUS_NEW_APPLICATION_OPEN } from '../helpers/constants';
 
-import { CaseUser, CaseItem } from '../types/caseItem';
-import { VivaApplicationStatus } from '../types/vivaMyPages';
-
-interface UpdateCaseCompletionsResponse {
-  Attributes: CaseItem;
-}
+import type { CaseUser, CaseCompletions } from '../types/caseItem';
+import type { VivaApplicationStatus } from '../types/vivaMyPages';
 
 interface LambdaContext {
   awsRequestId: string;
@@ -26,6 +22,11 @@ interface LambdaEvent {
     user: CaseUser;
     status: VivaApplicationStatus[];
   };
+}
+
+interface CaseKeys {
+  PK: string;
+  SK: string;
 }
 
 export async function main(event: LambdaEvent, context: LambdaContext) {
@@ -83,7 +84,7 @@ export async function main(event: LambdaEvent, context: LambdaContext) {
     return false;
   }
 
-  const caseKeys = {
+  const caseKeys: CaseKeys = {
     PK: userCase.PK,
     SK: userCase.SK,
   };
@@ -132,7 +133,7 @@ export async function main(event: LambdaEvent, context: LambdaContext) {
   return true;
 }
 
-function updateCaseCompletions(keys, newWorkflowCompletions) {
+function updateCaseCompletions(keys: CaseKeys, newWorkflowCompletions: CaseCompletions) {
   const updateParams = {
     TableName: config.cases.tableName,
     Key: {
@@ -143,8 +144,7 @@ function updateCaseCompletions(keys, newWorkflowCompletions) {
     ExpressionAttributeValues: {
       ':workflowCompletions': newWorkflowCompletions,
     },
-    ProjectionExpression: 'id',
-    ReturnValues: 'ALL_NEW',
+    ReturnValues: 'NONE',
   };
 
   return dynamoDb.call('update', updateParams);
