@@ -24,13 +24,15 @@ interface RequestedCaseCompletions {
 }
 
 export interface CaseCompletions {
-  readonly requested: RequestedCaseCompletions[];
   readonly attachmentUploaded: string[];
-  readonly completed: boolean;
+  readonly description: string | null;
   readonly dueDate: number | null;
-  readonly isCompleted: boolean;
   readonly isAttachmentPending: boolean;
+  readonly isCompleted: boolean;
+  readonly isDueDateExpired: boolean;
   readonly isRandomCheck: boolean;
+  readonly receivedDate: number | null;
+  readonly requested: RequestedCaseCompletions[];
 }
 
 export interface CaseItem {
