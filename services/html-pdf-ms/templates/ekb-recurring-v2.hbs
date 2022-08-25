@@ -278,13 +278,15 @@
 							<tr>
 								<td>
 									{{this.title}}
+									<br />
 									{{this.description}}
 									{{#if this.fromAddress}}
 										<br />
-										<span class="address">{{this.fromAddress}}</span>
+										<span class="address"> Från: {{this.fromAddress}}</span>
 									{{/if}}
 									{{#if this.toAddress}}
-										<span class="address"> - {{this.toAddress}}</span>
+										<br />
+										<span class="address"> Till: {{this.toAddress}}</span>
 									{{/if}}
 								</td>
 								<td>
@@ -314,12 +316,14 @@
 							<tr>
 								<td>
 									{{this.title}}
+									<br />
 									{{this.description}}
 									{{#if this.fromAddress}}
 										<br />
 										<span class="address">{{this.fromAddress}}</span>
 									{{/if}}
 									{{#if this.toAddress}}
+										<br />
 										<span class="address"> - {{this.toAddress}}</span>
 									{{/if}}
 								</td>
