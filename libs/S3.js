@@ -38,9 +38,11 @@ async function deleteFile(bucketName, key) {
 
 async function deleteFiles(bucketName, keys) {
   return s3Client
-    .deleteFiles({
+    .deleteObjects({
       Bucket: bucketName,
-      Delete: keys,
+      Delete: {
+        Objects: keys,
+      },
     })
     .promise();
 }
