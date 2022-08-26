@@ -88,7 +88,7 @@ async function updateCase(params: UpdateCaseParameters): Promise<void> {
   await dynamoDb.call('update', updateParams);
 }
 
-async function deleteS3Attachments(attachments: CaseAttachment[]) {
+function deleteS3Attachments(attachments: CaseAttachment[]) {
   const keys = attachments.map(({ id }) => ({ Key: id }));
 
   return S3.deleteFiles(process.env.BUCKET_NAME as string, keys);
