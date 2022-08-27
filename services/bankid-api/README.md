@@ -95,7 +95,9 @@ sequenceDiagram
     "type": "bankIdAuth",
     "attributes": {
       "orderRef": "order-reference-id",
-      "autoStartToken": "auto-start-token"
+      "autoStartToken": "auto-start-token",
+      "qrStartToken": "qr-start-token",
+      "qrStartSecret": "qr-start-secret"
     }
   }
 }
