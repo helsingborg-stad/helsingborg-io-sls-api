@@ -63,8 +63,8 @@ sequenceDiagram
 
     Frontend->>+Lambda: POST {personalNumber, endUserIp}
     Lambda->>+BankId: POST {personalNumber, endUserIp}
-    BankId-->>-Lambda: {orderRef, autoStartToken}
-    Lambda-->>-Frontend: {orderRef, autoStartToken}
+    BankId-->>-Lambda: {orderRef, autoStartToken, qrStartToken, qrStartSecret}
+    Lambda-->>-Frontend: {orderRef, autoStartToken, qrStartToken, qrStartSecret}
 ```
 
 #### Request type
@@ -296,8 +296,8 @@ sequenceDiagram
 
     Frontend->>+Lambda: POST {personalNumber, endUserIp, userVisibleData}
     Lambda->>+BankId: POST {personalNumber, endUserIp, userVisibleData}
-    BankId-->>-Lambda: {orderRef, autoStartToken}
-    Lambda-->>-Frontend: {orderRef, autoStartToken}
+    BankId-->>-Lambda: {orderRef, autoStartToken, qrStartToken, qrStartSecret}
+    Lambda-->>-Frontend: {orderRef, autoStartToken, qrStartToken, qrStartSecret}
 ```
 
 #### Request type
