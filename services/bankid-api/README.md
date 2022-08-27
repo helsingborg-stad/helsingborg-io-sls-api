@@ -166,7 +166,9 @@ Pending
 }
 ```
 
-Completed auth
+Completed auth (Mitt Helsingborg App)
+
+See - authorizationCode
 
 ```json
 {
@@ -174,7 +176,41 @@ Completed auth
     "version": "1.0"
   },
   "data": {
-    "orderRef": "131daac9-16c6-4618-beb0-365768f37288",
+    "authorizationCode": "some-token",
+    "orderRef": "some-ref",
+    "status": "complete",
+    "completionData": {
+      "user": {
+        "personalNumber": "190000000000",
+        "name": "Karl Karlsson",
+        "givenName": "Karl",
+        "surname": "Karlsson"
+      },
+      "device": {
+        "ipAddress": "192.168.0.1"
+      },
+      "cert": {
+        "notBefore": "1502983274000",
+        "notAfter": "1563549674000"
+      },
+      "signature": "<base64-encoded>",
+      "ocspResponse": "<base64-encoded>"
+    }
+  }
+}
+```
+
+Completed auth (Default)
+
+authorizationCode is left out
+
+```json
+{
+  "jsonapi": {
+    "version": "1.0"
+  },
+  "data": {
+    "orderRef": "some-ref",
     "status": "complete",
     "completionData": {
       "user": {
@@ -293,7 +329,9 @@ sequenceDiagram
     "type": "bankIdSign",
     "attributes": {
       "orderRef": "order-reference-id",
-      "autoStartToken": "auto-start-token"
+      "autoStartToken": "auto-start-token",
+      "qrStartToken": "qr-start-token",
+      "qrStartSecret": "qr-start-secret"
     }
   }
 }
