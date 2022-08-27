@@ -2,41 +2,39 @@
 
 ## Purpose
 
-The BankID Service purpose is to provide integration towards [the swedish bankid](https://www.bankid.com/) api.
+The BankID Service purpose is to provide integration towards the [Swedish BankID](https://www.bankid.com/) api.
 
 ## Description
 
 The Bankid Service is a RESTful API that allows you use the following bankid integrations: authentication, sign, collect and cancel.
 
-Complete documentation [Bank ID relying party guidelines (documentation)](https://www.bankid.com/bankid-i-dina-tjanster/rp-info).
+Complete documentation [BankID relying party guidelines (documentation)](https://www.bankid.com/bankid-i-dina-tjanster/rp-info).
 
 The workflow to perform a login is as follows: you make an authentication request, and then start periodically polling against the collect end-point. This continues until the session expires, or the user cancels, or the user successfully logs in, in which case we receive a success response.
 
 ## Getting started
 
 1. Read the global requierments for this repo, can be found [here](https://github.com/helsingborg-stad/helsingborg-io-sls-api/blob/dev/README.md)
+2. Create a S3 Bucket and upload bankd-id certificates - two files .ca and .pfx. Remember the bucket name for reference at step 3.
+3. Setup environment variables (aka. AWS System Manage - Parameter Store)
 
-2. Create a S3 Bucket and upload bankd-id certificates - two files .ca and .pfx. Save the bucket name for reference in step 3.
-
-3. Setup env variables (aka. AWS PARAMETERSTORE)
-
-```
+```json
 {
-    "apiUrl": "[BankId Root URL]",
-    "passphrase": "[Bankid Passphrase]",
-    "bucketName": "[AWS S3 bucket name",
-    "caName": "[some.ca file]",
-    "pfxName": "[some.pfx file]"
+  "apiUrl": "[BankID root url]",
+  "passphrase": "[BankID passphrase]",
+  "bucketName": "[AWS S3 bucket name]",
+  "caName": "[some.ca file]",
+  "pfxName": "[some.pfx file]"
 }
 ```
 
-### AWS API GATEWAY
+### AWS Api Gateway
 
-A running instance of a API GATEWAY on AWS that includes a gateway resource named /auth. You can find and deploy this in our [resource](https://github.com/helsingborg-stad/helsingborg-io-sls-resources/tree/dev/services/gateway/resources/auth) repository.
+A running instance of a Api Gateway on AWS that includes a gateway resource named /auth. You can find and deploy this in our [resource](https://github.com/helsingborg-stad/helsingborg-io-sls-resources/tree/dev/services/gateway/resources/auth) repository.
 
-### AWS PARAMETERSTORE
+### AWS System Manager - Paramter Store
 
-A setup of AWS paramterstore on aws. This can be created from the resource api. You can find and deploy this in our [resource](https://github.com/helsingborg-stad/helsingborg-io-sls-resources/tree/dev/services/parameterStore) repository.
+This can be created by the resources repo. You can find and deploy this in our [resource](https://github.com/helsingborg-stad/helsingborg-io-sls-resources/tree/dev/services/parameterStore) repository.
 
 ### Installation
 
@@ -44,7 +42,7 @@ A setup of AWS paramterstore on aws. This can be created from the resource api. 
 yarn install
 ```
 
-### Deploy and Run on AWS
+### Deploy and run on AWS
 
 ```bash
 sls deploy --verbose
@@ -52,9 +50,9 @@ sls deploy --verbose
 
 When you deploy the service, serverless will output the generated url in the terminal that the service can be accessed from.
 
-# BankID API
+## BankID API
 
-## AUTH
+### AUTH
 
 ```mermaid
 sequenceDiagram
@@ -69,22 +67,26 @@ sequenceDiagram
     Lambda-->>-Frontend: {orderRef, autoStartToken}
 ```
 
-### Endpoint
+#### Request type
+
+`POST`
+
+#### Endpoint
 
 `/bankid/auth`
 
-### JSON payload
+#### JSON payload
 
-```
-  {
-    "personalNumber": "203010101010",
-    "endUserIp": "0.0.0.0"
-  }
+```json
+{
+  "personalNumber": "203010101010",
+  "endUserIp": "0.0.0.0"
+}
 ```
 
-### Excpected response
+#### Excpected response
 
-```
+```json
 {
   "jsonapi": {
     "version": "1.0"
@@ -92,8 +94,8 @@ sequenceDiagram
   "data": {
     "type": "bankIdAuth",
     "attributes": {
-      "orderRef": "a-order-ref-id",
-      "autoStartToken": "a-auto-start-token"
+      "orderRef": "order-reference-id",
+      "autoStartToken": "auto-start-token"
     }
   }
 }
@@ -101,7 +103,7 @@ sequenceDiagram
 
 ---
 
-## COLLECT
+### COLLECT
 
 ```mermaid
 sequenceDiagram
@@ -126,23 +128,27 @@ sequenceDiagram
   end
 ```
 
-### Endpoint
+#### Request type
+
+`POST`
+
+#### Endpoint
 
 `/bankid/collect`
 
-### JSON payload
+#### JSON payload
 
-```
+```json
 {
-	"orderRef": "a-order-ref-id"
+  "orderRef": "order-reference-id"
 }
 ```
 
-### Expected response
+#### Expected response
 
-Pending:
+Pending
 
-```
+```json
 {
   "jsonapi": {
     "version": "1.0"
@@ -150,7 +156,7 @@ Pending:
   "data": {
     "type": "bankIdCollect",
     "attributes": {
-      "orderRef": "a-order-ref-id",
+      "orderRef": "order-reference-id",
       "status": "pending",
       "hintCode": "noClient"
     }
@@ -158,32 +164,32 @@ Pending:
 }
 ```
 
-Completed auth:
+Completed auth
 
-```
+```json
 {
   "jsonapi": {
     "version": "1.0"
   },
   "data": {
-    "orderRef":"131daac9-16c6-4618-beb0-365768f37288",
-    "status":"complete",
-    "completionData":{
-      "user":{
-        "personalNumber":"190000000000",
-        "name":"Karl Karlsson",
-        "givenName":"Karl",
-        "surname":"Karlsson"
+    "orderRef": "131daac9-16c6-4618-beb0-365768f37288",
+    "status": "complete",
+    "completionData": {
+      "user": {
+        "personalNumber": "190000000000",
+        "name": "Karl Karlsson",
+        "givenName": "Karl",
+        "surname": "Karlsson"
       },
-      "device":{
-        "ipAddress":"192.168.0.1"
+      "device": {
+        "ipAddress": "192.168.0.1"
       },
-      "cert":{
-        "notBefore":"1502983274000",
-        "notAfter":"1563549674000"
+      "cert": {
+        "notBefore": "1502983274000",
+        "notAfter": "1563549674000"
       },
-      "signature":"<base64-encoded data>",
-      "ocspResponse":"<base64-encoded data>"
+      "signature": "<base64-encoded>",
+      "ocspResponse": "<base64-encoded>"
     }
   }
 }
@@ -191,7 +197,7 @@ Completed auth:
 
 ---
 
-## CANCEL
+### CANCEL
 
 ```mermaid
 sequenceDiagram
@@ -206,30 +212,34 @@ sequenceDiagram
     Lambda-->>Frontend: {}
 ```
 
-### Endpoint
+#### Request type
+
+`POST`
+
+#### Endpoint
 
 `/bankid/cancel`
 
-### JSON payload
+#### JSON payload
 
-```
+```json
 {
-	"orderRef": "a-order-ref-id"
+  "orderRef": "order-reference-id"
 }
 ```
 
-### Expected response
+#### Expected response
 
-```
+```json
 {
   "jsonapi": {
     "version": "1.0"
   },
   "data": {
     "type": "bankidCancel",
-    "id": "a-order-ref-id",
+    "id": "order-reference-id",
     "attributes": {
-      "message": "cancelled",
+      "message": "cancelled"
     }
   }
 }
@@ -237,7 +247,7 @@ sequenceDiagram
 
 ---
 
-## SIGN
+### SIGN
 
 ```mermaid
 sequenceDiagram
@@ -252,23 +262,27 @@ sequenceDiagram
     Lambda-->>-Frontend: {orderRef, autoStartToken}
 ```
 
-### Endpoint
+#### Request type
+
+`POST`
+
+#### Endpoint
 
 `/bankid/sign`
 
-### JSON payload
+#### JSON payload
 
-```
+```json
 {
-	"personalNumber": "190101010101",
-	"endUserIp": "0.0.0.0",
-	"userVisibleData": "example-message"
+  "personalNumber": "190101010101",
+  "endUserIp": "0.0.0.0",
+  "userVisibleData": "example-message"
 }
 ```
 
-### Expected response
+#### Expected response
 
-```
+```json
 {
   "jsonapi": {
     "version": "1.0"
@@ -276,8 +290,8 @@ sequenceDiagram
   "data": {
     "type": "bankIdSign",
     "attributes": {
-      "orderRef": "a-order-ref-id",
-      "autoStartToken": "an-auto-start-token"
+      "orderRef": "order-reference-id",
+      "autoStartToken": "auto-start-token"
     }
   }
 }

@@ -8,37 +8,23 @@ helsingborg-io-sls-api, Token -->
 - [Token](#Token)
   - [Table of Contents](#table-of-contents)
   - [About Token](#about-token)
-  - [Getting Started](#getting-started)
-    - [Do first](#do-first)
-    - [Run local](#run-local)
-    - [Deploy](#deploy-and-run-on-aws)
+  - [Do first](#do-first)
+  - [Howto deploy](#deploy-and-run-on-aws)
   - [API](#api)
 
-## About Token
+## Purpose
 
 The Token Service purpose is to provide an authorization method for other services in this monorepo.
 It also serves as a REST API endpoint that generates tokens.
-
-## Getting Started
 
 ### Do first
 
 Read the global requierments for this repo, can be found [here](https://github.com/helsingborg-stad/helsingborg-io-sls-api/blob/dev/README.md)
 
-### Run Local
-
-```bash
-$ sls offline
-```
-
-When you deploy the service, Serverless will output the generated url in the terminal that the service can be accessed from.
-
 ### Deploy and run on AWS
 
-Deploy command:
-
 ```bash
-$ sls deploy -v
+$ sls deploy --verbose
 ```
 
 When you deploy the service, Serverless will output the generated url in the terminal that the service can be accessed from.
