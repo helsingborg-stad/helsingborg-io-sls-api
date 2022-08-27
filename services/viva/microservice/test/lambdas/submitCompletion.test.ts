@@ -35,7 +35,7 @@ function createCase(partialCase: Partial<CaseItem> = {}): CaseItem {
       },
       workflowId: '123',
     },
-    currentFormId: 'SOME STRING',
+    currentFormId: completionFormId,
     ...partialCase,
   };
 }
@@ -62,12 +62,32 @@ function createDependencies(
     postCompletion: () => Promise.resolve({ status: 'OK' }),
     updateCase: () => Promise.resolve(),
     getAttachments: () => Promise.resolve([]),
+    deleteAttachments: () => Promise.resolve(undefined),
     ...partialDependencies,
   };
 }
 
 it('successfully submits completions', async () => {
-  const result = await submitCompletion(createInput(), createDependencies(createCase()));
+  expect.assertions(4);
+
+  const updateCaseMock = jest.fn().mockResolvedValueOnce(undefined);
+  const deleteAttachmentsMock = jest.fn().mockResolvedValueOnce(undefined);
+
+  const attachments = [{ id: '1' }, { id: '2' }, { id: '3' }] as CaseAttachment[];
+  const getAttachmentsMock = jest.fn().mockResolvedValueOnce(attachments);
+
+  const result = await submitCompletion(
+    createInput(),
+    createDependencies(createCase(), {
+      updateCase: updateCaseMock,
+      deleteAttachments: deleteAttachmentsMock,
+      getAttachments: getAttachmentsMock,
+    })
+  );
+
+  expect(updateCaseMock).toHaveBeenCalledTimes(1);
+  expect(deleteAttachmentsMock).toHaveBeenCalledTimes(1);
+  expect(deleteAttachmentsMock).toHaveBeenCalledWith(attachments);
   expect(result).toBe(true);
 });
 
