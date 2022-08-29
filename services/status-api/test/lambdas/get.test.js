@@ -25,6 +25,7 @@ it('returns the value in `message` environment variable', async () => {
         message: expectedMessageValue,
       },
     }),
+    isBase64Encoded: false,
   };
 
   const result = await main();
@@ -42,6 +43,7 @@ it('returns an empty string if `message` variable is not set', async () => {
         message: '',
       },
     }),
+    isBase64Encoded: false,
   };
 
   const result = await main();
