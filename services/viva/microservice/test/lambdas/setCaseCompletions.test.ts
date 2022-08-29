@@ -6,6 +6,9 @@ import {
 
 import { VIVA_COMPLETION_REQUIRED, VIVA_RANDOM_CHECK_REQUIRED } from '../../src/libs/constants';
 
+import type { CaseItem } from '../../../types/caseItem';
+import { EncryptionType } from '../../../types/caseItem';
+
 const ssmParameters = {
   recurringFormId: 'recurring',
   randomCheckFormId: 'randomCheck',
@@ -26,31 +29,62 @@ const input: LambdaRequest = {
   },
 };
 
-const getCaseItem = (
+function getCaseItem(
   currentFormId: string,
   isRandomCheck: boolean,
   requested: { received: boolean; description: string }[]
-) => ({
-  currentFormId,
-  id: 'caseId',
-  persons: [],
-  details: {
-    workflowId: 'flowId',
-    period: {
-      startDate: 1,
-      endDate: 2,
+): CaseItem {
+  return {
+    PK: caseKeys.PK,
+    SK: caseKeys.SK,
+    currentFormId,
+    id: 'caseId',
+    persons: [],
+    state: 'SOME_STATE',
+    expirationTime: 123,
+    createdAt: 123,
+    updatedAt: 456,
+    status: {
+      type: '',
+      name: '',
+      description: '',
     },
-    completions: {
-      isRandomCheck,
-      requested,
-      attachmentUploaded: [],
-      completed: false,
-      dueDate: null,
-      isCompleted: false,
-      isAttachmentPending: false,
+    forms: {
+      abc123: {
+        answers: [],
+        encryption: {
+          type: EncryptionType.Decrypted,
+        },
+        currentPosition: {
+          currentMainStep: 0,
+          currentMainStepIndex: 0,
+          index: 0,
+          level: 0,
+          numberOfMainSteps: 0,
+        },
+      },
     },
-  },
-});
+    provider: 'VIVA',
+    details: {
+      workflowId: 'flowId',
+      period: {
+        startDate: 1,
+        endDate: 2,
+      },
+      completions: {
+        isRandomCheck,
+        requested,
+        receivedDate: 123,
+        description: null,
+        attachmentUploaded: [],
+        dueDate: null,
+        isDueDateExpired: false,
+        isCompleted: false,
+        isAttachmentPending: false,
+      },
+    },
+  };
+}
 
 test.each([
   {
