@@ -1,6 +1,6 @@
 import config from './config';
 
-export function success(statusCode = 200, body) {
+export function success(statusCode, body) {
   return buildResponse(statusCode, body);
 }
 
