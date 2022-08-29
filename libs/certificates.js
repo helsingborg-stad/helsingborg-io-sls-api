@@ -1,15 +1,12 @@
-import AWS from './aws-sdk';
+import S3 from 'aws-sdk/clients/s3';
 
-const S3 = new AWS.S3();
+const s3Client = new S3({ apiVersion: '2006-03-01' });
 
-export const read = async (Bucket, Key) => {
-  try {
-    const file = await S3.getObject({
-      Bucket,
-      Key,
-    }).promise();
-    return file;
-  } catch (error) {
-    throw `S3 - ${error.code}:${error.message}`;
-  }
-};
+export function read(bucket, key) {
+  return s3Client
+    .getObject({
+      Bucket: bucket,
+      Key: key,
+    })
+    .promise();
+}

@@ -9,6 +9,7 @@ export function success(
     'Access-Control-Allow-Credentials': boolean;
   };
   body: string;
+  isBase64Encoded: boolen;
 };
 export function failure(
   error: any,
@@ -20,6 +21,7 @@ export function failure(
     'Access-Control-Allow-Credentials': boolean;
   };
   body: string;
+  isBase64Encoded: boolen;
 };
 export function buildResponse(
   statusCode: any,
@@ -31,4 +33,5 @@ export function buildResponse(
     'Access-Control-Allow-Credentials': boolean;
   };
   body: string;
+  isBase64Encoded: boolen;
 };

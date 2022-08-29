@@ -1,6 +1,6 @@
 import config from './config';
 
-export function success(statusCode = 200, body) {
+export function success(statusCode, body) {
   return buildResponse(statusCode, body);
 }
 
@@ -33,5 +33,6 @@ export function buildResponse(statusCode, body) {
       'Access-Control-Allow-Credentials': true,
     },
     body: JSON.stringify(jsonApi),
+    isBase64Encoded: false,
   };
 }

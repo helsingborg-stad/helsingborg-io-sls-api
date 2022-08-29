@@ -1,6 +1,8 @@
-import AWS from './aws-sdk';
+import DynamoDB from 'aws-sdk/clients/dynamodb';
+
 import config from './config';
-export const docClient = new AWS.DynamoDB.DocumentClient();
+
+export const docClient = new DynamoDB.DocumentClient();
 
 export function call(action, params) {
   return docClient[action]({
@@ -10,5 +12,5 @@ export function call(action, params) {
 }
 
 export function unmarshall(record) {
-  return AWS.DynamoDB.Converter.unmarshall(record);
+  return DynamoDB.Converter.unmarshall(record);
 }

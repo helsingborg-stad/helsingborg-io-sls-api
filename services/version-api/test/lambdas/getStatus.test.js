@@ -29,6 +29,7 @@ beforeEach(() => {
     headers: {
       'User-Agent': 'MittHelsingborg/1.3.0/ios/15.0',
     },
+    isBase64Encoded: false,
   };
 });
 
@@ -40,6 +41,7 @@ it('returns the version status successfully', async () => {
     }),
     headers: mockHeaders,
     statusCode: 200,
+    isBase64Encoded: false,
   };
 
   const result = await main(mockEvent, mockContext);
@@ -58,6 +60,7 @@ test.each(malformedUserAgents)('returns failure for`User-Agent` %s', async userA
     }),
     headers: mockHeaders,
     statusCode: 400,
+    isBase64Encoded: false,
   };
 
   const result = await main(mockEvent, mockContext);
