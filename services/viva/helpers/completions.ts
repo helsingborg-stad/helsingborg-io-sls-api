@@ -18,15 +18,30 @@ import {
 
 import vivaAdapter from './vivaAdapterRequestClient';
 
-export function getCompletionFormId(completionForms, completions) {
-  const { randomCheckFormId, completionFormId } = completionForms;
+import type {
+  CaseItem,
+  CaseCompletions,
+  CaseStatus,
+  RequestedCaseCompletions,
+} from '../types/caseItem';
+import type { VadaWorkflowCompletions } from '../types/vadaCompletions';
+
+interface CompletionForms {
+  randomCheckFormId: string;
+  completionFormId: string;
+}
+
+function getCompletionFormId(
+  { randomCheckFormId, completionFormId }: CompletionForms,
+  completions: CaseCompletions
+): string {
   return isRandomCheck(completions) ? randomCheckFormId : completionFormId;
 }
 
-export function getCompletionStatus(completions) {
-  const { isCompleted, isAttachmentPending } = completions;
+function getCompletionStatus(completions: CaseCompletions): CaseStatus {
+  const { isAttachmentPending } = completions;
 
-  if (isCompleted) {
+  if (completions.isCompleted) {
     return getStatusByType(ACTIVE_SUBMITTED);
   }
 
@@ -44,7 +59,7 @@ export function getCompletionStatus(completions) {
   return getStatusByType(ACTIVE_COMPLETION_REQUIRED_VIVA);
 }
 
-export function getCompletionState(completions) {
+function getCompletionState(completions: CaseCompletions) {
   if (completions.isCompleted) {
     return VIVA_APPLICATION_RECEIVED;
   }
@@ -56,16 +71,18 @@ export function getCompletionState(completions) {
   return VIVA_COMPLETION_REQUIRED;
 }
 
-export function isRandomCheck(completions) {
-  const { isRandomCheck, requested } = completions;
+function isRandomCheck({ isRandomCheck, requested }: CaseCompletions): boolean {
   return isRandomCheck && !isAnyRequestedReceived(requested);
 }
 
-export function isAnyRequestedReceived(requestedList) {
-  return requestedList.some(item => item.received);
+function isAnyRequestedReceived(requested: RequestedCaseCompletions[]): boolean {
+  return requested.some(item => item.received);
 }
 
-async function getVivaWorkflowCompletions(personalNumber, workflowId) {
+async function getVivaWorkflowCompletions(
+  personalNumber: string,
+  workflowId: string
+): Promise<VadaWorkflowCompletions> {
   const getCompletionsResponse = await vivaAdapter.workflow.getCompletions({
     personalNumber,
     workflowId,
@@ -73,12 +90,12 @@ async function getVivaWorkflowCompletions(personalNumber, workflowId) {
   return getCompletionsResponse.attributes;
 }
 
-async function getLatestVivaWorkflowId(personalNumber) {
+async function getLatestVivaWorkflowId(personalNumber: string): Promise<string> {
   const getLatestResponse = await vivaAdapter.workflow.getLatest(personalNumber);
   return getLatestResponse.attributes.workflowid;
 }
 
-async function getCaseOnWorkflowId(personalNumber, workflowId) {
+async function getCaseOnWorkflowId(personalNumber: string, workflowId: string): Promise<CaseItem> {
   const PK = `USER#${personalNumber}`;
 
   const queryParams = {
@@ -101,24 +118,6 @@ async function getCaseOnWorkflowId(personalNumber, workflowId) {
   return caseItem;
 }
 
-function getLocaleDate(timestamp) {
-  return new Date(
-    new Date(timestamp).toLocaleDateString('sv-SE', {
-      timeZone: 'Europe/Stockholm',
-    })
-  ).setHours(0, 0, 0, 0);
-}
-
-function isDueDateExpired(timestamp) {
-  if (timestamp == undefined) {
-    return false;
-  }
-
-  const today = getLocaleDate(Date.now());
-  const dueDate = getLocaleDate(timestamp);
-  return today >= dueDate;
-}
-
 export default {
   get: {
     formId: getCompletionFormId,
@@ -132,5 +131,4 @@ export default {
       },
     },
   },
-  isDueDateExpired,
 };
