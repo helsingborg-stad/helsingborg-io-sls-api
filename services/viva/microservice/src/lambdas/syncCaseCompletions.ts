@@ -79,25 +79,12 @@ export async function syncCaseCompletions(input: LambdaRequest, dependencies: De
   }
 
   const latestWorkflowId = await dependencies.getLatestWorkflowId(personalNumber);
-  if (!latestWorkflowId) {
-    log.writeError('Get latest Viva workflow failed');
-    return false;
-  }
-
   const workflowCompletions = await dependencies.getWorkflowCompletions(
     personalNumber,
     latestWorkflowId
   );
-  if (!workflowCompletions) {
-    log.writeError('Get Viva workflow completions failed');
-    return false;
-  }
 
   const userCase = await dependencies.getCaseOnWorkflowId(personalNumber, latestWorkflowId);
-  if (!userCase) {
-    log.writeError('Get case from cases table failed');
-    return false;
-  }
 
   const caseKeys: CaseKeys = {
     PK: userCase.PK,
@@ -117,7 +104,7 @@ export async function syncCaseCompletions(input: LambdaRequest, dependencies: De
   return true;
 }
 
-export const main = log.wrap(async event => {
+export const main = log.wrap(event => {
   return syncCaseCompletions(event, {
     putSuccessEvent: putVivaMsEvent.syncCaseCompletionsSuccess,
     updateCase: updateCaseCompletions,
