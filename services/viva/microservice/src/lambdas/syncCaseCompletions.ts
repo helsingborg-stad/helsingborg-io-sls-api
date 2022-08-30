@@ -22,7 +22,7 @@ interface LambdaDetails {
   status: VivaApplicationStatus[];
 }
 
-interface LambdaRequest {
+export interface LambdaRequest {
   detail: LambdaDetails;
 }
 
