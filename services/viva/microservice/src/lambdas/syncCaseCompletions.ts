@@ -1,5 +1,3 @@
-import to from 'await-to-js';
-
 import config from '../libs/config';
 
 import * as dynamoDb from '../libs/dynamoDb';
@@ -10,130 +8,48 @@ import completionsHelper from '../helpers/completions';
 import validateApplicationStatus from '../helpers/validateApplicationStatus';
 import { VIVA_STATUS_NEW_APPLICATION_OPEN } from '../helpers/constants';
 
-import type { CaseUser, CaseCompletions } from '../types/caseItem';
+import type { CaseUser, CaseItem, PersonalNumber } from '../types/caseItem';
 import type { VivaApplicationStatus } from '../types/vivaMyPages';
-
-interface LambdaContext {
-  awsRequestId: string;
-}
-
-interface LambdaEvent {
-  detail: {
-    user: CaseUser;
-    status: VivaApplicationStatus[];
-  };
-}
+import type { VadaWorkflowCompletions } from '../types/vadaCompletions';
 
 interface CaseKeys {
   PK: string;
   SK: string;
 }
 
-export async function main(event: LambdaEvent, context: LambdaContext) {
-  const {
-    user: { personalNumber },
-    status: vivaApplicantStatusCodeList,
-  } = event.detail;
-
-  if (validateApplicationStatus(vivaApplicantStatusCodeList, [VIVA_STATUS_NEW_APPLICATION_OPEN])) {
-    log.info(
-      'Status belongs to a new application, stopping execution',
-      context.awsRequestId,
-      'service-viva-ms-syncCaseCompletions-005',
-      undefined
-    );
-    return true;
-  }
-
-  const [getLatestWorkflowIdError, latestWorkflowId] = await to(
-    completionsHelper.get.workflow.latest.id(personalNumber)
-  );
-  if (getLatestWorkflowIdError) {
-    log.error(
-      'Error getting the latest Viva workflow',
-      context.awsRequestId,
-      'service-viva-ms-syncCaseCompletions-010',
-      getLatestWorkflowIdError
-    );
-    return false;
-  }
-
-  const [getWorkflowCompletionsError, workflowCompletions] = await to(
-    completionsHelper.get.workflow.completions(personalNumber, latestWorkflowId)
-  );
-  if (getWorkflowCompletionsError) {
-    log.error(
-      'Error getting Viva workflow completions',
-      context.awsRequestId,
-      'service-viva-ms-syncCaseCompletions-015',
-      getWorkflowCompletionsError
-    );
-    return false;
-  }
-
-  const [getCaseError, userCase] = await to(
-    completionsHelper.get.caseOnWorkflowId(personalNumber, latestWorkflowId)
-  );
-  if (getCaseError) {
-    log.error(
-      'Get case from cases table failed',
-      context.awsRequestId,
-      'service-viva-ms-syncCaseCompletions-020',
-      getCaseError
-    );
-    return false;
-  }
-
-  const caseKeys: CaseKeys = {
-    PK: userCase.PK,
-    SK: userCase.SK,
-  };
-  const [updateCaseError, updateCaseCompletionsResponse] = await to(
-    updateCaseCompletions(caseKeys, workflowCompletions)
-  );
-  if (updateCaseError) {
-    log.error(
-      'Update case completion attributes failed',
-      context.awsRequestId,
-      'service-viva-ms-syncCaseCompletions-030',
-      updateCaseError
-    );
-    return false;
-  }
-
-  const { Attributes: updatedCase } =
-    updateCaseCompletionsResponse as UpdateCaseCompletionsResponse;
-
-  const [putEventError] = await to(
-    putVivaMsEvent.syncCaseCompletionsSuccess({
-      vivaApplicantStatusCodeList,
-      workflowCompletions,
-      caseKeys,
-      caseState: userCase.state,
-      caseStatusType: userCase.status.type,
-    })
-  );
-  if (putEventError) {
-    log.error(
-      'Error put event [syncCaseCompletionsSuccess]',
-      context.awsRequestId,
-      'service-viva-ms-syncCaseCompletions-035',
-      putEventError
-    );
-    return false;
-  }
-
-  log.info(
-    'Successfully updated completions attributes on case',
-    context.awsRequestId,
-    'service-viva-ms-syncCaseCompletions-040',
-    updatedCase.id
-  );
-
-  return true;
+interface LambdaDetails {
+  user: CaseUser;
+  status: VivaApplicationStatus[];
 }
 
-function updateCaseCompletions(keys: CaseKeys, newWorkflowCompletions: CaseCompletions) {
+interface LambdaRequest {
+  detail: LambdaDetails;
+}
+
+interface PutSuccessEvent {
+  applicantStatusCodeList: VivaApplicationStatus[];
+  workflowCompletions: VadaWorkflowCompletions;
+  caseKeys: CaseKeys;
+  caseState: string;
+  caseStatusType: string;
+}
+
+export interface Dependencies {
+  putSuccessEvent: (params: PutSuccessEvent) => Promise<void>;
+  updateCase: (keys: CaseKeys, newCompletions: VadaWorkflowCompletions) => Promise<void>;
+  validateStatusCode: (statusList: VivaApplicationStatus[], requiredCodeList: number[]) => boolean;
+  getLatestWorkflowId: (user: PersonalNumber) => Promise<string>;
+  getWorkflowCompletions: (
+    user: PersonalNumber,
+    workflowId: string
+  ) => Promise<VadaWorkflowCompletions>;
+  getCaseOnWorkflowId: (user: PersonalNumber, workflowId: string) => Promise<CaseItem>;
+}
+
+function updateCaseCompletions(
+  keys: CaseKeys,
+  newCompletions: VadaWorkflowCompletions
+): Promise<void> {
   const updateParams = {
     TableName: config.cases.tableName,
     Key: {
@@ -142,10 +58,72 @@ function updateCaseCompletions(keys: CaseKeys, newWorkflowCompletions: CaseCompl
     },
     UpdateExpression: 'SET details.completions = :workflowCompletions',
     ExpressionAttributeValues: {
-      ':workflowCompletions': newWorkflowCompletions,
+      ':workflowCompletions': newCompletions,
     },
     ReturnValues: 'NONE',
   };
 
   return dynamoDb.call('update', updateParams);
 }
+
+export async function syncCaseCompletions(input: LambdaRequest, dependencies: Dependencies) {
+  const {
+    user: { personalNumber },
+    status: applicantStatusCodeList,
+  } = input.detail;
+
+  if (
+    dependencies.validateStatusCode(applicantStatusCodeList, [VIVA_STATUS_NEW_APPLICATION_OPEN])
+  ) {
+    return true;
+  }
+
+  const latestWorkflowId = await dependencies.getLatestWorkflowId(personalNumber);
+  if (!latestWorkflowId) {
+    log.writeError('Get latest Viva workflow failed');
+    return false;
+  }
+
+  const workflowCompletions = await dependencies.getWorkflowCompletions(
+    personalNumber,
+    latestWorkflowId
+  );
+  if (!workflowCompletions) {
+    log.writeError('Get Viva workflow completions failed');
+    return false;
+  }
+
+  const userCase = await dependencies.getCaseOnWorkflowId(personalNumber, latestWorkflowId);
+  if (!userCase) {
+    log.writeError('Get case from cases table failed');
+    return false;
+  }
+
+  const caseKeys: CaseKeys = {
+    PK: userCase.PK,
+    SK: userCase.SK,
+  };
+
+  await dependencies.updateCase(caseKeys, workflowCompletions);
+
+  await dependencies.putSuccessEvent({
+    applicantStatusCodeList,
+    workflowCompletions,
+    caseKeys,
+    caseState: userCase.state,
+    caseStatusType: userCase.status.type,
+  });
+
+  return true;
+}
+
+export const main = log.wrap(async event => {
+  return syncCaseCompletions(event, {
+    putSuccessEvent: putVivaMsEvent.syncCaseCompletionsSuccess,
+    updateCase: updateCaseCompletions,
+    validateStatusCode: validateApplicationStatus,
+    getLatestWorkflowId: completionsHelper.get.workflow.latest.id,
+    getWorkflowCompletions: completionsHelper.get.workflow.completions,
+    getCaseOnWorkflowId: completionsHelper.get.caseOnWorkflowId,
+  });
+});
