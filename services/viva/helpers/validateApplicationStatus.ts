@@ -1,4 +1,4 @@
-import { VivaApplicationStatus } from '../types/vivaMyPages';
+import type { VivaApplicationStatus } from '../types/vivaMyPages';
 
 export default function validateApplicationStatus(
   statusList: VivaApplicationStatus[],
