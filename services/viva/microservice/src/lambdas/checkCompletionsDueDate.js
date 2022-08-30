@@ -17,8 +17,6 @@ import {
 } from '../helpers/constants';
 import validateApplicationStatus from '../helpers/validateApplicationStatus';
 
-import completionsHelper from '../helpers/completions';
-
 export async function main(event, context) {
   const { caseKeys, vivaApplicantStatusCodeList } = event.detail;
 
@@ -46,7 +44,7 @@ export async function main(event, context) {
     return false;
   }
 
-  if (!completionsHelper.isDueDateExpired(caseItem.details.completions.dueDate)) {
+  if (!caseItem.details.completions.isDueDateExpired) {
     return true;
   }
 

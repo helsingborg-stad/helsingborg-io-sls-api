@@ -18,7 +18,7 @@ export interface CaseUserAddress {
   readonly postalCode?: string;
 }
 
-interface RequestedCaseCompletions {
+export interface RequestedCaseCompletions {
   description: string;
   received: boolean;
 }
