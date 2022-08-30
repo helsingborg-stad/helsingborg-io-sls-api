@@ -8,8 +8,6 @@ import type { CaseItem } from '../../../types/caseItem';
 import { EncryptionType } from '../../../types/caseItem';
 import { VadaWorkflowCompletions } from '../../src/types/vadaCompletions';
 
-import { VIVA_STATUS_NEW_APPLICATION_OPEN } from '../../../helpers/constants';
-
 const caseKeys = {
   PK: 'PK',
   SK: 'SK',
@@ -101,23 +99,31 @@ const vadaCompletions: VadaWorkflowCompletions = {
   isDueDateExpired: false,
 };
 
-test.each([
-  {
-    description: 'it updates a recurring case with completions information received from Viva',
-    newCompletions: vadaCompletions,
-  },
-])('$description', async ({ newCompletions }) => {
+function createDependencies(statusCode: boolean): Dependencies {
   const updateCaseMock = jest.fn();
-  const dependencies: Dependencies = {
+  return {
     putSuccessEvent: () => Promise.resolve(),
     updateCase: updateCaseMock,
-    validateStatusCode: () => true,
+    validateStatusCode: () => statusCode,
     getLatestWorkflowId: () => Promise.resolve(workflowId),
-    getWorkflowCompletions: () => Promise.resolve(newCompletions),
+    getWorkflowCompletions: () => Promise.resolve(vadaCompletions),
     getCaseOnWorkflowId: () => Promise.resolve(caseToUpdate),
   };
+}
 
+it('updates a case with new completion information received from Viva', async () => {
+  const dependencies = createDependencies(false);
   const result = await syncCaseCompletions(input, dependencies);
   expect(result).toBe(true);
-  expect(updateCaseMock).toHaveBeenCalledWith(caseKeys, expect.objectContaining(vadaCompletions));
+  expect(dependencies.updateCase).toHaveBeenCalledWith(
+    caseKeys,
+    expect.objectContaining(vadaCompletions)
+  );
+});
+
+it('does nothing if Viva status code is 1', async () => {
+  const dependencies = createDependencies(true);
+  const result = await syncCaseCompletions(input, dependencies);
+  expect(result).toBe(true);
+  expect(dependencies.updateCase).toHaveBeenCalledTimes(0);
 });
