@@ -65,7 +65,7 @@ export interface CaseDetails {
   workflowId: string | null;
   period: CasePeriod;
   readonly workflow?: unknown;
-  completions: CaseCompletions;
+  completions: CaseCompletions | null;
   administrators?: CaseAdministrator[];
 }
 

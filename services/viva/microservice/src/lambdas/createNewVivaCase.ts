@@ -16,17 +16,17 @@ import {
   NEW_APPLICATION_VIVA,
 } from '../libs/constants';
 
-import { getFormTemplates } from '../helpers/dynamoDb';
 import createCaseHelper from '../helpers/createCase';
-import {
+import { getFormTemplates } from '../helpers/dynamoDb';
+import { VivaParametersResponse } from '../types/ssmParameters';
+import { CasePersonRole } from '../types/caseItem';
+import type {
   CaseUser,
   CaseItem,
   CaseForm,
   CaseStatus,
-  CasePersonRole,
   CasePerson,
 } from '../types/caseItem';
-import { VivaParametersResponse } from '../types/ssmParameters';
 
 interface GetUserCaseListResponse {
   Count: number;
@@ -130,6 +130,7 @@ export async function createNewVivaCase(
         startDate: 0,
         endDate: 0,
       },
+      completions: null,
     },
     currentFormId: newApplicationFormId,
   };

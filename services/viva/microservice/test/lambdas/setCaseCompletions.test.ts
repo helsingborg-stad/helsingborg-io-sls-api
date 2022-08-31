@@ -5,6 +5,7 @@ import {
 } from '../../src/lambdas/setCaseCompletions';
 
 import { VIVA_COMPLETION_REQUIRED, VIVA_RANDOM_CHECK_REQUIRED } from '../../src/libs/constants';
+import completionsHelper from '../../../helpers/completions'
 
 import type { CaseItem } from '../../../types/caseItem';
 import { EncryptionType } from '../../../types/caseItem';
@@ -148,6 +149,8 @@ test.each([
       putSuccessEvent: () => Promise.resolve(null),
       readParams: () => Promise.resolve(ssmParameters),
       updateCase: updateCaseMock,
+      getNewStatus: completionsHelper.get.status,
+      getNewState: completionsHelper.get.state,
     };
 
     const result = await setCaseCompletions(input, dependencies);

@@ -33,6 +33,7 @@ function createCase(partialCase: Partial<CaseItem> = {}): CaseItem {
         endDate: 1,
         startDate: 2,
       },
+      completions: null,
       workflowId: '123',
     },
     currentFormId: completionFormId,
