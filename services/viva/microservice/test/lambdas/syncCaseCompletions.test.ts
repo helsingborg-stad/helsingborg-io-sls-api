@@ -99,21 +99,26 @@ const vadaCompletions: VadaWorkflowCompletions = {
   isDueDateExpired: false,
 };
 
-function createDependencies(statusCode: boolean): Dependencies {
-  const updateCaseMock = jest.fn();
+function createDependencies(
+  statusCode: boolean,
+  partialDependencies: Partial<Dependencies> = {}
+): Dependencies {
   return {
     putSuccessEvent: () => Promise.resolve(),
-    updateCase: updateCaseMock,
+    updateCase: () => Promise.resolve(),
     validateStatusCode: () => statusCode,
     getLatestWorkflowId: () => Promise.resolve(workflowId),
     getWorkflowCompletions: () => Promise.resolve(vadaCompletions),
     getCaseOnWorkflowId: () => Promise.resolve(caseToUpdate),
+    ...partialDependencies,
   };
 }
 
 it('updates a case with new completion information received from Viva', async () => {
-  const dependencies = createDependencies(false);
+  const updateCaseMock = jest.fn();
+  const dependencies = createDependencies(false, { updateCase: updateCaseMock });
   const result = await syncCaseCompletions(input, dependencies);
+  
   expect(result).toBe(true);
   expect(dependencies.updateCase).toHaveBeenCalledWith(
     caseKeys,
@@ -122,8 +127,10 @@ it('updates a case with new completion information received from Viva', async ()
 });
 
 it('does nothing if Viva status code is 1', async () => {
-  const dependencies = createDependencies(true);
+  const updateCaseMock = jest.fn();
+  const dependencies = createDependencies(true, { updateCase: updateCaseMock });
   const result = await syncCaseCompletions(input, dependencies);
+  
   expect(result).toBe(true);
   expect(dependencies.updateCase).toHaveBeenCalledTimes(0);
 });

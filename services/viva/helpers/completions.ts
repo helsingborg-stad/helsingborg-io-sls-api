@@ -39,20 +39,18 @@ function getCompletionFormId(
 }
 
 function getCompletionStatus(completions: CaseCompletions): CaseStatus {
-  const { isAttachmentPending } = completions;
-
   if (completions.isCompleted) {
     return getStatusByType(ACTIVE_SUBMITTED);
   }
 
   if (isRandomCheck(completions)) {
-    if (isAttachmentPending) {
+    if (completions.isAttachmentPending) {
       return getStatusByType(ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA);
     }
     return getStatusByType(ACTIVE_RANDOM_CHECK_REQUIRED_VIVA);
   }
 
-  if (isAttachmentPending) {
+  if (completions.isAttachmentPending) {
     return getStatusByType(ACTIVE_COMPLETION_SUBMITTED_VIVA);
   }
 
