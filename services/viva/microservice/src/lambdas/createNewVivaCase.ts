@@ -39,6 +39,7 @@ interface LambdaDetails {
 export interface LambdaRequest {
   detail: LambdaDetails;
 }
+
 export interface Dependencies {
   createCase: typeof putItem;
   readParams: (envsKeyName: string) => Promise<VivaParametersResponse>;

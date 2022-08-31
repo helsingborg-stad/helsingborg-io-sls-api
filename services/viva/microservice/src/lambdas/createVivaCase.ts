@@ -20,6 +20,7 @@ import { getCaseListByPeriod, getLastUpdatedCase, getFormTemplates } from '../he
 import createCaseHelper from '../helpers/createCase';
 import populateFormWithVivaChildren from '../helpers/populateForm';
 import { CaseUser, CaseItem, CaseForm, CasePersonRole, CasePeriod } from '../types/caseItem';
+import { VivaParametersResponse } from '../types/ssmParameters';
 import { VivaMyPages } from '../types/vivaMyPages';
 
 interface DynamoDbQueryOutput {
@@ -28,71 +29,39 @@ interface DynamoDbQueryOutput {
   ScannedCount?: number;
 }
 
-interface AWSEvent {
-  detail: {
-    clientUser: CaseUser;
-    vivaPersonDetail: VivaMyPages;
-  };
+interface LambdaDetails {
+  clientUser: CaseUser;
+  vivaPersonDetail: VivaMyPages;
 }
 
-interface AWSContext {
-  awsRequestId: string;
+export interface LambdaRequest {
+  detail: LambdaDetails;
 }
 
-export async function main(event: AWSEvent, context: AWSContext) {
+export interface Dependencies {
+  createCase: typeof putItem;
+  readParams: (envsKeyName: string) => Promise<VivaParametersResponse>;
+  getCaseByPeriod: (personalNumber: string) => Promise<GetUserCaseListResponse>;
+  getTemplates: typeof getFormTemplates;
+}
+
+export async function createRecurringCase(vivaPerson: VivaMyPages, user: CaseUser) {
   const { clientUser, vivaPersonDetail } = event.detail;
 
   const casePeriod: CasePeriod = createCaseHelper.getPeriodInMilliseconds(
     vivaPersonDetail.application
   );
-  const [getCaseListOnPeriodError, caseList]: [Error | null, DynamoDbQueryOutput | undefined] =
-    await to(getCaseListByPeriod(clientUser.personalNumber, casePeriod));
-  if (getCaseListOnPeriodError) {
-    log.error(
-      'Failed to query cases table',
-      context.awsRequestId,
-      'service-viva-ms-createVivaCase-001',
-      getCaseListOnPeriodError
-    );
-    return false;
-  }
 
+  const caseList: DynamoDbQueryOutput = await getCaseListByPeriod(
+    clientUser.personalNumber,
+    casePeriod
+  );
   if (caseList?.Items?.[0]) {
-    log.info('Case with specified period already exists', context.awsRequestId, null);
+    log.writeInfo('Case with specified period already exists', context.awsRequestId);
     return true;
   }
 
-  const [createRecurringVivaCaseError, createdVivaCase] = await to(
-    createRecurringCase(vivaPersonDetail, clientUser)
-  );
-  if (createRecurringVivaCaseError) {
-    log.error(
-      'Failed to create recurring Viva case',
-      context.awsRequestId,
-      'service-viva-ms-createVivaCase-002',
-      createRecurringVivaCaseError
-    );
-    return false;
-  }
-
-  log.info(
-    'Viva case created successfully',
-    context.awsRequestId,
-    'service-viva-ms-createVivaCase-003',
-    createdVivaCase
-  );
-
-  return true;
-}
-
-async function createRecurringCase(vivaPerson: VivaMyPages, user: CaseUser) {
-  const [paramsReadError, vivaCaseSSMParams] = await to(
-    params.read(config.cases.providers.viva.envsKeyName)
-  );
-  if (paramsReadError) {
-    throw paramsReadError;
-  }
-
+  const vivaCaseSSMParams = await params.read(config.cases.providers.viva.envsKeyName);
   const { recurringFormId, completionFormId, randomCheckFormId } = vivaCaseSSMParams;
 
   const applicantPersonalNumber = createCaseHelper.stripNonNumericalCharacters(
@@ -122,6 +91,7 @@ async function createRecurringCase(vivaPerson: VivaMyPages, user: CaseUser) {
     details: {
       workflowId,
       period: createCaseHelper.getPeriodInMilliseconds(vivaPerson.application),
+      completions: null,
     },
     currentFormId: recurringFormId,
   };
@@ -177,15 +147,20 @@ async function createRecurringCase(vivaPerson: VivaMyPages, user: CaseUser) {
 
   newCaseItem.forms = prePopulatedForms;
 
-  const [putItemError, createdCaseItem] = await to(
-    putItem({
-      TableName: config.cases.tableName,
-      Item: newCaseItem,
-    })
-  );
-  if (putItemError) {
-    throw putItemError;
-  }
+  const createdCaseItem = putItem({
+    TableName: config.cases.tableName,
+    Item: newCaseItem,
+  });
 
-  return createdCaseItem;
+  log.writeInfo('Viva case created successfully', createdCaseItem);
+  return true;
 }
+
+export const main = log.wrap(event => {
+  return createRecurringCase(event, {
+    createCase: putItem,
+    readParams: params.read,
+    getUserCasesCount,
+    getTemplates: getFormTemplates,
+  });
+});
