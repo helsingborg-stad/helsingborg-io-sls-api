@@ -1,4 +1,3 @@
-import to from 'await-to-js';
 import * as dynamoDb from '../libs/dynamoDb';
 import config from '../libs/config';
 import {
@@ -98,32 +97,19 @@ export async function getLastUpdatedCase(PK) {
     },
   };
 
-  const [queryError, queryResponse] = await to(dynamoDb.call('query', queryParams));
-  if (queryError) {
-    throw queryError;
-  }
-
+  const queryResponse = await dynamoDb.call('query', queryParams);
   const sortedCases = queryResponse.Items.sort((a, b) => b.updatedAt - a.updatedAt);
   return sortedCases?.[0] || {};
-}
-
-async function getAlways(params) {
-  const result = await dynamoDb.call('get', params);
-
-  if (!result.Item) {
-    throw new Error(`unable to get item ${params.TableName} ${JSON.stringify(params.Key)}`);
-  }
-  return result;
 }
 
 export async function getFormTemplates(formIdList) {
   const formTemplateList = await Promise.all(
     formIdList.map(formId => {
-      const getFormParams = {
+      const getParams = {
         TableName: config.forms.tableName,
         Key: { PK: `FORM#${formId}` },
       };
-      return getAlways(getFormParams);
+      return dynamoDb.call('get', getParams);
     })
   );
 
