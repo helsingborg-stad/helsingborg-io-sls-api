@@ -20,13 +20,7 @@ import createCaseHelper from '../helpers/createCase';
 import { getFormTemplates } from '../helpers/dynamoDb';
 import { VivaParametersResponse } from '../types/ssmParameters';
 import { CasePersonRole } from '../types/caseItem';
-import type {
-  CaseUser,
-  CaseItem,
-  CaseForm,
-  CaseStatus,
-  CasePerson,
-} from '../types/caseItem';
+import type { CaseUser, CaseItem, CaseForm, CaseStatus, CasePerson } from '../types/caseItem';
 
 interface GetUserCaseListResponse {
   Count: number;
