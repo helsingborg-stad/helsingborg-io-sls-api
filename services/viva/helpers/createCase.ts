@@ -92,8 +92,8 @@ function getUserByRole(personList: CasePerson[], role: CasePersonRole): CasePers
   return personList.find(user => user.role === role);
 }
 
-function getVivaChildren(casePersonList: CasePerson[]): CasePerson[] {
-  return casePersonList.filter(person => person.role === 'children');
+function getVivaChildren(personList: CasePerson[]): CasePerson[] {
+  return personList.filter(person => person.role === CasePersonRole.Children);
 }
 
 function getInitialFormAttributes(
