@@ -99,7 +99,7 @@ export async function getLastUpdatedCase(PK) {
 
   const queryResponse = await dynamoDb.call('query', queryParams);
   const sortedCases = queryResponse.Items.sort((a, b) => b.updatedAt - a.updatedAt);
-  return sortedCases?.[0] || {};
+  return sortedCases?.[0];
 }
 
 export async function getFormTemplates(formIdList) {

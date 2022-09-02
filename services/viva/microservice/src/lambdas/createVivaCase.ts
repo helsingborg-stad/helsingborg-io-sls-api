@@ -25,9 +25,9 @@ import type { VivaParametersResponse } from '../types/ssmParameters';
 import type { VivaMyPages } from '../types/vivaMyPages';
 
 interface DynamoDbQueryOutput {
-  Items?: CaseItem[];
-  Count?: number;
-  ScannedCount?: number;
+  Items: CaseItem[];
+  Count: number;
+  ScannedCount: number;
 }
 
 interface LambdaDetails {
@@ -42,7 +42,7 @@ export interface LambdaRequest {
 export interface Dependencies {
   createCase: typeof putItem;
   readParams: (envsKeyName: string) => Promise<VivaParametersResponse>;
-  getLastUpdatedCase: (pk: string) => Promise<CaseItem> | Record<string, never>;
+  getLastUpdatedCase: (pk: string) => Promise<CaseItem | undefined>;
   getCaseListByPeriod: (personalNumber: string, period: CasePeriod) => Promise<DynamoDbQueryOutput>;
   getFormTemplates: (formIdList: string[]) => Promise<Record<string, unknown>>;
 }
@@ -55,7 +55,7 @@ export async function createVivaCase(
 
   const period = createCaseHelper.getPeriodInMilliseconds(vivaPerson.application);
   const caseList = await dependencies.getCaseListByPeriod(user.personalNumber, period);
-  if (caseList.Items?.[0]) {
+  if (caseList?.Count > 0) {
     log.writeInfo('Case with specified period already exists.', { period });
     return true;
   }
@@ -124,7 +124,7 @@ export async function createVivaCase(
     initialFormList,
     extendedPersonList,
     formTemplates,
-    lastUpdatedCase.forms
+    lastUpdatedCase?.forms
   ) as Record<string, CaseForm>;
 
   const vivaChildrenList = createCaseHelper.getVivaChildren(casePersonList);
