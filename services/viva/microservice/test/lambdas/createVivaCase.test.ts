@@ -1,4 +1,3 @@
-import uuid from 'uuid';
 import { CASE_PROVIDER_VIVA, VIVA_CASE_CREATED, NOT_STARTED_VIVA } from '../../src/libs/constants';
 import { getStatusByType } from '../../src/libs/caseStatuses';
 
@@ -78,34 +77,41 @@ function createLambdaInput(persons: VivaPersonsPerson | null = null): LambdaRequ
 
 it('successfully creates a recurring application case', async () => {
   const expectedParameters = {
-    PK: `USER#${user.personalNumber}`,
-    currentFormId: readParametersResponse.recurringFormId,
-    details: {
-      period: {
-        endDate: 1577836800000,
-        startDate: 1577836800000,
+    TableName: 'cases',
+    Item: {
+      id: '123abc',
+      PK: `USER#${user.personalNumber}`,
+      SK: 'CASE#123abc',
+      currentFormId: readParametersResponse.recurringFormId,
+      details: {
+        period: {
+          startDate: 1640995200000,
+          endDate: 1643587200000,
+        },
+        workflowId: null,
+        completions: null,
       },
-      workflowId: null,
-      completions: null,
-    },
-    forms: {
-      [readParametersResponse.recurringFormId]: defaultFormProperties,
-      [readParametersResponse.randomCheckFormId]: defaultFormProperties,
-      [readParametersResponse.completionFormId]: defaultFormProperties,
-    },
-    persons: [
-      {
-        firstName: user.firstName,
-        hasSigned: false,
-        lastName: user.lastName,
-        personalNumber: user.personalNumber,
-        role: CasePersonRole.Applicant,
+      forms: {
+        [readParametersResponse.recurringFormId]: defaultFormProperties,
+        [readParametersResponse.randomCheckFormId]: defaultFormProperties,
+        [readParametersResponse.completionFormId]: defaultFormProperties,
       },
-    ],
-    provider: CASE_PROVIDER_VIVA,
-    state: VIVA_CASE_CREATED,
-    status: getStatusByType(NOT_STARTED_VIVA),
-    updatedAt: 0,
+      persons: [
+        {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          hasSigned: false,
+          personalNumber: user.personalNumber,
+          role: CasePersonRole.Applicant,
+        },
+      ],
+      provider: CASE_PROVIDER_VIVA,
+      state: VIVA_CASE_CREATED,
+      status: getStatusByType(NOT_STARTED_VIVA),
+      updatedAt: 0,
+      createdAt: 1640995200000,
+      expirationTime: 1641038400,
+    },
   };
 
   const lambdaInput = createLambdaInput();
@@ -120,7 +126,7 @@ it('successfully creates a recurring application case', async () => {
   });
 
   expect(result).toBe(true);
-  expect(createCaseMock).toHaveBeenCalledTimes(1);
+  expect(createCaseMock).toHaveBeenCalledWith(expectedParameters);
 });
 
 it('successfully creates a recurring application case with partner', async () => {
@@ -148,15 +154,15 @@ it('successfully creates a recurring application case with partner', async () =>
       persons: [
         {
           firstName: user.firstName,
-          hasSigned: false,
           lastName: user.lastName,
+          hasSigned: false,
           personalNumber: user.personalNumber,
           role: CasePersonRole.Applicant,
         },
         {
           firstName: user.firstName,
-          hasSigned: false,
           lastName: user.lastName,
+          hasSigned: false,
           personalNumber: user.personalNumber,
           role: CasePersonRole.CoApplicant,
         },
@@ -194,9 +200,9 @@ it('successfully creates a recurring application case with partner', async () =>
   expect(createCaseMock).toHaveBeenCalledWith(expectedParameters);
 });
 
-it('stops execution when user case exists', async () => {
+it('stops execution when case exists based on the same Viva application period', async () => {
   const lambdaInput = createLambdaInput();
-  const createCaseMock = jest.fn().mockResolvedValueOnce(undefined);
+  const createCaseMock = jest.fn();
 
   const result = await createVivaCase(lambdaInput, {
     createCase: createCaseMock,
