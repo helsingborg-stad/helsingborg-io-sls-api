@@ -29,6 +29,10 @@ interface DynamoDbQueryOutput {
   Count: number;
   ScannedCount: number;
 }
+export interface DynamoDbPutParams {
+  TableName: string;
+  Item: CaseItem;
+}
 
 interface LambdaDetails {
   clientUser: CaseUser;
@@ -40,7 +44,7 @@ export interface LambdaRequest {
 }
 
 export interface Dependencies {
-  createCase: typeof putItem;
+  createCase: (params: DynamoDbPutParams) => Promise<void>;
   readParams: (envsKeyName: string) => Promise<VivaParametersResponse>;
   getLastUpdatedCase: (pk: string) => Promise<CaseItem | undefined>;
   getCaseListByPeriod: (personalNumber: string, period: CasePeriod) => Promise<DynamoDbQueryOutput>;
@@ -51,9 +55,9 @@ export async function createVivaCase(
   input: LambdaRequest,
   dependencies: Dependencies
 ): Promise<boolean> {
-  const { clientUser: user, vivaPersonDetail: vivaPerson } = input.detail;
+  const { clientUser: user, vivaPersonDetail: vivaMyPages } = input.detail;
 
-  const period = createCaseHelper.getPeriodInMilliseconds(vivaPerson.application);
+  const period = createCaseHelper.getPeriodInMilliseconds(vivaMyPages.application);
   const caseList = await dependencies.getCaseListByPeriod(user.personalNumber, period);
   if (caseList?.Count > 0) {
     log.writeInfo('Case with specified period already exists.', { period });
@@ -65,7 +69,7 @@ export async function createVivaCase(
   );
 
   const applicantPersonalNumber = createCaseHelper.stripNonNumericalCharacters(
-    vivaPerson.case.client.pnumber
+    vivaMyPages.case.client.pnumber
   );
 
   const id = uuid.v4();
@@ -73,8 +77,8 @@ export async function createVivaCase(
   const SK = `CASE#${id}`;
   const timestampNow = Date.now();
   const initialStatus: CaseStatus = getStatusByType(NOT_STARTED_VIVA);
-  const workflowId = vivaPerson.application?.workflowid ?? null;
-  const casePersonList = createCaseHelper.getCasePersonList(vivaPerson.case);
+  const workflowId = vivaMyPages.application?.workflowid ?? null;
+  const casePersonList = createCaseHelper.getCasePersonList(vivaMyPages.case);
   const expirationTime = millisecondsToSeconds(getFutureTimestamp(TWELVE_HOURS));
 
   const newRecurringCase: CaseItem = {

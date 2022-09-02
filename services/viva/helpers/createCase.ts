@@ -37,8 +37,8 @@ function stripNonNumericalCharacters(valueIncludingChars: string) {
 
 function getPeriodInMilliseconds(vivaApplication: VivaMyPagesPersonApplication): CasePeriod {
   return {
-    startDate: Date.parse(vivaApplication.period.start),
-    endDate: Date.parse(vivaApplication.period.end),
+    startDate: Date.parse(`${vivaApplication.period.start}T00:00:00.000Z`),
+    endDate: Date.parse(`${vivaApplication.period.end}T00:00:00.000Z`),
   };
 }
 
