@@ -50,6 +50,7 @@ const caseItem: CaseItem = {
       endDate: 0,
     },
     workflowId: '123',
+    completions: null,
   },
   state: 'SOME STATE',
   expirationTime: 0,
