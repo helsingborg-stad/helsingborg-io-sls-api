@@ -48,7 +48,7 @@ function getNavetPollEventDetail(navetUser: NavetUser): CaseUser {
   };
 }
 
-export const main = log.wrap(async event => {
+export const main = log.wrap(event => {
   return pollUser(event, {
     requestNavetUserXml: requestNavetUser,
     getParsedNavetPersonPost: getNavetPersonPost,

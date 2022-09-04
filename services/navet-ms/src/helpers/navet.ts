@@ -14,8 +14,15 @@ import {
 
 import type { NavetUser, NavetClientError, NavetUserResponse } from './types';
 
+interface SsmParameters {
+  orderNr: string;
+  orgNr: string;
+  personpostXmlEnvUrl: string;
+  personpostXmlEndpoint: string;
+}
+
 export async function requestNavetUser(personalNumber: string): Promise<string> {
-  const ssmParams = await params.read(config.navet.envsKeyName);
+  const ssmParams = (await params.read(config.navet.envsKeyName)) as SsmParameters;
 
   const [getNavetClientError, navetRequestClient] = await to(getNavetRequestClient(ssmParams));
   if (getNavetClientError) {
@@ -56,7 +63,7 @@ export async function getNavetPersonPost(xml: string): Promise<NavetUser> {
   }
 
   const { Folkbokforingspost } = parsedNavetPerson as NavetUserResponse;
-  if (Folkbokforingspost?.Personpost === undefined) {
+  if (Folkbokforingspost?.Personpost == undefined) {
     throw new InternalServerError();
   }
 
