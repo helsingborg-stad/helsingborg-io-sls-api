@@ -20,6 +20,7 @@ provider:
   endpointType: regional
   tracing:
     lambda: true
+    apiGateway: true
   apiGateway:
     restApiId:
       'Fn::ImportValue': ${self:custom.stage}-ExtApiGatewayRestApiId

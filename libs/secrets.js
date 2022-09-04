@@ -1,31 +1,14 @@
-import AWS from 'aws-sdk';
+import SecretsManager from 'aws-sdk/clients/secretsmanager';
 
-const secretsmanager = new AWS.SecretsManager();
-/**
- * Retrives a secret from the aws secrets manager
- * @param {string} secretName the name or arn of the secret that are being retrived
- */
+const secretsManager = new SecretsManager();
+
 function get(secretName, secretKeyName) {
-  return new Promise((resolve, reject) => {
-    secretsmanager.getSecretValue(
-      {
-        SecretId: secretName,
-      },
-      (err, data) => {
-        if (err) {
-          reject(err);
-        } else {
-          const secretStringObj = JSON.parse(data.SecretString);
-          const secretKey = secretStringObj[secretKeyName];
-          resolve(secretKey);
-        }
-      }
-    );
-  });
+  const secretValue = secretsManager.getSecretValue({ SecretId: secretName }).promise();
+
+  const secretJSON = JSON.parse(secretValue.SecretString);
+  return secretJSON[secretKeyName];
 }
 
-const secrets = {
+export default {
   get,
 };
-
-export default secrets;

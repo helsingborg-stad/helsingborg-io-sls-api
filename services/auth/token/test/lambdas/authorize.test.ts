@@ -1,6 +1,6 @@
-import { lambda, Dependencies, LambdaRequest } from '../../src/lambdas/authorize';
+import { authorizer, Dependencies, LambdaRequest } from '../../src/lambdas/authorize';
 
-const lambdaContext: Dependencies = {
+const dependencies: Dependencies = {
   getSecret: () => Promise.resolve('my:secret:value'),
   verifyToken: () =>
     Promise.resolve({
@@ -8,20 +8,20 @@ const lambdaContext: Dependencies = {
     }),
 };
 
-const eventObject: LambdaRequest = {
+const event: LambdaRequest = {
   authorizationToken: 'my:auth:token',
 };
 
 test('Expect to throw on missing authorizationCode', async () => {
   await expect(async () => {
-    await lambda({}, lambdaContext);
+    await authorizer({}, dependencies);
   }).rejects.toThrow();
 });
 
 test('Expect to throw on rejected token reader call', async () => {
   await expect(async () => {
-    await lambda(eventObject, {
-      ...lambdaContext,
+    await authorizer(event, {
+      ...dependencies,
       getSecret: () => {
         throw Error();
       },
@@ -31,8 +31,8 @@ test('Expect to throw on rejected token reader call', async () => {
 
 test('Expect to throw on rejected token verification call', async () => {
   await expect(async () => {
-    await lambda(eventObject, {
-      ...lambdaContext,
+    await authorizer(event, {
+      ...dependencies,
       verifyToken: () => {
         throw Error();
       },
@@ -41,7 +41,7 @@ test('Expect to throw on rejected token verification call', async () => {
 });
 
 test('Expect to return an AWS Principal on successful request', async () => {
-  const result = await lambda(eventObject, lambdaContext);
+  const result = await authorizer(event, dependencies);
   expect(result).toStrictEqual({
     principalId: 'my:decoded:token',
     policyDocument: {

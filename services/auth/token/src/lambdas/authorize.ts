@@ -1,35 +1,36 @@
 import generateIAMPolicy from '../libs/generateIAMPolicy';
-import { Token, verifyToken } from '../libs/token';
+import { Token, verifyToken, extractToken } from '../libs/token';
 import config from '../libs/config';
 import secrets from '../libs/secrets';
 import log from '../libs/logs';
-import { extractToken } from '../libs/token';
 
 const CONFIG_AUTH_SECRETS_ACCESS_TOKEN = config.auth.secrets.accessToken;
+
+export interface LambdaRequest {
+  authorizationToken?: string;
+}
+
 export interface Dependencies {
   getSecret: (secretName: string, secretKeyName: string) => Promise<string>;
   verifyToken: (token: string, secret: string) => Promise<Token>;
 }
 
-export interface LambdaRequest {
-  authorizationToken?: string;
+
+export async function authorizer(input: LambdaRequest, dependencies: Dependencies) {
+  const token = extractToken(input.authorizationToken);
+
+  const secret = await dependencies.getSecret(
+    CONFIG_AUTH_SECRETS_ACCESS_TOKEN.name,
+    CONFIG_AUTH_SECRETS_ACCESS_TOKEN.keyName
+  );
+  const decodedToken = await dependencies.verifyToken(token, secret);
+
+  return generateIAMPolicy(decodedToken.personalNumber, 'Allow', '*');
 }
-/* istanbul ignore next */
-export const main = log.wrap(async event => {
-  return await lambda(event, {
+
+export const main = log.wrap(event => {
+  return authorizer(event, {
     getSecret: secrets.get,
     verifyToken,
   });
 });
-
-export async function lambda(event: LambdaRequest, lambdaContext: Dependencies) {
-  const token = extractToken(event.authorizationToken);
-
-  const secret = await lambdaContext.getSecret(
-    CONFIG_AUTH_SECRETS_ACCESS_TOKEN.name,
-    CONFIG_AUTH_SECRETS_ACCESS_TOKEN.keyName
-  );
-  const decodedToken = await lambdaContext.verifyToken(token, secret);
-
-  return generateIAMPolicy(decodedToken.personalNumber, 'Allow', '*');
-}
