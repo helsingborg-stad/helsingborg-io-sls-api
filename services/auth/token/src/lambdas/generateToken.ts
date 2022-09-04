@@ -1,8 +1,7 @@
-import to from 'await-to-js';
 import config from '../libs/config';
 import secrets from '../libs/secrets';
 import * as response from '../libs/response';
-import { signToken, verifyToken } from '../libs/token';
+import { signToken, Token, verifyToken } from '../libs/token';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 import tokenValidationSchema from '../helpers/schema';
 import log from '../libs/logs';
@@ -16,194 +15,126 @@ interface SecretsConfig {
   name: string;
   keyName: string;
 }
-
+interface GrantValueTypes {
+  secretsConfig: SecretsConfig;
+  token?: string;
+}
 interface AuthLambdaRequest {
   grant_type: string;
   refresh_token?: string;
   code?: string;
 }
-
-interface JWTToken {
-  personalNumber: string;
+export interface LambdaContext {
+  getSecret: (secretName: string, secretKeyName: string) => Promise<string>;
+  verifyToken: (token: string, secret: string) => Promise<Token>;
+  signToken: (jsonToSign: Token, secret: string, expireTimeInMinutes: number) => Promise<string>;
 }
 
-interface SDKError {
-  code: string;
-  message: string;
-}
-export async function main(event: { body: string }, context: { awsRequestId: string }) {
-  const [parseJsonError, parsedJson] = await to<AuthLambdaRequest | undefined>(
-    parseJson(event.body)
-  );
+/* istanbul ignore next */
+export const main = log.wrap(async (event: { body: string }) => {
+  return await lambda(event, {
+    getSecret: secrets.get,
+    verifyToken,
+    signToken,
+  });
+});
 
-  if (parseJsonError) {
-    log.warn(
-      'JSON Parse error',
-      context.awsRequestId,
-      'service-auth-token-generateToken-001',
-      parseJsonError
-    );
-
-    return response.failure(parseJsonError);
-  }
-
-  const [validationError, validatedEventBody] = await to(
-    validateEventBody(
-      parsedJson ?? {
-        grant_type: '',
-      },
-      tokenValidationSchema
-    )
-  );
-
-  if (validationError) {
-    log.warn(
-      'Validation error',
-      context.awsRequestId,
-      'service-auth-token-generateToken-002',
-      validationError
-    );
-
-    return response.failure(validationError);
-  }
-
-  const grantTypeValues = getGrantTypeValues(validatedEventBody);
-
-  const [validateTokenError, decodedGrantToken] = await to(
-    validateToken(grantTypeValues?.secretsConfig, grantTypeValues?.token ?? '')
-  );
-
-  if (validateTokenError) {
-    log.warn(
-      'Validate token error',
-      context.awsRequestId,
-      'service-auth-token-generateToken-003',
-      validateTokenError
-    );
-
-    return response.failure(validateTokenError);
-  }
-
-  const personalNumber = decodedGrantToken?.personalNumber ?? '';
-
-  const [getAccessTokenError, accessToken] = await to(
-    generateToken(CONFIG_AUTH_SECRETS.accessToken, personalNumber, ACCESS_TOKEN_EXPIRES_IN_MINUTES)
-  );
-
-  if (getAccessTokenError) {
-    log.warn(
-      'Get access token error',
-      context.awsRequestId,
-      'service-auth-token-generateToken-004',
-      getAccessTokenError
-    );
-
-    return response.failure(getAccessTokenError);
-  }
-
-  const [getRefreshTokenError, refreshToken] = await to(
-    generateToken(
-      CONFIG_AUTH_SECRETS.refreshToken,
-      personalNumber,
-      REFRESH_TOKEN_EXPIRES_IN_MINUTES
-    )
-  );
-  if (getRefreshTokenError) {
-    log.warn(
-      'Get refresh token error',
-      context.awsRequestId,
-      'service-auth-token-generateToken-004',
-      getRefreshTokenError
-    );
-
-    return response.failure(getRefreshTokenError);
-  }
-
-  const successResponsePayload = {
-    type: 'authorizationToken',
-    attributes: {
-      accessToken,
-      refreshToken,
-    },
-  };
-  return response.success(200, successResponsePayload);
-}
-
-async function validateEventBody(eventBody: AuthLambdaRequest, schema: Joi.ObjectSchema) {
-  const { error, value } = schema.validate(eventBody, { abortEarly: false });
-  if (error) {
-    const matchDoubleQuote = /"/g;
-    const singleQuote = "'";
-    throwError(400, error.message.replace(matchDoubleQuote, singleQuote));
-  }
-
-  return value;
-}
-
-async function parseJson(eventBody: string): Promise<AuthLambdaRequest | undefined> {
+export async function lambda(event: { body: string }, lambdaContext: LambdaContext) {
   try {
-    const parsedJsonData = JSON.parse(eventBody);
-    return parsedJsonData as AuthLambdaRequest;
-  } catch (error) {
-    throwError(400, (error as SDKError).message);
+    const parsedJson = parseJson(event.body);
+    const validatedEventBody = validateEventBody(parsedJson, tokenValidationSchema);
+    const grantTypeValues = getGrantTypeValues(validatedEventBody);
+
+    const decodedGrantToken = await validateToken(
+      grantTypeValues.secretsConfig,
+      grantTypeValues.token,
+      lambdaContext
+    );
+
+    const accessToken = await generateToken(
+      CONFIG_AUTH_SECRETS.accessToken,
+      decodedGrantToken.personalNumber,
+      ACCESS_TOKEN_EXPIRES_IN_MINUTES,
+      lambdaContext
+    );
+
+    const refreshToken = await generateToken(
+      CONFIG_AUTH_SECRETS.refreshToken,
+      decodedGrantToken.personalNumber,
+      REFRESH_TOKEN_EXPIRES_IN_MINUTES,
+      lambdaContext
+    );
+
+    const successResponsePayload = {
+      type: 'authorizationToken',
+      attributes: {
+        accessToken,
+        refreshToken,
+      },
+    };
+    return response.success(200, successResponsePayload);
+  } catch (ex) {
+    return response.failure(ex);
   }
 }
 
-function getGrantTypeValues(eventBody: AuthLambdaRequest) {
-  if (eventBody.grant_type === 'authorization_code') {
-    return {
-      secretsConfig: CONFIG_AUTH_SECRETS.authorizationCode,
-      token: eventBody.code,
-    };
+function validateEventBody(
+  eventBody: AuthLambdaRequest,
+  schema: Joi.ObjectSchema<AuthLambdaRequest>
+) {
+  const { error, value } = schema.validate(eventBody, { abortEarly: false });
+  if (value && !error) {
+    return value;
   }
+  throwError(400, 'Invalid JSON body format');
+}
 
+function parseJson(eventBody: string): AuthLambdaRequest {
+  try {
+    return JSON.parse(eventBody);
+  } catch {
+    throwError(400, 'Missing JSON body');
+  }
+}
+
+function getGrantTypeValues(eventBody: AuthLambdaRequest): GrantValueTypes {
   if (eventBody.grant_type === 'refresh_token') {
     return {
       secretsConfig: CONFIG_AUTH_SECRETS.refreshToken,
       token: eventBody.refresh_token,
     };
   }
+  return {
+    secretsConfig: CONFIG_AUTH_SECRETS.authorizationCode,
+    token: eventBody.code,
+  };
 }
 
 async function generateToken(
   secretConfig: SecretsConfig,
   personalNumber: string,
-  expiresInMinutes: number
+  expiresInMinutes: number,
+  lambdaContext: LambdaContext
 ) {
-  const [getSecretError, secret] = await to<string, SDKError>(
-    secrets.get(secretConfig.name, secretConfig.keyName)
-  );
-  if (getSecretError) {
-    throwError(Number(getSecretError.code), getSecretError.message);
-  }
+  const secret = await lambdaContext.getSecret(secretConfig.name, secretConfig.keyName);
 
-  const [signTokenError, token] = await to(
-    signToken({ personalNumber }, secret ?? '', expiresInMinutes)
-  );
-  if (signTokenError) {
-    throwError(401, signTokenError.message);
+  try {
+    return await lambdaContext.signToken({ personalNumber }, secret, expiresInMinutes);
+  } catch {
+    throwError(401, 'Failed to sign token');
   }
-
-  return token;
 }
 
-async function validateToken(secretConfig: SecretsConfig, token: string): Promise<JWTToken> {
-  const [getSecretError, secret] = await to<string, SDKError>(
-    secrets.get(secretConfig.name, secretConfig.keyName)
-  );
-  if (getSecretError) {
-    throwError(Number(getSecretError.code), getSecretError.message);
-  }
-  const [verifyTokenError, verifiedToken] = await to<JWTToken, SDKError>(
-    verifyToken(token, secret ?? '')
-  );
-  if (verifyTokenError) {
-    throwError(401, verifyTokenError.message);
-  }
+async function validateToken(
+  secretConfig: SecretsConfig,
+  token = '',
+  lambdaContext: LambdaContext
+): Promise<Token> {
+  const secret = await lambdaContext.getSecret(secretConfig.name, secretConfig.keyName);
 
-  return (
-    verifiedToken ?? {
-      personalNumber: '',
-    }
-  );
+  try {
+    return await lambdaContext.verifyToken(token, secret);
+  } catch {
+    throwError(401, 'Failed to verify token');
+  }
 }

@@ -1,9 +1,5 @@
 import { lambda, LambdaContext, LambdaEvent } from '../../src/lambdas/authorize';
 
-/**
- * Create an abstraction of the context object
- */
-
 const lambdaContext: LambdaContext = {
   getSecret: () => Promise.resolve('my:secret:value'),
   verifyToken: () =>
@@ -12,9 +8,6 @@ const lambdaContext: LambdaContext = {
     }),
 };
 
-/**
- * Create an abstraction of the event object
- */
 const eventObject: LambdaEvent = {
   authorizationToken: 'my:auth:token',
 };
