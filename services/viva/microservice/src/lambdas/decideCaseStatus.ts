@@ -25,12 +25,12 @@ export interface LambdaRequest {
   detail: LambdaDetails;
 }
 
-interface SuccessEvent {
+interface PutSuccessEvent {
   caseKeys: CaseKeys;
 }
 
 export interface Dependencies {
-  putSuccessEvent: (params: SuccessEvent) => Promise<void>;
+  putSuccessEvent: (params: PutSuccessEvent) => Promise<void>;
   updateCase: (keys: CaseKeys, newStatus: CaseStatus) => Promise<void>;
 }
 
@@ -53,10 +53,7 @@ function updateCaseStatusAndState(keys: CaseKeys, newStatus: CaseStatus): Promis
   return dynamoDb.call('update', updateParams);
 }
 
-export async function decideCaseStatus(
-  input: LambdaRequest,
-  dependencies: Dependencies
-): Promise<boolean> {
+async function decideCaseStatus(input: LambdaRequest, dependencies: Dependencies) {
   const { caseKeys, workflow } = input.detail;
 
   const newStatusType = decideNewCaseStatus(workflow);
