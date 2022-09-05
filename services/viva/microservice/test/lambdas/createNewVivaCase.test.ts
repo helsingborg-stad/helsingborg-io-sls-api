@@ -50,6 +50,7 @@ it('successfully creates a new application case', async () => {
         startDate: 0,
       },
       workflowId: null,
+      completions: null,
     },
     forms: {
       [readParametersResponse.newApplicationFormId]: defaultFormProperties,

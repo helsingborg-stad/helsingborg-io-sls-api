@@ -6,6 +6,7 @@ import {
 
 import { EncryptionType } from '../../src/types/caseItem';
 import { VivaApplicationType } from '../../src/types/vivaMyPages';
+import type { CaseDetails } from '../../src/types/caseItem';
 
 import { DEFAULT_CURRENT_POSITION } from '../../src/helpers/constants';
 
@@ -24,8 +25,9 @@ const form = {
   },
 };
 
-const details = {
+const details: CaseDetails = {
   workflowId: 'workflowId',
+  completions: null,
   period: {
     startDate: 123,
     endDate: 456,

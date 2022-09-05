@@ -56,11 +56,7 @@ async function postCompletion(payload) {
     },
   };
 
-  const [sendVivaAdapterRequestError, response] = await to(sendVivaAdapterRequest(requestParams));
-  if (sendVivaAdapterRequestError) {
-    throw sendVivaAdapterRequestError;
-  }
-
+  const response = await sendVivaAdapterRequest(requestParams);
   return response.data;
 }
 
@@ -73,11 +69,7 @@ async function getLatestWorkflow(personalNumber) {
     method: 'get',
   };
 
-  const [sendVivaAdapterRequestError, response] = await to(sendVivaAdapterRequest(requestParams));
-  if (sendVivaAdapterRequestError) {
-    throw sendVivaAdapterRequestError;
-  }
-
+  const response = await sendVivaAdapterRequest(requestParams);
   return response.data;
 }
 
@@ -91,11 +83,7 @@ async function getWorkflowCompletions(payload) {
     method: 'get',
   };
 
-  const [sendVivaAdapterRequestError, response] = await to(sendVivaAdapterRequest(requestParams));
-  if (sendVivaAdapterRequestError) {
-    throw sendVivaAdapterRequestError;
-  }
-
+  const response = await sendVivaAdapterRequest(requestParams);
   return response.data;
 }
 
@@ -109,11 +97,7 @@ async function getWorkflow(payload) {
     method: 'get',
   };
 
-  const [sendVivaAdapterRequestError, response] = await to(sendVivaAdapterRequest(requestParams));
-  if (sendVivaAdapterRequestError) {
-    throw sendVivaAdapterRequestError;
-  }
-
+  const response = await sendVivaAdapterRequest(requestParams);
   return response.data;
 }
 
@@ -126,11 +110,7 @@ async function getOfficers(personalNumber) {
     method: 'get',
   };
 
-  const [sendVivaAdapterRequestError, response] = await to(sendVivaAdapterRequest(requestParams));
-  if (sendVivaAdapterRequestError) {
-    throw sendVivaAdapterRequestError;
-  }
-
+  const response = await sendVivaAdapterRequest(requestParams);
   return response.data.person.cases.vivacases.vivacase.officers;
 }
 
@@ -161,11 +141,7 @@ async function postApplication(payload) {
     },
   };
 
-  const [sendVivaAdapterRequestError, response] = await to(sendVivaAdapterRequest(requestParams));
-  if (sendVivaAdapterRequestError) {
-    throw sendVivaAdapterRequestError;
-  }
-
+  const response = await sendVivaAdapterRequest(requestParams);
   return response.data;
 }
 
@@ -178,11 +154,7 @@ async function getApplication(personalNumber) {
     method: 'get',
   };
 
-  const [sendVivaAdapterRequestError, response] = await to(sendVivaAdapterRequest(requestParams));
-  if (sendVivaAdapterRequestError) {
-    throw sendVivaAdapterRequestError;
-  }
-
+  const response = await sendVivaAdapterRequest(requestParams);
   return response.data.person.application.vivaapplication;
 }
 
@@ -195,11 +167,7 @@ async function getPerson(personalNumber) {
     method: 'get',
   };
 
-  const [sendVivaAdapterRequestError, response] = await to(sendVivaAdapterRequest(requestParams));
-  if (sendVivaAdapterRequestError) {
-    throw sendVivaAdapterRequestError;
-  }
-
+  const response = await sendVivaAdapterRequest(requestParams);
   return {
     case: response.data.person.cases.vivacases.vivacase,
     application: response.data.person.application.vivaapplication,
@@ -215,21 +183,12 @@ async function getApplicationStatus(personalNumber) {
     method: 'get',
   };
 
-  const [sendVivaAdapterRequestError, response] = await to(sendVivaAdapterRequest(requestParams));
-  if (sendVivaAdapterRequestError) {
-    throw sendVivaAdapterRequestError;
-  }
-
+  const response = await sendVivaAdapterRequest(requestParams);
   return response.data;
 }
 
-async function getVivaSsmParams() {
-  const [paramsReadError, vivaSsmParams] = await to(params.read(config.vada.envsKeyName));
-  if (paramsReadError) {
-    throw paramsReadError;
-  }
-
-  return vivaSsmParams;
+function getVivaSsmParams() {
+  return params.read(config.vada.envsKeyName);
 }
 
 export default {

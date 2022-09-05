@@ -9,8 +9,8 @@ import completionsHelper from '../helpers/completions';
 import resetPersonSignature from '../helpers/resetPersonSignature';
 import { updateCaseCompletionStatus } from '../helpers/dynamoDb';
 
-import { CaseItem } from '../types/caseItem';
 import { VivaParametersResponse } from '../types/ssmParameters';
+import type { CaseItem, CaseStatus, CaseCompletions } from '../types/caseItem';
 
 type CaseKeys = Pick<CaseItem, 'PK' | 'SK'>;
 type UserCase = Pick<CaseItem, 'details' | 'persons' | 'currentFormId' | 'id'>;
@@ -28,13 +28,14 @@ export interface Dependencies {
   readParams: (envsKeyName: string) => Promise<VivaParametersResponse>;
   putSuccessEvent: (params: LambdaDetails) => Promise<null>;
   updateCase: (keys: CaseKeys, caseUpdateAttributes: unknown) => Promise<void>;
+  getNewStatus: (completions: CaseCompletions) => CaseStatus;
+  getNewState: (completions: CaseCompletions) => string;
 }
 
 export async function setCaseCompletions(input: LambdaRequest, dependencies: Dependencies) {
   const { caseKeys } = input.detail;
-  const { getCase, readParams, putSuccessEvent, updateCase } = dependencies;
 
-  const caseItem = await getCase(caseKeys);
+  const caseItem = await dependencies.getCase(caseKeys);
 
   const {
     completionFormId,
@@ -42,11 +43,14 @@ export async function setCaseCompletions(input: LambdaRequest, dependencies: Dep
     newApplicationFormId,
     newApplicationCompletionFormId,
     newApplicationRandomCheckFormId,
-  } = await readParams(config.cases.providers.viva.envsKeyName);
+  } = await dependencies.readParams(config.cases.providers.viva.envsKeyName);
 
-  const completions = caseItem?.details?.completions;
+  const completions = caseItem.details.completions;
+  if (!completions) {
+    return true;
+  }
+
   const persons = caseItem.persons ?? [];
-
   const isNewApplication = caseItem.currentFormId === newApplicationFormId;
 
   const formIds = {
@@ -55,14 +59,14 @@ export async function setCaseCompletions(input: LambdaRequest, dependencies: Dep
   };
 
   const caseUpdateAttributes = {
-    newStatus: completionsHelper.get.status(completions),
-    newState: completionsHelper.get.state(completions),
+    newStatus: dependencies.getNewStatus(completions),
+    newState: dependencies.getNewState(completions),
     newCurrentFormId: completionsHelper.get.formId(formIds, completions),
     newPersons: persons.map(resetPersonSignature),
   };
 
-  await updateCase(caseKeys, caseUpdateAttributes);
-  await putSuccessEvent(input.detail);
+  await dependencies.updateCase(caseKeys, caseUpdateAttributes);
+  await dependencies.putSuccessEvent(input.detail);
 
   return true;
 }
@@ -73,5 +77,7 @@ export const main = log.wrap(async event => {
     readParams: params.read,
     putSuccessEvent: putVivaMsEvent.setCaseCompletionsSuccess,
     updateCase: updateCaseCompletionStatus,
+    getNewStatus: completionsHelper.get.status,
+    getNewState: completionsHelper.get.state,
   });
 });

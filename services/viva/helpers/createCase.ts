@@ -1,7 +1,7 @@
 import uuid from 'uuid';
 
 import {
-  VivaMyPagesPersonApplication,
+  VivaMyPagesApplicationPeriod,
   VivaMyPagesPersonCase,
   VivaPerson,
   VivaPersonType,
@@ -35,10 +35,10 @@ function stripNonNumericalCharacters(valueIncludingChars: string) {
   return valueIncludingChars.replace(matchNonNumericalCharactersRegex, '');
 }
 
-function getPeriodInMilliseconds(vivaApplication: VivaMyPagesPersonApplication): CasePeriod {
+function getPeriodInMilliseconds(vivaApplicationPeriod: VivaMyPagesApplicationPeriod): CasePeriod {
   return {
-    startDate: Date.parse(vivaApplication.period.start),
-    endDate: Date.parse(vivaApplication.period.end),
+    startDate: Date.parse(`${vivaApplicationPeriod.start}T00:00:00.000Z`),
+    endDate: Date.parse(`${vivaApplicationPeriod.end}T00:00:00.000Z`),
   };
 }
 
@@ -92,8 +92,8 @@ function getUserByRole(personList: CasePerson[], role: CasePersonRole): CasePers
   return personList.find(user => user.role === role);
 }
 
-function getVivaChildren(casePersonList: CasePerson[]): CasePerson[] {
-  return casePersonList.filter(person => person.role === 'children');
+function getVivaChildren(personList: CasePerson[]): CasePerson[] {
+  return personList.filter(person => person.role === CasePersonRole.Children);
 }
 
 function getInitialFormAttributes(

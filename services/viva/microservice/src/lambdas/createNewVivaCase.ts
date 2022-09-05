@@ -16,17 +16,11 @@ import {
   NEW_APPLICATION_VIVA,
 } from '../libs/constants';
 
-import { getFormTemplates } from '../helpers/dynamoDb';
 import createCaseHelper from '../helpers/createCase';
-import {
-  CaseUser,
-  CaseItem,
-  CaseForm,
-  CaseStatus,
-  CasePersonRole,
-  CasePerson,
-} from '../types/caseItem';
+import { getFormTemplates } from '../helpers/dynamoDb';
 import { VivaParametersResponse } from '../types/ssmParameters';
+import { CasePersonRole } from '../types/caseItem';
+import type { CaseUser, CaseItem, CaseForm, CaseStatus, CasePerson } from '../types/caseItem';
 
 interface GetUserCaseListResponse {
   Count: number;
@@ -39,6 +33,7 @@ interface LambdaDetails {
 export interface LambdaRequest {
   detail: LambdaDetails;
 }
+
 export interface Dependencies {
   createCase: typeof putItem;
   readParams: (envsKeyName: string) => Promise<VivaParametersResponse>;
@@ -130,6 +125,7 @@ export async function createNewVivaCase(
         startDate: 0,
         endDate: 0,
       },
+      completions: null,
     },
     currentFormId: newApplicationFormId,
   };

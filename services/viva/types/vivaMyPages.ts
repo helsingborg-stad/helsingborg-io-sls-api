@@ -45,6 +45,9 @@ export interface VivaMyPagesPersonApplication {
   readonly period: VivaMyPagesApplicationPeriod;
 }
 
+/**
+ * Expected string format: 'YYYY-MM-DD'
+ */
 export interface VivaMyPagesApplicationPeriod {
   readonly start: string;
   readonly end: string;
