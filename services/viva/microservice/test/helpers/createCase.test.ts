@@ -85,7 +85,7 @@ describe('stripNonNumericalCharacters', () => {
 
 describe('getPeriodInMilliseconds', () => {
   it('Returns an CasePeriod object with UTC timestamps', () => {
-    const result: CasePeriod = caseHelper.getPeriodInMilliseconds(vivaApplication);
+    const result: CasePeriod = caseHelper.getPeriodInMilliseconds(vivaApplication.period);
     expect(result).toEqual({
       endDate: 1643587200000,
       startDate: 1640995200000,
