@@ -1,7 +1,7 @@
 import uuid from 'uuid';
 
 import {
-  VivaMyPagesPersonApplication,
+  VivaMyPagesApplicationPeriod,
   VivaMyPagesPersonCase,
   VivaPerson,
   VivaPersonType,
@@ -35,10 +35,10 @@ function stripNonNumericalCharacters(valueIncludingChars: string) {
   return valueIncludingChars.replace(matchNonNumericalCharactersRegex, '');
 }
 
-function getPeriodInMilliseconds(vivaApplication: VivaMyPagesPersonApplication): CasePeriod {
+function getPeriodInMilliseconds(vivaApplicationPeriod: VivaMyPagesApplicationPeriod): CasePeriod {
   return {
-    startDate: Date.parse(`${vivaApplication.period.start}T00:00:00.000Z`),
-    endDate: Date.parse(`${vivaApplication.period.end}T00:00:00.000Z`),
+    startDate: Date.parse(`${vivaApplicationPeriod.start}T00:00:00.000Z`),
+    endDate: Date.parse(`${vivaApplicationPeriod.end}T00:00:00.000Z`),
   };
 }
 

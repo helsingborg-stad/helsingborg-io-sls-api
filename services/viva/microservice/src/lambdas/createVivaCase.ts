@@ -57,10 +57,10 @@ export async function createVivaCase(
 ): Promise<boolean> {
   const { clientUser: user, vivaPersonDetail: vivaMyPages } = input.detail;
 
-  const period = createCaseHelper.getPeriodInMilliseconds(vivaMyPages.application);
+  const period = createCaseHelper.getPeriodInMilliseconds(vivaMyPages.application.period);
   const caseList = await dependencies.getCaseListByPeriod(user.personalNumber, period);
   if (caseList?.Count > 0) {
-    log.writeInfo('Case with specified period already exists.', { period });
+    log.writeInfo('Case with specified period already exists. Case id:', caseList.Items[0].id);
     return true;
   }
 
