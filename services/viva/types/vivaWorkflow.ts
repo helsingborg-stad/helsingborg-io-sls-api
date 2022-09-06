@@ -1,9 +1,9 @@
 export interface VivaWorkflow {
   readonly workflowid: string;
   readonly application: VivaWorkflowApplication;
-  readonly decision?: VivaWorkflowDecisionRoot | VivaWorkflowDecisionRoot[];
+  readonly decision?: VivaWorkflowDecisionRoot;
   readonly calculations?: VivaWorkflowCalculationsRoot;
-  readonly payments?: VivaWorkflowPaymentsRoot;
+  readonly payments?: unknown;
   readonly journals?: VivaWorkflowJournalsRoot;
   readonly notes?: unknown;
 }
@@ -41,11 +41,11 @@ export interface VivaWorkflowDecisionRoot {
   readonly ssi: VivaWorkflowSsi;
   readonly parentssi: string | null;
   readonly createdby: string | null;
-  readonly createddatetime: string;
+  readonly createddatetime: string | null;
   readonly subject: string | null;
   readonly periodstartdate: string | null;
   readonly periodenddate: string | null;
-  readonly decisions: VivaWorkflowDecisions;
+  readonly decisions: VivaWorkflowDecisions | VivaWorkflowDecisions[] | null;
 }
 
 export interface VivaWorkflowSsi {
@@ -55,7 +55,7 @@ export interface VivaWorkflowSsi {
 }
 
 export interface VivaWorkflowDecisions {
-  readonly decision: VivaWorkflowDecision | VivaWorkflowDecision[];
+  readonly decision: VivaWorkflowDecision | VivaWorkflowDecision[] | null;
 }
 
 export interface VivaWorkflowDecision {
@@ -117,6 +117,9 @@ export interface VivaWorkflowCalculationCost {
   note: string | null;
 }
 
+// export interface VivaWorkflowCalculationIncomesRoot {}
+// export interface VivaWorkflowCalculationReductionsRoot {}
+
 export interface VivaWorkflowCalculationNorm {
   normpart: VivaWorkflowCalculationNormPart[] | VivaWorkflowCalculationNormPart | null;
   normsum: string | null;
@@ -133,29 +136,6 @@ export interface VivaWorkflowCalculationNormPart {
   type: string | null;
   amount: string | null;
   note: string | null;
-}
-
-export interface VivaWorkflowPaymentsRoot {
-  payment: VivaWorkflowPayment | VivaWorkflowPayment[];
-}
-
-export interface VivaWorkflowPayment {
-  readonly amount: string;
-  readonly canceled: string | null;
-  readonly createdBy: string;
-  readonly createdTime: string;
-  readonly giveDate: string;
-  readonly method: string;
-  readonly msg1: string | null;
-  readonly msg2: string | null;
-  readonly paymentid: string;
-  readonly periodenddate: string;
-  readonly periodstartdate: string;
-  readonly purpose: string | null;
-  readonly receivername: string;
-  readonly status: string;
-  readonly subject: string;
-  readonly type: string;
 }
 
 export interface VivaWorkflowJournalsRoot {
