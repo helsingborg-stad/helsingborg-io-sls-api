@@ -53,7 +53,7 @@ function updateCaseStatusAndState(keys: CaseKeys, newStatus: CaseStatus): Promis
   return dynamoDb.call('update', updateParams);
 }
 
-async function decideCaseStatus(
+export async function decideCaseStatus(
   input: LambdaRequest,
   dependencies: Dependencies
 ): Promise<boolean> {
