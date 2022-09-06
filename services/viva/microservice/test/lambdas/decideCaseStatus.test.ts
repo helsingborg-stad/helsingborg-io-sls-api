@@ -1,12 +1,7 @@
-import { getStatusByType } from '../../src/libs/caseStatuses';
-import { ACTIVE_PROCESSING } from '../../src/libs/constants';
 import { decideCaseStatus } from '../../src/lambdas/decideCaseStatus';
 import type { LambdaRequest } from '../../src/lambdas/decideCaseStatus';
-import type {
-  VivaWorkflow,
-  VivaWorkflowApplication,
-  VivaWorkflowDecisionRoot,
-} from '../../src/types/vivaWorkflow';
+import type { CaseStatus } from '../../src/types/caseItem';
+import type { VivaWorkflow, VivaWorkflowApplication } from '../../src/types/vivaWorkflow';
 
 const caseKeys = {
   PK: 'USER#198602102389',
@@ -23,15 +18,21 @@ function createLambdaInput(
       workflow: {
         workflowid: 'XYZ123',
         application: {
+          receiveddate: null,
+          periodstartdate: null,
+          periodenddate: null,
+          otherperiod: null,
+          requestingcompletion: null,
+          completiondate: null,
+          completionreceiveddate: null,
+          completionsreceived: null,
+          completionsuploaded: null,
+          completions: null,
+          completiondescription: null,
+          completionduedate: null,
+          islockedwithoutcompletionreceived: null,
           islocked: null,
           ...workflowApplicationParams,
-        },
-        decision: {
-          decisions: {
-            decision: {
-              typecode: '01',
-            },
-          },
         },
         ...workflowParams,
       },
@@ -39,42 +40,21 @@ function createLambdaInput(
   } as unknown as LambdaRequest;
 }
 
-describe('decideCaseStatus', () => {
-  it('successfully updates a case with new status', async () => {
-    const updateCaseMock = jest.fn();
-    const putSuccessEventMock = jest.fn();
+it('successfully updates case with new status', async () => {
+  const newSatatus: CaseStatus = {
+    type: 'closed:approved:viva',
+    name: 'Godkänd',
+    description: 'Din ansökan är godkänd. Pengarna sätts in på ditt konto',
+  };
 
-    const result = await decideCaseStatus(createLambdaInput(), {
-      updateCase: updateCaseMock,
-      putSuccessEvent: putSuccessEventMock,
-    });
+  const updateCaseMock = jest.fn();
+  const lambdaInput = createLambdaInput();
 
-    expect(result).toBe(true);
-    expect(updateCaseMock).toHaveBeenCalledWith(caseKeys, getStatusByType(ACTIVE_PROCESSING));
-    expect(putSuccessEventMock).toHaveBeenCalledWith({ caseKeys });
+  const result = await decideCaseStatus(lambdaInput, {
+    updateCase: updateCaseMock,
+    putSuccessEvent: () => Promise.resolve(),
   });
 
-  it('does not update case status for undefined new status type', async () => {
-    const updateCaseMock = jest.fn();
-    const putSuccessEventMock = jest.fn();
-
-    const lambdaInput = {
-      decision: {
-        decisions: {
-          decision: {
-            typecode: '0',
-          },
-        },
-      } as VivaWorkflowDecisionRoot,
-    };
-
-    const result = await decideCaseStatus(createLambdaInput(lambdaInput), {
-      updateCase: updateCaseMock,
-      putSuccessEvent: putSuccessEventMock,
-    });
-
-    expect(result).toBe(true);
-    expect(updateCaseMock).toHaveBeenCalledTimes(0);
-    expect(putSuccessEventMock).toHaveBeenCalledTimes(0);
-  });
+  expect(result).toBe(true);
+  expect(updateCaseMock).toHaveBeenCalledWith(caseKeys, newSatatus);
 });
