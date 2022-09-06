@@ -53,7 +53,10 @@ function updateCaseStatusAndState(keys: CaseKeys, newStatus: CaseStatus): Promis
   return dynamoDb.call('update', updateParams);
 }
 
-async function decideCaseStatus(input: LambdaRequest, dependencies: Dependencies) {
+async function decideCaseStatus(
+  input: LambdaRequest,
+  dependencies: Dependencies
+): Promise<boolean> {
   const { caseKeys, workflow } = input.detail;
 
   const newStatusType = decideNewCaseStatus(workflow);
