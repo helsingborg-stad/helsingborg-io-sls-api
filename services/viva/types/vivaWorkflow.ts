@@ -1,27 +1,28 @@
 export interface VivaWorkflow {
   readonly workflowid: string;
   readonly application: VivaWorkflowApplication;
+  readonly decision?: VivaWorkflowDecisionRoot;
+  readonly calculations?: VivaWorkflowCalculationsRoot;
+  readonly payments?: unknown;
+  readonly journals?: VivaWorkflowJournalsRoot;
+  readonly notes?: unknown;
 }
 
 export interface VivaWorkflowApplication {
-  readonly receiveddate: Date | null;
-  readonly periodstartdate: Date | null;
-  readonly periodenddate: Date | null;
+  readonly receiveddate: string | null;
+  readonly periodstartdate: string | null;
+  readonly periodenddate: string | null;
   readonly otherperiod: unknown | null;
   readonly requestingcompletion: string | null;
-  readonly completiondate: Date | null;
-  readonly completionreceiveddate: Date | null;
+  readonly completiondate: string | null;
+  readonly completionreceiveddate: string | null;
   readonly completionsreceived: VivaWorkflowCompletionsReceived | null;
   readonly completionsuploaded: VivaWorkflowCompletionsUploaded | null;
   readonly completions: VivaWorkflowCompletions | null;
   readonly completiondescription: string | null;
-  readonly completionduedate: Date | null;
-  readonly islockedwithoutcompletionreceived: Date | null;
-  readonly islocked: Date | null;
-  readonly decision?: VivaWorkflowDecisionRoot;
-  readonly calculations?: unknown;
-  readonly payments?: unknown;
-  readonly journals?: unknown;
+  readonly completionduedate: string | null;
+  readonly islockedwithoutcompletionreceived: string | null;
+  readonly islocked: string | null;
 }
 
 export interface VivaWorkflowCompletionsUploaded {
@@ -37,17 +38,17 @@ export interface VivaWorkflowCompletions {
 }
 
 export interface VivaWorkflowDecisionRoot {
-  readonly ssi: VivaWorkflowDecisionSsi;
+  readonly ssi: VivaWorkflowSsi;
   readonly parentssi: string | null;
   readonly createdby: string | null;
-  readonly createddatetime: Date | null;
+  readonly createddatetime: string | null;
   readonly subject: string | null;
-  readonly periodstartdate: Date | null;
-  readonly periodenddate: Date | null;
+  readonly periodstartdate: string | null;
+  readonly periodenddate: string | null;
   readonly decisions: VivaWorkflowDecisions | VivaWorkflowDecisions[] | null;
 }
 
-export interface VivaWorkflowDecisionSsi {
+export interface VivaWorkflowSsi {
   readonly server: string;
   readonly path: string;
   readonly id: string;
@@ -68,10 +69,96 @@ export interface VivaWorkflowDecision {
   readonly causepartner: string | null;
   readonly causetextpartner: string | null;
   readonly purpose: string | null;
-  readonly date: Date;
+  readonly date: string;
   readonly author: string;
   readonly amount: string;
   readonly explanation: string;
   readonly createdby: string;
-  readonly createddatetime: Date;
+  readonly createddatetime: string;
+}
+
+export interface VivaWorkflowCalculationsRoot {
+  readonly calculation: VivaWorkflowCalculation;
+}
+
+export interface VivaWorkflowCalculation {
+  readonly ssi: VivaWorkflowSsi;
+  readonly parentssi: string | null;
+  readonly createdby: string | null;
+  readonly createddatetime: string | null;
+  readonly subject: string | null;
+  readonly periodstartdate: string | null;
+  readonly periodenddate: string | null;
+  readonly calculationtype: string | null;
+  readonly calculationpersons: VivaWorkflowCalculationPersonsRoot | null;
+}
+
+export interface VivaWorkflowCalculationPersonsRoot {
+  readonly calculationperson: VivaWorkflowCalculationPerson[] | VivaWorkflowCalculationPerson;
+}
+
+export interface VivaWorkflowCalculationPerson {
+  readonly name: string | null;
+  readonly pnumber: string | null;
+  readonly norm: string | null;
+  readonly days: string | null;
+  readonly home: string | null;
+  readonly daycare: string | null;
+}
+
+export interface VivaWorkflowCalculationCostsRoot {
+  readonly costs: VivaWorkflowCalculationCost[] | VivaWorkflowCalculationCost;
+}
+
+export interface VivaWorkflowCalculationCost {
+  type: string | null;
+  actual: string | null;
+  approved: string | null;
+  note: string | null;
+}
+
+// export interface VivaWorkflowCalculationIncomesRoot {}
+// export interface VivaWorkflowCalculationReductionsRoot {}
+
+export interface VivaWorkflowCalculationNorm {
+  normpart: VivaWorkflowCalculationNormPart[] | VivaWorkflowCalculationNormPart | null;
+  normsum: string | null;
+  normgemsum: string | null;
+  normsubtotal: string | null;
+  costsum: string | null;
+  incomesum: string | null;
+  reductionsum: string | null;
+  calculationsum: string | null;
+  note: string | null;
+}
+
+export interface VivaWorkflowCalculationNormPart {
+  type: string | null;
+  amount: string | null;
+  note: string | null;
+}
+
+export interface VivaWorkflowJournalsRoot {
+  journal: VivaWorkflowJournal[] | VivaWorkflowJournal | null;
+}
+
+export interface VivaWorkflowJournal {
+  ssi: VivaWorkflowSsi;
+  createdby: string | null;
+  createddatetime: string | null;
+  responsible: string | null;
+  eventdate: string | null;
+  subject: string | null;
+  periodstartdate: string | null;
+  periodenddate: string | null;
+  notes: VivaWorkflowJournalsNotesRoot;
+}
+
+export interface VivaWorkflowJournalsNotesRoot {
+  note: VivaWorkflowJournalsNote[] | VivaWorkflowJournalsNote | null;
+}
+
+export interface VivaWorkflowJournalsNote {
+  label: string | null;
+  text: string | null;
 }
