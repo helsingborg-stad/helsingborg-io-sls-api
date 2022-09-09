@@ -2,8 +2,8 @@ import log from '../libs/logs';
 import config from '../libs/config';
 import * as dynamoDb from '../libs/dynamoDb';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
-import { CaseItem } from 'types/caseItem';
-import putVivaMsEvent from 'helpers/putVivaMsEvent';
+import { CaseItem } from '../types/caseItem';
+import putVivaMsEvent from '../helpers/putVivaMsEvent';
 
 type GetCaseResult = Promise<{ Items: CaseItem[] }>;
 
@@ -11,6 +11,7 @@ export interface Dependencies {
   getSubmittedOrProcessingOrOngoingCases: (personalNumber: string) => GetCaseResult;
   updateCaseDetailsWorkflow: (caseKeys: CaseKeys, newWorkflow: unknown) => any;
   syncWorkflowSuccess: (detail: Record<string, any>) => any;
+  getWorkflow: (payload: any) => any;
 }
 
 interface DetailUser {
@@ -21,7 +22,7 @@ interface LambdaDetails {
   user: DetailUser;
 }
 
-interface LambdaRequest {
+export interface LambdaRequest {
   detail: LambdaDetails;
 }
 
@@ -54,7 +55,7 @@ async function getSubmittedOrProcessingOrOngoingCases(personalNumber: string): G
   return dynamoDb.call('query', queryParams);
 }
 
-function updateCaseDetailsWorkflow(caseKeys: CaseKeys, newWorkflow) {
+function updateCaseDetailsWorkflow(caseKeys: CaseKeys, newWorkflow: any) {
   const updateParams = {
     TableName: config.cases.tableName,
     Key: {
@@ -74,8 +75,12 @@ function updateCaseDetailsWorkflow(caseKeys: CaseKeys, newWorkflow) {
 export async function syncWorkflow(event: LambdaRequest, dependencies: Dependencies) {
   const { personalNumber } = event.detail.user;
 
-  const { getSubmittedOrProcessingOrOngoingCases, updateCaseDetailsWorkflow, syncWorkflowSuccess } =
-    dependencies;
+  const {
+    getSubmittedOrProcessingOrOngoingCases,
+    updateCaseDetailsWorkflow,
+    syncWorkflowSuccess,
+    getWorkflow,
+  } = dependencies;
 
   const userCases = await getSubmittedOrProcessingOrOngoingCases(personalNumber);
 
@@ -95,7 +100,7 @@ export async function syncWorkflow(event: LambdaRequest, dependencies: Dependenc
 
     const { workflowId } = caseItem.details;
 
-    const workflow = await vivaAdapter.workflow.get({ personalNumber, workflowId });
+    const workflow = await getWorkflow({ personalNumber, workflowId });
 
     await updateCaseDetailsWorkflow(caseKeys, workflow.attributes);
     await syncWorkflowSuccess({ caseKeys, workflow });
@@ -109,5 +114,6 @@ export const main = log.wrap(event =>
     updateCaseDetailsWorkflow,
     getSubmittedOrProcessingOrOngoingCases,
     syncWorkflowSuccess: putVivaMsEvent.syncWorkflowSuccess,
+    getWorkflow: vivaAdapter.workflow.get,
   })
 );
