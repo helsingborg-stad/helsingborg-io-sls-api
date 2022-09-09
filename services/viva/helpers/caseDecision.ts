@@ -12,8 +12,8 @@ import type {
 } from '../types/vivaWorkflow';
 
 export default function decideNewCaseStatus(workflowAttributes: VivaWorkflow) {
-  const islocked = !!workflowAttributes.application?.islocked;
-  const paymentList = makeArray(workflowAttributes.payments?.payment);
+  const islocked = !!workflowAttributes.application.islocked;
+  const paymentList = makeArray(workflowAttributes?.payments?.payment);
   const decisionList = getLatestDecision(workflowAttributes.decision);
   const decisionTypeCode = getDecisionTypeCode(decisionList);
 

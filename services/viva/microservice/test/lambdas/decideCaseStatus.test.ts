@@ -1,8 +1,6 @@
-import { decideCaseStatus } from '../../src/lambdas/decideCaseStatus';
-
 import { getStatusByType } from '../../src/libs/caseStatuses';
 import { ACTIVE_PROCESSING } from '../../src/libs/constants';
-
+import { decideCaseStatus } from '../../src/lambdas/decideCaseStatus';
 import type { LambdaRequest } from '../../src/lambdas/decideCaseStatus';
 import type {
   VivaWorkflow,
@@ -31,12 +29,12 @@ function createLambdaInput(
         decision: {
           decisions: {
             decision: {
-              typecode: 1,
+              typecode: '01',
             },
           },
         },
         ...workflowParams,
-      } as VivaWorkflow,
+      },
     },
   } as unknown as LambdaRequest;
 }
@@ -53,10 +51,10 @@ describe('decideCaseStatus', () => {
 
     expect(result).toBe(true);
     expect(updateCaseMock).toHaveBeenCalledWith(caseKeys, getStatusByType(ACTIVE_PROCESSING));
-    expect(putSuccessEventMock).toHaveBeenCalledWith({ caseKeys: caseKeys });
+    expect(putSuccessEventMock).toHaveBeenCalledWith({ caseKeys });
   });
 
-  it('fails updating case status for undefined new status type', async () => {
+  it('does not update case status for undefined new status type', async () => {
     const updateCaseMock = jest.fn();
     const putSuccessEventMock = jest.fn();
 
