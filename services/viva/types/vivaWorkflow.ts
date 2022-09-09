@@ -1,9 +1,32 @@
+export interface VivaWorkflowPayment {
+  readonly amount: string;
+  readonly canceled: boolean | null;
+  readonly createdBy: string;
+  readonly createdTime: string;
+  readonly giveDate: string;
+  readonly method: string;
+  readonly msg1: string | null;
+  readonly msg2: string | null;
+  readonly paymentid: string;
+  readonly periodenddate: string;
+  readonly periodstartdate: string;
+  readonly purpose: string | null;
+  readonly receivername: string;
+  readonly status: string;
+  readonly subject: string;
+  readonly type: string;
+}
+
+export interface VivaWorkflowPaymentsRoot {
+  payment: VivaWorkflowPayment | VivaWorkflowPayment[];
+}
+
 export interface VivaWorkflow {
   readonly workflowid: string;
   readonly application: VivaWorkflowApplication;
-  readonly decision?: VivaWorkflowDecisionRoot;
+  readonly decision?: VivaWorkflowDecisionRoot | VivaWorkflowDecisionRoot[];
   readonly calculations?: VivaWorkflowCalculationsRoot;
-  readonly payments?: unknown;
+  readonly payments?: VivaWorkflowPaymentsRoot;
   readonly journals?: VivaWorkflowJournalsRoot;
   readonly notes?: unknown;
 }
@@ -116,9 +139,6 @@ export interface VivaWorkflowCalculationCost {
   approved: string | null;
   note: string | null;
 }
-
-// export interface VivaWorkflowCalculationIncomesRoot {}
-// export interface VivaWorkflowCalculationReductionsRoot {}
 
 export interface VivaWorkflowCalculationNorm {
   normpart: VivaWorkflowCalculationNormPart[] | VivaWorkflowCalculationNormPart | null;

@@ -7,6 +7,8 @@ import {
   CLOSED_PARTIALLY_APPROVED_VIVA,
 } from '../../src/libs/constants';
 
+import type { VivaWorkflow } from '../../src/types/vivaWorkflow';
+
 const workflow = {
   workflowid: 'EA2F293CA4763D1AC12587DD004F4ADE',
   application: {
@@ -25,13 +27,13 @@ const workflow = {
     islockedwithoutcompletionreceived: null,
     islocked: null,
   },
-};
+} as VivaWorkflow;
 
 const workflowCalculation = {
   calculations: {
     calculation: {},
   },
-};
+} as VivaWorkflow;
 
 const workflowDecisionApproved = {
   decision: {
@@ -41,7 +43,7 @@ const workflowDecisionApproved = {
       },
     },
   },
-};
+} as VivaWorkflow;
 
 const workflowDecisionPartiallyApproved = {
   decision: {
@@ -65,7 +67,7 @@ const workflowDecisionPartiallyApproved = {
       ],
     },
   },
-};
+} as VivaWorkflow;
 
 const workflowDecisionRejected = {
   decision: {
@@ -75,7 +77,7 @@ const workflowDecisionRejected = {
       },
     },
   },
-};
+} as VivaWorkflow;
 
 const workflowDecisionList = {
   decision: [
@@ -107,7 +109,7 @@ const workflowPayment = {
   payments: {
     payment: {},
   },
-};
+} as VivaWorkflow;
 
 const workflowCalculationANDDecisionApproved = {
   ...workflow,
@@ -146,7 +148,7 @@ const workflowDecisionWithListStructure = {
   ...workflowCalculation,
   ...workflowDecisionList,
   ...workflowPayment,
-};
+} as VivaWorkflow;
 
 it('Before the Viva administrator processes the application the case status must be unchanged', () => {
   const results = decideNewCaseStatus(workflow);
@@ -162,7 +164,7 @@ it(`Calculation exists in the Viva workflow collection, then status type must be
     calculations: {
       calculation: {},
     },
-  };
+  } as VivaWorkflow;
   const results = decideNewCaseStatus(workflowLockedWithCalculations);
   expect(results).toBe(ACTIVE_PROCESSING);
 });
@@ -193,8 +195,14 @@ it(`Calculation AND decision(approved) exists in the Viva workflow collection, t
 });
 
 it(`Calculation AND payment exists in the Viva workflow collection, then status type must be ${ACTIVE_PROCESSING}`, () => {
-  workflowCalculationANDPayment.application.islocked = '123';
-  const results = decideNewCaseStatus(workflowCalculationANDPayment);
+  const lockedWorkflowCalculationANDPayment = {
+    ...workflowCalculationANDPayment,
+    application: {
+      ...workflowCalculationANDPayment.application,
+      isLocked: '123',
+    },
+  };
+  const results = decideNewCaseStatus(lockedWorkflowCalculationANDPayment);
   expect(results).toBe(ACTIVE_PROCESSING);
 });
 

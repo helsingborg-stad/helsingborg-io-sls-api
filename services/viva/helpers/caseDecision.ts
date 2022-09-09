@@ -5,7 +5,13 @@ import {
   CLOSED_PARTIALLY_APPROVED_VIVA,
 } from '../libs/constants';
 
-export default function decideNewCaseStatus(workflowAttributes) {
+import type {
+  VivaWorkflow,
+  VivaWorkflowDecisionRoot,
+  VivaWorkflowDecision,
+} from '../types/vivaWorkflow';
+
+export default function decideNewCaseStatus(workflowAttributes: VivaWorkflow) {
   const islocked = !!workflowAttributes.application?.islocked;
   const paymentList = makeArray(workflowAttributes.payments?.payment);
   const decisionList = getLatestDecision(workflowAttributes.decision);
@@ -23,18 +29,20 @@ export default function decideNewCaseStatus(workflowAttributes) {
   return undefined;
 }
 
-function getLatestDecision(decision) {
-  if (Array.isArray(decision)) {
-    const latest = decision.sort((a, b) => {
-      return new Date(b.createddatetime) - new Date(a.createddatetime);
+function getLatestDecision(
+  decisionRoot: VivaWorkflowDecisionRoot | VivaWorkflowDecisionRoot[] | undefined
+): VivaWorkflowDecision[] {
+  if (Array.isArray(decisionRoot)) {
+    const latest = decisionRoot.sort((a, b) => {
+      return Number(new Date(b.createddatetime)) - Number(new Date(a.createddatetime));
     })[0];
-    return makeArray(latest?.decisions?.decision);
+    return makeArray(latest.decisions.decision);
   }
 
-  return makeArray(decision?.decisions?.decision);
+  return makeArray(decisionRoot?.decisions?.decision);
 }
 
-function getDecisionTypeCode(decisionList) {
+function getDecisionTypeCode(decisionList: VivaWorkflowDecision[]): number | undefined {
   if (decisionList.length === 0) {
     return undefined;
   }
@@ -42,7 +50,7 @@ function getDecisionTypeCode(decisionList) {
   return decisionList.reduce((typeCode, decision) => typeCode | parseInt(decision.typecode, 10), 0);
 }
 
-function getCaseStatusType(decisionTypeCode, hasPayment) {
+function getCaseStatusType(decisionTypeCode: number, hasPayment: boolean) {
   if (decisionTypeCode === 1 && hasPayment) {
     return CLOSED_APPROVED_VIVA;
   }
@@ -58,8 +66,8 @@ function getCaseStatusType(decisionTypeCode, hasPayment) {
   return ACTIVE_PROCESSING;
 }
 
-function makeArray(value) {
-  let list = [];
+function makeArray<T>(value: T | T[]): T[] {
+  let list: T[] = [];
 
   if (Array.isArray(value)) {
     list = [...value];
