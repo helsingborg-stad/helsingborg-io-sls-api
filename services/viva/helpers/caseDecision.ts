@@ -12,8 +12,8 @@ import type {
 } from '../types/vivaWorkflow';
 
 export default function decideNewCaseStatus(workflowAttributes: VivaWorkflow) {
-  const islocked = !!workflowAttributes.application.islocked;
-  const paymentList = makeArray(workflowAttributes?.payments?.payment);
+  const islocked = !!workflowAttributes.application?.islocked;
+  const paymentList = makeArray(workflowAttributes.payments?.payment);
   const decisionList = getLatestDecision(workflowAttributes.decision);
   const decisionTypeCode = getDecisionTypeCode(decisionList);
 
@@ -66,14 +66,16 @@ function getCaseStatusType(decisionTypeCode: number, hasPayment: boolean) {
   return ACTIVE_PROCESSING;
 }
 
-function makeArray<T>(value: T | T[] | undefined): T[] {
+function makeArray<T>(value: T | T[]): T[] {
+  let list: T[] = [];
+
   if (Array.isArray(value)) {
-    return [...value];
+    list = [...value];
   }
 
-  if (value === undefined) {
-    return [];
+  if (value != undefined) {
+    list.push(value);
   }
 
-  return [value];
+  return list;
 }

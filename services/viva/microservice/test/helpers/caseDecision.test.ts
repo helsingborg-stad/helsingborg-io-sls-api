@@ -1,4 +1,5 @@
 import decideNewCaseStatus from '../../src/helpers/caseDecision';
+
 import {
   ACTIVE_PROCESSING,
   CLOSED_APPROVED_VIVA,
@@ -8,7 +9,7 @@ import {
 
 import type { VivaWorkflow } from '../../src/types/vivaWorkflow';
 
-const workflow: VivaWorkflow = {
+const workflow = {
   workflowid: 'EA2F293CA4763D1AC12587DD004F4ADE',
   application: {
     receiveddate: '2022-02-02T15:26:05+01:00',
@@ -26,17 +27,15 @@ const workflow: VivaWorkflow = {
     islockedwithoutcompletionreceived: null,
     islocked: null,
   },
-};
+} as VivaWorkflow;
 
 const workflowCalculation = {
-  ...workflow,
   calculations: {
     calculation: {},
   },
 } as VivaWorkflow;
 
 const workflowDecisionApproved = {
-  ...workflow,
   decision: {
     decisions: {
       decision: {
@@ -47,7 +46,6 @@ const workflowDecisionApproved = {
 } as VivaWorkflow;
 
 const workflowDecisionPartiallyApproved = {
-  ...workflow,
   decision: {
     decisions: {
       decision: [
@@ -72,7 +70,6 @@ const workflowDecisionPartiallyApproved = {
 } as VivaWorkflow;
 
 const workflowDecisionRejected = {
-  ...workflow,
   decision: {
     decisions: {
       decision: {
@@ -83,7 +80,6 @@ const workflowDecisionRejected = {
 } as VivaWorkflow;
 
 const workflowDecisionList = {
-  ...workflow,
   decision: [
     {
       decisions: {
@@ -107,42 +103,52 @@ const workflowDecisionList = {
       createddatetime: '2022-02-18T10:13:04+01:00',
     },
   ],
-} as VivaWorkflow;
+};
 
 const workflowPayment = {
-  ...workflow,
   payments: {
     payment: {},
   },
 } as VivaWorkflow;
 
 const workflowCalculationANDDecisionApproved = {
+  ...workflow,
   ...workflowCalculation,
   ...workflowDecisionApproved,
 };
 
+const workflowCalculationANDPayment = {
+  ...workflow,
+  ...workflowCalculation,
+  ...workflowPayment,
+};
+
 const workflowCalculationANDDecisionApprovedANDPayment = {
+  ...workflow,
   ...workflowCalculation,
   ...workflowDecisionApproved,
   ...workflowPayment,
 };
 
 const workflowCalculationANDDecisionPartiallyApprovedANDPayment = {
+  ...workflow,
   ...workflowCalculation,
   ...workflowDecisionPartiallyApproved,
   ...workflowPayment,
 };
 
 const workflowCalculationANDDecisionRejected = {
+  ...workflow,
   ...workflowCalculation,
   ...workflowDecisionRejected,
 };
 
 const workflowDecisionWithListStructure = {
+  ...workflow,
   ...workflowCalculation,
   ...workflowDecisionList,
   ...workflowPayment,
-};
+} as VivaWorkflow;
 
 it('Before the Viva administrator processes the application the case status must be unchanged', () => {
   const results = decideNewCaseStatus(workflow);
@@ -155,13 +161,15 @@ it(`Calculation exists in the Viva workflow collection, then status type must be
     application: {
       islocked: '123',
     },
-    calculations: {},
+    calculations: {
+      calculation: {},
+    },
   } as VivaWorkflow;
   const results = decideNewCaseStatus(workflowLockedWithCalculations);
   expect(results).toBe(ACTIVE_PROCESSING);
 });
 
-it('Returns undefined if workflow only includes payment', () => {
+it('Payment exists in the Viva workflow collection, then the case status must be unchanged', () => {
   const results = decideNewCaseStatus(workflowPayment);
   expect(results).toBeUndefined();
 });
@@ -183,6 +191,18 @@ it(`Decision(rejected) exists in the Viva workflow collection, then status type 
 
 it(`Calculation AND decision(approved) exists in the Viva workflow collection, then status type must be ${ACTIVE_PROCESSING}`, () => {
   const results = decideNewCaseStatus(workflowCalculationANDDecisionApproved);
+  expect(results).toBe(ACTIVE_PROCESSING);
+});
+
+it(`Calculation AND payment exists in the Viva workflow collection, then status type must be ${ACTIVE_PROCESSING}`, () => {
+  const lockedWorkflowCalculationANDPayment = {
+    ...workflowCalculationANDPayment,
+    application: {
+      ...workflowCalculationANDPayment.application,
+      isLocked: '123',
+    },
+  };
+  const results = decideNewCaseStatus(lockedWorkflowCalculationANDPayment);
   expect(results).toBe(ACTIVE_PROCESSING);
 });
 
