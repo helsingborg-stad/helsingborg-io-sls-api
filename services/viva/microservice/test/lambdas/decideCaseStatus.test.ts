@@ -40,21 +40,23 @@ function createLambdaInput(
   } as unknown as LambdaRequest;
 }
 
-it('successfully updates case with new status', async () => {
-  const newSatatus: CaseStatus = {
-    type: 'closed:approved:viva',
-    name: 'Godkänd',
-    description: 'Din ansökan är godkänd. Pengarna sätts in på ditt konto',
-  };
+describe('decideCaseStatus', () => {
+  it('successfully updates case with new status', async () => {
+    const newSatatus: CaseStatus = {
+      type: 'closed:approved:viva',
+      name: 'Godkänd',
+      description: 'Din ansökan är godkänd. Pengarna sätts in på ditt konto',
+    };
 
-  const updateCaseMock = jest.fn();
-  const lambdaInput = createLambdaInput();
+    const updateCaseMock = jest.fn();
+    const lambdaInput = createLambdaInput();
 
-  const result = await decideCaseStatus(lambdaInput, {
-    updateCase: updateCaseMock,
-    putSuccessEvent: () => Promise.resolve(),
+    const result = await decideCaseStatus(lambdaInput, {
+      updateCase: updateCaseMock,
+      putSuccessEvent: () => Promise.resolve(),
+    });
+
+    expect(result).toBe(true);
+    expect(updateCaseMock).toHaveBeenCalledWith(caseKeys, newSatatus);
   });
-
-  expect(result).toBe(true);
-  expect(updateCaseMock).toHaveBeenCalledWith(caseKeys, newSatatus);
 });

@@ -25,12 +25,12 @@ export interface LambdaRequest {
   detail: LambdaDetails;
 }
 
-interface PutSuccessEvent {
+interface SuccessEvent {
   caseKeys: CaseKeys;
 }
 
 export interface Dependencies {
-  putSuccessEvent: (params: PutSuccessEvent) => Promise<void>;
+  putSuccessEvent: (params: SuccessEvent) => Promise<void>;
   updateCase: (keys: CaseKeys, newStatus: CaseStatus) => Promise<void>;
 }
 
