@@ -67,7 +67,7 @@ describe('personApplicationStatus', () => {
     expect(mockNewOpenEvent).toHaveBeenCalledTimes(1);
   });
 
-  it('return true and did not put event when status code is not open period', async () => {
+  it('did not put event when status code is not open period', async () => {
     const mockRecurringOpenEvent = jest.fn();
     const mockNewOpenEvent = jest.fn();
 
