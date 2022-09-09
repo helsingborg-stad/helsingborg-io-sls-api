@@ -66,16 +66,14 @@ function getCaseStatusType(decisionTypeCode: number, hasPayment: boolean) {
   return ACTIVE_PROCESSING;
 }
 
-function makeArray<T>(value: T | T[]): T[] {
-  let list: T[] = [];
-
+function makeArray<T>(value: T | T[] | undefined): T[] {
   if (Array.isArray(value)) {
-    list = [...value];
+    return [...value];
   }
 
-  if (value != undefined) {
-    list.push(value);
+  if (value === undefined) {
+    return [];
   }
 
-  return list;
+  return [value];
 }

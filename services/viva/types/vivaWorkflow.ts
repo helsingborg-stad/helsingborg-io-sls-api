@@ -68,7 +68,7 @@ export interface VivaWorkflowDecisionRoot {
   readonly subject: string | null;
   readonly periodstartdate: string | null;
   readonly periodenddate: string | null;
-  readonly decisions: VivaWorkflowDecisions | VivaWorkflowDecisions[] | null;
+  readonly decisions: VivaWorkflowDecisions | null;
 }
 
 export interface VivaWorkflowSsi {
