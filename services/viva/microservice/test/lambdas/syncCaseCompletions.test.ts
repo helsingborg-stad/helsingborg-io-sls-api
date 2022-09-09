@@ -25,7 +25,7 @@ const input: LambdaRequest = {
     status: [
       {
         code: 64,
-        desciption: 'You are requested to provide completary information',
+        description: 'You are requested to provide completary information',
       },
     ],
   },
@@ -118,7 +118,7 @@ it('updates a case with new completion information received from Viva', async ()
   const updateCaseMock = jest.fn();
   const dependencies = createDependencies(false, { updateCase: updateCaseMock });
   const result = await syncCaseCompletions(input, dependencies);
-  
+
   expect(result).toBe(true);
   expect(dependencies.updateCase).toHaveBeenCalledWith(
     caseKeys,
@@ -130,7 +130,7 @@ it('does nothing if Viva status code is 1', async () => {
   const updateCaseMock = jest.fn();
   const dependencies = createDependencies(true, { updateCase: updateCaseMock });
   const result = await syncCaseCompletions(input, dependencies);
-  
+
   expect(result).toBe(true);
   expect(dependencies.updateCase).toHaveBeenCalledTimes(0);
 });

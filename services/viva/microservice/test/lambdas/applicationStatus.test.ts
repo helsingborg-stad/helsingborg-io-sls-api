@@ -10,7 +10,7 @@ const MOCK_INPUT: LambdaRequest = {
 const MOCK_STATUSES: VivaApplicationStatus[] = [
   {
     code: 1,
-    desciption: 'hello world',
+    description: 'hello world',
   },
 ];
 
