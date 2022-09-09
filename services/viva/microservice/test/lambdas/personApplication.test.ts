@@ -50,7 +50,9 @@ it('successfully fetches person from viva', async () => {
   expect(result).toBe(true);
   expect(mockGetVivaPerson).toHaveBeenCalledWith(mockPersonalNumber);
   expect(mockPutSuccessEvent).toHaveBeenCalledWith({
-    clientUser: { personalNumber: mockPersonalNumber },
+    clientUser: {
+      personalNumber: mockPersonalNumber,
+    },
     vivaPersonDetail: defaultVivaMyPages,
   });
 });
