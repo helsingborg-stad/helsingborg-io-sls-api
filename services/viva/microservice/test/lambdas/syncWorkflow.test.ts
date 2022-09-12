@@ -4,7 +4,6 @@ import {
   LambdaRequest,
   syncWorkflow,
 } from '../../src/lambdas/syncWorkflow';
-import { EncryptionType } from '../../../types/caseItem';
 import { CaseItem } from '../../src/types/caseItem';
 
 type MockDependencies = Dependencies & {
