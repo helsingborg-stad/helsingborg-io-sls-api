@@ -1,13 +1,13 @@
-## Explain why these changes are made
-
-A good example:
-These changes complete the user login and account creation experience. See #CLICKUP_ID for more information.
-
 ## Explain the changes you’ve made
 
 Good example:
 I've added support for authentication to implement Key Result 2 of OKR1. It includes
 model, table, controller and test. For more background, see #CLICKUP-ID.
+
+## Explain why these changes are made
+
+A good example:
+These changes complete the user login and account creation experience. See #CLICKUP_ID for more information.
 
 ## How to test
 
