@@ -7,7 +7,7 @@ model, table, controller and test. For more background, see #CLICKUP-ID.
 ## Explain why these changes are made
 
 A good example:
-These changes complete the user login and account creation experience. See #CLICKUP_ID for more information.
+These changes complete the user login and account creation experience.
 
 ## How to test
 
