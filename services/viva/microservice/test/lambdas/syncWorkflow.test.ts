@@ -1,7 +1,6 @@
-import { LambdaRequest, syncWorkflow } from '../../src/lambdas/syncWorkflow';
+import { GetWorkflowResult, LambdaRequest, syncWorkflow } from '../../src/lambdas/syncWorkflow';
 import { EncryptionType } from '../../../types/caseItem';
 import { CaseItem } from '../../src/types/caseItem';
-import { VivaWorkflow } from '../../src/types/vivaWorkflow';
 
 const PK = 'USER#199001011234';
 const SK = 'CASE#11111111-2222-3333-4444-555555555555';
@@ -20,29 +19,31 @@ const input: LambdaRequest = {
   },
 };
 
-function makeWorkflow(): VivaWorkflow {
+function createWorkflow(): GetWorkflowResult {
   return {
-    workflowid: WORKFLOW_ID,
-    application: {
-      completiondate: null,
-      completiondescription: '',
-      completionduedate: null,
-      completionreceiveddate: null,
-      completions: null,
-      completionsreceived: null,
-      completionsuploaded: null,
-      islocked: null,
-      islockedwithoutcompletionreceived: null,
-      otherperiod: null,
-      periodenddate: null,
-      periodstartdate: null,
-      receiveddate: null,
-      requestingcompletion: null,
+    attributes: {
+      workflowid: WORKFLOW_ID,
+      application: {
+        completiondate: null,
+        completiondescription: '',
+        completionduedate: null,
+        completionreceiveddate: null,
+        completions: null,
+        completionsreceived: null,
+        completionsuploaded: null,
+        islocked: null,
+        islockedwithoutcompletionreceived: null,
+        otherperiod: null,
+        periodenddate: null,
+        periodstartdate: null,
+        receiveddate: null,
+        requestingcompletion: null,
+      },
     },
   };
 }
 
-function makeCase(workflowId: string = WORKFLOW_ID): CaseItem {
+function createCase(workflowId: string = WORKFLOW_ID): CaseItem {
   return {
     PK: caseKeys.PK,
     SK: caseKeys.SK,
@@ -98,10 +99,10 @@ function makeCase(workflowId: string = WORKFLOW_ID): CaseItem {
 it('Syncs cases', async () => {
   const syncWorkflowSuccess = jest.fn().mockResolvedValue(undefined);
 
-  const workflow = makeWorkflow();
+  const workflow = createWorkflow();
 
   const result = await syncWorkflow(input, {
-    getSubmittedOrProcessingOrOngoingCases: () => Promise.resolve({ Items: [makeCase()] }),
+    getSubmittedOrProcessingOrOngoingCases: () => Promise.resolve({ Items: [createCase()] }),
     syncWorkflowSuccess: syncWorkflowSuccess,
     updateCaseDetailsWorkflow: () => Promise.resolve(),
     getWorkflow: () => Promise.resolve(workflow),
@@ -114,7 +115,7 @@ it('Syncs cases', async () => {
 it("Doesn't sync cases with non-matching status", async () => {
   const syncWorkflowSuccess = jest.fn().mockResolvedValue(undefined);
 
-  const workflow = makeWorkflow();
+  const workflow = createWorkflow();
 
   const result = await syncWorkflow(input, {
     getSubmittedOrProcessingOrOngoingCases: () => Promise.resolve({ Items: [] }),
@@ -130,10 +131,10 @@ it("Doesn't sync cases with non-matching status", async () => {
 it("Doesn't sync cases without workflow id", async () => {
   const syncWorkflowSuccess = jest.fn().mockResolvedValue(undefined);
 
-  const workflow = makeWorkflow();
+  const workflow = createWorkflow();
 
   const result = await syncWorkflow(input, {
-    getSubmittedOrProcessingOrOngoingCases: () => Promise.resolve({ Items: [makeCase('')] }),
+    getSubmittedOrProcessingOrOngoingCases: () => Promise.resolve({ Items: [createCase('')] }),
     syncWorkflowSuccess: syncWorkflowSuccess,
     updateCaseDetailsWorkflow: () => Promise.resolve(),
     getWorkflow: () => Promise.resolve(workflow),
