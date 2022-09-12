@@ -84,7 +84,7 @@ export async function checkCompletionsDueDate(input: LambdaRequest, dependencies
   }
 
   const userCase = await dependencies.getCase(caseKeys);
-  if (!userCase.details?.completions?.isDueDateExpired) {
+  if (!userCase.details.completions?.isDueDateExpired) {
     return true;
   }
 
