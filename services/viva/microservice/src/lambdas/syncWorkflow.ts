@@ -18,8 +18,8 @@ export interface GetWorkflowResult {
 
 export interface Dependencies {
   getSubmittedOrProcessingOrOngoingCases: (personalNumber: string) => GetCaseResult;
-  updateCaseDetailsWorkflow: (caseKeys: CaseKeys, newWorkflow: VivaWorkflow) => unknown;
-  syncWorkflowSuccess: (detail: Record<string, unknown>) => unknown;
+  updateCaseDetailsWorkflow: (caseKeys: CaseKeys, newWorkflow: VivaWorkflow) => Promise<void>;
+  syncWorkflowSuccess: (detail: Record<string, unknown>) => Promise<void>;
   getWorkflow: (payload: GetWorkflowParams) => Promise<GetWorkflowResult>;
 }
 
@@ -88,7 +88,7 @@ export async function syncWorkflow(input: LambdaRequest, dependencies: Dependenc
 
   const caseList = userCases.Items;
 
-  const isEmptyCaseList = Array.isArray(caseList) && !caseList.length;
+  const isEmptyCaseList = caseList?.length === 0;
 
   if (isEmptyCaseList) {
     return true;
