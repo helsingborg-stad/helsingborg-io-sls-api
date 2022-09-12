@@ -88,11 +88,13 @@ export async function syncWorkflow(event: LambdaRequest, dependencies: Dependenc
 
   const isEmptyCaseList = Array.isArray(caseList) && !caseList.length;
 
-  if (isEmptyCaseList) return true;
+  if (isEmptyCaseList) {
+    return true;
+  }
 
   const caseListHasWorkflowId = caseList.filter(caseItem => !!caseItem.details.workflowId);
 
-  for await (const caseItem of caseListHasWorkflowId) {
+  async function syncWorkflow(caseItem: CaseItem) {
     const caseKeys = {
       PK: caseItem.PK,
       SK: caseItem.SK,
@@ -105,6 +107,10 @@ export async function syncWorkflow(event: LambdaRequest, dependencies: Dependenc
     await updateCaseDetailsWorkflow(caseKeys, workflow.attributes);
     await syncWorkflowSuccess({ caseKeys, workflow });
   }
+
+  const syncPromises = caseListHasWorkflowId.map(syncWorkflow);
+
+  await Promise.all(syncPromises);
 
   return true;
 }
