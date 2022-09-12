@@ -205,3 +205,8 @@ it('Decision is an list of decisions, then handle the latest by date', () => {
   const results = decideNewCaseStatus(workflowDecisionWithListStructure);
   expect(results).toBe(CLOSED_PARTIALLY_APPROVED_VIVA);
 });
+
+it('returns undefined if islocked set to null', () => {
+  const results = decideNewCaseStatus({ ...workflow });
+  expect(results).toBeUndefined();
+});
