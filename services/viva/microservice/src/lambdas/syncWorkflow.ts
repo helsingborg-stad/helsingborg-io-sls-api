@@ -96,7 +96,7 @@ export async function syncWorkflow(input: LambdaRequest, dependencies: Dependenc
 
   const caseListHasWorkflowId = caseList.filter(caseItem => !!caseItem.details.workflowId);
 
-  async function syncWorkflow(caseItem: CaseItem) {
+  const syncPromises = caseListHasWorkflowId.map(async caseItem => {
     const caseKeys = {
       PK: caseItem.PK,
       SK: caseItem.SK,
@@ -108,9 +108,7 @@ export async function syncWorkflow(input: LambdaRequest, dependencies: Dependenc
 
     await dependencies.updateCaseDetailsWorkflow(caseKeys, workflow.attributes);
     await dependencies.syncWorkflowSuccess({ caseKeys, workflow });
-  }
-
-  const syncPromises = caseListHasWorkflowId.map(syncWorkflow);
+  });
 
   await Promise.all(syncPromises);
 
