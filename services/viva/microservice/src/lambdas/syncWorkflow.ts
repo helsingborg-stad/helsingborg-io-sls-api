@@ -4,34 +4,43 @@ import * as dynamoDb from '../libs/dynamoDb';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 import { CaseItem } from '../types/caseItem';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
+import { VivaWorkflow } from '../types/vivaWorkflow';
 
 type GetCaseResult = Promise<{ Items: CaseItem[] }>;
+interface GetWorkflowParams {
+  personalNumber: string;
+  workflowId: string | null;
+}
+
+export interface GetWorkflowResult {
+  attributes: VivaWorkflow;
+}
 
 export interface Dependencies {
   getSubmittedOrProcessingOrOngoingCases: (personalNumber: string) => GetCaseResult;
-  updateCaseDetailsWorkflow: (caseKeys: CaseKeys, newWorkflow: unknown) => any;
-  syncWorkflowSuccess: (detail: Record<string, any>) => any;
-  getWorkflow: (payload: any) => any;
+  updateCaseDetailsWorkflow: (caseKeys: CaseKeys, newWorkflow: VivaWorkflow) => Promise<void>;
+  syncWorkflowSuccess: (detail: Record<string, unknown>) => Promise<void>;
+  getWorkflow: (payload: GetWorkflowParams) => Promise<GetWorkflowResult>;
 }
 
-interface DetailUser {
+interface User {
   personalNumber: string;
 }
 
 interface LambdaDetails {
-  user: DetailUser;
+  user: User;
 }
 
 export interface LambdaRequest {
   detail: LambdaDetails;
 }
 
-type CaseKeys = {
+interface CaseKeys {
   PK: string;
   SK: string;
-};
+}
 
-async function getSubmittedOrProcessingOrOngoingCases(personalNumber: string): GetCaseResult {
+function getSubmittedOrProcessingOrOngoingCases(personalNumber: string): GetCaseResult {
   const PK = `USER#${personalNumber}`;
 
   const queryParams = {
@@ -55,12 +64,12 @@ async function getSubmittedOrProcessingOrOngoingCases(personalNumber: string): G
   return dynamoDb.call('query', queryParams);
 }
 
-function updateCaseDetailsWorkflow(caseKeys: CaseKeys, newWorkflow: any) {
+function updateCaseDetailsWorkflow(keys: CaseKeys, newWorkflow: VivaWorkflow) {
   const updateParams = {
     TableName: config.cases.tableName,
     Key: {
-      PK: caseKeys.PK,
-      SK: caseKeys.SK,
+      PK: keys.PK,
+      SK: keys.SK,
     },
     UpdateExpression: 'SET details.workflow = :newWorkflow',
     ExpressionAttributeValues: {
@@ -72,21 +81,14 @@ function updateCaseDetailsWorkflow(caseKeys: CaseKeys, newWorkflow: any) {
   return dynamoDb.call('update', updateParams);
 }
 
-export async function syncWorkflow(event: LambdaRequest, dependencies: Dependencies) {
-  const { personalNumber } = event.detail.user;
+export async function syncWorkflow(input: LambdaRequest, dependencies: Dependencies) {
+  const { personalNumber } = input.detail.user;
 
-  const {
-    getSubmittedOrProcessingOrOngoingCases,
-    updateCaseDetailsWorkflow,
-    syncWorkflowSuccess,
-    getWorkflow,
-  } = dependencies;
-
-  const userCases = await getSubmittedOrProcessingOrOngoingCases(personalNumber);
+  const userCases = await dependencies.getSubmittedOrProcessingOrOngoingCases(personalNumber);
 
   const caseList = userCases.Items;
 
-  const isEmptyCaseList = Array.isArray(caseList) && !caseList.length;
+  const isEmptyCaseList = caseList?.length === 0;
 
   if (isEmptyCaseList) {
     return true;
@@ -102,10 +104,10 @@ export async function syncWorkflow(event: LambdaRequest, dependencies: Dependenc
 
     const { workflowId } = caseItem.details;
 
-    const workflow = await getWorkflow({ personalNumber, workflowId });
+    const workflow = await dependencies.getWorkflow({ personalNumber, workflowId });
 
-    await updateCaseDetailsWorkflow(caseKeys, workflow.attributes);
-    await syncWorkflowSuccess({ caseKeys, workflow });
+    await dependencies.updateCaseDetailsWorkflow(caseKeys, workflow.attributes);
+    await dependencies.syncWorkflowSuccess({ caseKeys, workflow });
   }
 
   const syncPromises = caseListHasWorkflowId.map(syncWorkflow);

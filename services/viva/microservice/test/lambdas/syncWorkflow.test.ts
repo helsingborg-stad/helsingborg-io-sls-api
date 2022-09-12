@@ -1,7 +1,15 @@
-import { LambdaRequest, syncWorkflow } from '../../src/lambdas/syncWorkflow';
+import {
+  Dependencies,
+  GetWorkflowResult,
+  LambdaRequest,
+  syncWorkflow,
+} from '../../src/lambdas/syncWorkflow';
 import { EncryptionType } from '../../../types/caseItem';
 import { CaseItem } from '../../src/types/caseItem';
-import { VivaWorkflow } from '../../src/types/vivaWorkflow';
+
+type MockDependencies = Dependencies & {
+  workflow?: GetWorkflowResult;
+};
 
 const PK = 'USER#199001011234';
 const SK = 'CASE#11111111-2222-3333-4444-555555555555';
@@ -20,125 +28,69 @@ const input: LambdaRequest = {
   },
 };
 
-function makeWorkflow(): VivaWorkflow {
+function createWorkflow(): GetWorkflowResult {
   return {
-    workflowid: WORKFLOW_ID,
-    application: {
-      completiondate: null,
-      completiondescription: '',
-      completionduedate: null,
-      completionreceiveddate: null,
-      completions: null,
-      completionsreceived: null,
-      completionsuploaded: null,
-      islocked: null,
-      islockedwithoutcompletionreceived: null,
-      otherperiod: null,
-      periodenddate: null,
-      periodstartdate: null,
-      receiveddate: null,
-      requestingcompletion: null,
+    attributes: {
+      workflowid: WORKFLOW_ID,
+      application: {},
     },
-  };
+  } as GetWorkflowResult;
 }
 
-function makeCase(workflowId: string = WORKFLOW_ID): CaseItem {
+function createCase(workflowId: string = WORKFLOW_ID): CaseItem {
   return {
     PK: caseKeys.PK,
     SK: caseKeys.SK,
-    currentFormId: '123ABC',
-    id: 'caseId',
-    persons: [],
-    state: 'SOME_STATE',
-    expirationTime: 123,
-    createdAt: 123,
-    updatedAt: 456,
-    status: {
-      type: 'active:submitted',
-      name: '',
-      description: '',
-    },
-    forms: {
-      abc123: {
-        answers: [],
-        encryption: {
-          type: EncryptionType.Decrypted,
-        },
-        currentPosition: {
-          currentMainStep: 0,
-          currentMainStepIndex: 0,
-          index: 0,
-          level: 0,
-          numberOfMainSteps: 0,
-        },
-      },
-    },
-    provider: 'VIVA',
     details: {
       workflowId: workflowId,
-      period: {
-        startDate: 1,
-        endDate: 2,
-      },
-      completions: {
-        requested: [],
-        description: null,
-        receivedDate: null,
-        dueDate: null,
-        attachmentUploaded: [],
-        isCompleted: false,
-        isRandomCheck: false,
-        isAttachmentPending: false,
-        isDueDateExpired: false,
-      },
     },
+  } as unknown as CaseItem;
+}
+
+function createDependencies(partialDependencies?: Partial<MockDependencies>): MockDependencies {
+  const syncWorkflowSuccess = jest.fn().mockResolvedValue(undefined);
+  const workflow = createWorkflow();
+
+  return {
+    getSubmittedOrProcessingOrOngoingCases: async () => ({ Items: [createCase()] }),
+    syncWorkflowSuccess: syncWorkflowSuccess,
+    updateCaseDetailsWorkflow: () => Promise.resolve(),
+    getWorkflow: () => Promise.resolve(workflow),
+    workflow,
+    ...partialDependencies,
   };
 }
 
 it('Syncs cases', async () => {
-  const syncWorkflowSuccess = jest.fn().mockResolvedValue(undefined);
+  const dependencies = createDependencies();
 
-  const workflow = makeWorkflow();
-
-  const result = await syncWorkflow(input, {
-    getSubmittedOrProcessingOrOngoingCases: () => Promise.resolve({ Items: [makeCase()] }),
-    syncWorkflowSuccess: syncWorkflowSuccess,
-    updateCaseDetailsWorkflow: () => Promise.resolve(),
-    getWorkflow: () => Promise.resolve(workflow),
-  });
+  const result = await syncWorkflow(input, dependencies);
 
   expect(result).toBe(true);
-  expect(syncWorkflowSuccess).toHaveBeenCalledWith({ caseKeys, workflow });
+  expect(dependencies.syncWorkflowSuccess).toHaveBeenCalledWith({
+    caseKeys,
+    workflow: dependencies.workflow,
+  });
 });
 
 it("Doesn't sync cases with non-matching status", async () => {
-  const syncWorkflowSuccess = jest.fn().mockResolvedValue(undefined);
-
-  const workflow = makeWorkflow();
-
-  const result = await syncWorkflow(input, {
+  const dependencies = createDependencies({
     getSubmittedOrProcessingOrOngoingCases: () => Promise.resolve({ Items: [] }),
-    syncWorkflowSuccess: syncWorkflowSuccess,
-    updateCaseDetailsWorkflow: () => Promise.resolve(),
-    getWorkflow: () => Promise.resolve(workflow),
   });
 
+  const result = await syncWorkflow(input, dependencies);
+
   expect(result).toBe(true);
-  expect(syncWorkflowSuccess).not.toHaveBeenCalled();
+  expect(dependencies.syncWorkflowSuccess).not.toHaveBeenCalled();
 });
 
 it("Doesn't sync cases without workflow id", async () => {
-  const syncWorkflowSuccess = jest.fn().mockResolvedValue(undefined);
-
-  const workflow = makeWorkflow();
-
-  const result = await syncWorkflow(input, {
-    getSubmittedOrProcessingOrOngoingCases: () => Promise.resolve({ Items: [makeCase('')] }),
-    syncWorkflowSuccess: syncWorkflowSuccess,
-    updateCaseDetailsWorkflow: () => Promise.resolve(),
-    getWorkflow: () => Promise.resolve(workflow),
+  const dependencies = createDependencies({
+    getSubmittedOrProcessingOrOngoingCases: () => Promise.resolve({ Items: [createCase('')] }),
   });
 
+  const result = await syncWorkflow(input, dependencies);
+
   expect(result).toBe(true);
-  expect(syncWorkflowSuccess).not.toHaveBeenCalled();
+  expect(dependencies.syncWorkflowSuccess).not.toHaveBeenCalled();
 });
