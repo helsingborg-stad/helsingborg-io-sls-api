@@ -18,7 +18,7 @@ export interface GetWorkflowResult {
 
 export interface Dependencies {
   getSubmittedOrProcessingOrOngoingCases: (personalNumber: string) => GetCaseResult;
-  updateCaseDetailsWorkflow: (caseKeys: CaseKeys, newWorkflow: VivaWorkflow) => any;
+  updateCaseDetailsWorkflow: (caseKeys: CaseKeys, newWorkflow: VivaWorkflow) => unknown;
   syncWorkflowSuccess: (detail: Record<string, unknown>) => unknown;
   getWorkflow: (payload: GetWorkflowParams) => Promise<GetWorkflowResult>;
 }

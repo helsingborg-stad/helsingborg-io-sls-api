@@ -81,5 +81,5 @@ export interface VivaOfficer {
 
 export interface VivaApplicationStatus {
   readonly code: number;
-  readonly desciption: string;
+  readonly description: string;
 }
