@@ -2,7 +2,7 @@ import log from '../libs/logs';
 
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
-import { VivaApplicationStatus } from '../types/vivaMyPages';
+import type { VivaApplicationStatus } from '../types/vivaMyPages';
 
 interface User {
   personalNumber: string;
