@@ -60,7 +60,7 @@ export async function personApplicationStatus(
 
 export const main = log.wrap(event =>
   personApplicationStatus(event, {
-    recurringOpenEvent: putVivaMsEvent.checkOpenNewApplicationSuccess,
+    recurringOpenEvent: putVivaMsEvent.checkOpenPeriodSuccess,
     newOpenEvent: putVivaMsEvent.checkOpenNewApplicationSuccess,
   })
 );
