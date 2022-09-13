@@ -43,7 +43,7 @@ export interface Dependencies {
     user: PersonalNumber,
     workflowId: string
   ) => Promise<VadaWorkflowCompletions>;
-  getCaseOnWorkflowId: (user: PersonalNumber, workflowId: string) => Promise<CaseItem>;
+  getCaseOnWorkflowId: (user: PersonalNumber, workflowId: string) => Promise<CaseItem | undefined>;
 }
 
 function updateCaseCompletions(
@@ -72,9 +72,10 @@ export async function syncCaseCompletions(input: LambdaRequest, dependencies: De
     status: vivaApplicantStatusCodeList,
   } = input.detail;
 
-  if (
-    dependencies.validateStatusCode(vivaApplicantStatusCodeList, [VIVA_STATUS_NEW_APPLICATION_OPEN])
-  ) {
+  const isNewApplicationOpen = dependencies.validateStatusCode(vivaApplicantStatusCodeList, [
+    VIVA_STATUS_NEW_APPLICATION_OPEN,
+  ]);
+  if (isNewApplicationOpen) {
     return true;
   }
 
@@ -85,12 +86,14 @@ export async function syncCaseCompletions(input: LambdaRequest, dependencies: De
   );
 
   const userCase = await dependencies.getCaseOnWorkflowId(personalNumber, latestWorkflowId);
+  if (!userCase) {
+    return true;
+  }
 
   const caseKeys: CaseKeys = {
     PK: userCase.PK,
     SK: userCase.SK,
   };
-
   await dependencies.updateCase(caseKeys, workflowCompletions);
 
   await dependencies.putSuccessEvent({

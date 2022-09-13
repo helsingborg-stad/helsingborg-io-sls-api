@@ -93,7 +93,10 @@ async function getLatestVivaWorkflowId(personalNumber: string): Promise<string> 
   return getLatestResponse.attributes.workflowid;
 }
 
-async function getCaseOnWorkflowId(personalNumber: string, workflowId: string): Promise<CaseItem> {
+async function getCaseOnWorkflowId(
+  personalNumber: string,
+  workflowId: string
+): Promise<CaseItem | undefined> {
   const PK = `USER#${personalNumber}`;
 
   const queryParams = {
@@ -107,13 +110,7 @@ async function getCaseOnWorkflowId(personalNumber: string, workflowId: string): 
   };
 
   const queryResponse = await dynamoDb.call('query', queryParams);
-
-  const caseItem = queryResponse.Items[0];
-  if (!caseItem) {
-    throw `Case with workflow id: ${workflowId} not found`;
-  }
-
-  return caseItem;
+  return queryResponse.Items[0];
 }
 
 export default {
