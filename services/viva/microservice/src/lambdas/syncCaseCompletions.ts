@@ -27,7 +27,7 @@ export interface LambdaRequest {
 }
 
 interface PutSuccessEvent {
-  applicantStatusCodeList: VivaApplicationStatus[];
+  vivaApplicantStatusCodeList: VivaApplicationStatus[];
   workflowCompletions: VadaWorkflowCompletions;
   caseKeys: CaseKeys;
   caseState: string;
@@ -69,11 +69,11 @@ function updateCaseCompletions(
 export async function syncCaseCompletions(input: LambdaRequest, dependencies: Dependencies) {
   const {
     user: { personalNumber },
-    status: applicantStatusCodeList,
+    status: vivaApplicantStatusCodeList,
   } = input.detail;
 
   if (
-    dependencies.validateStatusCode(applicantStatusCodeList, [VIVA_STATUS_NEW_APPLICATION_OPEN])
+    dependencies.validateStatusCode(vivaApplicantStatusCodeList, [VIVA_STATUS_NEW_APPLICATION_OPEN])
   ) {
     return true;
   }
@@ -94,7 +94,7 @@ export async function syncCaseCompletions(input: LambdaRequest, dependencies: De
   await dependencies.updateCase(caseKeys, workflowCompletions);
 
   await dependencies.putSuccessEvent({
-    applicantStatusCodeList,
+    vivaApplicantStatusCodeList,
     workflowCompletions,
     caseKeys,
     caseState: userCase.state,
