@@ -68,7 +68,7 @@ it('Syncs cases', async () => {
   expect(result).toBe(true);
   expect(dependencies.syncWorkflowSuccess).toHaveBeenCalledWith({
     caseKeys,
-    workflow: dependencies.workflow,
+    workflow: dependencies.workflow?.attributes,
   });
 });
 

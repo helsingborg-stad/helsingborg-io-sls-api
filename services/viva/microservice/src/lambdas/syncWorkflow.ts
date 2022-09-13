@@ -107,7 +107,7 @@ export async function syncWorkflow(input: LambdaRequest, dependencies: Dependenc
     const workflow = await dependencies.getWorkflow({ personalNumber, workflowId });
 
     await dependencies.updateCaseDetailsWorkflow(caseKeys, workflow.attributes);
-    await dependencies.syncWorkflowSuccess({ caseKeys, workflow });
+    await dependencies.syncWorkflowSuccess({ caseKeys, workflow: workflow.attributes });
   });
 
   await Promise.all(syncPromises);
