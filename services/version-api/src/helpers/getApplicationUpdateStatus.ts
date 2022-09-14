@@ -8,11 +8,16 @@ const COMPARISON_RESULT = {
   GREATER: 1,
 };
 
-/**
- * @param {{current: string, min: string, max: string}} parameters (properties in semver format i.e "1.2.0")
- * @returns {'OK' | 'UPDATE_OPTIONAL' | 'UPDATE_REQUIRED'} Status
- */
-function getApplicationUpdateStatus({ current, min, max }) {
+interface GetApplicationUpdateStatus {
+  current: string;
+  min: string;
+  max: string;
+}
+function getApplicationUpdateStatus({
+  current,
+  min,
+  max,
+}: GetApplicationUpdateStatus): VERSION_STATUS {
   const currentComparedToMax = semverCompare(current, max);
   const currentComparedToMin = semverCompare(current, min);
 
