@@ -1,7 +1,13 @@
 import * as response from '../libs/response';
 
-export async function main() {
+import log from '../libs/logs';
+
+export async function getApiStatus() {
   const message = process.env.message || '';
 
   return response.success(200, { message });
 }
+
+export const main = log.wrap(() => {
+  return getApiStatus();
+});
