@@ -39,9 +39,9 @@ interface ParamsReadResponse {
 export interface Dependencies {
   requestId: string;
   readParams: (envsKeyName: string) => Promise<ParamsReadResponse>;
-  updateVivaCase: (params: CaseKeys, workflowId: string) => Promise<null>;
+  updateVivaCase: (params: CaseKeys, workflowId: string) => Promise<void>;
   postVivaApplication: (params: Record<string, unknown>) => Promise<Record<string, unknown>>;
-  putSuccessEvent: (params: { personalNumber: string }) => Promise<null>;
+  putSuccessEvent: (params: { personalNumber: string }) => Promise<void>;
   attachmentFromAnswers: (
     personalNumber: PersonalNumber,
     answerList: CaseFormAnswer[]
@@ -59,7 +59,7 @@ export type LambdaResponse = boolean;
 type CaseKeys = Pick<CaseItem, 'PK' | 'SK'>;
 type Case = Pick<CaseItem, 'PK' | 'SK' | 'forms' | 'currentFormId' | 'details' | 'pdf' | 'id'>;
 
-export function updateVivaCase(keys: CaseKeys, workflowId: string): Promise<null> {
+export function updateVivaCase(keys: CaseKeys, workflowId: string): Promise<void> {
   const updateParams = {
     TableName: config.cases.tableName,
     Key: {
@@ -160,7 +160,7 @@ export async function submitApplication(
   return true;
 }
 
-export const main = log.wrap(async (event: SQSEvent, context: Context) => {
+export const main = log.wrap((event: SQSEvent, context: Context) => {
   validateSQSEvent(event, context);
 
   const [record] = event.Records;

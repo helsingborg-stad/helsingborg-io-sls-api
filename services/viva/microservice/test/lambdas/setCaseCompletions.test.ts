@@ -5,7 +5,7 @@ import {
 } from '../../src/lambdas/setCaseCompletions';
 
 import { VIVA_COMPLETION_REQUIRED, VIVA_RANDOM_CHECK_REQUIRED } from '../../src/libs/constants';
-import completionsHelper from '../../../helpers/completions'
+import completionsHelper from '../../../helpers/completions';
 
 import type { CaseItem } from '../../../types/caseItem';
 import { EncryptionType } from '../../../types/caseItem';
@@ -146,7 +146,7 @@ test.each([
     const updateCaseMock = jest.fn();
     const dependencies: Dependencies = {
       getCase: () => Promise.resolve(caseItem),
-      putSuccessEvent: () => Promise.resolve(null),
+      putSuccessEvent: () => Promise.resolve(),
       readParams: () => Promise.resolve(ssmParameters),
       updateCase: updateCaseMock,
       getNewStatus: completionsHelper.get.status,
