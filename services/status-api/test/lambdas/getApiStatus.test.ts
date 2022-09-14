@@ -1,4 +1,4 @@
-import { main } from '../../src/lambdas/get';
+import { getApiStatus } from '../../src/lambdas/getApiStatus';
 
 const oldEnvironment = { ...process.env };
 
@@ -28,7 +28,7 @@ it('returns the value in `message` environment variable', async () => {
     isBase64Encoded: false,
   };
 
-  const result = await main();
+  const result = await getApiStatus();
 
   expect(result).toEqual(epectedResult);
 });
@@ -46,7 +46,7 @@ it('returns an empty string if `message` variable is not set', async () => {
     isBase64Encoded: false,
   };
 
-  const result = await main();
+  const result = await getApiStatus();
 
   expect(result).toEqual(expectedResult);
 });

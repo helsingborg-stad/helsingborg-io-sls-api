@@ -32,7 +32,7 @@ provider:
 
 functions:
   get:
-    handler: src/lambdas/get.main
+    handler: src/lambdas/getApiStatus.main
     environment:
       message: ''
     events:
