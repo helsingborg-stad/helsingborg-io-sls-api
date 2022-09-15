@@ -10,8 +10,5 @@
   "license": "MIT",
   "dependencies": {
     "semver-compare": "^1.0.0"
-  },
-  "devDependencies": {
-    "@types/semver-compare": "^1.0.1"
   }
 }
