@@ -22,6 +22,11 @@ function createDependencies(): Dependencies {
             max: '1.3.0',
             updateUrl: mockUpdateUrl,
           },
+          android: {
+            min: '1.5.0',
+            max: '1.1.0',
+            updateUrl: mockUpdateUrl,
+          },
         },
       }),
   };

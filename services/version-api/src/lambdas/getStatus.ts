@@ -9,18 +9,16 @@ const USER_AGENT = 'User-Agent';
 const SPLIT_SYMBOL = '/';
 const SUPPORTED_OS = ['ios', 'android'];
 
+type DeviceOS = 'android' | 'ios';
+
 export interface DeviceVersions {
   min: string;
   max: string;
   updateUrl: string;
 }
 
-export interface DeviceVersion {
-  [key: string]: DeviceVersions;
-}
-
 export interface DeviceConfiguration {
-  versions: DeviceVersion;
+  versions: Record<DeviceOS, DeviceVersions>;
 }
 
 export interface Dependencies {
@@ -35,11 +33,15 @@ export interface LambdaRequest {
   headers: Headers;
 }
 
+function isSupportedOs(deviceOS: string): deviceOS is DeviceOS {
+  return SUPPORTED_OS.includes(deviceOS);
+}
+
 export async function getStatus(input: LambdaRequest, dependencies: Dependencies) {
   const userAgent = input.headers[USER_AGENT];
   const [, deviceApplicationVersion, deviceOS] = userAgent.split(SPLIT_SYMBOL);
 
-  const isMalformedUserAgent = !SUPPORTED_OS.includes(deviceOS) || !deviceApplicationVersion;
+  const isMalformedUserAgent = !isSupportedOs(deviceOS) || !deviceApplicationVersion;
   if (isMalformedUserAgent) {
     log.error(
       `Failed to get version status due to malformed User-Agent header: ${userAgent}`,
