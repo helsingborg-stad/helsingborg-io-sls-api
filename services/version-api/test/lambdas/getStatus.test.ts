@@ -1,58 +1,61 @@
-import { main } from '../../src/lambdas/getStatus';
-
-import { getVersionConfigurations } from '../../src/helpers/getVersionConfigurations';
+import { getStatus } from '../../src/lambdas/getStatus';
 
 import { VERSION_STATUS } from '../../src/helpers/constants';
 
-jest.mock('../../src/helpers/getVersionConfigurations');
-
-getVersionConfigurations.mockResolvedValue({
-  versions: {
-    ios: {
-      min: '1.0.0',
-      max: '1.3.0',
-      updateUrl: 'Some url',
-    },
-  },
-});
+import type { Dependencies, LambdaRequest } from '../../src/lambdas/getStatus';
 
 const mockHeaders = {
   'Access-Control-Allow-Credentials': true,
   'Access-Control-Allow-Origin': '*',
 };
 const mockJsonApi = { version: '1.0' };
-const mockContext = { awsRequestId: '123' };
+const defaultUserAgent = 'MittHelsingborg/1.3.0/ios/15.0';
+const mockUpdateUrl = 'some url';
 
-let mockEvent;
-beforeEach(() => {
-  mockEvent = {
-    headers: {
-      'User-Agent': 'MittHelsingborg/1.3.0/ios/15.0',
-    },
-    isBase64Encoded: false,
+function createDependencies(): Dependencies {
+  return {
+    getVersionConfigurations: () =>
+      Promise.resolve({
+        versions: {
+          ios: {
+            min: '1.0.0',
+            max: '1.3.0',
+            updateUrl: mockUpdateUrl,
+          },
+        },
+      }),
   };
-});
+}
+
+function createInput(userAgent = defaultUserAgent): LambdaRequest {
+  return {
+    headers: {
+      'User-Agent': userAgent,
+    },
+  };
+}
 
 it('returns the version status successfully', async () => {
   const expectedResult = {
     body: JSON.stringify({
       jsonapi: mockJsonApi,
-      data: { type: 'getStatus', attributes: { status: VERSION_STATUS.OK, updateUrl: 'Some url' } },
+      data: {
+        type: 'getStatus',
+        attributes: { status: VERSION_STATUS.OK, updateUrl: mockUpdateUrl },
+      },
     }),
     headers: mockHeaders,
     statusCode: 200,
     isBase64Encoded: false,
   };
 
-  const result = await main(mockEvent, mockContext);
+  const result = await getStatus(createInput(), createDependencies());
 
   expect(result).toEqual(expectedResult);
 });
 
 const malformedUserAgents = ['MittHelsingborg', '1.3.0/ios/15.0', 'MittHelsingborg/1.3.0/15.0'];
 test.each(malformedUserAgents)('returns failure for`User-Agent` %s', async userAgent => {
-  mockEvent.headers['User-Agent'] = userAgent;
-
   const expectedResult = {
     body: JSON.stringify({
       jsonapi: mockJsonApi,
@@ -63,7 +66,7 @@ test.each(malformedUserAgents)('returns failure for`User-Agent` %s', async userA
     isBase64Encoded: false,
   };
 
-  const result = await main(mockEvent, mockContext);
+  const result = await getStatus(createInput(userAgent), createDependencies());
 
   expect(result).toEqual(expectedResult);
 });
