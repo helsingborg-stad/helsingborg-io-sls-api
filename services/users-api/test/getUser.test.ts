@@ -7,7 +7,6 @@ import type { LambdaRequest, Dependencies } from '../src/lambdas/getUser';
 
 import type { CaseUser } from '../src/helpers/types';
 
-const requestId = '1234';
 const defaultPersonalNumber = '19900912345';
 const defaultCaseUser = {
   personalNumber: defaultPersonalNumber,
@@ -50,7 +49,7 @@ it('successfully fetches a user', async () => {
   const dependencies = createDependencies();
   const getUserSpy = jest.spyOn(dependencies, 'getUser');
 
-  const result = await getUser(createInput(), dependencies, requestId);
+  const result = await getUser(createInput(), dependencies);
 
   expect(getUserSpy).toHaveBeenCalledWith(defaultPersonalNumber);
   expect(result).toEqual(createHttpSuccessResponse(defaultCaseUser));
@@ -63,8 +62,7 @@ it('returns failure if no user is found', async () => {
     createInput(),
     createDependencies({
       getUser: getUserMock,
-    }),
-    requestId
+    })
   );
 
   expect(result).toEqual(createHttpUserNotFoundResponse());

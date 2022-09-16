@@ -36,7 +36,7 @@ function fetchUser(personalNumber: string): Promise<GetUserResponse> {
   return dynamoDb.call('get', getParams);
 }
 
-export async function getUser(input: LambdaRequest, dependencies: Dependencies, requestId: string) {
+export async function getUser(input: LambdaRequest, dependencies: Dependencies) {
   const decodedToken = dependencies.decodeToken(input);
 
   const getUserResponse = await dependencies.getUser(decodedToken.personalNumber);
@@ -44,7 +44,7 @@ export async function getUser(input: LambdaRequest, dependencies: Dependencies, 
 
   if (!user) {
     const errorMessage = 'No user with provided personal number found in the users table';
-    log.warn(errorMessage, requestId, 'services-users-api-getUser-001', errorMessage);
+    log.writeWarn(errorMessage);
 
     return response.failure(new ResourceNotFoundError(errorMessage));
   }
@@ -57,13 +57,9 @@ export async function getUser(input: LambdaRequest, dependencies: Dependencies, 
   });
 }
 
-export const main = log.wrap((event, context) => {
-  return getUser(
-    event,
-    {
-      decodeToken,
-      getUser: fetchUser,
-    },
-    context.awsRequestId
-  );
+export const main = log.wrap(event => {
+  return getUser(event, {
+    decodeToken,
+    getUser: fetchUser,
+  });
 });
