@@ -5,10 +5,6 @@ import log from '../libs/logs';
 
 import { getApplicationUpdateStatus } from '../helpers/getApplicationUpdateStatus';
 
-const USER_AGENT = 'User-Agent';
-const SPLIT_SYMBOL = '/';
-const SUPPORTED_OS = ['ios', 'android'];
-
 type DeviceOS = 'android' | 'ios';
 
 export interface DeviceVersions {
@@ -32,6 +28,10 @@ export interface Headers {
 export interface LambdaRequest {
   headers: Headers;
 }
+
+const USER_AGENT = 'User-Agent';
+const SPLIT_SYMBOL = '/';
+const SUPPORTED_OS = ['ios', 'android'];
 
 function isSupportedOs(deviceOS: string): deviceOS is DeviceOS {
   return SUPPORTED_OS.includes(deviceOS);
