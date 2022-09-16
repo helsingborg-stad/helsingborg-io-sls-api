@@ -21,7 +21,7 @@ export function getFormFieldsWithLoadPreviousAttribute(form) {
             dataMap.push({
               id: inputId,
               loadPrevious: loadPrevious,
-              tags: input.tags,
+              tags: input.tags ?? [],
               type: question.type,
             });
           }
@@ -41,7 +41,7 @@ export function getFormFieldsWithLoadPreviousAttribute(form) {
             dataMap.push({
               id: inputId,
               loadPrevious: loadPrevious,
-              tags: input.tags,
+              tags: input.tags ?? [],
               type: question.type,
             });
           }
@@ -54,7 +54,7 @@ export function getFormFieldsWithLoadPreviousAttribute(form) {
         dataMap.push({
           id: question.id,
           loadPrevious: question.loadPrevious,
-          tags: question.tags,
+          tags: question.tags ?? [],
           type: question.type,
         });
       }
