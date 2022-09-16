@@ -43,11 +43,7 @@ export async function getStatus(input: LambdaRequest, dependencies: Dependencies
 
   const isMalformedUserAgent = !isSupportedOs(deviceOS) || !deviceApplicationVersion;
   if (isMalformedUserAgent) {
-    log.error(
-      `Failed to get version status due to malformed User-Agent header: ${userAgent}`,
-      '',
-      'service-version-api-001'
-    );
+    log.writeError(`Failed to get version status due to malformed User-Agent header: ${userAgent}`);
     return response.failure({ status: 400, message: 'Malformed `User-Agent` header' });
   }
 
