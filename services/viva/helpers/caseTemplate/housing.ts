@@ -6,7 +6,7 @@ import type { ValidTags } from './shared';
 export interface Housing {
   streetAddress?: string;
   postalCode?: string;
-  postalAdress?: string;
+  postalAddress?: string;
   type: string;
   layoutDescription: string;
   numberPeopleLiving: number;
@@ -58,7 +58,7 @@ export function createHousing(answers: CaseFormAnswer[]): Housing {
     type: formHelpers.getFirstAnswerValueByTags(housingAnswers, ['type']) ?? '',
     streetAddress: formHelpers.getFirstAnswerValueByTags(housingAnswers, ['address']),
     postalCode: formHelpers.getFirstAnswerValueByTags(housingAnswers, ['postalCode']),
-    postalAdress: formHelpers.getFirstAnswerValueByTags(housingAnswers, ['postalAddress']),
+    postalAddress: formHelpers.getFirstAnswerValueByTags(housingAnswers, ['postalAddress']),
     numberPeopleLiving: parseInt(
       formHelpers.getFirstAnswerValueByTags(housingAnswers, ['numberPeopleLiving']) ?? '',
       10

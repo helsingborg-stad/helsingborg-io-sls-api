@@ -1732,9 +1732,7 @@
       "questions": [
         {
           "inputSelectValue": "hidden",
-          "loadPrevious": [
-            "coApplicant.personalNumber"
-          ],
+          "loadPrevious": ["coApplicant.personalNumber"],
           "description": "Finns det medsökande?",
           "label": "",
           "id": "partnerYes",
@@ -1750,10 +1748,7 @@
             {
               "label": "Mobilnummer",
               "type": "number",
-              "loadPrevious": [
-                "telephone",
-                "applicant.mobilePhone"
-              ],
+              "loadPrevious": ["telephone", "applicant.mobilePhone"],
               "inputSelectValue": "phone",
               "key": "telephone",
               "validation": {
@@ -1778,10 +1773,7 @@
             {
               "label": "E-post",
               "type": "text",
-              "loadPrevious": [
-                "email",
-                "applicant.email"
-              ],
+              "loadPrevious": ["email", "applicant.email"],
               "inputSelectValue": "email",
               "key": "email",
               "validation": {
@@ -1801,9 +1793,7 @@
               }
             },
             {
-              "loadPrevious": [
-                "occupation"
-              ],
+              "loadPrevious": ["occupation"],
               "inputSelectValue": "select",
               "label": "Sysselsättning",
               "type": "select",
@@ -1871,10 +1861,7 @@
             {
               "label": "Förnamn",
               "type": "text",
-              "loadPrevious": [
-                "partnerName",
-                "coApplicant.firstName"
-              ],
+              "loadPrevious": ["partnerName", "coApplicant.firstName"],
               "inputSelectValue": "text",
               "key": "partnerName",
               "validation": {
@@ -1885,10 +1872,7 @@
             {
               "label": "Efternamn",
               "type": "text",
-              "loadPrevious": [
-                "partnerName",
-                "coApplicant.lastName"
-              ],
+              "loadPrevious": ["partnerName", "coApplicant.lastName"],
               "inputSelectValue": "text",
               "key": "partnerLastname",
               "validation": {
@@ -1899,10 +1883,7 @@
             {
               "label": "Personnummer",
               "type": "number",
-              "loadPrevious": [
-                "partnerName",
-                "coApplicant.personalNumber"
-              ],
+              "loadPrevious": ["partnerName", "coApplicant.personalNumber"],
               "inputSelectValue": "personalNumber",
               "key": "partnerPersonalid",
               "validation": {
@@ -1931,9 +1912,7 @@
               "label": "Mobilnummer",
               "type": "number",
               "inputSelectValue": "phone",
-              "loadPrevious": [
-                "partnerPhone"
-              ],
+              "loadPrevious": ["partnerPhone"],
               "validation": {
                 "isRequired": true,
                 "rules": [
@@ -1958,9 +1937,7 @@
               "label": "E-post",
               "type": "text",
               "inputSelectValue": "email",
-              "loadPrevious": [
-                "partnerMail"
-              ],
+              "loadPrevious": ["partnerMail"],
               "validation": {
                 "isRequired": true,
                 "rules": [
@@ -1979,9 +1956,7 @@
               "key": "partnerMail"
             },
             {
-              "loadPrevious": [
-                "partnerOccupation"
-              ],
+              "loadPrevious": ["partnerOccupation"],
               "inputSelectValue": "select",
               "label": "Sysselsättning",
               "type": "select",
@@ -2064,11 +2039,7 @@
                   }
                 ]
               },
-              "tags": [
-                "children",
-                "firstName",
-                "group:children:info:x"
-              ]
+              "tags": ["children", "firstName", "group:children:info:x"]
             },
             {
               "id": "childrenLastname",
@@ -2085,11 +2056,7 @@
                   }
                 ]
               },
-              "tags": [
-                "children",
-                "lastName",
-                "group:children:info:x"
-              ]
+              "tags": ["children", "lastName", "group:children:info:x"]
             },
             {
               "id": "childrenPersonalID",
@@ -2116,11 +2083,7 @@
                   }
                 ]
               },
-              "tags": [
-                "children",
-                "personalNumber",
-                "group:children:info:x"
-              ]
+              "tags": ["children", "personalNumber", "group:children:info:x"]
             },
             {
               "inputSelectValue": "select",
@@ -2156,11 +2119,7 @@
                   }
                 ]
               },
-              "tags": [
-                "children",
-                "housing",
-                "group:children:info:x"
-              ]
+              "tags": ["children", "housing", "group:children:info:x"]
             },
             {
               "inputSelectValue": "select",
@@ -2208,20 +2167,14 @@
                   }
                 ]
               },
-              "tags": [
-                "children",
-                "school",
-                "group:children:info:x"
-              ]
+              "tags": ["children", "school", "group:children:info:x"]
             }
           ],
           "description": "Lägg till barn",
           "label": "",
           "id": "childrenInfo",
           "type": "repeaterField",
-          "loadPrevious": [
-            "childrenInfo"
-          ]
+          "loadPrevious": ["childrenInfo"]
         },
         {
           "startEditable": true,
@@ -2236,10 +2189,7 @@
             {
               "label": "Adress",
               "type": "text",
-              "loadPrevious": [
-                "streetAddress",
-                "applicant.address.street"
-              ],
+              "loadPrevious": ["streetAddress", "applicant.address.street"],
               "inputSelectValue": "text",
               "key": "streetAddress",
               "validation": {
@@ -2256,10 +2206,7 @@
             {
               "label": "Postnummer",
               "type": "number",
-              "loadPrevious": [
-                "postalCode",
-                "applicant.address.postalCode"
-              ],
+              "loadPrevious": ["postalCode", "applicant.address.postalCode"],
               "inputSelectValue": "postalCode",
               "key": "postalCode",
               "validation": {
@@ -2294,12 +2241,9 @@
             {
               "label": "Ort",
               "type": "text",
-              "loadPrevious": [
-                "postalAdress",
-                "applicant.address.city"
-              ],
+              "loadPrevious": ["postalAddress", "applicant.address.city"],
               "inputSelectValue": "text",
-              "key": "postalAdress",
+              "key": "postalAddress",
               "validation": {
                 "isRequired": true,
                 "rules": [
@@ -2312,9 +2256,7 @@
               }
             },
             {
-              "loadPrevious": [
-                "contract"
-              ],
+              "loadPrevious": ["contract"],
               "inputSelectValue": "select",
               "label": "Boendeform",
               "type": "select",
@@ -2371,9 +2313,7 @@
             {
               "label": "Hur många bor i bostaden?",
               "type": "number",
-              "loadPrevious": [
-                "numberpeopleLiving"
-              ],
+              "loadPrevious": ["numberpeopleLiving"],
               "inputSelectValue": "number",
               "key": "numberpeopleLiving",
               "validation": {
@@ -2934,13 +2874,7 @@
                   }
                 ]
               },
-              "tags": [
-                "incomes",
-                "lon",
-                "amount",
-                "group:applicant:salary:x",
-                "applicant"
-              ]
+              "tags": ["incomes", "lon", "amount", "group:applicant:salary:x", "applicant"]
             },
             {
               "id": "date",
@@ -2957,13 +2891,7 @@
                   }
                 ]
               },
-              "tags": [
-                "incomes",
-                "lon",
-                "date",
-                "group:applicant:salary:x",
-                "applicant"
-              ]
+              "tags": ["incomes", "lon", "date", "group:applicant:salary:x", "applicant"]
             }
           ],
           "description": "",
@@ -3002,13 +2930,7 @@
                   }
                 ]
               },
-              "tags": [
-                "incomes",
-                "lon",
-                "amount",
-                "group:coapplicant:salary:x",
-                "coapplicant"
-              ]
+              "tags": ["incomes", "lon", "amount", "group:coapplicant:salary:x", "coapplicant"]
             },
             {
               "inputSelectValue": "hidden",
@@ -3020,13 +2942,7 @@
                 "isRequired": false,
                 "rules": []
               },
-              "tags": [
-                "incomes",
-                "lon",
-                "appliesto",
-                "group:coapplicant:salary:x",
-                "coapplicant"
-              ]
+              "tags": ["incomes", "lon", "appliesto", "group:coapplicant:salary:x", "coapplicant"]
             },
             {
               "id": "date",
@@ -3037,13 +2953,7 @@
                 "isRequired": false,
                 "rules": []
               },
-              "tags": [
-                "incomes",
-                "lon",
-                "date",
-                "group:coapplicant:salary:x",
-                "coapplicant"
-              ]
+              "tags": ["incomes", "lon", "date", "group:coapplicant:salary:x", "coapplicant"]
             }
           ],
           "description": "Medsökandes lön",
@@ -3097,13 +3007,7 @@
               }
             ]
           },
-          "tags": [
-            "incomes",
-            "annan",
-            "amount",
-            "swish",
-            "group:swishapplicant"
-          ]
+          "tags": ["incomes", "annan", "amount", "swish", "group:swishapplicant"]
         },
         {
           "conditionalOn": "partnerYes",
@@ -3129,13 +3033,7 @@
               }
             ]
           },
-          "tags": [
-            "incomes",
-            "annan",
-            "amount",
-            "swish",
-            "group:swishcoapplicant"
-          ]
+          "tags": ["incomes", "annan", "amount", "swish", "group:swishcoapplicant"]
         },
         {
           "inputSelectValue": "hidden",
@@ -3148,13 +3046,7 @@
             "isRequired": false,
             "rules": []
           },
-          "tags": [
-            "incomes",
-            "annan",
-            "description",
-            "swish",
-            "group:swishapplicant"
-          ]
+          "tags": ["incomes", "annan", "description", "swish", "group:swishapplicant"]
         },
         {
           "inputSelectValue": "hidden",
@@ -3167,13 +3059,7 @@
             "isRequired": false,
             "rules": []
           },
-          "tags": [
-            "incomes",
-            "annan",
-            "description",
-            "swish",
-            "group:swishcoapplicant"
-          ]
+          "tags": ["incomes", "annan", "description", "swish", "group:swishcoapplicant"]
         },
         {
           "inputSelectValue": "hidden",
@@ -3186,13 +3072,7 @@
             "isRequired": false,
             "rules": []
           },
-          "tags": [
-            "incomes",
-            "annan",
-            "appliesto",
-            "swish",
-            "group:swishcoapplicant"
-          ]
+          "tags": ["incomes", "annan", "appliesto", "swish", "group:swishcoapplicant"]
         }
       ],
       "banner": {
@@ -3236,14 +3116,7 @@
                   }
                 ]
               },
-              "tags": [
-                "incomes",
-                "annan",
-                "description",
-                "other",
-                "group:applicant:x",
-                "applicant"
-              ]
+              "tags": ["incomes", "annan", "description", "other", "group:applicant:x", "applicant"]
             },
             {
               "id": "amount",
@@ -3265,14 +3138,7 @@
                   }
                 ]
               },
-              "tags": [
-                "incomes",
-                "annan",
-                "amount",
-                "other",
-                "group:applicant:x",
-                "applicant"
-              ]
+              "tags": ["incomes", "annan", "amount", "other", "group:applicant:x", "applicant"]
             }
           ],
           "description": "",
@@ -3329,14 +3195,7 @@
                   }
                 ]
               },
-              "tags": [
-                "incomes",
-                "annan",
-                "amount",
-                "other",
-                "group:coapplicant:x",
-                "coapplicant"
-              ]
+              "tags": ["incomes", "annan", "amount", "other", "group:coapplicant:x", "coapplicant"]
             },
             {
               "inputSelectValue": "hidden",
@@ -3673,11 +3532,7 @@
               }
             ]
           },
-          "tags": [
-            "assets",
-            "bil",
-            "amount"
-          ]
+          "tags": ["assets", "bil", "amount"]
         }
       ],
       "banner": {
@@ -3722,11 +3577,7 @@
               }
             ]
           },
-          "tags": [
-            "assets",
-            "motorcykel",
-            "amount"
-          ]
+          "tags": ["assets", "motorcykel", "amount"]
         }
       ],
       "banner": {
@@ -3771,11 +3622,7 @@
               }
             ]
           },
-          "tags": [
-            "assets",
-            "hus",
-            "amount"
-          ]
+          "tags": ["assets", "hus", "amount"]
         }
       ],
       "banner": {
@@ -4476,10 +4323,7 @@
             "isRequired": false,
             "rules": []
           },
-          "tags": [
-            "notes",
-            "note"
-          ]
+          "tags": ["notes", "note"]
         },
         {
           "conditionalOn": "! otherMessage",
@@ -5968,9 +5812,7 @@
       "colorSchema": "neutral",
       "questions": [
         {
-          "loadPrevious": [
-            "rent"
-          ],
+          "loadPrevious": ["rent"],
           "inputSelectValue": "number",
           "description": "",
           "id": "rent",
@@ -5992,11 +5834,7 @@
               }
             ]
           },
-          "tags": [
-            "expenses",
-            "boende",
-            "amount"
-          ]
+          "tags": ["expenses", "boende", "amount"]
         }
       ],
       "banner": {
@@ -6067,11 +5905,7 @@
               }
             ]
           },
-          "tags": [
-            "expenses",
-            "el",
-            "amount"
-          ]
+          "tags": ["expenses", "el", "amount"]
         }
       ],
       "banner": {
@@ -6095,9 +5929,7 @@
       "colorSchema": "neutral",
       "questions": [
         {
-          "loadPrevious": [
-            "homeInsurance"
-          ],
+          "loadPrevious": ["homeInsurance"],
           "inputSelectValue": "number",
           "description": "",
           "id": "homeInsurance",
@@ -6119,11 +5951,7 @@
               }
             ]
           },
-          "tags": [
-            "expenses",
-            "hemforsakring",
-            "amount"
-          ]
+          "tags": ["expenses", "hemforsakring", "amount"]
         }
       ],
       "banner": {
@@ -6318,13 +6146,7 @@
               }
             ]
           },
-          "tags": [
-            "incomes",
-            "annan",
-            "amount",
-            "resident",
-            "group:hyresdel_hyra"
-          ]
+          "tags": ["incomes", "annan", "amount", "resident", "group:hyresdel_hyra"]
         },
         {
           "inputSelectValue": "hidden",
@@ -6337,13 +6159,7 @@
             "isRequired": false,
             "rules": []
           },
-          "tags": [
-            "incomes",
-            "annan",
-            "description",
-            "resident",
-            "group:hyresdel_hyra"
-          ]
+          "tags": ["incomes", "annan", "description", "resident", "group:hyresdel_hyra"]
         },
         {
           "conditionalOn": "",
@@ -6369,13 +6185,7 @@
               }
             ]
           },
-          "tags": [
-            "incomes",
-            "annan",
-            "amount",
-            "resident",
-            "group:hyresdel_el"
-          ]
+          "tags": ["incomes", "annan", "amount", "resident", "group:hyresdel_el"]
         },
         {
           "inputSelectValue": "hidden",
@@ -6388,13 +6198,7 @@
             "isRequired": false,
             "rules": []
           },
-          "tags": [
-            "incomes",
-            "annan",
-            "description",
-            "resident",
-            "group:hyresdel_el"
-          ]
+          "tags": ["incomes", "annan", "description", "resident", "group:hyresdel_el"]
         },
         {
           "conditionalOn": "",
@@ -6420,13 +6224,7 @@
               }
             ]
           },
-          "tags": [
-            "incomes",
-            "annan",
-            "amount",
-            "resident",
-            "group:hyresdel_internet"
-          ]
+          "tags": ["incomes", "annan", "amount", "resident", "group:hyresdel_internet"]
         },
         {
           "inputSelectValue": "hidden",
@@ -6439,13 +6237,7 @@
             "isRequired": false,
             "rules": []
           },
-          "tags": [
-            "incomes",
-            "annan",
-            "description",
-            "resident",
-            "group:hyresdel_internet"
-          ]
+          "tags": ["incomes", "annan", "description", "resident", "group:hyresdel_internet"]
         }
       ],
       "banner": {
@@ -6483,12 +6275,7 @@
           "label": "Ditt busskort",
           "placeholder": "Summa",
           "type": "number",
-          "tags": [
-            "expenses",
-            "reskostnad",
-            "amount",
-            "group:reskostnadapplicant"
-          ]
+          "tags": ["expenses", "reskostnad", "amount", "group:reskostnadapplicant"]
         },
         {
           "addButtonText": "Lägg till för mig",
@@ -6507,12 +6294,7 @@
           "placeholder": "Summa",
           "type": "number",
           "hasCondition": true,
-          "tags": [
-            "expenses",
-            "reskostnad",
-            "amount",
-            "group:reskostnadcoapplicant"
-          ]
+          "tags": ["expenses", "reskostnad", "amount", "group:reskostnadcoapplicant"]
         },
         {
           "inputSelectValue": "hidden",
@@ -6557,9 +6339,7 @@
         {
           "addButtonText": "Lägg till för mig",
           "heading": "Hur mycket kostar ditt buss-eller pendelkort?",
-          "loadPrevious": [
-            "barnomsorg"
-          ],
+          "loadPrevious": ["barnomsorg"],
           "inputSelectValue": "number",
           "inputs": [
             {
@@ -6588,11 +6368,7 @@
               }
             ]
           },
-          "tags": [
-            "expenses",
-            "barnomsorg",
-            "amount"
-          ]
+          "tags": ["expenses", "barnomsorg", "amount"]
         }
       ],
       "banner": {
@@ -6688,13 +6464,7 @@
                   }
                 ]
               },
-              "tags": [
-                "expenses",
-                "medicin",
-                "amount",
-                "group:applicant:x",
-                "applicant"
-              ]
+              "tags": ["expenses", "medicin", "amount", "group:applicant:x", "applicant"]
             }
           ],
           "description": "",
@@ -6733,13 +6503,7 @@
                   }
                 ]
               },
-              "tags": [
-                "expenses",
-                "medicin",
-                "amount",
-                "group:coapplicant:x",
-                "coapplicant"
-              ]
+              "tags": ["expenses", "medicin", "amount", "group:coapplicant:x", "coapplicant"]
             },
             {
               "inputSelectValue": "hidden",
@@ -6751,13 +6515,7 @@
                 "isRequired": false,
                 "rules": []
               },
-              "tags": [
-                "expenses",
-                "medicin",
-                "appliesto",
-                "group:coapplicant:x",
-                "coapplicant"
-              ]
+              "tags": ["expenses", "medicin", "appliesto", "group:coapplicant:x", "coapplicant"]
             }
           ],
           "description": "",
@@ -6825,13 +6583,7 @@
                   }
                 ]
               },
-              "tags": [
-                "expenses",
-                "lakarvard",
-                "amount",
-                "group:applicant:x",
-                "applicant"
-              ]
+              "tags": ["expenses", "lakarvard", "amount", "group:applicant:x", "applicant"]
             }
           ],
           "description": "",
@@ -6870,13 +6622,7 @@
                   }
                 ]
               },
-              "tags": [
-                "expenses",
-                "lakarvard",
-                "amount",
-                "group:coapplicant:x",
-                "coapplicant"
-              ]
+              "tags": ["expenses", "lakarvard", "amount", "group:coapplicant:x", "coapplicant"]
             },
             {
               "inputSelectValue": "hidden",
@@ -6909,13 +6655,7 @@
                   }
                 ]
               },
-              "tags": [
-                "expenses",
-                "lakarvard",
-                "appliesto",
-                "group:coapplicant:x",
-                "coapplicant"
-              ]
+              "tags": ["expenses", "lakarvard", "appliesto", "group:coapplicant:x", "coapplicant"]
             }
           ],
           "description": "",
@@ -6951,9 +6691,7 @@
       "colorSchema": "neutral",
       "questions": [
         {
-          "loadPrevious": [
-            "internet"
-          ],
+          "loadPrevious": ["internet"],
           "inputSelectValue": "number",
           "description": "",
           "id": "internet",
@@ -6975,11 +6713,7 @@
               }
             ]
           },
-          "tags": [
-            "expenses",
-            "bredband",
-            "amount"
-          ]
+          "tags": ["expenses", "bredband", "amount"]
         }
       ],
       "banner": {
@@ -7024,11 +6758,7 @@
               }
             ]
           },
-          "tags": [
-            "assets",
-            "lagenhet",
-            "amount"
-          ]
+          "tags": ["assets", "lagenhet", "amount"]
         }
       ],
       "banner": {
@@ -7133,13 +6863,7 @@
                   }
                 ]
               },
-              "tags": [
-                "expenses",
-                "akuttandvard",
-                "amount",
-                "group:applicant:x",
-                "applicant"
-              ]
+              "tags": ["expenses", "akuttandvard", "amount", "group:applicant:x", "applicant"]
             }
           ],
           "description": "",
@@ -7178,13 +6902,7 @@
                   }
                 ]
               },
-              "tags": [
-                "expenses",
-                "akuttandvard",
-                "amount",
-                "group:coapplicant:x",
-                "coapplicant"
-              ]
+              "tags": ["expenses", "akuttandvard", "amount", "group:coapplicant:x", "coapplicant"]
             },
             {
               "inputSelectValue": "hidden",
@@ -7291,13 +7009,7 @@
                   }
                 ]
               },
-              "tags": [
-                "expenses",
-                "tandvard",
-                "amount",
-                "group:applicant:x",
-                "applicant"
-              ]
+              "tags": ["expenses", "tandvard", "amount", "group:applicant:x", "applicant"]
             }
           ],
           "description": "",
@@ -7336,13 +7048,7 @@
                   }
                 ]
               },
-              "tags": [
-                "expenses",
-                "tandvard",
-                "amount",
-                "group:coapplicant:x",
-                "coapplicant"
-              ]
+              "tags": ["expenses", "tandvard", "amount", "group:coapplicant:x", "coapplicant"]
             },
             {
               "inputSelectValue": "hidden",
@@ -7375,13 +7081,7 @@
                   }
                 ]
               },
-              "tags": [
-                "expenses",
-                "tandvard",
-                "appliesto",
-                "group:coapplicant:x",
-                "coapplicant"
-              ]
+              "tags": ["expenses", "tandvard", "appliesto", "group:coapplicant:x", "coapplicant"]
             }
           ],
           "description": "",
@@ -7438,13 +7138,7 @@
                   }
                 ]
               },
-              "tags": [
-                "expenses",
-                "annat",
-                "description",
-                "group:applicant:x",
-                "applicant"
-              ]
+              "tags": ["expenses", "annat", "description", "group:applicant:x", "applicant"]
             },
             {
               "id": "amount",
@@ -7471,13 +7165,7 @@
                   }
                 ]
               },
-              "tags": [
-                "expenses",
-                "annat",
-                "amount",
-                "group:applicant:x",
-                "applicant"
-              ]
+              "tags": ["expenses", "annat", "amount", "group:applicant:x", "applicant"]
             }
           ],
           "description": "",
@@ -7506,13 +7194,7 @@
                   }
                 ]
               },
-              "tags": [
-                "expenses",
-                "annat",
-                "description",
-                "group:coapplicant:x",
-                "coapplicant"
-              ]
+              "tags": ["expenses", "annat", "description", "group:coapplicant:x", "coapplicant"]
             },
             {
               "id": "amount",
@@ -7539,13 +7221,7 @@
                   }
                 ]
               },
-              "tags": [
-                "expenses",
-                "annat",
-                "amount",
-                "group:coapplicant:x",
-                "coapplicant"
-              ]
+              "tags": ["expenses", "annat", "amount", "group:coapplicant:x", "coapplicant"]
             },
             {
               "inputSelectValue": "hidden",
@@ -7568,13 +7244,7 @@
                   }
                 ]
               },
-              "tags": [
-                "expenses",
-                "annat",
-                "appliesto",
-                "group:coapplicant:x",
-                "coapplicant"
-              ]
+              "tags": ["expenses", "annat", "appliesto", "group:coapplicant:x", "coapplicant"]
             }
           ],
           "description": "",
@@ -7621,12 +7291,7 @@
                   }
                 ]
               },
-              "tags": [
-                "expenses",
-                "annat",
-                "description",
-                "group:children:expenses:x"
-              ]
+              "tags": ["expenses", "annat", "description", "group:children:expenses:x"]
             },
             {
               "id": "amount",
@@ -7653,12 +7318,7 @@
                   }
                 ]
               },
-              "tags": [
-                "expenses",
-                "annat",
-                "amount",
-                "group:children:expenses:x"
-              ]
+              "tags": ["expenses", "annat", "amount", "group:children:expenses:x"]
             },
             {
               "inputSelectValue": "hidden",
@@ -7681,12 +7341,7 @@
                   }
                 ]
               },
-              "tags": [
-                "expenses",
-                "annat",
-                "appliesto",
-                "group:children:expenses:x"
-              ]
+              "tags": ["expenses", "annat", "appliesto", "group:children:expenses:x"]
             }
           ],
           "description": "",
@@ -7735,11 +7390,7 @@
                 "isRequired": false,
                 "rules": []
               },
-              "tags": [
-                "assets",
-                "annan",
-                "description"
-              ]
+              "tags": ["assets", "annan", "description"]
             },
             {
               "id": "amount",
@@ -7761,11 +7412,7 @@
                   }
                 ]
               },
-              "tags": [
-                "assets",
-                "annan",
-                "amount"
-              ]
+              "tags": ["assets", "annan", "amount"]
             }
           ],
           "description": "",
@@ -7812,9 +7459,7 @@
       "questions": [
         {
           "color": "neutral",
-          "loadPrevious": [
-            "unemploymentAllowance"
-          ],
+          "loadPrevious": ["unemploymentAllowance"],
           "inputSelectValue": "checkbox",
           "description": "",
           "id": "unemploymentAllowance",
@@ -7825,9 +7470,7 @@
         },
         {
           "color": "neutral",
-          "loadPrevious": [
-            "forsakringskassanAllowance"
-          ],
+          "loadPrevious": ["forsakringskassanAllowance"],
           "inputSelectValue": "checkbox",
           "description": "",
           "id": "forsakringskassanAllowance",
@@ -7838,9 +7481,7 @@
         },
         {
           "color": "neutral",
-          "loadPrevious": [
-            "csnAllowance"
-          ],
+          "loadPrevious": ["csnAllowance"],
           "inputSelectValue": "checkbox",
           "description": "",
           "id": "csnAllowance",
@@ -7851,9 +7492,7 @@
         },
         {
           "color": "neutral",
-          "loadPrevious": [
-            "pensionAllowance"
-          ],
+          "loadPrevious": ["pensionAllowance"],
           "inputSelectValue": "checkbox",
           "description": "",
           "id": "pensionAllowance",
@@ -7864,9 +7503,7 @@
         },
         {
           "color": "neutral",
-          "loadPrevious": [
-            "irs"
-          ],
+          "loadPrevious": ["irs"],
           "inputSelectValue": "checkbox",
           "description": "",
           "id": "irs",
@@ -7919,13 +7556,7 @@
               }
             ]
           },
-          "tags": [
-            "incomes",
-            "annan",
-            "amount",
-            "loan",
-            "group:loanapplicant"
-          ]
+          "tags": ["incomes", "annan", "amount", "loan", "group:loanapplicant"]
         },
         {
           "addButtonText": "Lägg till",
@@ -7952,13 +7583,7 @@
               }
             ]
           },
-          "tags": [
-            "incomes",
-            "annan",
-            "amount",
-            "loan",
-            "group:loancoapplicant"
-          ]
+          "tags": ["incomes", "annan", "amount", "loan", "group:loancoapplicant"]
         },
         {
           "inputSelectValue": "hidden",
@@ -7971,13 +7596,7 @@
             "isRequired": false,
             "rules": []
           },
-          "tags": [
-            "incomes",
-            "annan",
-            "description",
-            "loan",
-            "group:loanapplicant"
-          ]
+          "tags": ["incomes", "annan", "description", "loan", "group:loanapplicant"]
         },
         {
           "inputSelectValue": "hidden",
@@ -7990,13 +7609,7 @@
             "isRequired": false,
             "rules": []
           },
-          "tags": [
-            "incomes",
-            "annan",
-            "description",
-            "loan",
-            "group:loancoapplicant"
-          ]
+          "tags": ["incomes", "annan", "description", "loan", "group:loancoapplicant"]
         },
         {
           "inputSelectValue": "hidden",
@@ -8009,13 +7622,7 @@
             "isRequired": false,
             "rules": []
           },
-          "tags": [
-            "incomes",
-            "annan",
-            "appliesto",
-            "loan",
-            "group:loancoapplicant"
-          ]
+          "tags": ["incomes", "annan", "appliesto", "loan", "group:loancoapplicant"]
         }
       ],
       "banner": {
@@ -8061,12 +7668,7 @@
               }
             ]
           },
-          "tags": [
-            "expenses",
-            "akassa",
-            "amount",
-            "group:akassaapplicant"
-          ]
+          "tags": ["expenses", "akassa", "amount", "group:akassaapplicant"]
         },
         {
           "conditionalOn": "partnerYes",
@@ -8093,12 +7695,7 @@
               }
             ]
           },
-          "tags": [
-            "expenses",
-            "akassa",
-            "amount",
-            "group:akassacoapplicant"
-          ]
+          "tags": ["expenses", "akassa", "amount", "group:akassacoapplicant"]
         },
         {
           "inputSelectValue": "hidden",
@@ -8111,12 +7708,7 @@
             "isRequired": false,
             "rules": []
           },
-          "tags": [
-            "expenses",
-            "akassa",
-            "appliesto",
-            "group:akassacoapplicant"
-          ]
+          "tags": ["expenses", "akassa", "appliesto", "group:akassacoapplicant"]
         }
       ],
       "description": "Pengar som du betalar för att vara med i a-kassan eller facket. Ange din månadsavgift. Ange den totala summan om du har flera räkningar.",
@@ -8161,11 +7753,7 @@
               }
             ]
           },
-          "tags": [
-            "assets",
-            "motorcykel",
-            "amount"
-          ]
+          "tags": ["assets", "motorcykel", "amount"]
         }
       ],
       "banner": {
@@ -8213,23 +7801,13 @@
                   }
                 ]
               },
-              "tags": [
-                "expenses",
-                "tandvard",
-                "amount",
-                "group:x"
-              ]
+              "tags": ["expenses", "tandvard", "amount", "group:x"]
             }
           ],
           "description": "",
           "label": "Din årlig kontroll/frisktandvård",
           "type": "number",
-          "tags": [
-            "expenses",
-            "annantandvard",
-            "amount",
-            "applicant"
-          ],
+          "tags": ["expenses", "annantandvard", "amount", "applicant"],
           "addButtonText": "Lägg till",
           "maxRows": 2,
           "inputSelectValue": "number",
@@ -8276,12 +7854,7 @@
                   }
                 ]
               },
-              "tags": [
-                "expenses",
-                "tandvard",
-                "amount",
-                "group:x"
-              ]
+              "tags": ["expenses", "tandvard", "amount", "group:x"]
             }
           ],
           "description": "",
@@ -8342,12 +7915,7 @@
                   }
                 ]
               },
-              "tags": [
-                "expenses",
-                "tandvard",
-                "amount",
-                "group:x"
-              ]
+              "tags": ["expenses", "tandvard", "amount", "group:x"]
             }
           ],
           "description": "",
@@ -8426,10 +7994,7 @@
             "isRequired": false,
             "rules": []
           },
-          "tags": [
-            "notes",
-            "note"
-          ]
+          "tags": ["notes", "note"]
         }
       ],
       "description": "",
