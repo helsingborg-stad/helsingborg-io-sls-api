@@ -7,13 +7,13 @@ import { getApplicationUpdateStatus } from '../helpers/getApplicationUpdateStatu
 
 type DeviceOS = 'android' | 'ios';
 
-export interface DeviceVersions {
+interface DeviceVersions {
   min: string;
   max: string;
   updateUrl: string;
 }
 
-export interface DeviceConfiguration {
+interface DeviceConfiguration {
   versions: Record<DeviceOS, DeviceVersions>;
 }
 
@@ -21,7 +21,7 @@ export interface Dependencies {
   getVersionConfigurations: (environment: string) => Promise<DeviceConfiguration>;
 }
 
-export interface Headers {
+interface Headers {
   'User-Agent': string;
 }
 
