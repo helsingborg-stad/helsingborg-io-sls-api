@@ -1,49 +1,66 @@
-import to from 'await-to-js';
-import { throwError } from '@helsingborg-stad/npm-api-error-handling';
+import { ResourceNotFoundError } from '@helsingborg-stad/npm-api-error-handling';
 
-import S3 from '../libs/S3';
 import * as response from '../libs/response';
 import { decodeToken } from '../libs/token';
 import log from '../libs/logs';
+import S3 from '../libs/S3';
 
 const BUCKET_NAME = process.env.BUCKET_NAME;
 
-export async function main(event, context) {
-  const decodedToken = decodeToken(event);
-  const { personalNumber } = decodedToken;
-  const { filename } = event.pathParameters;
+interface GetFileResponse {
+  Body: Buffer;
+  ContentType: string;
+}
 
-  const [getFileError, userS3File] = await to(
-    getFileFromUserS3Bucket(`${personalNumber}/${filename}`)
-  );
-  if (getFileError) {
-    log.error(
-      'Get file error',
-      context.awsRequestId,
-      'service-users-api-getAttachment-001',
-      getFileError
-    );
+export interface Dependencies {
+  decodeToken: (httpEvent: LambdaRequest) => { personalNumber: string };
+  getFile: (key: string) => Promise<GetFileResponse | null>;
+}
 
-    return response.failure(getFileError);
+interface HttpHeaders {
+  Authorization: string;
+}
+
+interface PathParameters {
+  filename: string;
+}
+
+export interface LambdaRequest {
+  headers: HttpHeaders;
+  pathParameters: PathParameters;
+}
+
+function getFile(key: string): Promise<GetFileResponse | null> {
+  return S3.getFile(BUCKET_NAME, key);
+}
+
+export async function getAttachment(input: LambdaRequest, dependencies: Dependencies) {
+  const { personalNumber } = dependencies.decodeToken(input);
+  const { filename } = input.pathParameters;
+
+  const file = await dependencies.getFile(`${personalNumber}/${filename}`);
+
+  if (file === null) {
+    log.writeError('Could not get file for user');
+
+    return response.failure(new ResourceNotFoundError('No file found for user'));
   }
 
-  const buffer = Buffer.from(userS3File.Body);
+  const buffer = Buffer.from(file.Body);
 
   return {
     statusCode: 200,
     isBase64Encoded: true,
     headers: {
-      'Content-Type': userS3File.ContentType,
+      'Content-Type': file.ContentType,
     },
     body: buffer.toString('base64'),
   };
 }
 
-async function getFileFromUserS3Bucket(s3Key) {
-  const [getS3FileError, s3File] = await to(S3.getFile(BUCKET_NAME, s3Key));
-  if (getS3FileError) {
-    throwError(getS3FileError.statusCode, getS3FileError.message);
-  }
-
-  return s3File;
-}
+export const main = log.wrap(event => {
+  return getAttachment(event, {
+    decodeToken,
+    getFile,
+  });
+});
