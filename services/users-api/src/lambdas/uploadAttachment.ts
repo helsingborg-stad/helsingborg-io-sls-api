@@ -24,7 +24,7 @@ export interface Dependencies {
     bucketName?: string,
     method?: string,
     params?: SignedUrlParameters
-  ) => Promise<string | undefined>;
+  ) => string | undefined;
   createUniqueFileName: (file: string, separator: string, uuidGenerator: () => string) => string;
 }
 
@@ -75,7 +75,7 @@ export async function uploadAttachment(input: LambdaRequest, dependencies: Depen
     Expires: 60 * 10,
   };
 
-  const uploadUrl = await dependencies.getSignedUrl(process.env.BUCKET_NAME, 'putObject', params);
+  const uploadUrl = dependencies.getSignedUrl(process.env.BUCKET_NAME, 'putObject', params);
   if (!uploadUrl) {
     const errorMessage = 'Get signed url error';
     log.writeError(errorMessage);

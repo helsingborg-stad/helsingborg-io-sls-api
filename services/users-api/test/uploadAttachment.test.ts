@@ -4,7 +4,7 @@ const dependencies: Dependencies = {
   decodeToken: () => ({
     personalNumber: 'my:decoded:token',
   }),
-  getSignedUrl: () => Promise.resolve('my:signed:url'),
+  getSignedUrl: () => 'my:signed:url',
   createUniqueFileName: () => 'myfile_00000000-0000-0000-0000-000000000000.jpg',
 };
 
@@ -82,10 +82,9 @@ test('mimeType unknown should return 400', async () => {
 });
 
 test('failure to retreive signed URL should return 400', async () => {
-  const getSignedUrlMock = jest.fn().mockRejectedValue(undefined);
   const result = await uploadAttachment(mockInput, {
     ...dependencies,
-    getSignedUrl: getSignedUrlMock,
+    getSignedUrl: () => undefined,
   });
 
   expect(result.statusCode).toBe(400);

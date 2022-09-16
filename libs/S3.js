@@ -2,7 +2,7 @@ import S3 from 'aws-sdk/clients/s3';
 
 export const s3Client = new S3({ apiVersion: '2006-03-01' });
 
-async function getSignedUrl(bucketName, method, params) {
+function getSignedUrl(bucketName, method, params) {
   return s3Client.getSignedUrl(method, {
     Bucket: bucketName,
     ...params,
