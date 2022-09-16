@@ -9,7 +9,7 @@ declare namespace _default {
   export { storeFile };
 }
 export default _default;
-declare function getSignedUrl(bucketName: any, method: any, params: any): Promise<any>;
+declare function getSignedUrl(bucketName: any, method: any, params: any): string | undefined;
 declare function getFiles(bucketName: any, prefix: any): Promise<any>;
 declare function getFile(bucketName: any, key: any): Promise<any>;
 declare function deleteFile(bucketName: any, key: any): Promise<any>;
