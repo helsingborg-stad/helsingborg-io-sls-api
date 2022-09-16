@@ -1,32 +1,65 @@
-/* eslint-disable no-console */
-import to from 'await-to-js';
-import { throwError } from '@helsingborg-stad/npm-api-error-handling';
-import S3 from '../libs/S3';
+import { ResourceNotFoundError } from '@helsingborg-stad/npm-api-error-handling';
+
 import * as response from '../libs/response';
 import { decodeToken } from '../libs/token';
 import log from '../libs/logs';
+import S3 from '../libs/S3';
 
 const BUCKET_NAME = process.env.BUCKET_NAME;
 
-export async function main(event, context) {
-  const decodedToken = decodeToken(event);
+interface FileContent {
+  Key: string;
+  Size: number;
+  LastModified: string;
+}
+
+interface GetUserFilesResponse {
+  Contents: FileContent[] | null;
+}
+
+export interface Dependencies {
+  decodeToken: (httpEvent: LambdaRequest) => { personalNumber: string };
+  getUserFiles: (personalNumber: string) => Promise<FileContent[] | null>;
+}
+
+interface HttpHeaders {
+  Authorization: string;
+}
+
+export interface LambdaRequest {
+  headers: HttpHeaders;
+}
+
+async function getUserFiles(personalNumber: string): Promise<FileContent[] | null> {
+  const files = (await S3.getFiles(BUCKET_NAME, `${personalNumber}/`)) as GetUserFilesResponse;
+
+  return files?.Contents ?? null;
+}
+
+function removePersonalNumberPrefix(files: FileContent[], prefix: string) {
+  const nonPrefixedFiles = files.filter(file => file.Key !== `${prefix}/`);
+  return nonPrefixedFiles.map(file => ({
+    s3key: file.Key,
+    name: file.Key.substring(`${prefix}/`.length),
+    sizeInBytes: file.Size,
+    lastModifiedInMilliseconds: Date.parse(file.LastModified),
+  }));
+}
+
+export async function getAttachmentList(input: LambdaRequest, dependencies: Dependencies) {
+  const decodedToken = dependencies.decodeToken(input);
   const { personalNumber } = decodedToken;
 
-  const [getFilesError, s3Files] = await to(getFilesFromUserS3Bucket(personalNumber));
-  if (getFilesError) {
-    log.error(
-      'Get file error',
-      context.awsRequestId,
-      'service-users-api-getAttachmentList-001',
-      getFilesError
-    );
+  const files = await dependencies.getUserFiles(personalNumber);
 
-    return response.failure(getFilesError);
+  if (files === null) {
+    log.writeError('Could not find files for user');
+    return response.failure(new ResourceNotFoundError('No files found for user'));
   }
 
-  const files = getUserFilesWithoutPersonalNumberPrefix(s3Files, personalNumber);
+  const filesWithoutPrefix = removePersonalNumberPrefix(files, personalNumber);
 
-  const totalFileSizeSumInBytes = files.reduce(
+  const totalFileSizeSumInBytes = filesWithoutPrefix.reduce(
     (fileSizeSum, file) => fileSizeSum + file.sizeInBytes,
     0
   );
@@ -40,21 +73,9 @@ export async function main(event, context) {
   });
 }
 
-async function getFilesFromUserS3Bucket(personalNumber) {
-  const [getFilesError, s3Files] = await to(S3.getFiles(BUCKET_NAME, `${personalNumber}/`));
-  if (getFilesError) {
-    throwError(getFilesError.statusCode, getFilesError.message);
-  }
-
-  return s3Files;
-}
-
-function getUserFilesWithoutPersonalNumberPrefix(s3Files, prefix) {
-  const nonPrefixedFiles = s3Files.Contents.filter(file => file.Key !== `${prefix}/`);
-  return nonPrefixedFiles.map(file => ({
-    s3key: file.Key,
-    name: file.Key.substring(`${prefix}/`.length),
-    sizeInBytes: file.Size,
-    lastModifiedInMilliseconds: Date.parse(file.LastModified),
-  }));
-}
+export const main = log.wrap(event => {
+  return getAttachmentList(event, {
+    decodeToken,
+    getUserFiles: getUserFiles,
+  });
+});
