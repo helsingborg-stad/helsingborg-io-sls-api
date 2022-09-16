@@ -1,18 +1,14 @@
-import { lambda, LambdaContext } from '../src/lambdas/uploadAttachment';
+import { uploadAttachment, Dependencies } from '../src/lambdas/uploadAttachment';
 
-const abstractLambdaContext: LambdaContext = {
+const dependencies: Dependencies = {
   decodeToken: () => ({
     personalNumber: 'my:decoded:token',
   }),
   getSignedUrl: () => Promise.resolve('my:signed:url'),
-  getUniqueFileName: () => 'myfile_00000000-0000-0000-0000-000000000000.jpg',
+  createUniqueFileName: () => 'myfile_00000000-0000-0000-0000-000000000000.jpg',
 };
 
-const abstractAWSContext = {
-  awsRequestId: 'my:request:id',
-};
-
-const abstractAWSEvent = {
+const mockInput = {
   body: JSON.stringify({
     fileName: 'myfile.jpg',
     mime: 'image/jpeg',
@@ -23,7 +19,7 @@ const abstractAWSEvent = {
 };
 
 test('successful request should return expected structure', async () => {
-  const result = await lambda(abstractAWSEvent, abstractAWSContext, abstractLambdaContext);
+  const result = await uploadAttachment(mockInput, dependencies);
 
   expect(result.statusCode).toBe(200);
   expect(JSON.parse(result.body)).toEqual({
@@ -41,60 +37,55 @@ test('successful request should return expected structure', async () => {
 });
 
 test('event body missing should return status 400', async () => {
-  const result = await lambda({}, abstractAWSContext, abstractLambdaContext);
+  const result = await uploadAttachment({}, dependencies);
   expect(result.statusCode).toBe(400);
 });
 
 test('fileName missing should return status 400', async () => {
-  const result = await lambda(
+  const result = await uploadAttachment(
     {
       body: JSON.stringify({
         mime: 'image/jpg',
       }),
     },
-    abstractAWSContext,
-    abstractLambdaContext
+    dependencies
   );
 
   expect(result.statusCode).toBe(400);
 });
 
 test('mimeType missing should return 400', async () => {
-  const result = await lambda(
+  const result = await uploadAttachment(
     {
       body: JSON.stringify({
         fileName: 'myfile.jpg',
       }),
     },
-    abstractAWSContext,
-    abstractLambdaContext
+    dependencies
   );
 
   expect(result.statusCode).toBe(400);
 });
 
 test('mimeType unknown should return 400', async () => {
-  const result = await lambda(
+  const result = await uploadAttachment(
     {
       body: JSON.stringify({
         fileName: 'myfile.jpg',
         mime: 'my/mime-type',
       }),
     },
-    abstractAWSContext,
-    abstractLambdaContext
+    dependencies
   );
 
   expect(result.statusCode).toBe(400);
 });
 
 test('failure to retreive signed URL should return 400', async () => {
-  const result = await lambda(abstractAWSEvent, abstractAWSContext, {
-    ...abstractLambdaContext,
-    getSignedUrl: () =>
-      Promise.reject({
-        status: 400,
-      }),
+  const getSignedUrlMock = jest.fn().mockRejectedValue(undefined);
+  const result = await uploadAttachment(mockInput, {
+    ...dependencies,
+    getSignedUrl: getSignedUrlMock,
   });
 
   expect(result.statusCode).toBe(400);
@@ -103,8 +94,8 @@ test('failure to retreive signed URL should return 400', async () => {
 test('signed URL is called with the correct parameters', async () => {
   const getSignedUrl = jest.fn().mockResolvedValue('');
 
-  await lambda(abstractAWSEvent, abstractAWSContext, {
-    ...abstractLambdaContext,
+  await uploadAttachment(mockInput, {
+    ...dependencies,
     getSignedUrl,
   });
 
