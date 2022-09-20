@@ -2,12 +2,14 @@ import { CASE_PROVIDER_VIVA, VIVA_CASE_CREATED, NOT_STARTED_VIVA } from '../../s
 import { getStatusByType } from '../../src/libs/caseStatuses';
 
 import { createVivaCase, LambdaRequest, DynamoDbPutParams } from '../../src/lambdas/createVivaCase';
-import { EncryptionType, CasePersonRole } from '../../src/types/caseItem';
+import { EncryptionType, CasePersonRole, CaseForm } from '../../src/types/caseItem';
 import { VivaPersonsPerson, VivaPersonType } from '../../src/types/vivaMyPages';
 import { DEFAULT_CURRENT_POSITION } from '../../src/helpers/constants';
 
 jest.useFakeTimers('modern').setSystemTime(1640995200000);
-jest.mock('uuid', () => ({ v4: () => '123abc' }));
+
+const mockUuid = '00000000-0000-0000-0000-000000000000';
+jest.mock('uuid', () => ({ v4: () => mockUuid }));
 
 const user = {
   firstName: 'First',
@@ -24,10 +26,11 @@ const readParametersResponse = {
   newApplicationCompletionFormId: '6',
 };
 
-const defaultFormProperties = {
+const defaultFormProperties: CaseForm = {
   answers: [],
   currentPosition: DEFAULT_CURRENT_POSITION,
   encryption: {
+    symmetricKeyName: mockUuid,
     type: EncryptionType.Decrypted,
   },
 };
@@ -37,7 +40,7 @@ const partnerFormProperties = {
   currentPosition: DEFAULT_CURRENT_POSITION,
   encryption: {
     type: EncryptionType.Decrypted,
-    symmetricKeyName: '123abc',
+    symmetricKeyName: mockUuid,
   },
 };
 
@@ -79,9 +82,9 @@ it('successfully creates a recurring application case', async () => {
   const expectedParameters = {
     TableName: 'cases',
     Item: {
-      id: '123abc',
+      id: mockUuid,
       PK: `USER#${user.personalNumber}`,
-      SK: 'CASE#123abc',
+      SK: `CASE#${mockUuid}`,
       currentFormId: readParametersResponse.recurringFormId,
       details: {
         period: {
@@ -133,9 +136,9 @@ it('successfully creates a recurring application case with partner', async () =>
   const expectedParameters: DynamoDbPutParams = {
     TableName: 'cases',
     Item: {
-      id: '123abc',
+      id: mockUuid,
       PK: `USER#${user.personalNumber}`,
-      SK: 'CASE#123abc',
+      SK: `CASE#${mockUuid}`,
       GSI1: `USER#${user.personalNumber}`,
       currentFormId: readParametersResponse.recurringFormId,
       details: {

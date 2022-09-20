@@ -11,6 +11,9 @@ const completionFormId = 'completionFormId';
 const PK = 'USER#199492921234';
 const SK = 'CASE#123';
 
+const mockUuid = '00000000-0000-0000-0000-000000000000';
+jest.mock('uuid', () => ({ v4: () => mockUuid }));
+
 function createCase(partialCase: Partial<CaseItem> = {}): CaseItem {
   return {
     id: '123',
@@ -115,6 +118,7 @@ it('calls postCompletion with form answer containing attachment', async () => {
     answers: [],
     currentPosition: DEFAULT_CURRENT_POSITION,
     encryption: {
+      symmetricKeyName: mockUuid,
       type: EncryptionType.Decrypted,
     },
   };
@@ -149,6 +153,7 @@ it('calls `updateCase` with correct parameters for form id: completionFormId', a
     answers: [],
     currentPosition: DEFAULT_CURRENT_POSITION,
     encryption: {
+      symmetricKeyName: mockUuid,
       type: EncryptionType.Decrypted,
     },
   };

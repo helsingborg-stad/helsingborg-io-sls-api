@@ -7,9 +7,12 @@ import {
 } from '../../src/libs/constants';
 import { getStatusByType } from '../../src/libs/caseStatuses';
 
-import { EncryptionType, CasePersonRole } from '../../src/types/caseItem';
+import { EncryptionType, CasePersonRole, CaseForm } from '../../src/types/caseItem';
 
 import { DEFAULT_CURRENT_POSITION } from '../../src/helpers/constants';
+
+const mockUuid = '00000000-0000-0000-0000-000000000000';
+jest.mock('uuid', () => ({ v4: () => mockUuid }));
 
 const user = {
   firstName: 'First',
@@ -26,10 +29,11 @@ const readParametersResponse = {
   newApplicationCompletionFormId: '6',
 };
 
-const defaultFormProperties = {
+const defaultFormProperties: CaseForm = {
   answers: [],
   currentPosition: DEFAULT_CURRENT_POSITION,
   encryption: {
+    symmetricKeyName: mockUuid,
     type: EncryptionType.Decrypted,
   },
 };

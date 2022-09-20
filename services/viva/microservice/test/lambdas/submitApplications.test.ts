@@ -4,7 +4,7 @@ import {
   Dependencies,
 } from '../../src/lambdas/submitApplication';
 
-import { EncryptionType } from '../../src/types/caseItem';
+import { CaseForm, EncryptionType } from '../../src/types/caseItem';
 import { VivaApplicationType } from '../../src/types/vivaMyPages';
 import type { CaseDetails } from '../../src/types/caseItem';
 
@@ -17,10 +17,11 @@ const SK = 'mockSK';
 const id = 'mockCaseId';
 const postVivaResponseId = 'mockPostResponseId';
 
-const form = {
+const form: CaseForm = {
   answers: [],
   currentPosition: DEFAULT_CURRENT_POSITION,
   encryption: {
+    symmetricKeyName: '00000000-0000-0000-0000-000000000000',
     type: EncryptionType.Decrypted,
   },
 };

@@ -138,5 +138,5 @@ export enum EncryptionType {
 
 export interface CaseFormEncryption {
   type: EncryptionType.Decrypted;
-  symmetricKeyName?: string;
+  symmetricKeyName: string;
 }
