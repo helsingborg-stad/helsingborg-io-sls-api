@@ -79,7 +79,7 @@ function updateCase(params: UpdateCaseParameters): Promise<UpdateCaseAddPersonRe
     },
     ExpressionAttributeValues: {
       ':coApplicant': [coApplicant],
-      ':personalNumberGSI1': coApplicant.personalNumber,
+      ':personalNumberGSI1': `USER#${coApplicant.personalNumber}`,
       ':newForm': form[newApplicationFormId],
     },
     ReturnValues: 'ALL_NEW',
