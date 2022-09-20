@@ -112,10 +112,10 @@ function getInitialFormAttributes(
   );
 }
 
-function getFormEncryptionAttributes(isCoApplicant: boolean): CaseFormEncryption {
+function getFormEncryptionAttributes(): CaseFormEncryption {
   return {
     type: EncryptionType.Decrypted,
-    ...(isCoApplicant && { symmetricKeyName: uuid.v4() }),
+    symmetricKeyName: uuid.v4(),
   };
 }
 
