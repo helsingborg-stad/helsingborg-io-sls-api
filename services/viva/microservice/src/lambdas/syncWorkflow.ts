@@ -70,7 +70,7 @@ async function getCasesByStatusType(
   const queryParams = {
     TableName: config.cases.tableName,
     KeyConditionExpression: 'PK = :pk',
-    FilterExpression: `(${filterExpression}) and provider = :provider and not_null(details.workflowId)`,
+    FilterExpression: `(${filterExpression}) and provider = :provider`,
     ExpressionAttributeNames: {
       '#status': 'status',
       '#type': 'type',
