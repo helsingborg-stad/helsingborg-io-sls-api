@@ -96,9 +96,10 @@ function updateCaseDetailsWorkflow(keys: CaseKeys, newWorkflow: VivaWorkflow) {
       PK: keys.PK,
       SK: keys.SK,
     },
-    UpdateExpression: 'SET details.workflow = :newWorkflow',
+    UpdateExpression: 'SET details.workflow = :newWorkflow, updatedAt = :updatedAt',
     ExpressionAttributeValues: {
       ':newWorkflow': newWorkflow,
+      ':updatedAt': Date.now(),
     },
     ReturnValues: 'NONE',
   };
