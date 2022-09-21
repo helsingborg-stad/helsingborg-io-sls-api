@@ -59,9 +59,9 @@ function createDependencies(partialDependencies?: Partial<MockDependencies>): Mo
   const workflow = createWorkflow();
 
   return {
-    getCaseList: async () => [createCase()],
+    getCasesByStatusType: async () => [createCase()],
     syncWorkflowSuccess: syncWorkflowSuccess,
-    updateCaseDetailsWorkflow: () => Promise.resolve(),
+    updateCase: () => Promise.resolve(),
     getWorkflow: () => Promise.resolve(workflow),
     workflow,
     ...partialDependencies,
@@ -82,7 +82,7 @@ it('Syncs cases', async () => {
 
 it("Doesn't sync cases with non-matching status", async () => {
   const dependencies = createDependencies({
-    getCaseList: () => Promise.resolve([]),
+    getCasesByStatusType: () => Promise.resolve([]),
   });
 
   const result = await syncWorkflow(input, dependencies);
@@ -93,7 +93,7 @@ it("Doesn't sync cases with non-matching status", async () => {
 
 it("Doesn't sync cases without workflow id", async () => {
   const dependencies = createDependencies({
-    getCaseList: () => Promise.resolve([createCase('')]),
+    getCasesByStatusType: () => Promise.resolve([createCase('')]),
   });
 
   const result = await syncWorkflow(input, dependencies);
@@ -104,7 +104,7 @@ it("Doesn't sync cases without workflow id", async () => {
 
 it('Syncs cases with multiple status types', async () => {
   const dependencies = createDependencies({
-    getCaseList: () => Promise.resolve([createCase(), createCase()]),
+    getCasesByStatusType: () => Promise.resolve([createCase(), createCase()]),
   });
 
   const result = await syncWorkflow(input, dependencies);

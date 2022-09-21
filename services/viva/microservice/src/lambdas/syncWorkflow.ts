@@ -2,8 +2,10 @@ import log from '../libs/logs';
 import config from '../libs/config';
 import * as dynamoDb from '../libs/dynamoDb';
 import { ACTIVE_ONGOING, ACTIVE_SUBMITTED, ACTIVE_PROCESSING, CLOSED } from '../libs/constants';
+
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
+
 import type { CaseItem } from '../types/caseItem';
 import type { VivaWorkflow } from '../types/vivaWorkflow';
 
@@ -18,15 +20,13 @@ export interface GetWorkflowResult {
   attributes: VivaWorkflow;
 }
 
-export interface Dependencies {
-  getCaseList: (personalNumber: string, statusTypeList: string[]) => GetCaseResult;
-  updateCaseDetailsWorkflow: (caseKeys: CaseKeys, newWorkflow: VivaWorkflow) => Promise<void>;
-  syncWorkflowSuccess: (detail: Record<string, unknown>) => Promise<void>;
-  getWorkflow: (payload: GetWorkflowParams) => Promise<GetWorkflowResult>;
-}
-
 interface User {
   personalNumber: string;
+}
+
+interface CaseKeys {
+  PK: string;
+  SK: string;
 }
 
 interface LambdaDetails {
@@ -37,9 +37,11 @@ export interface LambdaRequest {
   detail: LambdaDetails;
 }
 
-interface CaseKeys {
-  PK: string;
-  SK: string;
+export interface Dependencies {
+  getCasesByStatusType: (personalNumber: string, statusTypeList: string[]) => GetCaseResult;
+  updateCase: (caseKeys: CaseKeys, newWorkflow: VivaWorkflow) => Promise<void>;
+  syncWorkflowSuccess: (detail: Record<string, unknown>) => Promise<void>;
+  getWorkflow: (payload: GetWorkflowParams) => Promise<GetWorkflowResult>;
 }
 
 function createAttributeValueName(statusType: string): string {
@@ -107,7 +109,7 @@ function updateCaseDetailsWorkflow(keys: CaseKeys, newWorkflow: VivaWorkflow) {
 export async function syncWorkflow(input: LambdaRequest, dependencies: Dependencies) {
   const { personalNumber } = input.detail.user;
 
-  const caseList = await dependencies.getCaseList(personalNumber, [
+  const caseList = await dependencies.getCasesByStatusType(personalNumber, [
     ACTIVE_ONGOING,
     ACTIVE_SUBMITTED,
     ACTIVE_PROCESSING,
@@ -122,15 +124,13 @@ export async function syncWorkflow(input: LambdaRequest, dependencies: Dependenc
 
   await Promise.all(
     caseListWithWorkflowId.map(async caseItem => {
-      const caseKeys = {
-        PK: caseItem.PK,
-        SK: caseItem.SK,
-      };
+      const workflow = await dependencies.getWorkflow({
+        personalNumber,
+        workflowId: caseItem.details.workflowId,
+      });
 
-      const { workflowId } = caseItem.details;
-      const workflow = await dependencies.getWorkflow({ personalNumber, workflowId });
-
-      await dependencies.updateCaseDetailsWorkflow(caseKeys, workflow.attributes);
+      const caseKeys = { PK: caseItem.PK, SK: caseItem.SK };
+      await dependencies.updateCase(caseKeys, workflow.attributes);
       await dependencies.syncWorkflowSuccess({ caseKeys, workflow: workflow.attributes });
     })
   );
@@ -140,8 +140,8 @@ export async function syncWorkflow(input: LambdaRequest, dependencies: Dependenc
 
 export const main = log.wrap(event =>
   syncWorkflow(event, {
-    updateCaseDetailsWorkflow,
-    getCaseList: getCasesByStatusType,
+    updateCase: updateCaseDetailsWorkflow,
+    getCasesByStatusType,
     syncWorkflowSuccess: putVivaMsEvent.syncWorkflowSuccess,
     getWorkflow: vivaAdapter.workflow.get,
   })
