@@ -9,8 +9,6 @@ import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import type { CaseItem } from '../types/caseItem';
 import type { VivaWorkflow } from '../types/vivaWorkflow';
 
-type GetCaseResult = Promise<CaseItem[]>;
-
 interface GetWorkflowParams {
   personalNumber: string;
   workflowId: string | null;
@@ -38,10 +36,10 @@ export interface LambdaRequest {
 }
 
 export interface Dependencies {
-  getCasesByStatusType: (personalNumber: string, statusTypeList: string[]) => GetCaseResult;
+  getCasesByStatusType: (personalNumber: string, statusTypeList: string[]) => Promise<CaseItem[]>;
   updateCase: (caseKeys: CaseKeys, newWorkflow: VivaWorkflow) => Promise<void>;
   syncWorkflowSuccess: (detail: Record<string, unknown>) => Promise<void>;
-  getWorkflow: (payload: GetWorkflowParams) => Promise<GetWorkflowResult>;
+  getWorkflow: (params: GetWorkflowParams) => Promise<GetWorkflowResult>;
 }
 
 function createAttributeValueName(statusType: string): string {
@@ -58,10 +56,7 @@ export function filterExpressionMapper(statusType: string): string {
   return `begins_with(#status.#type, ${valueName})`;
 }
 
-async function getCasesByStatusType(
-  personalNumber: string,
-  statusTypeList: string[]
-): GetCaseResult {
+async function getCasesByStatusType(personalNumber: string, statusTypeList: string[]) {
   const PK = `USER#${personalNumber}`;
 
   const filterExpression = statusTypeList.map(filterExpressionMapper).join(' or ');
