@@ -40,9 +40,9 @@ beforeEach(() => {
   context = {
     requestId: 'requestId',
     postVivaApplication: () => Promise.resolve({ status: 'OK', id: postVivaResponseId }),
-    putSuccessEvent: () => Promise.resolve(null),
+    putSuccessEvent: () => Promise.resolve(),
     readParams: () => Promise.resolve({ newApplicationFormId, recurringFormId: recurrentFormId }),
-    updateVivaCase: () => Promise.resolve(null),
+    updateVivaCase: () => Promise.resolve(),
     attachmentFromAnswers: () => Promise.resolve([]),
     isAnswerAttachment: () => true,
   };

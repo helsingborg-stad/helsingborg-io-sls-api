@@ -1,5 +1,10 @@
 import { putEvent } from '../libs/awsEventBridge';
 
+interface EventParameters {
+  source: string;
+  detailType: string;
+}
+
 export const eventTypeCollection = {
   checkOpenNewApplicationSuccess: {
     source: 'vivaMs.personApplicationStatus',
@@ -51,24 +56,31 @@ export const eventTypeCollection = {
   },
 };
 
-function putUserEvent(detail, type, typeCollection = eventTypeCollection) {
+function putUserEvent(
+  detail: unknown,
+  type: string,
+  typeCollection: Record<string, EventParameters> = eventTypeCollection
+): Promise<void> {
   const { detailType, source } = typeCollection[type];
   return putEvent(detail, detailType, source);
 }
 
 export default {
   completions: {
-    success: detail => putUserEvent(detail, 'checkCompletionsStatusSuccess'),
-    required: detail => putUserEvent(detail, 'checkCompletionsStatusRequired'),
+    success: (detail: unknown) => putUserEvent(detail, 'checkCompletionsStatusSuccess'),
+    required: (detail: unknown) => putUserEvent(detail, 'checkCompletionsStatusRequired'),
   },
-  checkOpenPeriodSuccess: detail => putUserEvent(detail, 'checkOpenPeriodSuccess'),
-  personDetailSuccess: detail => putUserEvent(detail, 'personDetailSuccess'),
-  applicationReceivedSuccess: detail => putUserEvent(detail, 'applicationReceivedSuccess'),
-  decideCaseStatusSuccess: detail => putUserEvent(detail, 'decideCaseStatusSuccess'),
-  syncWorkflowSuccess: detail => putUserEvent(detail, 'syncWorkflowSuccess'),
-  htmlGeneratedSuccess: detail => putUserEvent(detail, 'htmlGeneratedSuccess'),
-  applicationStatusSuccess: detail => putUserEvent(detail, 'applicationStatusSuccess'),
-  setCaseCompletionsSuccess: detail => putUserEvent(detail, 'setCaseCompletionsSuccess'),
-  syncCaseCompletionsSuccess: detail => putUserEvent(detail, 'syncCaseCompletionsSuccess'),
-  checkOpenNewApplicationSuccess: detail => putUserEvent(detail, 'checkOpenNewApplicationSuccess'),
+  checkOpenPeriodSuccess: (detail: unknown) => putUserEvent(detail, 'checkOpenPeriodSuccess'),
+  personDetailSuccess: (detail: unknown) => putUserEvent(detail, 'personDetailSuccess'),
+  applicationReceivedSuccess: (detail: unknown) =>
+    putUserEvent(detail, 'applicationReceivedSuccess'),
+  decideCaseStatusSuccess: (detail: unknown) => putUserEvent(detail, 'decideCaseStatusSuccess'),
+  syncWorkflowSuccess: (detail: unknown) => putUserEvent(detail, 'syncWorkflowSuccess'),
+  htmlGeneratedSuccess: (detail: unknown) => putUserEvent(detail, 'htmlGeneratedSuccess'),
+  applicationStatusSuccess: (detail: unknown) => putUserEvent(detail, 'applicationStatusSuccess'),
+  setCaseCompletionsSuccess: (detail: unknown) => putUserEvent(detail, 'setCaseCompletionsSuccess'),
+  syncCaseCompletionsSuccess: (detail: unknown) =>
+    putUserEvent(detail, 'syncCaseCompletionsSuccess'),
+  checkOpenNewApplicationSuccess: (detail: unknown) =>
+    putUserEvent(detail, 'checkOpenNewApplicationSuccess'),
 };

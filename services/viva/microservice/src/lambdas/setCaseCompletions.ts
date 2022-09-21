@@ -26,7 +26,7 @@ export interface LambdaRequest {
 export interface Dependencies {
   getCase: (keys: CaseKeys) => Promise<UserCase>;
   readParams: (envsKeyName: string) => Promise<VivaParametersResponse>;
-  putSuccessEvent: (params: LambdaDetails) => Promise<null>;
+  putSuccessEvent: (params: LambdaDetails) => Promise<void>;
   updateCase: (keys: CaseKeys, caseUpdateAttributes: unknown) => Promise<void>;
   getNewStatus: (completions: CaseCompletions) => CaseStatus;
   getNewState: (completions: CaseCompletions) => string;

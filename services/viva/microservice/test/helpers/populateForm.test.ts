@@ -6,7 +6,9 @@ import formTemplate from '../mock/formTemplate.json';
 
 import { DEFAULT_CURRENT_POSITION } from '../../src/helpers/constants';
 
-import { EncryptionType } from '../../src/types/caseItem';
+import type { FormField } from '../../src/helpers/populateForm';
+import type { CasePerson } from '../../src/types/caseItem';
+import { EncryptionType, CasePersonRole } from '../../src/types/caseItem';
 
 const caseRecurringForm = {
   answers: [],
@@ -16,7 +18,7 @@ const caseRecurringForm = {
   currentPosition: DEFAULT_CURRENT_POSITION,
 };
 
-const repeaterInputFields = [
+const repeaterInputFields: FormField[] = [
   {
     id: 'childrenInfo.[*].childrenPersonalID',
     loadPrevious: ['childrenInfo.[*].childrenPersonalID'],
@@ -37,18 +39,18 @@ const repeaterInputFields = [
   },
 ];
 
-const vivaChildrenList = [
+const vivaChildrenList: CasePerson[] = [
   {
     firstName: 'Sanna',
     lastName: 'Backman',
     personalNumber: '200605282383',
-    role: 'children',
+    role: CasePersonRole.Children,
   },
   {
     firstName: 'Olle',
     lastName: 'Backman',
     personalNumber: '200701282397',
-    role: 'children',
+    role: CasePersonRole.Children,
   },
 ];
 
