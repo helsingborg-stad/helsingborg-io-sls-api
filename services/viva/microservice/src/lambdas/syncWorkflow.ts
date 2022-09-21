@@ -86,7 +86,7 @@ async function getCasesByStatusType(
 
   const result = await dynamoDb.call('query', queryParams);
 
-  return result.Items as CaseItem[];
+  return (result.Items ?? []) as CaseItem[];
 }
 
 function updateCaseDetailsWorkflow(keys: CaseKeys, newWorkflow: VivaWorkflow) {
