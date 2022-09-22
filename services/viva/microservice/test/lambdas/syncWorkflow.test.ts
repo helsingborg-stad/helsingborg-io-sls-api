@@ -1,8 +1,16 @@
 import {
+  ACTIVE_ONGOING,
+  ACTIVE_SUBMITTED,
+  ACTIVE_PROCESSING,
+  CLOSED,
+} from '../../src/libs/constants';
+import {
   Dependencies,
   GetWorkflowResult,
   LambdaRequest,
   syncWorkflow,
+  createAttributeValues,
+  filterExpressionMapper,
 } from '../../src/lambdas/syncWorkflow';
 import { CaseItem } from '../../src/types/caseItem';
 
@@ -51,9 +59,9 @@ function createDependencies(partialDependencies?: Partial<MockDependencies>): Mo
   const workflow = createWorkflow();
 
   return {
-    getSubmittedOrProcessingOrOngoingCases: async () => ({ Items: [createCase()] }),
+    getCasesByStatusType: async () => [createCase()],
     syncWorkflowSuccess: syncWorkflowSuccess,
-    updateCaseDetailsWorkflow: () => Promise.resolve(),
+    updateCase: () => Promise.resolve(),
     getWorkflow: () => Promise.resolve(workflow),
     workflow,
     ...partialDependencies,
@@ -74,7 +82,7 @@ it('Syncs cases', async () => {
 
 it("Doesn't sync cases with non-matching status", async () => {
   const dependencies = createDependencies({
-    getSubmittedOrProcessingOrOngoingCases: () => Promise.resolve({ Items: [] }),
+    getCasesByStatusType: () => Promise.resolve([]),
   });
 
   const result = await syncWorkflow(input, dependencies);
@@ -85,11 +93,46 @@ it("Doesn't sync cases with non-matching status", async () => {
 
 it("Doesn't sync cases without workflow id", async () => {
   const dependencies = createDependencies({
-    getSubmittedOrProcessingOrOngoingCases: () => Promise.resolve({ Items: [createCase('')] }),
+    getCasesByStatusType: () => Promise.resolve([createCase('')]),
   });
 
   const result = await syncWorkflow(input, dependencies);
 
   expect(result).toBe(true);
   expect(dependencies.syncWorkflowSuccess).not.toHaveBeenCalled();
+});
+
+it('Syncs cases with multiple status types', async () => {
+  const dependencies = createDependencies({
+    getCasesByStatusType: () => Promise.resolve([createCase(), createCase()]),
+  });
+
+  const result = await syncWorkflow(input, dependencies);
+
+  expect(result).toBe(true);
+  expect(dependencies.syncWorkflowSuccess).toHaveBeenCalledTimes(2);
+});
+
+it('Creates query filter expression', async () => {
+  const statusTypeList = [ACTIVE_ONGOING, ACTIVE_SUBMITTED, ACTIVE_PROCESSING, CLOSED];
+  const filterExpression = statusTypeList.map(filterExpressionMapper).join(' or ');
+
+  expect(filterExpression).toBe(
+    'begins_with(#status.#type, :statusTypeOngoing) or begins_with(#status.#type, :statusTypeSubmitted) or begins_with(#status.#type, :statusTypeProcessing) or begins_with(#status.#type, :statusTypeClosed)'
+  );
+});
+
+it('Creates query expression attribute values', async () => {
+  const statusTypeList = ['active:ongoing', 'active:submitted', 'active:processing', 'closed'];
+
+  const expressionAttributeValues = statusTypeList.reduce((acc, statusType) => {
+    return { ...acc, ...createAttributeValues(statusType) };
+  }, {});
+
+  expect(expressionAttributeValues).toEqual({
+    ':statusTypeClosed': 'closed',
+    ':statusTypeOngoing': 'active:ongoing',
+    ':statusTypeProcessing': 'active:processing',
+    ':statusTypeSubmitted': 'active:submitted',
+  });
 });

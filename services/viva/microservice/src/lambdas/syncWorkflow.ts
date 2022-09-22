@@ -1,12 +1,14 @@
 import log from '../libs/logs';
 import config from '../libs/config';
 import * as dynamoDb from '../libs/dynamoDb';
-import vivaAdapter from '../helpers/vivaAdapterRequestClient';
-import { CaseItem } from '../types/caseItem';
-import putVivaMsEvent from '../helpers/putVivaMsEvent';
-import { VivaWorkflow } from '../types/vivaWorkflow';
+import { ACTIVE_ONGOING, ACTIVE_SUBMITTED, ACTIVE_PROCESSING, CLOSED } from '../libs/constants';
 
-type GetCaseResult = Promise<{ Items: CaseItem[] }>;
+import vivaAdapter from '../helpers/vivaAdapterRequestClient';
+import putVivaMsEvent from '../helpers/putVivaMsEvent';
+
+import type { CaseItem } from '../types/caseItem';
+import type { VivaWorkflow } from '../types/vivaWorkflow';
+
 interface GetWorkflowParams {
   personalNumber: string;
   workflowId: string | null;
@@ -16,15 +18,13 @@ export interface GetWorkflowResult {
   attributes: VivaWorkflow;
 }
 
-export interface Dependencies {
-  getSubmittedOrProcessingOrOngoingCases: (personalNumber: string) => GetCaseResult;
-  updateCaseDetailsWorkflow: (caseKeys: CaseKeys, newWorkflow: VivaWorkflow) => Promise<void>;
-  syncWorkflowSuccess: (detail: Record<string, unknown>) => Promise<void>;
-  getWorkflow: (payload: GetWorkflowParams) => Promise<GetWorkflowResult>;
-}
-
 interface User {
   personalNumber: string;
+}
+
+interface CaseKeys {
+  PK: string;
+  SK: string;
 }
 
 interface LambdaDetails {
@@ -35,33 +35,53 @@ export interface LambdaRequest {
   detail: LambdaDetails;
 }
 
-interface CaseKeys {
-  PK: string;
-  SK: string;
+export interface Dependencies {
+  getCasesByStatusType: (personalNumber: string, statusTypeList: string[]) => Promise<CaseItem[]>;
+  updateCase: (caseKeys: CaseKeys, newWorkflow: VivaWorkflow) => Promise<void>;
+  syncWorkflowSuccess: (detail: Record<string, unknown>) => Promise<void>;
+  getWorkflow: (params: GetWorkflowParams) => Promise<GetWorkflowResult>;
 }
 
-function getSubmittedOrProcessingOrOngoingCases(personalNumber: string): GetCaseResult {
+function createAttributeValueName(statusType: string): string {
+  const name = statusType.includes(':') ? statusType.split(':')[1] : statusType;
+  return `:statusType${name.charAt(0).toUpperCase() + name.slice(1)}`;
+}
+
+export function createAttributeValues(statusType: string) {
+  return { [createAttributeValueName(statusType)]: statusType };
+}
+
+export function filterExpressionMapper(statusType: string): string {
+  const valueName = createAttributeValueName(statusType);
+  return `begins_with(#status.#type, ${valueName})`;
+}
+
+async function getCasesByStatusType(personalNumber: string, statusTypeList: string[]) {
   const PK = `USER#${personalNumber}`;
+
+  const filterExpression = statusTypeList.map(filterExpressionMapper).join(' or ');
+  const expressionAttributeValues = statusTypeList.reduce((acc, statusType) => {
+    return { ...acc, ...createAttributeValues(statusType) };
+  }, {});
 
   const queryParams = {
     TableName: config.cases.tableName,
     KeyConditionExpression: 'PK = :pk',
-    FilterExpression:
-      '(begins_with(#status.#type, :statusTypeSubmitted) or begins_with(#status.#type, :statusTypeProcessing) or begins_with(#status.#type, :statusTypeOngoing)) and provider = :provider',
+    FilterExpression: `(${filterExpression}) and provider = :provider`,
     ExpressionAttributeNames: {
       '#status': 'status',
       '#type': 'type',
     },
     ExpressionAttributeValues: {
       ':pk': PK,
-      ':statusTypeSubmitted': 'active:submitted',
-      ':statusTypeProcessing': 'active:processing',
-      ':statusTypeOngoing': 'active:ongoing',
       ':provider': 'VIVA',
+      ...expressionAttributeValues,
     },
   };
 
-  return dynamoDb.call('query', queryParams);
+  const result = await dynamoDb.call('query', queryParams);
+
+  return (result.Items ?? []) as CaseItem[];
 }
 
 function updateCaseDetailsWorkflow(keys: CaseKeys, newWorkflow: VivaWorkflow) {
@@ -71,9 +91,10 @@ function updateCaseDetailsWorkflow(keys: CaseKeys, newWorkflow: VivaWorkflow) {
       PK: keys.PK,
       SK: keys.SK,
     },
-    UpdateExpression: 'SET details.workflow = :newWorkflow',
+    UpdateExpression: 'SET details.workflow = :newWorkflow, updatedAt = :updatedAt',
     ExpressionAttributeValues: {
       ':newWorkflow': newWorkflow,
+      ':updatedAt': Date.now(),
     },
     ReturnValues: 'NONE',
   };
@@ -84,41 +105,39 @@ function updateCaseDetailsWorkflow(keys: CaseKeys, newWorkflow: VivaWorkflow) {
 export async function syncWorkflow(input: LambdaRequest, dependencies: Dependencies) {
   const { personalNumber } = input.detail.user;
 
-  const userCases = await dependencies.getSubmittedOrProcessingOrOngoingCases(personalNumber);
-
-  const caseList = userCases.Items;
-
-  const isEmptyCaseList = caseList?.length === 0;
-
+  const caseList = await dependencies.getCasesByStatusType(personalNumber, [
+    ACTIVE_ONGOING,
+    ACTIVE_SUBMITTED,
+    ACTIVE_PROCESSING,
+    CLOSED,
+  ]);
+  const isEmptyCaseList = caseList.length === 0;
   if (isEmptyCaseList) {
     return true;
   }
 
-  const caseListHasWorkflowId = caseList.filter(caseItem => !!caseItem.details.workflowId);
+  const caseListWithWorkflowId = caseList.filter(caseItem => !!caseItem.details.workflowId);
 
-  const syncPromises = caseListHasWorkflowId.map(async caseItem => {
-    const caseKeys = {
-      PK: caseItem.PK,
-      SK: caseItem.SK,
-    };
+  await Promise.all(
+    caseListWithWorkflowId.map(async caseItem => {
+      const workflow = await dependencies.getWorkflow({
+        personalNumber,
+        workflowId: caseItem.details.workflowId,
+      });
 
-    const { workflowId } = caseItem.details;
-
-    const workflow = await dependencies.getWorkflow({ personalNumber, workflowId });
-
-    await dependencies.updateCaseDetailsWorkflow(caseKeys, workflow.attributes);
-    await dependencies.syncWorkflowSuccess({ caseKeys, workflow: workflow.attributes });
-  });
-
-  await Promise.all(syncPromises);
+      const caseKeys = { PK: caseItem.PK, SK: caseItem.SK };
+      await dependencies.updateCase(caseKeys, workflow.attributes);
+      await dependencies.syncWorkflowSuccess({ caseKeys, workflow: workflow.attributes });
+    })
+  );
 
   return true;
 }
 
 export const main = log.wrap(event =>
   syncWorkflow(event, {
-    updateCaseDetailsWorkflow,
-    getSubmittedOrProcessingOrOngoingCases,
+    updateCase: updateCaseDetailsWorkflow,
+    getCasesByStatusType,
     syncWorkflowSuccess: putVivaMsEvent.syncWorkflowSuccess,
     getWorkflow: vivaAdapter.workflow.get,
   })
