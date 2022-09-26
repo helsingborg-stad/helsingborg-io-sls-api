@@ -1,35 +1,94 @@
-<h1> HELSINGBORG IO SLS VIVA MICRO SERVICE</h1>
+# HELSINGBORG IO SLS VIVA MICROSERVICE
 
 ## Purpose
 
-The purpose of Viva Micro Serivce is to provide the data flow between the aws and viva api adapter.
-
-## Description
-
-When a case changes status from ongoing to submitted, the microservice responds and sends a request to the adapter, which in turn creates a case in Viva.
+The purpose of the Viva Microserivce is to provide the data flow between AWS and the Viva api adapter - VADA.
 
 ## Requirements
 
 Read the global requirements for this repo, can be found [here](https://github.com/helsingborg-stad/helsingborg-io-sls-api/blob/dev/README.md)
 
-### Installation
+### Installation Viva Microservice
 
 ```bash
-$ npm install
+cd microservice
+yarn install
 ```
 
-### Run Local
+### Installation Viva Api
 
 ```bash
-$ sls offline
+cd api/cases
+yarn install
 ```
 
-### Deploy and Run on AWS
+### Deploy and run on AWS
 
 Deploy command:
 
 ```bash
-$ sls deploy -v
+sls deploy
 ```
 
-When you deploy the service, serverless will output the generated url in the terminal that the service can be accessed from.
+## Viva Api
+
+#### Request type
+
+`POST`
+
+#### Endpoint
+
+`/viva-cases/{caseId}/persons`
+
+#### JSON payload
+
+```json
+{
+  "personalNumber": "203010101010"
+}
+```
+
+#### Excpected response
+
+```json
+{
+  "jsonapi": {
+    "version": "1.0"
+  },
+  "data": {
+    "type": "viva-cases",
+    "attributes": "[case]"
+  }
+}
+```
+
+---
+
+## Viva submit new application sequence diagram
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant App
+  participant Lambda BankId
+  participant Lambda SubmitApplication
+  participant SQS
+  participant VADA/Viva
+  participant Lambda SyncWorkflowId
+  participant DynamoDB Cases
+
+  App->>+Lambda SubmitApplication: Submit
+  Lambda SubmitApplication-->>-App: OK
+  Lambda SubmitApplication->>+SQS: Put in queue
+  SQS->>+VADA/Viva: POST
+  VADA/Viva-->>-Lambda SubmitApplication: OK
+  App->>+Lambda BankId: Login
+  Lambda BankId-->>-App: OK
+  Lambda BankId->>+Lambda SyncWorkflowId: BankId collect
+  Lambda SyncWorkflowId->>-VADA/Viva: GET workflow/latest
+  VADA/Viva-->>+Lambda SyncWorkflowId: workflow
+  Lambda SyncWorkflowId->>+DynamoDB Cases: {workflowId}
+  DynamoDB Cases-->>-Lambda SyncWorkflowId: Update success
+```
+
+---
