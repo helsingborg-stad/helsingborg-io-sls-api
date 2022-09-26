@@ -107,8 +107,7 @@ export async function createVivaCase(
   }
 
   const formIdList = [recurringFormId, completionFormId, randomCheckFormId];
-  const isCoApplicant = coApplicant != undefined;
-  const initialFormEncryption = createCaseHelper.getFormEncryptionAttributes(isCoApplicant);
+  const initialFormEncryption = createCaseHelper.getFormEncryptionAttributes();
   const initialFormList = createCaseHelper.getInitialFormAttributes(
     formIdList,
     initialFormEncryption

@@ -76,8 +76,7 @@ export async function createNewVivaCase(
     newApplicationRandomCheckFormId,
   ];
 
-  const isCoApplicant = false;
-  const initialFormEncryption = createCaseHelper.getFormEncryptionAttributes(isCoApplicant);
+  const initialFormEncryption = createCaseHelper.getFormEncryptionAttributes();
   const initialFormList = createCaseHelper.getInitialFormAttributes(
     formIdList,
     initialFormEncryption

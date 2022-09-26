@@ -131,8 +131,7 @@ export async function submitCompletion(input: LambdaRequest, dependencies: Depen
     return false;
   }
 
-  const isCoApplicant = false;
-  const initialCompletionFormEncryption = caseHelper.getFormEncryptionAttributes(isCoApplicant);
+  const initialCompletionFormEncryption = caseHelper.getFormEncryptionAttributes();
   const initialCompletionForm = caseHelper.getInitialFormAttributes(
     [currentFormId],
     initialCompletionFormEncryption
