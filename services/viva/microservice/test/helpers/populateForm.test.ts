@@ -7,12 +7,13 @@ import formTemplate from '../mock/formTemplate.json';
 import { DEFAULT_CURRENT_POSITION } from '../../src/helpers/constants';
 
 import type { FormField } from '../../src/helpers/populateForm';
-import type { CasePerson } from '../../src/types/caseItem';
+import type { CaseForm, CasePerson } from '../../src/types/caseItem';
 import { EncryptionType, CasePersonRole } from '../../src/types/caseItem';
 
-const caseRecurringForm = {
+const caseRecurringForm: CaseForm = {
   answers: [],
   encryption: {
+    symmetricKeyName: '',
     type: EncryptionType.Decrypted,
   },
   currentPosition: DEFAULT_CURRENT_POSITION,
@@ -99,7 +100,7 @@ const expectedChildrenAnswers = [
   },
 ];
 
-const expectedPopulatedFormWithChildren = {
+const expectedPopulatedFormWithChildren: CaseForm = {
   answers: [
     {
       field: {
@@ -145,6 +146,7 @@ const expectedPopulatedFormWithChildren = {
     },
   ],
   encryption: {
+    symmetricKeyName: '',
     type: EncryptionType.Decrypted,
   },
   currentPosition: DEFAULT_CURRENT_POSITION,
