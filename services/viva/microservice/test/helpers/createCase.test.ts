@@ -140,7 +140,8 @@ describe('getInitialFormAttributes', () => {
 
     const caseEncryption: CaseFormEncryption = {
       type: EncryptionType.Decrypted,
-      symmetricKeyName: 'symmetricKeyName',
+      encryptionKeyId: 'encryptionKeyId',
+      symmetricKeyName: 'encryptionKeyId',
     };
 
     const expectedDefaultValue = {

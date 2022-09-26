@@ -23,6 +23,7 @@ const encryptedAnswers = Joi.object({
 
 const encryption = Joi.object({
   type: Joi.string().required(),
+  encryptionKeyId: Joi.string(),
   symmetricKeyName: Joi.string(),
   primes: Joi.object({
     P: Joi.number(),

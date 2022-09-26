@@ -119,6 +119,7 @@ it('calls postCompletion with form answer containing attachment', async () => {
     currentPosition: DEFAULT_CURRENT_POSITION,
     encryption: {
       symmetricKeyName: mockUuid,
+      encryptionKeyId: mockUuid,
       type: EncryptionType.Decrypted,
     },
   };
@@ -154,6 +155,7 @@ it('calls `updateCase` with correct parameters for form id: completionFormId', a
     currentPosition: DEFAULT_CURRENT_POSITION,
     encryption: {
       symmetricKeyName: mockUuid,
+      encryptionKeyId: mockUuid,
       type: EncryptionType.Decrypted,
     },
   };
