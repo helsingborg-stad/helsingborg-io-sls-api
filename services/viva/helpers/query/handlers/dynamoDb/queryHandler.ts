@@ -10,7 +10,7 @@ export const dynamoQueryHandler: DynamoQueryHandler = {
       TableName: tableName,
       Key: {
         PK: keys.PK,
-        SK: keys.SK,
+        ...(!!keys.SK && { SK: keys.SK }),
       },
     };
 
