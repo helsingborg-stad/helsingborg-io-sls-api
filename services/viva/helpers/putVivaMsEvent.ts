@@ -38,6 +38,10 @@ export const eventTypeCollection = {
     source: 'vivaMs.syncWorkflow',
     detailType: 'syncWorkflowSuccess',
   },
+  syncWorkflowIdSuccess: {
+    source: 'vivaMs.syncNewCaseWorkflowId',
+    detailType: 'syncWorkflowIdSuccess',
+  },
   htmlGeneratedSuccess: {
     source: 'vivaMs.generateRecurringCaseHtml',
     detailType: 'htmlGeneratedSuccess',
@@ -72,15 +76,13 @@ export default {
   },
   checkOpenPeriodSuccess: (detail: unknown) => putUserEvent(detail, 'checkOpenPeriodSuccess'),
   personDetailSuccess: (detail: unknown) => putUserEvent(detail, 'personDetailSuccess'),
-  applicationReceivedSuccess: (detail: unknown) =>
-    putUserEvent(detail, 'applicationReceivedSuccess'),
+  applicationReceivedSuccess: (detail: unknown) => putUserEvent(detail, 'applicationReceivedSuccess'),
   decideCaseStatusSuccess: (detail: unknown) => putUserEvent(detail, 'decideCaseStatusSuccess'),
   syncWorkflowSuccess: (detail: unknown) => putUserEvent(detail, 'syncWorkflowSuccess'),
+  syncWorkflowIdSuccess: (detail: unknown) => putUserEvent(detail, 'syncWorkflowIdSuccess'),
   htmlGeneratedSuccess: (detail: unknown) => putUserEvent(detail, 'htmlGeneratedSuccess'),
   applicationStatusSuccess: (detail: unknown) => putUserEvent(detail, 'applicationStatusSuccess'),
   setCaseCompletionsSuccess: (detail: unknown) => putUserEvent(detail, 'setCaseCompletionsSuccess'),
-  syncCaseCompletionsSuccess: (detail: unknown) =>
-    putUserEvent(detail, 'syncCaseCompletionsSuccess'),
-  checkOpenNewApplicationSuccess: (detail: unknown) =>
-    putUserEvent(detail, 'checkOpenNewApplicationSuccess'),
+  syncCaseCompletionsSuccess: (detail: unknown) => putUserEvent(detail, 'syncCaseCompletionsSuccess'),
+  checkOpenNewApplicationSuccess: (detail: unknown) => putUserEvent(detail, 'checkOpenNewApplicationSuccess'),
 };

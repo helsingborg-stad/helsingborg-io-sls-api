@@ -288,6 +288,20 @@ functions:
             source:
               - vivaMs.setCaseCompletions
 
+  syncCaseWorkflowId:
+    handler: src/lambdas/syncNewCaseWorkflowId.main
+    timeout: 30
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - vivaMs.applicationStatus
+            detail-type:
+              - applicationStatusSuccess
+            detail:
+              status:
+                code: [16]
+
   generateRecurringCaseHtml:
     handler: src/lambdas/generateRecurringCaseHtml.main
     environment:
