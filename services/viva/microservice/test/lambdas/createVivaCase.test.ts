@@ -31,6 +31,7 @@ const defaultFormProperties: CaseForm = {
   currentPosition: DEFAULT_CURRENT_POSITION,
   encryption: {
     symmetricKeyName: mockUuid,
+    encryptionKeyId: mockUuid,
     type: EncryptionType.Decrypted,
   },
 };
@@ -40,6 +41,7 @@ const partnerFormProperties = {
   currentPosition: DEFAULT_CURRENT_POSITION,
   encryption: {
     type: EncryptionType.Decrypted,
+    encryptionKeyId: mockUuid,
     symmetricKeyName: mockUuid,
   },
 };

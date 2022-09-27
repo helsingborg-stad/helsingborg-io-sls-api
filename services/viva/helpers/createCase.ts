@@ -113,9 +113,11 @@ function getInitialFormAttributes(
 }
 
 function getFormEncryptionAttributes(): CaseFormEncryption {
+  const keyId = uuid.v4();
   return {
     type: EncryptionType.Decrypted,
-    symmetricKeyName: uuid.v4(),
+    symmetricKeyName: keyId,
+    encryptionKeyId: keyId,
   };
 }
 
