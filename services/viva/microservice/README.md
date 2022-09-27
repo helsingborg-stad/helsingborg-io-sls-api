@@ -64,31 +64,50 @@ sls deploy
 
 ---
 
-## Viva submit new application sequence diagram
+## Viva submit application sequence diagram
 
 ```mermaid
 sequenceDiagram
   autonumber
-  participant App
-  participant Lambda BankId
-  participant Lambda SubmitApplication
+  participant EventBridge
   participant SQS
+  participant Lambda SubmitApplication
   participant VADA/Viva
-  participant Lambda SyncWorkflowId
   participant DynamoDB Cases
 
-  App->>+Lambda SubmitApplication: Submit
-  Lambda SubmitApplication-->>-App: OK
-  Lambda SubmitApplication->>+SQS: Put in queue
-  SQS->>+VADA/Viva: POST
-  VADA/Viva-->>-Lambda SubmitApplication: OK
-  App->>+Lambda BankId: Login
-  Lambda BankId-->>-App: OK
-  Lambda BankId->>+Lambda SyncWorkflowId: BankId collect
-  Lambda SyncWorkflowId->>-VADA/Viva: GET workflow/latest
-  VADA/Viva-->>+Lambda SyncWorkflowId: workflow
-  Lambda SyncWorkflowId->>+DynamoDB Cases: {workflowId}
-  DynamoDB Cases-->>-Lambda SyncWorkflowId: Update success
+  EventBridge-)+SQS: {event}
+
+  loop retry if not success
+    SQS-)-Lambda SubmitApplication: {SQSEvent}
+    Lambda SubmitApplication->>+VADA/Viva: POST application
+  end
+
+  VADA/Viva-->>+Lambda SubmitApplication: {status, workflowId}
+  Lambda SubmitApplication->>DynamoDB Cases: {workflowId}
+
+  Lambda SubmitApplication-)-EventBridge: {personalNumber}
 ```
 
 ---
+
+## Sync case with latest workflow id (new application)
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant EventBridge
+  participant Lambda SyncWorkflowId
+  participant VADA/Viva
+  participant DynamoDB Cases
+
+  EventBridge-)+Lambda SyncWorkflowId: {event: bankId collect}
+
+  Lambda SyncWorkflowId->>-VADA/Viva: GET mypages/{hashId}/workflow/latest
+
+  alt workflow exists
+    VADA/Viva-->>+Lambda SyncWorkflowId: {workflow}
+    Lambda SyncWorkflowId->>DynamoDB Cases: {workflowId}
+  end
+
+  Lambda SyncWorkflowId-)-EventBridge: {personalNumber}
+```
