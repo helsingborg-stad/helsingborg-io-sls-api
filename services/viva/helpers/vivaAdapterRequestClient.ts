@@ -6,16 +6,20 @@ import * as request from '../libs/request';
 import params from '../libs/params';
 import hash from '../libs/helperHashEncode';
 
-import type { VivaWorkflow } from '../types/vivaWorkflow';
+import type { VadaWorkflow, VivaWorkflow } from '../types/vivaWorkflow';
 import type {
   VivaMyPages,
-  VivaOfficersOfficer,
-  VivaMyPagesPersonApplication,
-  VivaApplicationStatus,
+  VivaOfficer,
+  VivaMyPagesApplication,
+  VivaMyPagesVivaApplication,
 } from '../types/vivaMyPages';
-import type { VadaWorkflowCompletions } from '../types/vadaCompletions';
+import type {
+  VadaApplicationsStatus,
+  VivaApplicationsStatusItem,
+} from '../types/vivaApplicationsStatus';
+import type { VadaCompletions, VadaWorkflowCompletions } from '../types/vadaCompletions';
 
-interface VadaErrorResponseData {
+interface AdapterErrorResponseData {
   error: {
     code: number;
     description: string;
@@ -23,13 +27,17 @@ interface VadaErrorResponseData {
   };
 }
 
-interface VadaResponseData<T = VivaWorkflow | VadaWorkflowCompletions | unknown> {
+interface AdapterResponseData<
+  T =
+    | VadaWorkflow
+    | VivaMyPages
+    | VivaMyPagesApplication
+    | VadaCompletions
+    | VadaApplicationsStatus
+    | unknown
+> {
   type: string;
-  attibutes: T;
-}
-
-interface VadaMyPagesResponse {
-  person: VivaMyPages;
+  attributes: T;
 }
 
 interface AdapterRequest<Body = unknown> {
@@ -38,25 +46,22 @@ interface AdapterRequest<Body = unknown> {
   body?: Body;
 }
 
-interface ConfigParams {
-  vadaUrl: string;
-  xApiKeyToken: string;
-  hashSalt: string;
-  hashSaltLength: number;
-}
-
-interface CompletionPostPayload {
+interface PostCompletionsPayload {
   personalNumber: number;
   workflowId: string;
   attachments: Record<string, unknown>[];
 }
 
-interface WorkflowGetPayload {
+interface GetWorkflowPayload {
   personalNumber: number;
   workflowId: string;
 }
+interface AdapterCompletionRequestBody {
+  workflowId: string;
+  attachments: Record<string, unknown>[];
+}
 
-interface ApplicationPostPayload {
+interface PostApplicationsPayload {
   personalNumber: number;
   applicationType: string;
   answers: Record<string, unknown>[];
@@ -66,18 +71,32 @@ interface ApplicationPostPayload {
   attachments: Record<string, unknown>[];
 }
 
-interface AdapterCompletionRequestBody {
+interface AdapterPostApplicationBody {
+  applicationType: string;
+  hashid: string;
+  answers: Record<string, unknown>[];
+  rawData: string;
+  rawDataType: string;
   workflowId: string;
   attachments: Record<string, unknown>[];
 }
 
+interface ConfigParams {
+  vadaUrl: string;
+  xApiKeyToken: string;
+  hashSalt: string;
+  hashSaltLength: number;
+}
+
 const REQUEST_TIMEOUT_IN_MS = 30000;
 
-async function sendVivaAdapterRequest<T>({
+async function sendVivaAdapterRequest<Attributes>({
   endpoint,
   method,
   body = undefined,
-}: AdapterRequest): Promise<AxiosResponse<VadaResponseData<T>, unknown> | Record<string, never>> {
+}: AdapterRequest): Promise<
+  AxiosResponse<AdapterResponseData<Attributes>> | Record<string, never>
+> {
   const { vadaUrl, xApiKeyToken } = await getVivaSsmParams();
   const requestClient = request.requestClient(
     {},
@@ -86,8 +105,8 @@ async function sendVivaAdapterRequest<T>({
   );
 
   const [requestError, response] = await to<
-    AxiosResponse<VadaResponseData<T>>,
-    AxiosError<VadaErrorResponseData>
+    AxiosResponse<AdapterResponseData<Attributes>>,
+    AxiosError<AdapterErrorResponseData>
   >(request.call(requestClient, method, `${vadaUrl}/${endpoint}`, body));
 
   if (requestError) {
@@ -112,24 +131,6 @@ async function sendVivaAdapterRequest<T>({
   return response ?? {};
 }
 
-async function postCompletion(payload: CompletionPostPayload) {
-  const { personalNumber, workflowId, attachments } = payload;
-  const { hashSalt, hashSaltLength } = await getVivaSsmParams();
-  const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
-
-  const requestParams: AdapterRequest<AdapterCompletionRequestBody> = {
-    endpoint: `applications/${hashedPersonalNumber}/completions`,
-    method: 'post',
-    body: {
-      workflowId,
-      attachments,
-    },
-  };
-
-  const response = (await sendVivaAdapterRequest(requestParams)) as unknown as AxiosResponse;
-  return response.data;
-}
-
 async function getLatestWorkflow(personalNumber: number): Promise<VivaWorkflow> {
   const { hashSalt, hashSaltLength } = await getVivaSsmParams();
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
@@ -139,56 +140,99 @@ async function getLatestWorkflow(personalNumber: number): Promise<VivaWorkflow> 
     method: 'get',
   };
 
-  const response = await sendVivaAdapterRequest<VivaWorkflow>(requestParams);
-  return response.data.attibutes;
+  const response = await sendVivaAdapterRequest<VadaWorkflow>(requestParams);
+  return response.data.attributes.workflow;
+}
+
+async function getWorkflow(payload: GetWorkflowPayload): Promise<VivaWorkflow> {
+  const { personalNumber, workflowId } = payload;
+  const { hashSalt, hashSaltLength } = await getVivaSsmParams();
+  const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
+
+  const requestParams: AdapterRequest = {
+    endpoint: `mypages/${hashedPersonalNumber}/workflows/${workflowId}`,
+    method: 'get',
+  };
+
+  const response = await sendVivaAdapterRequest<VadaWorkflow>(requestParams);
+  return response.data.attributes.workflow;
 }
 
 async function getWorkflowCompletions(
-  payload: WorkflowGetPayload
+  payload: GetWorkflowPayload
 ): Promise<VadaWorkflowCompletions> {
   const { personalNumber, workflowId } = payload;
   const { hashSalt, hashSaltLength } = await getVivaSsmParams();
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
-  const requestParams = {
+  const requestParams: AdapterRequest = {
     endpoint: `mypages/${hashedPersonalNumber}/workflows/${workflowId}/completions`,
     method: 'get',
   };
 
-  const response = await sendVivaAdapterRequest<VadaWorkflowCompletions>(requestParams);
-  return response.data.attibutes;
+  const response = await sendVivaAdapterRequest<VadaCompletions>(requestParams);
+  return response.data.attributes.completions;
 }
 
-async function getWorkflow(payload: WorkflowGetPayload): Promise<VivaWorkflow> {
-  const { personalNumber, workflowId } = payload;
+async function getOfficers(personalNumber: number): Promise<VivaOfficer[] | VivaOfficer> {
   const { hashSalt, hashSaltLength } = await getVivaSsmParams();
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
-  const requestParams = {
-    endpoint: `mypages/${hashedPersonalNumber}/workflows/${workflowId}`,
-    method: 'get',
-  };
-
-  const response = await sendVivaAdapterRequest<VivaWorkflow>(requestParams);
-  return response.data.attibutes;
-}
-
-async function getOfficers(personalNumber: number): Promise<VivaOfficersOfficer> {
-  const { hashSalt, hashSaltLength } = await getVivaSsmParams();
-  const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
-
-  const requestParams = {
+  const requestParams: AdapterRequest = {
     endpoint: `mypages/${hashedPersonalNumber}`,
     method: 'get',
   };
 
-  const response = (await sendVivaAdapterRequest(
-    requestParams
-  )) as unknown as AxiosResponse<VadaMyPagesResponse>;
-  return response.data.person.cases.vivacases.vivacase.officers;
+  const response = await sendVivaAdapterRequest<VivaMyPages>(requestParams);
+  return response.data.attributes.cases.vivacases.vivacase.officers.officer;
 }
 
-async function postApplication(payload: ApplicationPostPayload) {
+async function getApplications(personalNumber: number): Promise<VivaMyPagesVivaApplication> {
+  const { hashSalt, hashSaltLength } = await getVivaSsmParams();
+  const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
+
+  const requestParams: AdapterRequest = {
+    endpoint: `mypages/${hashedPersonalNumber}`,
+    method: 'get',
+  };
+
+  const response = await sendVivaAdapterRequest<VivaMyPagesApplication>(requestParams);
+  return response.data.attributes.vivaapplication;
+}
+
+async function getMyPages(personalNumber: number): Promise<VivaMyPages> {
+  const { hashSalt, hashSaltLength } = await getVivaSsmParams();
+  const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
+
+  const requestParams: AdapterRequest = {
+    endpoint: `mypages/${hashedPersonalNumber}`,
+    method: 'get',
+  };
+
+  const response = await sendVivaAdapterRequest<VivaMyPages>(requestParams);
+  return response.data.attributes;
+}
+
+async function getApplicationsStatus(
+  personalNumber: number
+): Promise<VivaApplicationsStatusItem[]> {
+  const { hashSalt, hashSaltLength } = await getVivaSsmParams();
+  const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
+
+  const requestParams: AdapterRequest = {
+    endpoint: `applications/${hashedPersonalNumber}/status`,
+    method: 'get',
+  };
+
+  const response = await sendVivaAdapterRequest<VadaApplicationsStatus>(requestParams);
+  return response.data.attributes.status;
+}
+
+function getVivaSsmParams(): Promise<ConfigParams> {
+  return params.read(config.vada.envsKeyName);
+}
+
+async function postApplications(payload: PostApplicationsPayload): Promise<unknown> {
   const {
     personalNumber,
     applicationType,
@@ -201,7 +245,7 @@ async function postApplication(payload: ApplicationPostPayload) {
   const { hashSalt, hashSaltLength } = await getVivaSsmParams();
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
-  const requestParams = {
+  const requestParams: AdapterRequest<AdapterPostApplicationBody> = {
     endpoint: 'applications',
     method: 'post',
     body: {
@@ -215,68 +259,40 @@ async function postApplication(payload: ApplicationPostPayload) {
     },
   };
 
-  const response = (await sendVivaAdapterRequest(requestParams)) as unknown as AxiosResponse;
+  const response = (await sendVivaAdapterRequest(requestParams)) as AxiosResponse;
   return response.data;
 }
 
-async function getApplication(personalNumber: number): Promise<VivaMyPagesPersonApplication> {
+async function postCompletions(payload: PostCompletionsPayload): Promise<unknown> {
+  const { personalNumber, workflowId, attachments } = payload;
   const { hashSalt, hashSaltLength } = await getVivaSsmParams();
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
-  const requestParams = {
-    endpoint: `mypages/${hashedPersonalNumber}`,
-    method: 'get',
+  const requestParams: AdapterRequest<AdapterCompletionRequestBody> = {
+    endpoint: `applications/${hashedPersonalNumber}/completions`,
+    method: 'post',
+    body: {
+      workflowId,
+      attachments,
+    },
   };
 
-  const response = (await sendVivaAdapterRequest(requestParams)) as unknown as AxiosResponse;
-  return response.data.person.application.vivaapplication;
-}
-
-async function getPerson(personalNumber: number): Promise<VivaMyPages> {
-  const { hashSalt, hashSaltLength } = await getVivaSsmParams();
-  const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
-
-  const requestParams = {
-    endpoint: `mypages/${hashedPersonalNumber}`,
-    method: 'get',
-  };
-
-  const response = (await sendVivaAdapterRequest(requestParams)) as unknown as AxiosResponse;
-  return {
-    cases: response.data.person.cases.vivacases.vivacase,
-    application: response.data.person.application.vivaapplication,
-  };
-}
-
-async function getApplicationStatus(personalNumber: number): Promise<VivaApplicationStatus[]> {
-  const { hashSalt, hashSaltLength } = await getVivaSsmParams();
-  const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
-
-  const requestParams = {
-    endpoint: `applications/${hashedPersonalNumber}/status`,
-    method: 'get',
-  };
-
-  const response = (await sendVivaAdapterRequest(requestParams)) as unknown as AxiosResponse;
+  const response = (await sendVivaAdapterRequest(requestParams)) as AxiosResponse;
   return response.data;
-}
-
-function getVivaSsmParams(): Promise<ConfigParams> {
-  return params.read(config.vada.envsKeyName);
 }
 
 export default {
-  completion: { post: postCompletion },
+  completions: { post: postCompletions },
   workflow: {
     get: getWorkflow,
     getLatest: getLatestWorkflow,
     getCompletions: getWorkflowCompletions,
   },
   officers: { get: getOfficers },
-  person: { get: getPerson },
-  application: {
-    post: postApplication,
-    get: getApplication,
-    status: getApplicationStatus,
+  myPages: { get: getMyPages },
+  applications: {
+    post: postApplications,
+    get: getApplications,
+    status: getApplicationsStatus,
   },
 };

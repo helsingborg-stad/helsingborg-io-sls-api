@@ -92,8 +92,3 @@ export interface VivaOfficer {
   readonly mail: string;
   readonly title: string;
 }
-
-export interface VivaApplicationStatus {
-  readonly code: number;
-  readonly description: string;
-}

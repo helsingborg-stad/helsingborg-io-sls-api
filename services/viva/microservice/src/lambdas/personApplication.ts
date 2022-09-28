@@ -14,14 +14,14 @@ export interface LambdaRequest {
   detail: LambdaDetail;
 }
 
-export interface PutEventParameters {
+export interface SuccessEvent {
   clientUser: CaseUser;
   vivaPersonDetail: VivaMyPages;
 }
 
 export interface Dependencies {
-  getVivaPerson: (personalNumber: string) => Promise<VivaMyPages>;
-  putSuccessEvent: (parameters: PutEventParameters) => Promise<void>;
+  getVivaMyPages: (personalNumber: number) => Promise<VivaMyPages>;
+  putSuccessEvent: (parameters: SuccessEvent) => Promise<void>;
 }
 
 export async function personApplication(
@@ -30,7 +30,7 @@ export async function personApplication(
 ): Promise<boolean> {
   const clientUser = input.detail.user;
 
-  const vivaPersonDetail = await dependencies.getVivaPerson(clientUser.personalNumber);
+  const vivaPersonDetail = await dependencies.getVivaMyPages(+clientUser.personalNumber);
 
   await dependencies.putSuccessEvent({
     clientUser,
@@ -42,7 +42,7 @@ export async function personApplication(
 
 export const main = log.wrap(event => {
   return personApplication(event, {
-    getVivaPerson: vivaAdapter.person.get,
+    getVivaMyPages: vivaAdapter.myPages.get,
     putSuccessEvent: putVivaMsEvent.personDetailSuccess,
   });
 });
