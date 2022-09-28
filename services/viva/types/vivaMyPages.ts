@@ -22,14 +22,18 @@ export enum VivaApplicationType {
 }
 
 export interface VivaMyPages {
-  readonly case: VivaMyPagesPersonCase;
+  readonly cases: VivaMyPagesPersonCase;
   readonly application: VivaMyPagesPersonApplication;
 }
 
 export interface VivaMyPagesPersonCase {
-  readonly client: VivaClient;
-  readonly officers: VivaOfficersOfficer;
-  readonly persons: VivaPersonsPerson | null;
+  readonly vivacases: {
+    readonly vivacase: {
+      readonly client: VivaClient;
+      readonly officers: VivaOfficersOfficer;
+      readonly persons: VivaPersonsPerson | null;
+    };
+  };
 }
 
 export interface VivaOfficersOfficer {
