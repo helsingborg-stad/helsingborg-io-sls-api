@@ -1,8 +1,8 @@
 export interface VivaParametersResponse {
-  recurringFormId: string;
-  randomCheckFormId: string;
-  completionFormId: string;
-  newApplicationFormId: string;
-  newApplicationRandomCheckFormId: string;
-  newApplicationCompletionFormId: string;
+  readonly recurringFormId: string;
+  readonly randomCheckFormId: string;
+  readonly completionFormId: string;
+  readonly newApplicationFormId: string;
+  readonly newApplicationRandomCheckFormId: string;
+  readonly newApplicationCompletionFormId: string;
 }
