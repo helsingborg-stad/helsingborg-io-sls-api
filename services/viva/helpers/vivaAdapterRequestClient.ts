@@ -9,6 +9,7 @@ import hash from '../libs/helperHashEncode';
 import type { VadaWorkflow, VivaWorkflow } from '../types/vivaWorkflow';
 import type {
   VivaMyPages,
+  VivaMyPagesVivaCase,
   VivaOfficer,
   VivaMyPagesApplication,
   VivaMyPagesVivaApplication,
@@ -61,11 +62,11 @@ interface AdapterCompletionRequestBody {
   attachments: Record<string, unknown>[];
 }
 
-interface PostApplicationsPayload {
+export interface PostApplicationsPayload {
   personalNumber: number;
   applicationType: string;
   answers: Record<string, unknown>[];
-  rawData: string;
+  rawData?: string;
   rawDataType: string;
   workflowId: string;
   attachments: Record<string, unknown>[];
@@ -174,43 +175,24 @@ async function getWorkflowCompletions(
   return response.data.attributes.completions;
 }
 
-async function getOfficers(personalNumber: number): Promise<VivaOfficer[] | VivaOfficer> {
-  const { hashSalt, hashSaltLength } = await getVivaSsmParams();
-  const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
-
-  const requestParams: AdapterRequest = {
-    endpoint: `mypages/${hashedPersonalNumber}`,
-    method: 'get',
-  };
-
+async function getOfficers(
+  personalNumber: number
+): Promise<VivaOfficer[] | VivaOfficer | undefined> {
+  const requestParams = await createVivaMyPagesAdapterRequest(personalNumber);
   const response = await sendVivaAdapterRequest<VivaMyPages>(requestParams);
-  return response.data.attributes.cases.vivacases.vivacase.officers.officer;
+  return response.data.attributes.cases.vivacases.vivacase.officers?.officer;
 }
 
-async function getApplications(personalNumber: number): Promise<VivaMyPagesVivaApplication> {
-  const { hashSalt, hashSaltLength } = await getVivaSsmParams();
-  const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
+async function getMyPages(personalNumber: number): Promise<VivaMyPagesVivaCase> {
+  const requestParams = await createVivaMyPagesAdapterRequest(personalNumber);
+  const response = await sendVivaAdapterRequest<VivaMyPages>(requestParams);
+  return response.data.attributes.cases.vivacases.vivacase;
+}
 
-  const requestParams: AdapterRequest = {
-    endpoint: `mypages/${hashedPersonalNumber}`,
-    method: 'get',
-  };
-
+async function getApplication(personalNumber: number): Promise<VivaMyPagesVivaApplication> {
+  const requestParams = await createVivaMyPagesAdapterRequest(personalNumber);
   const response = await sendVivaAdapterRequest<VivaMyPagesApplication>(requestParams);
   return response.data.attributes.vivaapplication;
-}
-
-async function getMyPages(personalNumber: number): Promise<VivaMyPages> {
-  const { hashSalt, hashSaltLength } = await getVivaSsmParams();
-  const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
-
-  const requestParams: AdapterRequest = {
-    endpoint: `mypages/${hashedPersonalNumber}`,
-    method: 'get',
-  };
-
-  const response = await sendVivaAdapterRequest<VivaMyPages>(requestParams);
-  return response.data.attributes;
 }
 
 async function getApplicationsStatus(
@@ -228,11 +210,23 @@ async function getApplicationsStatus(
   return response.data.attributes.status;
 }
 
+async function createVivaMyPagesAdapterRequest(personalNumber: number): Promise<AdapterRequest> {
+  const { hashSalt, hashSaltLength } = await getVivaSsmParams();
+  const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
+
+  return {
+    endpoint: `mypages/${hashedPersonalNumber}`,
+    method: 'get',
+  };
+}
+
 function getVivaSsmParams(): Promise<ConfigParams> {
   return params.read(config.vada.envsKeyName);
 }
 
-async function postApplications(payload: PostApplicationsPayload): Promise<unknown> {
+async function postApplications(
+  payload: PostApplicationsPayload
+): Promise<Record<string, unknown>> {
   const {
     personalNumber,
     applicationType,
@@ -263,7 +257,7 @@ async function postApplications(payload: PostApplicationsPayload): Promise<unkno
   return response.data;
 }
 
-async function postCompletions(payload: PostCompletionsPayload): Promise<unknown> {
+async function postCompletions(payload: PostCompletionsPayload): Promise<Record<string, unknown>> {
   const { personalNumber, workflowId, attachments } = payload;
   const { hashSalt, hashSaltLength } = await getVivaSsmParams();
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
@@ -292,7 +286,7 @@ export default {
   myPages: { get: getMyPages },
   applications: {
     post: postApplications,
-    get: getApplications,
+    get: getApplication,
     status: getApplicationsStatus,
   },
 };

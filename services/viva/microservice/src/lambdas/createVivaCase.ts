@@ -22,7 +22,7 @@ import populateFormWithVivaChildren from '../helpers/populateForm';
 import { CasePersonRole } from '../types/caseItem';
 import type { CaseUser, CaseItem, CaseForm, CasePeriod, CaseStatus } from '../types/caseItem';
 import type { VivaParametersResponse } from '../types/ssmParameters';
-import type { VivaMyPages } from '../types/vivaMyPages';
+import type { VivaMyPagesVivaCase, VivaMyPagesVivaApplication } from '../types/vivaMyPages';
 
 interface DynamoDbQueryOutput {
   Items: CaseItem[];
@@ -36,7 +36,8 @@ export interface DynamoDbPutParams {
 
 interface LambdaDetails {
   clientUser: CaseUser;
-  vivaPersonDetail: VivaMyPages;
+  myPages: VivaMyPagesVivaCase;
+  application: VivaMyPagesVivaApplication;
 }
 
 export interface LambdaRequest {
@@ -55,9 +56,9 @@ export async function createVivaCase(
   input: LambdaRequest,
   dependencies: Dependencies
 ): Promise<boolean> {
-  const { clientUser: user, vivaPersonDetail: vivaMyPages } = input.detail;
+  const { clientUser: user, myPages, application } = input.detail;
 
-  const period = createCaseHelper.getPeriodInMilliseconds(vivaMyPages.application.period);
+  const period = createCaseHelper.getPeriodInMilliseconds(application.period);
   const caseList = await dependencies.getCaseListByPeriod(user.personalNumber, period);
   if (caseList?.Count > 0) {
     log.writeInfo('Case with specified period already exists. Case id:', caseList.Items[0]?.id);
@@ -69,7 +70,7 @@ export async function createVivaCase(
   );
 
   const applicantPersonalNumber = createCaseHelper.stripNonNumericalCharacters(
-    vivaMyPages.case.client.pnumber
+    myPages.client.pnumber
   );
 
   const id = uuid.v4();
@@ -77,8 +78,8 @@ export async function createVivaCase(
   const SK = `CASE#${id}`;
   const timestampNow = Date.now();
   const initialStatus: CaseStatus = getStatusByType(NOT_STARTED_VIVA);
-  const workflowId = vivaMyPages.application?.workflowid ?? null;
-  const casePersonList = createCaseHelper.getCasePersonList(vivaMyPages.case);
+  const workflowId = application?.workflowid ?? null;
+  const casePersonList = createCaseHelper.getCasePersonList(myPages.persons);
   const expirationTime = millisecondsToSeconds(getFutureTimestamp(TWELVE_HOURS));
 
   const newRecurringCase: CaseItem = {

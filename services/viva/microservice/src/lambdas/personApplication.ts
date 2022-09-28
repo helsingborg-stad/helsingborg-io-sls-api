@@ -3,11 +3,14 @@ import log from '../libs/logs';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
-import type { CaseUser } from '../types/caseItem';
-import type { VivaMyPages } from '../types/vivaMyPages';
+import type { VivaMyPagesVivaCase } from '../types/vivaMyPages';
+
+interface User {
+  personalNumber: string;
+}
 
 export interface LambdaDetail {
-  user: CaseUser;
+  user: User;
 }
 
 export interface LambdaRequest {
@@ -15,12 +18,12 @@ export interface LambdaRequest {
 }
 
 export interface SuccessEvent {
-  clientUser: CaseUser;
-  vivaPersonDetail: VivaMyPages;
+  clientUser: User;
+  vivaPersonDetail: VivaMyPagesVivaCase;
 }
 
 export interface Dependencies {
-  getVivaMyPages: (personalNumber: number) => Promise<VivaMyPages>;
+  getMyPages: (personalNumber: number) => Promise<VivaMyPagesVivaCase>;
   putSuccessEvent: (parameters: SuccessEvent) => Promise<void>;
 }
 
@@ -30,7 +33,7 @@ export async function personApplication(
 ): Promise<boolean> {
   const clientUser = input.detail.user;
 
-  const vivaPersonDetail = await dependencies.getVivaMyPages(+clientUser.personalNumber);
+  const vivaPersonDetail = await dependencies.getMyPages(+clientUser.personalNumber);
 
   await dependencies.putSuccessEvent({
     clientUser,
@@ -42,7 +45,7 @@ export async function personApplication(
 
 export const main = log.wrap(event => {
   return personApplication(event, {
-    getVivaMyPages: vivaAdapter.myPages.get,
+    getMyPages: vivaAdapter.myPages.get,
     putSuccessEvent: putVivaMsEvent.personDetailSuccess,
   });
 });

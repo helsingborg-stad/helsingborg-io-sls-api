@@ -42,7 +42,7 @@ export interface VivaMyPagesVivaCases {
 
 export interface VivaMyPagesVivaCase {
   readonly client: VivaClient;
-  readonly officers: VivaOfficersOfficer;
+  readonly officers?: VivaOfficersOfficer;
   readonly persons: VivaPersonsPerson | null;
 }
 
