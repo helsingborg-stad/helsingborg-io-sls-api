@@ -1,14 +1,35 @@
+import { AxiosError, AxiosResponse } from 'axios';
 import to from 'await-to-js';
 
 import config from '../libs/config';
-
 import * as request from '../libs/request';
 import params from '../libs/params';
 import hash from '../libs/helperHashEncode';
 
+import type { VivaWorkflow } from '../types/vivaWorkflow';
+import type { VivaMyPages } from '../types/vivaMyPages';
+import type { VadaWorkflowCompletions } from '../types/vadaCompletions';
+
+interface VadaErrorResponseData {
+  error: {
+    code: number;
+    description: string;
+    details: string;
+  };
+}
+
+interface VadaResponse<TAttributes = VivaWorkflow | VivaMyPages | VadaWorkflowCompletions> {
+  type: string;
+  attibutes: TAttributes;
+}
+
+interface RequestClientResponse<TAttributesData> {
+  data: TAttributesData;
+}
+
 const REQUEST_TIMEOUT_IN_MS = 30000;
 
-async function sendVivaAdapterRequest({ endpoint, method, body = undefined }) {
+async function sendVivaAdapterRequest<TVadaResponse>({ endpoint, method, body = undefined }) {
   const { vadaUrl, xApiKeyToken } = await getVivaSsmParams();
   const requestClient = request.requestClient(
     {},
@@ -16,9 +37,10 @@ async function sendVivaAdapterRequest({ endpoint, method, body = undefined }) {
     REQUEST_TIMEOUT_IN_MS
   );
 
-  const [requestError, response] = await to(
-    request.call(requestClient, method, `${vadaUrl}/${endpoint}`, body)
-  );
+  const [requestError, response]: [
+    AxiosError<VadaErrorResponseData, unknown> | null,
+    AxiosResponse<RequestClientResponse<TVadaResponse>, unknown> | undefined
+  ] = await to(request.call(requestClient, method, `${vadaUrl}/${endpoint}`, body));
 
   if (requestError) {
     if (requestError.response) {
@@ -60,7 +82,7 @@ async function postCompletion(payload) {
   return response.data;
 }
 
-async function getLatestWorkflow(personalNumber) {
+async function getLatestWorkflow(personalNumber: number): Promise<VadaResponse<VivaWorkflow>> {
   const { hashSalt, hashSaltLength } = await getVivaSsmParams();
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
@@ -69,7 +91,7 @@ async function getLatestWorkflow(personalNumber) {
     method: 'get',
   };
 
-  const response = await sendVivaAdapterRequest(requestParams);
+  const response = await sendVivaAdapterRequest<VadaResponse<VivaWorkflow>>(requestParams);
   return response.data;
 }
 
