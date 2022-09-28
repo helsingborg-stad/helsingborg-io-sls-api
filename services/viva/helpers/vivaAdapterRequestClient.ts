@@ -7,7 +7,12 @@ import params from '../libs/params';
 import hash from '../libs/helperHashEncode';
 
 import type { VivaWorkflow } from '../types/vivaWorkflow';
-import type { VivaMyPages } from '../types/vivaMyPages';
+import type {
+  VivaMyPages,
+  VivaOfficersOfficer,
+  VivaMyPagesPersonApplication,
+  VivaApplicationStatus,
+} from '../types/vivaMyPages';
 import type { VadaWorkflowCompletions } from '../types/vadaCompletions';
 
 interface VadaErrorResponseData {
@@ -18,18 +23,61 @@ interface VadaErrorResponseData {
   };
 }
 
-interface VadaResponse<TAttributes = VivaWorkflow | VivaMyPages | VadaWorkflowCompletions> {
+interface VadaResponseData<T = VivaWorkflow | VadaWorkflowCompletions | unknown> {
   type: string;
-  attibutes: TAttributes;
+  attibutes: T;
 }
 
-interface RequestClientResponse<TAttributesData> {
-  data: TAttributesData;
+interface VadaMyPagesResponse {
+  person: VivaMyPages;
+}
+
+interface AdapterRequest<Body = unknown> {
+  endpoint: string;
+  method: string;
+  body?: Body;
+}
+
+interface ConfigParams {
+  vadaUrl: string;
+  xApiKeyToken: string;
+  hashSalt: string;
+  hashSaltLength: number;
+}
+
+interface CompletionPostPayload {
+  personalNumber: number;
+  workflowId: string;
+  attachments: Record<string, unknown>[];
+}
+
+interface WorkflowGetPayload {
+  personalNumber: number;
+  workflowId: string;
+}
+
+interface ApplicationPostPayload {
+  personalNumber: number;
+  applicationType: string;
+  answers: Record<string, unknown>[];
+  rawData: string;
+  rawDataType: string;
+  workflowId: string;
+  attachments: Record<string, unknown>[];
+}
+
+interface AdapterCompletionRequestBody {
+  workflowId: string;
+  attachments: Record<string, unknown>[];
 }
 
 const REQUEST_TIMEOUT_IN_MS = 30000;
 
-async function sendVivaAdapterRequest<TVadaResponse>({ endpoint, method, body = undefined }) {
+async function sendVivaAdapterRequest<T>({
+  endpoint,
+  method,
+  body = undefined,
+}: AdapterRequest): Promise<AxiosResponse<VadaResponseData<T>, unknown> | Record<string, never>> {
   const { vadaUrl, xApiKeyToken } = await getVivaSsmParams();
   const requestClient = request.requestClient(
     {},
@@ -37,10 +85,10 @@ async function sendVivaAdapterRequest<TVadaResponse>({ endpoint, method, body = 
     REQUEST_TIMEOUT_IN_MS
   );
 
-  const [requestError, response]: [
-    AxiosError<VadaErrorResponseData, unknown> | null,
-    AxiosResponse<RequestClientResponse<TVadaResponse>, unknown> | undefined
-  ] = await to(request.call(requestClient, method, `${vadaUrl}/${endpoint}`, body));
+  const [requestError, response] = await to<
+    AxiosResponse<VadaResponseData<T>>,
+    AxiosError<VadaErrorResponseData>
+  >(request.call(requestClient, method, `${vadaUrl}/${endpoint}`, body));
 
   if (requestError) {
     if (requestError.response) {
@@ -61,15 +109,15 @@ async function sendVivaAdapterRequest<TVadaResponse>({ endpoint, method, body = 
     }
   }
 
-  return response;
+  return response ?? {};
 }
 
-async function postCompletion(payload) {
+async function postCompletion(payload: CompletionPostPayload) {
   const { personalNumber, workflowId, attachments } = payload;
   const { hashSalt, hashSaltLength } = await getVivaSsmParams();
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
-  const requestParams = {
+  const requestParams: AdapterRequest<AdapterCompletionRequestBody> = {
     endpoint: `applications/${hashedPersonalNumber}/completions`,
     method: 'post',
     body: {
@@ -78,24 +126,26 @@ async function postCompletion(payload) {
     },
   };
 
-  const response = await sendVivaAdapterRequest(requestParams);
+  const response = (await sendVivaAdapterRequest(requestParams)) as unknown as AxiosResponse;
   return response.data;
 }
 
-async function getLatestWorkflow(personalNumber: number): Promise<VadaResponse<VivaWorkflow>> {
+async function getLatestWorkflow(personalNumber: number): Promise<VivaWorkflow> {
   const { hashSalt, hashSaltLength } = await getVivaSsmParams();
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
-  const requestParams = {
+  const requestParams: AdapterRequest = {
     endpoint: `mypages/${hashedPersonalNumber}/workflows/latest`,
     method: 'get',
   };
 
-  const response = await sendVivaAdapterRequest<VadaResponse<VivaWorkflow>>(requestParams);
-  return response.data;
+  const response = await sendVivaAdapterRequest<VivaWorkflow>(requestParams);
+  return response.data.attibutes;
 }
 
-async function getWorkflowCompletions(payload) {
+async function getWorkflowCompletions(
+  payload: WorkflowGetPayload
+): Promise<VadaWorkflowCompletions> {
   const { personalNumber, workflowId } = payload;
   const { hashSalt, hashSaltLength } = await getVivaSsmParams();
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
@@ -105,11 +155,11 @@ async function getWorkflowCompletions(payload) {
     method: 'get',
   };
 
-  const response = await sendVivaAdapterRequest(requestParams);
-  return response.data;
+  const response = await sendVivaAdapterRequest<VadaWorkflowCompletions>(requestParams);
+  return response.data.attibutes;
 }
 
-async function getWorkflow(payload) {
+async function getWorkflow(payload: WorkflowGetPayload): Promise<VivaWorkflow> {
   const { personalNumber, workflowId } = payload;
   const { hashSalt, hashSaltLength } = await getVivaSsmParams();
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
@@ -119,11 +169,11 @@ async function getWorkflow(payload) {
     method: 'get',
   };
 
-  const response = await sendVivaAdapterRequest(requestParams);
-  return response.data;
+  const response = await sendVivaAdapterRequest<VivaWorkflow>(requestParams);
+  return response.data.attibutes;
 }
 
-async function getOfficers(personalNumber) {
+async function getOfficers(personalNumber: number): Promise<VivaOfficersOfficer> {
   const { hashSalt, hashSaltLength } = await getVivaSsmParams();
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
@@ -132,11 +182,13 @@ async function getOfficers(personalNumber) {
     method: 'get',
   };
 
-  const response = await sendVivaAdapterRequest(requestParams);
+  const response = (await sendVivaAdapterRequest(
+    requestParams
+  )) as unknown as AxiosResponse<VadaMyPagesResponse>;
   return response.data.person.cases.vivacases.vivacase.officers;
 }
 
-async function postApplication(payload) {
+async function postApplication(payload: ApplicationPostPayload) {
   const {
     personalNumber,
     applicationType,
@@ -163,11 +215,11 @@ async function postApplication(payload) {
     },
   };
 
-  const response = await sendVivaAdapterRequest(requestParams);
+  const response = (await sendVivaAdapterRequest(requestParams)) as unknown as AxiosResponse;
   return response.data;
 }
 
-async function getApplication(personalNumber) {
+async function getApplication(personalNumber: number): Promise<VivaMyPagesPersonApplication> {
   const { hashSalt, hashSaltLength } = await getVivaSsmParams();
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
@@ -176,11 +228,11 @@ async function getApplication(personalNumber) {
     method: 'get',
   };
 
-  const response = await sendVivaAdapterRequest(requestParams);
+  const response = (await sendVivaAdapterRequest(requestParams)) as unknown as AxiosResponse;
   return response.data.person.application.vivaapplication;
 }
 
-async function getPerson(personalNumber) {
+async function getPerson(personalNumber: number): Promise<VivaMyPages> {
   const { hashSalt, hashSaltLength } = await getVivaSsmParams();
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
@@ -189,14 +241,14 @@ async function getPerson(personalNumber) {
     method: 'get',
   };
 
-  const response = await sendVivaAdapterRequest(requestParams);
+  const response = (await sendVivaAdapterRequest(requestParams)) as unknown as AxiosResponse;
   return {
-    case: response.data.person.cases.vivacases.vivacase,
+    cases: response.data.person.cases.vivacases.vivacase,
     application: response.data.person.application.vivaapplication,
   };
 }
 
-async function getApplicationStatus(personalNumber) {
+async function getApplicationStatus(personalNumber: number): Promise<VivaApplicationStatus[]> {
   const { hashSalt, hashSaltLength } = await getVivaSsmParams();
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
@@ -205,11 +257,11 @@ async function getApplicationStatus(personalNumber) {
     method: 'get',
   };
 
-  const response = await sendVivaAdapterRequest(requestParams);
+  const response = (await sendVivaAdapterRequest(requestParams)) as unknown as AxiosResponse;
   return response.data;
 }
 
-function getVivaSsmParams() {
+function getVivaSsmParams(): Promise<ConfigParams> {
   return params.read(config.vada.envsKeyName);
 }
 
