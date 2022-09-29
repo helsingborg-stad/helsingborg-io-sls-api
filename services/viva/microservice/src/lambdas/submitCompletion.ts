@@ -25,12 +25,8 @@ export interface LambdaRequest {
   readonly detail: LambdaDetail;
 }
 
-interface PostCompletionResponse {
-  readonly status: string;
-}
-
-interface PostCompletionRequest {
-  personalNumber: string;
+interface PostCompletionsRequest {
+  personalNumber: number;
   workflowId: string;
   attachments: CaseAttachment[];
 }
@@ -46,11 +42,14 @@ interface UpdateCaseParameters {
   currentFormId: string;
   initialCompletionForm: Record<string, CaseForm>;
 }
+interface PostCompletionsResponse {
+  status: string;
+}
 
 export interface Dependencies {
   getCase: (keys: EventDetailCaseKeys) => Promise<CaseItem>;
   readParams: (name: string) => Promise<SSMParamsReadResponse>;
-  postCompletion: (payload: PostCompletionRequest) => Promise<PostCompletionResponse>;
+  postCompletions: (payload: PostCompletionsRequest) => Promise<PostCompletionsResponse>;
   updateCase: (params: UpdateCaseParameters) => Promise<void>;
   getAttachments: (
     personalNumber: string,
@@ -96,17 +95,15 @@ function deleteS3Attachments(attachments: CaseAttachment[]) {
 
 export async function submitCompletion(input: LambdaRequest, dependencies: Dependencies) {
   const { caseKeys } = input.detail;
-  const { getCase, readParams, postCompletion, updateCase, getAttachments, deleteAttachments } =
-    dependencies;
 
-  const caseItem = await getCase(caseKeys);
+  const caseItem = await dependencies.getCase(caseKeys);
   if (!caseItem) {
     log.writeWarn(`Requested case item with SK: ${caseKeys.SK}, was not found in the cases table`);
     return true;
   }
 
   const { currentFormId } = caseItem;
-  const { randomCheckFormId, completionFormId } = await readParams(
+  const { randomCheckFormId, completionFormId } = await dependencies.readParams(
     config.cases.providers.viva.envsKeyName
   );
   const isCompletionForm = [randomCheckFormId, completionFormId].includes(currentFormId);
@@ -116,11 +113,11 @@ export async function submitCompletion(input: LambdaRequest, dependencies: Depen
 
   const personalNumber = caseItem.PK.substring(5);
   const caseAnswers = caseItem.forms?.[currentFormId]?.answers ?? [];
-  const attachments = await getAttachments(personalNumber, caseAnswers);
+  const attachments = await dependencies.getAttachments(personalNumber, caseAnswers);
   const workflowId = caseItem.details.workflowId ?? '';
 
-  const postCompletionResponse = await postCompletion({
-    personalNumber,
+  const postCompletionResponse = await dependencies.postCompletions({
+    personalNumber: +personalNumber,
     workflowId,
     attachments,
   });
@@ -144,8 +141,8 @@ export async function submitCompletion(input: LambdaRequest, dependencies: Depen
     newState: getReceivedState(currentFormId, randomCheckFormId),
   };
 
-  await updateCase(updateCaseParams);
-  await deleteAttachments(attachments);
+  await dependencies.updateCase(updateCaseParams);
+  await dependencies.deleteAttachments(attachments);
 
   return true;
 }
@@ -154,7 +151,7 @@ export const main = log.wrap(async event => {
   return submitCompletion(event, {
     getCase: cases.get,
     readParams: params.read,
-    postCompletion: vivaAdapter.completion.post,
+    postCompletions: vivaAdapter.completions.post,
     updateCase,
     getAttachments: attachment.createFromAnswers,
     deleteAttachments: deleteS3Attachments,

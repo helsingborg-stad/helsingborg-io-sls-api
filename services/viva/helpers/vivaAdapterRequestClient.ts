@@ -22,6 +22,13 @@ import type { VadaCompletions, VadaWorkflowCompletions } from '../types/vadaComp
 import type { CaseAttachment } from '../helpers/attachment';
 import type { CaseFormAnswer } from '../types/caseItem';
 
+interface ConfigParams {
+  vadaUrl: string;
+  xApiKeyToken: string;
+  hashSalt: string;
+  hashSaltLength: number;
+}
+
 interface AdapterErrorResponseData {
   error: {
     code: number;
@@ -49,17 +56,13 @@ interface AdapterRequest<Body = unknown> {
   body?: Body;
 }
 
-interface PostCompletionsPayload {
-  personalNumber: number;
-  workflowId: string;
-  attachments: CaseAttachment[];
-}
-
 interface GetWorkflowPayload {
   personalNumber: number;
   workflowId: string;
 }
-interface AdapterCompletionsRequestBody {
+
+interface PostCompletionsPayload {
+  personalNumber: number;
   workflowId: string;
   attachments: CaseAttachment[];
 }
@@ -74,9 +77,14 @@ export interface PostApplicationsPayload {
   attachments: CaseAttachment[];
 }
 
+interface AdapterCompletionsRequestBody {
+  workflowId: string;
+  attachments: CaseAttachment[];
+}
+
 interface AdapterPostApplicationsBody {
-  applicationType: string;
   hashid: string;
+  applicationType: string;
   answers: CaseFormAnswer[];
   rawData: string;
   rawDataType: string;
@@ -84,11 +92,8 @@ interface AdapterPostApplicationsBody {
   attachments: CaseAttachment[];
 }
 
-interface ConfigParams {
-  vadaUrl: string;
-  xApiKeyToken: string;
-  hashSalt: string;
-  hashSaltLength: number;
+interface PostCompletionsResponse {
+  status: string;
 }
 
 const REQUEST_TIMEOUT_IN_MS = 30000;
@@ -259,7 +264,7 @@ async function postApplications(
   return response.data;
 }
 
-async function postCompletions(payload: PostCompletionsPayload): Promise<Record<string, unknown>> {
+async function postCompletions(payload: PostCompletionsPayload): Promise<PostCompletionsResponse> {
   const { personalNumber, workflowId, attachments } = payload;
   const { hashSalt, hashSaltLength } = await getVivaSsmParams();
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
