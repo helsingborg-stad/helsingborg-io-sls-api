@@ -149,7 +149,7 @@ async function getLatestWorkflow(personalNumber: number): Promise<VivaWorkflow> 
   };
 
   const response = await sendVivaAdapterRequest<VadaWorkflow>(requestParams);
-  return response.data.attributes.workflow;
+  return response.data.attributes.latestWorkflow;
 }
 
 async function getWorkflow(payload: GetWorkflowPayload): Promise<VivaWorkflow> {
@@ -163,7 +163,7 @@ async function getWorkflow(payload: GetWorkflowPayload): Promise<VivaWorkflow> {
   };
 
   const response = await sendVivaAdapterRequest<VadaWorkflow>(requestParams);
-  return response.data.attributes.workflow;
+  return response.data.attributes.latestWorkflow;
 }
 
 async function getWorkflowCompletions(

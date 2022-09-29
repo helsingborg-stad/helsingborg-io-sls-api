@@ -1,5 +1,5 @@
 export interface VadaWorkflow {
-  readonly workflow: VivaWorkflow;
+  readonly latestWorkflow: VivaWorkflow;
 }
 
 export interface VivaWorkflow {
