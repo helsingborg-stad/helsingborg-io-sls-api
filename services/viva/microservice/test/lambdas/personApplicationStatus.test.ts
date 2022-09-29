@@ -1,9 +1,9 @@
 import { personApplicationStatus } from '../../src/lambdas/personApplicationStatus';
 
 import type { LambdaRequest } from '../../src/lambdas/personApplicationStatus';
-import type { VivaApplicationStatus } from '../../src/types/vivaMyPages';
+import type { VivaApplicationsStatusItem } from '../../src/types/vivaApplicationsStatus';
 
-function createInput(status: VivaApplicationStatus[]): LambdaRequest {
+function createInput(status: VivaApplicationsStatusItem[]): LambdaRequest {
   return {
     detail: {
       user: {

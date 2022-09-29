@@ -6,16 +6,16 @@ import {
 } from '../../src/libs/constants';
 import {
   Dependencies,
-  GetWorkflowResult,
   LambdaRequest,
   syncWorkflow,
   createAttributeValues,
   filterExpressionMapper,
 } from '../../src/lambdas/syncWorkflow';
-import { CaseItem } from '../../src/types/caseItem';
+import type { CaseItem } from '../../src/types/caseItem';
+import type { VivaWorkflow } from '../../src/types/vivaWorkflow';
 
 type MockDependencies = Dependencies & {
-  workflow?: GetWorkflowResult;
+  workflow?: VivaWorkflow;
 };
 
 const PK = 'USER#199001011234';
@@ -35,13 +35,11 @@ const input: LambdaRequest = {
   },
 };
 
-function createWorkflow(): GetWorkflowResult {
+function createWorkflow(): VivaWorkflow {
   return {
-    attributes: {
-      workflowid: WORKFLOW_ID,
-      application: {},
-    },
-  } as GetWorkflowResult;
+    workflowid: WORKFLOW_ID,
+    application: {},
+  } as VivaWorkflow;
 }
 
 function createCase(workflowId: string = WORKFLOW_ID): CaseItem {
@@ -76,7 +74,7 @@ it('Syncs cases', async () => {
   expect(result).toBe(true);
   expect(dependencies.syncWorkflowSuccess).toHaveBeenCalledWith({
     caseKeys,
-    workflow: dependencies.workflow?.attributes,
+    workflow: dependencies.workflow,
   });
 });
 

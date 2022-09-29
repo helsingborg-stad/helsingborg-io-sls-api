@@ -1,5 +1,5 @@
 import { checkApplicationStatus, LambdaRequest } from '../../src/lambdas/applicationStatus';
-import { VivaApplicationStatus } from '../../src/types/vivaMyPages';
+import { VivaApplicationsStatusItem } from '../../src/types/vivaApplicationsStatus';
 
 const MOCK_INPUT: LambdaRequest = {
   detail: {
@@ -7,14 +7,14 @@ const MOCK_INPUT: LambdaRequest = {
   },
 };
 
-const MOCK_STATUSES: VivaApplicationStatus[] = [
+const MOCK_STATUSES: VivaApplicationsStatusItem[] = [
   {
     code: 1,
     description: 'hello world',
   },
 ];
 
-function getStatus(): Promise<VivaApplicationStatus[]> {
+function getStatus(): Promise<VivaApplicationsStatusItem[]> {
   return Promise.resolve(MOCK_STATUSES);
 }
 

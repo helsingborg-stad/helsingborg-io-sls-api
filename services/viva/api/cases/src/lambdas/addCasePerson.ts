@@ -15,7 +15,7 @@ import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
 import { CasePersonRole } from '../types/caseItem';
 import type { CaseItem, CasePerson, CaseForm } from '../types/caseItem';
-import type { VivaApplicationStatus } from '../types/vivaMyPages';
+import type { VivaApplicationsStatusItem } from '../types/vivaApplicationsStatus';
 
 type CaseKeys = Pick<CaseItem, 'PK' | 'SK'>;
 
@@ -55,7 +55,7 @@ interface UpdateCaseParameters {
 export interface Dependencies {
   decodeToken: (params: LambdaRequest) => Token;
   updateCase: (params: UpdateCaseParameters) => Promise<UpdateCaseAddPersonResponse>;
-  coApplicantStatus: (personalNumber: string) => Promise<unknown>;
+  coApplicantStatus: (personalNumber: number) => Promise<VivaApplicationsStatusItem[]>;
   validateCoApplicantStatus: typeof validateApplicationStatus;
   getCase: (keys: CaseKeys) => Promise<CaseItem>;
   getFormTemplates: typeof getFormTemplates;
@@ -89,17 +89,7 @@ function updateCase(params: UpdateCaseParameters): Promise<UpdateCaseAddPersonRe
 }
 
 export async function addCasePerson(input: LambdaRequest, dependencies: Dependencies) {
-  const {
-    getCase,
-    decodeToken,
-    getFormTemplates,
-    coApplicantStatus,
-    validateCoApplicantStatus,
-    updateCase,
-    populateForm,
-  } = dependencies;
-
-  const applicant = decodeToken(input);
+  const applicant = dependencies.decodeToken(input);
   const coApplicantRequestBody = JSON.parse(input.body) as AddCasePersonRequest;
 
   const isApplicantAndCoApplicantTheSamePerson =
@@ -109,12 +99,10 @@ export async function addCasePerson(input: LambdaRequest, dependencies: Dependen
     return response.failure(new BadRequestError(message));
   }
 
-  const statusList = (await coApplicantStatus(
-    coApplicantRequestBody.personalNumber
-  )) as VivaApplicationStatus[];
+  const statusList = await dependencies.coApplicantStatus(+coApplicantRequestBody.personalNumber);
 
   const coApplicantAllowedStatusCode = [VIVA_STATUS_NEW_APPLICATION_OPEN];
-  if (!validateCoApplicantStatus(statusList, coApplicantAllowedStatusCode)) {
+  if (!dependencies.validateCoApplicantStatus(statusList, coApplicantAllowedStatusCode)) {
     const message = process.env.forbiddenMessage ?? '';
     return response.failure(new ForbiddenError(message));
   }
@@ -124,7 +112,7 @@ export async function addCasePerson(input: LambdaRequest, dependencies: Dependen
     SK: `CASE#${input.pathParameters.caseId}`,
   };
 
-  const caseItem = await getCase(caseKeys);
+  const caseItem = await dependencies.getCase(caseKeys);
 
   const caseForm = {
     [caseItem.currentFormId]: caseItem.forms?.[caseItem.currentFormId],
@@ -138,19 +126,19 @@ export async function addCasePerson(input: LambdaRequest, dependencies: Dependen
     hasSigned: false,
   };
 
-  const formTemplates = (await getFormTemplates([caseItem.currentFormId])) as Record<
+  const formTemplates = (await dependencies.getFormTemplates([caseItem.currentFormId])) as Record<
     string,
     CaseForm
   >;
 
-  const formWithCoApplicant: Record<string, CaseForm> = populateForm(
+  const formWithCoApplicant: Record<string, CaseForm> = dependencies.populateForm(
     caseForm,
     [coApplicant],
     formTemplates,
     {}
   );
 
-  const updateCaseResult = await updateCase({
+  const updateCaseResult = await dependencies.updateCase({
     caseKeys,
     coApplicant,
     form: formWithCoApplicant,
@@ -171,7 +159,7 @@ export const main = log.wrap(async event => {
     decodeToken,
     updateCase,
     getFormTemplates,
-    coApplicantStatus: vivaAdapter.application.status,
+    coApplicantStatus: vivaAdapter.applications.status,
     validateCoApplicantStatus: validateApplicationStatus,
     getCase: cases.get,
     populateForm: populateFormWithPreviousCaseAnswers,

@@ -63,7 +63,7 @@ function createDependencies(
   return {
     getCase: () => Promise.resolve(caseToUse),
     readParams: () => Promise.resolve({ randomCheckFormId, completionFormId }),
-    postCompletion: () => Promise.resolve({ status: 'OK' }),
+    postCompletions: () => Promise.resolve({ status: 'OK' }),
     updateCase: () => Promise.resolve(),
     getAttachments: () => Promise.resolve([]),
     deleteAttachments: () => Promise.resolve(undefined),
@@ -107,7 +107,7 @@ it('returns false if VADA `postCompletionResponse` is successful but `status` is
   const result = await submitCompletion(
     createInput(),
     createDependencies(createCase({ currentFormId: randomCheckFormId }), {
-      postCompletion: () => Promise.resolve({ status: 'ERROR' }),
+      postCompletions: () => Promise.resolve({ status: 'ERROR' }),
     })
   );
   expect(result).toBe(false);
@@ -143,7 +143,7 @@ it('calls postCompletion with form answer containing attachment', async () => {
     { getAttachments: () => Promise.resolve(attachments) }
   );
 
-  const postCompletionSpy = jest.spyOn(dependencies, 'postCompletion');
+  const postCompletionSpy = jest.spyOn(dependencies, 'postCompletions');
   await submitCompletion(createInput(), dependencies);
 
   expect(postCompletionSpy).toHaveBeenCalledWith(expect.objectContaining({ attachments }));

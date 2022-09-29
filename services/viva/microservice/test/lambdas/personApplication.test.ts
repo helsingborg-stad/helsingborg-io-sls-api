@@ -2,26 +2,20 @@ import { personApplication } from '../../src/lambdas/personApplication';
 
 import type { LambdaRequest, Dependencies } from '../../src/lambdas/personApplication';
 import type { CaseUser } from '../../../types/caseItem';
-import type {
-  VivaMyPagesPersonApplication,
-  VivaMyPagesPersonCase,
-} from '../../../types/vivaMyPages';
+import type { VivaMyPagesVivaCase } from '../../../types/vivaMyPages';
 
-const mockPersonalNumber = '1990091234';
+const mockPersonalNumber = 199009123412;
 const defaultVivaMyPages = {
-  case: {
-    client: {
-      pnumber: mockPersonalNumber,
-    },
-  } as VivaMyPagesPersonCase,
-  application: {} as VivaMyPagesPersonApplication,
-};
+  client: {
+    pnumber: '19900912-3412',
+  },
+} as VivaMyPagesVivaCase;
 
 function createInput(): LambdaRequest {
   return {
     detail: {
       user: {
-        personalNumber: mockPersonalNumber,
+        personalNumber: mockPersonalNumber.toString(),
       } as CaseUser,
     },
   };
@@ -29,7 +23,7 @@ function createInput(): LambdaRequest {
 
 function createDependencies(dependencies: Partial<Dependencies> = {}): Dependencies {
   return {
-    getVivaPerson: () => Promise.resolve(defaultVivaMyPages),
+    getMyPages: () => Promise.resolve(defaultVivaMyPages),
     putSuccessEvent: () => Promise.resolve(undefined),
     ...dependencies,
   };
@@ -42,7 +36,7 @@ it('successfully fetches person from viva', async () => {
   const result = await personApplication(
     createInput(),
     createDependencies({
-      getVivaPerson: mockGetVivaPerson,
+      getMyPages: mockGetVivaPerson,
       putSuccessEvent: mockPutSuccessEvent,
     })
   );
@@ -51,7 +45,7 @@ it('successfully fetches person from viva', async () => {
   expect(mockGetVivaPerson).toHaveBeenCalledWith(mockPersonalNumber);
   expect(mockPutSuccessEvent).toHaveBeenCalledWith({
     clientUser: {
-      personalNumber: mockPersonalNumber,
+      personalNumber: mockPersonalNumber.toString(),
     },
     vivaPersonDetail: defaultVivaMyPages,
   });
