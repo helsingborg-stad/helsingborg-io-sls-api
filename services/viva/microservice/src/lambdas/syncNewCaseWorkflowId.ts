@@ -102,8 +102,11 @@ async function syncNewCaseWorkflowId(
   return true;
 }
 
-export const main = log.wrap(event => {
+export const main = log.wrap((event, context: Context) => {
+  const { awsRequestId: requestId } = context;
+
   return syncNewCaseWorkflowId(event, {
+    requestId,
     getCase: cases.get,
     updateCase: updateCaseWorkflowId,
     syncSuccess: putVivaMsEvent.syncWorkflowIdSuccess,
