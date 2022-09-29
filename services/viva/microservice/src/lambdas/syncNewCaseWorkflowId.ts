@@ -9,11 +9,7 @@ import putVivaMsEvent from '../helpers/putVivaMsEvent';
 
 import type { CaseItem } from '../types/caseItem';
 import type { VivaWorkflow } from '../types/vivaWorkflow';
-import type { VivaApplicationStatus } from '../types/vivaMyPages';
-
-export interface WorkflowResult {
-  attributes: VivaWorkflow;
-}
+import type { VivaApplicationsStatusItem } from '../types/vivaApplicationsStatus';
 
 interface CaseKeys {
   PK: string;
@@ -26,7 +22,7 @@ interface User {
 
 interface LambdaDetails {
   user: User;
-  status: VivaApplicationStatus[];
+  status: VivaApplicationsStatusItem[];
 }
 
 export interface LambdaRequest {
@@ -34,7 +30,7 @@ export interface LambdaRequest {
 }
 
 interface SuccessEvent {
-  vivaApplicantStatusCodeList: VivaApplicationStatus[];
+  vivaApplicantStatusCodeList: VivaApplicationsStatusItem[];
   caseKeys: CaseKeys;
   user: User;
   workflowId: string;
@@ -44,10 +40,10 @@ export interface Dependencies {
   getCase: (keys: CaseKeys) => Promise<CaseItem>;
   updateCase: (caseKeys: CaseKeys, newWorkflowId: string) => Promise<void>;
   syncSuccess: (detail: SuccessEvent) => Promise<void>;
-  getLatestWorkflow: (personalNumber: string) => Promise<WorkflowResult>;
+  getLatestWorkflow: (personalNumber: number) => Promise<VivaWorkflow>;
 }
 
-function updateCaseWorkflowId(keys: CaseKeys, newWorkflowId: string) {
+function updateCaseWorkflowId(keys: CaseKeys, newWorkflowId: string): Promise<void> {
   const updateParams = {
     TableName: config.cases.tableName,
     Key: {
@@ -71,12 +67,12 @@ async function syncNewCaseWorkflowId(
 ): Promise<boolean> {
   const { user, status } = input.detail;
 
-  const [getError, response] = await to(dependencies.getLatestWorkflow(user.personalNumber));
-  if (!response?.attributes) {
+  const [getError, workflow] = await to(dependencies.getLatestWorkflow(+user.personalNumber));
+  if (!workflow) {
     log.writeInfo('No workflow found for user', getError);
     return true;
   }
-  const workflowId = response.attributes.workflowid;
+  const workflowId = workflow.workflowid;
 
   const queryCaseKeys: CaseKeys = {
     PK: `USER#${input.detail.user.personalNumber}`,
