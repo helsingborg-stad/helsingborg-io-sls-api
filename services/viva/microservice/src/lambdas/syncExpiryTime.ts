@@ -1,7 +1,8 @@
 import log from '../libs/logs';
 import { getFutureTimestamp, millisecondsToSeconds } from '../libs/timestampHelper';
+import config from '../libs/config';
+import * as dynamoDb from '../libs/dynamoDb';
 import { cases } from '../helpers/query';
-import { updateCaseExpirationTime } from '../helpers/dynamoDb';
 import expiryTime from '../helpers/caseExpiryTime';
 
 import type { CaseItem } from '../types/caseItem';
@@ -21,7 +22,25 @@ export interface LambdaRequest {
 
 export interface Dependencies {
   getCase: (keys: CaseKeys) => Promise<CaseItem>;
-  updateCase: (caseKeys: CaseKeys, newWorkflowId: string) => Promise<void>;
+  updateCase: (keys: CaseKeys, time: number) => Promise<void>;
+}
+
+function updateCaseExpirationTime(keys: CaseKeys, newExpirationTime: number): Promise<void> {
+  const updateParams = {
+    TableName: config.cases.tableName,
+    Key: {
+      PK: keys.PK,
+      SK: keys.SK,
+    },
+    UpdateExpression: 'SET expirationTime = :newExpirationTime, , updatedAt = :updatedAt',
+    ExpressionAttributeValues: {
+      ':newExpirationTime': newExpirationTime,
+      ':updatedAt': Date.now(),
+    },
+    ReturnValues: 'NONE',
+  };
+
+  return dynamoDb.call('update', updateParams);
 }
 
 export async function syncExpiryTime(
@@ -34,7 +53,7 @@ export async function syncExpiryTime(
   const expireHours = expiryTime.getHoursOnStatusType(userCase.status.type);
   const newExpirationTime = millisecondsToSeconds(getFutureTimestamp(expireHours));
 
-  await updateCaseExpirationTime({ caseKeys, newExpirationTime });
+  await dependencies.updateCase(caseKeys, newExpirationTime);
 
   return true;
 }
