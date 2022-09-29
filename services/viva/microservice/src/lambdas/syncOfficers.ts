@@ -26,6 +26,10 @@ interface LambdaDetails {
 interface LambdaRequest {
   detail: LambdaDetails;
 }
+export interface Dependencies {
+  getVivaOfficers: (personalNumber: number) => Promise<VivaOfficer | VivaOfficer[]>;
+  updateCase: (keys: CaseKeys, administrators: CaseAdministrator[]) => Promise<void>;
+}
 
 const allowedOfficerTypes: string[] = [VivaOfficerType.Officer];
 
@@ -69,11 +73,6 @@ function updateCaseAdministrators(keys: CaseKeys, newAdministrators: CaseAdminis
   };
 
   return dynamoDb.call('update', dynamoDbParams);
-}
-
-export interface Dependencies {
-  getVivaOfficers: (personalNumber: number) => Promise<VivaOfficer | VivaOfficer[]>;
-  updateCase: (keys: CaseKeys, administrators: CaseAdministrator[]) => Promise<void>;
 }
 
 export async function syncOfficers(input: LambdaRequest, dependencies: Dependencies) {
