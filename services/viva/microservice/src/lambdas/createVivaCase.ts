@@ -79,7 +79,7 @@ export async function createVivaCase(
   const timestampNow = Date.now();
   const initialStatus: CaseStatus = getStatusByType(NOT_STARTED_VIVA);
   const workflowId = application?.workflowid ?? null;
-  const casePersonList = createCaseHelper.getCasePersonList(myPages.persons);
+  const casePersonList = createCaseHelper.getCasePersonList(myPages);
   const expirationTime = millisecondsToSeconds(getFutureTimestamp(TWELVE_HOURS));
 
   const newRecurringCase: CaseItem = {
