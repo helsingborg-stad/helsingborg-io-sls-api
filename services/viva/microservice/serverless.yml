@@ -134,7 +134,7 @@ functions:
     timeout: 15
     events:
       - eventBridge:
-          enabled: false
+          enabled: true
           pattern:
             source:
               - vivaMs.personApplicationStatus
@@ -239,6 +239,7 @@ functions:
     timeout: 15
     events:
       - eventBridge:
+          enabled: false
           pattern:
             source:
               - cases.database
@@ -298,9 +299,6 @@ functions:
               - vivaMs.applicationStatus
             detail-type:
               - applicationStatusSuccess
-            detail:
-              status:
-                code: [16]
 
   generateRecurringCaseHtml:
     handler: src/lambdas/generateRecurringCaseHtml.main
