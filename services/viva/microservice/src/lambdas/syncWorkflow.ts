@@ -10,12 +10,8 @@ import type { CaseItem } from '../types/caseItem';
 import type { VivaWorkflow } from '../types/vivaWorkflow';
 
 interface GetWorkflowParams {
-  personalNumber: string;
-  workflowId: string | null;
-}
-
-export interface GetWorkflowResult {
-  attributes: VivaWorkflow;
+  personalNumber: number;
+  workflowId: string;
 }
 
 interface User {
@@ -39,7 +35,7 @@ export interface Dependencies {
   getCasesByStatusType: (personalNumber: string, statusTypeList: string[]) => Promise<CaseItem[]>;
   updateCase: (caseKeys: CaseKeys, newWorkflow: VivaWorkflow) => Promise<void>;
   syncWorkflowSuccess: (detail: Record<string, unknown>) => Promise<void>;
-  getWorkflow: (params: GetWorkflowParams) => Promise<GetWorkflowResult>;
+  getWorkflow: (params: GetWorkflowParams) => Promise<VivaWorkflow>;
 }
 
 function createAttributeValueName(statusType: string): string {
@@ -120,14 +116,15 @@ export async function syncWorkflow(input: LambdaRequest, dependencies: Dependenc
 
   await Promise.all(
     caseListWithWorkflowId.map(async caseItem => {
+      const workflowId = caseItem.details.workflowId as string;
       const workflow = await dependencies.getWorkflow({
-        personalNumber,
-        workflowId: caseItem.details.workflowId,
+        personalNumber: +personalNumber,
+        workflowId,
       });
 
       const caseKeys = { PK: caseItem.PK, SK: caseItem.SK };
-      await dependencies.updateCase(caseKeys, workflow.attributes);
-      await dependencies.syncWorkflowSuccess({ caseKeys, workflow: workflow.attributes });
+      await dependencies.updateCase(caseKeys, workflow);
+      await dependencies.syncWorkflowSuccess({ caseKeys, workflow });
     })
   );
 
