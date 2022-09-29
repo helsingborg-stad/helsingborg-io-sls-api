@@ -182,12 +182,10 @@ async function getWorkflowCompletions(
   return response.data.attributes.completions;
 }
 
-async function getOfficers(
-  personalNumber: number
-): Promise<VivaOfficer[] | VivaOfficer | undefined> {
+async function getOfficers(personalNumber: number): Promise<VivaOfficer[] | VivaOfficer> {
   const requestParams = await createVivaMyPagesAdapterRequest(personalNumber);
   const response = await sendVivaAdapterRequest<VivaMyPages>(requestParams);
-  return response.data.attributes.cases.vivacases.vivacase.officers?.officer;
+  return response.data.attributes.cases.vivacases.vivacase.officers?.officer ?? [];
 }
 
 async function getMyPages(personalNumber: number): Promise<VivaMyPagesVivaCase> {
