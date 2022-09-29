@@ -20,7 +20,7 @@ import type {
 } from '../types/vivaApplicationsStatus';
 import type { VadaCompletions, VadaWorkflowCompletions } from '../types/vadaCompletions';
 import type { CaseAttachment } from '../helpers/attachment';
-import type { PersonalNumber, CaseItem, CaseFormAnswer } from '../types/caseItem';
+import type { CaseFormAnswer } from '../types/caseItem';
 
 interface AdapterErrorResponseData {
   error: {
@@ -67,7 +67,7 @@ interface AdapterCompletionsRequestBody {
 export interface PostApplicationsPayload {
   personalNumber: number;
   applicationType: string;
-  answers: Record<string, unknown>[];
+  answers: CaseFormAnswer[];
   rawData: string;
   rawDataType: string;
   workflowId: string;
@@ -77,7 +77,7 @@ export interface PostApplicationsPayload {
 interface AdapterPostApplicationsBody {
   applicationType: string;
   hashid: string;
-  answers: Record<string, unknown>[];
+  answers: CaseFormAnswer[];
   rawData: string;
   rawDataType: string;
   workflowId: string;
