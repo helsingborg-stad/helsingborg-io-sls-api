@@ -18,6 +18,7 @@ import { TraceException } from '../helpers/TraceException';
 import { VivaApplicationType } from '../types/vivaMyPages';
 import type { CaseAttachment } from '../helpers/attachment';
 import type { PersonalNumber, CaseItem, CaseFormAnswer } from '../types/caseItem';
+import type { PostApplicationsPayload } from '../helpers/vivaAdapterRequestClient';
 
 interface VivaPostError {
   status: string;
@@ -40,7 +41,7 @@ export interface Dependencies {
   requestId: string;
   readParams: (envsKeyName: string) => Promise<ParamsReadResponse>;
   updateVivaCase: (params: CaseKeys, workflowId: string) => Promise<void>;
-  postVivaApplication: (params: Record<string, unknown>) => Promise<Record<string, unknown>>;
+  postVivaApplication: (params: PostApplicationsPayload) => Promise<Record<string, unknown>>;
   putSuccessEvent: (params: { personalNumber: string }) => Promise<void>;
   attachmentFromAnswers: (
     personalNumber: PersonalNumber,
@@ -110,7 +111,7 @@ export async function submitApplication(
   const [vivaPostError, vivaApplicationResponse] = await to<Record<string, unknown>, VivaPostError>(
     dependencies.postVivaApplication({
       applicationType,
-      personalNumber,
+      personalNumber: +personalNumber,
       workflowId,
       answers,
       attachments,
@@ -185,7 +186,7 @@ export const main = log.wrap((event: SQSEvent, context: Context) => {
     requestId,
     readParams: params.read,
     updateVivaCase,
-    postVivaApplication: vivaAdapter.application.post,
+    postVivaApplication: vivaAdapter.applications.post,
     putSuccessEvent: putVivaMsEvent.applicationReceivedSuccess,
     attachmentFromAnswers: attachment.createFromAnswers,
     isAnswerAttachment: attachment.isAnswerAttachment,

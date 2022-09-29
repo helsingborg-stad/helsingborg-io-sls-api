@@ -19,6 +19,8 @@ import type {
   VivaApplicationsStatusItem,
 } from '../types/vivaApplicationsStatus';
 import type { VadaCompletions, VadaWorkflowCompletions } from '../types/vadaCompletions';
+import type { CaseAttachment } from '../helpers/attachment';
+import type { PersonalNumber, CaseItem, CaseFormAnswer } from '../types/caseItem';
 
 interface AdapterErrorResponseData {
   error: {
@@ -50,36 +52,36 @@ interface AdapterRequest<Body = unknown> {
 interface PostCompletionsPayload {
   personalNumber: number;
   workflowId: string;
-  attachments: Record<string, unknown>[];
+  attachments: CaseAttachment[];
 }
 
 interface GetWorkflowPayload {
   personalNumber: number;
   workflowId: string;
 }
-interface AdapterCompletionRequestBody {
+interface AdapterCompletionsRequestBody {
   workflowId: string;
-  attachments: Record<string, unknown>[];
+  attachments: CaseAttachment[];
 }
 
 export interface PostApplicationsPayload {
   personalNumber: number;
   applicationType: string;
   answers: Record<string, unknown>[];
-  rawData?: string;
+  rawData: string;
   rawDataType: string;
   workflowId: string;
-  attachments: Record<string, unknown>[];
+  attachments: CaseAttachment[];
 }
 
-interface AdapterPostApplicationBody {
+interface AdapterPostApplicationsBody {
   applicationType: string;
   hashid: string;
   answers: Record<string, unknown>[];
   rawData: string;
   rawDataType: string;
   workflowId: string;
-  attachments: Record<string, unknown>[];
+  attachments: CaseAttachment[];
 }
 
 interface ConfigParams {
@@ -239,7 +241,7 @@ async function postApplications(
   const { hashSalt, hashSaltLength } = await getVivaSsmParams();
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
-  const requestParams: AdapterRequest<AdapterPostApplicationBody> = {
+  const requestParams: AdapterRequest<AdapterPostApplicationsBody> = {
     endpoint: 'applications',
     method: 'post',
     body: {
@@ -262,7 +264,7 @@ async function postCompletions(payload: PostCompletionsPayload): Promise<Record<
   const { hashSalt, hashSaltLength } = await getVivaSsmParams();
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
-  const requestParams: AdapterRequest<AdapterCompletionRequestBody> = {
+  const requestParams: AdapterRequest<AdapterCompletionsRequestBody> = {
     endpoint: `applications/${hashedPersonalNumber}/completions`,
     method: 'post',
     body: {
