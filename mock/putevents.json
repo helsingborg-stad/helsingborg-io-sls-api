@@ -1,7 +1,7 @@
 [
   {
     "Source": "bankId.collect",
-    "Detail": "{ \"user\": { \"personalNumber\": \"197607012395\" } }",
+    "Detail": "{ \"user\": { \"personalNumber\": \"198811042384\" } }",
     "Resources": ["SYNC"],
     "DetailType": "BankIdCollectComplete",
     "EventBusName": "default"
