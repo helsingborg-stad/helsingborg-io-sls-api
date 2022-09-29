@@ -1,61 +1,47 @@
-import to from 'await-to-js';
-
-import { getFutureTimestamp, millisecondsToSeconds } from '../libs/timestampHelper';
-import { getItem as getStoredUserCase } from '../libs/queries';
-import config from '../libs/config';
 import log from '../libs/logs';
-
+import { getFutureTimestamp, millisecondsToSeconds } from '../libs/timestampHelper';
+import { cases } from '../helpers/query';
 import { updateCaseExpirationTime } from '../helpers/dynamoDb';
-import caseExpiryTime from '../helpers/caseExpiryTime';
+import expiryTime from '../helpers/caseExpiryTime';
 
-interface LambdaContext {
-  awsRequestId: string;
+import type { CaseItem } from '../types/caseItem';
+
+interface CaseKeys {
+  PK: string;
+  SK: string;
 }
-interface LambdaEvent {
-  detail: {
-    caseKeys: {
-      PK: string;
-      SK: string;
-    };
-  };
+
+interface LambdaDetails {
+  caseKeys: CaseKeys;
 }
-export async function main(event: LambdaEvent, context: LambdaContext): Promise<boolean> {
-  const { caseKeys } = event.detail;
-  const { PK, SK } = caseKeys;
 
-  const [getStoredUserCaseError, storedUserCase] = await getStoredUserCase(
-    config.cases.tableName,
-    PK,
-    SK
-  );
-  if (getStoredUserCaseError) {
-    log.error(
-      'Error getting stored case from the cases table.',
-      context.awsRequestId,
-      'service-viva-ms-syncExpiryTime-001',
-      getStoredUserCaseError
-    );
-    return false;
-  }
+export interface LambdaRequest {
+  detail: LambdaDetails;
+}
 
-  const expireHours = caseExpiryTime.getHoursOnStatusType(storedUserCase.Item.status.type);
+export interface Dependencies {
+  getCase: (keys: CaseKeys) => Promise<CaseItem>;
+  updateCase: (caseKeys: CaseKeys, newWorkflowId: string) => Promise<void>;
+}
+
+export async function syncExpiryTime(
+  input: LambdaRequest,
+  dependencies: Dependencies
+): Promise<boolean> {
+  const { caseKeys } = input.detail;
+
+  const userCase = await dependencies.getCase(caseKeys);
+  const expireHours = expiryTime.getHoursOnStatusType(userCase.status.type);
   const newExpirationTime = millisecondsToSeconds(getFutureTimestamp(expireHours));
 
-  const [updateCaseError] = await to(
-    updateCaseExpirationTime({
-      caseKeys,
-      newExpirationTime,
-    })
-  );
-  if (updateCaseError) {
-    log.error(
-      'Update case error.',
-      context.awsRequestId,
-      'service-viva-ms-syncExpiryTime-002',
-      updateCaseError
-    );
-    return false;
-  }
+  await updateCaseExpirationTime({ caseKeys, newExpirationTime });
 
   return true;
 }
+
+export const main = log.wrap(event => {
+  return syncExpiryTime(event, {
+    getCase: cases.get,
+    updateCase: updateCaseExpirationTime,
+  });
+});
