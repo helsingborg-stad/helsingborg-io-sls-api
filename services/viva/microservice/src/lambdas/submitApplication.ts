@@ -115,7 +115,7 @@ export async function submitApplication(
       workflowId,
       answers,
       attachments,
-      rawData: pdf?.toString(),
+      rawData: pdf?.toString() ?? '',
       rawDataType: 'pdf',
     })
   );
