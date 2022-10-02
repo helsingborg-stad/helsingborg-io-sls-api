@@ -9,6 +9,7 @@ import Hashids from 'hashids';
  * @returns {string} Hashed personal number
  */
 function encode(number, hashSalt, hashSaltLength) {
+  typeof number === 'number' || (number = parseInt(number, 10));
   const hashids = new Hashids(hashSalt, hashSaltLength);
   const encodedNumber = hashids.encode(number);
   return encodedNumber;

@@ -57,18 +57,18 @@ interface AdapterRequest<Body = unknown> {
 }
 
 interface GetWorkflowPayload {
-  personalNumber: number;
+  personalNumber: string;
   workflowId: string;
 }
 
 interface PostCompletionsPayload {
-  personalNumber: number;
+  personalNumber: string;
   workflowId: string;
   attachments: CaseAttachment[];
 }
 
 export interface PostApplicationsPayload {
-  personalNumber: number;
+  personalNumber: string;
   applicationType: string;
   answers: CaseFormAnswer[];
   rawData: string;
@@ -139,7 +139,7 @@ async function sendVivaAdapterRequest<Attributes>({
   return response ?? {};
 }
 
-async function getLatestWorkflow(personalNumber: number): Promise<VivaWorkflow> {
+async function getLatestWorkflow(personalNumber: string): Promise<VivaWorkflow> {
   const { hashSalt, hashSaltLength } = await getVivaSsmParams();
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
@@ -182,26 +182,26 @@ async function getWorkflowCompletions(
   return response.data.attributes.completions;
 }
 
-async function getOfficers(personalNumber: number): Promise<VivaOfficer[] | VivaOfficer> {
+async function getOfficers(personalNumber: string): Promise<VivaOfficer[] | VivaOfficer> {
   const requestParams = await createVivaMyPagesAdapterRequest(personalNumber);
   const response = await sendVivaAdapterRequest<VivaMyPages>(requestParams);
   return response.data.attributes.cases.vivacases.vivacase.officers?.officer ?? [];
 }
 
-async function getMyPages(personalNumber: number): Promise<VivaMyPagesVivaCase> {
+async function getMyPages(personalNumber: string): Promise<VivaMyPagesVivaCase> {
   const requestParams = await createVivaMyPagesAdapterRequest(personalNumber);
   const response = await sendVivaAdapterRequest<VivaMyPages>(requestParams);
   return response.data.attributes.cases.vivacases.vivacase;
 }
 
-async function getApplication(personalNumber: number): Promise<VivaMyPagesVivaApplication> {
+async function getApplication(personalNumber: string): Promise<VivaMyPagesVivaApplication> {
   const requestParams = await createVivaMyPagesAdapterRequest(personalNumber);
   const response = await sendVivaAdapterRequest<VivaMyPagesApplication>(requestParams);
   return response.data.attributes.vivaapplication;
 }
 
 async function getApplicationsStatus(
-  personalNumber: number
+  personalNumber: string
 ): Promise<VivaApplicationsStatusItem[]> {
   const { hashSalt, hashSaltLength } = await getVivaSsmParams();
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
@@ -215,7 +215,7 @@ async function getApplicationsStatus(
   return response.data.attributes.status;
 }
 
-async function createVivaMyPagesAdapterRequest(personalNumber: number): Promise<AdapterRequest> {
+async function createVivaMyPagesAdapterRequest(personalNumber: string): Promise<AdapterRequest> {
   const { hashSalt, hashSaltLength } = await getVivaSsmParams();
   const hashedPersonalNumber = hash.encode(personalNumber, hashSalt, hashSaltLength);
 
