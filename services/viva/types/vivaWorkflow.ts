@@ -1,7 +1,3 @@
-export interface VadaWorkflow {
-  readonly latestWorkflow: VivaWorkflow;
-}
-
 export interface VivaWorkflow {
   readonly workflowid: string;
   readonly application: VivaWorkflowApplication;

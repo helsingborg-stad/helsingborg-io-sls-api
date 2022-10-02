@@ -21,11 +21,6 @@ export enum VivaApplicationType {
   Recurring = 'recurring',
 }
 
-export interface VivaMyPages {
-  readonly cases: VivaMyPagesCases;
-  readonly application: VivaMyPagesApplication;
-}
-
 export interface VivaMyPagesApplication {
   readonly status: string;
   readonly vivaapplication: VivaMyPagesVivaApplication;

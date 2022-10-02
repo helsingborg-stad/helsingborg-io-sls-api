@@ -6,19 +6,23 @@ import * as request from '../libs/request';
 import params from '../libs/params';
 import hash from '../libs/helperHashEncode';
 
-import type { VadaWorkflow, VivaWorkflow } from '../types/vivaWorkflow';
+import type { VivaWorkflow } from '../types/vivaWorkflow';
 import type {
-  VivaMyPages,
+  VadaWorkflowResponse,
+  VadaLatestWorkflowResponse,
+  VadaApplicationsStatusResponse,
+  VadaCompletionsResponse,
+  VadaMyPagesReposnse,
+} from '../types/vadaResponse';
+import type {
   VivaMyPagesVivaCase,
   VivaOfficer,
   VivaMyPagesApplication,
   VivaMyPagesVivaApplication,
+  VivaMyPagesCases,
 } from '../types/vivaMyPages';
-import type {
-  VadaApplicationsStatus,
-  VivaApplicationsStatusItem,
-} from '../types/vivaApplicationsStatus';
-import type { VadaCompletions, VadaWorkflowCompletions } from '../types/vadaCompletions';
+import type { VivaApplicationsStatusItem } from '../types/vivaApplicationsStatus';
+import type { VadaWorkflowCompletions } from '../types/vadaCompletions';
 import type { CaseAttachment } from '../helpers/attachment';
 import type { CaseFormAnswer } from '../types/caseItem';
 
@@ -39,11 +43,12 @@ interface AdapterErrorResponseData {
 
 interface AdapterResponseData<
   T =
-    | VadaWorkflow
-    | VivaMyPages
+    | VadaLatestWorkflowResponse
+    | VadaWorkflowResponse
+    | VadaCompletionsResponse
+    | VadaApplicationsStatusResponse
+    | VivaMyPagesCases
     | VivaMyPagesApplication
-    | VadaCompletions
-    | VadaApplicationsStatus
     | unknown
 > {
   type: string;
@@ -148,7 +153,7 @@ async function getLatestWorkflow(personalNumber: string): Promise<VivaWorkflow> 
     method: 'get',
   };
 
-  const response = await sendVivaAdapterRequest<VadaWorkflow>(requestParams);
+  const response = await sendVivaAdapterRequest<VadaLatestWorkflowResponse>(requestParams);
   return response.data.attributes.latestWorkflow;
 }
 
@@ -162,8 +167,8 @@ async function getWorkflow(payload: GetWorkflowPayload): Promise<VivaWorkflow> {
     method: 'get',
   };
 
-  const response = await sendVivaAdapterRequest<VadaWorkflow>(requestParams);
-  return response.data.attributes.latestWorkflow;
+  const response = await sendVivaAdapterRequest<VadaWorkflowResponse>(requestParams);
+  return response.data.attributes.workflow;
 }
 
 async function getWorkflowCompletions(
@@ -178,26 +183,28 @@ async function getWorkflowCompletions(
     method: 'get',
   };
 
-  const response = await sendVivaAdapterRequest<VadaCompletions>(requestParams);
+  const response = await sendVivaAdapterRequest<VadaCompletionsResponse>(requestParams);
   return response.data.attributes.completions;
 }
 
 async function getOfficers(personalNumber: string): Promise<VivaOfficer[] | VivaOfficer> {
   const requestParams = await createVivaMyPagesAdapterRequest(personalNumber);
-  const response = await sendVivaAdapterRequest<VivaMyPages>(requestParams);
-  return response.data.attributes.cases.vivacases.vivacase.officers?.officer ?? [];
+  const response = await sendVivaAdapterRequest<VadaMyPagesReposnse>(requestParams);
+  return (
+    response.data.attributes.cases.vivacases.vivacase.officers?.officer ?? ([] as VivaOfficer[])
+  );
 }
 
 async function getMyPages(personalNumber: string): Promise<VivaMyPagesVivaCase> {
   const requestParams = await createVivaMyPagesAdapterRequest(personalNumber);
-  const response = await sendVivaAdapterRequest<VivaMyPages>(requestParams);
+  const response = await sendVivaAdapterRequest<VadaMyPagesReposnse>(requestParams);
   return response.data.attributes.cases.vivacases.vivacase;
 }
 
 async function getApplication(personalNumber: string): Promise<VivaMyPagesVivaApplication> {
   const requestParams = await createVivaMyPagesAdapterRequest(personalNumber);
-  const response = await sendVivaAdapterRequest<VivaMyPagesApplication>(requestParams);
-  return response.data.attributes.vivaapplication;
+  const response = await sendVivaAdapterRequest<VadaMyPagesReposnse>(requestParams);
+  return response.data.attributes.application.vivaapplication;
 }
 
 async function getApplicationsStatus(
@@ -211,7 +218,7 @@ async function getApplicationsStatus(
     method: 'get',
   };
 
-  const response = await sendVivaAdapterRequest<VadaApplicationsStatus>(requestParams);
+  const response = await sendVivaAdapterRequest<VadaApplicationsStatusResponse>(requestParams);
   return response.data.attributes.status;
 }
 

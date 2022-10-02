@@ -1,7 +1,3 @@
-export interface VadaCompletions {
-  readonly completions: VadaWorkflowCompletions;
-}
-
 export interface VadaWorkflowCompletions {
   readonly requested: VadaWorkflowCompletionsRequested[] | [];
   readonly description: string | null;
