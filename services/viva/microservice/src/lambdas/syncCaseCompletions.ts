@@ -6,8 +6,10 @@ import log from '../libs/logs';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import completionsHelper from '../helpers/completions';
 import validateApplicationStatus from '../helpers/validateApplicationStatus';
+import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 import { VIVA_STATUS_NEW_APPLICATION_OPEN } from '../helpers/constants';
 
+import type { GetWorkflowPayload } from '../helpers/vivaAdapterRequestClient';
 import type { CaseUser, CaseItem, PersonalNumber } from '../types/caseItem';
 import type { VivaApplicationsStatusItem } from '../types/vivaApplicationsStatus';
 import type { VadaWorkflowCompletions } from '../types/vadaCompletions';
@@ -42,10 +44,7 @@ export interface Dependencies {
     requiredCodeList: number[]
   ) => boolean;
   getLatestWorkflowId: (user: PersonalNumber) => Promise<string>;
-  getWorkflowCompletions: (
-    user: PersonalNumber,
-    workflowId: string
-  ) => Promise<VadaWorkflowCompletions>;
+  getWorkflowCompletions: (payload: GetWorkflowPayload) => Promise<VadaWorkflowCompletions>;
   getCaseOnWorkflowId: (user: PersonalNumber, workflowId: string) => Promise<CaseItem | undefined>;
 }
 
@@ -83,10 +82,10 @@ export async function syncCaseCompletions(input: LambdaRequest, dependencies: De
   }
 
   const latestWorkflowId = await dependencies.getLatestWorkflowId(personalNumber);
-  const workflowCompletions = await dependencies.getWorkflowCompletions(
+  const workflowCompletions = await dependencies.getWorkflowCompletions({
     personalNumber,
-    latestWorkflowId
-  );
+    workflowId: latestWorkflowId,
+  });
 
   const userCase = await dependencies.getCaseOnWorkflowId(personalNumber, latestWorkflowId);
   if (!userCase) {
@@ -116,7 +115,7 @@ export const main = log.wrap(event => {
     updateCase: updateCaseCompletions,
     validateStatusCode: validateApplicationStatus,
     getLatestWorkflowId: completionsHelper.get.workflow.latest.id,
-    getWorkflowCompletions: completionsHelper.get.workflow.completions,
+    getWorkflowCompletions: vivaAdapter.workflow.getCompletions,
     getCaseOnWorkflowId: completionsHelper.get.caseOnWorkflowId,
   });
 });

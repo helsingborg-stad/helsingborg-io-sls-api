@@ -33,12 +33,14 @@ interface ConfigParams {
   hashSaltLength: number;
 }
 
+interface AdapterError {
+  code: number;
+  description: string;
+  details: string;
+}
+
 interface AdapterErrorResponseData {
-  error: {
-    code: number;
-    description: string;
-    details: string;
-  };
+  error: AdapterError;
 }
 
 interface AdapterResponseData<
@@ -61,7 +63,7 @@ interface AdapterRequest<Body = unknown> {
   body?: Body;
 }
 
-interface GetWorkflowPayload {
+export interface GetWorkflowPayload {
   personalNumber: string;
   workflowId: string;
 }
