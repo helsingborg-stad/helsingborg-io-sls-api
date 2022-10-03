@@ -46,7 +46,7 @@ interface SuccessEvent {
   workflowId: string;
 }
 
-interface GetCaseResponse {
+export interface GetCaseResponse {
   Count: number;
   Items: CaseItem[];
   ScannedCount: number;
@@ -95,7 +95,7 @@ function getUserApplicantCase(personalNumber: string): Promise<GetCaseResponse> 
   return dynamoDb.call('query', queryParams);
 }
 
-async function syncNewCaseWorkflowId(
+export async function syncNewCaseWorkflowId(
   input: LambdaRequest,
   dependencies: Dependencies
 ): Promise<boolean> {
@@ -111,7 +111,7 @@ async function syncNewCaseWorkflowId(
   }
 
   const getCaseResponse = await dependencies.getCase(user.personalNumber);
-  if (!getCaseResponse || getCaseResponse.Count > 0) {
+  if (!getCaseResponse || getCaseResponse.Count > 1) {
     return true;
   }
   const userCase = getCaseResponse.Items[0];
@@ -120,7 +120,6 @@ async function syncNewCaseWorkflowId(
     config.cases.providers.viva.envsKeyName
   );
   const isNewApplication = userCase.currentFormId === newApplicationFormId;
-
   if (isNewApplication) {
     const [getError, workflow] = await to(dependencies.getLatestWorkflow(user.personalNumber));
     if (!workflow) {
