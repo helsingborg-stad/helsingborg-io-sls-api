@@ -96,18 +96,18 @@ sequenceDiagram
 sequenceDiagram
   autonumber
   participant EventBridge
-  participant Lambda SyncWorkflowId
+  participant Lambda SyncNewCaseWorkflowId
   participant VADA/Viva
   participant DynamoDB Cases
 
-  EventBridge-)+Lambda SyncWorkflowId: {event: bankId collect}
+  EventBridge-)+Lambda SyncNewCaseWorkflowId: {event: application status}
 
-  Lambda SyncWorkflowId->>-VADA/Viva: GET mypages/{hashId}/workflow/latest
+  Lambda SyncNewCaseWorkflowId->>-VADA/Viva: GET mypages/{hashId}/workflow/latest
 
   alt workflow exists
-    VADA/Viva-->>+Lambda SyncWorkflowId: {workflow}
-    Lambda SyncWorkflowId->>DynamoDB Cases: {workflowId}
+    VADA/Viva-->>+Lambda SyncNewCaseWorkflowId: {workflow}
+    Lambda SyncNewCaseWorkflowId->>DynamoDB Cases: {workflowId}
   end
 
-  Lambda SyncWorkflowId-)-EventBridge: {personalNumber}
+  Lambda SyncNewCaseWorkflowId-)-EventBridge: {user, caseKeys, vivaApplicantStatusCodeList}
 ```

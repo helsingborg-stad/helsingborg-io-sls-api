@@ -111,32 +111,32 @@ export interface VivaWorkflowCalculationCostsRoot {
 }
 
 export interface VivaWorkflowCalculationCost {
-  type: string | null;
-  actual: string | null;
-  approved: string | null;
-  note: string | null;
+  readonly type: string | null;
+  readonly actual: string | null;
+  readonly approved: string | null;
+  readonly note: string | null;
 }
 
 export interface VivaWorkflowCalculationNorm {
-  normpart: VivaWorkflowCalculationNormPart[] | VivaWorkflowCalculationNormPart | null;
-  normsum: string | null;
-  normgemsum: string | null;
-  normsubtotal: string | null;
-  costsum: string | null;
-  incomesum: string | null;
-  reductionsum: string | null;
-  calculationsum: string | null;
-  note: string | null;
+  readonly normpart: VivaWorkflowCalculationNormPart[] | VivaWorkflowCalculationNormPart | null;
+  readonly normsum: string | null;
+  readonly normgemsum: string | null;
+  readonly normsubtotal: string | null;
+  readonly costsum: string | null;
+  readonly incomesum: string | null;
+  readonly reductionsum: string | null;
+  readonly calculationsum: string | null;
+  readonly note: string | null;
 }
 
 export interface VivaWorkflowCalculationNormPart {
-  type: string | null;
-  amount: string | null;
-  note: string | null;
+  readonly type: string | null;
+  readonly amount: string | null;
+  readonly note: string | null;
 }
 
 export interface VivaWorkflowPaymentsRoot {
-  payment: VivaWorkflowPayment | VivaWorkflowPayment[];
+  readonly payment: VivaWorkflowPayment | VivaWorkflowPayment[];
 }
 
 export interface VivaWorkflowPayment {
@@ -159,26 +159,26 @@ export interface VivaWorkflowPayment {
 }
 
 export interface VivaWorkflowJournalsRoot {
-  journal: VivaWorkflowJournal[] | VivaWorkflowJournal | null;
+  readonly journal: VivaWorkflowJournal[] | VivaWorkflowJournal | null;
 }
 
 export interface VivaWorkflowJournal {
-  ssi: VivaWorkflowSsi;
-  createdby: string | null;
-  createddatetime: string | null;
-  responsible: string | null;
-  eventdate: string | null;
-  subject: string | null;
-  periodstartdate: string | null;
-  periodenddate: string | null;
-  notes: VivaWorkflowJournalsNotesRoot;
+  readonly ssi: VivaWorkflowSsi;
+  readonly createdby: string | null;
+  readonly createddatetime: string | null;
+  readonly responsible: string | null;
+  readonly eventdate: string | null;
+  readonly subject: string | null;
+  readonly periodstartdate: string | null;
+  readonly periodenddate: string | null;
+  readonly notes: VivaWorkflowJournalsNotesRoot;
 }
 
 export interface VivaWorkflowJournalsNotesRoot {
-  note: VivaWorkflowJournalsNote[] | VivaWorkflowJournalsNote | null;
+  readonly note: VivaWorkflowJournalsNote[] | VivaWorkflowJournalsNote | null;
 }
 
 export interface VivaWorkflowJournalsNote {
-  label: string | null;
-  text: string | null;
+  readonly label: string | null;
+  readonly text: string | null;
 }

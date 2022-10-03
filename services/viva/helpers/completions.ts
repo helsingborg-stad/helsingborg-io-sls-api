@@ -24,7 +24,6 @@ import type {
   CaseStatus,
   RequestedCaseCompletions,
 } from '../types/caseItem';
-import type { VadaWorkflowCompletions } from '../types/vadaCompletions';
 
 interface CompletionForms {
   randomCheckFormId: string;
@@ -77,20 +76,9 @@ function isAnyRequestedReceived(requested: RequestedCaseCompletions[]): boolean 
   return requested.some(item => item.received);
 }
 
-async function getVivaWorkflowCompletions(
-  personalNumber: string,
-  workflowId: string
-): Promise<VadaWorkflowCompletions> {
-  const getCompletionsResponse = await vivaAdapter.workflow.getCompletions({
-    personalNumber,
-    workflowId,
-  });
-  return getCompletionsResponse.attributes;
-}
-
 async function getLatestVivaWorkflowId(personalNumber: string): Promise<string> {
-  const getLatestResponse = await vivaAdapter.workflow.getLatest(personalNumber);
-  return getLatestResponse.attributes.workflowid;
+  const workflow = await vivaAdapter.workflow.getLatest(personalNumber);
+  return workflow.workflowid;
 }
 
 async function getCaseOnWorkflowId(
@@ -120,7 +108,6 @@ export default {
     state: getCompletionState,
     caseOnWorkflowId: getCaseOnWorkflowId,
     workflow: {
-      completions: getVivaWorkflowCompletions,
       latest: {
         id: getLatestVivaWorkflowId,
       },

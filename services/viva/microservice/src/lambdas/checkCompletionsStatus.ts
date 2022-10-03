@@ -8,7 +8,7 @@ import {
 } from '../helpers/constants';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import validateApplicationStatus from '../helpers/validateApplicationStatus';
-import type { VivaApplicationStatus } from '../types/vivaMyPages';
+import type { VivaApplicationsStatusItem } from '../types/vivaApplicationsStatus';
 import type { VadaWorkflowCompletions } from '../types/vadaCompletions';
 
 interface CaseKeys {
@@ -17,7 +17,7 @@ interface CaseKeys {
 }
 
 interface LambdaDetails {
-  vivaApplicantStatusCodeList: VivaApplicationStatus[];
+  vivaApplicantStatusCodeList: VivaApplicationsStatusItem[];
   workflowCompletions: VadaWorkflowCompletions;
   caseKeys: CaseKeys;
   caseState: string;

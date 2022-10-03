@@ -1,7 +1,7 @@
-import type { VivaApplicationStatus } from '../types/vivaMyPages';
+import type { VivaApplicationsStatusItem } from '../types/vivaApplicationsStatus';
 
 export default function validateApplicationStatus(
-  statusList: VivaApplicationStatus[],
+  statusList: VivaApplicationsStatusItem[],
   requiredCodeList: number[]
 ): boolean {
   if (!Array.isArray(statusList)) {

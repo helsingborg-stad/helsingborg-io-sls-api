@@ -21,14 +21,23 @@ export enum VivaApplicationType {
   Recurring = 'recurring',
 }
 
-export interface VivaMyPages {
-  readonly case: VivaMyPagesPersonCase;
-  readonly application: VivaMyPagesPersonApplication;
+export interface VivaMyPagesApplication {
+  readonly status: string;
+  readonly vivaapplication: VivaMyPagesVivaApplication;
 }
 
-export interface VivaMyPagesPersonCase {
+export interface VivaMyPagesCases {
+  readonly status: string;
+  readonly vivacases: VivaMyPagesVivaCases;
+}
+
+export interface VivaMyPagesVivaCases {
+  readonly vivacase: VivaMyPagesVivaCase;
+}
+
+export interface VivaMyPagesVivaCase {
   readonly client: VivaClient;
-  readonly officers: VivaOfficersOfficer;
+  readonly officers?: VivaOfficersOfficer;
   readonly persons: VivaPersonsPerson | null;
 }
 
@@ -40,7 +49,7 @@ export interface VivaPersonsPerson {
   readonly person: VivaPerson[] | VivaPerson;
 }
 
-export interface VivaMyPagesPersonApplication {
+export interface VivaMyPagesVivaApplication {
   readonly workflowid?: string;
   readonly period: VivaMyPagesApplicationPeriod;
 }
@@ -57,7 +66,7 @@ export interface VivaClient {
   readonly pnumber: string;
   readonly fname: string;
   readonly lname: string;
-  type?: VivaPersonType.Client;
+  readonly type?: VivaPersonType.Client;
 }
 
 export interface VivaPerson {
@@ -77,9 +86,4 @@ export interface VivaOfficer {
   readonly phone: string | null;
   readonly mail: string;
   readonly title: string;
-}
-
-export interface VivaApplicationStatus {
-  readonly code: number;
-  readonly description: string;
 }

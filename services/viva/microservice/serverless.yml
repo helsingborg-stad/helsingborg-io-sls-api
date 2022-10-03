@@ -17,6 +17,7 @@ provider:
   stage: dev
   region: eu-north-1
   endpointType: regional
+  versionFunctions: false
   eventBridge:
     useCloudFormation: true
   tracing:
@@ -134,7 +135,7 @@ functions:
     timeout: 15
     events:
       - eventBridge:
-          enabled: false
+          enabled: true
           pattern:
             source:
               - vivaMs.personApplicationStatus
@@ -239,6 +240,7 @@ functions:
     timeout: 15
     events:
       - eventBridge:
+          enabled: false
           pattern:
             source:
               - cases.database
@@ -287,6 +289,17 @@ functions:
           pattern:
             source:
               - vivaMs.setCaseCompletions
+
+  syncNewCaseWorkflowId:
+    handler: src/lambdas/syncNewCaseWorkflowId.main
+    timeout: 30
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - vivaMs.applicationStatus
+            detail-type:
+              - applicationStatusSuccess
 
   generateRecurringCaseHtml:
     handler: src/lambdas/generateRecurringCaseHtml.main

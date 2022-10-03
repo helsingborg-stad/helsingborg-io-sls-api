@@ -1,8 +1,8 @@
 import caseHelper from '../../src/helpers/createCase';
 import {
   VivaClient,
-  VivaMyPagesPersonApplication,
-  VivaMyPagesPersonCase,
+  VivaMyPagesVivaApplication,
+  VivaMyPagesVivaCase,
   VivaOfficer,
   VivaOfficersOfficer,
   VivaPerson,
@@ -18,7 +18,7 @@ import {
 
 import { DEFAULT_CURRENT_POSITION } from '../../src/helpers/constants';
 
-const vivaApplication: VivaMyPagesPersonApplication = {
+const vivaApplication: VivaMyPagesVivaApplication = {
   workflowid: '123',
   period: {
     start: '2022-01-01',
@@ -63,13 +63,13 @@ const vivaOfficerSingle: VivaOfficersOfficer = {
   officer: vivaOfficer,
 };
 
-const vivaCaseClientOnly: VivaMyPagesPersonCase = {
+const vivaCaseClientOnly: VivaMyPagesVivaCase = {
   client: vivaClient,
   officers: vivaOfficerSingle,
   persons: null,
 };
 
-const vivaCaseWithPersonList: VivaMyPagesPersonCase = {
+const vivaCaseWithPersonList: VivaMyPagesVivaCase = {
   client: vivaClient,
   officers: vivaOfficerSingle,
   persons: vivaPersonList,

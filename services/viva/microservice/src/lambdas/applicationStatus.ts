@@ -2,7 +2,7 @@ import log from '../libs/logs';
 
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
-import type { VivaApplicationStatus } from '../types/vivaMyPages';
+import type { VivaApplicationsStatusItem } from '../types/vivaApplicationsStatus';
 
 interface User {
   personalNumber: string;
@@ -14,11 +14,11 @@ export interface LambdaRequest {
 
 interface SuccessEvent {
   user: User;
-  status: VivaApplicationStatus[];
+  status: VivaApplicationsStatusItem[];
 }
 
 interface Dependencies {
-  getStatus: (personalNumber: string) => Promise<VivaApplicationStatus[]>;
+  getStatus: (personalNumber: string) => Promise<VivaApplicationsStatusItem[]>;
   putSuccessEvent: (event: SuccessEvent) => Promise<void>;
 }
 
@@ -37,7 +37,7 @@ export async function checkApplicationStatus(
 
 export const main = log.wrap(event =>
   checkApplicationStatus(event, {
-    getStatus: vivaAdapter.application.status,
+    getStatus: vivaAdapter.applications.status,
     putSuccessEvent: putVivaMsEvent.applicationStatusSuccess,
   })
 );
