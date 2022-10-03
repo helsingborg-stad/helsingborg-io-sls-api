@@ -51,7 +51,6 @@ export interface GetCaseResponse {
 }
 
 export interface Dependencies {
-  requestId: string;
   getCase: (personalNumber: string) => Promise<GetCaseResponse>;
   updateCase: (caseKeys: CaseKeys, newWorkflowId: string) => Promise<void>;
   syncSuccess: (detail: SuccessEvent) => Promise<void>;
@@ -126,11 +125,8 @@ export async function syncNewCaseWorkflowId(
   return true;
 }
 
-export const main = log.wrap((event, context: Context) => {
-  const { awsRequestId: requestId } = context;
-
+export const main = log.wrap(event => {
   return syncNewCaseWorkflowId(event, {
-    requestId,
     getCase: getUserApplicantCase,
     updateCase: updateCaseWorkflowId,
     syncSuccess: putVivaMsEvent.syncWorkflowIdSuccess,

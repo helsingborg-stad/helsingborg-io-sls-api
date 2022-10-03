@@ -63,7 +63,6 @@ function createGetCaseReponse(): GetCaseResponse {
 
 function createDependencies(partialDependencies?: Partial<Dependencies>): Dependencies {
   return {
-    requestId: 'requestId',
     getCase: jest.fn().mockResolvedValue(createGetCaseReponse()),
     updateCase: jest.fn().mockResolvedValue(undefined),
     syncSuccess: jest.fn().mockResolvedValue(undefined),

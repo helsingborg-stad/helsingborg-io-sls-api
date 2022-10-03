@@ -290,7 +290,7 @@ functions:
             source:
               - vivaMs.setCaseCompletions
 
-  syncCaseWorkflowId:
+  syncNewCaseWorkflowId:
     handler: src/lambdas/syncNewCaseWorkflowId.main
     timeout: 30
     events:
