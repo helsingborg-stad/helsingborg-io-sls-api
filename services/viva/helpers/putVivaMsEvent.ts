@@ -38,6 +38,10 @@ export const eventTypeCollection = {
     source: 'vivaMs.syncWorkflow',
     detailType: 'syncWorkflowSuccess',
   },
+  syncWorkflowIdSuccess: {
+    source: 'vivaMs.syncNewCaseWorkflowId',
+    detailType: 'syncWorkflowIdSuccess',
+  },
   htmlGeneratedSuccess: {
     source: 'vivaMs.generateRecurringCaseHtml',
     detailType: 'htmlGeneratedSuccess',
@@ -76,6 +80,7 @@ export default {
     putUserEvent(detail, 'applicationReceivedSuccess'),
   decideCaseStatusSuccess: (detail: unknown) => putUserEvent(detail, 'decideCaseStatusSuccess'),
   syncWorkflowSuccess: (detail: unknown) => putUserEvent(detail, 'syncWorkflowSuccess'),
+  syncWorkflowIdSuccess: (detail: unknown) => putUserEvent(detail, 'syncWorkflowIdSuccess'),
   htmlGeneratedSuccess: (detail: unknown) => putUserEvent(detail, 'htmlGeneratedSuccess'),
   applicationStatusSuccess: (detail: unknown) => putUserEvent(detail, 'applicationStatusSuccess'),
   setCaseCompletionsSuccess: (detail: unknown) => putUserEvent(detail, 'setCaseCompletionsSuccess'),

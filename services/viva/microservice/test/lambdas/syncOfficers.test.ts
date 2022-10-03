@@ -52,15 +52,15 @@ it('successfully updates case with new officers', async () => {
   };
 
   const result = await syncOfficers(lambdaInput, {
-    getVivaOfficers: () => Promise.resolve({ officer: [makeVivaOfficer()] }),
-    updateCaseAdministrators: updateCaseOfficersMock,
+    getVivaOfficers: () => Promise.resolve([makeVivaOfficer()]),
+    updateCase: updateCaseOfficersMock,
   });
 
   expect(result).toBe(true);
   expect(updateCaseOfficersMock).toHaveBeenCalledWith({ PK, SK }, expectedCaseAdministrators);
 });
 
-it('returns null if `NewImage` property is undefined', async () => {
+it('returns true if `NewImage` property is undefined', async () => {
   const updateCaseOfficersMock = jest.fn().mockResolvedValueOnce(undefined);
 
   const result = await syncOfficers(
@@ -72,12 +72,12 @@ it('returns null if `NewImage` property is undefined', async () => {
       },
     },
     {
-      getVivaOfficers: () => Promise.resolve({ officer: [makeVivaOfficer()] }),
-      updateCaseAdministrators: updateCaseOfficersMock,
+      getVivaOfficers: () => Promise.resolve([makeVivaOfficer()]),
+      updateCase: updateCaseOfficersMock,
     }
   );
 
-  expect(result).toBeNull();
+  expect(result).toBeTruthy();
   expect(updateCaseOfficersMock).toHaveBeenCalledTimes(0);
 });
 
@@ -116,10 +116,8 @@ it('updates the case with only allowed officers', async () => {
 
   const result = await syncOfficers(lambdaInput, {
     getVivaOfficers: () =>
-      Promise.resolve({
-        officer: [makeVivaOfficer(), makeVivaOfficer({ type: 'Not allowed type' })],
-      }),
-    updateCaseAdministrators: updateCaseOfficersMock,
+      Promise.resolve([makeVivaOfficer(), makeVivaOfficer({ type: 'Not allowed type' })]),
+    updateCase: updateCaseOfficersMock,
   });
 
   expect(result).toBe(true);
@@ -171,10 +169,10 @@ it('does not update case if officers are the same in viva as in the case', async
   const updateCaseOfficersMock = jest.fn().mockResolvedValueOnce(undefined);
 
   const result = await syncOfficers(lambdaInput, {
-    getVivaOfficers: () => Promise.resolve({ officer: [makeVivaOfficer()] }),
-    updateCaseAdministrators: updateCaseOfficersMock,
+    getVivaOfficers: () => Promise.resolve([makeVivaOfficer()]),
+    updateCase: updateCaseOfficersMock,
   });
 
-  expect(result).toBe(false);
+  expect(result).toBeTruthy();
   expect(updateCaseOfficersMock).toHaveBeenCalledTimes(0);
 });

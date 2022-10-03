@@ -10,7 +10,7 @@ import {
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import validateApplicationStatus from '../helpers/validateApplicationStatus';
 
-import type { VivaApplicationStatus } from '../types/vivaMyPages';
+import type { VivaApplicationsStatusItem } from '../types/vivaApplicationsStatus';
 
 interface User {
   personalNumber: string;
@@ -22,7 +22,7 @@ interface RecurringApplicationSuccessEvent {
 
 interface LambdaDetail {
   user: User;
-  status: VivaApplicationStatus[];
+  status: VivaApplicationsStatusItem[];
 }
 
 export interface LambdaRequest {

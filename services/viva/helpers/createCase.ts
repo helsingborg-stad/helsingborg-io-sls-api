@@ -2,7 +2,7 @@ import uuid from 'uuid';
 
 import {
   VivaMyPagesApplicationPeriod,
-  VivaMyPagesPersonCase,
+  VivaMyPagesVivaCase,
   VivaPerson,
   VivaPersonType,
 } from '../types/vivaMyPages';
@@ -42,12 +42,14 @@ function getPeriodInMilliseconds(vivaApplicationPeriod: VivaMyPagesApplicationPe
   };
 }
 
-function getCasePersonList(vivaCase: VivaMyPagesPersonCase): CasePerson[] {
+function getCasePersonList(vivaCase: VivaMyPagesVivaCase): CasePerson[] {
   const vivaPerson = vivaCase.persons?.person;
-  const vivaClient = vivaCase.client;
-  vivaClient.type = VivaPersonType.Client;
+  const vivaClient: VivaPerson = {
+    ...vivaCase.client,
+    type: VivaPersonType.Client,
+  };
 
-  const personList: VivaPerson[] = [vivaClient as VivaPerson];
+  const personList: VivaPerson[] = [vivaClient];
 
   if (Array.isArray(vivaPerson)) {
     personList.push(...vivaPerson);

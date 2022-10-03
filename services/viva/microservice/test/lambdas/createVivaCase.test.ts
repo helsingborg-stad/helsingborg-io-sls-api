@@ -50,30 +50,18 @@ function createLambdaInput(persons: VivaPersonsPerson | null = null): LambdaRequ
   return {
     detail: {
       clientUser: user,
-      vivaPersonDetail: {
-        case: {
-          client: {
-            pnumber: '19940201-1234',
-            fname: 'First',
-            lname: 'LastName',
-          },
-          officers: {
-            officer: {
-              name: 'officerName',
-              type: 'officerType',
-              typeenclair: 'officerTypeenclair',
-              phone: null,
-              mail: 'some@mail.com',
-              title: 'someTitle',
-            },
-          },
-          persons,
+      myPages: {
+        client: {
+          pnumber: '199402011234',
+          fname: 'First',
+          lname: 'LastName',
         },
-        application: {
-          period: {
-            start: '2022-01-01',
-            end: '2022-01-31',
-          },
+        persons,
+      },
+      application: {
+        period: {
+          start: '2022-01-01',
+          end: '2022-01-31',
         },
       },
     },

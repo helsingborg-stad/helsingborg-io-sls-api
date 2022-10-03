@@ -19,8 +19,8 @@ export interface CaseUserAddress {
 }
 
 export interface RequestedCaseCompletions {
-  description: string;
-  received: boolean;
+  readonly description: string;
+  readonly received: boolean;
 }
 
 export interface CaseCompletions {
@@ -36,9 +36,9 @@ export interface CaseCompletions {
 }
 
 export interface CaseItem {
-  id: string;
-  PK: string;
-  SK: string;
+  readonly id: string;
+  readonly PK: string;
+  readonly SK: string;
   state: string;
   expirationTime: number;
   createdAt: number;

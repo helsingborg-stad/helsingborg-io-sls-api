@@ -1,4 +1,4 @@
 export interface EventDetailCaseKeys {
-  PK: string;
-  SK: string;
+  readonly PK: string;
+  readonly SK: string;
 }
