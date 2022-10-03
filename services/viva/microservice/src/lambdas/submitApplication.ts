@@ -111,7 +111,7 @@ export async function submitApplication(
   const [vivaPostError, vivaApplicationResponse] = await to<Record<string, unknown>, VivaPostError>(
     dependencies.postVivaApplication({
       applicationType,
-      personalNumber: +personalNumber,
+      personalNumber,
       workflowId,
       answers,
       attachments,

@@ -10,7 +10,7 @@ import type { CaseItem } from '../types/caseItem';
 import type { VivaWorkflow } from '../types/vivaWorkflow';
 
 interface GetWorkflowParams {
-  personalNumber: number;
+  personalNumber: string;
   workflowId: string;
 }
 

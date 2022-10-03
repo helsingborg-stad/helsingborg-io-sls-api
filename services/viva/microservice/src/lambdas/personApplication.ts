@@ -23,7 +23,7 @@ export interface SuccessEvent {
 }
 
 export interface Dependencies {
-  getMyPages: (personalNumber: number) => Promise<VivaMyPagesVivaCase>;
+  getMyPages: (personalNumber: string) => Promise<VivaMyPagesVivaCase>;
   putSuccessEvent: (parameters: SuccessEvent) => Promise<void>;
 }
 
@@ -33,7 +33,7 @@ export async function personApplication(
 ): Promise<boolean> {
   const clientUser = input.detail.user;
 
-  const vivaPersonDetail = await dependencies.getMyPages(+clientUser.personalNumber);
+  const vivaPersonDetail = await dependencies.getMyPages(clientUser.personalNumber);
 
   await dependencies.putSuccessEvent({
     clientUser,

@@ -5,12 +5,12 @@ const dynamoDbClient = new DynamoDb.DocumentClient({ apiVersion: '2012-08-10' })
 import { DynamoQueryHandler } from './types';
 
 export const dynamoQueryHandler: DynamoQueryHandler = {
-  async get<T>(tableName: string, keys: { PK: string; SK?: string }) {
+  async get<T>(tableName: string, keys: { PK: string; SK: string }) {
     const parameters = {
       TableName: tableName,
       Key: {
         PK: keys.PK,
-        ...(!!keys.SK && { SK: keys.SK }),
+        SK: keys.SK,
       },
     };
 

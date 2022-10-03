@@ -18,7 +18,7 @@ interface SuccessEvent {
 }
 
 interface Dependencies {
-  getStatus: (personalNumber: number) => Promise<VivaApplicationsStatusItem[]>;
+  getStatus: (personalNumber: string) => Promise<VivaApplicationsStatusItem[]>;
   putSuccessEvent: (event: SuccessEvent) => Promise<void>;
 }
 
@@ -28,7 +28,7 @@ export async function checkApplicationStatus(
 ): Promise<boolean> {
   const user = input.detail;
 
-  const status = await dependencies.getStatus(+user.personalNumber);
+  const status = await dependencies.getStatus(user.personalNumber);
 
   await dependencies.putSuccessEvent({ user, status });
 

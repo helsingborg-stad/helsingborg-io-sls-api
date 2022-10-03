@@ -57,7 +57,7 @@ export interface Dependencies {
   getCase: (personalNumber: string) => Promise<GetCaseResponse>;
   updateCase: (caseKeys: CaseKeys, newWorkflowId: string) => Promise<void>;
   syncSuccess: (detail: SuccessEvent) => Promise<void>;
-  getLatestWorkflow: (personalNumber: number) => Promise<VivaWorkflow>;
+  getLatestWorkflow: (personalNumber: string) => Promise<VivaWorkflow>;
   readParams: (envsKeyName: string) => Promise<VivaParametersResponse>;
 }
 
@@ -122,7 +122,7 @@ async function syncNewCaseWorkflowId(
   const isNewApplication = userCase.currentFormId === newApplicationFormId;
 
   if (isNewApplication) {
-    const [getError, workflow] = await to(dependencies.getLatestWorkflow(+user.personalNumber));
+    const [getError, workflow] = await to(dependencies.getLatestWorkflow(user.personalNumber));
     if (!workflow) {
       throw new TraceException('No workflow found for user', dependencies.requestId, {
         ...getError,
@@ -147,4 +147,3 @@ export const main = log.wrap((event, context: Context) => {
     readParams: params.read,
   });
 });
-

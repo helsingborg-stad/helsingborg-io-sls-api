@@ -4,7 +4,7 @@ import type { LambdaRequest, Dependencies } from '../../src/lambdas/personApplic
 import type { CaseUser } from '../../../types/caseItem';
 import type { VivaMyPagesVivaCase } from '../../../types/vivaMyPages';
 
-const mockPersonalNumber = 199009123412;
+const mockPersonalNumber = '199009123412';
 const defaultVivaMyPages = {
   client: {
     pnumber: '19900912-3412',
@@ -15,7 +15,7 @@ function createInput(): LambdaRequest {
   return {
     detail: {
       user: {
-        personalNumber: mockPersonalNumber.toString(),
+        personalNumber: mockPersonalNumber,
       } as CaseUser,
     },
   };
@@ -45,7 +45,7 @@ it('successfully fetches person from viva', async () => {
   expect(mockGetVivaPerson).toHaveBeenCalledWith(mockPersonalNumber);
   expect(mockPutSuccessEvent).toHaveBeenCalledWith({
     clientUser: {
-      personalNumber: mockPersonalNumber.toString(),
+      personalNumber: mockPersonalNumber,
     },
     vivaPersonDetail: defaultVivaMyPages,
   });

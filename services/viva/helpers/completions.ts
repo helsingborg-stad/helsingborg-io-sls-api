@@ -82,14 +82,14 @@ async function getVivaWorkflowCompletions(
   workflowId: string
 ): Promise<VadaWorkflowCompletions> {
   const completions = await vivaAdapter.workflow.getCompletions({
-    personalNumber: +personalNumber,
+    personalNumber,
     workflowId,
   });
   return completions;
 }
 
 async function getLatestVivaWorkflowId(personalNumber: string): Promise<string> {
-  const workflow = await vivaAdapter.workflow.getLatest(+personalNumber);
+  const workflow = await vivaAdapter.workflow.getLatest(personalNumber);
   return workflow.workflowid;
 }
 

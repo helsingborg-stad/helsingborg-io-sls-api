@@ -27,7 +27,7 @@ interface LambdaRequest {
   detail: LambdaDetails;
 }
 export interface Dependencies {
-  getVivaOfficers: (personalNumber: number) => Promise<VivaOfficer | VivaOfficer[]>;
+  getVivaOfficers: (personalNumber: string) => Promise<VivaOfficer | VivaOfficer[]>;
   updateCase: (keys: CaseKeys, administrators: CaseAdministrator[]) => Promise<void>;
 }
 
@@ -41,7 +41,6 @@ export function createCaseAdministrators(
   if (Array.isArray(vivaOfficer)) {
     vivaOfficers = [...vivaOfficer];
   } else {
-    // vivaOfficer is an object when viva applicant has only one officer
     vivaOfficers.push(vivaOfficer);
   }
 
@@ -85,7 +84,7 @@ export async function syncOfficers(input: LambdaRequest, dependencies: Dependenc
   const caseAdministrators = details?.administrators ?? [];
 
   const personalNumber = PK.substring(5);
-  const vivaOfficers = await dependencies.getVivaOfficers(+personalNumber);
+  const vivaOfficers = await dependencies.getVivaOfficers(personalNumber);
 
   const administrators = createCaseAdministrators(vivaOfficers);
   const currentAdministrators = administrators.filter(({ type }) =>
