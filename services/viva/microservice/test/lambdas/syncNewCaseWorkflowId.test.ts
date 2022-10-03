@@ -147,11 +147,3 @@ it('Does not sync new case if current form id not match', async () => {
   expect(dependencies.getLatestWorkflow).toHaveBeenCalledTimes(0);
   expect(dependencies.updateCase).toHaveBeenCalledTimes(0);
 });
-
-it('Throws error if workflow id not found in Viva', async () => {
-  const dependencies = createDependencies({
-    getLatestWorkflow: jest.fn().mockResolvedValue(undefined),
-  });
-
-  await expect(syncNewCaseWorkflowId(input, dependencies)).rejects.toThrow(TraceException);
-});

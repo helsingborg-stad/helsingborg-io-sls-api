@@ -1,4 +1,3 @@
-import to from 'await-to-js';
 import { Context } from 'aws-lambda';
 
 import params from '../libs/params';
@@ -111,7 +110,7 @@ export async function syncNewCaseWorkflowId(
   }
 
   const getCaseResponse = await dependencies.getCase(user.personalNumber);
-  if (!getCaseResponse || getCaseResponse.Count > 1) {
+  if (getCaseResponse?.Count !== 1) {
     return true;
   }
   const userCase = getCaseResponse.Items[0];
@@ -121,13 +120,7 @@ export async function syncNewCaseWorkflowId(
   );
   const isNewApplication = userCase.currentFormId === newApplicationFormId;
   if (isNewApplication) {
-    const [getError, workflow] = await to(dependencies.getLatestWorkflow(user.personalNumber));
-    if (!workflow) {
-      throw new TraceException('No workflow found for user', dependencies.requestId, {
-        ...getError,
-      });
-    }
-
+    const workflow = await dependencies.getLatestWorkflow(user.personalNumber);
     await dependencies.updateCase({ PK: userCase.PK, SK: userCase.SK }, workflow.workflowid);
   }
 
