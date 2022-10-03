@@ -1,4 +1,3 @@
-import { TraceException } from '../../src/helpers/TraceException';
 import {
   Dependencies,
   LambdaRequest,

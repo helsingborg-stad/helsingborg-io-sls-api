@@ -5,7 +5,6 @@ import log from '../libs/logs';
 import config from '../libs/config';
 import * as dynamoDb from '../libs/dynamoDb';
 
-import { TraceException } from '../helpers/TraceException';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import {
