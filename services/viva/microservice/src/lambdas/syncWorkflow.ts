@@ -118,7 +118,7 @@ export async function syncWorkflow(input: LambdaRequest, dependencies: Dependenc
     caseListWithWorkflowId.map(async caseItem => {
       const workflowId = caseItem.details.workflowId as string;
       const workflow = await dependencies.getWorkflow({
-        personalNumber: +personalNumber,
+        personalNumber,
         workflowId,
       });
 

@@ -55,7 +55,7 @@ interface UpdateCaseParameters {
 export interface Dependencies {
   decodeToken: (params: LambdaRequest) => Token;
   updateCase: (params: UpdateCaseParameters) => Promise<UpdateCaseAddPersonResponse>;
-  coApplicantStatus: (personalNumber: number) => Promise<VivaApplicationsStatusItem[]>;
+  coApplicantStatus: (personalNumber: string) => Promise<VivaApplicationsStatusItem[]>;
   validateCoApplicantStatus: typeof validateApplicationStatus;
   getCase: (keys: CaseKeys) => Promise<CaseItem>;
   getFormTemplates: typeof getFormTemplates;
