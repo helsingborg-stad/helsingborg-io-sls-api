@@ -66,7 +66,7 @@ interface GetWorkflowPayload {
   workflowId: string;
 }
 
-interface PostCompletionsPayload {
+export interface PostCompletionsPayload {
   personalNumber: string;
   workflowId: string;
   attachments: CaseAttachment[];

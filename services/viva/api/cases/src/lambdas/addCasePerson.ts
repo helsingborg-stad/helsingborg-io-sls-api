@@ -99,7 +99,7 @@ export async function addCasePerson(input: LambdaRequest, dependencies: Dependen
     return response.failure(new BadRequestError(message));
   }
 
-  const statusList = await dependencies.coApplicantStatus(+coApplicantRequestBody.personalNumber);
+  const statusList = await dependencies.coApplicantStatus(coApplicantRequestBody.personalNumber);
 
   const coApplicantAllowedStatusCode = [VIVA_STATUS_NEW_APPLICATION_OPEN];
   if (!dependencies.validateCoApplicantStatus(statusList, coApplicantAllowedStatusCode)) {

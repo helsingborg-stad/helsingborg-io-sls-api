@@ -12,6 +12,7 @@ import attachment from '../helpers/attachment';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 import { CaseAttachment } from '../helpers/attachment';
 
+import type { PostCompletionsPayload } from '../helpers/vivaAdapterRequestClient';
 import type { CaseItem, CaseForm, CaseFormAnswer } from '../types/caseItem';
 import type { EventDetailCaseKeys } from '../types/eventDetail';
 
@@ -23,12 +24,6 @@ interface LambdaDetail {
 
 export interface LambdaRequest {
   readonly detail: LambdaDetail;
-}
-
-interface PostCompletionsRequest {
-  personalNumber: number;
-  workflowId: string;
-  attachments: CaseAttachment[];
 }
 
 interface SSMParamsReadResponse {
@@ -49,7 +44,7 @@ interface PostCompletionsResponse {
 export interface Dependencies {
   getCase: (keys: EventDetailCaseKeys) => Promise<CaseItem>;
   readParams: (name: string) => Promise<SSMParamsReadResponse>;
-  postCompletions: (payload: PostCompletionsRequest) => Promise<PostCompletionsResponse>;
+  postCompletions: (payload: PostCompletionsPayload) => Promise<PostCompletionsResponse>;
   updateCase: (params: UpdateCaseParameters) => Promise<void>;
   getAttachments: (
     personalNumber: string,
@@ -117,7 +112,7 @@ export async function submitCompletion(input: LambdaRequest, dependencies: Depen
   const workflowId = caseItem.details.workflowId ?? '';
 
   const postCompletionResponse = await dependencies.postCompletions({
-    personalNumber: +personalNumber,
+    personalNumber,
     workflowId,
     attachments,
   });
