@@ -1,5 +1,3 @@
-import { Context } from 'aws-lambda';
-
 import params from '../libs/params';
 import log from '../libs/logs';
 import config from '../libs/config';
