@@ -36,6 +36,10 @@ export async function setCaseCompletions(input: LambdaRequest, dependencies: Dep
   const { caseKeys } = input.detail;
 
   const caseItem = await dependencies.getCase(caseKeys);
+  const { completions } = caseItem.details;
+  if (!completions) {
+    return true;
+  }
 
   const {
     completionFormId,
@@ -45,12 +49,6 @@ export async function setCaseCompletions(input: LambdaRequest, dependencies: Dep
     newApplicationRandomCheckFormId,
   } = await dependencies.readParams(config.cases.providers.viva.envsKeyName);
 
-  const completions = caseItem.details.completions;
-  if (!completions) {
-    return true;
-  }
-
-  const persons = caseItem.persons ?? [];
   const isNewApplication = caseItem.currentFormId === newApplicationFormId;
 
   const formIds = {
@@ -62,7 +60,7 @@ export async function setCaseCompletions(input: LambdaRequest, dependencies: Dep
     newStatus: dependencies.getNewStatus(completions),
     newState: dependencies.getNewState(completions),
     newCurrentFormId: completionsHelper.get.formId(formIds, completions),
-    newPersons: persons.map(resetPersonSignature),
+    newPersons: caseItem.persons.map(resetPersonSignature),
   };
 
   await dependencies.updateCase(caseKeys, caseUpdateAttributes);
