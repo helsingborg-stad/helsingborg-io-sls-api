@@ -6,6 +6,7 @@ import * as dynamoDb from '../libs/dynamoDb';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import {
+  VIVA_STATUS_COMPLETION,
   VIVA_STATUS_CASE_EXISTS,
   VIVA_STATUS_WEB_APPLICATION_ACTIVE,
   VIVA_STATUS_WEB_APPLICATION_ALLOWED,
@@ -96,12 +97,23 @@ export async function syncNewCaseWorkflowId(
 ): Promise<boolean> {
   const { user, status } = input.detail;
 
-  const requiredStatusCodeList = [
+  const completionsStatusCodeList = [
+    VIVA_STATUS_COMPLETION,
     VIVA_STATUS_CASE_EXISTS,
     VIVA_STATUS_WEB_APPLICATION_ACTIVE,
     VIVA_STATUS_WEB_APPLICATION_ALLOWED,
   ];
-  if (!validateApplicationStatus(status, requiredStatusCodeList)) {
+  const applicationReceivedStatusCodeList = [
+    VIVA_STATUS_CASE_EXISTS,
+    VIVA_STATUS_WEB_APPLICATION_ACTIVE,
+    VIVA_STATUS_WEB_APPLICATION_ALLOWED,
+  ];
+
+  const isApprovedStatusCode =
+    validateApplicationStatus(status, completionsStatusCodeList) ||
+    validateApplicationStatus(status, applicationReceivedStatusCodeList);
+
+  if (!isApprovedStatusCode) {
     return true;
   }
 
@@ -109,11 +121,12 @@ export async function syncNewCaseWorkflowId(
   if (getCaseResponse?.Count !== 1) {
     return true;
   }
-  const userCase = getCaseResponse.Items[0];
+  const [userCase] = getCaseResponse.Items;
 
   const { newApplicationFormId } = await dependencies.readParams(
     config.cases.providers.viva.envsKeyName
   );
+
   const isNewApplication = userCase.currentFormId === newApplicationFormId;
   if (isNewApplication) {
     const workflow = await dependencies.getLatestWorkflow(user.personalNumber);
