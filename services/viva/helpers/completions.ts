@@ -9,6 +9,7 @@ import {
   ACTIVE_COMPLETION_REQUIRED_VIVA,
   ACTIVE_COMPLETION_SUBMITTED_VIVA,
   ACTIVE_SUBMITTED,
+  ACTIVE_NEW_APPLICATION_RANDOM_CHECK_VIVA,
 
   // state
   VIVA_RANDOM_CHECK_REQUIRED,
@@ -37,16 +38,20 @@ function getCompletionFormId(
   return isRandomCheck(completions) ? randomCheckFormId : completionFormId;
 }
 
-function getCompletionStatus(completions: CaseCompletions): CaseStatus {
+function getCompletionStatus(completions: CaseCompletions, isNewApplication = false): CaseStatus {
   if (completions.isCompleted) {
     return getStatusByType(ACTIVE_SUBMITTED);
   }
 
-  if (isRandomCheck(completions)) {
-    if (completions.isAttachmentPending) {
-      return getStatusByType(ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA);
-    }
-    return getStatusByType(ACTIVE_RANDOM_CHECK_REQUIRED_VIVA);
+  const isRandomCheckRequired =
+    (isRandomCheck(completions) && completions.isAttachmentPending) || isRandomCheck(completions);
+
+  if (isRandomCheckRequired) {
+    return getStatusByType(
+      isNewApplication
+        ? ACTIVE_NEW_APPLICATION_RANDOM_CHECK_VIVA
+        : ACTIVE_RANDOM_CHECK_REQUIRED_VIVA
+    );
   }
 
   if (completions.isAttachmentPending) {

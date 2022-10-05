@@ -15,20 +15,20 @@ import type { CaseItem, CaseStatus, CaseCompletions } from '../types/caseItem';
 type CaseKeys = Pick<CaseItem, 'PK' | 'SK'>;
 type UserCase = Pick<CaseItem, 'details' | 'persons' | 'currentFormId' | 'id'>;
 
-interface LambdaDetails {
+interface LambdaDetail {
   caseKeys: CaseKeys;
 }
 
 export interface LambdaRequest {
-  detail: LambdaDetails;
+  detail: LambdaDetail;
 }
 
 export interface Dependencies {
   getCase: (keys: CaseKeys) => Promise<UserCase>;
   readParams: (envsKeyName: string) => Promise<VivaParametersResponse>;
-  putSuccessEvent: (params: LambdaDetails) => Promise<void>;
+  putSuccessEvent: (params: LambdaDetail) => Promise<void>;
   updateCase: (keys: CaseKeys, caseUpdateAttributes: unknown) => Promise<void>;
-  getNewStatus: (completions: CaseCompletions) => CaseStatus;
+  getNewStatus: (completions: CaseCompletions, isNewApplication: boolean) => CaseStatus;
   getNewState: (completions: CaseCompletions) => string;
 }
 
@@ -49,7 +49,9 @@ export async function setCaseCompletions(input: LambdaRequest, dependencies: Dep
     newApplicationRandomCheckFormId,
   } = await dependencies.readParams(config.cases.providers.viva.envsKeyName);
 
-  const isNewApplication = caseItem.currentFormId === newApplicationFormId;
+  const isNewApplication =
+    caseItem.currentFormId ===
+    (newApplicationFormId || newApplicationCompletionFormId || newApplicationRandomCheckFormId);
 
   const formIds = {
     randomCheckFormId: isNewApplication ? newApplicationRandomCheckFormId : randomCheckFormId,
@@ -57,7 +59,7 @@ export async function setCaseCompletions(input: LambdaRequest, dependencies: Dep
   };
 
   const caseUpdateAttributes = {
-    newStatus: dependencies.getNewStatus(completions),
+    newStatus: dependencies.getNewStatus(completions, isNewApplication),
     newState: dependencies.getNewState(completions),
     newCurrentFormId: completionsHelper.get.formId(formIds, completions),
     newPersons: caseItem.persons.map(resetPersonSignature),
