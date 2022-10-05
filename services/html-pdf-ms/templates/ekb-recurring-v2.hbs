@@ -19,25 +19,25 @@
 
 	<body>
 		<header>
-			{{#if (eq type "EKB_RECURRING")}}
+			{{#if period}}
 				<div>
-					<h1>Ansökan gäller för perioden</h1>
+				<h1>Ansökan gäller för perioden</h1>
 				</div>
 				<div>
-					<p>
-						{{period.startDate}}
-						-
-						{{period.endDate}}
-					</p>
+				<p>
+					{{period.startDate}}
+					-
+					{{period.endDate}}
+				</p>
 				</div>
 			{{else}}
 				<div>
-					<h1>Ansökan inkom</h1>
+				<h1>Ansökan inkom</h1>
 				</div>
 				<div>
-					<p>
-						{{updatedAt}}
-					</p>
+				<p>
+					{{updatedAt}}
+				</p>
 				</div>
 			{{/if}}
 		</header>
