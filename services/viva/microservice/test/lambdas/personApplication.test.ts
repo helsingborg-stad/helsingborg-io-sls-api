@@ -24,12 +24,20 @@ function createInput(): LambdaRequest {
 function createDependencies(dependencies: Partial<Dependencies> = {}): Dependencies {
   return {
     getMyPages: () => Promise.resolve(defaultVivaMyPages),
+    getApplication: () =>
+      Promise.resolve({
+        workflowId: '123',
+        period: {
+          start: '2021-01-01',
+          end: '2021-01-31',
+        },
+      }),
     putSuccessEvent: () => Promise.resolve(undefined),
     ...dependencies,
   };
 }
 
-it('successfully fetches person from viva', async () => {
+it('successfully fetches MyPages info from Viva', async () => {
   const mockGetVivaPerson = jest.fn().mockResolvedValue(defaultVivaMyPages);
   const mockPutSuccessEvent = jest.fn();
 
@@ -47,6 +55,13 @@ it('successfully fetches person from viva', async () => {
     clientUser: {
       personalNumber: mockPersonalNumber,
     },
-    vivaPersonDetail: defaultVivaMyPages,
+    myPages: defaultVivaMyPages,
+    application: {
+      workflowId: '123',
+      period: {
+        start: '2021-01-01',
+        end: '2021-01-31',
+      },
+    },
   });
 });
