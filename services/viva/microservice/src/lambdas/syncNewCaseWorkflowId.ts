@@ -97,6 +97,12 @@ export async function syncNewCaseWorkflowId(
 ): Promise<boolean> {
   const { user, status } = input.detail;
 
+  const getCaseResponse = await dependencies.getCase(user.personalNumber);
+  if (getCaseResponse?.Count !== 1) {
+    return true;
+  }
+  const [userCase] = getCaseResponse.Items;
+
   const completionsStatusCodeList = [
     VIVA_STATUS_COMPLETION,
     VIVA_STATUS_CASE_EXISTS,
@@ -112,16 +118,9 @@ export async function syncNewCaseWorkflowId(
   const isApprovedStatusCode =
     validateApplicationStatus(status, completionsStatusCodeList) ||
     validateApplicationStatus(status, applicationReceivedStatusCodeList);
-
   if (!isApprovedStatusCode) {
     return true;
   }
-
-  const getCaseResponse = await dependencies.getCase(user.personalNumber);
-  if (getCaseResponse?.Count !== 1) {
-    return true;
-  }
-  const [userCase] = getCaseResponse.Items;
 
   const { newApplicationFormId } = await dependencies.readParams(
     config.cases.providers.viva.envsKeyName
@@ -130,7 +129,13 @@ export async function syncNewCaseWorkflowId(
   const isNewApplication = userCase.currentFormId === newApplicationFormId;
   if (isNewApplication) {
     const workflow = await dependencies.getLatestWorkflow(user.personalNumber);
-    await dependencies.updateCase({ PK: userCase.PK, SK: userCase.SK }, workflow.workflowid);
+    await dependencies.updateCase(
+      {
+        PK: userCase.PK,
+        SK: userCase.SK,
+      },
+      workflow.workflowid
+    );
   }
 
   return true;

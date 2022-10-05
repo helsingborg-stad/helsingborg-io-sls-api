@@ -111,7 +111,7 @@ it('Does not sync new case if no match on status', async () => {
   const result = await syncNewCaseWorkflowId(input, dependencies);
 
   expect(result).toBe(true);
-  expect(dependencies.getCase).toHaveBeenCalledTimes(0);
+  expect(dependencies.getCase).toHaveBeenCalledTimes(1);
   expect(dependencies.getLatestWorkflow).toHaveBeenCalledTimes(0);
   expect(dependencies.updateCase).toHaveBeenCalledTimes(0);
 });
@@ -128,6 +128,7 @@ it('Does not sync new case if got more than one case', async () => {
   const result = await syncNewCaseWorkflowId(input, dependencies);
 
   expect(result).toBe(true);
+  expect(dependencies.getCase).toHaveBeenCalledTimes(1);
   expect(dependencies.getLatestWorkflow).toHaveBeenCalledTimes(0);
   expect(dependencies.updateCase).toHaveBeenCalledTimes(0);
 });
@@ -142,6 +143,7 @@ it('Does not sync new case if current form id not match', async () => {
   const result = await syncNewCaseWorkflowId(input, dependencies);
 
   expect(result).toBe(true);
+  expect(dependencies.getCase).toHaveBeenCalledTimes(1);
   expect(dependencies.getLatestWorkflow).toHaveBeenCalledTimes(0);
   expect(dependencies.updateCase).toHaveBeenCalledTimes(0);
 });
