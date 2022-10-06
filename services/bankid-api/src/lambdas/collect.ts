@@ -1,7 +1,7 @@
 import to from 'await-to-js';
 
 import { AxiosInstance, AxiosError } from 'axios';
-import { throwError, InternalServerError } from '@helsingborg-stad/npm-api-error-handling';
+import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
 import config from '../libs/config';
 import params from '../libs/params';
@@ -46,6 +46,7 @@ export async function main(
   const [bankIdCollectRequestError, bankIdCollectResponse] = await to(
     sendBankIdCollectRequest({ orderRef })
   );
+
   if (bankIdCollectRequestError) {
     log.error(
       'Bank Id Collect request error',
@@ -53,8 +54,7 @@ export async function main(
       'service-bankid-api-collect-001',
       bankIdCollectRequestError
     );
-    response.failure(new InternalServerError(bankIdCollectRequestError.message));
-    return false;
+    return response.failure(bankIdCollectRequestError);
   }
 
   let responseAttributes = {};
