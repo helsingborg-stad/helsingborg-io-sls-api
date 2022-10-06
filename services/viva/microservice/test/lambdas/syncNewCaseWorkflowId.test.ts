@@ -66,7 +66,7 @@ function createDependencies(partialDependencies?: Partial<Dependencies>): Depend
     getCase: jest.fn().mockResolvedValue(createGetCaseReponse()),
     updateCase: jest.fn().mockResolvedValue(undefined),
     syncSuccess: jest.fn().mockResolvedValue(undefined),
-    getLatestWorkflow: jest.fn().mockResolvedValue(createWorkflow()),
+    getWorkflow: jest.fn().mockResolvedValue(createWorkflow()),
     readParams: () =>
       Promise.resolve({
         recurringFormId: 'recurringFormId',
@@ -87,7 +87,7 @@ it('Syncs new case with workflow id', async () => {
 
   expect(result).toBe(true);
   expect(dependencies.getCase).toHaveBeenCalledWith(input.detail.user.personalNumber);
-  expect(dependencies.getLatestWorkflow).toHaveBeenCalledWith(input.detail.user.personalNumber);
+  expect(dependencies.getWorkflow).toHaveBeenCalledWith(input.detail.user.personalNumber);
   expect(dependencies.updateCase).toHaveBeenCalledWith(caseKeys, WORKFLOW_ID);
 });
 
@@ -112,7 +112,7 @@ it('Does not sync new case if no match on status', async () => {
 
   expect(result).toBe(true);
   expect(dependencies.getCase).toHaveBeenCalledTimes(1);
-  expect(dependencies.getLatestWorkflow).toHaveBeenCalledTimes(0);
+  expect(dependencies.getWorkflow).toHaveBeenCalledTimes(0);
   expect(dependencies.updateCase).toHaveBeenCalledTimes(0);
 });
 
@@ -129,7 +129,7 @@ it('Does not sync new case if got more than one case', async () => {
 
   expect(result).toBe(true);
   expect(dependencies.getCase).toHaveBeenCalledTimes(1);
-  expect(dependencies.getLatestWorkflow).toHaveBeenCalledTimes(0);
+  expect(dependencies.getWorkflow).toHaveBeenCalledTimes(0);
   expect(dependencies.updateCase).toHaveBeenCalledTimes(0);
 });
 
@@ -144,6 +144,6 @@ it('Does not sync new case if current form id not match', async () => {
 
   expect(result).toBe(true);
   expect(dependencies.getCase).toHaveBeenCalledTimes(1);
-  expect(dependencies.getLatestWorkflow).toHaveBeenCalledTimes(0);
+  expect(dependencies.getWorkflow).toHaveBeenCalledTimes(0);
   expect(dependencies.updateCase).toHaveBeenCalledTimes(0);
 });
