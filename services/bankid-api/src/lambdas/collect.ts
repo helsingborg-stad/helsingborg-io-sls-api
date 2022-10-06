@@ -1,23 +1,19 @@
+import { throwError } from '@helsingborg-stad/npm-api-error-handling';
+import { AxiosInstance, AxiosError } from 'axios';
 import to from 'await-to-js';
 
-import { AxiosInstance, AxiosError } from 'axios';
-import { throwError } from '@helsingborg-stad/npm-api-error-handling';
-
-import config from '../libs/config';
-import params from '../libs/params';
-import log from '../libs/logs';
-import secrets from '../libs/secrets';
-
-import * as request from '../libs/request';
 import * as response from '../libs/response';
+import * as request from '../libs/request';
+import secrets from '../libs/secrets';
+import params from '../libs/params';
+import config from '../libs/config';
+import log from '../libs/logs';
 
 import { putEvent } from '../libs/awsEventBridge';
 import { signToken } from '../libs/token';
 
-import * as bankId from '../helpers/bankId';
 import { BankIdError, BankIdSSMParams } from '../helpers/types';
-
-const SSMParams = params.read(config.bankId.envsKeyName);
+import * as bankId from '../helpers/bankId';
 
 const CONFIG_AUTH_SECRETS_AUTHORIZATION_CODE = config.auth.secrets.authorizationCode;
 
@@ -25,89 +21,37 @@ interface BankIdCollectLambdaRequest {
   orderRef: string;
 }
 
-interface BankIdCollectResponse {
-  data: {
-    status: string;
-    completionData: {
-      user: {
-        personalNumber: string;
-      };
+interface BankIdCollectData {
+  status: string;
+  completionData: {
+    user: {
+      personalNumber: string;
     };
   };
 }
 
-export async function main(
-  event: { body: string; headers: Record<string, string> },
-  context: { awsRequestId: string }
-) {
-  const { body, headers } = event;
-  const { orderRef } = JSON.parse(body);
+interface ResponseAttributes extends Partial<BankIdCollectData> {
+  authorizationCode?: string;
+}
 
-  const [bankIdCollectRequestError, bankIdCollectResponse] = await to(
-    sendBankIdCollectRequest({ orderRef })
-  );
+interface BankIdCollectResponse {
+  data: BankIdCollectData;
+}
 
-  if (bankIdCollectRequestError) {
-    log.error(
-      'Bank Id Collect request error',
-      context.awsRequestId,
-      'service-bankid-api-collect-001',
-      bankIdCollectRequestError
-    );
-    return response.failure(bankIdCollectRequestError);
-  }
+interface Dependencies {
+  sendBankIdCollectRequest: (
+    parameters: BankIdCollectLambdaRequest
+  ) => Promise<BankIdCollectResponse | undefined>;
+  generateAuthorizationCode: (personalNumber: string) => Promise<string | undefined>;
+}
 
-  let responseAttributes = {};
-
-  if (!isBankidCollectStatusComplete(bankIdCollectResponse?.data)) {
-    responseAttributes = bankIdCollectResponse?.data ?? {};
-  }
-
-  if (isBankidCollectStatusComplete(bankIdCollectResponse?.data)) {
-    responseAttributes = {
-      ...bankIdCollectResponse?.data,
-    };
-  }
-
-  if (
-    isUserAgentMittHelsingborgApp(headers) &&
-    isBankidCollectStatusComplete(bankIdCollectResponse?.data)
-  ) {
-    await putEvent(
-      bankIdCollectResponse?.data.completionData ?? {},
-      'BankIdCollectComplete',
-      'bankId.collect'
-    );
-
-    const personalNumber = bankIdCollectResponse?.data.completionData.user.personalNumber;
-    const [generateAuthorizationCodeError, authorizationCode] = await to(
-      generateAuthorizationCode(personalNumber ?? '')
-    );
-    if (generateAuthorizationCodeError) {
-      log.error(
-        'Bank Id Authorization code error',
-        context.awsRequestId,
-        'service-bankid-api-collect-002',
-        bankIdCollectRequestError ?? {}
-      );
-
-      return response.failure(generateAuthorizationCodeError);
-    }
-
-    responseAttributes = {
-      authorizationCode,
-      ...responseAttributes,
-    };
-  }
-
-  return response.success(200, {
-    type: 'bankIdCollect',
-    attributes: responseAttributes,
-  });
+interface LambdaRequest {
+  body: string;
+  headers: Record<string, string>;
 }
 
 function isBankidCollectStatusComplete(responseData: BankIdCollectResponse['data'] | undefined) {
-  return responseData && responseData.status === 'complete';
+  return responseData?.status === 'complete';
 }
 
 function isUserAgentMittHelsingborgApp(headers: Record<string, string>) {
@@ -146,8 +90,10 @@ async function generateAuthorizationCode(personalNumber: string) {
   return signedToken;
 }
 
-async function sendBankIdCollectRequest(payload: BankIdCollectLambdaRequest) {
-  const bankIdSSMparams: BankIdSSMParams = await SSMParams;
+async function sendBankIdCollectRequest(
+  payload: BankIdCollectLambdaRequest
+): Promise<BankIdCollectResponse | undefined> {
+  const bankIdSSMparams: BankIdSSMParams = await params.read(config.bankId.envsKeyName);
 
   const [axiosError, bankIdClient] = await to<AxiosInstance, AxiosError>(
     bankId.client(bankIdSSMparams)
@@ -168,3 +114,67 @@ async function sendBankIdCollectRequest(payload: BankIdCollectLambdaRequest) {
 
   return collectResponse;
 }
+
+export async function collect(input: LambdaRequest, dependencies: Dependencies) {
+  const { body, headers } = input;
+  const { orderRef } = JSON.parse(body);
+
+  const [bankIdCollectRequestError, bankIdCollectResponse] = await to(
+    dependencies.sendBankIdCollectRequest({ orderRef })
+  );
+
+  if (bankIdCollectRequestError) {
+    log.error(
+      'Bank Id Collect request error',
+      'context.awsRequestId',
+      'service-bankid-api-collect-001',
+      bankIdCollectRequestError
+    );
+    return response.failure(bankIdCollectRequestError, {
+      type: 'bankIdCollect',
+    });
+  }
+
+  let responseAttributes: ResponseAttributes = {
+    ...(bankIdCollectResponse?.data ?? {}),
+  };
+
+  if (
+    isUserAgentMittHelsingborgApp(headers) &&
+    isBankidCollectStatusComplete(bankIdCollectResponse?.data)
+  ) {
+    await putEvent(responseAttributes, 'BankIdCollectComplete', 'bankId.collect');
+
+    const personalNumber = bankIdCollectResponse?.data.completionData.user.personalNumber;
+    const [generateAuthorizationCodeError, authorizationCode] = await to(
+      dependencies.generateAuthorizationCode(personalNumber ?? '')
+    );
+    if (generateAuthorizationCodeError) {
+      log.error(
+        'Bank Id Authorization code error',
+        'context.awsRequestId',
+        'service-bankid-api-collect-002',
+        generateAuthorizationCodeError ?? {}
+      );
+
+      return response.failure(generateAuthorizationCodeError);
+    }
+
+    responseAttributes = {
+      authorizationCode,
+      ...responseAttributes,
+    };
+  }
+
+  return response.success(200, {
+    type: 'bankIdCollect',
+    attributes: responseAttributes,
+  });
+}
+
+export const main = log.wrap(async event => {
+  return collect(event, {
+    sendBankIdCollectRequest,
+    generateAuthorizationCode,
+  });
+});
