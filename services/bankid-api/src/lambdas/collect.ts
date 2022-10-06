@@ -45,6 +45,11 @@ export interface Dependencies {
     parameters: BankIdCollectLambdaRequest
   ) => Promise<BankIdCollectResponse | undefined>;
   generateAuthorizationCode: (personalNumber: string) => Promise<string | undefined>;
+  sendBankIdStatusCompleteEvent: (
+    detail: ResponseAttributes,
+    detailType: string,
+    source: string
+  ) => Promise<void>;
 }
 
 export interface LambdaRequest {
@@ -145,7 +150,11 @@ export async function collect(input: LambdaRequest, dependencies: Dependencies) 
     isUserAgentMittHelsingborgApp(headers) &&
     isBankidCollectStatusComplete(bankIdCollectResponse?.data)
   ) {
-    await putEvent(responseAttributes, 'BankIdCollectComplete', 'bankId.collect');
+    await dependencies.sendBankIdStatusCompleteEvent(
+      responseAttributes,
+      'BankIdCollectComplete',
+      'bankId.collect'
+    );
 
     const personalNumber = bankIdCollectResponse?.data.completionData.user.personalNumber;
     const [generateAuthorizationCodeError, authorizationCode] = await to(
@@ -178,5 +187,6 @@ export const main = log.wrap(async event => {
   return collect(event, {
     sendBankIdCollectRequest,
     generateAuthorizationCode,
+    sendBankIdStatusCompleteEvent: putEvent,
   });
 });
