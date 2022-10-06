@@ -1,4 +1,5 @@
-import { CasePerson, CasePersonRole } from '../types/caseItem';
+import { CasePersonRole } from '../types/caseItem';
+import type { CasePerson } from '../types/caseItem';
 
 export default function resetPersonSignature(person: CasePerson) {
   const personCopy = { ...person };
