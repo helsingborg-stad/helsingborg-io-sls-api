@@ -1,7 +1,6 @@
 import config from '../libs/config';
 
 import * as dynamoDb from '../libs/dynamoDb';
-import { getStatusByType } from '../libs/caseStatuses';
 import {
   // status type
   ACTIVE_RANDOM_CHECK_REQUIRED_VIVA,
@@ -19,16 +18,26 @@ import {
 
 import vivaAdapter from './vivaAdapterRequestClient';
 
-import type {
-  CaseItem,
-  CaseCompletions,
-  CaseStatus,
-  RequestedCaseCompletions,
-} from '../types/caseItem';
+import type { CaseItem, CaseCompletions, RequestedCaseCompletions } from '../types/caseItem';
 
 interface CompletionForms {
   randomCheckFormId: string;
   completionFormId: string;
+}
+
+interface ConditionParams {
+  completions: CaseCompletions;
+  isNewApplication: boolean;
+}
+
+interface CompletionsResult {
+  statusType: string;
+  state: string;
+}
+
+interface CompletionsRule {
+  condition: (params: ConditionParams) => boolean;
+  result: CompletionsResult;
 }
 
 function getCompletionFormId(
@@ -38,39 +47,66 @@ function getCompletionFormId(
   return isRandomCheck(completions) ? randomCheckFormId : completionFormId;
 }
 
-function getCompletionStatus(completions: CaseCompletions, isNewApplication = false): CaseStatus {
-  if (completions.isCompleted) {
-    return getStatusByType(ACTIVE_SUBMITTED);
-  }
+function createCompletionsResult(params: ConditionParams): CompletionsResult {
+  const rules: CompletionsRule[] = [
+    {
+      condition: ({ completions }) => completions.isCompleted,
+      result: {
+        statusType: ACTIVE_SUBMITTED,
+        state: VIVA_APPLICATION_RECEIVED,
+      },
+    },
+    {
+      condition: ({ completions }) => isRandomCheck(completions) && completions.isAttachmentPending,
+      result: {
+        statusType: ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA,
+        state: VIVA_RANDOM_CHECK_REQUIRED,
+      },
+    },
+    {
+      condition: ({ completions, isNewApplication }) =>
+        isRandomCheck(completions) && isNewApplication && !completions.isAttachmentPending,
+      result: {
+        statusType: ACTIVE_NEW_APPLICATION_RANDOM_CHECK_VIVA,
+        state: VIVA_RANDOM_CHECK_REQUIRED,
+      },
+    },
+    {
+      condition: ({ completions, isNewApplication }) =>
+        isRandomCheck(completions) && !isNewApplication && !completions.isAttachmentPending,
+      result: {
+        statusType: ACTIVE_RANDOM_CHECK_REQUIRED_VIVA,
+        state: VIVA_RANDOM_CHECK_REQUIRED,
+      },
+    },
+    {
+      condition: ({ completions, isNewApplication }) =>
+        !isRandomCheck(completions) && !isNewApplication && completions.isAttachmentPending,
+      result: {
+        statusType: ACTIVE_COMPLETION_SUBMITTED_VIVA,
+        state: VIVA_COMPLETION_REQUIRED,
+      },
+    },
+  ];
 
-  const isRandomCheckRequired =
-    (isRandomCheck(completions) && completions.isAttachmentPending) || isRandomCheck(completions);
+  const defaultResult: CompletionsResult = {
+    statusType: ACTIVE_COMPLETION_REQUIRED_VIVA,
+    state: VIVA_COMPLETION_REQUIRED,
+  };
 
-  if (isRandomCheckRequired) {
-    return getStatusByType(
-      isNewApplication
-        ? ACTIVE_NEW_APPLICATION_RANDOM_CHECK_VIVA
-        : ACTIVE_RANDOM_CHECK_REQUIRED_VIVA
-    );
-  }
+  const result = rules.reduce<CompletionsResult | undefined>(
+    (result: CompletionsResult | undefined, rule: CompletionsRule) => {
+      if (!result) {
+        if (rule.condition(params)) {
+          return rule.result;
+        }
+      }
+      return result;
+    },
+    undefined
+  );
 
-  if (completions.isAttachmentPending) {
-    return getStatusByType(ACTIVE_COMPLETION_SUBMITTED_VIVA);
-  }
-
-  return getStatusByType(ACTIVE_COMPLETION_REQUIRED_VIVA);
-}
-
-function getCompletionState(completions: CaseCompletions) {
-  if (completions.isCompleted) {
-    return VIVA_APPLICATION_RECEIVED;
-  }
-
-  if (isRandomCheck(completions)) {
-    return VIVA_RANDOM_CHECK_REQUIRED;
-  }
-
-  return VIVA_COMPLETION_REQUIRED;
+  return result ?? defaultResult;
 }
 
 function isRandomCheck({ isRandomCheck, requested }: CaseCompletions): boolean {
@@ -86,7 +122,7 @@ async function getLatestVivaWorkflowId(personalNumber: string): Promise<string> 
   return workflow.workflowid;
 }
 
-async function getCaseOnWorkflowId(
+async function getCaseByWorkflowId(
   personalNumber: string,
   workflowId: string
 ): Promise<CaseItem | undefined> {
@@ -107,11 +143,10 @@ async function getCaseOnWorkflowId(
 }
 
 export default {
+  createCompletionsResult,
   get: {
     formId: getCompletionFormId,
-    status: getCompletionStatus,
-    state: getCompletionState,
-    caseOnWorkflowId: getCaseOnWorkflowId,
+    caseOnWorkflowId: getCaseByWorkflowId,
     workflow: {
       latest: {
         id: getLatestVivaWorkflowId,
