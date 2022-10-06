@@ -1,22 +1,33 @@
+import { getStatusByType } from '../../src/libs/caseStatuses';
+
 import {
   setCaseCompletions,
   Dependencies,
   LambdaRequest,
 } from '../../src/lambdas/setCaseCompletions';
 
-import { VIVA_COMPLETION_REQUIRED, VIVA_RANDOM_CHECK_REQUIRED } from '../../src/libs/constants';
-import completionsHelper from '../../../helpers/completions';
+import {
+  ACTIVE_RANDOM_CHECK_REQUIRED_VIVA,
+  ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA,
+  ACTIVE_COMPLETION_REQUIRED_VIVA,
+  ACTIVE_COMPLETION_SUBMITTED_VIVA,
+  ACTIVE_SUBMITTED,
+  ACTIVE_NEW_APPLICATION_RANDOM_CHECK_VIVA,
+  VIVA_RANDOM_CHECK_REQUIRED,
+  VIVA_COMPLETION_REQUIRED,
+  VIVA_APPLICATION_RECEIVED,
+} from '../../src/libs/constants';
 
 import type { CaseItem } from '../../../types/caseItem';
 import { EncryptionType } from '../../../types/caseItem';
 
 const ssmParameters = {
   recurringFormId: 'recurring',
-  randomCheckFormId: 'randomCheck',
   completionFormId: 'completionForm',
+  randomCheckFormId: 'randomCheck',
   newApplicationFormId: 'newApplication',
+  newApplicationCompletionFormId: 'completionForm',
   newApplicationRandomCheckFormId: 'newApplicationRandomCheck',
-  newApplicationCompletionFormId: 'newApplicationCompletion',
 };
 
 const caseKeys = {
@@ -30,15 +41,11 @@ const input: LambdaRequest = {
   },
 };
 
-function getCaseItem(
-  currentFormId: string,
-  isRandomCheck: boolean,
-  requested: { received: boolean; description: string }[]
-): CaseItem {
+function createCaseItem(partialCaseItem: Partial<CaseItem>): CaseItem {
   return {
     PK: caseKeys.PK,
     SK: caseKeys.SK,
-    currentFormId,
+    currentFormId: '123abc',
     id: 'caseId',
     persons: [],
     state: 'SOME_STATE',
@@ -74,75 +81,160 @@ function getCaseItem(
         endDate: 2,
       },
       completions: {
-        requested,
+        requested: [],
         dueDate: null,
         receivedDate: 123,
         description: null,
         attachmentUploaded: [],
-        isRandomCheck,
+        isRandomCheck: false,
         isDueDateExpired: false,
         isCompleted: false,
         isAttachmentPending: false,
       },
     },
-  };
+    ...partialCaseItem,
+  } as CaseItem;
 }
 
 test.each([
   {
-    description: 'it updates a recurring case for randomCheck with correct parameters',
-    currentFormId: ssmParameters.recurringFormId,
+    description:
+      'it updates a recurring case as submitted, when all requested completions are received',
     isRandomCheck: true,
+    isCompleted: true,
+    isAttachmentPending: false,
+    newCurrentFormId: ssmParameters.completionFormId,
+    requestedCompletions: [{ received: true }],
+    completionsResult: {
+      status: getStatusByType(ACTIVE_SUBMITTED),
+      state: VIVA_APPLICATION_RECEIVED,
+    },
+  },
+  {
+    description: 'it updates a recurring case for randomCheck',
+    isRandomCheck: true,
+    isCompleted: false,
+    isAttachmentPending: false,
     newCurrentFormId: ssmParameters.randomCheckFormId,
-    requestedCompletions: [{ received: false, description: '' }],
-    newState: VIVA_RANDOM_CHECK_REQUIRED,
+    requestedCompletions: [{ received: false }],
+    completionsResult: {
+      status: getStatusByType(ACTIVE_RANDOM_CHECK_REQUIRED_VIVA),
+      state: VIVA_RANDOM_CHECK_REQUIRED,
+    },
   },
   {
-    description: 'it updates a recurring case for completions with correct parameters',
-    currentFormId: ssmParameters.recurringFormId,
-    isRandomCheck: true,
-    newCurrentFormId: ssmParameters.completionFormId,
-    requestedCompletions: [{ received: true, description: '' }],
-    newState: VIVA_COMPLETION_REQUIRED,
-  },
-  {
-    description:
-      'it updates a recurring case for completions with correct parameters, no completions received before',
-    currentFormId: ssmParameters.recurringFormId,
+    description: 'it updates a recurring case for completions, requested received',
     isRandomCheck: false,
-    requestedCompletions: [{ received: false, description: '' }],
+    isCompleted: false,
+    isAttachmentPending: false,
     newCurrentFormId: ssmParameters.completionFormId,
-    newState: VIVA_COMPLETION_REQUIRED,
+    requestedCompletions: [{ received: true }],
+    completionsResult: {
+      status: getStatusByType(ACTIVE_COMPLETION_REQUIRED_VIVA),
+      state: VIVA_COMPLETION_REQUIRED,
+    },
   },
   {
-    description: 'it updates a new application case for randomCheck with correct parameters',
+    description: 'it updates a recurring case for completions, requested not received',
+    isRandomCheck: false,
+    isCompleted: false,
+    isAttachmentPending: false,
+    requestedCompletions: [{ received: false }],
+    newCurrentFormId: ssmParameters.completionFormId,
+    completionsResult: {
+      status: getStatusByType(ACTIVE_COMPLETION_REQUIRED_VIVA),
+      state: VIVA_COMPLETION_REQUIRED,
+    },
+  },
+  {
+    description: 'it updates a new application case for randomCheck',
     currentFormId: ssmParameters.newApplicationFormId,
     isRandomCheck: true,
-    requestedCompletions: [{ received: false, description: '' }],
+    isCompleted: false,
+    isAttachmentPending: false,
+    requestedCompletions: [{ received: false }],
     newCurrentFormId: ssmParameters.newApplicationRandomCheckFormId,
-    newState: VIVA_RANDOM_CHECK_REQUIRED,
+    completionsResult: {
+      status: getStatusByType(ACTIVE_NEW_APPLICATION_RANDOM_CHECK_VIVA),
+      state: VIVA_RANDOM_CHECK_REQUIRED,
+    },
   },
   {
-    description: 'it updates a new application case for completions with correct parameters',
-    currentFormId: ssmParameters.newApplicationFormId,
-    isRandomCheck: true,
-    requestedCompletions: [{ received: true, description: '' }],
-    newCurrentFormId: ssmParameters.newApplicationCompletionFormId,
-    newState: VIVA_COMPLETION_REQUIRED,
-  },
-  {
-    description:
-      'it updates a new application case for completions with correct parameters, no completions received before',
+    description: 'it updates a new application case for completions, requested received',
     currentFormId: ssmParameters.newApplicationFormId,
     isRandomCheck: false,
-    requestedCompletions: [{ received: false, description: '' }],
+    isCompleted: false,
+    isAttachmentPending: false,
+    requestedCompletions: [{ received: true }],
     newCurrentFormId: ssmParameters.newApplicationCompletionFormId,
-    newState: VIVA_COMPLETION_REQUIRED,
+    completionsResult: {
+      status: getStatusByType(ACTIVE_COMPLETION_REQUIRED_VIVA),
+      state: VIVA_COMPLETION_REQUIRED,
+    },
+  },
+  {
+    description: 'it updates a new application case for completions, requested not received',
+    currentFormId: ssmParameters.newApplicationFormId,
+    isRandomCheck: false,
+    isCompleted: false,
+    isAttachmentPending: false,
+    requestedCompletions: [{ received: false }],
+    newCurrentFormId: ssmParameters.newApplicationCompletionFormId,
+    completionsResult: {
+      status: getStatusByType(ACTIVE_COMPLETION_REQUIRED_VIVA),
+      state: VIVA_COMPLETION_REQUIRED,
+    },
+  },
+  {
+    description: 'it updates a new application case for submitted random check',
+    currentFormId: ssmParameters.newApplicationFormId,
+    isRandomCheck: true,
+    isCompleted: false,
+    isAttachmentPending: true,
+    requestedCompletions: [{ received: false }],
+    newCurrentFormId: ssmParameters.newApplicationRandomCheckFormId,
+    completionsResult: {
+      status: getStatusByType(ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA),
+      state: VIVA_RANDOM_CHECK_REQUIRED,
+    },
+  },
+  {
+    description: 'it updates a new application case for submitted completions',
+    currentFormId: ssmParameters.newApplicationCompletionFormId,
+    isRandomCheck: false,
+    isCompleted: false,
+    isAttachmentPending: true,
+    requestedCompletions: [{ received: false }],
+    newCurrentFormId: ssmParameters.newApplicationCompletionFormId,
+    completionsResult: {
+      status: getStatusByType(ACTIVE_COMPLETION_SUBMITTED_VIVA),
+      state: VIVA_COMPLETION_REQUIRED,
+    },
   },
 ])(
   '$description',
-  async ({ currentFormId, isRandomCheck, requestedCompletions, newCurrentFormId, newState }) => {
-    const caseItem = getCaseItem(currentFormId, isRandomCheck, requestedCompletions);
+  async ({
+    currentFormId,
+    isRandomCheck,
+    isCompleted,
+    isAttachmentPending,
+    requestedCompletions,
+    newCurrentFormId,
+    completionsResult,
+  }) => {
+    const createParams = {
+      currentFormId,
+      details: {
+        completions: {
+          isRandomCheck,
+          requested: requestedCompletions,
+          attachmentUploaded: [],
+          isCompleted,
+          isAttachmentPending,
+        },
+      },
+    } as unknown as CaseItem;
+    const caseItem = createCaseItem(createParams);
 
     const updateCaseMock = jest.fn();
     const dependencies: Dependencies = {
@@ -150,18 +242,18 @@ test.each([
       putSuccessEvent: () => Promise.resolve(),
       readParams: () => Promise.resolve(ssmParameters),
       updateCase: updateCaseMock,
-      getNewStatus: completionsHelper.get.status,
-      getNewState: completionsHelper.get.state,
     };
 
     const result = await setCaseCompletions(input, dependencies);
 
     expect(result).toBe(true);
-    expect(updateCaseMock).toHaveBeenCalledWith(
+    expect(dependencies.updateCase).toHaveBeenCalledWith(
       caseKeys,
       expect.objectContaining({
+        newStatus: completionsResult.status,
+        newState: completionsResult.state,
         newCurrentFormId,
-        newState,
+        newPersons: [],
       })
     );
   }
