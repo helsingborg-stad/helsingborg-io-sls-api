@@ -32,7 +32,7 @@ interface BankIdCollectData {
   };
 }
 
-interface ResponseAttributes extends Partial<BankIdCollectData> {
+export interface ResponseAttributes extends Partial<BankIdCollectData> {
   authorizationCode?: string;
 }
 
