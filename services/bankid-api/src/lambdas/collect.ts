@@ -21,8 +21,10 @@ interface BankIdCollectLambdaRequest {
   orderRef: string;
 }
 
+type BankIdStatus = 'pending' | 'complete' | 'failed';
+
 interface BankIdCollectData {
-  status: string;
+  status: BankIdStatus;
   completionData: {
     user: {
       personalNumber: string;
@@ -38,14 +40,14 @@ interface BankIdCollectResponse {
   data: BankIdCollectData;
 }
 
-interface Dependencies {
+export interface Dependencies {
   sendBankIdCollectRequest: (
     parameters: BankIdCollectLambdaRequest
   ) => Promise<BankIdCollectResponse | undefined>;
   generateAuthorizationCode: (personalNumber: string) => Promise<string | undefined>;
 }
 
-interface LambdaRequest {
+export interface LambdaRequest {
   body: string;
   headers: Record<string, string>;
 }
