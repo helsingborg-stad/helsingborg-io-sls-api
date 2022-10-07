@@ -1,43 +1,36 @@
 [
   {
     "Source": "bankId.collect",
-    "Detail": "{ \"user\": { \"personalNumber\": \"198811042384\" } }",
-    "Resources": ["SYNC"],
+    "Detail": "{ \"user\": { \"personalNumber\": \"198603232391\" } }",
+    "Resources": ["MILTON"],
     "DetailType": "BankIdCollectComplete",
     "EventBusName": "default"
   },
   {
     "Source": "OFFbankId.collect",
     "Detail": "{ \"user\": { \"personalNumber\": \"198602132394\" } }",
-    "Resources": ["resourceMock"],
+    "Resources": ["BROR"],
     "DetailType": "BankIdCollectComplete",
-    "EventBusName": "default"
-  },
-  {
-    "Source": "OFFusersMs.findUser",
-    "Detail": "{ \"personalNumber\": \"198602132394\" }",
-    "Resources": ["resourceMock"],
-    "DetailType": "usersMsFindUserSuccess",
     "EventBusName": "default"
   },
   {
     "Source": "OFFvivaMs.submitApplication",
     "Detail": "{ \"personalNumber\": \"198602132394\" }",
-    "Resources": ["resourceMock"],
+    "Resources": ["BROR"],
     "DetailType": "applicationReceivedSuccess",
     "EventBusName": "default"
   },
   {
     "Source": "OFFcasesApi.updateCase",
-    "Detail": "{ \"caseKeys\": { \"PK\": \"USER#198602132394\", \"SK\": \"CASE#a68e6de8-05c9-41a7-bde3-dab8bb3aa309\" }, \"status\": { \"type\": \"active:submitted\" }, \"state\": \"VIVA_COMPLETION_RANDOM_CHECK_REQUIRED\" }",
-    "Resources": ["resourceMock"],
+    "Detail": "{ \"caseKeys\": { \"PK\": \"USER#198602132394\", \"SK\": \"CASE#<someId>\" }, \"status\": { \"type\": \"<some status type>\" }, \"state\": \"<some state>\" }",
+    "Resources": ["BROR"],
     "DetailType": "casesApiUpdateCaseSuccess",
     "EventBusName": "default"
   },
   {
     "Source": "OFFcasesApi.getCaseList",
     "Detail": "{ \"personalNumber\": \"198602132394\" }",
-    "Resources": ["resourceMock"],
+    "Resources": ["BROR"],
     "DetailType": "casesApiInvokeSuccess",
     "EventBusName": "default"
   }
