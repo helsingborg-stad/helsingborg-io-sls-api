@@ -32,7 +32,7 @@ function updateCaseExpirationTime(keys: CaseKeys, newExpirationTime: number): Pr
       PK: keys.PK,
       SK: keys.SK,
     },
-    UpdateExpression: 'SET expirationTime = :newExpirationTime, , updatedAt = :updatedAt',
+    UpdateExpression: 'SET expirationTime = :newExpirationTime, updatedAt = :updatedAt',
     ExpressionAttributeValues: {
       ':newExpirationTime': newExpirationTime,
       ':updatedAt': Date.now(),

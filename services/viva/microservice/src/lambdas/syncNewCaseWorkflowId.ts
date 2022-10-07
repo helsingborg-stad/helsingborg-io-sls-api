@@ -27,13 +27,13 @@ interface User {
   personalNumber: string;
 }
 
-interface LambdaDetails {
+interface LambdaDetail {
   user: User;
   status: VivaApplicationsStatusItem[];
 }
 
 export interface LambdaRequest {
-  detail: LambdaDetails;
+  detail: LambdaDetail;
 }
 
 interface SuccessEvent {
@@ -53,9 +53,11 @@ export interface Dependencies {
   getCase: (personalNumber: string) => Promise<GetCaseResponse>;
   updateCase: (caseKeys: CaseKeys, newWorkflowId: string) => Promise<void>;
   syncSuccess: (detail: SuccessEvent) => Promise<void>;
-  getLatestWorkflow: (personalNumber: string) => Promise<VivaWorkflow>;
+  getWorkflow: (personalNumber: string) => Promise<VivaWorkflow>;
   readParams: (envsKeyName: string) => Promise<VivaParametersResponse>;
 }
+
+const NEW_APPLICATION_WORKFLOW_ID_UPDATED = 'NEW_APPLICATION_WORKFLOW_ID_UPDATED';
 
 function updateCaseWorkflowId(keys: CaseKeys, newWorkflowId: string): Promise<void> {
   const updateParams = {
@@ -64,8 +66,13 @@ function updateCaseWorkflowId(keys: CaseKeys, newWorkflowId: string): Promise<vo
       PK: keys.PK,
       SK: keys.SK,
     },
-    UpdateExpression: 'SET details.workflowId = :newWorkflowId, updatedAt = :updatedAt',
+    UpdateExpression:
+      'SET details.workflowId = :newWorkflowId, #state = :newState, updatedAt = :updatedAt',
+    ExpressionAttributeNames: {
+      '#state': 'state',
+    },
     ExpressionAttributeValues: {
+      ':newState': NEW_APPLICATION_WORKFLOW_ID_UPDATED,
       ':newWorkflowId': newWorkflowId,
       ':updatedAt': Date.now(),
     },
@@ -97,6 +104,12 @@ export async function syncNewCaseWorkflowId(
 ): Promise<boolean> {
   const { user, status } = input.detail;
 
+  const getCaseResponse = await dependencies.getCase(user.personalNumber);
+  if (getCaseResponse?.Count !== 1) {
+    return true;
+  }
+  const [userCase] = getCaseResponse.Items;
+
   const completionsStatusCodeList = [
     VIVA_STATUS_COMPLETION,
     VIVA_STATUS_CASE_EXISTS,
@@ -112,16 +125,9 @@ export async function syncNewCaseWorkflowId(
   const isApprovedStatusCode =
     validateApplicationStatus(status, completionsStatusCodeList) ||
     validateApplicationStatus(status, applicationReceivedStatusCodeList);
-
   if (!isApprovedStatusCode) {
     return true;
   }
-
-  const getCaseResponse = await dependencies.getCase(user.personalNumber);
-  if (getCaseResponse?.Count !== 1) {
-    return true;
-  }
-  const [userCase] = getCaseResponse.Items;
 
   const { newApplicationFormId } = await dependencies.readParams(
     config.cases.providers.viva.envsKeyName
@@ -129,8 +135,14 @@ export async function syncNewCaseWorkflowId(
 
   const isNewApplication = userCase.currentFormId === newApplicationFormId;
   if (isNewApplication) {
-    const workflow = await dependencies.getLatestWorkflow(user.personalNumber);
-    await dependencies.updateCase({ PK: userCase.PK, SK: userCase.SK }, workflow.workflowid);
+    const latestWorkflow = await dependencies.getWorkflow(user.personalNumber);
+    await dependencies.updateCase(
+      {
+        PK: userCase.PK,
+        SK: userCase.SK,
+      },
+      latestWorkflow.workflowid
+    );
   }
 
   return true;
@@ -141,7 +153,7 @@ export const main = log.wrap(event => {
     getCase: getUserApplicantCase,
     updateCase: updateCaseWorkflowId,
     syncSuccess: putVivaMsEvent.syncWorkflowIdSuccess,
-    getLatestWorkflow: vivaAdapter.workflow.getLatest,
+    getWorkflow: vivaAdapter.workflow.getLatest,
     readParams: params.read,
   });
 });
