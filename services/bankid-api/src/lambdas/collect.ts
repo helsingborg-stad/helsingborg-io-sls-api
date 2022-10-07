@@ -131,12 +131,7 @@ export async function collect(input: LambdaRequest, dependencies: Dependencies) 
   );
 
   if (bankIdCollectRequestError) {
-    log.error(
-      'Bank Id Collect request error',
-      'context.awsRequestId',
-      'service-bankid-api-collect-001',
-      bankIdCollectRequestError
-    );
+    log.writeError('Bank Id Collect request error', bankIdCollectRequestError);
     return response.failure(bankIdCollectRequestError, {
       type: 'bankIdCollect',
     });
@@ -161,12 +156,7 @@ export async function collect(input: LambdaRequest, dependencies: Dependencies) 
       dependencies.generateAuthorizationCode(personalNumber ?? '')
     );
     if (generateAuthorizationCodeError) {
-      log.error(
-        'Bank Id Authorization code error',
-        'context.awsRequestId',
-        'service-bankid-api-collect-002',
-        generateAuthorizationCodeError ?? {}
-      );
+      log.writeError('Bank Id Authorization code error', generateAuthorizationCodeError ?? {});
 
       return response.failure(generateAuthorizationCodeError);
     }
@@ -183,7 +173,7 @@ export async function collect(input: LambdaRequest, dependencies: Dependencies) 
   });
 }
 
-export const main = log.wrap(async event => {
+export const main = log.wrap(event => {
   return collect(event, {
     sendBankIdCollectRequest,
     generateAuthorizationCode,
