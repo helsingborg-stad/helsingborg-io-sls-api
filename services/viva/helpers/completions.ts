@@ -94,19 +94,9 @@ function createCompletionsResult(params: ConditionParams): CompletionsResult {
     state: VIVA_COMPLETION_REQUIRED,
   };
 
-  const result = rules.reduce<CompletionsResult | undefined>(
-    (result: CompletionsResult | undefined, rule: CompletionsRule) => {
-      if (!result) {
-        if (rule.condition(params)) {
-          return rule.result;
-        }
-      }
-      return result;
-    },
-    undefined
-  );
+  const firstMatchingRule = rules.find(({ condition }) => condition(params));
 
-  return result ?? defaultResult;
+  return firstMatchingRule?.result ?? defaultResult;
 }
 
 function isRandomCheck({ isRandomCheck, requested }: CaseCompletions): boolean {
