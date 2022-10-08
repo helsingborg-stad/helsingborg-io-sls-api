@@ -80,8 +80,8 @@ function createCompletionsResult(params: ConditionParams): CompletionsResult {
       },
     },
     {
-      condition: ({ completions, isNewApplication }) =>
-        !isRandomCheck(completions) && !isNewApplication && completions.isAttachmentPending,
+      condition: ({ completions }) =>
+        !isRandomCheck(completions) && completions.isAttachmentPending,
       result: {
         statusType: ACTIVE_COMPLETION_SUBMITTED_VIVA,
         state: VIVA_COMPLETION_REQUIRED,

@@ -161,7 +161,7 @@ test.each([
   },
   {
     description: 'it updates a new application case for completions, requested received',
-    currentFormId: ssmParameters.newApplicationFormId,
+    currentFormId: ssmParameters.newApplicationRandomCheckFormId,
     isRandomCheck: false,
     isCompleted: false,
     isAttachmentPending: false,
@@ -200,7 +200,7 @@ test.each([
   },
   {
     description: 'it updates a new application case for submitted completions',
-    currentFormId: ssmParameters.newApplicationCompletionFormId,
+    currentFormId: ssmParameters.newApplicationRandomCheckFormId,
     isRandomCheck: false,
     isCompleted: false,
     isAttachmentPending: true,
