@@ -56,9 +56,11 @@ export async function setCaseCompletions(input: LambdaRequest, dependencies: Dep
     newApplicationRandomCheckFormId,
   } = await dependencies.readParams(config.cases.providers.viva.envsKeyName);
 
-  const isNewApplication =
-    caseItem.currentFormId ===
-    (newApplicationFormId || newApplicationRandomCheckFormId || newApplicationCompletionFormId);
+  const isNewApplication = [
+    newApplicationFormId,
+    newApplicationRandomCheckFormId,
+    newApplicationCompletionFormId,
+  ].includes(caseItem.currentFormId);
 
   const completionsFormIds = {
     randomCheckFormId: isNewApplication ? newApplicationRandomCheckFormId : randomCheckFormId,
