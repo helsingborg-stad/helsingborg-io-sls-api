@@ -16,13 +16,13 @@ interface CaseKeys {
   SK: string;
 }
 
-interface LambdaDetails {
+interface LambdaDetail {
   caseKeys: CaseKeys;
   workflow: VivaWorkflow;
 }
 
 export interface LambdaRequest {
-  detail: LambdaDetails;
+  detail: LambdaDetail;
 }
 
 interface SuccessEvent {

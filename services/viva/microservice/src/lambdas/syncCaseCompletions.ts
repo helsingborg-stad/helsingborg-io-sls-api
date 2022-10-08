@@ -19,13 +19,13 @@ interface CaseKeys {
   SK: string;
 }
 
-interface LambdaDetails {
+interface LambdaDetail {
   user: CaseUser;
   status: VivaApplicationsStatusItem[];
 }
 
 export interface LambdaRequest {
-  detail: LambdaDetails;
+  detail: LambdaDetail;
 }
 
 interface PutSuccessEvent {

@@ -23,12 +23,12 @@ interface CaseKeys {
   SK: string;
 }
 
-interface LambdaDetails {
+interface LambdaDetail {
   user: User;
 }
 
 export interface LambdaRequest {
-  detail: LambdaDetails;
+  detail: LambdaDetail;
 }
 
 export interface Dependencies {
@@ -87,10 +87,10 @@ function updateCaseDetailsWorkflow(keys: CaseKeys, newWorkflow: VivaWorkflow) {
       PK: keys.PK,
       SK: keys.SK,
     },
-    UpdateExpression: 'SET details.workflow = :newWorkflow, updatedAt = :updatedAt',
+    UpdateExpression: 'SET details.workflow = :newWorkflow, updatedAt = :newUpdatedAt',
     ExpressionAttributeValues: {
       ':newWorkflow': newWorkflow,
-      ':updatedAt': Date.now(),
+      ':newUpdatedAt': Date.now(),
     },
     ReturnValues: 'NONE',
   };
@@ -122,7 +122,10 @@ export async function syncWorkflow(input: LambdaRequest, dependencies: Dependenc
         workflowId,
       });
 
-      const caseKeys = { PK: caseItem.PK, SK: caseItem.SK };
+      const caseKeys = {
+        PK: caseItem.PK,
+        SK: caseItem.SK,
+      };
       await dependencies.updateCase(caseKeys, workflow);
       await dependencies.syncWorkflowSuccess({ caseKeys, workflow });
     })

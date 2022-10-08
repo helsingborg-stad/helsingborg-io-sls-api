@@ -26,12 +26,12 @@ interface GetUserCaseListResponse {
   Count: number;
 }
 
-interface LambdaDetails {
+interface LambdaDetail {
   user: CaseUser;
 }
 
 export interface LambdaRequest {
-  detail: LambdaDetails;
+  detail: LambdaDetail;
 }
 
 export interface Dependencies {
@@ -59,16 +59,18 @@ export async function createNewVivaCase(
   dependencies: Dependencies
 ): Promise<boolean> {
   const { user } = input.detail;
-  const { readParams, getTemplates, getUserCasesCount, createCase } = dependencies;
 
-  const { Count } = await getUserCasesCount(user.personalNumber);
+  const { Count } = await dependencies.getUserCasesCount(user.personalNumber);
 
   if (Count > 0) {
     return true;
   }
 
-  const { newApplicationFormId, newApplicationCompletionFormId, newApplicationRandomCheckFormId } =
-    await readParams(config.cases.providers.viva.envsKeyName);
+  const {
+    newApplicationFormId,
+    newApplicationCompletionFormId,
+    newApplicationRandomCheckFormId,
+  } = await dependencies.readParams(config.cases.providers.viva.envsKeyName);
 
   const formIdList = [
     newApplicationFormId,
@@ -97,7 +99,7 @@ export async function createNewVivaCase(
     return person;
   });
 
-  const formTemplates = await getTemplates(formIdList);
+  const formTemplates = await dependencies.getTemplates(formIdList);
 
   const prePopulatedForms: Record<string, CaseForm> = populateFormWithPreviousCaseAnswers(
     initialFormList,
@@ -129,13 +131,12 @@ export async function createNewVivaCase(
     currentFormId: newApplicationFormId,
   };
 
-  await createCase({
+  await dependencies.createCase({
     TableName: config.cases.tableName,
     Item: newVivaCaseItem,
   });
 
   log.writeInfo(`New case with id: ${newVivaCaseItem.id} successfully created`);
-
   return true;
 }
 
