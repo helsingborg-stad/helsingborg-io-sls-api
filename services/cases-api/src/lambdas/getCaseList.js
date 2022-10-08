@@ -2,7 +2,7 @@ import to from 'await-to-js';
 import {
   throwError,
   ResourceNotFoundError,
-  InternalServerError
+  InternalServerError,
 } from '@helsingborg-stad/npm-api-error-handling';
 
 import config from '../libs/config';
@@ -13,49 +13,26 @@ import { decodeToken } from '../libs/token';
 import { objectWithoutProperties } from '../libs/objects';
 import log from '../libs/logs';
 
-export async function main(event, context) {
+export async function main(event) {
   const decodedToken = decodeToken(event);
-
   const { personalNumber } = decodedToken;
 
-  const [putEventError] = await to(
-    putEvent(
-      { personalNumber },
-      'casesApiInvokeSuccess',
-      'casesApi.getCaseList'
-    )
-  );
-  if (putEventError) {
-    log.error(
-      'Error put event [casesApiInvokeSuccess]',
-      context.awsRequestId,
-      'service-cases-api-getCaseList-003',
-      putEventError
-    );
-    return response.failure(new InternalServerError(putEventError));
-  }
+  putEvent({ personalNumber }, 'casesApiInvokeSuccess', 'casesApi.getCaseList');
 
   const [getUserCaseListError, userCaseList] = await to(getUserCaseList(personalNumber));
   if (getUserCaseListError) {
-    log.error(
-      'Get User Case list error',
-      context.awsRequestId,
-      'service-cases-api-getCaseList-001',
-      getUserCaseListError
-    );
-
+    log.writeError('Get User Case list error', getUserCaseListError);
     return response.failure(new InternalServerError(getUserCaseListError));
   }
 
   if (userCaseList.length === 0) {
     const errorMessage = 'No user cases found';
-    log.error(errorMessage, context.awsRequestId, 'service-cases-api-getCaseList-002');
-
+    log.writeError(errorMessage);
     return response.failure(new ResourceNotFoundError(errorMessage));
   }
 
   const userCaseListWithoutKeys = userCaseList.map(item =>
-    objectWithoutProperties(item, ['PK', 'SK', 'GSI1'])
+    objectWithoutProperties(item, ['PK', 'SK', 'GSI1', 'PDF'])
   );
 
   return response.success(200, {
@@ -81,6 +58,7 @@ async function getUserCaseList(personalNumber) {
     throwError(getUserCoApplicantCaseListError.statusCode, getUserCoApplicantCaseListError.message);
   }
 
+  // eslint-disable-next-line func-style
   const concatAndDeDuplicateCaseList = (...cases) => [...new Set([].concat(...cases))];
   return concatAndDeDuplicateCaseList(
     applicantCaseListResult.Items,
