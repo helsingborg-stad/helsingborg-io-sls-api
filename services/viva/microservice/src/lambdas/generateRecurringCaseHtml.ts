@@ -142,34 +142,43 @@ export async function generateRecurringCaseHtml(
 ): Promise<LambdaResponse> {
   const { caseKeys } = input.detail;
 
-  const [getCaseItemError, storedUserCase] = await dependencies.getCase(
+  const [getCaseError, getCaseResult] = await dependencies.getCase(
     config.cases.tableName,
     caseKeys.PK,
     caseKeys.SK
   );
-  if (getCaseItemError) {
-    return printErrorAndReturn('Error getting stored case from the cases table', getCaseItemError);
+  if (getCaseError) {
+    return printErrorAndReturn('Error getting stored case from the cases table', getCaseError);
   }
-  const { Item: caseItem } = storedUserCase;
+  const { Item: caseItem } = getCaseResult;
+  const { Items: closedCases } = await dependencies.getClosedCases(caseKeys.PK);
 
-  const closedUserCases = await dependencies.getClosedCases(caseKeys.PK);
-  const { Items: closedCaseList } = closedUserCases;
+  const {
+    recurringFormId,
+    newApplicationFormId,
+    newApplicationCompletionFormId,
+    newApplicationRandomCheckFormId,
+  } = await dependencies.readParams(config.cases.providers.viva.envsKeyName);
 
-  const { recurringFormId, newApplicationFormId } = await dependencies.readParams(
-    config.cases.providers.viva.envsKeyName
-  );
+  const isNewApplication = [
+    newApplicationFormId,
+    newApplicationRandomCheckFormId,
+    newApplicationCompletionFormId,
+  ].includes(caseItem.currentFormId);
+
   let changedAnswerValues: CaseFormAnswer[] = [...caseItem.forms[caseItem.currentFormId].answers];
 
-  if (closedCaseList.length > 0) {
-    const [closedCase] = closedCaseList.sort((caseA, caseB) => caseB.updatedAt - caseA.updatedAt);
+  if (closedCases.length > 0) {
+    const [latestClosedCase] = closedCases.sort(
+      (caseA, caseB) => caseB.updatedAt - caseA.updatedAt
+    );
 
     changedAnswerValues = getChangedCaseAnswerValues(
-      caseItem.forms[recurringFormId].answers as CaseFormAnswer[],
-      closedCase.forms[recurringFormId].answers as CaseFormAnswer[]
+      caseItem.forms[recurringFormId].answers,
+      latestClosedCase.forms[isNewApplication ? newApplicationFormId : recurringFormId].answers
     );
   }
 
-  const isNewApplication = caseItem.currentFormId === newApplicationFormId;
   const handlebarTemplate = isNewApplication
     ? S3_HANDLEBAR_TEMPLATE_V3
     : S3_HANDLEBAR_TEMPLATE_V2_DEPRECATED;
