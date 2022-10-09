@@ -160,12 +160,6 @@ export async function generateRecurringCaseHtml(
     newApplicationRandomCheckFormId,
   } = await dependencies.readParams(config.cases.providers.viva.envsKeyName);
 
-  const isNewApplication = [
-    newApplicationFormId,
-    newApplicationRandomCheckFormId,
-    newApplicationCompletionFormId,
-  ].includes(caseItem.currentFormId);
-
   let changedAnswerValues: CaseFormAnswer[] = [...caseItem.forms[caseItem.currentFormId].answers];
 
   if (closedCases.length > 0) {
@@ -173,13 +167,27 @@ export async function generateRecurringCaseHtml(
       (caseA, caseB) => caseB.updatedAt - caseA.updatedAt
     );
 
+    const isLatestClosedCaseNewApplication = [
+      newApplicationFormId,
+      newApplicationRandomCheckFormId,
+      newApplicationCompletionFormId,
+    ].includes(latestClosedCase.currentFormId);
+
     changedAnswerValues = getChangedCaseAnswerValues(
       caseItem.forms[recurringFormId].answers,
-      latestClosedCase.forms[isNewApplication ? newApplicationFormId : recurringFormId].answers
+      latestClosedCase.forms[
+        isLatestClosedCaseNewApplication ? newApplicationFormId : recurringFormId
+      ].answers
     );
   }
 
-  const handlebarTemplate = isNewApplication
+  const isCurrentCaseNewApplication = [
+    newApplicationFormId,
+    newApplicationRandomCheckFormId,
+    newApplicationCompletionFormId,
+  ].includes(caseItem.currentFormId);
+
+  const handlebarTemplate = isCurrentCaseNewApplication
     ? S3_HANDLEBAR_TEMPLATE_V3
     : S3_HANDLEBAR_TEMPLATE_V2_DEPRECATED;
 
@@ -191,7 +199,9 @@ export async function generateRecurringCaseHtml(
     return printErrorAndReturn('Failed to get handlebar template');
   }
 
-  const caseTemplateDataFunction = dependencies.getCaseTemplateFunction(isNewApplication);
+  const caseTemplateDataFunction = dependencies.getCaseTemplateFunction(
+    isCurrentCaseNewApplication
+  );
   const caseTemplateData = caseTemplateDataFunction(caseItem, changedAnswerValues);
 
   const handlebarsTemplateFileBody = hbsTemplateS3Object.Body?.toString();
