@@ -12,7 +12,7 @@ function httpErrorTransformer<LambdaEvent, LambdaResponse>(
       const result = await lambda(event, context);
       return result;
     } catch (error) {
-      const transformedError = new ErrorTransformerFactory(error).transformError();
+      const transformedError = ErrorTransformerFactory.transformError(error);
 
       throw transformedError;
     }
