@@ -4,7 +4,7 @@ import ErrorTransformerFactory from '../libs/errorTransformerFactory';
 import * as response from '../libs/response';
 import log from '../libs/logs';
 
-function httpErrorTransformer<LambdaEvent, LambdaResponse>(
+function httpErrorWrapper<LambdaEvent, LambdaResponse>(
   lambda: (event: LambdaEvent, context: Context) => Promise<LambdaResponse>
 ) {
   return async (event: LambdaEvent, context: Context) => {
@@ -42,7 +42,7 @@ function lambdaWrapper<LambdaEvent, LambdaResponse>(
 ) {
   return log.wrap(
     httpResponseWrapper<LambdaEvent, LambdaResponse>(
-      httpErrorTransformer((event, context) => {
+      httpErrorWrapper((event, context) => {
         return lambda(event, context);
       }),
       type
