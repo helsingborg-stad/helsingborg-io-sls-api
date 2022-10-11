@@ -18,13 +18,17 @@ interface BankIdCollectLambdaRequest {
 
 type BankIdStatus = 'pending' | 'complete' | 'failed';
 
+interface User {
+  personalNumber: string;
+}
+
+interface BankIDCompletionData {
+  user: User;
+}
+
 interface BankIdCollectData {
   status: BankIdStatus;
-  completionData: {
-    user: {
-      personalNumber: string;
-    };
-  };
+  completionData: BankIDCompletionData;
 }
 
 export interface FunctionResponse extends Partial<BankIdCollectData> {
