@@ -1,19 +1,14 @@
-import { throwError } from '@helsingborg-stad/npm-api-error-handling';
-import { AxiosInstance, AxiosError } from 'axios';
-import to from 'await-to-js';
-
-import * as response from '../libs/response';
+import lambdaWrapper from '../libs/lambdaWrapper';
+import { putEvent } from '../libs/awsEventBridge';
 import * as request from '../libs/request';
+import { signToken } from '../libs/token';
 import secrets from '../libs/secrets';
 import params from '../libs/params';
 import config from '../libs/config';
-import log from '../libs/logs';
 
-import { putEvent } from '../libs/awsEventBridge';
-import { signToken } from '../libs/token';
-
-import { BankIdError, BankIdSSMParams } from '../helpers/types';
 import * as bankId from '../helpers/bankId';
+
+import { BankIdSSMParams } from '../helpers/types';
 
 const CONFIG_AUTH_SECRETS_AUTHORIZATION_CODE = config.auth.secrets.authorizationCode;
 
@@ -32,7 +27,7 @@ interface BankIdCollectData {
   };
 }
 
-export interface ResponseAttributes extends Partial<BankIdCollectData> {
+export interface FunctionResponse extends Partial<BankIdCollectData> {
   authorizationCode?: string;
 }
 
@@ -46,13 +41,13 @@ export interface Dependencies {
   ) => Promise<BankIdCollectResponse | undefined>;
   generateAuthorizationCode: (personalNumber: string) => Promise<string | undefined>;
   sendBankIdStatusCompleteEvent: (
-    detail: ResponseAttributes,
+    detail: FunctionResponse,
     detailType: string,
     source: string
   ) => Promise<void>;
 }
 
-export interface LambdaRequest {
+export interface FunctionInput {
   body: string;
   headers: Record<string, string>;
 }
@@ -67,32 +62,18 @@ function isUserAgentMittHelsingborgApp(headers: Record<string, string>) {
   return searchElementRegex.test(userAgent);
 }
 
-async function generateAuthorizationCode(personalNumber: string) {
-  type AuthError = {
-    code: number;
-    message: string;
-  };
-  const [authorizationCodeSecretError, auhtorizationCodeSecret] = await to<string, AuthError>(
-    secrets.get(
-      CONFIG_AUTH_SECRETS_AUTHORIZATION_CODE.name,
-      CONFIG_AUTH_SECRETS_AUTHORIZATION_CODE.keyName
-    )
+async function generateAuthorizationCode(personalNumber: string): Promise<string | undefined> {
+  const auhtorizationCodeSecret = await secrets.get(
+    CONFIG_AUTH_SECRETS_AUTHORIZATION_CODE.name,
+    CONFIG_AUTH_SECRETS_AUTHORIZATION_CODE.keyName
   );
-  if (authorizationCodeSecretError) {
-    throwError(authorizationCodeSecretError.code, authorizationCodeSecretError.message);
-  }
-
-  const signTokenPayload = {
-    personalNumber,
-  };
 
   const tokenExpireTimeInMinutes = 5;
-  const [signTokenError, signedToken] = await to(
-    signToken(signTokenPayload, auhtorizationCodeSecret ?? '', tokenExpireTimeInMinutes)
+  const signedToken = await signToken(
+    { personalNumber },
+    auhtorizationCodeSecret ?? '',
+    tokenExpireTimeInMinutes
   );
-  if (signTokenError) {
-    throwError(500, signTokenError.message);
-  }
 
   return signedToken;
 }
@@ -101,43 +82,25 @@ async function sendBankIdCollectRequest(
   payload: BankIdCollectLambdaRequest
 ): Promise<BankIdCollectResponse | undefined> {
   const bankIdSSMparams: BankIdSSMParams = await params.read(config.bankId.envsKeyName);
+  const bankIdClient = await bankId.client(bankIdSSMparams);
 
-  const [axiosError, bankIdClient] = await to<AxiosInstance, AxiosError>(
-    bankId.client(bankIdSSMparams)
+  const collectResult = await request.call(
+    bankIdClient,
+    'post',
+    bankId.url(bankIdSSMparams.apiUrl, '/collect'),
+    payload
   );
-  if (axiosError) {
-    throw axiosError;
-  }
 
-  const [collectError, collectResponse] = await to<BankIdCollectResponse, BankIdError>(
-    request.call(bankIdClient, 'post', bankId.url(bankIdSSMparams.apiUrl, '/collect'), payload)
-  );
-  if (collectError) {
-    if (collectError?.response.data?.details === 'No such order') {
-      throwError(404, collectError.response.data.details);
-    }
-    throwError(collectError?.response.status, collectError?.response.data?.details || '');
-  }
-
-  return collectResponse;
+  return collectResult;
 }
 
-export async function collect(input: LambdaRequest, dependencies: Dependencies) {
+export async function collect(input: FunctionInput, dependencies: Dependencies) {
   const { body, headers } = input;
   const { orderRef } = JSON.parse(body);
 
-  const [bankIdCollectRequestError, bankIdCollectResponse] = await to(
-    dependencies.sendBankIdCollectRequest({ orderRef })
-  );
+  const bankIdCollectResponse = await dependencies.sendBankIdCollectRequest({ orderRef });
 
-  if (bankIdCollectRequestError) {
-    log.writeError('Bank Id Collect request error', bankIdCollectRequestError);
-    return response.failure(bankIdCollectRequestError, {
-      type: 'bankIdCollect',
-    });
-  }
-
-  let responseAttributes: ResponseAttributes = {
+  let responseAttributes: FunctionResponse = {
     ...(bankIdCollectResponse?.data ?? {}),
   };
 
@@ -151,15 +114,8 @@ export async function collect(input: LambdaRequest, dependencies: Dependencies) 
       'bankId.collect'
     );
 
-    const personalNumber = bankIdCollectResponse?.data.completionData.user.personalNumber;
-    const [generateAuthorizationCodeError, authorizationCode] = await to(
-      dependencies.generateAuthorizationCode(personalNumber ?? '')
-    );
-    if (generateAuthorizationCodeError) {
-      log.writeError('Bank Id Authorization code error', generateAuthorizationCodeError ?? {});
-
-      return response.failure(generateAuthorizationCodeError);
-    }
+    const personalNumber = bankIdCollectResponse?.data?.completionData?.user?.personalNumber ?? '';
+    const authorizationCode = await dependencies.generateAuthorizationCode(personalNumber);
 
     responseAttributes = {
       authorizationCode,
@@ -167,16 +123,15 @@ export async function collect(input: LambdaRequest, dependencies: Dependencies) 
     };
   }
 
-  return response.success(200, {
-    type: 'bankIdCollect',
-    attributes: responseAttributes,
-  });
+  return responseAttributes;
 }
 
-export const main = log.wrap(event => {
-  return collect(event, {
-    sendBankIdCollectRequest,
-    generateAuthorizationCode,
-    sendBankIdStatusCompleteEvent: putEvent,
-  });
-});
+export const main = lambdaWrapper<FunctionInput, FunctionResponse>(
+  event =>
+    collect(event, {
+      sendBankIdCollectRequest: sendBankIdCollectRequest,
+      generateAuthorizationCode: generateAuthorizationCode,
+      sendBankIdStatusCompleteEvent: putEvent,
+    }),
+  'bankId.collect'
+);
