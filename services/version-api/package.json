@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "cd ../../ && node node_modules/.bin/jest version-api"
+    "test": "../../scripts/test.sh"
   },
   "author": "Helsingborg Stad",
   "license": "MIT",
