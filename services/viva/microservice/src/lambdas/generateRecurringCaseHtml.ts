@@ -5,7 +5,6 @@ import {
 
 import { CASE_HTML_GENERATED } from '../libs/constants';
 import * as dynamoDb from '../libs/dynamoDb';
-import { getItem } from '../libs/queries';
 import config from '../libs/config';
 import params from '../libs/params';
 import log from '../libs/logs';
@@ -15,6 +14,7 @@ import createRecurringCaseTemplate from '../helpers/createRecurringCaseTemplate'
 import createCaseTemplate from '../helpers/createCaseTemplate';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import handlebars from '../helpers/htmlTemplate';
+import { cases } from '../helpers/query';
 
 import type { VivaParametersResponse } from '../types/ssmParameters';
 import type { CaseFormAnswer, CaseItem } from '../types/caseItem';
@@ -45,7 +45,7 @@ interface SuccessEvent {
 }
 
 export interface Dependencies {
-  getCase: (TableName: string, PK: string, SK: string) => Promise<[Error, { Item: CaseItem }]>;
+  getCase: (keys: CaseKeys) => Promise<CaseItem>;
   readParams: (id: string) => Promise<VivaParametersResponse>;
   getClosedCases: (PK: string) => Promise<{ Items: CaseItem[] }>;
   getFile: (bucket: string, key: string) => Promise<PromiseResult<S3GetObjectOutput, AWSError>>;
@@ -142,15 +142,10 @@ export async function generateRecurringCaseHtml(
 ): Promise<LambdaResponse> {
   const { caseKeys } = input.detail;
 
-  const [getCaseError, getCaseResult] = await dependencies.getCase(
-    config.cases.tableName,
-    caseKeys.PK,
-    caseKeys.SK
-  );
-  if (getCaseError) {
-    return printErrorAndReturn('Error getting stored case from the cases table', getCaseError);
+  const caseItem = await dependencies.getCase(caseKeys);
+  if (!caseItem) {
+    return printErrorAndReturn('Error getting stored case from the cases table');
   }
-  const { Item: caseItem } = getCaseResult;
   const { Items: closedCases } = await dependencies.getClosedCases(caseKeys.PK);
 
   const {
@@ -224,7 +219,7 @@ export async function generateRecurringCaseHtml(
 
 export const main = log.wrap(event => {
   return generateRecurringCaseHtml(event, {
-    getCase: getItem,
+    getCase: cases.get,
     readParams: params.read,
     getClosedCases,
     getFile: S3.getFile,
