@@ -1,8 +1,8 @@
 import { Context } from 'aws-lambda';
 
-import ErrorTransformerFactory from '../libs/errorTransformerFactory';
-import * as response from '../libs/response';
-import log from '../libs/logs';
+import ErrorTransformerFactory from './errorTransformerFactory';
+import * as response from './response';
+import log from './logs';
 
 function httpErrorWrapper<LambdaEvent, LambdaResponse>(
   lambda: (event: LambdaEvent, context: Context) => Promise<LambdaResponse>
