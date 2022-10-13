@@ -40,7 +40,7 @@ const awsSDKErrorTransformer: ErrorTransformer<AWSError> = {
   },
 
   isErrorType(error: unknown): error is AWSError {
-    return ['AccessDeniedException'].includes(error?.code ?? '');
+    return ['AccessDeniedException'].includes((error as AWSError)?.code ?? '');
   },
 };
 
