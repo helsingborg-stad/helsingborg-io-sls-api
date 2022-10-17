@@ -162,11 +162,8 @@ export async function generateRecurringCaseHtml(
       (caseA, caseB) => caseB.updatedAt - caseA.updatedAt
     );
 
-    const isLatestClosedCaseNewApplication = [
-      newApplicationFormId,
-      newApplicationRandomCheckFormId,
-      newApplicationCompletionFormId,
-    ].includes(latestClosedCase.currentFormId);
+    const isLatestClosedCaseNewApplication =
+      newApplicationFormId === latestClosedCase.currentFormId;
 
     changedAnswerValues = getChangedCaseAnswerValues(
       caseItem.forms[recurringFormId].answers,
