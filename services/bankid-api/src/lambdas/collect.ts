@@ -98,7 +98,10 @@ async function sendBankIdCollectRequest(
   return collectResult;
 }
 
-export async function collect(input: FunctionInput, dependencies: Dependencies) {
+export async function collect(
+  input: FunctionInput,
+  dependencies: Dependencies
+): Promise<FunctionResponse> {
   const { body, headers } = input;
   const { orderRef } = JSON.parse(body);
 
@@ -130,12 +133,8 @@ export async function collect(input: FunctionInput, dependencies: Dependencies) 
   return responseAttributes;
 }
 
-export const main = lambdaWrapper<FunctionInput, FunctionResponse>(
-  event =>
-    collect(event, {
-      sendBankIdCollectRequest: sendBankIdCollectRequest,
-      generateAuthorizationCode: generateAuthorizationCode,
-      sendBankIdStatusCompleteEvent: putEvent,
-    }),
-  'bankId.collect'
-);
+export const main = lambdaWrapper(collect, {
+  sendBankIdCollectRequest: sendBankIdCollectRequest,
+  generateAuthorizationCode: generateAuthorizationCode,
+  sendBankIdStatusCompleteEvent: putEvent,
+});

@@ -20,14 +20,12 @@ function httpErrorWrapper<LambdaEvent, LambdaResponse>(
 }
 
 function httpResponseWrapper<LambdaEvent, LambdaResponse>(
-  lambda: (event: LambdaEvent, context: Context) => Promise<LambdaResponse>,
-  type: string
+  lambda: (event: LambdaEvent, context: Context) => Promise<LambdaResponse>
 ) {
   return async (event: LambdaEvent, context: Context) => {
     try {
       const result = await lambda(event, context);
       return response.success(200, {
-        type,
         attributes: result,
       });
     } catch (error) {
@@ -36,16 +34,15 @@ function httpResponseWrapper<LambdaEvent, LambdaResponse>(
   };
 }
 
-function lambdaWrapper<LambdaEvent, LambdaResponse>(
-  lambda: (event: LambdaEvent, context: Context) => Promise<LambdaResponse>,
-  type: string
+function lambdaWrapper<LambdaEvent, LambdaResponse, Dependencies>(
+  lambda: (event: LambdaEvent, dependencies: Dependencies) => Promise<LambdaResponse>,
+  dependencies: Dependencies
 ) {
   return log.wrap(
     httpResponseWrapper<LambdaEvent, LambdaResponse>(
-      httpErrorWrapper((event, context) => {
-        return lambda(event, context);
-      }),
-      type
+      httpErrorWrapper(event => {
+        return lambda(event, dependencies);
+      })
     )
   );
 }
