@@ -7,6 +7,8 @@ interface FactoryError extends Error {
   detail: string;
 }
 
+const defaultStatus = '500';
+
 interface ErrorTransformer<T> {
   transform: (error: T) => FactoryError;
   isErrorType: (error: unknown) => error is T;
@@ -15,7 +17,7 @@ interface ErrorTransformer<T> {
 const axiosErrorTransformer: ErrorTransformer<AxiosError> = {
   transform(error) {
     return {
-      status: error?.response?.status.toString() || '500',
+      status: error?.response?.status.toString() || defaultStatus,
       code: error?.code,
       name: error?.name,
       message: error?.message,
@@ -31,7 +33,7 @@ const axiosErrorTransformer: ErrorTransformer<AxiosError> = {
 const awsSDKErrorTransformer: ErrorTransformer<AWSError> = {
   transform(error) {
     return {
-      status: error.statusCode?.toString() || '500',
+      status: error.statusCode?.toString() || defaultStatus,
       message: error.message,
       name: error.name,
       code: error.code,
@@ -47,10 +49,10 @@ const awsSDKErrorTransformer: ErrorTransformer<AWSError> = {
 const javascriptRuntimeErrorTransformer: ErrorTransformer<TypeError> = {
   transform(error) {
     return {
-      status: '500',
+      status: defaultStatus,
       message: error.message,
       name: error.name,
-      code: '500',
+      code: defaultStatus,
       detail: error.message,
     };
   },
