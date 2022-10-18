@@ -60,22 +60,20 @@ const javascriptRuntimeErrorTransformer: ErrorTransformer<TypeError> = {
   },
 };
 
-class ErrorTransformerFactory {
-  static transformError(error: unknown): Error {
-    if (axiosErrorTransformer.isErrorType(error)) {
-      return axiosErrorTransformer.transform(error);
-    }
-
-    if (awsSDKErrorTransformer.isErrorType(error)) {
-      return awsSDKErrorTransformer.transform(error);
-    }
-
-    if (javascriptRuntimeErrorTransformer.isErrorType(error)) {
-      return javascriptRuntimeErrorTransformer.transform(error);
-    }
-
-    throw new Error('Unknown error type');
+function transformError(error: unknown): Error {
+  if (axiosErrorTransformer.isErrorType(error)) {
+    return axiosErrorTransformer.transform(error);
   }
+
+  if (awsSDKErrorTransformer.isErrorType(error)) {
+    return awsSDKErrorTransformer.transform(error);
+  }
+
+  if (javascriptRuntimeErrorTransformer.isErrorType(error)) {
+    return javascriptRuntimeErrorTransformer.transform(error);
+  }
+
+  throw new Error('Unknown error type');
 }
 
-export default ErrorTransformerFactory;
+export default transformError;

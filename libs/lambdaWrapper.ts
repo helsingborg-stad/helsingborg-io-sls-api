@@ -1,6 +1,6 @@
 import { Context } from 'aws-lambda';
 
-import ErrorTransformerFactory from './errorTransformerFactory';
+import transformError from './errorTransformerFactory';
 import * as response from './response';
 import log from './logs';
 
@@ -12,7 +12,7 @@ function httpErrorWrapper<LambdaEvent, LambdaResponse>(
       const result = await lambda(event, context);
       return result;
     } catch (error) {
-      const transformedError = ErrorTransformerFactory.transformError(error);
+      const transformedError = transformError(error);
 
       throw transformedError;
     }
