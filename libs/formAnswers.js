@@ -168,8 +168,8 @@ export function populateFormWithPreviousCaseAnswers(
     const caseFormTemplate = formTemplates?.[formId] || {};
 
     const previousCaseAnswers = previousForms?.[formId]?.answers;
-    const previousAreEncrypted = !Array.isArray(previousCaseAnswers);
-    const previousAnswers = previousAreEncrypted ? [] : previousCaseAnswers;
+    const isPreviousFormEncrypted = !Array.isArray(previousCaseAnswers);
+    const previousAnswers = isPreviousFormEncrypted ? [] : previousCaseAnswers;
 
     const formFields = getFormFieldsWithLoadPreviousAttribute(caseFormTemplate);
 
