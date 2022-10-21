@@ -73,12 +73,12 @@ export async function main(event, context) {
 
   const applicants = [{ role: 'applicant', ...user }];
 
-  const prePopulatedForms = populateFormWithPreviousCaseAnswers(
-    initialForms,
+  const prePopulatedForms = populateFormWithPreviousCaseAnswers({
+    forms: initialForms,
     applicants,
     formTemplates,
-    previousCase?.forms || {}
-  );
+    previousForms: previousCase?.forms || {},
+  });
 
   const persons = [
     {

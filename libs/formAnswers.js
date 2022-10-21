@@ -156,12 +156,12 @@ export function mergeAnswers(previousAnswers, newAnswers) {
   );
 }
 
-export function populateFormWithPreviousCaseAnswers(
+export function populateFormWithPreviousCaseAnswers({
   forms,
   applicants,
   formTemplates,
-  previousForms
-) {
+  previousForms,
+}) {
   const populatedForms = {};
 
   Object.keys(forms).forEach(formId => {

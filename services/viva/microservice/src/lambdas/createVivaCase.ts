@@ -124,12 +124,12 @@ export async function createVivaCase(
   const formTemplates = await dependencies.getFormTemplates(formIdList);
   const lastUpdatedCase = await dependencies.getLastUpdatedCase(PK);
 
-  const prePopulatedForms = populateFormWithPreviousCaseAnswers(
-    initialFormList,
-    extendedPersonList,
+  const prePopulatedForms = populateFormWithPreviousCaseAnswers({
+    forms: initialFormList,
+    applicants: extendedPersonList,
     formTemplates,
-    lastUpdatedCase?.forms
-  ) as Record<string, CaseForm>;
+    previousForms: lastUpdatedCase?.forms,
+  }) as Record<string, CaseForm>;
 
   const vivaChildrenList = createCaseHelper.getVivaChildren(casePersonList);
   if (vivaChildrenList.length > 0) {

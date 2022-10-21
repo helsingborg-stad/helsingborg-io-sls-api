@@ -112,12 +112,12 @@ export async function createNewVivaCase(
 
   const formTemplates = await dependencies.getTemplates(formIdList);
 
-  const prePopulatedForms: Record<string, CaseForm> = populateFormWithPreviousCaseAnswers(
-    initialFormList,
-    extendedCasePersonList,
+  const prePopulatedForms: Record<string, CaseForm> = populateFormWithPreviousCaseAnswers({
+    forms: initialFormList,
+    applicants: extendedCasePersonList,
     formTemplates,
-    {}
-  );
+    previousForms: {},
+  });
 
   const newVivaCaseItem: CaseItem = {
     id,
