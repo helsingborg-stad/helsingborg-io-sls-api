@@ -39,6 +39,15 @@ export interface Dependencies {
   readParams: (envsKeyName: string) => Promise<VivaParametersResponse>;
   getUserCasesCount: (personalNumber: string) => Promise<GetUserCaseListResponse>;
   getTemplates: typeof getFormTemplates;
+  getApprovedNewApplicationUsers: () => Promise<string[]>;
+}
+
+async function getApprovedNewApplicationUsers(): Promise<string[]> {
+  const { approvedNewApplicationUsers = [] } = await params.read(
+    config.vivaNewApplication.envsKeyName
+  );
+
+  return approvedNewApplicationUsers;
 }
 
 function getUserCasesCount(personalNumber: string): Promise<GetUserCaseListResponse> {
@@ -60,17 +69,19 @@ export async function createNewVivaCase(
 ): Promise<boolean> {
   const { user } = input.detail;
 
+  const approvedNewApplicationUsers = await dependencies.getApprovedNewApplicationUsers();
+  if (!approvedNewApplicationUsers.includes(user.personalNumber)) {
+    return true;
+  }
+
   const { Count } = await dependencies.getUserCasesCount(user.personalNumber);
 
   if (Count > 0) {
     return true;
   }
 
-  const {
-    newApplicationFormId,
-    newApplicationCompletionFormId,
-    newApplicationRandomCheckFormId,
-  } = await dependencies.readParams(config.cases.providers.viva.envsKeyName);
+  const { newApplicationFormId, newApplicationCompletionFormId, newApplicationRandomCheckFormId } =
+    await dependencies.readParams(config.cases.providers.viva.envsKeyName);
 
   const formIdList = [
     newApplicationFormId,
@@ -146,5 +157,6 @@ export const main = log.wrap(event => {
     readParams: params.read,
     getUserCasesCount,
     getTemplates: getFormTemplates,
+    getApprovedNewApplicationUsers: getApprovedNewApplicationUsers,
   });
 });
