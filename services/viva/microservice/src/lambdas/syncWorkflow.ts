@@ -1,7 +1,12 @@
 import log from '../libs/logs';
 import config from '../libs/config';
 import * as dynamoDb from '../libs/dynamoDb';
-import { ACTIVE_ONGOING, ACTIVE_SUBMITTED, ACTIVE_PROCESSING, CLOSED } from '../libs/constants';
+import {
+  ACTIVE_ONGOING,
+  ACTIVE_SUBMITTED,
+  ACTIVE_PROCESSING,
+  CLOSED_REJECTED_VIVA,
+} from '../libs/constants';
 
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
@@ -105,7 +110,7 @@ export async function syncWorkflow(input: LambdaRequest, dependencies: Dependenc
     ACTIVE_ONGOING,
     ACTIVE_SUBMITTED,
     ACTIVE_PROCESSING,
-    CLOSED,
+    CLOSED_REJECTED_VIVA,
   ]);
   const isEmptyCaseList = caseList.length === 0;
   if (isEmptyCaseList) {
@@ -114,7 +119,7 @@ export async function syncWorkflow(input: LambdaRequest, dependencies: Dependenc
 
   const caseListWithWorkflowId = caseList.filter(caseItem => !!caseItem.details.workflowId);
 
-  await Promise.all(
+  await Promise.allSettled(
     caseListWithWorkflowId.map(async caseItem => {
       const workflowId = caseItem.details.workflowId as string;
       const workflow = await dependencies.getWorkflow({

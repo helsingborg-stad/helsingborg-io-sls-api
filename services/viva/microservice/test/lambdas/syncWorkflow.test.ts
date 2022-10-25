@@ -2,7 +2,7 @@ import {
   ACTIVE_ONGOING,
   ACTIVE_SUBMITTED,
   ACTIVE_PROCESSING,
-  CLOSED,
+  CLOSED_REJECTED_VIVA,
 } from '../../src/libs/constants';
 import {
   Dependencies,
@@ -112,23 +112,32 @@ it('Syncs cases with multiple status types', async () => {
 });
 
 it('Creates query filter expression', async () => {
-  const statusTypeList = [ACTIVE_ONGOING, ACTIVE_SUBMITTED, ACTIVE_PROCESSING, CLOSED];
+  const statusTypeList = [
+    ACTIVE_ONGOING,
+    ACTIVE_SUBMITTED,
+    ACTIVE_PROCESSING,
+    CLOSED_REJECTED_VIVA,
+  ];
   const filterExpression = statusTypeList.map(filterExpressionMapper).join(' or ');
 
   expect(filterExpression).toBe(
-    'begins_with(#status.#type, :statusTypeOngoing) or begins_with(#status.#type, :statusTypeSubmitted) or begins_with(#status.#type, :statusTypeProcessing) or begins_with(#status.#type, :statusTypeClosed)'
+    'begins_with(#status.#type, :statusTypeOngoing) or begins_with(#status.#type, :statusTypeSubmitted) or begins_with(#status.#type, :statusTypeProcessing) or begins_with(#status.#type, :statusTypeRejected)'
   );
 });
 
 it('Creates query expression attribute values', async () => {
-  const statusTypeList = ['active:ongoing', 'active:submitted', 'active:processing', 'closed'];
-
+  const statusTypeList = [
+    ACTIVE_ONGOING,
+    ACTIVE_SUBMITTED,
+    ACTIVE_PROCESSING,
+    CLOSED_REJECTED_VIVA,
+  ];
   const expressionAttributeValues = statusTypeList.reduce((acc, statusType) => {
     return { ...acc, ...createAttributeValues(statusType) };
   }, {});
 
   expect(expressionAttributeValues).toEqual({
-    ':statusTypeClosed': 'closed',
+    ':statusTypeRejected': 'closed:rejected:viva',
     ':statusTypeOngoing': 'active:ongoing',
     ':statusTypeProcessing': 'active:processing',
     ':statusTypeSubmitted': 'active:submitted',
