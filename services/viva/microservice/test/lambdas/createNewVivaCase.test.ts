@@ -12,7 +12,6 @@ import { EncryptionType, CasePersonRole, CaseForm } from '../../src/types/caseIt
 import { DEFAULT_CURRENT_POSITION } from '../../src/helpers/constants';
 
 import type { Dependencies } from '../../src/lambdas/createNewVivaCase';
-import createCase from '../../src/helpers/createCase';
 
 const mockUuid = '00000000-0000-0000-0000-000000000000';
 jest.mock('uuid', () => ({ v4: () => mockUuid }));
