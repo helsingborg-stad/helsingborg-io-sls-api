@@ -12,9 +12,9 @@ export function formatAnswer(
   value: any;
 };
 export function mergeAnswers(previousAnswers: any, newAnswers: any): any[];
-export function populateFormWithPreviousCaseAnswers(
+export function populateFormWithPreviousCaseAnswers({
   forms: any,
   applicants: any,
   formTemplates: any,
-  previousForms: any
-): Record<string, never>;
+  previousForms: any,
+}): Record<string, never>;

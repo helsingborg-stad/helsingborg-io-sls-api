@@ -135,12 +135,12 @@ export async function addCasePerson(input: LambdaRequest, dependencies: Dependen
     CaseForm
   >;
 
-  const formWithCoApplicant: Record<string, CaseForm> = dependencies.populateForm(
-    caseForm,
-    [coApplicant],
+  const formWithCoApplicant: Record<string, CaseForm> = dependencies.populateForm({
+    forms: caseForm,
+    applicants: [coApplicant],
     formTemplates,
-    {}
-  );
+    previousForms: {},
+  });
 
   const updateCaseResult = await dependencies.updateCase({
     caseKeys,

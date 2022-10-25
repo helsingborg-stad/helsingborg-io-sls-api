@@ -156,18 +156,20 @@ export function mergeAnswers(previousAnswers, newAnswers) {
   );
 }
 
-export function populateFormWithPreviousCaseAnswers(
+export function populateFormWithPreviousCaseAnswers({
   forms,
   applicants,
   formTemplates,
-  previousForms
-) {
+  previousForms,
+}) {
   const populatedForms = {};
 
   Object.keys(forms).forEach(formId => {
     const caseFormTemplate = formTemplates?.[formId] || {};
 
-    const previousAnswers = previousForms?.[formId]?.answers || [];
+    const previousCaseAnswers = previousForms?.[formId]?.answers;
+    const isPreviousFormEncrypted = !Array.isArray(previousCaseAnswers);
+    const previousAnswers = isPreviousFormEncrypted ? [] : previousCaseAnswers;
 
     const formFields = getFormFieldsWithLoadPreviousAttribute(caseFormTemplate);
 
