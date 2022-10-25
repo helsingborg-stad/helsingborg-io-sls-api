@@ -157,6 +157,6 @@ export const main = log.wrap(event => {
     readParams: params.read,
     getUserCasesCount,
     getTemplates: getFormTemplates,
-    getApprovedNewApplicationUsers: getApprovedNewApplicationUsers,
+    getApprovedNewApplicationUsers,
   });
 });
