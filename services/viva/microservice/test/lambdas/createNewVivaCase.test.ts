@@ -138,3 +138,18 @@ it('stops execution when users personal number is not approved for new applicati
   expect(result).toBe(true);
   expect(createCaseMock).toHaveBeenCalledTimes(0);
 });
+
+it('stops execution when allowed users personal number array is empty', async () => {
+  const createCaseMock = jest.fn().mockResolvedValueOnce(undefined);
+
+  const result = await createNewVivaCase(
+    lambdaInput,
+    createDependencies({
+      createCase: createCaseMock,
+      getApprovedNewApplicationUsers: () => Promise.resolve([]),
+    })
+  );
+
+  expect(result).toBe(true);
+  expect(createCaseMock).toHaveBeenCalledTimes(0);
+});
