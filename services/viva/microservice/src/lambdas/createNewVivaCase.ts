@@ -36,18 +36,27 @@ export interface LambdaRequest {
 
 export interface Dependencies {
   createCase: typeof putItem;
-  readParams: (envsKeyName: string) => Promise<VivaParametersResponse>;
+  getFormTemplateId: () => Promise<VivaParametersResponse>;
   getUserCasesCount: (personalNumber: string) => Promise<GetUserCaseListResponse>;
   getTemplates: typeof getFormTemplates;
-  getApprovedNewApplicationUsers: () => Promise<string[]>;
+  isApprovedForNewApplication: (personalNumber: string) => Promise<boolean>;
 }
 
-async function getApprovedNewApplicationUsers(): Promise<string[]> {
+function getFormTemplateId(): Promise<VivaParametersResponse> {
+  return params.read(config.cases.providers.viva.envsKeyName);
+}
+
+async function isApprovedForNewApplication(personalNumber: string): Promise<boolean> {
   const { approvedNewApplicationUsers = [] } = await params.read(
     config.vivaNewApplication.envsKeyName
   );
 
-  return approvedNewApplicationUsers;
+  // If the list of approved users is empty, all users are approved.
+  if (approvedNewApplicationUsers.length === 0) {
+    return true;
+  }
+
+  return approvedNewApplicationUsers.includes(personalNumber);
 }
 
 function getUserCasesCount(personalNumber: string): Promise<GetUserCaseListResponse> {
@@ -69,19 +78,18 @@ export async function createNewVivaCase(
 ): Promise<boolean> {
   const { user } = input.detail;
 
-  const approvedNewApplicationUsers = await dependencies.getApprovedNewApplicationUsers();
-  if (!approvedNewApplicationUsers.includes(user.personalNumber)) {
+  const isApplicantApproved = await dependencies.isApprovedForNewApplication(user.personalNumber);
+  if (!isApplicantApproved) {
     return true;
   }
 
   const { Count } = await dependencies.getUserCasesCount(user.personalNumber);
-
   if (Count > 0) {
     return true;
   }
 
   const { newApplicationFormId, newApplicationCompletionFormId, newApplicationRandomCheckFormId } =
-    await dependencies.readParams(config.cases.providers.viva.envsKeyName);
+    await dependencies.getFormTemplateId();
 
   const formIdList = [
     newApplicationFormId,
@@ -154,9 +162,9 @@ export async function createNewVivaCase(
 export const main = log.wrap(event => {
   return createNewVivaCase(event, {
     createCase: putItem,
-    readParams: params.read,
+    getFormTemplateId,
     getUserCasesCount,
     getTemplates: getFormTemplates,
-    getApprovedNewApplicationUsers,
+    isApprovedForNewApplication,
   });
 });

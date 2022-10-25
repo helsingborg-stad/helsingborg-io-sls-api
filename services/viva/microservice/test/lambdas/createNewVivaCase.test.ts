@@ -47,15 +47,13 @@ const lambdaInput = {
   },
 };
 
-const getApprovedNewApplicationUsers = ['199402011234'];
-
 function createDependencies(partialDependencies: Partial<Dependencies> = {}) {
   return {
-    readParams: () => Promise.resolve(readParametersResponse),
     getTemplates: () => Promise.resolve({}),
+    getFormTemplateId: () => Promise.resolve(readParametersResponse),
     getUserCasesCount: () => Promise.resolve({ Count: 0 }),
-    getApprovedNewApplicationUsers: () => Promise.resolve(getApprovedNewApplicationUsers),
     createCase: () => Promise.resolve({ id: '123' }),
+    isApprovedForNewApplication: () => Promise.resolve(true),
     ...partialDependencies,
   };
 }
@@ -109,7 +107,7 @@ it('successfully creates a new application case', async () => {
   );
 });
 
-it('stops execution when user cases exists', async () => {
+it('stops execution when user case exists', async () => {
   const createCaseMock = jest.fn().mockResolvedValueOnce(undefined);
 
   const result = await createNewVivaCase(
@@ -124,29 +122,14 @@ it('stops execution when user cases exists', async () => {
   expect(createCaseMock).toHaveBeenCalledTimes(0);
 });
 
-it('stops execution when users personal number is not approved for new application', async () => {
+it('stops execution when user personal number is not approved for new application', async () => {
   const createCaseMock = jest.fn().mockResolvedValueOnce(undefined);
 
   const result = await createNewVivaCase(
     lambdaInput,
     createDependencies({
       createCase: createCaseMock,
-      getApprovedNewApplicationUsers: () => Promise.resolve(['111111']),
-    })
-  );
-
-  expect(result).toBe(true);
-  expect(createCaseMock).toHaveBeenCalledTimes(0);
-});
-
-it('stops execution when allowed users personal number array is empty', async () => {
-  const createCaseMock = jest.fn().mockResolvedValueOnce(undefined);
-
-  const result = await createNewVivaCase(
-    lambdaInput,
-    createDependencies({
-      createCase: createCaseMock,
-      getApprovedNewApplicationUsers: () => Promise.resolve([]),
+      isApprovedForNewApplication: () => Promise.resolve(false),
     })
   );
 
