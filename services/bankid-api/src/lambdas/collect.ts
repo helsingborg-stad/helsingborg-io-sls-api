@@ -39,13 +39,17 @@ interface BankIdCollectResponse {
   data: BankIdCollectData;
 }
 
+interface SuccessEventDetail {
+  user: User;
+}
+
 export interface Dependencies {
   sendBankIdCollectRequest: (
     parameters: BankIdCollectLambdaRequest
-  ) => Promise<BankIdCollectResponse | undefined>;
+  ) => Promise<BankIdCollectResponse>;
   generateAuthorizationCode: (personalNumber: string) => Promise<string | undefined>;
   sendBankIdStatusCompleteEvent: (
-    detail: FunctionResponse,
+    detail: SuccessEventDetail,
     detailType: string,
     source: string
   ) => Promise<void>;
@@ -84,7 +88,7 @@ async function generateAuthorizationCode(personalNumber: string): Promise<string
 
 async function sendBankIdCollectRequest(
   payload: BankIdCollectLambdaRequest
-): Promise<BankIdCollectResponse | undefined> {
+): Promise<BankIdCollectResponse> {
   const bankIdSSMparams: BankIdSSMParams = await params.read(config.bankId.envsKeyName);
   const bankIdClient = await bankId.client(bankIdSSMparams);
 
@@ -108,7 +112,7 @@ export async function collect(
   const bankIdCollectResponse = await dependencies.sendBankIdCollectRequest({ orderRef });
 
   let responseAttributes: FunctionResponse = {
-    ...(bankIdCollectResponse?.data ?? {}),
+    ...bankIdCollectResponse.data,
   };
 
   if (
@@ -116,7 +120,7 @@ export async function collect(
     isBankidCollectStatusComplete(bankIdCollectResponse?.data)
   ) {
     await dependencies.sendBankIdStatusCompleteEvent(
-      responseAttributes,
+      { ...bankIdCollectResponse.data.completionData },
       'BankIdCollectComplete',
       'bankId.collect'
     );
