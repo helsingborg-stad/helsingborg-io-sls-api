@@ -93,7 +93,7 @@ provider:
 functions:
   applicationStatus:
     handler: src/lambdas/applicationStatus.main
-    timeout: 15
+    timeout: 30
     events:
       - eventBridge:
           pattern:
@@ -110,7 +110,7 @@ functions:
 
   personApplicationStatus:
     handler: src/lambdas/personApplicationStatus.main
-    timeout: 15
+    timeout: 30
     events:
       - eventBridge:
           pattern:
@@ -121,7 +121,7 @@ functions:
 
   personApplication:
     handler: src/lambdas/personApplication.main
-    timeout: 15
+    timeout: 30
     events:
       - eventBridge:
           pattern:
@@ -133,7 +133,7 @@ functions:
   createNewVivaCase:
     handler: src/lambdas/createNewVivaCase.main
     reservedConcurrency: 1
-    timeout: 15
+    timeout: 30
     events:
       - eventBridge:
           enabled: true
@@ -146,7 +146,7 @@ functions:
   createVivaCase:
     handler: src/lambdas/createVivaCase.main
     reservedConcurrency: 1
-    timeout: 15
+    timeout: 30
     events:
       - eventBridge:
           pattern:
@@ -157,7 +157,7 @@ functions:
 
   submitApplication:
     handler: src/lambdas/submitApplication.main
-    timeout: 15
+    timeout: 30
     environment:
       BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-AttachmentsBucketName
     events:
@@ -167,7 +167,7 @@ functions:
 
   syncCaseCompletions:
     handler: src/lambdas/syncCaseCompletions.main
-    timeout: 15
+    timeout: 30
     events:
       - eventBridge:
           pattern:
@@ -178,7 +178,7 @@ functions:
 
   checkCompletionsStatus:
     handler: src/lambdas/checkCompletionsStatus.main
-    timeout: 15
+    timeout: 30
     events:
       - eventBridge:
           pattern:
@@ -189,7 +189,7 @@ functions:
 
   setCaseCompletions:
     handler: src/lambdas/setCaseCompletions.main
-    timeout: 15
+    timeout: 30
     events:
       - eventBridge:
           pattern:
@@ -207,7 +207,7 @@ functions:
 
   checkCompletionsDueDate:
     handler: src/lambdas/checkCompletionsDueDate.main
-    timeout: 15
+    timeout: 30
     events:
       - eventBridge:
           pattern:
@@ -221,7 +221,7 @@ functions:
 
   submitCompletion:
     handler: src/lambdas/submitCompletion.main
-    timeout: 15
+    timeout: 30
     environment:
       BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-AttachmentsBucketName
     events:
@@ -238,7 +238,7 @@ functions:
 
   syncOfficers:
     handler: src/lambdas/syncOfficers.main
-    timeout: 15
+    timeout: 30
     events:
       - eventBridge:
           pattern:
@@ -255,7 +255,7 @@ functions:
 
   syncWorkflow:
     handler: src/lambdas/syncWorkflow.main
-    timeout: 15
+    timeout: 30
     events:
       - eventBridge:
           pattern:
