@@ -49,6 +49,9 @@ const stageConfigs = {
     version: {
       envsKeyName: '/versionEnvs/dev',
     },
+    vivaNewApplication: {
+      envsKeyName: '/vivaNewApplicationEnvs/dev',
+    },
   },
   test: {
     auth: {
@@ -95,6 +98,9 @@ const stageConfigs = {
     },
     version: {
       envsKeyName: '/versionEnvs/test',
+    },
+    vivaNewApplication: {
+      envsKeyName: '/vivaNewApplicationEnvs/test',
     },
   },
   stage: {
@@ -143,6 +149,9 @@ const stageConfigs = {
     version: {
       envsKeyName: '/versionEnvs/stage',
     },
+    vivaNewApplication: {
+      envsKeyName: '/vivaNewApplicationEnvs/stage',
+    },
   },
   prod: {
     auth: {
@@ -190,6 +199,9 @@ const stageConfigs = {
     version: {
       envsKeyName: '/versionEnvs/prod',
     },
+    vivaNewApplication: {
+      envsKeyName: '/vivaNewApplicationEnvs/prod',
+    },
   },
   release: {
     auth: {
@@ -236,6 +248,9 @@ const stageConfigs = {
     },
     version: {
       envsKeyName: '/versionEnvs/release',
+    },
+    vivaNewApplication: {
+      envsKeyName: '/vivaNewApplicationEnvs/release',
     },
   },
 };

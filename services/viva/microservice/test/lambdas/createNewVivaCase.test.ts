@@ -11,6 +11,8 @@ import { EncryptionType, CasePersonRole, CaseForm } from '../../src/types/caseIt
 
 import { DEFAULT_CURRENT_POSITION } from '../../src/helpers/constants';
 
+import type { Dependencies } from '../../src/lambdas/createNewVivaCase';
+
 const mockUuid = '00000000-0000-0000-0000-000000000000';
 jest.mock('uuid', () => ({ v4: () => mockUuid }));
 
@@ -44,6 +46,19 @@ const lambdaInput = {
     user,
   },
 };
+
+const getApprovedNewApplicationUsers = ['199402011234'];
+
+function createDependencies(partialDependencies: Partial<Dependencies> = {}) {
+  return {
+    readParams: () => Promise.resolve(readParametersResponse),
+    getTemplates: () => Promise.resolve({}),
+    getUserCasesCount: () => Promise.resolve({ Count: 0 }),
+    getApprovedNewApplicationUsers: () => Promise.resolve(getApprovedNewApplicationUsers),
+    createCase: () => Promise.resolve({ id: '123' }),
+    ...partialDependencies,
+  };
+}
 
 it('successfully creates a new application case', async () => {
   const expectedParameters = {
@@ -79,12 +94,12 @@ it('successfully creates a new application case', async () => {
 
   const createCaseMock = jest.fn().mockResolvedValueOnce({ id: '123' });
 
-  const result = await createNewVivaCase(lambdaInput, {
-    createCase: createCaseMock,
-    readParams: () => Promise.resolve(readParametersResponse),
-    getTemplates: () => Promise.resolve({}),
-    getUserCasesCount: () => Promise.resolve({ Count: 0 }),
-  });
+  const result = await createNewVivaCase(
+    lambdaInput,
+    createDependencies({
+      createCase: createCaseMock,
+    })
+  );
 
   expect(result).toBe(true);
   expect(createCaseMock).toHaveBeenCalledWith(
@@ -97,12 +112,43 @@ it('successfully creates a new application case', async () => {
 it('stops execution when user cases exists', async () => {
   const createCaseMock = jest.fn().mockResolvedValueOnce(undefined);
 
-  const result = await createNewVivaCase(lambdaInput, {
-    createCase: createCaseMock,
-    readParams: () => Promise.resolve(readParametersResponse),
-    getTemplates: () => Promise.resolve({}),
-    getUserCasesCount: () => Promise.resolve({ Count: 1 }),
-  });
+  const result = await createNewVivaCase(
+    lambdaInput,
+    createDependencies({
+      createCase: createCaseMock,
+      getUserCasesCount: () => Promise.resolve({ Count: 1 }),
+    })
+  );
+
+  expect(result).toBe(true);
+  expect(createCaseMock).toHaveBeenCalledTimes(0);
+});
+
+it('stops execution when users personal number is not approved for new application', async () => {
+  const createCaseMock = jest.fn().mockResolvedValueOnce(undefined);
+
+  const result = await createNewVivaCase(
+    lambdaInput,
+    createDependencies({
+      createCase: createCaseMock,
+      getApprovedNewApplicationUsers: () => Promise.resolve(['111111']),
+    })
+  );
+
+  expect(result).toBe(true);
+  expect(createCaseMock).toHaveBeenCalledTimes(0);
+});
+
+it('stops execution when allowed users personal number array is empty', async () => {
+  const createCaseMock = jest.fn().mockResolvedValueOnce(undefined);
+
+  const result = await createNewVivaCase(
+    lambdaInput,
+    createDependencies({
+      createCase: createCaseMock,
+      getApprovedNewApplicationUsers: () => Promise.resolve([]),
+    })
+  );
 
   expect(result).toBe(true);
   expect(createCaseMock).toHaveBeenCalledTimes(0);

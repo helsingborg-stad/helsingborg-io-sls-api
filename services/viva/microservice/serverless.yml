@@ -37,6 +37,7 @@ provider:
           Resource:
             - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${file(../../../config.json):${self:custom.stage}.vada.envsKeyName}'
             - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${file(../../../config.json):${self:custom.stage}.cases.providers.viva.envsKeyName}'
+            - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${file(../../../config.json):${self:custom.stage}.vivaNewApplication.envsKeyName}'
 
         - Effect: Allow
           Action:

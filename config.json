@@ -44,6 +44,9 @@
     },
     "version": {
       "envsKeyName": "/versionEnvs/dev"
+    },
+    "vivaNewApplication": {
+      "envsKeyName": "/vivaNewApplicationEnvs/dev"
     }
   },
   "test": {
@@ -91,6 +94,9 @@
     },
     "version": {
       "envsKeyName": "/versionEnvs/test"
+    },
+    "vivaNewApplication": {
+      "envsKeyName": "/vivaNewApplicationEnvs/test"
     }
   },
   "stage": {
@@ -138,6 +144,9 @@
     },
     "version": {
       "envsKeyName": "/versionEnvs/stage"
+    },
+    "vivaNewApplication": {
+      "envsKeyName": "/vivaNewApplicationEnvs/stage"
     }
   },
   "release": {
@@ -185,6 +194,9 @@
     },
     "version": {
       "envsKeyName": "/versionEnvs/release"
+    },
+    "vivaNewApplication": {
+      "envsKeyName": "/vivaNewApplicationEnvs/release"
     }
   },
   "prod": {
@@ -232,6 +244,9 @@
     },
     "version": {
       "envsKeyName": "/versionEnvs/prod"
+    },
+    "vivaNewApplication": {
+      "envsKeyName": "/vivaNewApplicationEnvs/prod"
     }
   }
 }
