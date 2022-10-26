@@ -49,6 +49,7 @@ it('returns collect data successfully for bankId status pending', async () => {
 
 it('returns collect data successfully for bankId status complete', async () => {
   const sendBankIdStatusCompleteEventMock = jest.fn();
+  const expectedPutEventParams = { user: mockUser };
 
   const result = await collect(
     createInput(),
@@ -64,5 +65,10 @@ it('returns collect data successfully for bankId status complete', async () => {
     },
     status: 'complete',
   });
-  expect(sendBankIdStatusCompleteEventMock).toHaveBeenCalled();
+  expect(sendBankIdStatusCompleteEventMock).toHaveBeenCalledTimes(1);
+  expect(sendBankIdStatusCompleteEventMock).toHaveBeenCalledWith(
+    expectedPutEventParams,
+    'BankIdCollectComplete',
+    'bankId.collect'
+  );
 });
