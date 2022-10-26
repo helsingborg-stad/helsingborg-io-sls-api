@@ -1,7 +1,7 @@
 import { isMetricValueWithMeta } from './metrics';
 import type { MaybeMetricMeta, Metric, MetricType, MetricValue } from './metrics.types';
 
-export class MetricBuilder<TMeta extends MaybeMetricMeta = void> {
+export default class MetricBuilder<TMeta extends MaybeMetricMeta = void> {
   #metric: Metric<TMeta>;
 
   constructor(name: string) {

@@ -1,4 +1,4 @@
-import { MetricBuilder } from './metricBuilder';
+import MetricBuilder from './metricBuilder';
 import type { Metric, MetricValue } from './metrics.types';
 
 const MOCK_METRIC: Metric = {
