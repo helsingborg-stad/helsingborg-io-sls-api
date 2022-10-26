@@ -142,7 +142,7 @@ export async function createNewVivaCase(
     details: {
       workflowId: null,
       period: {
-        startDate: 0,
+        startDate: createCaseHelper.createPeriodStartDate(),
         endDate: 0,
       },
       completions: null,

@@ -13,6 +13,8 @@ import { DEFAULT_CURRENT_POSITION } from '../../src/helpers/constants';
 
 import type { Dependencies } from '../../src/lambdas/createNewVivaCase';
 
+jest.useFakeTimers('modern').setSystemTime(new Date('2022-01-01'));
+
 const mockUuid = '00000000-0000-0000-0000-000000000000';
 jest.mock('uuid', () => ({ v4: () => mockUuid }));
 
@@ -65,7 +67,7 @@ it('successfully creates a new application case', async () => {
     details: {
       period: {
         endDate: 0,
-        startDate: 0,
+        startDate: 1640991600000,
       },
       workflowId: null,
       completions: null,

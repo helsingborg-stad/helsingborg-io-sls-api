@@ -114,6 +114,11 @@ function getInitialFormAttributes(
   );
 }
 
+function createPeriodStartDate(): number {
+  const nowDate = new Date();
+  return new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate()).getTime();
+}
+
 function getFormEncryptionAttributes(): CaseFormEncryption {
   const keyId = uuid.v4();
   return {
@@ -132,4 +137,5 @@ export default {
   getInitialFormAttributes,
   getFormEncryptionAttributes,
   createCaseApplicantPerson,
+  createPeriodStartDate,
 };
