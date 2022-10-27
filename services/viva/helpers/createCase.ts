@@ -116,7 +116,10 @@ function getInitialFormAttributes(
 
 function createPeriodStartDate(): number {
   const nowDate = new Date();
-  return new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate()).getTime();
+  const startDateUTC = new Date(
+    Date.UTC(nowDate.getUTCFullYear(), nowDate.getUTCMonth(), nowDate.getUTCDate())
+  );
+  return startDateUTC.getTime();
 }
 
 function getFormEncryptionAttributes(): CaseFormEncryption {

@@ -66,8 +66,8 @@ it('successfully creates a new application case', async () => {
     currentFormId: readParametersResponse.newApplicationFormId,
     details: {
       period: {
+        startDate: 1640995200000,
         endDate: 0,
-        startDate: 1640991600000,
       },
       workflowId: null,
       completions: null,
