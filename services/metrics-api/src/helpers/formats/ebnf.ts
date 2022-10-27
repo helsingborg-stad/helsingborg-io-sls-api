@@ -11,20 +11,18 @@ function createTokenComment(prefix: CommentToken, metric: CommentTokenMetric): s
 }
 
 function metricValueToEbnf(name: string, metricValue: MetricValue<MaybeMetricMeta>): string {
-  let str = `${name}`;
+  let outputLine = `${name}`;
 
   if (isMetricValueWithMeta(metricValue)) {
     const labels = Object.entries(metricValue.meta ?? {}).map(
       ([name, value]) => `${name}="${value}"`
     );
-    if (labels && labels.length > 0) {
-      str += `{${labels.join(',')}}`;
-    }
+    outputLine += `{${labels.join(',')}}`;
   }
 
-  str += ` ${metricValue.value}`;
+  outputLine += ` ${metricValue.value}`;
 
-  return str;
+  return outputLine;
 }
 
 function curriedMetricValueToEbnf(name: string): (metricValue: MetricValue) => string {

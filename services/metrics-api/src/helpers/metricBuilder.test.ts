@@ -1,4 +1,5 @@
 import MetricBuilder from './metricBuilder';
+import { MetricType } from './metrics.constants';
 import type { Metric, MetricValue } from './metrics.types';
 
 const MOCK_METRIC: Metric = {
@@ -30,11 +31,11 @@ describe('MetricBuilder', () => {
   it('sets type', () => {
     const expected: Metric = {
       ...MOCK_METRIC,
-      type: 'summary',
+      type: MetricType.SUMMARY,
     };
 
     const metric = new MetricBuilder('myMetric')
-      .setType('summary')
+      .setType(MetricType.SUMMARY)
       .addValue({ value: 123 })
       .getMetric();
 
@@ -83,7 +84,7 @@ describe('MetricBuilder', () => {
     const expected: Metric<{ source: string; purpose: string }> = {
       ...MOCK_METRIC,
       help: 'my helpful metric description',
-      type: 'gauge',
+      type: MetricType.GAUGE,
       values: [
         {
           value: 123,
@@ -118,7 +119,7 @@ describe('MetricBuilder', () => {
 
     const metric = new MetricBuilder<{ source: string; purpose: string }>('myMetric')
       .setHelp('my helpful metric description')
-      .setType('gauge')
+      .setType(MetricType.GAUGE)
       .addValue({
         value: 123,
         meta: {

@@ -1,4 +1,4 @@
-export type MetricType = 'counter' | 'gauge' | 'histogram' | 'summary' | 'untyped';
+import type { MetricType } from './metrics.constants';
 
 export type MetricMetaBase = Record<string, unknown>;
 export type MaybeMetricMeta = MetricMetaBase | void;

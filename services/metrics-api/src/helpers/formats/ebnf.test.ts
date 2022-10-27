@@ -1,4 +1,6 @@
 import { ebnf } from '.';
+import { MetricType } from '../metrics.constants';
+
 import type { MaybeMetricMeta, Metric } from '../metrics.types';
 
 describe('EBNF adapter', () => {
@@ -42,7 +44,7 @@ describe('EBNF adapter', () => {
     const metric: Metric = {
       name: 'myMetric',
       values: [{ value: 1 }],
-      type: 'counter',
+      type: MetricType.COUNTER,
     };
 
     const result = ebnf.format(metric);
@@ -81,13 +83,13 @@ describe('EBNF adapter', () => {
         name: 'myMetric1',
         values: [{ value: 3.1415 }],
         help: 'short version of PI.',
-        type: 'gauge',
+        type: MetricType.GAUGE,
       },
       {
         name: 'myMetric2',
         values: [{ value: 1.41421 }],
         help: 'Square root of 2 probably.',
-        type: 'histogram',
+        type: MetricType.HISTOGRAM,
       },
       {
         name: 'myMetric3',
@@ -101,7 +103,7 @@ describe('EBNF adapter', () => {
           },
         ],
         help: "Approximation of Euler's number.",
-        type: 'untyped',
+        type: MetricType.UNTYPED,
       },
     ];
 
