@@ -1,19 +1,18 @@
 import uuid from 'uuid';
 
-import {
+import { VivaPersonType } from '../types/vivaMyPages';
+import { EncryptionType, CasePersonRole } from '../types/caseItem';
+import type {
   VivaMyPagesApplicationPeriod,
   VivaMyPagesVivaCase,
   VivaPerson,
-  VivaPersonType,
 } from '../types/vivaMyPages';
-import {
+import type {
   CaseForm,
   CasePeriod,
   CasePerson,
-  CasePersonRole,
   CaseUser,
   CaseFormEncryption,
-  EncryptionType,
 } from '../types/caseItem';
 
 import { DEFAULT_CURRENT_POSITION } from './constants';
@@ -114,6 +113,14 @@ function getInitialFormAttributes(
   );
 }
 
+function createPeriodStartDate(): number {
+  const nowDate = new Date();
+  const startDateUTC = new Date(
+    Date.UTC(nowDate.getUTCFullYear(), nowDate.getUTCMonth(), nowDate.getUTCDate())
+  );
+  return startDateUTC.getTime();
+}
+
 function getFormEncryptionAttributes(): CaseFormEncryption {
   const keyId = uuid.v4();
   return {
@@ -132,4 +139,5 @@ export default {
   getInitialFormAttributes,
   getFormEncryptionAttributes,
   createCaseApplicantPerson,
+  createPeriodStartDate,
 };
