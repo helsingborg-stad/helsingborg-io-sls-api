@@ -1,17 +1,14 @@
-import { createNewVivaCase } from '../../src/lambdas/createNewVivaCase';
-
 import {
   CASE_PROVIDER_VIVA,
   VIVA_CASE_CREATED,
   NEW_APPLICATION_VIVA,
 } from '../../src/libs/constants';
 import { getStatusByType } from '../../src/libs/caseStatuses';
-
-import { EncryptionType, CasePersonRole, CaseForm } from '../../src/types/caseItem';
-
-import { DEFAULT_CURRENT_POSITION } from '../../src/helpers/constants';
-
+import { EncryptionType, CasePersonRole } from '../../src/types/caseItem';
 import type { Dependencies } from '../../src/lambdas/createNewVivaCase';
+import type { CaseForm } from '../../src/types/caseItem';
+import { createNewVivaCase } from '../../src/lambdas/createNewVivaCase';
+import { DEFAULT_CURRENT_POSITION } from '../../src/helpers/constants';
 
 jest.useFakeTimers('modern').setSystemTime(new Date('2022-01-01'));
 
@@ -19,7 +16,7 @@ const mockUuid = '00000000-0000-0000-0000-000000000000';
 jest.mock('uuid', () => ({ v4: () => mockUuid }));
 
 const user = {
-  firstName: 'First',
+  firstName: 'FirstName',
   lastName: 'LastName',
   personalNumber: '199402011234',
 };
@@ -79,10 +76,10 @@ it('successfully creates a new application case', async () => {
     },
     persons: [
       {
-        firstName: user.firstName,
-        hasSigned: false,
-        lastName: user.lastName,
         personalNumber: user.personalNumber,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        hasSigned: false,
         role: CasePersonRole.Applicant,
       },
     ],

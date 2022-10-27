@@ -1,5 +1,7 @@
 import caseHelper from '../../src/helpers/createCase';
-import {
+import { VivaPersonType } from '../../src/types/vivaMyPages';
+import { EncryptionType } from '../../src/types/caseItem';
+import type {
   VivaClient,
   VivaMyPagesVivaApplication,
   VivaMyPagesVivaCase,
@@ -7,14 +9,8 @@ import {
   VivaOfficersOfficer,
   VivaPerson,
   VivaPersonsPerson,
-  VivaPersonType,
 } from '../../src/types/vivaMyPages';
-import {
-  CasePerson,
-  CasePeriod,
-  CaseFormEncryption,
-  EncryptionType,
-} from '../../src/types/caseItem';
+import type { CasePerson, CasePeriod, CaseFormEncryption } from '../../src/types/caseItem';
 
 import { DEFAULT_CURRENT_POSITION } from '../../src/helpers/constants';
 
@@ -47,8 +43,8 @@ const vivaPersonPartner: VivaPerson = {
 };
 
 const vivaOfficer: VivaOfficer = {
-  name: 'CN=Dan Nilsson/OU=extern/O=UVNHBG',
-  mail: 'dan.nilsson@helsingborg.se',
+  name: 'CN=Some Name/OU=extern/O=UVNHBG',
+  mail: 'some.name@helsingborg.se',
   phone: '0733442266',
   title: 'HBG Works',
   type: 'officer',
