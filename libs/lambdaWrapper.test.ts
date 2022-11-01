@@ -50,7 +50,7 @@ describe('lambda wrappers', () => {
     });
 
     it('throws on error', async () => {
-      async function mockLambda() {
+      async function mockLambda(): Promise<boolean> {
         throw new Error('oops');
       }
       const func = wrappers.event.wrap(mockLambda, testDependencies);

@@ -63,10 +63,10 @@ type LambdaFunction<TLambdaInput, TDependencies, TLambdaOutput> = (
   dependencies: TDependencies
 ) => Promise<TLambdaOutput>;
 
-interface LambdaWrapper<TEventType, TReturnType> {
+interface LambdaWrapper<TEventType, TReturnType, TLambdaOutput> {
   wrap<TLambdaInput, TDependencies>(
-    lambda: LambdaFunction<TLambdaInput, TDependencies, unknown>,
-    dependencies: unknown
+    lambda: LambdaFunction<TLambdaInput, TDependencies, TLambdaOutput>,
+    dependencies: TDependencies
   ): LambdaMainExport<TEventType, TReturnType>;
 }
 
@@ -82,7 +82,7 @@ interface LambdaInvocationConfig<
   context: Context;
   dependencies: TDependencies;
   onSuccess: (result: TLambdaOutput) => TEventResult;
-  onError: (error: LambdaError) => TEventResult;
+  onError: (error: LambdaError) => TEventResult | Error;
   inputTransformer?: (event: TEventType) => TLambdaInput;
 }
 
@@ -108,8 +108,8 @@ const successHandlers = {
 };
 
 const errorHandlers = {
-  throwAsIs<TError extends LambdaError>(error: TError): never {
-    throw error;
+  returnAsIs<TError extends LambdaError>(error: TError): LambdaError {
+    return error;
   },
   asApiResponse<TError extends LambdaError>(error: TError): APIGatewayProxyResult {
     return response.failure(error);
@@ -146,14 +146,17 @@ async function invokeLambda<
     return eventResult;
   } catch (error) {
     const transformedError = transformError(error);
-    log.finalize(null, transformedError);
     const eventResult = onError(transformedError);
+    log.finalize(null, transformedError);
+    if (eventResult instanceof Error) {
+      throw eventResult;
+    }
     return eventResult;
   }
 }
 
 export const wrappers = {
-  event: <LambdaWrapper<unknown, boolean>>{
+  event: <LambdaWrapper<unknown, boolean, boolean>>{
     wrap<TLambdaInput, TDependencies>(
       lambda: LambdaFunction<TLambdaInput, TDependencies, boolean>,
       dependencies: TDependencies
@@ -165,18 +168,18 @@ export const wrappers = {
           context,
           dependencies,
           onSuccess: successHandlers.returnAsIs,
-          onError: errorHandlers.throwAsIs,
+          onError: errorHandlers.returnAsIs,
         });
       };
     },
   },
 
-  restRaw: <LambdaWrapper<APIGatewayEvent, APIGatewayProxyResult>>{
+  restRaw: <LambdaWrapper<APIGatewayEvent, APIGatewayProxyResult, string>>{
     wrap<TLambdaInput, TDependencies>(
       lambda: LambdaFunction<TLambdaInput, TDependencies, string>,
       dependencies: TDependencies
     ): LambdaMainExport<APIGatewayEvent, APIGatewayProxyResult> {
-      return async function (event, context) {
+      return function (event, context) {
         return invokeLambda({
           lambda,
           event,
@@ -190,12 +193,12 @@ export const wrappers = {
     },
   },
 
-  restJSON: <LambdaWrapper<APIGatewayEvent, APIGatewayProxyResult>>{
+  restJSON: <LambdaWrapper<APIGatewayEvent, APIGatewayProxyResult, unknown>>{
     wrap<TLambdaInput, TDependencies>(
       lambda: LambdaFunction<TLambdaInput, TDependencies, unknown>,
       dependencies: TDependencies
     ): LambdaMainExport<APIGatewayEvent, APIGatewayProxyResult> {
-      return async function (event, context) {
+      return function (event, context) {
         return invokeLambda({
           lambda,
           event,
