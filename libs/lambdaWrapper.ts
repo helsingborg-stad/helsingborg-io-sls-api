@@ -59,7 +59,7 @@ type LambdaMainExport<TEventType, TReturnType> = (
 ) => Promise<TReturnType>;
 
 type LambdaFunction<TLambdaInput, TDependencies, TLambdaOutput> = (
-  event: TLambdaInput,
+  input: TLambdaInput,
   dependencies: TDependencies
 ) => Promise<TLambdaOutput>;
 
