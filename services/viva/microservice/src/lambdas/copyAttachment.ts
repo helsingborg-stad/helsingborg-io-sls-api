@@ -59,7 +59,10 @@ export async function copyAttachment(input: LambdaRequest, dependencies: Depende
   const [personalNumber, filename] = input.Records[0].s3.object.key.split('/');
   const caseItem = await dependencies.getLatestUpdatedCase(personalNumber);
 
-  const coApplicant = caseItem.persons.find(({ role }) => role === CasePersonRole.CoApplicant);
+  const coApplicant = caseItem.persons.find(
+    applicant =>
+      applicant.role === CasePersonRole.CoApplicant && applicant.personalNumber !== personalNumber
+  );
   if (!coApplicant) {
     return false;
   }

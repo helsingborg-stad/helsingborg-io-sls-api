@@ -77,3 +77,22 @@ it('skips copying of file if coapplicant does not exist', async () => {
   expect(result).toBe(false);
   expect(copyFileMock).not.toHaveBeenCalled();
 });
+
+it('skips copying of file if personal number is the same as s3 key and is coapplicant', async () => {
+  const copyFileMock = jest.fn();
+  const result = await copyAttachment(
+    {
+      Records: [createS3Record(`${coApplicantPersonalNumber}/${fileName}`)],
+    },
+    createDependencies({
+      copyFile: copyFileMock,
+      getLatestUpdatedCase: () =>
+        Promise.resolve({
+          persons: [createPerson(coApplicantPersonalNumber, CasePersonRole.CoApplicant)],
+        }) as Promise<CaseItem>,
+    })
+  );
+
+  expect(result).toBe(false);
+  expect(copyFileMock).not.toHaveBeenCalled();
+});
