@@ -60,8 +60,7 @@ export async function copyAttachment(input: LambdaRequest, dependencies: Depende
   const caseItem = await dependencies.getLatestUpdatedCase(personalNumber);
 
   const coApplicant = caseItem.persons.find(
-    applicant =>
-      applicant.role === CasePersonRole.CoApplicant && applicant.personalNumber !== personalNumber
+    person => person.role === CasePersonRole.CoApplicant && person.personalNumber !== personalNumber
   );
   if (!coApplicant) {
     return false;
