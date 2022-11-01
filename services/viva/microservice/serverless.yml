@@ -49,6 +49,7 @@ provider:
             - s3:GetObject
             - s3:PutObject
             - s3:DeleteObject
+            - s3:ListBucket
           Resource:
             - Fn::ImportValue: ${self:custom.resourcesStage}-AttachmentsBucketArn
             - Fn::Join:
@@ -316,3 +317,13 @@ functions:
               status:
                 type: [{ 'prefix': 'active:submitted' }]
               state: ['VIVA_CASE_CREATED']
+
+  copyAttachment:
+    handler: src/lambdas/copyAttachment.main
+    environment:
+      BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-AttachmentsBucketName
+    events:
+      - s3:
+          bucket: !ImportValue ${self:custom.resourcesStage}-AttachmentsBucketName
+          event: s3:ObjectCreated:*
+          existing: true
