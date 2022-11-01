@@ -1,28 +1,59 @@
-import axios, { AxiosError } from 'axios';
-import { AWSError } from 'aws-sdk/lib/error';
+import type { AxiosError } from 'axios';
+import axios from 'axios';
+import type { AWSError } from 'aws-sdk/lib/error';
 
-interface FactoryError extends Error {
+export interface LambdaError extends Error {
   status: string;
-  code?: string;
+  code?: number;
   detail: string;
 }
 
-const defaultStatus = '500';
+interface FactoryErrorConstructorParameters {
+  status: string;
+  code?: number;
+  detail: string;
+  message: string;
+  name: string;
+}
+
+export class LambdaError extends Error implements LambdaError {
+  status: string;
+  code?: number;
+  detail: string;
+
+  constructor({ status, code, detail, message, name }: FactoryErrorConstructorParameters) {
+    super(message);
+    this.status = status;
+    this.code = code;
+    this.detail = detail;
+    this.name = name;
+
+    // See https://github.com/Microsoft/TypeScript-wiki/blob/main/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work
+    Object.setPrototypeOf(this, LambdaError.prototype);
+  }
+}
+
+const defaultStatus = 500;
+
+function getStatusCode(input?: string): number {
+  const statusCode = input ? parseInt(input) : defaultStatus;
+  return isNaN(statusCode) ? defaultStatus : statusCode;
+}
 
 interface ErrorTransformer<T> {
-  transform: (error: T) => FactoryError;
+  transform: (error: T) => LambdaError;
   isErrorType: (error: unknown) => error is T;
 }
 
 const axiosErrorTransformer: ErrorTransformer<AxiosError> = {
   transform(error) {
-    return {
-      status: error?.response?.status.toString() || defaultStatus,
-      code: error?.code,
+    return new LambdaError({
+      status: getStatusCode(error?.response?.status.toString()).toString(),
+      code: getStatusCode(error?.code),
       name: error?.name,
       message: error?.message,
       detail: error.response?.data?.details,
-    };
+    });
   },
 
   isErrorType(error: unknown): error is AxiosError {
@@ -32,13 +63,13 @@ const axiosErrorTransformer: ErrorTransformer<AxiosError> = {
 
 const awsSDKErrorTransformer: ErrorTransformer<AWSError> = {
   transform(error) {
-    return {
-      status: error.statusCode?.toString() || defaultStatus,
+    return new LambdaError({
+      status: getStatusCode(error.statusCode?.toString()).toString(),
       message: error.message,
       name: error.name,
-      code: error.code,
+      code: getStatusCode(error.code),
       detail: error.message,
-    };
+    });
   },
 
   isErrorType(error: unknown): error is AWSError {
@@ -46,23 +77,23 @@ const awsSDKErrorTransformer: ErrorTransformer<AWSError> = {
   },
 };
 
-const javascriptRuntimeErrorTransformer: ErrorTransformer<TypeError> = {
+const javascriptRuntimeErrorTransformer: ErrorTransformer<Error> = {
   transform(error) {
-    return {
-      status: defaultStatus,
+    return new LambdaError({
+      status: getStatusCode().toString(),
       message: error.message,
       name: error.name,
-      code: defaultStatus,
+      code: getStatusCode(),
       detail: error.message,
-    };
+    });
   },
 
-  isErrorType(error: unknown): error is TypeError {
-    return error instanceof TypeError;
+  isErrorType(error: unknown): error is Error {
+    return error instanceof Error;
   },
 };
 
-function transformError(error: unknown): Error {
+function transformError(error: unknown): LambdaError {
   if (axiosErrorTransformer.isErrorType(error)) {
     return axiosErrorTransformer.transform(error);
   }
@@ -75,7 +106,11 @@ function transformError(error: unknown): Error {
     return javascriptRuntimeErrorTransformer.transform(error);
   }
 
-  throw new Error('Unknown error type');
+  const asError = error as Error;
+  return javascriptRuntimeErrorTransformer.transform({
+    ...asError,
+    message: `(unknown error) ${asError?.message}`,
+  });
 }
 
 export default transformError;
