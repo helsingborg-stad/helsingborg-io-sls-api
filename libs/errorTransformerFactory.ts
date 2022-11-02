@@ -28,7 +28,7 @@ export class LambdaError extends Error implements LambdaError {
     this.detail = detail;
     this.name = name;
 
-    // See https://github.com/Microsoft/TypeScript-wiki/blob/main/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work
+    // See https://github.com/microsoft/TypeScript-wiki/blob/a425a2d1b26e81d9989b0f51499591181f93e956/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work
     Object.setPrototypeOf(this, LambdaError.prototype);
   }
 }
