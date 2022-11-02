@@ -1,4 +1,4 @@
-import { Handler } from 'aws-lambda';
+import type { Handler } from 'aws-lambda';
 
 type Primitive = string | number | null | undefined;
 type Level = 'info' | 'error' | 'warn' | 'verbose' | 'debug';
@@ -65,6 +65,8 @@ declare namespace log {
     errorCode: Primitive,
     customData?: unknown
   ): void;
+  function initialize(event: unknown, context: unknown): void;
+  function finalize(response: unknown, error: unknown): void;
   function wrap(lambda: Handler): Handler;
 }
 

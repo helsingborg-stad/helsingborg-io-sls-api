@@ -7,6 +7,7 @@ import type { Dependencies, LambdaRequest } from '../../src/lambdas/getStatus';
 const mockHeaders = {
   'Access-Control-Allow-Credentials': true,
   'Access-Control-Allow-Origin': '*',
+  'Content-Type': 'application/json',
 };
 const mockJsonApi = { version: '1.0' };
 const defaultUserAgent = 'MittHelsingborg/1.3.0/ios/15.0';
@@ -60,11 +61,11 @@ it('returns the version status successfully', async () => {
 });
 
 const malformedUserAgents = ['MittHelsingborg', '1.3.0/ios/15.0', 'MittHelsingborg/1.3.0/15.0'];
-test.each(malformedUserAgents)('returns failure for`User-Agent` %s', async userAgent => {
+test.each(malformedUserAgents)('returns failure for `User-Agent` %s', async userAgent => {
   const expectedResult = {
     body: JSON.stringify({
       jsonapi: mockJsonApi,
-      data: { status: '400', code: '400', message: 'Malformed `User-Agent` header' },
+      data: { status: 400, message: 'Malformed `User-Agent` header' },
     }),
     headers: mockHeaders,
     statusCode: 400,
