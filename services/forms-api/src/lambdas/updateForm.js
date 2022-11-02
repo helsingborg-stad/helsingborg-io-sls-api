@@ -1,5 +1,5 @@
 import to from 'await-to-js';
-import { buildResponse } from '../libs/response';
+import * as response from '../libs/response';
 import { objectWithoutProperties } from '../libs/objects';
 import config from '../libs/config';
 import { validateFormData } from '../helpers/formValidation';
@@ -36,7 +36,12 @@ export async function main(event, context) {
       updateErrors
     );
 
-    return buildResponse(400, { errorMessage: 'Invalid update.', updateErrors });
+    return response.failure({
+      status: 400,
+      code: 400,
+      ...updateErrors,
+      message: 'Invalid update.',
+    });
   }
   const validationErrors = validateFormData(requestBody, true);
   if (validationErrors) {
@@ -47,9 +52,11 @@ export async function main(event, context) {
       validationErrors
     );
 
-    return buildResponse(400, {
-      errorType: 'Validation error',
-      errorDescriptions: validationErrors,
+    return response.failure({
+      status: 400,
+      code: 400,
+      message: 'Validation error',
+      detail: validationErrors,
     });
   }
 
@@ -66,9 +73,12 @@ export async function main(event, context) {
   if (error) {
     log.error('Form update error', context.awsRequestId, 'service-forms-api-updateForm-003', error);
 
-    return buildResponse(error.status, error);
+    return response.failure({
+      code: error.status,
+      ...error,
+    });
   }
-  return buildResponse(200, dynamoDbResponse);
+  return response.success(200, dynamoDbResponse);
 }
 
 export function createUpdateExpression(

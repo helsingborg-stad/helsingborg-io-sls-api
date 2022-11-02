@@ -1,7 +1,7 @@
 import to from 'await-to-js';
 import uuid from 'uuid';
 
-import { buildResponse } from '../libs/response';
+import * as response from '../libs/response';
 import config from '../libs/config';
 import { validateFormData } from '../helpers/formValidation';
 import { putItem } from '../libs/queries';
@@ -23,9 +23,11 @@ export async function main(event, context) {
       validationErrors
     );
 
-    return buildResponse(400, {
-      errorType: 'Validation error',
-      errorDescriptions: validationErrors,
+    return response.failure({
+      status: 400,
+      code: 400,
+      message: 'Validation error',
+      detail: validationErrors,
     });
   }
 
@@ -53,13 +55,15 @@ export async function main(event, context) {
       dynamodbError
     );
 
-    return buildResponse(dynamodbError.status, {
+    return response.failure({
+      status: dynamodbError.status,
+      code: dynamodbError.status,
       errorType: 'DynamoDB error',
       errorObject: dynamodbError,
     });
   }
 
-  return buildResponse(201, {
+  return response.success(201, {
     Item,
   });
 }

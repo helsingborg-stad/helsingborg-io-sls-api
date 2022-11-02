@@ -1,6 +1,6 @@
 import to from 'await-to-js';
 import config from '../libs/config';
-import { buildResponse } from '../libs/response';
+import * as response from '../libs/response';
 import * as dynamoDb from '../libs/dynamoDb';
 import log from '../libs/logs';
 
@@ -22,9 +22,13 @@ export async function main(_event, context) {
       error
     );
 
-    return buildResponse(400, error);
+    return response.failure({
+      status: 400,
+      code: 400,
+      ...error,
+    });
   }
-  return buildResponse(200, { count: queryResponse[1].Count, forms: queryResponse[1].Items });
+  return response.success(200, { count: queryResponse[1].Count, forms: queryResponse[1].Items });
 }
 
 async function makeScanQuery(params) {
