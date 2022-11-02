@@ -2,6 +2,10 @@ import type { APIGatewayEvent, Context } from 'aws-lambda';
 import { wrappers } from './lambdaWrapper';
 import log from './logs';
 
+type EVENT_LAMBDA_RETURN_TYPE = Promise<boolean>;
+type REST_LAMBDA_RETURN_TYPE = Promise<string>;
+type REST_JSON_LAMBDA_RETURN_TYPE = Promise<Record<string, unknown>>;
+
 const testInput = {
   top: 'Lorem ipsum',
   nested: {
@@ -29,7 +33,7 @@ describe('lambda wrappers', () => {
 
   describe('event', () => {
     it('passes correct data to lambda', async () => {
-      const mockLambda = jest.fn();
+      const mockLambda = jest.fn<EVENT_LAMBDA_RETURN_TYPE, []>();
       const func = wrappers.event.wrap(mockLambda, testDependencies);
 
       await func(testInput, {} as Context);
@@ -64,7 +68,7 @@ describe('lambda wrappers', () => {
 
   describe('rest (raw)', () => {
     it('passes correct data to lambda', async () => {
-      const mockLambda = jest.fn();
+      const mockLambda = jest.fn<REST_LAMBDA_RETURN_TYPE, []>();
       const mockEvent: APIGatewayEvent = {
         queryStringParameters: {
           myVar: 'hello',
@@ -113,9 +117,9 @@ describe('lambda wrappers', () => {
         },
       ],
     ])('(on success) returns %s', async (_, expectedObject) => {
-      const mockLambda = jest.fn().mockReturnValue('hello');
+      const mockLambda = jest.fn<REST_LAMBDA_RETURN_TYPE, []>().mockResolvedValue('hello');
 
-      const wrapFunc = wrappers.restRaw.wrap(mockLambda, {});
+      const wrapFunc = wrappers.restRaw.wrap(mockLambda, { s: '' });
       const result = await wrapFunc({} as APIGatewayEvent, {} as Context);
 
       expect(result).toEqual(expect.objectContaining(expectedObject));
@@ -154,7 +158,9 @@ describe('lambda wrappers', () => {
         },
       ],
     ])('(on error) returns %s', async (_, expectedObject) => {
-      const mockLambda = jest.fn().mockRejectedValue(new Error('hello'));
+      const mockLambda = jest
+        .fn<REST_LAMBDA_RETURN_TYPE, []>()
+        .mockRejectedValue(new Error('hello'));
 
       const wrapFunc = wrappers.restRaw.wrap(mockLambda, {});
       const result = await wrapFunc({} as APIGatewayEvent, {} as Context);
@@ -165,7 +171,7 @@ describe('lambda wrappers', () => {
 
   describe('rest (json)', () => {
     it('passes correct data to lambda', async () => {
-      const mockLambda = jest.fn();
+      const mockLambda = jest.fn<REST_JSON_LAMBDA_RETURN_TYPE, []>();
       const mockEvent: APIGatewayEvent = {
         queryStringParameters: {
           myVar: 'hello',
@@ -219,7 +225,9 @@ describe('lambda wrappers', () => {
         },
       ],
     ])('(on success) returns %s', async (_, expectedObject) => {
-      const mockLambda = jest.fn().mockReturnValue(MOCK_LAMBDA_RETURN_OBJECT);
+      const mockLambda = jest
+        .fn<REST_JSON_LAMBDA_RETURN_TYPE, []>()
+        .mockResolvedValue(MOCK_LAMBDA_RETURN_OBJECT);
 
       const wrapFunc = wrappers.restJSON.wrap(mockLambda, {});
       const result = await wrapFunc({} as APIGatewayEvent, {} as Context);
@@ -260,7 +268,9 @@ describe('lambda wrappers', () => {
         },
       ],
     ])('(on error) returns %s', async (_, expectedObject) => {
-      const mockLambda = jest.fn().mockRejectedValue(new Error('hello'));
+      const mockLambda = jest
+        .fn<REST_JSON_LAMBDA_RETURN_TYPE, []>()
+        .mockRejectedValue(new Error('hello'));
 
       const wrapFunc = wrappers.restJSON.wrap(mockLambda, {});
       const result = await wrapFunc({} as APIGatewayEvent, {} as Context);
