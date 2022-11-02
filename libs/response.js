@@ -1,6 +1,6 @@
 import config from './config';
 
-export function buildResponse(statusCode, contentType, body) {
+function buildResponse(statusCode, contentType, body) {
   return {
     statusCode: parseInt(statusCode),
     headers: {
@@ -13,11 +13,11 @@ export function buildResponse(statusCode, contentType, body) {
   };
 }
 
-export function buildResponseRaw(statusCode, rawBody) {
+function buildResponseRaw(statusCode, rawBody) {
   return buildResponse(statusCode, 'text/plain', rawBody);
 }
 
-export function buildResponseJSON(statusCode, body) {
+function buildResponseJSON(statusCode, body) {
   const jsonApi = {
     jsonapi: {
       version: '1.0',
