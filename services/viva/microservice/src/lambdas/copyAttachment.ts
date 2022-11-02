@@ -1,7 +1,7 @@
 import * as dynamoDb from '../libs/dynamoDb';
 import config from '../libs/config';
-import log from '../libs/logs';
 import S3 from '../libs/S3';
+import { wrappers } from '../libs/lambdaWrapper';
 
 import { CasePersonRole } from '../types/caseItem';
 import type { CaseItem } from '../types/caseItem';
@@ -18,7 +18,7 @@ interface S3 {
   object: S3Object;
 }
 
-export interface Record {
+export interface S3Record {
   s3: S3;
 }
 
@@ -28,7 +28,7 @@ export interface Dependencies {
 }
 
 export interface LambdaRequest {
-  Records: Record[];
+  Records: S3Record[];
 }
 
 function copyFile(sourceKey: string, targetKey: string): Promise<void> {
@@ -55,28 +55,46 @@ async function getLatestUpdatedCase(personalNumber: string): Promise<CaseItem> {
   return latestCase[0] ?? ({} as CaseItem);
 }
 
+function getUniqueKeysByPersonalNumber(
+  oldValue: Record<string, string[]>,
+  newValue: S3Record
+): Record<string, string[]> {
+  const [personalNumber, ...rest] = newValue.s3.object.key.split('/');
+  const filename = rest.join('/');
+  return {
+    ...oldValue,
+    [personalNumber]: [...new Set([...(oldValue[personalNumber] ?? []), filename])],
+  };
+}
+
 export async function copyAttachment(input: LambdaRequest, dependencies: Dependencies) {
-  const [personalNumber, filename] = input.Records[0].s3.object.key.split('/');
-  const caseItem = await dependencies.getLatestUpdatedCase(personalNumber);
+  const personalNumbersMap = input.Records.reduce(getUniqueKeysByPersonalNumber, {});
 
-  const coApplicant = caseItem.persons.find(
-    person => person.role === CasePersonRole.CoApplicant && person.personalNumber !== personalNumber
-  );
-  if (!coApplicant) {
-    return false;
-  }
+  const copyAttachmentPromises = Object.entries(personalNumbersMap)
+    .flatMap(async ([personalNumber, files]) => {
+      const caseItem = await dependencies.getLatestUpdatedCase(personalNumber);
 
-  await dependencies.copyFile(
-    `${personalNumber}/${filename}`,
-    `${coApplicant.personalNumber}/${filename}`
-  );
+      const coApplicant = caseItem.persons.find(
+        person =>
+          person.role === CasePersonRole.CoApplicant && person.personalNumber !== personalNumber
+      );
 
+      if (coApplicant) {
+        return files.map(fileName =>
+          dependencies.copyFile(
+            `${personalNumber}/${fileName}`,
+            `${coApplicant.personalNumber}/${fileName}`
+          )
+        );
+      }
+    })
+    .filter(Boolean);
+
+  await Promise.all(copyAttachmentPromises);
   return true;
 }
 
-export const main = log.wrap(event => {
-  return copyAttachment(event, {
-    copyFile,
-    getLatestUpdatedCase,
-  });
+export const main = wrappers.event.wrap(copyAttachment, {
+  copyFile,
+  getLatestUpdatedCase,
 });
