@@ -19,7 +19,7 @@ export interface EventDetail {
 
 export interface Dependencies {
   copyFile: (sourceKey: string, destinationKey: string) => Promise<void>;
-  getLatestUpdatedCase: (personalNumber: string) => Promise<CaseItem>;
+  getLatestUpdatedCase: (personalNumber: string) => Promise<CaseItem | undefined>;
 }
 
 export interface LambdaRequest {
@@ -32,7 +32,7 @@ function copyFile(sourceKey: string, targetKey: string): Promise<void> {
   return S3.copyFileWithinBucket(BUCKET_NAME, sourceKey, targetKey);
 }
 
-async function getLatestUpdatedCase(personalNumber: string): Promise<CaseItem> {
+async function getLatestUpdatedCase(personalNumber: string): Promise<CaseItem | undefined> {
   const PK = `USER#${personalNumber}`;
 
   const queryParams = {
@@ -47,14 +47,14 @@ async function getLatestUpdatedCase(personalNumber: string): Promise<CaseItem> {
   const result = (await dynamoDb.call('query', queryParams)) as GetCasesResponse;
   const latestCase = (result.Items ?? []).sort((a, b) => a.updatedAt - b.updatedAt);
 
-  return latestCase[0] ?? ({} as CaseItem);
+  return latestCase[0];
 }
 
 export async function copyAttachment(input: LambdaRequest, dependencies: Dependencies) {
   const [personalNumber, filename] = input.detail.object.key.split('/');
   const caseItem = await dependencies.getLatestUpdatedCase(personalNumber);
 
-  const coApplicant = caseItem.persons.find(
+  const coApplicant = caseItem?.persons.find(
     applicant =>
       applicant.role === CasePersonRole.CoApplicant && applicant.personalNumber !== personalNumber
   );
