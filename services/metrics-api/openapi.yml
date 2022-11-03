@@ -1,0 +1,85 @@
+openapi: '3.0.2'
+info:
+  title: Metrics
+  version: '1.0'
+  license:
+    name: 'MIT'
+    url: 'https://github.com/helsingborg-stad/helsingborg-io-sls-api/blob/master/LICENSE'
+servers:
+  - url: https://dev.api.helsingborg.io
+  - url: https://api.helsingborg.io
+  - url: https://unqoxc4wy8.execute-api.eu-north-1.amazonaws.com/dev/
+
+paths:
+  /metrics/ekb:
+    get:
+      description: Get metrics related to EKB.
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: format
+          required: true
+          in: query
+          description: Format to return metrics in.
+          schema:
+            type: string
+            enum:
+              - ebnf
+      responses:
+        '200':
+          description: OK.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: |
+                  # HELP ekb_cases_total The total amount of cases.
+                  # TYPE ekb_cases_total gauge
+                  ekb_cases_total{status="active"} 50
+                  ekb_cases_total{status="closed"} 232
+        '400':
+          description: Invalid format specified.
+          content:
+            'application/vnd.api+json':
+              schema:
+                $ref: '#/components/schemas/jsonApiError'
+        '403':
+          description: API Key was not provided or is invalid.
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API Key used to authenticate the endpoint.
+  schemas:
+    jsonApiError:
+      properties:
+        jsonapi:
+          type: object
+          properties:
+            version:
+              type: string
+              example: '1.0'
+        data:
+          type: object
+          properties:
+            status:
+              type: string
+              example: '400'
+            code:
+              type: number
+              example: 400
+            title:
+              type: string
+              example: InvalidArgumentError
+            detail:
+              type: string
+              example: No valid metric formatter for format 'ebnx'
+            message:
+              type: string
+              example: No valid metric formatter for format 'ebnx'
+            stack:
+              type: string
+              example: "InvalidArgumentError: No valid metric formatter for format 'ebnx'\n    at Object.transform"
