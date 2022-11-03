@@ -322,7 +322,15 @@ functions:
     environment:
       BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-AttachmentsBucketName
     events:
-      - s3:
-          bucket: !ImportValue ${self:custom.resourcesStage}-AttachmentsBucketName
-          event: s3:ObjectCreated:*
-          existing: true
+      - eventBridge:
+          pattern:
+            source:
+              - 'aws.s3'
+            detail-type:
+              - 'Object Created'
+            detail:
+              bucket:
+                name:
+                  - !ImportValue ${self:custom.resourcesStage}-AttachmentsBucketName
+              reason:
+                - 'PutObject'
