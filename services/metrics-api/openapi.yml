@@ -8,7 +8,6 @@ info:
 servers:
   - url: https://dev.api.helsingborg.io
   - url: https://api.helsingborg.io
-  - url: https://unqoxc4wy8.execute-api.eu-north-1.amazonaws.com/dev/
 
 paths:
   /metrics/ekb:
