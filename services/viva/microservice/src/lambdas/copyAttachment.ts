@@ -27,7 +27,7 @@ export interface LambdaRequest {
 }
 
 function copyFile(sourceKey: string, targetKey: string): Promise<void> {
-  const BUCKET_NAME = process.env.BUCKET_NAME ?? '';
+  const { BUCKET_NAME = '' } = process.env;
 
   return S3.copyFileWithinBucket(BUCKET_NAME, sourceKey, targetKey);
 }
@@ -45,9 +45,9 @@ async function getLatestUpdatedCase(personalNumber: string): Promise<CaseItem | 
   };
 
   const result = (await dynamoDb.call('query', queryParams)) as GetCasesResponse;
-  const latestCase = (result.Items ?? []).sort((a, b) => a.updatedAt - b.updatedAt);
+  const [latestCase] = (result.Items ?? []).sort((a, b) => a.updatedAt - b.updatedAt);
 
-  return latestCase[0];
+  return latestCase;
 }
 
 export async function copyAttachment(input: LambdaRequest, dependencies: Dependencies) {
