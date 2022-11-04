@@ -104,8 +104,6 @@ functions:
           method: post
           cors: true
           private: true
-          response:
-            contentHandling: CONVERT_TO_BINARY
           authorizer:
             type: TOKEN
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
