@@ -13,6 +13,7 @@ interface GetCasesResponse {
 interface S3EventObject {
   key: string;
 }
+
 export interface EventDetail {
   object: S3EventObject;
 }
