@@ -1,4 +1,4 @@
-import { AxiosError, AxiosResponse } from 'axios';
+import type { AxiosError, AxiosResponse } from 'axios';
 import to from 'await-to-js';
 
 import config from '../libs/config';
@@ -23,7 +23,7 @@ import type {
 } from '../types/vivaMyPages';
 import type { VivaApplicationsStatusItem } from '../types/vivaApplicationsStatus';
 import type { VadaWorkflowCompletions } from '../types/vadaCompletions';
-import type { CaseAttachment } from '../helpers/attachment';
+import type { VivaAttachment } from '../types/vivaAttachment';
 import type { CaseFormAnswer } from '../types/caseItem';
 
 interface ConfigParams {
@@ -71,7 +71,7 @@ export interface GetWorkflowPayload {
 export interface PostCompletionsPayload {
   personalNumber: string;
   workflowId: string;
-  attachments: CaseAttachment[];
+  attachments: VivaAttachment[];
 }
 
 export interface PostApplicationsPayload {
@@ -81,12 +81,12 @@ export interface PostApplicationsPayload {
   rawData: string;
   rawDataType: string;
   workflowId: string;
-  attachments: CaseAttachment[];
+  attachments: VivaAttachment[];
 }
 
 interface AdapterCompletionsRequestBody {
   workflowId: string;
-  attachments: CaseAttachment[];
+  attachments: VivaAttachment[];
 }
 
 interface AdapterPostApplicationsBody {
@@ -96,7 +96,7 @@ interface AdapterPostApplicationsBody {
   rawData: string;
   rawDataType: string;
   workflowId: string;
-  attachments: CaseAttachment[];
+  attachments: VivaAttachment[];
 }
 
 interface PostCompletionsResponse {
