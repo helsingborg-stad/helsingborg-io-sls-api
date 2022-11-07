@@ -27,3 +27,15 @@ export interface VadaMyPagesReposnse {
   readonly cases: VivaMyPagesCases;
   readonly application: VivaMyPagesApplication;
 }
+
+export interface VadaError {
+  readonly status: string;
+  readonly vadaResponse: {
+    readonly error?: {
+      readonly details?: {
+        readonly errorCode?: string;
+        readonly errorMessage?: string;
+      };
+    };
+  };
+}
