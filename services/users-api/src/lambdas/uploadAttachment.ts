@@ -1,27 +1,20 @@
 import uuid from 'uuid';
 import S3 from '../libs/S3';
-import type { Token } from '../libs/token';
-import { decodeToken } from '../libs/token';
 import { wrappers } from '../libs/lambdaWrapper';
 
 type SupportedMimeTypes = 'image/jpeg' | 'image/png' | 'image/jpg' | 'application/pdf';
 
-export interface UploadAttachmentRequest {
-  readonly mime: SupportedMimeTypes;
-}
-
-interface LambdaResponse {
+interface FunctionResponse {
   uploadUrl: string;
   id: string;
 }
 
 export interface Dependencies {
-  decodeToken: (event: LambdaRequest) => Token;
   getUploadUrl: (key: string, mime: SupportedMimeTypes) => string;
   getUniqueId: () => string;
 }
 
-export interface LambdaRequest {
+export interface FunctionInput {
   mime: SupportedMimeTypes;
   personalNumber: string;
 }
@@ -38,15 +31,13 @@ function getUploadUrl(key: string, mime: SupportedMimeTypes): string {
 }
 
 export async function uploadAttachment(
-  input: LambdaRequest,
+  input: FunctionInput,
   dependencies: Dependencies
-): Promise<LambdaResponse> {
-  const { mime, personalNumber } = input;
-
+): Promise<FunctionResponse> {
   const uniqueUploadId = dependencies.getUniqueId();
-  const fileStorageKeyName = `${personalNumber}/${uniqueUploadId}`;
+  const fileStorageKeyName = `${input.personalNumber}/${uniqueUploadId}`;
 
-  const uploadUrl = dependencies.getUploadUrl(fileStorageKeyName, mime);
+  const uploadUrl = dependencies.getUploadUrl(fileStorageKeyName, input.mime);
 
   return {
     id: uniqueUploadId,
@@ -55,7 +46,6 @@ export async function uploadAttachment(
 }
 
 export const main = wrappers.restJSON.wrap(uploadAttachment, {
-  decodeToken,
   getUploadUrl,
   getUniqueId: uuid.v4,
 });

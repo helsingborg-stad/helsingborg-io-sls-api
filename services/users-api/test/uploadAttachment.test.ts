@@ -1,4 +1,4 @@
-import type { Dependencies, LambdaRequest } from '../src/lambdas/uploadAttachment';
+import type { Dependencies, FunctionInput } from '../src/lambdas/uploadAttachment';
 import { uploadAttachment } from '../src/lambdas/uploadAttachment';
 
 const defaultUploadUrl = 'https://example.com';
@@ -9,15 +9,12 @@ const defaultUniqueId = 'UNIQUE_ID';
 function createDependencies(partialDependencies: Partial<Dependencies> = {}) {
   return {
     getUniqueId: () => defaultUniqueId,
-    decodeToken: jest.fn().mockReturnValue({
-      personalNumber: defaultPersonalNumber,
-    }),
     getUploadUrl: jest.fn().mockReturnValue(defaultUploadUrl),
     ...partialDependencies,
   };
 }
 
-function createInput(): LambdaRequest {
+function createInput(): FunctionInput {
   return {
     mime: defaultMime,
     personalNumber: defaultPersonalNumber,
