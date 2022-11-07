@@ -19,12 +19,8 @@ function createDependencies(partialDependencies: Partial<Dependencies> = {}) {
 
 function createInput(): LambdaRequest {
   return {
-    body: JSON.stringify({
-      mime: defaultMime,
-    }),
-    headers: {
-      Authorization: 'Bearer 01234567890',
-    },
+    mime: defaultMime,
+    personalNumber: defaultPersonalNumber,
   };
 }
 

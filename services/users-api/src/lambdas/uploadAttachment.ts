@@ -22,10 +22,8 @@ export interface Dependencies {
 }
 
 export interface LambdaRequest {
-  readonly body: string;
-  readonly headers?: {
-    readonly Authorization?: string;
-  };
+  mime: SupportedMimeTypes;
+  personalNumber: string;
 }
 
 function getUploadUrl(key: string, mime: SupportedMimeTypes): string {
@@ -43,9 +41,7 @@ export async function uploadAttachment(
   input: LambdaRequest,
   dependencies: Dependencies
 ): Promise<LambdaResponse> {
-  const { personalNumber } = dependencies.decodeToken(input);
-
-  const { mime } = JSON.parse(input.body) as UploadAttachmentRequest;
+  const { mime, personalNumber } = input;
 
   const uniqueUploadId = dependencies.getUniqueId();
   const fileStorageKeyName = `${personalNumber}/${uniqueUploadId}`;
