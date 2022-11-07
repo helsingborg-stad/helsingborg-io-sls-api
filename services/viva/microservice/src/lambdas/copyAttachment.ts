@@ -23,9 +23,11 @@ export interface Dependencies {
   getLatestUpdatedCase: (personalNumber: string) => Promise<CaseItem | undefined>;
 }
 
-export interface LambdaRequest {
+export interface FunctionInput {
   detail: EventDetail;
 }
+
+type FunctionResponse = Promise<boolean>;
 
 function copyFile(sourceKey: string, targetKey: string): Promise<void> {
   const { BUCKET_NAME = '' } = process.env;
@@ -51,7 +53,10 @@ async function getLatestUpdatedCase(personalNumber: string): Promise<CaseItem | 
   return latestCase;
 }
 
-export async function copyAttachment(input: LambdaRequest, dependencies: Dependencies) {
+export async function copyAttachment(
+  input: FunctionInput,
+  dependencies: Dependencies
+): FunctionResponse {
   const [personalNumber, filename] = input.detail.object.key.split('/');
   const caseItem = await dependencies.getLatestUpdatedCase(personalNumber);
 
