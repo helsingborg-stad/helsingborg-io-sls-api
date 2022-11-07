@@ -28,6 +28,11 @@ export interface VadaMyPagesReposnse {
   readonly application: VivaMyPagesApplication;
 }
 
+export interface VadaSubmitApplicationResponse {
+  readonly id: string;
+  readonly status: string;
+}
+
 export interface VadaError {
   readonly status: string;
   readonly vadaResponse: {
