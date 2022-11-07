@@ -1,5 +1,6 @@
 import * as S3 from '../../src/libs/S3';
 import attachment from '../../src/helpers/attachment';
+import type { CaseFormAnswer } from '../../src/types/caseItem';
 
 jest.mock('../../src/libs/S3');
 
@@ -19,7 +20,7 @@ it('return a list of attachment objects', async () => {
       Body: 'Some body hereA0',
     });
 
-  const answerList = [
+  const answerList: CaseFormAnswer[] = [
     {
       field: {
         id: '123',
@@ -27,10 +28,22 @@ it('return a list of attachment objects', async () => {
       },
       value: [
         {
-          uploadedFileName: 'uploadedFileName_0.png',
+          uploadedId: 'uploadedId_0.png',
+          deviceFileName: 'deviceFileName_0.png',
+          mime: 'png',
+          id: '1',
+          index: 0,
+          questionId: 'questionId_0.png',
+          externalDisplayName: 'externalDisplayName_0.png',
         },
         {
-          uploadedFileName: 'uploadedFileName_1.png',
+          uploadedId: 'uploadedId_1.png',
+          deviceFileName: 'deviceFileName_1.png',
+          mime: 'png',
+          id: '2',
+          index: 1,
+          questionId: 'questionId_1.png',
+          externalDisplayName: 'externalDisplayName_1.png',
         },
       ],
     },
@@ -41,7 +54,13 @@ it('return a list of attachment objects', async () => {
       },
       value: [
         {
-          uploadedFileName: 'uploadedFileNameA_0.png',
+          uploadedId: 'uploadedIdA_0.png',
+          deviceFileName: 'deviceFileNameA_0.png',
+          mime: 'png',
+          id: '3',
+          index: 0,
+          questionId: 'questionIdA_0.png',
+          externalDisplayName: 'externalDisplayNameA_0.png',
         },
       ],
     },
@@ -51,20 +70,20 @@ it('return a list of attachment objects', async () => {
 
   expect(result).toEqual([
     {
-      id: '199492921234/uploadedFileName_0.png',
-      name: 'uploadedFileName_0.png',
+      id: '199492921234/uploadedId_0.png',
+      name: 'uploadedId_0.png',
       category: '',
       fileBase64: 'Some body here0',
     },
     {
-      id: '199492921234/uploadedFileName_1.png',
-      name: 'uploadedFileName_1.png',
+      id: '199492921234/uploadedId_1.png',
+      name: 'uploadedId_1.png',
       category: '',
       fileBase64: 'Some body here1',
     },
     {
-      id: '199492921234/uploadedFileNameA_0.png',
-      name: 'uploadedFileNameA_0.png',
+      id: '199492921234/uploadedIdA_0.png',
+      name: 'uploadedIdA_0.png',
       category: 'expenses',
       fileBase64: 'Some body hereA0',
     },
@@ -77,7 +96,7 @@ it("return empty array when attachment file can't be retrived", async () => {
     id: '999',
   });
 
-  const answerList = [
+  const answerList: CaseFormAnswer[] = [
     {
       field: {
         id: '999',
@@ -85,7 +104,13 @@ it("return empty array when attachment file can't be retrived", async () => {
       },
       value: [
         {
-          uploadedFileName: 'doNotExists.png',
+          uploadedId: 'doNotExists.png',
+          deviceFileName: 'doNotExists.png',
+          mime: 'jpg',
+          id: '1',
+          index: 0,
+          questionId: 'doNotExistsId',
+          externalDisplayName: 'doNotExists.png',
         },
       ],
     },
@@ -97,7 +122,7 @@ it("return empty array when attachment file can't be retrived", async () => {
 });
 
 it('return empty array if answer value is of type string', async () => {
-  const answerList = [
+  const answerList: CaseFormAnswer[] = [
     {
       field: {
         id: '99',
@@ -124,7 +149,7 @@ it('return list of attachment where category is set to expenses', async () => {
       Body: 'Some body here1',
     });
 
-  const answerList = [
+  const answerList: CaseFormAnswer[] = [
     {
       field: {
         id: '123',
@@ -132,10 +157,22 @@ it('return list of attachment where category is set to expenses', async () => {
       },
       value: [
         {
-          uploadedFileName: 'uploadedFileName_0.jpg',
+          uploadedId: 'uploadedId_0.jpg',
+          deviceFileName: 'deviceFileName_0.jpg',
+          mime: 'jpg',
+          id: '1',
+          index: 0,
+          questionId: 'questionId_0.jpg',
+          externalDisplayName: 'externalDisplayName_0.jpg',
         },
         {
-          uploadedFileName: 'uploadedFileName_1.jpg',
+          uploadedId: 'uploadedId_1.jpg',
+          deviceFileName: 'deviceFileName_1.jpg',
+          mime: 'jpg',
+          id: '2',
+          index: 1,
+          questionId: 'questionId_1.jpg',
+          externalDisplayName: 'externalDisplayName_1.jpg',
         },
       ],
     },
@@ -145,14 +182,14 @@ it('return list of attachment where category is set to expenses', async () => {
 
   expect(result).toEqual([
     {
-      id: '199492921234/uploadedFileName_0.jpg',
-      name: 'uploadedFileName_0.jpg',
+      id: '199492921234/uploadedId_0.jpg',
+      name: 'uploadedId_0.jpg',
       category: 'expenses',
       fileBase64: 'Some body here0',
     },
     {
-      id: '199492921234/uploadedFileName_1.jpg',
-      name: 'uploadedFileName_1.jpg',
+      id: '199492921234/uploadedId_1.jpg',
+      name: 'uploadedId_1.jpg',
       category: 'expenses',
       fileBase64: 'Some body here1',
     },

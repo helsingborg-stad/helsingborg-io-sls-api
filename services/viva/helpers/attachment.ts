@@ -1,6 +1,7 @@
 import S3 from '../libs/S3';
 import log from '../libs/logs';
-import { VivaAttachmentCategory } from '../types/vivaMyPages';
+import { VivaAttachmentCategory } from '../types/vivaAttachment';
+import type { VivaAttachment } from '../types/vivaAttachment';
 import type { PersonalNumber, CaseFormAnswer, CaseFormAnswerAttachment } from '../types/caseItem';
 
 export enum ValidAttachmentCategoryTag {
@@ -9,15 +10,8 @@ export enum ValidAttachmentCategoryTag {
   Category = 'category',
 }
 
-export interface CaseAttachment {
-  id: string;
-  name: string;
-  category: VivaAttachmentCategory;
-  fileBase64: string;
-}
-
-function createS3Key(keyPrefix: PersonalNumber, filename: string): string {
-  return `${keyPrefix}/${filename}`;
+function createS3Key(prefix: PersonalNumber, name: string): string {
+  return `${prefix}/${name}`;
 }
 
 function getAttachmentCategory(
@@ -28,14 +22,13 @@ function getAttachmentCategory(
     VivaAttachmentCategory.Completion,
   ]
 ): VivaAttachmentCategory {
-  const vivaAttachmentCategoryTags: ValidAttachmentCategoryTag[] = [
+  const validAttachmentCategoryTags: ValidAttachmentCategoryTag[] = [
     ValidAttachmentCategoryTag.Viva,
     ValidAttachmentCategoryTag.Attachment,
     ValidAttachmentCategoryTag.Category,
   ];
-  const hasAttachmentCategoryTag = vivaAttachmentCategoryTags.every(tag => tags.includes(tag));
-
-  if (!hasAttachmentCategoryTag) {
+  const isValidTags = validAttachmentCategoryTags.every(tag => tags.includes(tag));
+  if (!isValidTags) {
     return VivaAttachmentCategory.Unknown;
   }
 
@@ -47,7 +40,10 @@ function getAttachmentCategory(
   }, VivaAttachmentCategory.Unknown);
 }
 
-function getFulfilled(previous: CaseAttachment[], current: PromiseSettledResult<CaseAttachment>) {
+function getFulfilled(
+  previous: VivaAttachment[],
+  current: PromiseSettledResult<VivaAttachment>
+): VivaAttachment[] {
   if (current.status !== 'fulfilled') {
     log.writeWarn(`Could not get file with id: ${current.reason.id}`, current.reason);
     return previous;
@@ -62,23 +58,23 @@ function isAnswerAttachmentFilter(answer: CaseFormAnswer): answer is CaseFormAns
 async function createAttachmentFromAnswers(
   personalNumber: PersonalNumber,
   answerList: CaseFormAnswer[]
-): Promise<CaseAttachment[]> {
+): Promise<VivaAttachment[]> {
   const answerAttachmentList = answerList.filter(isAnswerAttachmentFilter);
 
   const attachmentPromiseList = answerAttachmentList.flatMap(answer => {
-    const attachmentCategory = getAttachmentCategory(answer.field.tags);
+    const vivaAttachmentCategory = getAttachmentCategory(answer.field.tags);
 
     return answer.value.map(async attachment => {
-      const s3AttachmentFileKey = createS3Key(personalNumber, attachment.uploadedFileName);
+      const s3AttachmentFileKey = createS3Key(personalNumber, attachment.uploadedId);
       const file = await S3.getFile(process.env.BUCKET_NAME, s3AttachmentFileKey);
 
-      const caseAttachment: CaseAttachment = {
+      const VivaAttachment: VivaAttachment = {
         id: s3AttachmentFileKey,
-        name: attachment.uploadedFileName,
-        category: attachmentCategory,
+        name: attachment.uploadedId,
+        category: vivaAttachmentCategory,
         fileBase64: file.Body.toString('base64'),
       };
-      return caseAttachment;
+      return VivaAttachment;
     });
   });
 
