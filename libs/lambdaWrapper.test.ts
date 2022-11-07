@@ -8,7 +8,7 @@ type EVENT_LAMBDA_RETURN_TYPE = Promise<boolean>;
 type REST_LAMBDA_RETURN_TYPE = Promise<string>;
 type REST_JSON_LAMBDA_RETURN_TYPE = Promise<Record<string, unknown>>;
 
-const mockTokenPersonalNumber = '197001011234';
+const tokenPersonalNumber = '197001011234';
 const testInput = {
   top: 'Lorem ipsum',
   nested: {
@@ -180,7 +180,7 @@ describe('lambda wrappers', () => {
           myVar: 'hello',
         },
         headers: {
-          Authorization: await signToken({ personalNumber: mockTokenPersonalNumber }, 'secret', 10),
+          Authorization: await signToken({ personalNumber: tokenPersonalNumber }, 'secret', 10),
         },
         body: JSON.stringify({
           myVar: 'goodbye',
@@ -194,7 +194,7 @@ describe('lambda wrappers', () => {
         nested: {
           myVar: 'galaxy',
         },
-        personalNumber: mockTokenPersonalNumber,
+        personalNumber: tokenPersonalNumber,
       };
 
       const wrapFunc = wrappers.restJSON.wrap(mockLambda, testDependencies);
