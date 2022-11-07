@@ -1,8 +1,9 @@
-import { submitCompletion, LambdaRequest, Dependencies } from '../../src/lambdas/submitCompletion';
+import { submitCompletion } from '../../src/lambdas/submitCompletion';
 import { EncryptionType } from '../../src/types/caseItem';
-import { VivaAttachmentCategory } from '../../src/types/vivaMyPages';
+import { VivaAttachmentCategory } from '../../src/types/vivaAttachment';
 import type { CaseItem, CaseForm } from '../../src/types/caseItem';
-import type { CaseAttachment } from '../../src/helpers/attachment';
+import type { VivaAttachment } from '../../src/types/vivaAttachment';
+import type { LambdaRequest, Dependencies } from '../../src/lambdas/submitCompletion';
 
 import { DEFAULT_CURRENT_POSITION } from '../../src/helpers/constants';
 
@@ -77,7 +78,7 @@ it('successfully submits completions', async () => {
   const updateCaseMock = jest.fn().mockResolvedValueOnce(undefined);
   const deleteAttachmentsMock = jest.fn().mockResolvedValueOnce(undefined);
 
-  const attachments = [{ id: '1' }, { id: '2' }, { id: '3' }] as CaseAttachment[];
+  const attachments = [{ id: '1' }, { id: '2' }, { id: '3' }] as VivaAttachment[];
   const getAttachmentsMock = jest.fn().mockResolvedValueOnce(attachments);
 
   const result = await submitCompletion(
@@ -124,7 +125,7 @@ it('calls postCompletion with form answer containing attachment', async () => {
     },
   };
 
-  const attachments: CaseAttachment[] = [
+  const attachments: VivaAttachment[] = [
     {
       id: '199492921234/uploadedFileNameA_0.png',
       name: 'uploadedFileNameA_0.png',
