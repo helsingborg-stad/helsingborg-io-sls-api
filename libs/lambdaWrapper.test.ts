@@ -1,11 +1,14 @@
-import type { APIGatewayEvent, Context } from 'aws-lambda';
 import { wrappers } from './lambdaWrapper';
+import { signToken } from './token';
 import log from './logs';
+
+import type { APIGatewayEvent, Context } from 'aws-lambda';
 
 type EVENT_LAMBDA_RETURN_TYPE = Promise<boolean>;
 type REST_LAMBDA_RETURN_TYPE = Promise<string>;
 type REST_JSON_LAMBDA_RETURN_TYPE = Promise<Record<string, unknown>>;
 
+const tokenPersonalNumber = '197001011234';
 const testInput = {
   top: 'Lorem ipsum',
   nested: {
@@ -171,6 +174,37 @@ describe('lambda wrappers', () => {
 
   describe('rest (json)', () => {
     it('passes correct data to lambda', async () => {
+      const mockLambda = jest.fn<REST_JSON_LAMBDA_RETURN_TYPE, []>();
+      const mockEvent: APIGatewayEvent = {
+        queryStringParameters: {
+          myVar: 'hello',
+        },
+        headers: {
+          Authorization: await signToken({ personalNumber: tokenPersonalNumber }, 'secret', 10),
+        },
+        body: JSON.stringify({
+          myVar: 'goodbye',
+          nested: {
+            myVar: 'galaxy',
+          },
+        }),
+      } as unknown as APIGatewayEvent;
+      const expected = {
+        myVar: 'hello',
+        nested: {
+          myVar: 'galaxy',
+        },
+        personalNumber: tokenPersonalNumber,
+      };
+
+      const wrapFunc = wrappers.restJSON.wrap(mockLambda, testDependencies);
+      await wrapFunc(mockEvent, {} as Context);
+
+      expect(mockLambda).toHaveBeenCalledTimes(1);
+      expect(mockLambda).toHaveBeenCalledWith(expected, testDependencies);
+    });
+
+    it('excludes authorization token if not exists', async () => {
       const mockLambda = jest.fn<REST_JSON_LAMBDA_RETURN_TYPE, []>();
       const mockEvent: APIGatewayEvent = {
         queryStringParameters: {

@@ -3,11 +3,17 @@ import type { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { success, successRaw, failure } from './response';
 import type { LambdaError } from './errorTransformerFactory';
 
+import { decodeToken } from '../libs/token';
+
 export const inputTransformers = {
   fromApiGatewayEvent<TOutputType>(event: APIGatewayEvent): TOutputType {
+    const decodedToken = decodeToken(event);
     return {
       ...JSON.parse(event.body ?? '{}'),
       ...event.queryStringParameters,
+      ...(decodedToken && {
+        personalNumber: decodedToken.personalNumber,
+      }),
     } as unknown as TOutputType;
   },
 };
