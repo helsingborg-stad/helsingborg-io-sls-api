@@ -5,9 +5,9 @@ import jwt from 'jsonwebtoken';
  * @param {*} httpEvent the event passed to the lambda
  */
 export function decodeToken(httpEvent) {
-  const authorizationValue = httpEvent.headers.Authorization;
+  const authorizationValue = httpEvent?.headers?.Authorization ?? '';
 
-  const token = authorizationValue.includes('Bearer')
+  const token = authorizationValue?.includes('Bearer')
     ? authorizationValue.substr(authorizationValue.indexOf(' ') + 1)
     : authorizationValue;
 
