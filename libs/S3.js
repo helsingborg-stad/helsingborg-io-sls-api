@@ -36,6 +36,16 @@ async function deleteFile(bucketName, key) {
     .promise();
 }
 
+async function storeFile(bucketName, key, body) {
+  return s3Client
+    .putObject({
+      Bucket: bucketName,
+      Key: key,
+      Body: body,
+    })
+    .promise();
+}
+
 async function deleteFiles(bucketName, keys) {
   return s3Client
     .deleteObjects({
@@ -47,12 +57,12 @@ async function deleteFiles(bucketName, keys) {
     .promise();
 }
 
-async function storeFile(bucketName, key, body) {
+async function copyFileWithinBucket(bucketName, sourceKey, targetKey) {
   return s3Client
-    .putObject({
+    .copyObject({
       Bucket: bucketName,
-      Key: key,
-      Body: body,
+      CopySource: `${bucketName}/${sourceKey}`,
+      Key: targetKey,
     })
     .promise();
 }
@@ -64,4 +74,5 @@ export default {
   deleteFile,
   deleteFiles,
   storeFile,
+  copyFileWithinBucket,
 };

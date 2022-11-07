@@ -316,3 +316,21 @@ functions:
               status:
                 type: [{ 'prefix': 'active:submitted' }]
               state: ['VIVA_CASE_CREATED']
+
+  copyAttachment:
+    handler: src/lambdas/copyAttachment.main
+    environment:
+      BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-AttachmentsBucketName
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - 'aws.s3'
+            detail-type:
+              - 'Object Created'
+            detail:
+              bucket:
+                name:
+                  - !ImportValue ${self:custom.resourcesStage}-AttachmentsBucketName
+              reason:
+                - 'PutObject'
