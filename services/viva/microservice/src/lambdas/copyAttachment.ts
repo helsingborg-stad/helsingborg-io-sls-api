@@ -57,7 +57,9 @@ export async function copyAttachment(
   input: FunctionInput,
   dependencies: Dependencies
 ): FunctionResponse {
-  const [personalNumber, filename] = input.detail.object.key.split('/');
+  const [personalNumber, ...rest] = input.detail.object.key.split('/');
+  const filename = rest.join('/');
+
   const caseItem = await dependencies.getLatestUpdatedCase(personalNumber);
 
   const coApplicant = caseItem?.persons.find(
