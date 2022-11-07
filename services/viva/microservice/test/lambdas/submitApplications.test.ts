@@ -1,13 +1,8 @@
-import {
-  submitApplication,
-  LambdaRequest,
-  Dependencies,
-} from '../../src/lambdas/submitApplication';
-
-import { CaseForm, EncryptionType } from '../../src/types/caseItem';
+import { submitApplication } from '../../src/lambdas/submitApplication';
+import { EncryptionType } from '../../src/types/caseItem';
 import { VivaApplicationType } from '../../src/types/vivaMyPages';
-import type { CaseDetails } from '../../src/types/caseItem';
-
+import type { CaseDetails, CaseForm } from '../../src/types/caseItem';
+import type { LambdaRequest, Dependencies } from '../../src/lambdas/submitApplication';
 import { DEFAULT_CURRENT_POSITION } from '../../src/helpers/constants';
 
 const newApplicationFormId = 'newApplicationFormId';
@@ -37,6 +32,7 @@ const details: CaseDetails = {
 
 let input: LambdaRequest;
 let context: Dependencies;
+
 beforeEach(() => {
   context = {
     requestId: 'requestId',
@@ -61,6 +57,17 @@ beforeEach(() => {
         [recurrentFormId]: form,
       },
       details,
+      state: '',
+      expirationTime: 123,
+      createdAt: 123,
+      updatedAt: 123,
+      status: {
+        type: 'someType',
+        name: 'someName',
+        description: 'someDescription',
+      },
+      provider: 'provider',
+      persons: [],
     },
   };
 });
