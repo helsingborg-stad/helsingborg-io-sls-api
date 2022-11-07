@@ -1,7 +1,8 @@
-import type { APIGatewayEvent, Context } from 'aws-lambda';
 import { wrappers } from './lambdaWrapper';
+import { signToken } from './token';
 import log from './logs';
-import jwt from 'jsonwebtoken';
+
+import type { APIGatewayEvent, Context } from 'aws-lambda';
 
 type EVENT_LAMBDA_RETURN_TYPE = Promise<boolean>;
 type REST_LAMBDA_RETURN_TYPE = Promise<string>;
@@ -179,7 +180,7 @@ describe('lambda wrappers', () => {
           myVar: 'hello',
         },
         headers: {
-          Authorization: jwt.sign({ personalNumber: mockTokenPersonalNumber }, 'secret'),
+          Authorization: await signToken({ personalNumber: mockTokenPersonalNumber }, 'secret', 10),
         },
         body: JSON.stringify({
           myVar: 'goodbye',
