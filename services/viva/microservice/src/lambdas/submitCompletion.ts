@@ -10,7 +10,7 @@ import log from '../libs/logs';
 import caseHelper from '../helpers/createCase';
 import attachment from '../helpers/attachment';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
-import { CaseAttachment } from '../helpers/attachment';
+import type { VivaAttachment } from '../types/vivaAttachment';
 
 import type { PostCompletionsPayload } from '../helpers/vivaAdapterRequestClient';
 import type { CaseItem, CaseForm, CaseFormAnswer } from '../types/caseItem';
@@ -49,8 +49,8 @@ export interface Dependencies {
   getAttachments: (
     personalNumber: string,
     answerList: CaseFormAnswer[]
-  ) => Promise<CaseAttachment[]>;
-  deleteAttachments: (attachments: CaseAttachment[]) => Promise<void>;
+  ) => Promise<VivaAttachment[]>;
+  deleteAttachments: (attachments: VivaAttachment[]) => Promise<void>;
 }
 
 function getReceivedState(currentFormId: string, randomCheckFormId: string) {
@@ -82,7 +82,7 @@ async function updateCase(params: UpdateCaseParameters): Promise<void> {
   await dynamoDb.call('update', updateParams);
 }
 
-function deleteS3Attachments(attachments: CaseAttachment[]) {
+function deleteS3Attachments(attachments: VivaAttachment[]) {
   const keys = attachments.map(({ id }) => ({ Key: id }));
 
   return S3.deleteFiles(process.env.BUCKET_NAME as string, keys);

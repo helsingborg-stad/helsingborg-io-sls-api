@@ -1,4 +1,4 @@
-import { ValidTags } from '../helpers/caseTemplate/shared';
+import type { ValidTags } from '../helpers/caseTemplate/shared';
 
 export interface CaseUser {
   readonly personalNumber: string;
@@ -114,22 +114,28 @@ export interface CaseFormCurrentPosition {
 export type CaseFormAnswerValue = AnswerAttachment[] | string | boolean | number;
 
 export interface CaseFormAnswer {
-  field: CaseFormAnswerField;
-  value: CaseFormAnswerValue;
+  readonly field: CaseFormAnswerField;
+  readonly value: CaseFormAnswerValue;
 }
 
 export interface CaseFormAnswerAttachment {
-  field: CaseFormAnswerField;
-  value: AnswerAttachment[];
+  readonly field: CaseFormAnswerField;
+  readonly value: AnswerAttachment[];
 }
 
 export interface AnswerAttachment {
-  uploadedFileName: string;
+  readonly externalDisplayName: string;
+  readonly uploadedId: string;
+  readonly deviceFileName: string;
+  readonly mime: string;
+  readonly id: string;
+  readonly index: number;
+  readonly questionId: string;
 }
 
 export interface CaseFormAnswerField {
-  id: string;
-  tags: ValidTags[] | string[];
+  readonly id: string;
+  readonly tags: ValidTags[] | string[];
 }
 
 export enum EncryptionType {
