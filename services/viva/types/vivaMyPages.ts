@@ -3,13 +3,6 @@ export enum VivaOfficerType {
   Assistant = 'assistant',
 }
 
-export enum VivaAttachmentCategory {
-  Expenses = 'expenses',
-  Incomes = 'incomes',
-  Completion = 'completion',
-  Unknown = '',
-}
-
 export enum VivaPersonType {
   Client = 'client',
   Partner = 'partner',

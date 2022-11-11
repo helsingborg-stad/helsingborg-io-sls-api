@@ -1,5 +1,5 @@
 import to from 'await-to-js';
-import { SQSEvent, Context } from 'aws-lambda';
+import type { SQSEvent, Context } from 'aws-lambda';
 
 import * as dynamoDb from '../libs/dynamoDb';
 import params from '../libs/params';
@@ -16,20 +16,14 @@ import { validateSQSEvent } from '../helpers/validateSQSEvent';
 import { TraceException } from '../helpers/TraceException';
 
 import { VivaApplicationType } from '../types/vivaMyPages';
-import type { CaseAttachment } from '../helpers/attachment';
+import type { VivaAttachment } from '../types/vivaAttachment';
 import type { PersonalNumber, CaseItem, CaseFormAnswer } from '../types/caseItem';
 import type { PostApplicationsPayload } from '../helpers/vivaAdapterRequestClient';
+import type { VadaError } from '../types/vadaResponse';
 
-interface VivaPostError {
-  status: string;
-  vadaResponse: {
-    error?: {
-      details?: {
-        errorCode?: string;
-        errorMessage?: string;
-      };
-    };
-  };
+interface CaseKeys {
+  PK: string;
+  SK: string;
 }
 
 interface ParamsReadResponse {
@@ -46,19 +40,16 @@ export interface Dependencies {
   attachmentFromAnswers: (
     personalNumber: PersonalNumber,
     answerList: CaseFormAnswer[]
-  ) => Promise<CaseAttachment[]>;
+  ) => Promise<VivaAttachment[]>;
   isAnswerAttachment: (answer: CaseFormAnswer) => boolean;
 }
 
 export interface LambdaRequest {
-  caseItem: Case;
   messageId: string;
+  caseItem: CaseItem;
 }
 
 export type LambdaResponse = boolean;
-
-type CaseKeys = Pick<CaseItem, 'PK' | 'SK'>;
-type Case = Pick<CaseItem, 'PK' | 'SK' | 'forms' | 'currentFormId' | 'details' | 'pdf' | 'id'>;
 
 export function updateVivaCase(keys: CaseKeys, workflowId: string): Promise<void> {
   const updateParams = {
@@ -103,12 +94,12 @@ export async function submitApplication(
   const isRecurringForm = recurringFormId === currentFormId;
   const applicationType = isRecurringForm ? VivaApplicationType.Recurring : VivaApplicationType.New;
   const formId = isRecurringForm ? recurringFormId : newApplicationFormId;
-  const workflowId = details?.workflowId ?? '';
+  const workflowId = details.workflowId ?? '';
   const formAnswers = forms?.[formId].answers ?? [];
   const answers = formAnswers.filter(answer => !dependencies.isAnswerAttachment(answer));
   const attachments = await dependencies.attachmentFromAnswers(personalNumber, formAnswers);
 
-  const [vivaPostError, vivaApplicationResponse] = await to<Record<string, unknown>, VivaPostError>(
+  const [vadaError, vadaResponse] = await to<Record<string, unknown>, VadaError>(
     dependencies.postVivaApplication({
       applicationType,
       personalNumber,
@@ -119,16 +110,16 @@ export async function submitApplication(
       rawDataType: 'pdf',
     })
   );
-  if (vivaPostError) {
+  if (vadaError) {
     const postError = {
       messageId,
       caseId: id,
-      httpStatusCode: vivaPostError.status,
-      ...(vivaPostError.vadaResponse?.error?.details?.errorCode && {
-        vivaErrorCode: vivaPostError.vadaResponse.error.details.errorCode,
+      httpStatusCode: vadaError.status,
+      ...(vadaError.vadaResponse?.error?.details?.errorCode && {
+        vivaErrorCode: vadaError.vadaResponse.error.details.errorCode,
       }),
-      ...(vivaPostError.vadaResponse?.error?.details?.errorMessage && {
-        vivaErrorMessage: vivaPostError.vadaResponse.error.details.errorMessage,
+      ...(vadaError.vadaResponse?.error?.details?.errorMessage && {
+        vivaErrorMessage: vadaError.vadaResponse.error.details.errorMessage,
       }),
     };
 
@@ -144,18 +135,16 @@ export async function submitApplication(
     );
   }
 
-  if (vivaApplicationResponse?.status !== 'OK') {
-    log.writeError('Viva response status NOT ok!', vivaApplicationResponse?.status);
+  if (vadaResponse?.status !== 'OK') {
+    log.writeError('Viva response status NOT ok!', vadaResponse?.status);
     throw new TraceException('Viva application receive failed. Will be retried.', requestId, {
-      vivaResponse: { ...vivaApplicationResponse },
+      vadaResponse: { ...vadaResponse },
     });
   }
 
-  const vivaWorkflowId = vivaApplicationResponse.id as string;
+  const vivaWorkflowId = vadaResponse.id as string;
   await dependencies.updateVivaCase({ PK, SK }, vivaWorkflowId);
-
-  const clientUser = { personalNumber };
-  await dependencies.putSuccessEvent(clientUser);
+  await dependencies.putSuccessEvent({ personalNumber });
 
   log.writeInfo('Record processed SUCCESSFULLY', { messageId, caseId: SK });
   return true;
