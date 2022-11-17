@@ -10,6 +10,7 @@ export const inputTransformers = {
     const decodedToken = decodeToken(event);
     return {
       ...JSON.parse(event.body ?? '{}'),
+      ...event.pathParameters,
       ...event.queryStringParameters,
       ...(decodedToken && {
         personalNumber: decodedToken.personalNumber,

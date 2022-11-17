@@ -29,6 +29,36 @@ const MOCK_LAMBDA_RETURN_OBJECT = {
   },
 };
 
+async function getmockGatewayEvent(): Promise<APIGatewayEvent> {
+  return {
+    queryStringParameters: {
+      myVar: 'hello',
+    },
+    pathParameters: {
+      myPathVar: 'world',
+      myVar: 'sayonara',
+    },
+    headers: {
+      Authorization: await signToken({ personalNumber: tokenPersonalNumber }, 'secret', 10),
+    },
+    body: JSON.stringify({
+      myVar: 'goodbye',
+      nested: {
+        myVar: 'galaxy',
+      },
+    }),
+  } as unknown as APIGatewayEvent;
+}
+
+const MOCK_GATEWAY_EVENT_RESULT = {
+  myVar: 'hello',
+  myPathVar: 'world',
+  nested: {
+    myVar: 'galaxy',
+  },
+  personalNumber: tokenPersonalNumber,
+};
+
 describe('lambda wrappers', () => {
   beforeAll(() => {
     jest.spyOn(log, 'writeLog').mockImplementation();
@@ -72,29 +102,12 @@ describe('lambda wrappers', () => {
   describe('rest (raw)', () => {
     it('passes correct data to lambda', async () => {
       const mockLambda = jest.fn<REST_LAMBDA_RETURN_TYPE, []>();
-      const mockEvent: APIGatewayEvent = {
-        queryStringParameters: {
-          myVar: 'hello',
-        },
-        body: JSON.stringify({
-          myVar: 'goodbye',
-          nested: {
-            myVar: 'galaxy',
-          },
-        }),
-      } as unknown as APIGatewayEvent;
-      const expected = {
-        myVar: 'hello',
-        nested: {
-          myVar: 'galaxy',
-        },
-      };
 
       const wrapFunc = wrappers.restRaw.wrap(mockLambda, testDependencies);
-      await wrapFunc(mockEvent, {} as Context);
+      await wrapFunc(await getmockGatewayEvent(), {} as Context);
 
       expect(mockLambda).toHaveBeenCalledTimes(1);
-      expect(mockLambda).toHaveBeenCalledWith(expected, testDependencies);
+      expect(mockLambda).toHaveBeenCalledWith(MOCK_GATEWAY_EVENT_RESULT, testDependencies);
     });
 
     test.each([
@@ -175,33 +188,12 @@ describe('lambda wrappers', () => {
   describe('rest (json)', () => {
     it('passes correct data to lambda', async () => {
       const mockLambda = jest.fn<REST_JSON_LAMBDA_RETURN_TYPE, []>();
-      const mockEvent: APIGatewayEvent = {
-        queryStringParameters: {
-          myVar: 'hello',
-        },
-        headers: {
-          Authorization: await signToken({ personalNumber: tokenPersonalNumber }, 'secret', 10),
-        },
-        body: JSON.stringify({
-          myVar: 'goodbye',
-          nested: {
-            myVar: 'galaxy',
-          },
-        }),
-      } as unknown as APIGatewayEvent;
-      const expected = {
-        myVar: 'hello',
-        nested: {
-          myVar: 'galaxy',
-        },
-        personalNumber: tokenPersonalNumber,
-      };
 
       const wrapFunc = wrappers.restJSON.wrap(mockLambda, testDependencies);
-      await wrapFunc(mockEvent, {} as Context);
+      await wrapFunc(await getmockGatewayEvent(), {} as Context);
 
       expect(mockLambda).toHaveBeenCalledTimes(1);
-      expect(mockLambda).toHaveBeenCalledWith(expected, testDependencies);
+      expect(mockLambda).toHaveBeenCalledWith(MOCK_GATEWAY_EVENT_RESULT, testDependencies);
     });
 
     it('excludes authorization token if not exists', async () => {

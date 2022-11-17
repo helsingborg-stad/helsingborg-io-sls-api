@@ -1,19 +1,15 @@
 import { getAttachment } from '../src/lambdas/getAttachment';
 
-import type { LambdaRequest, Dependencies } from '../src/lambdas/getAttachment';
+import type { FunctionInput, Dependencies } from '../src/lambdas/getAttachment';
 
 const defaultPersonalNumber = '197001011234';
 const defaultFileUrl = 'https://example.com';
 const defaultFilename = 'file';
 
-function createInput(): LambdaRequest {
+function createInput(): FunctionInput {
   return {
-    headers: {
-      Authorization: defaultPersonalNumber,
-    },
-    pathParameters: {
-      filename: defaultFilename,
-    },
+    personalNumber: defaultPersonalNumber,
+    filename: defaultFilename,
   };
 }
 
