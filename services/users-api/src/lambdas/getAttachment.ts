@@ -4,25 +4,17 @@ import S3 from '../libs/S3';
 
 const BUCKET_NAME = process.env.BUCKET_NAME;
 
-interface HttpHeaders {
-  Authorization: string;
-}
-
-interface PathParameters {
-  filename: string;
-}
-
-interface LambdaResponse {
+interface FunctionResponse {
   fileUrl: string | undefined;
 }
 
-export interface LambdaRequest {
-  headers: HttpHeaders;
-  pathParameters: PathParameters;
+export interface FunctionInput {
+  personalNumber: string;
+  filename: string;
 }
 
 export interface Dependencies {
-  decodeToken: (httpEvent: LambdaRequest) => { personalNumber: string };
+  decodeToken: (httpEvent: FunctionInput) => { personalNumber: string };
   getFileUrl: (key: string) => string | undefined;
 }
 
@@ -34,11 +26,10 @@ function getFileUrl(key: string): string | undefined {
 }
 
 export async function getAttachment(
-  input: LambdaRequest,
+  input: FunctionInput,
   dependencies: Dependencies
-): Promise<LambdaResponse> {
-  const { personalNumber } = dependencies.decodeToken(input);
-  const { filename } = input.pathParameters;
+): Promise<FunctionResponse> {
+  const { personalNumber, filename } = input;
 
   const key = `${personalNumber}/${filename}`;
 
