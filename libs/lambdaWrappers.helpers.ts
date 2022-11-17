@@ -11,7 +11,7 @@ export const inputTransformers = {
     return {
       ...JSON.parse(event.body ?? '{}'),
       ...event.queryStringParameters,
-      ...event.pathParameters,
+      ...(event?.pathParameters ?? {}),
       ...(decodedToken && {
         personalNumber: decodedToken.personalNumber,
       }),
