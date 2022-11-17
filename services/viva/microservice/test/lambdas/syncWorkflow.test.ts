@@ -5,9 +5,8 @@ import {
   CLOSED_REJECTED_VIVA,
   CLOSED_PARTIALLY_APPROVED_VIVA,
 } from '../../src/libs/constants';
+import type { Dependencies, LambdaRequest } from '../../src/lambdas/syncWorkflow';
 import {
-  Dependencies,
-  LambdaRequest,
   syncWorkflow,
   createAttributeValues,
   filterExpressionMapper,
