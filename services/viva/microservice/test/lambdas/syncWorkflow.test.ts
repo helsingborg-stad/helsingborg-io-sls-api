@@ -3,10 +3,10 @@ import {
   ACTIVE_SUBMITTED,
   ACTIVE_PROCESSING,
   CLOSED_REJECTED_VIVA,
+  CLOSED_PARTIALLY_APPROVED_VIVA,
 } from '../../src/libs/constants';
+import type { Dependencies, LambdaRequest } from '../../src/lambdas/syncWorkflow';
 import {
-  Dependencies,
-  LambdaRequest,
   syncWorkflow,
   createAttributeValues,
   filterExpressionMapper,
@@ -117,12 +117,18 @@ it('Creates query filter expression', async () => {
     ACTIVE_SUBMITTED,
     ACTIVE_PROCESSING,
     CLOSED_REJECTED_VIVA,
+    CLOSED_PARTIALLY_APPROVED_VIVA,
   ];
   const filterExpression = statusTypeList.map(filterExpressionMapper).join(' or ');
+  const beginsWithFilterExpressions = [
+    'begins_with(#status.#type, :statusTypeOngoing)',
+    'begins_with(#status.#type, :statusTypeSubmitted)',
+    'begins_with(#status.#type, :statusTypeProcessing)',
+    'begins_with(#status.#type, :statusTypeRejected)',
+    'begins_with(#status.#type, :statusTypePartiallyApproved)',
+  ].join(' or ');
 
-  expect(filterExpression).toBe(
-    'begins_with(#status.#type, :statusTypeOngoing) or begins_with(#status.#type, :statusTypeSubmitted) or begins_with(#status.#type, :statusTypeProcessing) or begins_with(#status.#type, :statusTypeRejected)'
-  );
+  expect(filterExpression).toBe(beginsWithFilterExpressions);
 });
 
 it('Creates query expression attribute values', async () => {
@@ -131,6 +137,7 @@ it('Creates query expression attribute values', async () => {
     ACTIVE_SUBMITTED,
     ACTIVE_PROCESSING,
     CLOSED_REJECTED_VIVA,
+    CLOSED_PARTIALLY_APPROVED_VIVA,
   ];
   const expressionAttributeValues = statusTypeList.reduce((acc, statusType) => {
     return { ...acc, ...createAttributeValues(statusType) };
@@ -141,5 +148,6 @@ it('Creates query expression attribute values', async () => {
     ':statusTypeOngoing': 'active:ongoing',
     ':statusTypeProcessing': 'active:processing',
     ':statusTypeSubmitted': 'active:submitted',
+    ':statusTypePartiallyApproved': 'closed:partiallyApproved:viva',
   });
 });

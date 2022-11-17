@@ -6,6 +6,7 @@ import {
   ACTIVE_SUBMITTED,
   ACTIVE_PROCESSING,
   CLOSED_REJECTED_VIVA,
+  CLOSED_PARTIALLY_APPROVED_VIVA,
 } from '../libs/constants';
 
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
@@ -111,6 +112,7 @@ export async function syncWorkflow(input: LambdaRequest, dependencies: Dependenc
     ACTIVE_SUBMITTED,
     ACTIVE_PROCESSING,
     CLOSED_REJECTED_VIVA,
+    CLOSED_PARTIALLY_APPROVED_VIVA,
   ]);
   const isEmptyCaseList = caseList.length === 0;
   if (isEmptyCaseList) {
