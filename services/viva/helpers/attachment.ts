@@ -70,7 +70,7 @@ async function createAttachmentFromAnswers(
 
       const VivaAttachment: VivaAttachment = {
         id: s3AttachmentFileKey,
-        name: attachment.uploadedId,
+        name: attachment.externalDisplayName,
         category: vivaAttachmentCategory,
         fileBase64: file.Body.toString('base64'),
       };
