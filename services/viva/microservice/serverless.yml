@@ -101,12 +101,20 @@ functions:
               - usersMs.findUser
             detail-type:
               - usersMsFindUserSuccess
+          retryPolicy:
+            maximumEventAge: 3600
+            maximumRetryAttempts: 3
+          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
       - eventBridge:
           pattern:
             source:
               - vivaMs.submitApplication
             detail-type:
               - applicationReceivedSuccess
+          retryPolicy:
+            maximumEventAge: 3600
+            maximumRetryAttempts: 3
+          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
 
   personApplicationStatus:
     handler: src/lambdas/personApplicationStatus.main
@@ -118,6 +126,10 @@ functions:
               - vivaMs.applicationStatus
             detail-type:
               - applicationStatusSuccess
+          retryPolicy:
+            maximumEventAge: 3600
+            maximumRetryAttempts: 3
+          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
 
   personApplication:
     handler: src/lambdas/personApplication.main
@@ -129,6 +141,10 @@ functions:
               - vivaMs.personApplicationStatus
             detail-type:
               - checkOpenPeriodSuccess
+          retryPolicy:
+            maximumEventAge: 3600
+            maximumRetryAttempts: 3
+          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
 
   createNewVivaCase:
     handler: src/lambdas/createNewVivaCase.main
@@ -141,6 +157,10 @@ functions:
               - vivaMs.personApplicationStatus
             detail-type:
               - checkOpenNewApplicationSuccess
+          retryPolicy:
+            maximumEventAge: 3600
+            maximumRetryAttempts: 3
+          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
 
   createVivaCase:
     handler: src/lambdas/createVivaCase.main
@@ -153,6 +173,10 @@ functions:
               - vivaMs.personApplication
             detail-type:
               - personDetailSuccess
+          retryPolicy:
+            maximumEventAge: 3600
+            maximumRetryAttempts: 3
+          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
 
   submitApplication:
     handler: src/lambdas/submitApplication.main
@@ -174,6 +198,10 @@ functions:
               - vivaMs.applicationStatus
             detail-type:
               - applicationStatusSuccess
+          retryPolicy:
+            maximumEventAge: 3600
+            maximumRetryAttempts: 3
+          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
 
   checkCompletionsStatus:
     handler: src/lambdas/checkCompletionsStatus.main
@@ -185,6 +213,10 @@ functions:
               - vivaMs.syncCaseCompletions
             detail-type:
               - syncSuccess
+          retryPolicy:
+            maximumEventAge: 3600
+            maximumRetryAttempts: 3
+          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
 
   setCaseCompletions:
     handler: src/lambdas/setCaseCompletions.main
@@ -203,6 +235,10 @@ functions:
                   { 'anything-but': 'VIVA_RANDOM_CHECK_RECEIVED' },
                   { 'anything-but': 'VIVA_COMPLETION_RECEIVED' },
                 ]
+          retryPolicy:
+            maximumEventAge: 3600
+            maximumRetryAttempts: 3
+          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
 
   checkCompletionsDueDate:
     handler: src/lambdas/checkCompletionsDueDate.main
@@ -217,6 +253,10 @@ functions:
             detail:
               caseStatusType: [{ 'anything-but': { 'prefix': 'active:processing' } }]
               caseState: [{ 'anything-but': 'VIVA_APPLICATION_RECEIVED' }]
+          retryPolicy:
+            maximumEventAge: 3600
+            maximumRetryAttempts: 3
+          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
 
   submitCompletion:
     handler: src/lambdas/submitCompletion.main
@@ -234,6 +274,10 @@ functions:
               status:
                 type: [{ 'prefix': 'active:submitted' }]
               state: ['VIVA_RANDOM_CHECK_REQUIRED', 'VIVA_COMPLETION_REQUIRED']
+          retryPolicy:
+            maximumEventAge: 3600
+            maximumRetryAttempts: 3
+          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
 
   syncOfficers:
     handler: src/lambdas/syncOfficers.main
@@ -251,6 +295,10 @@ functions:
                 NewImage:
                   provider:
                     S: ['VIVA']
+          retryPolicy:
+            maximumEventAge: 3600
+            maximumRetryAttempts: 3
+          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
 
   syncWorkflow:
     handler: src/lambdas/syncWorkflow.main
@@ -262,6 +310,10 @@ functions:
               - bankId.collect
             detail-type:
               - BankIdCollectComplete
+          retryPolicy:
+            maximumEventAge: 3600
+            maximumRetryAttempts: 3
+          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
 
   decideCaseStatus:
     handler: src/lambdas/decideCaseStatus.main
@@ -272,6 +324,10 @@ functions:
               - vivaMs.syncWorkflow
             detail-type:
               - syncWorkflowSuccess
+          retryPolicy:
+            maximumEventAge: 3600
+            maximumRetryAttempts: 3
+          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
 
   syncExpiryTime:
     handler: src/lambdas/syncExpiryTime.main
@@ -280,14 +336,26 @@ functions:
           pattern:
             source:
               - casesApi.updateCase
+          retryPolicy:
+            maximumEventAge: 3600
+            maximumRetryAttempts: 3
+          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
       - eventBridge:
           pattern:
             source:
               - vivaMs.decideCaseStatus
+          retryPolicy:
+            maximumEventAge: 3600
+            maximumRetryAttempts: 3
+          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
       - eventBridge:
           pattern:
             source:
               - vivaMs.setCaseCompletions
+          retryPolicy:
+            maximumEventAge: 3600
+            maximumRetryAttempts: 3
+          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
 
   syncNewCaseWorkflowId:
     handler: src/lambdas/syncNewCaseWorkflowId.main
@@ -299,6 +367,10 @@ functions:
               - vivaMs.applicationStatus
             detail-type:
               - applicationStatusSuccess
+          retryPolicy:
+            maximumEventAge: 3600
+            maximumRetryAttempts: 3
+          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
 
   generateRecurringCaseHtml:
     handler: src/lambdas/generateRecurringCaseHtml.main
@@ -315,6 +387,10 @@ functions:
               status:
                 type: [{ 'prefix': 'active:submitted' }]
               state: ['VIVA_CASE_CREATED']
+          retryPolicy:
+            maximumEventAge: 3600
+            maximumRetryAttempts: 3
+          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
 
   copyAttachment:
     handler: src/lambdas/copyAttachment.main
@@ -333,3 +409,7 @@ functions:
                   - !ImportValue ${self:custom.resourcesStage}-AttachmentsBucketName
               reason:
                 - 'PutObject'
+          retryPolicy:
+            maximumEventAge: 3600
+            maximumRetryAttempts: 3
+          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
