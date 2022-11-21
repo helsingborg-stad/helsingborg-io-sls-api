@@ -71,19 +71,19 @@ it('return a list of attachment objects', async () => {
   expect(result).toEqual([
     {
       id: '199492921234/1234',
-      name: '1234',
+      name: 'externalDisplayName_0.png',
       category: '',
       fileBase64: 'Some body here0',
     },
     {
       id: '199492921234/4321',
-      name: '4321',
+      name: 'externalDisplayName_1.png',
       category: '',
       fileBase64: 'Some body here1',
     },
     {
       id: '199492921234/7890',
-      name: '7890',
+      name: 'externalDisplayNameA_0.png',
       category: 'expenses',
       fileBase64: 'Some body hereA0',
     },
@@ -183,13 +183,13 @@ it('return list of attachment where category is set to expenses', async () => {
   expect(result).toEqual([
     {
       id: '199492921234/3344',
-      name: '3344',
+      name: 'externalDisplayName_0.jpg',
       category: 'expenses',
       fileBase64: 'Some body here0',
     },
     {
       id: '199492921234/6611',
-      name: '6611',
+      name: 'externalDisplayName_1.jpg',
       category: 'expenses',
       fileBase64: 'Some body here1',
     },
