@@ -65,3 +65,7 @@ functions:
               - pdfMs.generate
             detail-type:
               - PdfMsGenerateSuccess
+          retryPolicy:
+            maximumEventAge: 3600
+            maximumRetryAttempts: 3
+          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
