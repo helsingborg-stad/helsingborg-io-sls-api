@@ -66,3 +66,7 @@ functions:
               - vivaMs.generateRecurringCaseHtml
             detail-type:
               - htmlGeneratedSuccess
+          retryPolicy:
+            maximumEventAge: 3600
+            maximumRetryAttempts: 3
+          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
