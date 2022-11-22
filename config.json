@@ -47,6 +47,11 @@
     },
     "vivaNewApplication": {
       "envsKeyName": "/vivaNewApplicationEnvs/dev"
+    },
+    "status": {
+      "messages": {
+        "envsKeyName": "/statusMessagesEnvs/dev"
+      }
     }
   },
   "test": {
@@ -97,6 +102,11 @@
     },
     "vivaNewApplication": {
       "envsKeyName": "/vivaNewApplicationEnvs/test"
+    },
+    "status": {
+      "messages": {
+        "envsKeyName": "/statusMessagesEnvs/dev"
+      }
     }
   },
   "stage": {
@@ -147,6 +157,11 @@
     },
     "vivaNewApplication": {
       "envsKeyName": "/vivaNewApplicationEnvs/stage"
+    },
+    "status": {
+      "messages": {
+        "envsKeyName": "/statusMessagesEnvs/dev"
+      }
     }
   },
   "release": {
@@ -197,6 +212,11 @@
     },
     "vivaNewApplication": {
       "envsKeyName": "/vivaNewApplicationEnvs/release"
+    },
+    "status": {
+      "messages": {
+        "envsKeyName": "/statusMessagesEnvs/dev"
+      }
     }
   },
   "prod": {
@@ -247,6 +267,11 @@
     },
     "vivaNewApplication": {
       "envsKeyName": "/vivaNewApplicationEnvs/prod"
+    },
+    "status": {
+      "messages": {
+        "envsKeyName": "/statusMessagesEnvs/dev"
+      }
     }
   }
 }

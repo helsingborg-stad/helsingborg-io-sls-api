@@ -49,6 +49,14 @@ const stageConfigs = {
     version: {
       envsKeyName: '/versionEnvs/dev',
     },
+    vivaNewApplication: {
+      envsKeyName: '/vivaNewApplicationEnvs/dev',
+    },
+    status: {
+      messages: {
+        envsKeyName: '/statusMessagesEnvs/dev',
+      },
+    },
   },
   test: {
     auth: {
@@ -95,6 +103,14 @@ const stageConfigs = {
     },
     version: {
       envsKeyName: '/versionEnvs/test',
+    },
+    vivaNewApplication: {
+      envsKeyName: '/vivaNewApplicationEnvs/test',
+    },
+    status: {
+      messages: {
+        envsKeyName: '/statusMessagesEnvs/dev',
+      },
     },
   },
   stage: {
@@ -143,6 +159,14 @@ const stageConfigs = {
     version: {
       envsKeyName: '/versionEnvs/stage',
     },
+    vivaNewApplication: {
+      envsKeyName: '/vivaNewApplicationEnvs/stage',
+    },
+    status: {
+      messages: {
+        envsKeyName: '/statusMessagesEnvs/dev',
+      },
+    },
   },
   prod: {
     auth: {
@@ -190,6 +214,14 @@ const stageConfigs = {
     version: {
       envsKeyName: '/versionEnvs/prod',
     },
+    vivaNewApplication: {
+      envsKeyName: '/vivaNewApplicationEnvs/prod',
+    },
+    status: {
+      messages: {
+        envsKeyName: '/statusMessagesEnvs/dev',
+      },
+    },
   },
   release: {
     auth: {
@@ -236,6 +268,14 @@ const stageConfigs = {
     },
     version: {
       envsKeyName: '/versionEnvs/release',
+    },
+    vivaNewApplication: {
+      envsKeyName: '/vivaNewApplicationEnvs/release',
+    },
+    status: {
+      messages: {
+        envsKeyName: '/statusMessagesEnvs/dev',
+      },
     },
   },
 };
