@@ -56,18 +56,30 @@ functions:
               - navetMs.pollUser
             detail-type:
               - navetMsPollUserSuccess
+          retryPolicy:
+            maximumEventAge: 3600
+            maximumRetryAttempts: 3
+          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
       - eventBridge:
           pattern:
             source:
               - usersMs.createUser
             detail-type:
               - usersMsCreateUserSuccess
+          retryPolicy:
+            maximumEventAge: 3600
+            maximumRetryAttempts: 3
+          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
       - eventBridge:
           pattern:
             source:
               - casesApi.getCaseList
             detail-type:
               - casesApiInvokeSuccess
+          retryPolicy:
+            maximumEventAge: 3600
+            maximumRetryAttempts: 3
+          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
 
   create:
     handler: src/lambdas/createUser.main
@@ -78,3 +90,7 @@ functions:
               - usersMs.findUser
             detail-type:
               - usersMsFindUserUnsucceeded
+          retryPolicy:
+            maximumEventAge: 3600
+            maximumRetryAttempts: 3
+          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
