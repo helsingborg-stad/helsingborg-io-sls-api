@@ -41,3 +41,12 @@ functions:
           method: get
           private: true
           cors: true
+
+  getMessages:
+    handler: src/lambdas/getMessages.main
+    events:
+      - http:
+          path: status/messages
+          method: get
+          private: true
+          cors: true
