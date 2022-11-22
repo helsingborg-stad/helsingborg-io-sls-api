@@ -138,16 +138,18 @@ it('Creates query expression attribute values', async () => {
     ACTIVE_PROCESSING,
     CLOSED_REJECTED_VIVA,
     CLOSED_PARTIALLY_APPROVED_VIVA,
+    'noSemicolonInName',
   ];
   const expressionAttributeValues = statusTypeList.reduce((acc, statusType) => {
     return { ...acc, ...createAttributeValues(statusType) };
   }, {});
 
   expect(expressionAttributeValues).toEqual({
-    ':statusTypeRejected': 'closed:rejected:viva',
     ':statusTypeOngoing': 'active:ongoing',
     ':statusTypeProcessing': 'active:processing',
     ':statusTypeSubmitted': 'active:submitted',
+    ':statusTypeRejected': 'closed:rejected:viva',
     ':statusTypePartiallyApproved': 'closed:partiallyApproved:viva',
+    ':statusTypeNoSemicolonInName': 'noSemicolonInName',
   });
 });
