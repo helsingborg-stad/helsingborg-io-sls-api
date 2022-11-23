@@ -4,15 +4,17 @@ import { wrappers } from '../libs/lambdaWrapper';
 import * as dynamoDb from '../libs/dynamoDb';
 import config from '../libs/config';
 
-export type Case = Record<string, unknown>;
+import type { CaseItem } from '../types/case';
+
+export type CaseWithOmittedProperties = Omit<CaseItem, 'PK' | 'SK' | 'GS1I' | 'PDF'>;
 
 export interface FunctionResponse {
-  attributes: { cases: Case[] };
+  attributes: { cases: CaseWithOmittedProperties[] };
 }
 
 export interface Dependencies {
   putSuccessEvent: (personalNumber: string) => void;
-  getCases: (personalNumber: string) => Promise<Case[]>;
+  getCases: (personalNumber: string) => Promise<CaseItem[]>;
 }
 
 interface FunctionInput {
@@ -23,7 +25,7 @@ function putSuccessEvent(personalNumber: string): void {
   putEvent({ personalNumber }, 'casesApiInvokeSuccess', 'casesApi.getCaseList');
 }
 
-function getUserCoApplicantCaseList(personalNumber: string): Promise<{ Items: Case[] }> {
+function getUserCoApplicantCaseList(personalNumber: string): Promise<{ Items: CaseItem[] }> {
   const GSI1 = `USER#${personalNumber}`;
   const SK = 'CASE#';
 
@@ -40,7 +42,7 @@ function getUserCoApplicantCaseList(personalNumber: string): Promise<{ Items: Ca
   return dynamoDb.call('query', queryParams);
 }
 
-function getUserApplicantCaseList(personalNumber: string): Promise<{ Items: Case[] }> {
+function getUserApplicantCaseList(personalNumber: string): Promise<{ Items: CaseItem[] }> {
   const PK = `USER#${personalNumber}`;
   const SK = 'CASE#';
 
@@ -56,7 +58,7 @@ function getUserApplicantCaseList(personalNumber: string): Promise<{ Items: Case
   return dynamoDb.call('query', queryParams);
 }
 
-async function getUserCaseList(personalNumber: string): Promise<Case[]> {
+async function getUserCaseList(personalNumber: string): Promise<CaseItem[]> {
   const applicantCaseListResult = (await getUserApplicantCaseList(personalNumber)).Items;
   const coApplicantCaseListResult = (await getUserCoApplicantCaseList(personalNumber)).Items;
 
@@ -76,7 +78,7 @@ export async function getCaseList(
 
   return {
     attributes: {
-      cases: casesWithoutProperties,
+      cases: casesWithoutProperties as unknown as CaseWithOmittedProperties[],
     },
   };
 }

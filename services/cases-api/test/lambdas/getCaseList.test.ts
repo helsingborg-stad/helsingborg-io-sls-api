@@ -1,19 +1,25 @@
 import { getCaseList } from '../../src/lambdas/getCaseList';
 
-import type { Dependencies, Case, FunctionResponse } from '../../src/lambdas/getCaseList';
+import type {
+  Dependencies,
+  CaseWithOmittedProperties,
+  FunctionResponse,
+} from '../../src/lambdas/getCaseList';
 
-const defaultCases = [{ id: '1' }, { id: '2' }] as Case[];
+import type { CaseItem } from '../../src/types/case';
+
+const defaultCases = [{ id: '1' }, { id: '2' }] as CaseWithOmittedProperties[];
 const defaultPersonalNumber = '1234567890';
 
 function getDependencies(partialDependencies: Partial<Dependencies> = {}): Dependencies {
   return {
     putSuccessEvent: jest.fn(),
-    getCases: () => Promise.resolve(defaultCases),
+    getCases: () => Promise.resolve(defaultCases as CaseItem[]),
     ...partialDependencies,
   };
 }
 
-function createFunctionResponse(cases: Case[]): FunctionResponse {
+function createFunctionResponse(cases: CaseWithOmittedProperties[]): FunctionResponse {
   return {
     attributes: {
       cases,
@@ -58,5 +64,5 @@ it('removes cases without "PK", "SK", "GSI1", "PDF" properties', async () => {
   );
 
   expect(getCasesMock).toHaveBeenCalledWith(defaultPersonalNumber);
-  expect(result).toEqual(createFunctionResponse([{ id: 'id' }]));
+  expect(result).toEqual(createFunctionResponse([{ id: 'id' }] as CaseWithOmittedProperties[]));
 });
