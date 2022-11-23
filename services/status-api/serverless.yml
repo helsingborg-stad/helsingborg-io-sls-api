@@ -30,6 +30,15 @@ provider:
     stage: ${self:custom.stage}
     resourcesStage: ${self:custom.resourcesStage}
 
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - SSM:GetParameter*
+          Resource:
+            - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${file(../../config.json):${self:custom.stage}.status.messages.envsKeyName}'
+
 functions:
   get:
     handler: src/lambdas/getApiStatus.main
@@ -37,7 +46,7 @@ functions:
       message: ''
     events:
       - http:
-          path: status
+          path: /status
           method: get
           private: true
           cors: true
@@ -46,7 +55,7 @@ functions:
     handler: src/lambdas/getMessages.main
     events:
       - http:
-          path: status/messages
+          path: /status/messages
           method: get
           private: true
           cors: true
