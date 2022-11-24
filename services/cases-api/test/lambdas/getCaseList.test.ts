@@ -43,7 +43,7 @@ it('returns a list of cases', async () => {
   expect(result).toEqual(createFunctionResponse(defaultCases));
 });
 
-it('removes cases without "PK", "SK", "GSI1", "PDF" properties', async () => {
+it('removes "PK", "SK", "GSI1" and "PDF" properties from cases', async () => {
   const getCasesMock = jest.fn().mockResolvedValueOnce([
     {
       id: 'id',
