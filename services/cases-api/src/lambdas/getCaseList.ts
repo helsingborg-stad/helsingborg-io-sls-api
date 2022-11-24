@@ -59,10 +59,12 @@ function getUserApplicantCaseList(personalNumber: string): Promise<{ Items: Case
 }
 
 async function getUserCaseList(personalNumber: string): Promise<CaseItem[]> {
-  const applicantCaseListResult = (await getUserApplicantCaseList(personalNumber)).Items;
-  const coApplicantCaseListResult = (await getUserCoApplicantCaseList(personalNumber)).Items;
+  const cases = await Promise.all([
+    (await getUserApplicantCaseList(personalNumber)).Items,
+    (await getUserCoApplicantCaseList(personalNumber)).Items,
+  ]);
 
-  return [...new Set([...applicantCaseListResult, ...coApplicantCaseListResult])];
+  return [...new Set(cases.flat())];
 }
 
 export async function getCaseList(
