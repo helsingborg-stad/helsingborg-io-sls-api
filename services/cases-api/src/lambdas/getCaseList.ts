@@ -6,7 +6,7 @@ import config from '../libs/config';
 
 import type { CaseItem } from '../types/case';
 
-export type CaseWithOmittedProperties = Omit<CaseItem, 'PK' | 'SK' | 'GS1I' | 'PDF'>;
+export type CaseWithOmittedProperties = Omit<CaseItem, 'PK' | 'SK' | 'GSI1' | 'PDF'>;
 
 export interface FunctionResponse {
   attributes: { cases: CaseWithOmittedProperties[] };
