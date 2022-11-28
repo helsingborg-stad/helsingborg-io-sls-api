@@ -1,14 +1,6 @@
 import { MessageType, getMessages } from '../../src/lambdas/getMessages';
 import type { MessageItem, FunctionResponse } from '../../src/lambdas/getMessages';
 
-const mockHeaders = {
-  'Access-Control-Allow-Credentials': true,
-  'Access-Control-Allow-Origin': '*',
-  'Content-Type': 'application/json',
-};
-
-const mockJsonApi = { version: '1.0' };
-
 function createFunctionResponse(messages: MessageItem[]): FunctionResponse {
   return {
     attributes: {
