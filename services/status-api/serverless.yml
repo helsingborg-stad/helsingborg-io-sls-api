@@ -39,6 +39,11 @@ provider:
           Resource:
             - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${file(../../config.json):${self:custom.stage}.status.messages.envsKeyName}'
 
+        - Effect: Allow
+          Action:
+            - kms:Decrypt
+          Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
+
 functions:
   get:
     handler: src/lambdas/getApiStatus.main
