@@ -1,5 +1,5 @@
 import { MessageType, getMessages } from '../../src/lambdas/getMessages';
-import type { MessageItem } from '../../src/lambdas/getMessages';
+import type { MessageItem, FunctionResponse } from '../../src/lambdas/getMessages';
 
 const mockHeaders = {
   'Access-Control-Allow-Credentials': true,
@@ -8,6 +8,14 @@ const mockHeaders = {
 };
 
 const mockJsonApi = { version: '1.0' };
+
+function createFunctionResponse(messages: MessageItem[]): FunctionResponse {
+  return {
+    attributes: {
+      messages,
+    },
+  };
+}
 
 it('returns messages between current start date and expire date', async () => {
   jest.useFakeTimers('modern').setSystemTime(new Date('2022-01-01T02:00:00.000'));
@@ -49,19 +57,7 @@ it('returns messages between current start date and expire date', async () => {
     getStatusMessages: jest.fn().mockResolvedValueOnce(mockMessages),
   });
 
-  expect(result).toEqual(
-    expect.objectContaining({
-      statusCode: 200,
-      headers: mockHeaders,
-      body: JSON.stringify({
-        jsonapi: mockJsonApi,
-        data: {
-          messages: expectedMessages,
-        },
-      }),
-      isBase64Encoded: false,
-    })
-  );
+  expect(result).toEqual(createFunctionResponse(expectedMessages));
 });
 
 it('returns empty messages list if dates is expired', async () => {
@@ -94,19 +90,7 @@ it('returns empty messages list if dates is expired', async () => {
     getStatusMessages: jest.fn().mockResolvedValueOnce(mockMessages),
   });
 
-  expect(result).toEqual(
-    expect.objectContaining({
-      statusCode: 200,
-      headers: mockHeaders,
-      body: JSON.stringify({
-        jsonapi: mockJsonApi,
-        data: {
-          messages: expectedMessages,
-        },
-      }),
-      isBase64Encoded: false,
-    })
-  );
+  expect(result).toEqual(createFunctionResponse(expectedMessages));
 });
 
 it('returns empty messages list if dates is not started', async () => {
@@ -139,17 +123,5 @@ it('returns empty messages list if dates is not started', async () => {
     getStatusMessages: jest.fn().mockResolvedValueOnce(mockMessages),
   });
 
-  expect(result).toEqual(
-    expect.objectContaining({
-      statusCode: 200,
-      headers: mockHeaders,
-      body: JSON.stringify({
-        jsonapi: mockJsonApi,
-        data: {
-          messages: expectedMessages,
-        },
-      }),
-      isBase64Encoded: false,
-    })
-  );
+  expect(result).toEqual(createFunctionResponse(expectedMessages));
 });

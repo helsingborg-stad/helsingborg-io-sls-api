@@ -1,10 +1,10 @@
-import * as response from '../libs/response';
 import params from '../libs/params';
-import log from '../libs/logs';
 import config from '../libs/config';
+import { wrappers } from '../libs/lambdaWrapper';
 
 export enum MessageType {
   Info = 'info',
+  Warning = 'warning',
   Maintenance = 'maintenance',
 }
 
@@ -24,6 +24,10 @@ export interface Dependencies {
   getStatusMessages: () => Promise<MessageItem[]>;
 }
 
+export interface FunctionResponse {
+  attributes: { messages: MessageItem[] };
+}
+
 function betweenDateFilter({ start, expiry }: MessageItem): boolean {
   const now = Date.now();
   const startTime = new Date(start).getTime();
@@ -35,14 +39,16 @@ function getStatusMessages(): Promise<MessageItem[]> {
   return params.read(config.status.messages.envsKeyName);
 }
 
-export async function getMessages(dependencies: Dependencies) {
+export async function getMessages(dependencies: Dependencies): Promise<FunctionResponse> {
   const statusMessages = await dependencies.getStatusMessages();
   const messages: MessageItem[] = statusMessages.filter(betweenDateFilter);
-  return response.success(200, { messages });
+  return {
+    attributes: {
+      messages,
+    },
+  };
 }
 
-export const main = log.wrap(() => {
-  return getMessages({
-    getStatusMessages,
-  });
+export const main = wrappers.restJSON.wrap(getMessages, {
+  getStatusMessages,
 });
