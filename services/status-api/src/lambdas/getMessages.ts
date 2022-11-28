@@ -21,7 +21,7 @@ interface Message {
 }
 
 export interface Dependencies {
-  readParams: (envsKeyName: string) => Promise<MessageItem[]>;
+  getStatusMessages: () => Promise<MessageItem[]>;
 }
 
 function betweenDateFilter({ start, expiry }: MessageItem): boolean {
@@ -31,14 +31,18 @@ function betweenDateFilter({ start, expiry }: MessageItem): boolean {
   return now >= startTime && now <= expiryTime;
 }
 
+function getStatusMessages(): Promise<MessageItem[]> {
+  return params.read(config.status.messages.envsKeyName);
+}
+
 export async function getMessages(dependencies: Dependencies) {
-  const statusMessages = await dependencies.readParams(config.status.messages.envsKeyName);
+  const statusMessages = await dependencies.getStatusMessages();
   const messages: MessageItem[] = statusMessages.filter(betweenDateFilter);
   return response.success(200, { messages });
 }
 
 export const main = log.wrap(() => {
   return getMessages({
-    readParams: params.read,
+    getStatusMessages,
   });
 });
