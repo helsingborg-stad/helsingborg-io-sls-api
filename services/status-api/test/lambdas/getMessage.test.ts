@@ -45,7 +45,7 @@ it('returns messages between current start date and expire date', async () => {
     },
   ];
 
-  const result = await getMessages({
+  const result = await getMessages(undefined as never, {
     getStatusMessages: jest.fn().mockResolvedValueOnce(mockMessages),
   });
 
@@ -78,7 +78,7 @@ it('returns empty messages list if dates is expired', async () => {
 
   const expectedMessages: MessageItem[] = [];
 
-  const result = await getMessages({
+  const result = await getMessages(undefined as never, {
     getStatusMessages: jest.fn().mockResolvedValueOnce(mockMessages),
   });
 
@@ -111,7 +111,7 @@ it('returns empty messages list if dates is not started', async () => {
 
   const expectedMessages: MessageItem[] = [];
 
-  const result = await getMessages({
+  const result = await getMessages(undefined as never, {
     getStatusMessages: jest.fn().mockResolvedValueOnce(mockMessages),
   });
 
