@@ -39,7 +39,7 @@ function getStatusMessages(): Promise<MessageItem[]> {
   return params.read(config.status.messages.envsKeyName);
 }
 
-export async function getMessages(dependencies: Dependencies): Promise<FunctionResponse> {
+export async function getMessages(_: never, dependencies: Dependencies): Promise<FunctionResponse> {
   const statusMessages = await dependencies.getStatusMessages();
   const messages: MessageItem[] = statusMessages.filter(betweenDateFilter);
   return {
