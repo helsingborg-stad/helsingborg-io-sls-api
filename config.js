@@ -109,7 +109,7 @@ const stageConfigs = {
     },
     status: {
       messages: {
-        envsKeyName: '/statusMessagesEnvs/dev',
+        envsKeyName: '/statusMessagesEnvs/test',
       },
     },
   },
@@ -164,7 +164,7 @@ const stageConfigs = {
     },
     status: {
       messages: {
-        envsKeyName: '/statusMessagesEnvs/dev',
+        envsKeyName: '/statusMessagesEnvs/stage',
       },
     },
   },
@@ -219,7 +219,7 @@ const stageConfigs = {
     },
     status: {
       messages: {
-        envsKeyName: '/statusMessagesEnvs/dev',
+        envsKeyName: '/statusMessagesEnvs/prod',
       },
     },
   },
@@ -274,7 +274,7 @@ const stageConfigs = {
     },
     status: {
       messages: {
-        envsKeyName: '/statusMessagesEnvs/dev',
+        envsKeyName: '/statusMessagesEnvs/release',
       },
     },
   },
