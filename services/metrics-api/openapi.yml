@@ -1,9 +1,13 @@
 openapi: '3.0.2'
 info:
   title: Metrics
+  description: API for fetching current metrics.
+  contact:
+    name: GitHub Repo
+    url: https://github.com/helsingborg-stad/helsingborg-io-sls-api
   version: '1.0'
   license:
-    name: 'MIT'
+    name: MIT
     url: 'https://github.com/helsingborg-stad/helsingborg-io-sls-api/blob/master/LICENSE'
 servers:
   - url: https://dev.api.helsingborg.io
@@ -12,7 +16,10 @@ servers:
 paths:
   /metrics/ekb:
     get:
-      description: Get metrics related to EKB.
+      tags:
+        - Metrics
+      summary: Get metrics related to EKB
+      description: Returns EKB-related metrics in a given format.
       security:
         - ApiKeyAuth: []
       parameters:
@@ -44,6 +51,12 @@ paths:
                 $ref: '#/components/schemas/jsonApiError'
         '403':
           description: API Key was not provided or is invalid.
+          content:
+            'application/json':
+              schema:
+                type: object
+                example:
+                  message: 'Missing Authentication Token'
 
 components:
   securitySchemes:
@@ -75,10 +88,10 @@ components:
               example: InvalidArgumentError
             detail:
               type: string
-              example: No valid metric formatter for format 'ebnx'
+              example: Invalid argument X supplied to Y
             message:
               type: string
-              example: No valid metric formatter for format 'ebnx'
+              example: Invalid argument X supplied to Y
             stack:
               type: string
-              example: "InvalidArgumentError: No valid metric formatter for format 'ebnx'\n    at Object.transform"
+              example: "InvalidArgumentError: Invalid argument X supplied to Y\n    at Object.transform"
