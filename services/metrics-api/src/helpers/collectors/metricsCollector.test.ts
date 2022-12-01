@@ -41,4 +41,29 @@ describe('metrics collector', () => {
 
     expect(results).toEqual(expected);
   });
+
+  it('returns all successful collect results', async () => {
+    const mockCollectorA: MetricsCollector<MockCollectorMetaA> = {
+      async collect() {
+        return [
+          new MetricBuilder<MockCollectorMetaA>('a')
+            .addValue({ value: 10, meta: { a: 'hello' } })
+            .getMetric(),
+        ];
+      },
+    };
+    const mockCollectorB: MetricsCollector<MockCollectorMetaB> = {
+      async collect() {
+        throw new Error('collect fail test');
+      },
+    };
+
+    const expected: Metric<MockCollectorMetaA | MockCollectorMetaB>[] = [
+      { name: 'a', values: [{ meta: { a: 'hello' }, value: 10 }] },
+    ];
+
+    const results = await collectFromAll([mockCollectorA, mockCollectorB]);
+
+    expect(results).toEqual(expected);
+  });
 });
