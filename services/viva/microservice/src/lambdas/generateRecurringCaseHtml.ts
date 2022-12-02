@@ -143,7 +143,7 @@ async function getFormIds(): Promise<VivaParametersResponse> {
 
 function isFormNewApplication(formIds: VivaParametersResponse, targetFormId: string): boolean {
   return Object.keys(formIds)
-    .filter(key => key.includes('new'))
+    .filter(k => k.startsWith('new'))
     .includes(targetFormId);
 }
 
