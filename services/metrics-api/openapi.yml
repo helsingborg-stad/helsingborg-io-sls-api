@@ -1,4 +1,4 @@
-openapi: '3.0.2'
+openapi: '3.0.3'
 info:
   title: Metrics
   description: API for fetching current metrics.
@@ -11,6 +11,7 @@ info:
     url: 'https://github.com/helsingborg-stad/helsingborg-io-sls-api/blob/master/LICENSE'
 servers:
   - url: https://dev.api.helsingborg.io
+  - url: https://release.api.helsingborg.io
   - url: https://api.helsingborg.io
 
 paths:
@@ -48,7 +49,7 @@ paths:
           content:
             'application/vnd.api+json':
               schema:
-                $ref: '#/components/schemas/jsonApiError'
+                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
         '403':
           description: API Key was not provided or is invalid.
           content:
@@ -60,38 +61,4 @@ paths:
 
 components:
   securitySchemes:
-    ApiKeyAuth:
-      type: apiKey
-      in: header
-      name: X-API-Key
-      description: API Key used to authenticate the endpoint.
-  schemas:
-    jsonApiError:
-      properties:
-        jsonapi:
-          type: object
-          properties:
-            version:
-              type: string
-              example: '1.0'
-        data:
-          type: object
-          properties:
-            status:
-              type: string
-              example: '400'
-            code:
-              type: number
-              example: 400
-            title:
-              type: string
-              example: InvalidArgumentError
-            detail:
-              type: string
-              example: Invalid argument X supplied to Y
-            message:
-              type: string
-              example: Invalid argument X supplied to Y
-            stack:
-              type: string
-              example: "InvalidArgumentError: Invalid argument X supplied to Y\n    at Object.transform"
+    $ref: '../common-openapi.yml#/components/securitySchemes'
