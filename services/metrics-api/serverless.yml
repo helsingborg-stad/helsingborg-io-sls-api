@@ -1,0 +1,42 @@
+service: metrics-api
+
+plugins:
+  - serverless-bundle
+  - serverless-add-api-key
+
+projectDir: ../../
+
+custom: ${file(../../serverless.common.yml):custom}
+
+package:
+  individually: true
+
+provider:
+  lambdaHashingVersion: 20201221
+  name: aws
+  runtime: nodejs14.x
+  stage: dev
+  region: eu-north-1
+  endpointType: regional
+  versionFunctions: false
+  tracing:
+    lambda: true
+  apiGateway:
+    restApiId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiId
+    restApiRootResourceId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
+    restApiResources:
+      metrics: !ImportValue ${self:custom.stage}-ExtApiGatewayResourceMetrics
+
+  environment:
+    stage: ${self:custom.stage}
+    resourcesStage: ${self:custom.resourcesStage}
+
+functions:
+  get:
+    handler: src/lambdas/get.main
+    events:
+      - http:
+          path: metrics/ekb
+          method: get
+          private: true
+          cors: true

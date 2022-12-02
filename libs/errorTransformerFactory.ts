@@ -1,6 +1,7 @@
 import type { AxiosError } from 'axios';
 import axios from 'axios';
 import type { AWSError } from 'aws-sdk/lib/error';
+import { InvalidArgumentError } from './customErrors';
 
 export interface LambdaError extends Error {
   status: string;
@@ -93,6 +94,22 @@ const javascriptRuntimeErrorTransformer: ErrorTransformer<Error> = {
   },
 };
 
+const invalidArgumentErrorTransformer: ErrorTransformer<InvalidArgumentError> = {
+  transform(error) {
+    return new LambdaError({
+      status: '400',
+      message: error.message,
+      name: error.name,
+      code: 400,
+      detail: error.message,
+    });
+  },
+
+  isErrorType(error: unknown): error is InvalidArgumentError {
+    return error instanceof InvalidArgumentError;
+  },
+};
+
 function transformError(error: unknown): LambdaError {
   if (axiosErrorTransformer.isErrorType(error)) {
     return axiosErrorTransformer.transform(error);
@@ -100,6 +117,10 @@ function transformError(error: unknown): LambdaError {
 
   if (awsSDKErrorTransformer.isErrorType(error)) {
     return awsSDKErrorTransformer.transform(error);
+  }
+
+  if (invalidArgumentErrorTransformer.isErrorType(error)) {
+    return invalidArgumentErrorTransformer.transform(error);
   }
 
   if (javascriptRuntimeErrorTransformer.isErrorType(error)) {

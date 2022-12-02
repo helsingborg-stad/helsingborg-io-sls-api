@@ -1,0 +1,12 @@
+{
+  "name": "metrics-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "../../scripts/test.sh"
+  },
+  "keywords": [],
+  "author": "Helsingborg Stad",
+  "license": "MIT"
+}
