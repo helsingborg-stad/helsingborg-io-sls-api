@@ -1,4 +1,4 @@
-import {
+import type {
   GetObjectOutput as S3GetObjectOutput,
   PutObjectOutput as S3PutObjectOutput,
 } from 'aws-sdk/clients/s3';
@@ -46,7 +46,7 @@ interface SuccessEvent {
 
 export interface Dependencies {
   getCase: (keys: CaseKeys) => Promise<CaseItem>;
-  readParams: (id: string) => Promise<VivaParametersResponse>;
+  getFormIds: () => Promise<VivaParametersResponse>;
   getClosedCases: (PK: string) => Promise<{ Items: CaseItem[] }>;
   getFile: (bucket: string, key: string) => Promise<PromiseResult<S3GetObjectOutput, AWSError>>;
   storeFile: (
@@ -136,6 +136,17 @@ function getClosedCases(partitionKey: string) {
   return dynamoDb.call('query', queryParams);
 }
 
+async function getFormIds(): Promise<VivaParametersResponse> {
+  const formIds = await params.read(config.cases.providers.viva.envsKeyName);
+  return formIds;
+}
+
+function isFormNewApplication(formIds: VivaParametersResponse, targetFormId: string): boolean {
+  return Object.keys(formIds)
+    .filter(k => k.startsWith('new'))
+    .includes(targetFormId);
+}
+
 export async function generateRecurringCaseHtml(
   input: LambdaRequest,
   dependencies: Dependencies
@@ -148,36 +159,27 @@ export async function generateRecurringCaseHtml(
   }
   const { Items: closedCases } = await dependencies.getClosedCases(caseKeys.PK);
 
-  const {
-    recurringFormId,
-    newApplicationFormId,
-    newApplicationCompletionFormId,
-    newApplicationRandomCheckFormId,
-  } = await dependencies.readParams(config.cases.providers.viva.envsKeyName);
-
   let changedAnswerValues: CaseFormAnswer[] = [...caseItem.forms[caseItem.currentFormId].answers];
 
-  if (closedCases.length > 0) {
+  const formIds = await dependencies.getFormIds();
+  const isClosedCases = closedCases.length > 0;
+
+  if (isClosedCases) {
     const [latestClosedCase] = closedCases.sort(
       (caseA, caseB) => caseB.updatedAt - caseA.updatedAt
     );
 
-    const isLatestClosedCaseNewApplication =
-      newApplicationFormId === latestClosedCase.currentFormId;
-
     changedAnswerValues = getChangedCaseAnswerValues(
-      caseItem.forms[recurringFormId].answers,
+      caseItem.forms[formIds.recurringFormId].answers,
       latestClosedCase.forms[
-        isLatestClosedCaseNewApplication ? newApplicationFormId : recurringFormId
+        isFormNewApplication(formIds, latestClosedCase.currentFormId)
+          ? formIds.newApplicationFormId
+          : formIds.recurringFormId
       ].answers
     );
   }
 
-  const isCurrentCaseNewApplication = [
-    newApplicationFormId,
-    newApplicationRandomCheckFormId,
-    newApplicationCompletionFormId,
-  ].includes(caseItem.currentFormId);
+  const isCurrentCaseNewApplication = isFormNewApplication(formIds, caseItem.currentFormId);
 
   const handlebarTemplate = isCurrentCaseNewApplication
     ? S3_HANDLEBAR_TEMPLATE_V3
@@ -217,7 +219,7 @@ export async function generateRecurringCaseHtml(
 export const main = log.wrap(event => {
   return generateRecurringCaseHtml(event, {
     getCase: cases.get,
-    readParams: params.read,
+    getFormIds,
     getClosedCases,
     getFile: S3.getFile,
     storeFile: S3.storeFile,

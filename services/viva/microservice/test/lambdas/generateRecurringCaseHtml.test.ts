@@ -33,7 +33,7 @@ function createGetCaseReponse(partialCaseItem?: Partial<CaseItem>): CaseItem {
 function createDependencies(partialDependencies?: Partial<Dependencies>): Dependencies {
   return {
     getCase: jest.fn().mockResolvedValue(undefined),
-    readParams: () =>
+    getFormIds: () =>
       Promise.resolve({
         recurringFormId: 'recurringFormId',
         randomCheckFormId: 'randomCheckFormId',
