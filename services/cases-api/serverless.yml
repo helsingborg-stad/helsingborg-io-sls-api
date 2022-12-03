@@ -17,6 +17,7 @@ provider:
   stage: dev
   region: eu-north-1
   endpointType: regional
+  versionFunctions: false
   tracing:
     lambda: true
 
