@@ -77,7 +77,6 @@ paths:
                 type: object
                 example:
                   message: 'Missing Authentication Token'
-        # <additional http codes>
 
 components:
   securitySchemes:
