@@ -1,10 +1,7 @@
 import { getStatusByType } from '../../src/libs/caseStatuses';
 
-import {
-  setCaseCompletions,
-  Dependencies,
-  LambdaRequest,
-} from '../../src/lambdas/setCaseCompletions';
+import type { Dependencies, LambdaRequest } from '../../src/lambdas/setCaseCompletions';
+import { setCaseCompletions } from '../../src/lambdas/setCaseCompletions';
 
 import {
   ACTIVE_RANDOM_CHECK_REQUIRED_VIVA,
@@ -19,14 +16,13 @@ import {
 } from '../../src/libs/constants';
 
 import type { CaseItem } from '../../../types/caseItem';
-import { EncryptionType } from '../../../types/caseItem';
 
 const ssmParameters = {
   recurringFormId: 'recurring',
   completionFormId: 'completionForm',
   randomCheckFormId: 'randomCheck',
   newApplicationFormId: 'newApplication',
-  newApplicationCompletionFormId: 'completionForm',
+  newApplicationCompletionFormId: 'newApplicationCompletionForm',
   newApplicationRandomCheckFormId: 'newApplicationRandomCheck',
 };
 
@@ -45,7 +41,6 @@ function createCaseItem(partialCaseItem: Partial<CaseItem>): CaseItem {
   return {
     PK: caseKeys.PK,
     SK: caseKeys.SK,
-    currentFormId: '123abc',
     id: 'caseId',
     persons: [],
     state: 'SOME_STATE',
@@ -58,20 +53,7 @@ function createCaseItem(partialCaseItem: Partial<CaseItem>): CaseItem {
       description: '',
     },
     forms: {
-      abc123: {
-        answers: [],
-        encryption: {
-          symmetricKeyName: '00000000-0000-0000-0000-000000000000',
-          type: EncryptionType.Decrypted,
-        },
-        currentPosition: {
-          currentMainStep: 0,
-          currentMainStepIndex: 0,
-          index: 0,
-          level: 0,
-          numberOfMainSteps: 0,
-        },
-      },
+      ...ssmParameters,
     },
     provider: 'VIVA',
     details: {
@@ -100,6 +82,7 @@ test.each([
   {
     description:
       'it updates a recurring case as submitted, when all requested completions are received',
+    currentFormId: ssmParameters.recurringFormId,
     isRandomCheck: true,
     isCompleted: true,
     isAttachmentPending: false,
@@ -112,6 +95,7 @@ test.each([
   },
   {
     description: 'it updates a recurring case for randomCheck',
+    currentFormId: ssmParameters.recurringFormId,
     isRandomCheck: true,
     isCompleted: false,
     isAttachmentPending: false,
@@ -121,9 +105,13 @@ test.each([
       status: getStatusByType(ACTIVE_RANDOM_CHECK_REQUIRED_VIVA),
       state: VIVA_RANDOM_CHECK_REQUIRED,
     },
+    forms: {
+      ...ssmParameters,
+    },
   },
   {
     description: 'it updates a recurring case for completions, requested received',
+    currentFormId: ssmParameters.recurringFormId,
     isRandomCheck: false,
     isCompleted: false,
     isAttachmentPending: false,
@@ -136,6 +124,7 @@ test.each([
   },
   {
     description: 'it updates a recurring case for completions, requested not received',
+    currentFormId: ssmParameters.recurringFormId,
     isRandomCheck: false,
     isCompleted: false,
     isAttachmentPending: false,
@@ -161,7 +150,7 @@ test.each([
   },
   {
     description: 'it updates a new application case for completions, requested received',
-    currentFormId: ssmParameters.newApplicationRandomCheckFormId,
+    currentFormId: ssmParameters.newApplicationFormId,
     isRandomCheck: false,
     isCompleted: false,
     isAttachmentPending: false,
@@ -187,7 +176,7 @@ test.each([
   },
   {
     description: 'it updates a new application case for submitted random check',
-    currentFormId: ssmParameters.newApplicationFormId,
+    currentFormId: ssmParameters.newApplicationRandomCheckFormId,
     isRandomCheck: true,
     isCompleted: false,
     isAttachmentPending: true,
@@ -200,7 +189,7 @@ test.each([
   },
   {
     description: 'it updates a new application case for submitted completions',
-    currentFormId: ssmParameters.newApplicationRandomCheckFormId,
+    currentFormId: ssmParameters.newApplicationCompletionFormId,
     isRandomCheck: false,
     isCompleted: false,
     isAttachmentPending: true,
