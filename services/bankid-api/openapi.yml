@@ -1,0 +1,371 @@
+openapi: '3.0.3'
+info:
+  title: BankID
+  description: |
+    BankID operations.
+
+    All operations mostly mimic their BankID counterpart. 
+    For full BankID documentation see [BankID docs](https://www.bankid.com/assets/bankid/rp/BankID-Relying-Party-Guidelines-v3.7.pdf).
+  contact:
+    name: GitHub Repo
+    url: https://github.com/helsingborg-stad/helsingborg-io-sls-api
+  version: '1.0'
+  license:
+    name: MIT
+    url: 'https://github.com/helsingborg-stad/helsingborg-io-sls-api/blob/master/LICENSE'
+servers:
+  - url: https://dev.api.helsingborg.io
+  - url: https://release.api.helsingborg.io
+  - url: https://api.helsingborg.io
+
+paths:
+  /auth/bankid/auth:
+    post:
+      tags:
+        - BankID
+      summary: Initiate authentication
+      description: |
+        Starts a BankID authentication request and returns data that can
+        be used to continue and complete the BankID login.
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/authRequest'
+      responses:
+        '200':
+          description: |
+            OK. A login request should be active for the given personal number.
+            Start the BankID-app to continue.
+          content:
+            'application/vnd.api+json':
+              schema:
+                $ref: '#/components/schemas/authAndSignResponse'
+        '403':
+          description: API Key was not provided or is invalid.
+          content:
+            'application/json':
+              schema:
+                type: object
+                example:
+                  message: 'Missing Authentication Token'
+
+  /auth/bankid/sign:
+    post:
+      tags:
+        - BankID
+      summary: Initiate a signing request
+      description: |
+        Starts a BankID sign request and returns data that can
+        be used to continue and complete the BankID sign.
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/signRequest'
+      responses:
+        '200':
+          description: |
+            OK. A sign request should be active for the given personal number.
+            Start the BankID-app to continue.
+          content:
+            'application/vnd.api+json':
+              schema:
+                $ref: '#/components/schemas/authAndSignResponse'
+        '403':
+          description: API Key was not provided or is invalid.
+          content:
+            'application/json':
+              schema:
+                type: object
+                example:
+                  message: 'Missing Authentication Token'
+
+  /auth/bankid/collect:
+    post:
+      tags:
+        - BankID
+      summary: Finalize an auth or sign request
+      description: |
+        Query an order previously started with `/auth` or `/sign`.
+
+        See BankID docs for more in-depth info.
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/orderQueryRequest'
+      responses:
+        '200':
+          description: |
+            OK. This does not mean that the collect is done or successful;
+            it can still be pending or failed. See BankID docs for more info.
+          content:
+            'application/vnd.api+json':
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/collectCompleteResponse'
+                  - $ref: '#/components/schemas/collectPendingResponse'
+                  - $ref: '#/components/schemas/collectFailedResponse'
+        '400':
+          description: Invalid `orderRef` provided. It is either malformed or has expired.
+          content:
+            'application/vnd.api+json':
+              schema:
+                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
+        '403':
+          description: API Key was not provided or is invalid.
+          content:
+            'application/json':
+              schema:
+                type: object
+                example:
+                  message: 'Missing Authentication Token'
+
+  /auth/bankid/cancel:
+    post:
+      tags:
+        - BankID
+      summary: Cancel a request
+      description: Cancel an auth or sign request.
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/orderQueryRequest'
+      responses:
+        '200':
+          description: |
+            OK.
+          content:
+            'application/vnd.api+json':
+              schema:
+                $ref: '#/components/schemas/cancelResponse'
+        '403':
+          description: API Key was not provided or is invalid.
+          content:
+            'application/json':
+              schema:
+                type: object
+                example:
+                  message: 'Missing Authentication Token'
+
+components:
+  securitySchemes:
+    $ref: '../common-openapi.yml#/components/securitySchemes'
+  schemas:
+    authRequest:
+      properties:
+        endUserIp:
+          type: string
+          example: 192.168.0.1
+        personalNumber:
+          type: string
+          example: 198001239999
+      required:
+        - endUserIp
+        - personalNumber
+
+    signRequest:
+      properties:
+        endUserIp:
+          type: string
+          example: 192.168.0.1
+        personalNumber:
+          type: string
+          example: 198001239999
+        userVisibleData:
+          type: string
+      required:
+        - endUserIp
+        - personalNumber
+        - userVisibleData
+
+    orderQueryRequest:
+      properties:
+        orderRef:
+          type: string
+          example: fde498c5-6368-40a9-bc48-c38f23162cdb
+
+    authAndSignResponse:
+      properties:
+        jsonapi:
+          type: object
+          properties:
+            version:
+              type: string
+              example: '1.0'
+        data:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+                - bankIdAuth
+            attributes:
+              type: object
+              properties:
+                orderRef:
+                  type: string
+                  example: a648c31a-2ac7-4db7-b64c-a9c78dfe8d9e
+                autoStartToken:
+                  type: string
+                  example: f30dbd8e-e30c-4b9e-96c6-ed4b10cccdd1
+                qrStartToken:
+                  type: string
+                  example: fe14cea8-5fdf-4c8c-9821-22b5f44401d3
+                qrStartSecret:
+                  type: string
+                  example: 9ad84bf7-6bae-4e34-9083-81a365c98548
+
+    collectPendingResponse:
+      properties:
+        jsonapi:
+          type: object
+          properties:
+            version:
+              type: string
+              example: '1.0'
+        data:
+          type: object
+          properties:
+            attributes:
+              type: object
+              properties:
+                orderRef:
+                  type: string
+                  example: fde498c5-6368-40a9-bc48-c38f23162cdb
+                status:
+                  type: string
+                  enum:
+                    - pending
+                hintCode:
+                  type: string
+                  description: See BankID docs for more information.
+                  enum:
+                    - noClient
+                    - outstandingTransaction
+                    - started
+                    - userSign
+
+    collectFailedResponse:
+      properties:
+        jsonapi:
+          type: object
+          properties:
+            version:
+              type: string
+              example: '1.0'
+        data:
+          type: object
+          properties:
+            attributes:
+              type: object
+              properties:
+                orderRef:
+                  type: string
+                  example: fde498c5-6368-40a9-bc48-c38f23162cdb
+                status:
+                  type: string
+                  enum:
+                    - failed
+                hintCode:
+                  type: string
+                  description: See BankID docs for more information.
+                  enum:
+                    - expiredTransaction
+                    - certificateErr
+                    - userCancel
+                    - cancelled
+                    - startFailed
+
+    collectCompleteResponse:
+      properties:
+        jsonapi:
+          type: object
+          properties:
+            version:
+              type: string
+              example: '1.0'
+        data:
+          type: object
+          properties:
+            attributes:
+              type: object
+              properties:
+                authorizationCode:
+                  type: string
+                  description: |
+                    Code that can be used with `/auth/token` in the Auth service
+                    to generate an access token.
+                  # jwt token pattern
+                  pattern: ^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_.+/=]*$
+                orderRef:
+                  type: string
+                  example: fde498c5-6368-40a9-bc48-c38f23162cdb
+                status:
+                  type: string
+                  enum:
+                    - complete
+                completionData:
+                  type: object
+                  description: See BankID docs for more information.
+                  properties:
+                    user:
+                      type: object
+                      properties:
+                        personalNumber:
+                          type: string
+                          example: 198001239999
+                        name:
+                          type: string
+                          example: Sven Karlsson
+                        givenName:
+                          type: string
+                          example: Sven
+                        surname:
+                          type: string
+                          example: Karlsson
+                    device:
+                      type: object
+                      properties:
+                        ipAddress:
+                          type: string
+                          example: 192.168.0.1
+                    cert:
+                      type: object
+                      properties:
+                        notBefore:
+                          type: string
+                          example: 1640995200000
+                        notAfter:
+                          type: string
+                          example: 1643670000000
+                    signature:
+                      type: string
+
+    cancelResponse:
+      properties:
+        jsonapi:
+          type: object
+          properties:
+            version:
+              type: string
+              example: '1.0'
+            data:
+              type: object
+              properties:
+                type:
+                  type: string
+                  enum:
+                    - bankidCancel
+                attributes:
+                  type: object
