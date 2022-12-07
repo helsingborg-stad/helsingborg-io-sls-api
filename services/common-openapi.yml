@@ -5,6 +5,17 @@ components:
       in: header
       name: X-API-Key
       description: API Key used to authenticate the endpoint.
+
+  responses:
+    missingApiKeyResponse:
+      description: API Key was not provided or is invalid.
+      content:
+        'application/json':
+          schema:
+            type: object
+            example:
+              message: 'Missing Authentication Token'
+
   schemas:
     jsonApiError:
       properties:
