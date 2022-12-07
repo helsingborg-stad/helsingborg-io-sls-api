@@ -1,0 +1,136 @@
+openapi: '3.0.3'
+info:
+  title: Auth
+  description: Generic authentication functionality.
+  contact:
+    name: GitHub Repo
+    url: https://github.com/helsingborg-stad/helsingborg-io-sls-api
+  version: '1.0'
+  license:
+    name: MIT
+    url: 'https://github.com/helsingborg-stad/helsingborg-io-sls-api/blob/master/LICENSE'
+servers:
+  - url: https://dev.api.helsingborg.io
+  - url: https://release.api.helsingborg.io
+  - url: https://api.helsingborg.io
+
+paths:
+  /auth/token:
+    post:
+      tags:
+        - Auth
+      summary: Generate access/refresh token
+      description: |
+        This endpoint provides two features:
+
+        1. Generate access token and refresh token by using an authorization code,
+        obtained for example from using the BankID auth API.
+
+        Set `grant_type` to `"authorization_code"` and provide the authorization
+        code in the `code` property:
+
+        ```
+        { "grant_type": "authorization_code", "code": "..." }
+        ```
+
+        2. (Re)generate access token and refresh token by providing a previously
+        generated refresh token.
+
+        Set `grant_type` to `"refresh_token"` and provide the authorization
+        code in the `refresh_token` property:
+
+        ```
+        { "grant_type": "refresh_token", "refresh_token": "..." }
+        ```
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+      responses:
+        '200':
+          description: OK.
+          content:
+            'application/vnd.api+json':
+              schema:
+                $ref: '#/components/schemas/AuthResult'
+        '400':
+          description: Invalid request body.
+          content:
+            'application/vnd.api+json':
+              schema:
+                $ref: '../../common-openapi.yml#/components/schemas/jsonApiError'
+        '401':
+          description: Invalid JWT.
+          content:
+            'application/vnd.api+json':
+              schema:
+                $ref: '../../common-openapi.yml#/components/schemas/jsonApiError'
+        '403':
+          $ref: '../../common-openapi.yml#/components/responses/missingApiKeyResponse'
+
+components:
+  securitySchemes:
+    $ref: '../../common-openapi.yml#/components/securitySchemes'
+  schemas:
+    TokenRequest:
+      oneOf:
+        - $ref: '#/components/schemas/AuthorizationRequest'
+        - $ref: '#/components/schemas/RefreshTokenRequest'
+
+    AuthorizationRequest:
+      type: object
+      properties:
+        grant_type:
+          enum:
+            - authorization_code
+        code:
+          type: string
+          # jwt token pattern
+          pattern: ^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_.+/=]*$
+      required:
+        - grant_type
+        - code
+
+    RefreshTokenRequest:
+      type: object
+      properties:
+        grant_type:
+          enum:
+            - refresh_token
+        refresh_token:
+          type: string
+          # jwt token pattern
+          pattern: ^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_.+/=]*$
+      required:
+        - grant_type
+        - refresh_token
+
+    AuthResult:
+      properties:
+        jsonapi:
+          type: object
+          properties:
+            version:
+              type: string
+              example: '1.0'
+        data:
+          type: object
+          properties:
+            type:
+              enum:
+                - authorizationToken
+            attributes:
+              type: object
+              properties:
+                accessToken:
+                  type: string
+                  # jwt token pattern
+                  pattern: ^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_.+/=]*$
+                refreshToken:
+                  type: string
+                  # jwt token pattern
+                  pattern: ^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_.+/=]*$
