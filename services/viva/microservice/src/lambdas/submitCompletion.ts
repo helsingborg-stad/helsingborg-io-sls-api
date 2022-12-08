@@ -15,6 +15,7 @@ import type { VivaAttachment } from '../types/vivaAttachment';
 import type { PostCompletionsPayload } from '../helpers/vivaAdapterRequestClient';
 import type { CaseItem, CaseForm, CaseFormAnswer } from '../types/caseItem';
 import type { EventDetailCaseKeys } from '../types/eventDetail';
+import type { VivaParametersResponse } from '../types/ssmParameters';
 
 interface LambdaDetail {
   readonly caseKeys: EventDetailCaseKeys;
@@ -24,11 +25,6 @@ interface LambdaDetail {
 
 export interface LambdaRequest {
   readonly detail: LambdaDetail;
-}
-
-interface SSMParamsReadResponse {
-  readonly randomCheckFormId: string;
-  readonly completionFormId: string;
 }
 
 interface UpdateCaseParameters {
@@ -43,7 +39,7 @@ interface PostCompletionsResponse {
 
 export interface Dependencies {
   getCase: (keys: EventDetailCaseKeys) => Promise<CaseItem>;
-  readParams: (name: string) => Promise<SSMParamsReadResponse>;
+  readParams: (name: string) => Promise<VivaParametersResponse>;
   postCompletions: (payload: PostCompletionsPayload) => Promise<PostCompletionsResponse>;
   updateCase: (params: UpdateCaseParameters) => Promise<void>;
   getAttachments: (
@@ -97,11 +93,16 @@ export async function submitCompletion(input: LambdaRequest, dependencies: Depen
     return true;
   }
 
+  const { randomCheckFormId, completionFormId, newApplicationCompletionFormId } =
+    await dependencies.readParams(config.cases.providers.viva.envsKeyName);
+
   const { currentFormId } = caseItem;
-  const { randomCheckFormId, completionFormId } = await dependencies.readParams(
-    config.cases.providers.viva.envsKeyName
-  );
-  const isCompletionForm = [randomCheckFormId, completionFormId].includes(currentFormId);
+  const isCompletionForm = [
+    randomCheckFormId,
+    completionFormId,
+    newApplicationCompletionFormId,
+  ].includes(currentFormId);
+
   if (!isCompletionForm) {
     return true;
   }
