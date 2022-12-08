@@ -7,8 +7,13 @@ import type { LambdaRequest, Dependencies } from '../../src/lambdas/submitComple
 
 import { DEFAULT_CURRENT_POSITION } from '../../src/helpers/constants';
 
+const recurringFormId = 'recurringFormId';
 const randomCheckFormId = 'randomCheckFormId';
 const completionFormId = 'completionFormId';
+const newApplicationFormId = 'newApplicationFormId';
+const newApplicationRandomCheckFormId = 'newApplicationRandomCheckFormId';
+const newApplicationCompletionFormId = 'newApplicationCompletionFormId';
+
 const PK = 'USER#199492921234';
 const SK = 'CASE#123';
 
@@ -29,7 +34,11 @@ function createCase(partialCase: Partial<CaseItem> = {}): CaseItem {
       name: 'myStatusName',
       description: 'myStatusDescription',
     },
-    forms: {},
+    forms: {
+      randomCheckFormId: {},
+      completionFormId: {},
+      newApplicationCompletionFormId: {},
+    } as unknown as Record<string, CaseForm>,
     provider: 'VIVA',
     persons: [],
     details: {
@@ -63,7 +72,15 @@ function createDependencies(
 ): Dependencies {
   return {
     getCase: () => Promise.resolve(caseToUse),
-    readParams: () => Promise.resolve({ randomCheckFormId, completionFormId }),
+    readParams: () =>
+      Promise.resolve({
+        recurringFormId,
+        randomCheckFormId,
+        completionFormId,
+        newApplicationFormId,
+        newApplicationRandomCheckFormId,
+        newApplicationCompletionFormId,
+      }),
     postCompletions: () => Promise.resolve({ status: 'OK' }),
     updateCase: () => Promise.resolve(),
     getAttachments: () => Promise.resolve([]),
@@ -96,7 +113,7 @@ it('successfully submits completions', async () => {
   expect(result).toBe(true);
 });
 
-it('returns true if `currentFormId` does not match `randomCheckFormId` or `completionFormId`', async () => {
+it('returns true if `currentFormId` does not match `randomCheckFormId` or `completionFormId` or `newApplicationCompletionFormId`', async () => {
   const result = await submitCompletion(
     createInput(),
     createDependencies(createCase({ currentFormId: 'No matching form id' }))
