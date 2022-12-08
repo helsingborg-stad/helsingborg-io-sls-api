@@ -108,9 +108,14 @@ export async function submitCompletion(input: LambdaRequest, dependencies: Depen
   }
 
   const personalNumber = caseItem.PK.substring(5);
-  const caseAnswers = caseItem.forms?.[currentFormId]?.answers ?? [];
+  const caseAnswers = caseItem.forms[currentFormId].answers;
   const attachments = await dependencies.getAttachments(personalNumber, caseAnswers);
-  const workflowId = caseItem.details.workflowId ?? '';
+
+  const workflowId = caseItem.details.workflowId;
+  if (!workflowId) {
+    log.writeWarn('Viva workflowId is missing');
+    return true;
+  }
 
   const postCompletionResponse = await dependencies.postCompletions({
     personalNumber,
@@ -118,7 +123,7 @@ export async function submitCompletion(input: LambdaRequest, dependencies: Depen
     attachments,
   });
 
-  const isCompletionReceived = postCompletionResponse?.status.toLowerCase() === 'ok';
+  const isCompletionReceived = postCompletionResponse.status.toLowerCase() === 'ok';
   if (!isCompletionReceived) {
     log.writeError('Viva completion receive failed', postCompletionResponse);
     return false;
