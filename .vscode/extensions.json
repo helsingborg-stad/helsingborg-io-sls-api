@@ -3,6 +3,7 @@
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
     "firsttris.vscode-jest-runner",
-    "bierner.markdown-mermaid"
+    "bierner.markdown-mermaid",
+    "42crunch.vscode-openapi"
   ]
 }
