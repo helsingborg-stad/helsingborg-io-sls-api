@@ -6,7 +6,7 @@ import config from '../libs/config';
 
 import type { CaseItem } from '../types/case';
 
-export type CaseWithOmittedProperties = Omit<CaseItem, 'PK' | 'SK' | 'GSI1' | 'pdf'>;
+export type CaseWithOmittedProperties = Omit<CaseItem, 'PK' | 'SK' | 'GSI1'>;
 
 export interface FunctionResponse {
   attributes: { cases: CaseWithOmittedProperties[] };
@@ -75,7 +75,7 @@ export async function getCaseList(
 
   const cases = await dependencies.getCases(input.personalNumber);
   const casesWithoutProperties = cases.map(item =>
-    objectWithoutProperties(item, ['PK', 'SK', 'GSI1', 'pdf'])
+    objectWithoutProperties(item, ['PK', 'SK', 'GSI1'])
   );
 
   return {
