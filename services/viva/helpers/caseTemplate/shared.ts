@@ -62,7 +62,16 @@ type HousingTags =
   | 'postalAddress'
   | 'postalCode'
   | 'rent'
-  | 'value';
+  | 'value'
+  | 'lease'
+  | 'sublease'
+  | 'roommate'
+  | 'parents'
+  | 'child'
+  | 'condo'
+  | 'house'
+  | 'other'
+  | 'homeless';
 
 type ChildTags = 'school';
 

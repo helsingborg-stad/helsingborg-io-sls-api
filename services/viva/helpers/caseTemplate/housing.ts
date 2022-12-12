@@ -20,6 +20,30 @@ export interface Housing {
   otherAdultsLivingTypes: string[];
 }
 
+enum ValidHousingTypes {
+  lease = 'lease',
+  sublease = 'sublease',
+  roommate = 'roommate',
+  parents = 'parents',
+  child = 'child',
+  condo = 'condo',
+  house = 'house',
+  other = 'other',
+  homeless = 'homeless',
+}
+
+const friendlyHousingDescriptions: Record<ValidHousingTypes, string> = {
+  lease: 'Hyresrätt/förstahandskontrakt',
+  sublease: 'Andrahand',
+  roommate: 'Inneboende',
+  parents: 'Bor hos föräldrar',
+  child: 'Bor hos vuxna barn',
+  condo: 'Bostadsrätt',
+  house: 'Eget hus eller fastighet',
+  other: 'Annat boende',
+  homeless: 'Bostadslös',
+};
+
 enum ValidOtherAdultsLivingTypes {
   withChildren = 'withChildren',
   withParents = 'withParents',
@@ -33,6 +57,16 @@ const friendlyOtherAdultsLivingDescriptions: Record<ValidOtherAdultsLivingTypes,
   withRelatives: 'Släktingar',
   withRoomMate: 'Inneboende',
 };
+
+function getHousingTypeDescription(answers: CaseFormAnswer[]): string {
+  const typeAnswers = formHelpers
+    .filterByTags(answers, ['type'])
+    .filter(answer => answer.value === true);
+  const validTypes = Object.values(ValidHousingTypes) as string[] as ValidTags[];
+  const housingType = validTypes.filter(type => typeAnswers[0]?.field.tags.includes(type))[0];
+  const description = friendlyHousingDescriptions[housingType] ?? '';
+  return description;
+}
 
 function getCheckedOtherAdultsLivingDescriptions(answers: CaseFormAnswer[]): string[] {
   const otherLivingTypes = Object.values(ValidOtherAdultsLivingTypes) as string[] as ValidTags[];
@@ -55,7 +89,7 @@ export function createHousing(answers: CaseFormAnswer[]): Housing {
   const housingAnswers = formHelpers.filterByTags(answers, ['housing']);
 
   return {
-    type: formHelpers.getFirstAnswerValueByTags(housingAnswers, ['type']) ?? '',
+    type: getHousingTypeDescription(housingAnswers),
     streetAddress: formHelpers.getFirstAnswerValueByTags(housingAnswers, ['address']),
     postalCode: formHelpers.getFirstAnswerValueByTags(housingAnswers, ['postalCode']),
     postalAddress: formHelpers.getFirstAnswerValueByTags(housingAnswers, ['postalAddress']),
