@@ -201,3 +201,11 @@ export function parseFloatSafe(value: string): number | undefined {
   const float = parseFloat(value);
   return isNaN(float) ? undefined : float;
 }
+
+export function asBooleanSafe(value: unknown): boolean | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  return !!value;
+}
