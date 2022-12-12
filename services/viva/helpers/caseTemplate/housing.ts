@@ -1,6 +1,6 @@
 import * as formHelpers from '../formHelpers';
 
-import { asBooleanSafe, parseFloatSafe } from './shared';
+import { asBooleanSafe, fromYesNoBoolean, parseFloatSafe } from './shared';
 
 import type { CaseFormAnswer } from '../../types/caseItem';
 import type { ValidTags } from './shared';
@@ -14,6 +14,7 @@ export interface Housing {
   numberPeopleLiving: number;
   rent?: number;
   hasUnpaidRent?: boolean;
+  hasUnpaidElectricity?: boolean;
   hasOwnerContractApproved?: boolean;
   hasOwnRoom?: boolean;
   value?: number;
@@ -102,8 +103,11 @@ export function createHousing(answers: CaseFormAnswer[]): Housing {
     otherAdultsLivingTypes: getCheckedOtherAdultsLivingDescriptions(answers),
     value: parseFloatSafe(formHelpers.getFirstAnswerValueByTags(housingAnswers, ['value']) ?? ''),
     rent: parseFloatSafe(formHelpers.getFirstAnswerValueByTags(housingAnswers, ['rent']) ?? ''),
-    hasUnpaidRent: asBooleanSafe(
+    hasUnpaidRent: fromYesNoBoolean(
       formHelpers.getFirstAnswerValueByTags(housingAnswers, ['debtRent'])
+    ),
+    hasUnpaidElectricity: fromYesNoBoolean(
+      formHelpers.getFirstAnswerValueByTags(housingAnswers, ['debtElectricity'])
     ),
     hasOwnRoom: asBooleanSafe(formHelpers.getFirstAnswerValueByTags(housingAnswers, ['ownRoom'])),
     hasOwnerContractApproved: asBooleanSafe(

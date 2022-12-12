@@ -52,26 +52,27 @@ type NoteTags = 'message';
 
 type HousingTags =
   | 'address'
+  | 'child'
+  | 'condo'
+  | 'debtElectricity'
   | 'debtRent'
+  | 'homeless'
   | 'homelessDescription'
+  | 'house'
   | 'layout'
+  | 'lease'
   | 'numberPeopleLiving'
+  | 'other'
   | 'otherLivingDescription'
   | 'ownerContractApproved'
   | 'ownRoom'
+  | 'parents'
   | 'postalAddress'
   | 'postalCode'
   | 'rent'
-  | 'value'
-  | 'lease'
-  | 'sublease'
   | 'roommate'
-  | 'parents'
-  | 'child'
-  | 'condo'
-  | 'house'
-  | 'other'
-  | 'homeless';
+  | 'sublease'
+  | 'value';
 
 type ChildTags = 'school';
 
@@ -208,4 +209,12 @@ export function asBooleanSafe(value: unknown): boolean | undefined {
   }
 
   return !!value;
+}
+
+export function fromYesNoBoolean(value: string | undefined): boolean | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  return value.toLocaleLowerCase() === 'ja';
 }
