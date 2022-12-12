@@ -196,3 +196,8 @@ export function toDateString(maybeDateNumber?: CaseFormAnswerValue): string {
   }
   return '';
 }
+
+export function parseFloatSafe(value: string): number | undefined {
+  const float = parseFloat(value);
+  return isNaN(float) ? undefined : float;
+}
