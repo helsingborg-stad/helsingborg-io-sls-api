@@ -1,10 +1,13 @@
 import deepMerge from 'lodash.merge';
 
-import { filterValid, groupAnswersByGroupTag, Human } from './shared';
-import { mapToCommonValue, ValidTags } from './shared';
+import type { Human } from './shared';
+import { filterValid, groupAnswersByGroupTag } from './shared';
+import type { ValidTags } from './shared';
+import { mapToCommonValue } from './shared';
 import * as formHelpers from '../formHelpers';
 
-import { FinancialEntry, makeFinancialEntryIfValid } from './financials';
+import type { FinancialEntry } from './financials';
+import { makeFinancialEntryIfValid } from './financials';
 import { createOccupations } from './occupation';
 
 import type { CaseFormAnswer, CasePerson } from '../../types/caseItem';
@@ -119,6 +122,14 @@ function mapDental(answers: CaseFormAnswer[]): FinancialEntry {
   };
 }
 
+function mapTravel(answers: CaseFormAnswer[]): FinancialEntry {
+  const description = formHelpers.getFirstAnswerValueByTags<string>(answers, ['description']);
+  return {
+    ...mapToCommonValue(answers),
+    title: description ?? 'Reskostnad',
+  };
+}
+
 function mapOtherExpense(answers: CaseFormAnswer[]): FinancialEntry {
   const description = formHelpers.getFirstAnswerValueByTags<string>(answers, ['description']);
   return {
@@ -145,10 +156,19 @@ function getExpenses(answers: CaseFormAnswer[]): FinancialEntry[] {
   );
   const dentalEntries = dentalAnswers.map(mapDental);
 
+  const travelAnswers = groupAnswersByGroupTag(formHelpers.filterByTags(answers, ['reskostnad']));
+  const travelEntries = travelAnswers.map(mapTravel);
+
   const otherAnswers = groupAnswersByGroupTag(formHelpers.filterByTags(relevantAnswers, ['annat']));
   const otherEntries = otherAnswers.map(mapOtherExpense);
 
-  return filterValid([union, ...medicineEntries, ...dentalEntries, ...otherEntries]);
+  return filterValid([
+    union,
+    ...medicineEntries,
+    ...dentalEntries,
+    ...travelEntries,
+    ...otherEntries,
+  ]);
 }
 
 function createTemplatePerson(

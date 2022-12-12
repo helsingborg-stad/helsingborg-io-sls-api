@@ -35,6 +35,7 @@ type PersonTags =
   | 'medicin'
   | 'other'
   | 'phonenumber'
+  | 'reskostnad'
   | 'tandvard';
 
 type OccupationTags =
