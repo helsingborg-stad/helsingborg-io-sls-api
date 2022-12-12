@@ -25,7 +25,7 @@ export async function main(event) {
     return response.failure(new ResourceNotFoundError(errorMessage));
   }
 
-  const userCaseWithoutKeys = objectWithoutProperties(userCase, ['PK', 'SK', 'GSI1', 'PDF']);
+  const userCaseWithoutKeys = objectWithoutProperties(userCase, ['PK', 'SK', 'GSI1']);
 
   return response.success(200, {
     type: 'getCase',
