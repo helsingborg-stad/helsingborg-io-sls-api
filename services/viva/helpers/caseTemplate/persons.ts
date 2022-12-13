@@ -1,8 +1,8 @@
 import deepMerge from 'lodash.merge';
 
-import type { Human } from './shared';
+import { asBooleanSafe } from './shared';
 import { filterValid, groupAnswersByGroupTag } from './shared';
-import type { ValidTags } from './shared';
+import type { ValidTags, Human } from './shared';
 import { mapToCommonValue } from './shared';
 import * as formHelpers from '../formHelpers';
 
@@ -21,6 +21,7 @@ export interface TemplatePerson extends Partial<Human> {
   citizenship?: string;
   incomes: FinancialEntry[];
   expenses: FinancialEntry[];
+  needBuscard?: boolean;
 }
 
 interface RoleAnswers {
@@ -188,6 +189,7 @@ function createTemplatePerson(
     citizenship: getCitizenship(answers),
     incomes: getIncomes(answers),
     expenses: getExpenses(answers),
+    needBuscard: asBooleanSafe(formHelpers.getFirstAnswerValueByTags(answers, ['buscard'])),
   };
 }
 

@@ -24,6 +24,7 @@ type PersonTags =
   | 'amount'
   | 'annat'
   | 'applicant'
+  | 'buscard'
   | 'citizenship'
   | 'coapplicant'
   | 'date'
@@ -217,5 +218,9 @@ export function fromYesNoBoolean(value: string | undefined): boolean | undefined
     return undefined;
   }
 
-  return value.toLocaleLowerCase() === 'ja';
+  if (typeof value === 'string') {
+    return value.toLocaleLowerCase() === 'ja';
+  }
+
+  return false;
 }
