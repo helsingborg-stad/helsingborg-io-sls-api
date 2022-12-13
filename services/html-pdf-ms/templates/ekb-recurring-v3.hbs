@@ -331,8 +331,8 @@
 
       {{#each persons}}
         <h2>
-          {{#if (eq this.role 'applicant')}} Sökandes utgifter A{{/if}}
-          {{#if (eq this.role 'coApplicant')}} Medsökandes utgifter A{{/if}}
+          {{#if (eq this.role 'applicant')}} Sökandes utgifter{{/if}}
+          {{#if (eq this.role 'coApplicant')}} Medsökandes utgifter{{/if}}
         </h2>
         <table>
           {{#each this.expenses}}
