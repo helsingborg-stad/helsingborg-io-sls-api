@@ -5,10 +5,11 @@ import { signToken } from '../libs/token';
 import secrets from '../libs/secrets';
 import params from '../libs/params';
 import config from '../libs/config';
+import type { PutEventOptions } from '../libs/eventBridge';
 
 import * as bankId from '../helpers/bankId';
 
-import { BankIdSSMParams } from '../helpers/types';
+import type { BankIdSSMParams } from '../helpers/types';
 
 const CONFIG_AUTH_SECRETS_AUTHORIZATION_CODE = config.auth.secrets.authorizationCode;
 
