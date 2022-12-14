@@ -73,6 +73,12 @@ provider:
         - Effect: Allow
           Action:
             - dynamodb:Query
+          Resource:
+            - !ImportValue ${self:custom.resourcesStage}-CasesTableAllIndexArn
+
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
             - dynamodb:GetItem
           Resource:
             - 'Fn::ImportValue': ${self:custom.resourcesStage}-UsersTableArn

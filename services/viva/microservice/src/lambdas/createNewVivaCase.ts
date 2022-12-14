@@ -1,14 +1,18 @@
 import uuid from 'uuid';
 
-import config from '../libs/config';
-
-import * as dynamoDb from '../libs/dynamoDb';
-import params from '../libs/params';
-import log from '../libs/logs';
-import { putItem } from '../libs/queries';
+import { getFutureTimestamp, millisecondsToSeconds } from '../libs/timestampHelper';
 import { populateFormWithPreviousCaseAnswers } from '../libs/formAnswers';
 import { getStatusByType } from '../libs/caseStatuses';
-import { getFutureTimestamp, millisecondsToSeconds } from '../libs/timestampHelper';
+import * as dynamoDb from '../libs/dynamoDb';
+import { putItem } from '../libs/queries';
+import params from '../libs/params';
+import config from '../libs/config';
+import log from '../libs/logs';
+
+import { isFormNewApplication } from '../helpers/newApplication';
+import { getFormTemplates } from '../helpers/dynamoDb';
+import createCaseHelper from '../helpers/createCase';
+
 import {
   CASE_PROVIDER_VIVA,
   TWELVE_HOURS,
@@ -16,15 +20,9 @@ import {
   NEW_APPLICATION_VIVA,
 } from '../libs/constants';
 
-import createCaseHelper from '../helpers/createCase';
-import { getFormTemplates } from '../helpers/dynamoDb';
+import type { CaseUser, CaseItem, CaseForm, CaseStatus, CasePerson } from '../types/caseItem';
 import type { VivaParametersResponse } from '../types/ssmParameters';
 import { CasePersonRole } from '../types/caseItem';
-import type { CaseUser, CaseItem, CaseForm, CaseStatus, CasePerson } from '../types/caseItem';
-
-interface GetUserCaseListResponse {
-  Count: number;
-}
 
 interface LambdaDetail {
   user: CaseUser;
@@ -37,7 +35,8 @@ export interface LambdaRequest {
 export interface Dependencies {
   createCase: typeof putItem;
   getFormTemplateId: () => Promise<VivaParametersResponse>;
-  getUserCasesCount: (personalNumber: string) => Promise<GetUserCaseListResponse>;
+  getApplicantCases: (personalNumber: string) => Promise<CaseItem[]>;
+  getCoApplicantCases: (personalNumber: string) => Promise<CaseItem[]>;
   getTemplates: typeof getFormTemplates;
   isApprovedForNewApplication: (personalNumber: string) => Promise<boolean>;
 }
@@ -59,17 +58,51 @@ async function isApprovedForNewApplication(personalNumber: string): Promise<bool
   return approvedNewApplicationUsers.includes(personalNumber);
 }
 
-function getUserCasesCount(personalNumber: string): Promise<GetUserCaseListResponse> {
+async function getApplicantCases(personalNumber: string): Promise<CaseItem[]> {
   const queryParams = {
     TableName: config.cases.tableName,
     KeyConditionExpression: 'PK = :pk',
+    Select: 'SPECIFIC_ATTRIBUTES',
     ExpressionAttributeValues: {
       ':pk': `USER#${personalNumber}`,
     },
-    Select: 'COUNT',
+    ProjectionExpression: '#s, currentFormId',
+    ExpressionAttributeNames: {
+      '#s': 'status',
+    },
   };
 
-  return dynamoDb.call('query', queryParams);
+  return (await dynamoDb.call('query', queryParams)).Items;
+}
+
+async function getCoApplicantCases(personalNumber: string): Promise<CaseItem[]> {
+  const GSI1 = `USER#${personalNumber}`;
+  const SK = 'CASE#';
+
+  const queryParams = {
+    TableName: config.cases.tableName,
+    IndexName: 'GSI1-SK-index',
+    KeyConditionExpression: 'GSI1 = :gsi1 AND begins_with(SK, :sk)',
+    ExpressionAttributeValues: {
+      ':gsi1': GSI1,
+      ':sk': SK,
+    },
+    Select: 'SPECIFIC_ATTRIBUTES',
+    ProjectionExpression: '#s, currentFormId',
+    ExpressionAttributeNames: {
+      '#s': 'status',
+    },
+  };
+
+  return (await dynamoDb.call('query', queryParams)).Items;
+}
+
+function getOpenedCase(caseItem: CaseItem): boolean {
+  return !caseItem.status.type.includes('closed');
+}
+
+function getNewApplicationCase(formId: VivaParametersResponse): (caseItem: CaseItem) => boolean {
+  return ({ currentFormId }) => isFormNewApplication(formId, currentFormId);
 }
 
 export async function createNewVivaCase(
@@ -80,21 +113,29 @@ export async function createNewVivaCase(
 
   const isApplicantApproved = await dependencies.isApprovedForNewApplication(user.personalNumber);
   if (!isApplicantApproved) {
-    return true;
+    return false;
   }
 
-  const { Count } = await dependencies.getUserCasesCount(user.personalNumber);
-  if (Count > 0) {
-    return true;
-  }
+  const formId = await dependencies.getFormTemplateId();
 
-  const { newApplicationFormId, newApplicationCompletionFormId, newApplicationRandomCheckFormId } =
-    await dependencies.getFormTemplateId();
+  const cases = (
+    await Promise.all([
+      dependencies.getApplicantCases(user.personalNumber),
+      dependencies.getCoApplicantCases(user.personalNumber),
+    ])
+  ).flat();
+
+  const newApplicationCases = cases.filter(getNewApplicationCase(formId));
+  const hasOpenedNewApplicationCases = newApplicationCases.filter(getOpenedCase).length > 0;
+
+  if (hasOpenedNewApplicationCases) {
+    return false;
+  }
 
   const formIdList = [
-    newApplicationFormId,
-    newApplicationCompletionFormId,
-    newApplicationRandomCheckFormId,
+    formId.newApplicationFormId,
+    formId.newApplicationCompletionFormId,
+    formId.newApplicationRandomCheckFormId,
   ];
 
   const initialFormEncryption = createCaseHelper.getFormEncryptionAttributes();
@@ -147,7 +188,7 @@ export async function createNewVivaCase(
       },
       completions: null,
     },
-    currentFormId: newApplicationFormId,
+    currentFormId: formId.newApplicationFormId,
   };
 
   await dependencies.createCase({
@@ -163,7 +204,8 @@ export const main = log.wrap(event => {
   return createNewVivaCase(event, {
     createCase: putItem,
     getFormTemplateId,
-    getUserCasesCount,
+    getApplicantCases,
+    getCoApplicantCases,
     getTemplates: getFormTemplates,
     isApprovedForNewApplication,
   });
