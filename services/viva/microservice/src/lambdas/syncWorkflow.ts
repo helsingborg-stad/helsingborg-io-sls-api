@@ -104,6 +104,10 @@ function updateCaseDetailsWorkflow(keys: CaseKeys, newWorkflow: VivaWorkflow) {
   return dynamoDb.call('update', updateParams);
 }
 
+function isSetWorkflowId(caseItem: CaseItem) {
+  return !!caseItem.details.workflowId;
+}
+
 export async function syncWorkflow(input: LambdaRequest, dependencies: Dependencies) {
   const { personalNumber } = input.detail.user;
 
@@ -119,7 +123,7 @@ export async function syncWorkflow(input: LambdaRequest, dependencies: Dependenc
     return true;
   }
 
-  const caseListWithWorkflowId = caseList.filter(caseItem => !!caseItem.details.workflowId);
+  const caseListWithWorkflowId = caseList.filter(isSetWorkflowId);
 
   await Promise.allSettled(
     caseListWithWorkflowId.map(async caseItem => {
