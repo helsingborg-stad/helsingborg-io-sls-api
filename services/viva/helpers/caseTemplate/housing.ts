@@ -67,7 +67,7 @@ function getHousingTypeDescription(answers: CaseFormAnswer[]): string {
     .filter(answer => answer.value === true);
   const validTypes = Object.values(ValidHousingTypes) as string[] as ValidTags[];
   const housingType = validTypes.filter(type => typeAnswers[0]?.field.tags.includes(type))[0];
-  const description = friendlyHousingDescriptions[housingType] ?? '';
+  const description = friendlyHousingDescriptions[housingType as ValidHousingTypes] ?? '';
   return description;
 }
 

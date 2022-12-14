@@ -1,0 +1,1213 @@
+{
+  "PK": "USER#198603032395",
+  "SK": "CASE#c4ccb48e-2be5-47da-8fa3-37663ff28bed",
+  "createdAt": 1670493480560,
+  "currentFormId": "3ffa1100-fb93-11ec-b1b7-a797f65e09cb",
+  "details": {
+    "completions": null,
+    "period": {
+      "endDate": 0,
+      "startDate": 1670457600000
+    },
+    "workflowId": "4F291723569A5F8BC12589120044B0B5"
+  },
+  "expirationTime": 1674390610,
+  "forms": {
+    "3ffa1100-fb93-11ec-b1b7-a797f65e09cb": {
+      "answers": [
+        {
+          "field": {
+            "id": "hiddenCoapplicant",
+            "tags": []
+          },
+          "value": "198603052385"
+        },
+        {
+          "field": {
+            "id": "coapplicantInfo.coapplicantfirstName",
+            "tags": ["housing", "personInfo", "firstName", "partner", "coapplicant"]
+          },
+          "value": "Kajsa"
+        },
+        {
+          "field": {
+            "id": "coapplicantInfo.coapplicantlastName",
+            "tags": ["housing", "personInfo", "lastName", "partner", "coapplicant"]
+          },
+          "value": "Sandberg"
+        },
+        {
+          "field": {
+            "id": "coapplicantInfo.coapplicantpersonalNumber",
+            "tags": ["housing", "personInfo", "personalNumber", "partner", "coapplicant"]
+          },
+          "value": "198603052385"
+        },
+        {
+          "field": {
+            "id": "coapplicantInfo.coapplicantPhone",
+            "tags": [
+              "housing",
+              "personInfo",
+              "phonenumber",
+              "phoneNumber",
+              "phoneNumber",
+              "partner",
+              "coapplicant"
+            ]
+          },
+          "value": "0767123456"
+        },
+        {
+          "field": {
+            "id": "coapplicantInfo.coapplicantEmail",
+            "tags": ["housing", "personInfo", "email", "partner", "coapplicant"]
+          },
+          "value": "kajsa@example.com"
+        },
+        {
+          "field": {
+            "id": "hiddenfirstName",
+            "tags": []
+          },
+          "value": "firstName"
+        },
+        {
+          "field": {
+            "id": "hiddenlastName",
+            "tags": []
+          },
+          "value": "lastName"
+        },
+        {
+          "field": {
+            "id": "applicantInfo.firstName",
+            "tags": ["housing", "personInfo", "firstName", "applicant", "client"]
+          },
+          "value": "Buster"
+        },
+        {
+          "field": {
+            "id": "applicantInfo.lastName",
+            "tags": ["housing", "personInfo", "lastName", "applicant", "client"]
+          },
+          "value": "von Emmen"
+        },
+        {
+          "field": {
+            "id": "applicantInfo.personalNumber",
+            "tags": ["housing", "personInfo", "personalNumber", "applicant", "client"]
+          },
+          "value": "198603032395"
+        },
+        {
+          "field": {
+            "id": "applicantInfo.phone",
+            "tags": ["housing", "personInfo", "phonenumber", "applicant", "phoneNumber", "client"]
+          },
+          "value": "0723806237"
+        },
+        {
+          "field": {
+            "id": "applicantInfo.email",
+            "tags": ["housing", "personInfo", "email", "applicant", "client"]
+          },
+          "value": "buster@example.com"
+        },
+        {
+          "field": {
+            "id": "address.street",
+            "tags": ["housing", "personInfo", "address", "client"]
+          },
+          "value": "BANINGENJÖRSVÄGEN 2"
+        },
+        {
+          "field": {
+            "id": "address.postalCode",
+            "tags": ["housing", "personInfo", "postalCode", "client"]
+          },
+          "value": "98134"
+        },
+        {
+          "field": {
+            "id": "address.postalAddress",
+            "tags": ["housing", "personInfo", "postalAddress", "client"]
+          },
+          "value": "KIRUNA"
+        },
+        {
+          "field": {
+            "id": "acceptGDPR",
+            "tags": []
+          },
+          "value": true
+        },
+        {
+          "field": {
+            "id": "unemployed",
+            "tags": ["applicant", "occupation", "type", "unemployed"]
+          },
+          "value": true
+        },
+        {
+          "field": {
+            "id": "otheroccupation",
+            "tags": ["applicant", "occupation", "type", "otheroccupation"]
+          },
+          "value": true
+        },
+        {
+          "field": {
+            "id": "descriptionOtheroccupation",
+            "tags": ["applicant", "occupation", "description", "otheroccupation"]
+          },
+          "value": "Hej hej hej"
+        },
+        {
+          "field": {
+            "id": "coapplicantFulltime",
+            "tags": ["coapplicant", "occupation", "type", "fulltime"]
+          },
+          "value": true
+        },
+        {
+          "field": {
+            "id": "name_coapplicantFulltime",
+            "tags": ["coapplicant", "occupation", "description", "fulltime"]
+          },
+          "value": "Heltid AB"
+        },
+        {
+          "field": {
+            "id": "noChildren",
+            "tags": []
+          },
+          "value": true
+        },
+        {
+          "field": {
+            "id": "housingLease",
+            "tags": ["housing", "type", "lease"]
+          },
+          "value": true
+        },
+        {
+          "field": {
+            "id": "numberpeopleLiving",
+            "tags": ["housing", "numberPeopleLiving"]
+          },
+          "value": "5"
+        },
+        {
+          "field": {
+            "id": "imgContract",
+            "tags": []
+          },
+          "value": [
+            {
+              "deviceFileName": "Hyresavi.pdf",
+              "externalDisplayName": "Lägg till hyreskontrakt_0.pdf",
+              "id": "dd600308-4cb6-4d8d-b211-d05df8d004b2",
+              "mime": "application/pdf",
+              "questionId": "imgContract",
+              "uploadedId": "708ceeb5-60b0-4713-a0d5-c6145bd8bf21"
+            }
+          ]
+        },
+        {
+          "field": {
+            "id": "imgRent",
+            "tags": []
+          },
+          "value": [
+            {
+              "deviceFileName": "481B3635-D14E-41ED-B838-0DBFFECA2DF8",
+              "externalDisplayName": "Lägg till hyresfaktura_0.jpg",
+              "id": "95ef23c4-5eb7-45e3-81f2-eb42bd522796",
+              "mime": "image/jpeg",
+              "questionId": "imgRent",
+              "uploadedId": "c4304f36-f237-4750-95d8-83beb53cca83"
+            },
+            {
+              "deviceFileName": "Hyresavi.pdf",
+              "externalDisplayName": "Lägg till hyresfaktura_1.pdf",
+              "id": "597b9518-ff7f-498e-8bd5-c321de883e2b",
+              "mime": "application/pdf",
+              "questionId": "imgRent",
+              "uploadedId": "8c2b79b6-e870-4255-955e-141a80e5055e"
+            }
+          ]
+        },
+        {
+          "field": {
+            "id": "withRelatives",
+            "tags": ["housing", "withRelatives"]
+          },
+          "value": true
+        },
+        {
+          "field": {
+            "id": "imgKontoutdrag",
+            "tags": []
+          },
+          "value": [
+            {
+              "deviceFileName": "9F983DBA-EC35-42B8-8773-B597CF782EDD.JPG",
+              "externalDisplayName": "Ladda upp kontoutdrag_0.jpg",
+              "id": "a4cd7664-7eb2-4fa1-a06a-8b768137ccf7",
+              "mime": "image/jpeg",
+              "questionId": "imgKontoutdrag",
+              "uploadedId": "a77a048e-5ef3-49d7-8b4d-4dec9a5a4a32"
+            }
+          ]
+        },
+        {
+          "field": {
+            "id": "imgKontooversikt",
+            "tags": []
+          },
+          "value": [
+            {
+              "deviceFileName": "Hyresavi.pdf",
+              "externalDisplayName": "Ladda upp banköversikt_0.pdf",
+              "id": "5e60d62f-faf1-48e3-af3c-1b4b6440ed55",
+              "mime": "application/pdf",
+              "questionId": "imgKontooversikt",
+              "uploadedId": "7000fc43-4ab9-44ec-b3a6-8213993e8a0e"
+            }
+          ]
+        },
+        {
+          "field": {
+            "id": "unemploymentPayment",
+            "tags": ["aid", "unemployment"]
+          },
+          "value": true
+        },
+        {
+          "field": {
+            "id": "csnPayment",
+            "tags": ["aid", "csn"]
+          },
+          "value": true
+        },
+        {
+          "field": {
+            "id": "salaryApplicant.0.date",
+            "tags": ["incomes", "lon", "date", "group:applicant:salary:0", "applicant"]
+          },
+          "value": 1670410800000
+        },
+        {
+          "field": {
+            "id": "salaryApplicant.0.amount",
+            "tags": ["incomes", "lon", "amount", "group:applicant:salary:0", "applicant"]
+          },
+          "value": "1000"
+        },
+        {
+          "field": {
+            "id": "salaryApplicant.1.date",
+            "tags": ["incomes", "lon", "date", "group:applicant:salary:1", "applicant"]
+          },
+          "value": 1670324400000
+        },
+        {
+          "field": {
+            "id": "salaryApplicant.1.amount",
+            "tags": ["incomes", "lon", "amount", "group:applicant:salary:1", "applicant"]
+          },
+          "value": "1001"
+        },
+        {
+          "field": {
+            "id": "partnerSalary.0.date",
+            "tags": ["incomes", "lon", "date", "group:coapplicant:salary:0", "coapplicant"]
+          },
+          "value": 1670497200000
+        },
+        {
+          "field": {
+            "id": "partnerSalary.0.amount",
+            "tags": ["incomes", "lon", "amount", "group:coapplicant:salary:0", "coapplicant"]
+          },
+          "value": "1100"
+        },
+        {
+          "field": {
+            "id": "partnerSalary.0.amountHidden",
+            "tags": ["incomes", "lon", "appliesto", "group:coapplicant:salary:0", "coapplicant"]
+          },
+          "value": "COAPPLICANT"
+        },
+        {
+          "field": {
+            "id": "partnerSalary.1.date",
+            "tags": ["incomes", "lon", "date", "group:coapplicant:salary:1", "coapplicant"]
+          },
+          "value": 1670583600000
+        },
+        {
+          "field": {
+            "id": "partnerSalary.1.amount",
+            "tags": ["incomes", "lon", "amount", "group:coapplicant:salary:1", "coapplicant"]
+          },
+          "value": "1101"
+        },
+        {
+          "field": {
+            "id": "partnerSalary.1.amountHidden",
+            "tags": ["incomes", "lon", "appliesto", "group:coapplicant:salary:1", "coapplicant"]
+          },
+          "value": "COAPPLICANT"
+        },
+        {
+          "field": {
+            "id": "hiddenRoomaterentMonth",
+            "tags": ["incomes", "annan", "description", "resident", "group:hyresdel_hyra:x"]
+          },
+          "value": "Hyra inneboende #month"
+        },
+        {
+          "field": {
+            "id": "hiddenRoomaterentMonth-1",
+            "tags": ["incomes", "annan", "description", "resident", "group:hyresdel_hyra:x"]
+          },
+          "value": "Hyra inneboende #month-1"
+        },
+        {
+          "field": {
+            "id": "hiddenRoomateelectricityMonth",
+            "tags": ["incomes", "annan", "description", "resident", "group:hyresdel_el:x"]
+          },
+          "value": "El inneboende"
+        },
+        {
+          "field": {
+            "id": "hiddenRoomateelectricityMonth-1",
+            "tags": ["incomes", "annan", "description", "resident", "group:hyresdel_el:x"]
+          },
+          "value": "El inneboende"
+        },
+        {
+          "field": {
+            "id": "hiddenRoomateinternet",
+            "tags": ["incomes", "annan", "description", "resident", "group:hyresdel_internet:x"]
+          },
+          "value": "Internet inneboende"
+        },
+        {
+          "field": {
+            "id": "hiddenRoomateinternet-1",
+            "tags": ["incomes", "annan", "description", "resident", "group:hyresdel_internet:x"]
+          },
+          "value": "Internet inneboende"
+        },
+        {
+          "field": {
+            "id": "rentRoommateMonth",
+            "tags": ["incomes", "annan", "amount", "boende", "resident", "month"]
+          },
+          "value": "100"
+        },
+        {
+          "field": {
+            "id": "rentRoommateMonth-1",
+            "tags": ["incomes", "annan", "amount", "boende", "resident", "month-1"]
+          },
+          "value": "101"
+        },
+        {
+          "field": {
+            "id": "roommateElectricityMonth",
+            "tags": ["incomes", "annan", "amount", "electricity", "resident", "month"]
+          },
+          "value": "102"
+        },
+        {
+          "field": {
+            "id": "roommateElectricityMonth-1",
+            "tags": ["incomes", "annan", "amount", "electricity", "resident", "month-1"]
+          },
+          "value": "103"
+        },
+        {
+          "field": {
+            "id": "roommateInternetMonth",
+            "tags": ["incomes", "annan", "amount", "internet", "resident", "month"]
+          },
+          "value": "104"
+        },
+        {
+          "field": {
+            "id": "roommateInternetMonth-1",
+            "tags": ["incomes", "annan", "amount", "internet", "resident", "month-1"]
+          },
+          "value": "105"
+        },
+        {
+          "field": {
+            "id": "applicantForeignPension",
+            "tags": [
+              "incomes",
+              "annan",
+              "amount",
+              "other",
+              "applicant",
+              "foreignPension",
+              "group:aldreforsorjningsstodapplicant:x"
+            ]
+          },
+          "value": "106"
+        },
+        {
+          "field": {
+            "id": "partnerForeignpension",
+            "tags": [
+              "incomes",
+              "annan",
+              "amount",
+              "other",
+              "coapplicant",
+              "foreignPension",
+              "group:aldreforsorjningsstodapplicant:x"
+            ]
+          },
+          "value": "107"
+        },
+        {
+          "field": {
+            "id": "applicantOtherIncome.0.text",
+            "tags": ["incomes", "annan", "description", "other", "group:applicant:0", "applicant"]
+          },
+          "value": "Swish"
+        },
+        {
+          "field": {
+            "id": "applicantOtherIncome.0.date",
+            "tags": ["incomes", "annan", "date", "other", "group:applicant:0", "applicant"]
+          },
+          "value": 1670670000000
+        },
+        {
+          "field": {
+            "id": "applicantOtherIncome.0.amount",
+            "tags": ["incomes", "annan", "amount", "other", "group:applicant:0", "applicant"]
+          },
+          "value": "108"
+        },
+        {
+          "field": {
+            "id": "applicantOtherIncome.1.text",
+            "tags": ["incomes", "annan", "description", "other", "group:applicant:1", "applicant"]
+          },
+          "value": "Lånade pengar"
+        },
+        {
+          "field": {
+            "id": "applicantOtherIncome.1.date",
+            "tags": ["incomes", "annan", "date", "other", "group:applicant:1", "applicant"]
+          },
+          "value": 1670756400000
+        },
+        {
+          "field": {
+            "id": "applicantOtherIncome.1.amount",
+            "tags": ["incomes", "annan", "amount", "other", "group:applicant:1", "applicant"]
+          },
+          "value": "109"
+        },
+        {
+          "field": {
+            "id": "partnerOtherIncome.0.text",
+            "tags": [
+              "incomes",
+              "annan",
+              "description",
+              "other",
+              "group:coapplicant:0",
+              "coapplicant"
+            ]
+          },
+          "value": "Gåva/present"
+        },
+        {
+          "field": {
+            "id": "partnerOtherIncome.0.date",
+            "tags": ["incomes", "annan", "date", "other", "group:coapplicant:0", "coapplicant"]
+          },
+          "value": 1670842800000
+        },
+        {
+          "field": {
+            "id": "partnerOtherIncome.0.amount",
+            "tags": ["incomes", "annan", "amount", "other", "group:coapplicant:0", "coapplicant"]
+          },
+          "value": "110"
+        },
+        {
+          "field": {
+            "id": "partnerOtherIncome.1.text",
+            "tags": [
+              "incomes",
+              "annan",
+              "description",
+              "other",
+              "group:coapplicant:1",
+              "coapplicant"
+            ]
+          },
+          "value": "Inkomst från försäljning"
+        },
+        {
+          "field": {
+            "id": "partnerOtherIncome.1.date",
+            "tags": ["incomes", "annan", "date", "other", "group:coapplicant:1", "coapplicant"]
+          },
+          "value": 1670929200000
+        },
+        {
+          "field": {
+            "id": "partnerOtherIncome.1.amount",
+            "tags": ["incomes", "annan", "amount", "other", "group:coapplicant:1", "coapplicant"]
+          },
+          "value": "111"
+        },
+        {
+          "field": {
+            "id": "assetCar",
+            "tags": ["assets", "fordon", "amount"]
+          },
+          "value": "20000"
+        },
+        {
+          "field": {
+            "id": "assetHouse",
+            "tags": ["assets", "fastighet", "amount"]
+          },
+          "value": "30000"
+        },
+        {
+          "field": {
+            "id": "assetOtherDescription.0.text",
+            "tags": ["assets", "övrig", "description", "group:assets:0"]
+          },
+          "value": "Hatt"
+        },
+        {
+          "field": {
+            "id": "assetOtherDescription.0.amount",
+            "tags": ["assets", "övrig", "amount", "group:assets:0"]
+          },
+          "value": "112"
+        },
+        {
+          "field": {
+            "id": "assetOtherDescription.1.text",
+            "tags": ["assets", "övrig", "description", "group:assets:1"]
+          },
+          "value": "Mössa"
+        },
+        {
+          "field": {
+            "id": "assetOtherDescription.1.amount",
+            "tags": ["assets", "övrig", "amount", "group:assets:1"]
+          },
+          "value": "113"
+        },
+        {
+          "field": {
+            "id": "rent",
+            "tags": ["expenses", "boende", "amount", "month+1"]
+          },
+          "value": "2000"
+        },
+        {
+          "field": {
+            "id": "rent-1",
+            "tags": ["expenses", "boende", "amount", "month"]
+          },
+          "value": "2001"
+        },
+        {
+          "field": {
+            "id": "debtRent",
+            "tags": ["housing", "debtRent"]
+          },
+          "value": "Nej"
+        },
+        {
+          "field": {
+            "id": "electricityMonth",
+            "tags": ["expenses", "el", "electricity", "amount", "month+1"]
+          },
+          "value": "200"
+        },
+        {
+          "field": {
+            "id": "electricityMonth1",
+            "tags": ["expenses", "el", "electricity", "amount", "month"]
+          },
+          "value": "201"
+        },
+        {
+          "field": {
+            "id": "debtelectricity",
+            "tags": ["housing", "debtElectricity"]
+          },
+          "value": "Ja"
+        },
+        {
+          "field": {
+            "id": "homeinsuranceMonth",
+            "tags": ["expenses", "homeinsurance", "hemforsakring", "amount", "month+1"]
+          },
+          "value": "202"
+        },
+        {
+          "field": {
+            "id": "homeinsuranceMonth-1",
+            "tags": ["expenses", "homeinsurance", "hemforsakring", "amount", "month"]
+          },
+          "value": "203"
+        },
+        {
+          "field": {
+            "id": "internetMonth",
+            "tags": ["expenses", "internet", "bredband", "amount", "month+1"]
+          },
+          "value": "204"
+        },
+        {
+          "field": {
+            "id": "internetMonth-1",
+            "tags": ["expenses", "internet", "bredband", "amount", "month"]
+          },
+          "value": "205"
+        },
+        {
+          "field": {
+            "id": "childcare",
+            "tags": ["expenses", "children", "childcare", "barnomsorg"]
+          },
+          "value": "206"
+        },
+        {
+          "field": {
+            "id": "applicableBuscardApplicant",
+            "tags": []
+          },
+          "value": true
+        },
+        {
+          "field": {
+            "id": "applicableBuscardCoapplicant",
+            "tags": []
+          },
+          "value": false
+        },
+        {
+          "field": {
+            "id": "applicantBuscard.0.date",
+            "tags": [
+              "expenses",
+              "reskostnad",
+              "applicant",
+              "annat",
+              "date",
+              "group:reskostnadapplicant:0"
+            ]
+          },
+          "value": 1671015600000
+        },
+        {
+          "field": {
+            "id": "applicantBuscard.0.description",
+            "tags": [
+              "expenses",
+              "reskostnad",
+              "applicant",
+              "annat",
+              "description",
+              "group:reskostnadapplicant:0"
+            ]
+          },
+          "value": "Busskort"
+        },
+        {
+          "field": {
+            "id": "applicantBuscard.0.amount",
+            "tags": [
+              "expenses",
+              "reskostnad",
+              "applicant",
+              "annat",
+              "amount",
+              "group:reskostnadapplicant:0"
+            ]
+          },
+          "value": "207"
+        },
+        {
+          "field": {
+            "id": "applicantBuscard.1.date",
+            "tags": [
+              "expenses",
+              "reskostnad",
+              "applicant",
+              "annat",
+              "date",
+              "group:reskostnadapplicant:1"
+            ]
+          },
+          "value": 1671102000000
+        },
+        {
+          "field": {
+            "id": "applicantBuscard.1.description",
+            "tags": [
+              "expenses",
+              "reskostnad",
+              "applicant",
+              "annat",
+              "description",
+              "group:reskostnadapplicant:1"
+            ]
+          },
+          "value": "Busskort"
+        },
+        {
+          "field": {
+            "id": "applicantBuscard.1.amount",
+            "tags": [
+              "expenses",
+              "reskostnad",
+              "applicant",
+              "annat",
+              "amount",
+              "group:reskostnadapplicant:1"
+            ]
+          },
+          "value": "208"
+        },
+        {
+          "field": {
+            "id": "partnerBuscard.0.date",
+            "tags": [
+              "expenses",
+              "reskostnad",
+              "coapplicant",
+              "annat",
+              "date",
+              "group:reskostnadcoapplicant:0"
+            ]
+          },
+          "value": 1671188400000
+        },
+        {
+          "field": {
+            "id": "partnerBuscard.0.description",
+            "tags": [
+              "expenses",
+              "reskostnad",
+              "coapplicant",
+              "annat",
+              "description",
+              "group:reskostnadcoapplicant:0"
+            ]
+          },
+          "value": "Busskort"
+        },
+        {
+          "field": {
+            "id": "partnerBuscard.0.amount",
+            "tags": [
+              "expenses",
+              "reskostnad",
+              "coapplicant",
+              "annat",
+              "amount",
+              "group:reskostnadcoapplicant:0"
+            ]
+          },
+          "value": "209"
+        },
+        {
+          "field": {
+            "id": "partnerBuscard.1.date",
+            "tags": [
+              "expenses",
+              "reskostnad",
+              "coapplicant",
+              "annat",
+              "date",
+              "group:reskostnadcoapplicant:1"
+            ]
+          },
+          "value": 1671274800000
+        },
+        {
+          "field": {
+            "id": "partnerBuscard.1.description",
+            "tags": [
+              "expenses",
+              "reskostnad",
+              "coapplicant",
+              "annat",
+              "description",
+              "group:reskostnadcoapplicant:1"
+            ]
+          },
+          "value": "Busskort"
+        },
+        {
+          "field": {
+            "id": "partnerBuscard.1.amount",
+            "tags": [
+              "expenses",
+              "reskostnad",
+              "coapplicant",
+              "annat",
+              "amount",
+              "group:reskostnadcoapplicant:1"
+            ]
+          },
+          "value": "210"
+        },
+        {
+          "field": {
+            "id": "needBuscardApplicant",
+            "tags": ["buscard", "applicant"]
+          },
+          "value": false
+        },
+        {
+          "field": {
+            "id": "needBuscardcoapplicant",
+            "tags": ["buscard", "coapplicant"]
+          },
+          "value": true
+        },
+        {
+          "field": {
+            "id": "applicantUnionfee",
+            "tags": ["expenses", "akassa", "amount", "applicant", "group:akassaapplicant:x"]
+          },
+          "value": "211"
+        },
+        {
+          "field": {
+            "id": "partnerUnionfee",
+            "tags": ["expenses", "akassa", "amount", "coapplicant", "group:akassacoapplicant:x"]
+          },
+          "value": "212"
+        },
+        {
+          "field": {
+            "id": "medicineDoctorApplicant.0.text",
+            "tags": ["expenses", "medicin", "description", "group:applicant:0", "applicant"]
+          },
+          "value": "Medicin"
+        },
+        {
+          "field": {
+            "id": "medicineDoctorApplicant.0.date",
+            "tags": ["expenses", "medicin", "date", "group:applicant:0", "applicant"]
+          },
+          "value": 1671361200000
+        },
+        {
+          "field": {
+            "id": "medicineDoctorApplicant.0.amount",
+            "tags": ["expenses", "medicin", "amount", "group:applicant:0", "applicant"]
+          },
+          "value": "213"
+        },
+        {
+          "field": {
+            "id": "medicineDoctorApplicant.1.text",
+            "tags": ["expenses", "medicin", "description", "group:applicant:1", "applicant"]
+          },
+          "value": "Sjukvård"
+        },
+        {
+          "field": {
+            "id": "medicineDoctorApplicant.1.date",
+            "tags": ["expenses", "medicin", "date", "group:applicant:1", "applicant"]
+          },
+          "value": 1671447600000
+        },
+        {
+          "field": {
+            "id": "medicineDoctorApplicant.1.amount",
+            "tags": ["expenses", "medicin", "amount", "group:applicant:1", "applicant"]
+          },
+          "value": "214"
+        },
+        {
+          "field": {
+            "id": "partnerMedicineDoctor.0.text",
+            "tags": ["expenses", "medicin", "description", "group:applicant:0", "coapplicant"]
+          },
+          "value": "Sjukvård"
+        },
+        {
+          "field": {
+            "id": "partnerMedicineDoctor.0.date",
+            "tags": ["expenses", "medicin", "date", "group:applicant:0", "coapplicant"]
+          },
+          "value": 1671534000000
+        },
+        {
+          "field": {
+            "id": "partnerMedicineDoctor.0.amount",
+            "tags": ["expenses", "medicin", "amount", "group:applicant:0", "coapplicant"]
+          },
+          "value": "215"
+        },
+        {
+          "field": {
+            "id": "partnerMedicineDoctor.1.text",
+            "tags": ["expenses", "medicin", "description", "group:applicant:1", "coapplicant"]
+          },
+          "value": "Medicin"
+        },
+        {
+          "field": {
+            "id": "partnerMedicineDoctor.1.date",
+            "tags": ["expenses", "medicin", "date", "group:applicant:1", "coapplicant"]
+          },
+          "value": 1671620400000
+        },
+        {
+          "field": {
+            "id": "partnerMedicineDoctor.1.amount",
+            "tags": ["expenses", "medicin", "amount", "group:applicant:1", "coapplicant"]
+          },
+          "value": "216"
+        },
+        {
+          "field": {
+            "id": "dentistApplicant.0.date",
+            "tags": ["expenses", "tandvard", "date", "group:applicant:0", "applicant"]
+          },
+          "value": 1671706800000
+        },
+        {
+          "field": {
+            "id": "dentistApplicant.0.amount",
+            "tags": ["expenses", "tandvard", "amount", "group:applicant:0", "applicant"]
+          },
+          "value": "217"
+        },
+        {
+          "field": {
+            "id": "dentistApplicant.1.date",
+            "tags": ["expenses", "tandvard", "date", "group:applicant:1", "applicant"]
+          },
+          "value": 1671793200000
+        },
+        {
+          "field": {
+            "id": "dentistApplicant.1.amount",
+            "tags": ["expenses", "tandvard", "amount", "group:applicant:1", "applicant"]
+          },
+          "value": "218"
+        },
+        {
+          "field": {
+            "id": "dentistPartner.0.date",
+            "tags": ["expenses", "tandvard", "date", "group:coapplicant:0", "coapplicant"]
+          },
+          "value": 1671879600000
+        },
+        {
+          "field": {
+            "id": "dentistPartner.0.amount",
+            "tags": ["expenses", "tandvard", "amount", "group:coapplicant:0", "coapplicant"]
+          },
+          "value": "219"
+        },
+        {
+          "field": {
+            "id": "dentistPartner.1.date",
+            "tags": ["expenses", "tandvard", "date", "group:coapplicant:1", "coapplicant"]
+          },
+          "value": 1671966000000
+        },
+        {
+          "field": {
+            "id": "dentistPartner.1.amount",
+            "tags": ["expenses", "tandvard", "amount", "group:coapplicant:1", "coapplicant"]
+          },
+          "value": "220"
+        },
+        {
+          "field": {
+            "id": "othercostApplicant.0.text",
+            "tags": ["expenses", "annat", "description", "group:applicant:0", "applicant"]
+          },
+          "value": "Vantar"
+        },
+        {
+          "field": {
+            "id": "othercostApplicant.0.amount",
+            "tags": ["expenses", "annat", "amount", "group:applicant:0", "applicant"]
+          },
+          "value": "0"
+        },
+        {
+          "field": {
+            "id": "othercostApplicant.1.text",
+            "tags": ["expenses", "annat", "description", "group:applicant:1", "applicant"]
+          },
+          "value": "Byxor"
+        },
+        {
+          "field": {
+            "id": "othercostApplicant.1.amount",
+            "tags": ["expenses", "annat", "amount", "group:applicant:1", "applicant"]
+          },
+          "value": "221"
+        },
+        {
+          "field": {
+            "id": "partnerOthercost.0.text",
+            "tags": ["expenses", "annat", "description", "group:coapplicant:0", "coapplicant"]
+          },
+          "value": "Tröja"
+        },
+        {
+          "field": {
+            "id": "partnerOthercost.0.amount",
+            "tags": ["expenses", "annat", "amount", "group:coapplicant:0", "coapplicant"]
+          },
+          "value": "222"
+        },
+        {
+          "field": {
+            "id": "partnerOthercost.1.text",
+            "tags": ["expenses", "annat", "description", "group:coapplicant:1", "coapplicant"]
+          },
+          "value": "Skor"
+        },
+        {
+          "field": {
+            "id": "partnerOthercost.1.amount",
+            "tags": ["expenses", "annat", "amount", "group:coapplicant:1", "coapplicant"]
+          },
+          "value": "0"
+        },
+        {
+          "field": {
+            "id": "checkboxExpensesChildren",
+            "tags": []
+          },
+          "value": true
+        },
+        {
+          "field": {
+            "id": "childOthercost.0.text",
+            "tags": ["expenses", "annat", "description", "group:children:0", "children"]
+          },
+          "value": "Glasögon"
+        },
+        {
+          "field": {
+            "id": "childOthercost.0.amount",
+            "tags": ["expenses", "annat", "amount", "group:children:0", "children"]
+          },
+          "value": "223"
+        },
+        {
+          "field": {
+            "id": "childOthercost.1.text",
+            "tags": ["expenses", "annat", "description", "group:children:1", "children"]
+          },
+          "value": "Halsduk"
+        },
+        {
+          "field": {
+            "id": "childOthercost.1.amount",
+            "tags": ["expenses", "annat", "amount", "group:children:1", "children"]
+          },
+          "value": "0"
+        },
+        {
+          "field": {
+            "id": "message",
+            "tags": ["message"]
+          },
+          "value": "Tjena tjena tjena"
+        },
+        {
+          "field": {
+            "id": "notifyMe",
+            "tags": ["notification", "sms", "applicant"]
+          },
+          "value": true
+        }
+      ],
+      "currentPosition": {
+        "currentMainStep": 27,
+        "currentMainStepIndex": 40,
+        "index": 40,
+        "level": 0,
+        "numberOfMainSteps": 28
+      },
+      "encryption": {
+        "encryptionKeyId": "2935d39f-1e9c-4953-a8d0-2b766e5a03a8",
+        "symmetricKeyName": "2935d39f-1e9c-4953-a8d0-2b766e5a03a8",
+        "type": "decrypted"
+      }
+    },
+    "af8f7030-5f23-11ec-9b4f-a11971f491b4": {
+      "answers": [],
+      "currentPosition": {
+        "currentMainStep": 1,
+        "currentMainStepIndex": 0,
+        "index": 0,
+        "level": 0,
+        "numberOfMainSteps": 0
+      },
+      "encryption": {
+        "encryptionKeyId": "2935d39f-1e9c-4953-a8d0-2b766e5a03a8",
+        "symmetricKeyName": "2935d39f-1e9c-4953-a8d0-2b766e5a03a8",
+        "type": "decrypted"
+      }
+    }
+  },
+  "GSI1": "USER#198603052385",
+  "id": "c4ccb48e-2be5-47da-8fa3-37663ff28bed",
+  "persons": [
+    {
+      "firstName": "Buster",
+      "hasSigned": true,
+      "lastName": "von Emmen",
+      "personalNumber": "198603032395",
+      "role": "applicant"
+    },
+    {
+      "firstName": "Kajsa",
+      "hasSigned": true,
+      "lastName": "Sandberg",
+      "personalNumber": "198603052385",
+      "role": "coApplicant"
+    },
+    {
+      "firstName": "Kajsa",
+      "hasSigned": true,
+      "lastName": "Sandberg",
+      "personalNumber": "198603052385",
+      "role": "coApplicant"
+    }
+  ],
+  "provider": "VIVA",
+  "state": "VIVA_APPLICATION_RECEIVED",
+  "status": {
+    "description": "Ansökan är inskickad",
+    "name": "Inskickad",
+    "type": "active:submitted"
+  },
+  "updatedAt": 1670502610819
+}

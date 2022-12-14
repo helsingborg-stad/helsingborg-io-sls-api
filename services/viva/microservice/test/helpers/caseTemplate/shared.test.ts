@@ -1,5 +1,7 @@
-import type { CommonValue, ValidTags } from '../../../src/helpers/caseTemplate/shared';
 import {
+  asBooleanSafe,
+  fromYesNoBoolean,
+  parseFloatSafe,
   filterCheckedTags,
   filterValid,
   getMonthNameFromDate,
@@ -8,8 +10,10 @@ import {
   parseRelativeMonth,
   toDateString,
 } from '../../../src/helpers/caseTemplate/shared';
-import { CaseFormAnswer, CaseFormAnswerValue } from '../../../src/types/caseItem';
 import { makeAnswer } from './testHelpers';
+
+import type { CommonValue, ValidTags } from '../../../src/helpers/caseTemplate/shared';
+import type { CaseFormAnswer, CaseFormAnswerValue } from '../../../src/types/caseItem';
 
 describe('Case Template - shared', () => {
   describe('groupAnswersByGroupTag', () => {
@@ -221,6 +225,51 @@ describe('Case Template - shared', () => {
     ])('maps %s to "%s"', (maybeDateNumber, expected) => {
       const result = toDateString(maybeDateNumber);
 
+      expect(result).toBe(expected);
+    });
+  });
+
+  describe('parseFloatSafe', () => {
+    it.each([
+      ['12.34', 12.34],
+      [13.37, 13.37],
+      ['invalid', undefined],
+      [undefined, undefined],
+      [null, undefined],
+      [true, undefined],
+    ])('for %s returns %s', (input, expected) => {
+      const result = parseFloatSafe(input as string);
+      expect(result).toBe(expected);
+    });
+  });
+
+  describe('asBooleanSafe', () => {
+    it.each([
+      [true, true],
+      [false, false],
+      [undefined, undefined],
+      [null, false],
+      ['abc', true],
+      ['', false],
+    ])('for %s returns %s', (input, expected) => {
+      const result = asBooleanSafe(input);
+      expect(result).toBe(expected);
+    });
+  });
+
+  describe('fromYesNoBoolean', () => {
+    it.each([
+      ['ja', true],
+      ['JA', true],
+      ['jA', true],
+      ['nej', false],
+      ['NEJ', false],
+      ['nEj', false],
+      [undefined, undefined],
+      [1, false],
+      [null, false],
+    ])('for %s returns %s', (input, expected) => {
+      const result = fromYesNoBoolean(input as string);
       expect(result).toBe(expected);
     });
   });

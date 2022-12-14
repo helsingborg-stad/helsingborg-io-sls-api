@@ -1,5 +1,6 @@
-import type { FinancialEntry } from '../../../src/helpers/caseTemplate/financials';
 import { makeFinancialEntryIfValid } from '../../../src/helpers/caseTemplate/financials';
+
+import type { FinancialEntry } from '../../../src/helpers/caseTemplate/financials';
 import type { CaseFormAnswerValue } from '../../../src/types/caseItem';
 
 describe('Case Template - financials', () => {

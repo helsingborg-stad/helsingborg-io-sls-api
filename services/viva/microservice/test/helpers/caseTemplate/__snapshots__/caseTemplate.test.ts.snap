@@ -1,0 +1,385 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Case Template generates template data for new application 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "firstName": "",
+      "housing": "",
+      "lastName": "",
+      "personalNumber": "",
+      "role": "children",
+      "school": "",
+    },
+    Object {
+      "firstName": "",
+      "housing": "",
+      "lastName": "",
+      "personalNumber": "",
+      "role": "children",
+      "school": "",
+    },
+  ],
+  "financials": Object {
+    "assets": Array [
+      Object {
+        "title": "Fordon",
+        "value": 20000,
+      },
+      Object {
+        "title": "Eget hus, lägenhet eller fastighet",
+        "value": 30000,
+      },
+      Object {
+        "title": "Hatt",
+        "value": 112,
+      },
+      Object {
+        "title": "Mössa",
+        "value": 113,
+      },
+    ],
+    "expenses": Object {
+      "children": Array [
+        Object {
+          "title": "Barnomsorg",
+          "value": 206,
+        },
+        Object {
+          "title": "Glasögon",
+          "value": 223,
+        },
+        Object {
+          "title": "Halsduk",
+          "value": 0,
+        },
+      ],
+      "housing": Array [
+        Object {
+          "title": "Hyra/avgift januari",
+          "value": 2000,
+        },
+        Object {
+          "title": "Hyra/avgift december",
+          "value": 2001,
+        },
+        Object {
+          "title": "El januari",
+          "value": 200,
+        },
+        Object {
+          "title": "El december",
+          "value": 201,
+        },
+        Object {
+          "title": "Hemförsäkring januari",
+          "value": 202,
+        },
+        Object {
+          "title": "Hemförsäkring december",
+          "value": 203,
+        },
+        Object {
+          "title": "Internet/bredband januari",
+          "value": 204,
+        },
+        Object {
+          "title": "Internet/bredband december",
+          "value": 205,
+        },
+      ],
+    },
+    "governmentAids": Array [
+      "A-kassa",
+      "CSN",
+    ],
+    "residentIncomes": Array [
+      Object {
+        "title": "Hyra/avgift december",
+        "value": 100,
+      },
+      Object {
+        "title": "Hyra/avgift november",
+        "value": 101,
+      },
+      Object {
+        "title": "El december",
+        "value": 102,
+      },
+      Object {
+        "title": "El november",
+        "value": 103,
+      },
+      Object {
+        "title": "Internet/bredband december",
+        "value": 104,
+      },
+      Object {
+        "title": "Internet/bredband november",
+        "value": 105,
+      },
+    ],
+  },
+  "housing": Object {
+    "hasOwnRoom": undefined,
+    "hasOwnerContractApproved": undefined,
+    "hasUnpaidElectricity": true,
+    "hasUnpaidRent": false,
+    "homelessDescription": undefined,
+    "layoutDescription": "",
+    "numberPeopleLiving": 5,
+    "otherAdultsLivingTypes": Array [
+      "Släktingar",
+    ],
+    "otherLivingDescription": undefined,
+    "postalAddress": "KIRUNA",
+    "postalCode": "98134",
+    "rent": undefined,
+    "streetAddress": "BANINGENJÖRSVÄGEN 2",
+    "type": "Hyresrätt/förstahandskontrakt",
+    "value": undefined,
+  },
+  "notes": Array [
+    Object {
+      "text": "Tjena tjena tjena",
+      "title": "Meddelande från sökande",
+    },
+  ],
+  "persons": Array [
+    Object {
+      "citizenship": "",
+      "email": "buster@example.com",
+      "expenses": Array [
+        Object {
+          "title": "A-kassa och fackavgift",
+          "value": 211,
+        },
+        Object {
+          "date": "2022-12-18",
+          "description": "Medicin",
+          "title": "Medicin",
+          "type": undefined,
+          "value": 213,
+        },
+        Object {
+          "date": "2022-12-19",
+          "description": "Sjukvård",
+          "title": "Sjukvård",
+          "type": undefined,
+          "value": 214,
+        },
+        Object {
+          "date": "2022-12-22",
+          "description": undefined,
+          "title": "Tandvård",
+          "type": undefined,
+          "value": 217,
+        },
+        Object {
+          "date": "2022-12-23",
+          "description": undefined,
+          "title": "Tandvård",
+          "type": undefined,
+          "value": 218,
+        },
+        Object {
+          "date": "2022-12-14",
+          "description": "Busskort",
+          "title": "Busskort",
+          "type": undefined,
+          "value": 207,
+        },
+        Object {
+          "date": "2022-12-15",
+          "description": "Busskort",
+          "title": "Busskort",
+          "type": undefined,
+          "value": 208,
+        },
+        Object {
+          "date": "2022-12-14",
+          "description": "Busskort",
+          "title": "Busskort",
+          "type": undefined,
+          "value": 207,
+        },
+        Object {
+          "date": "2022-12-15",
+          "description": "Busskort",
+          "title": "Busskort",
+          "type": undefined,
+          "value": 208,
+        },
+      ],
+      "firstName": "Buster",
+      "hasSigned": true,
+      "incomes": Array [
+        Object {
+          "date": "2022-12-07",
+          "description": undefined,
+          "title": "Lön 1",
+          "type": undefined,
+          "value": 1000,
+        },
+        Object {
+          "date": "2022-12-06",
+          "description": undefined,
+          "title": "Lön 2",
+          "type": undefined,
+          "value": 1001,
+        },
+        Object {
+          "date": "2022-12-10",
+          "description": "Swish",
+          "title": "Swish",
+          "type": undefined,
+          "value": 108,
+        },
+        Object {
+          "date": "2022-12-11",
+          "description": "Lånade pengar",
+          "title": "Lånade pengar",
+          "type": undefined,
+          "value": 109,
+        },
+        Object {
+          "title": "Utländsk pension",
+          "value": "106",
+        },
+      ],
+      "lastName": "von Emmen",
+      "needBuscard": false,
+      "occupations": Array [
+        Object {
+          "description": undefined,
+          "name": "Arbetssökande",
+          "type": "unemployed",
+        },
+        Object {
+          "description": "Hej hej hej",
+          "name": "Annat",
+          "type": "otheroccupation",
+        },
+      ],
+      "personalNumber": "198603032395",
+      "phone": "0723806237",
+      "role": "applicant",
+    },
+    Object {
+      "citizenship": "",
+      "email": "kajsa@example.com",
+      "expenses": Array [
+        Object {
+          "title": "A-kassa och fackavgift",
+          "value": 212,
+        },
+        Object {
+          "date": "2022-12-20",
+          "description": "Sjukvård",
+          "title": "Sjukvård",
+          "type": undefined,
+          "value": 215,
+        },
+        Object {
+          "date": "2022-12-21",
+          "description": "Medicin",
+          "title": "Medicin",
+          "type": undefined,
+          "value": 216,
+        },
+        Object {
+          "date": "2022-12-24",
+          "description": undefined,
+          "title": "Tandvård",
+          "type": undefined,
+          "value": 219,
+        },
+        Object {
+          "date": "2022-12-25",
+          "description": undefined,
+          "title": "Tandvård",
+          "type": undefined,
+          "value": 220,
+        },
+        Object {
+          "date": "2022-12-16",
+          "description": "Busskort",
+          "title": "Busskort",
+          "type": undefined,
+          "value": 209,
+        },
+        Object {
+          "date": "2022-12-17",
+          "description": "Busskort",
+          "title": "Busskort",
+          "type": undefined,
+          "value": 210,
+        },
+        Object {
+          "date": "2022-12-16",
+          "description": "Busskort",
+          "title": "Busskort",
+          "type": undefined,
+          "value": 209,
+        },
+        Object {
+          "date": "2022-12-17",
+          "description": "Busskort",
+          "title": "Busskort",
+          "type": undefined,
+          "value": 210,
+        },
+      ],
+      "firstName": "Kajsa",
+      "hasSigned": true,
+      "incomes": Array [
+        Object {
+          "date": "2022-12-08",
+          "description": undefined,
+          "title": "Lön 1",
+          "type": undefined,
+          "value": 1100,
+        },
+        Object {
+          "date": "2022-12-09",
+          "description": undefined,
+          "title": "Lön 2",
+          "type": undefined,
+          "value": 1101,
+        },
+        Object {
+          "date": "2022-12-12",
+          "description": "Gåva/present",
+          "title": "Gåva/present",
+          "type": undefined,
+          "value": 110,
+        },
+        Object {
+          "date": "2022-12-13",
+          "description": "Inkomst från försäljning",
+          "title": "Inkomst från försäljning",
+          "type": undefined,
+          "value": 111,
+        },
+        Object {
+          "title": "Utländsk pension",
+          "value": "107",
+        },
+      ],
+      "lastName": "Sandberg",
+      "needBuscard": true,
+      "occupations": Array [
+        Object {
+          "description": "Heltid AB",
+          "name": "Arbetar heltid",
+          "type": "fulltime",
+        },
+      ],
+      "personalNumber": "198603052385",
+      "phone": "0767123456",
+      "role": "coApplicant",
+    },
+  ],
+  "updatedAt": "2022-12-08",
+}
+`;
