@@ -65,14 +65,14 @@ function getHousingTypeDescription(answers: CaseFormAnswer[]): string {
   const typeAnswers = formHelpers
     .filterByTags(answers, ['type'])
     .filter(answer => answer.value === true);
-  const validTypes = Object.values(ValidHousingTypes) as string[] as ValidTags[];
+  const validTypes = Object.values(ValidHousingTypes);
   const housingType = validTypes.filter(type => typeAnswers[0]?.field.tags.includes(type))[0];
-  const description = friendlyHousingDescriptions[housingType as ValidHousingTypes] ?? '';
+  const description = friendlyHousingDescriptions[housingType] ?? '';
   return description;
 }
 
 function getCheckedOtherAdultsLivingDescriptions(answers: CaseFormAnswer[]): string[] {
-  const otherLivingTypes = Object.values(ValidOtherAdultsLivingTypes) as string[] as ValidTags[];
+  const otherLivingTypes = Object.values<string>(ValidOtherAdultsLivingTypes) as ValidTags[];
   return otherLivingTypes.reduce((list, potentialLivingType) => {
     const checkValue = formHelpers.getFirstAnswerValueByTags(answers, [
       'housing',
