@@ -13,6 +13,7 @@ import S3 from '../libs/S3';
 import createRecurringCaseTemplate from '../helpers/createRecurringCaseTemplate';
 import createCaseTemplate from '../helpers/createCaseTemplate';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
+import { isFormNewApplication } from '../helpers/newApplication';
 import handlebars from '../helpers/htmlTemplate';
 import { cases } from '../helpers/query';
 
@@ -139,13 +140,6 @@ function getClosedCases(partitionKey: string) {
 async function getFormIds(): Promise<VivaParametersResponse> {
   const formIds = await params.read(config.cases.providers.viva.envsKeyName);
   return formIds;
-}
-
-function isFormNewApplication(formIds: VivaParametersResponse, targetFormId: string): boolean {
-  return Object.entries(formIds)
-    .filter(([key]) => key.startsWith('new'))
-    .map(([, value]) => value)
-    .includes(targetFormId);
 }
 
 export async function generateRecurringCaseHtml(
