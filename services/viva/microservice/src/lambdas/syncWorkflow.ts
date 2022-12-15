@@ -58,7 +58,10 @@ export function filterExpressionMapper(statusType: string): string {
   return `begins_with(#status.#type, ${valueName})`;
 }
 
-async function getCasesByStatusType(personalNumber: string, statusTypeList: string[]) {
+async function getCasesByStatusType(
+  personalNumber: string,
+  statusTypeList: string[]
+): Promise<CaseItem[]> {
   const PK = `USER#${personalNumber}`;
 
   const filterExpression = statusTypeList.map(filterExpressionMapper).join(' or ');
@@ -86,7 +89,7 @@ async function getCasesByStatusType(personalNumber: string, statusTypeList: stri
   return (result.Items ?? []) as CaseItem[];
 }
 
-function updateCaseDetailsWorkflow(keys: CaseKeys, newWorkflow: VivaWorkflow) {
+function updateCaseDetailsWorkflow(keys: CaseKeys, newWorkflow: VivaWorkflow): Promise<void> {
   const updateParams = {
     TableName: config.cases.tableName,
     Key: {
@@ -108,7 +111,10 @@ function isSetWorkflowId(caseItem: CaseItem) {
   return !!caseItem.details.workflowId;
 }
 
-export async function syncWorkflow(input: LambdaRequest, dependencies: Dependencies) {
+export async function syncWorkflow(
+  input: LambdaRequest,
+  dependencies: Dependencies
+): Promise<boolean> {
   const { personalNumber } = input.detail.user;
 
   const caseList = await dependencies.getCasesByStatusType(personalNumber, [
