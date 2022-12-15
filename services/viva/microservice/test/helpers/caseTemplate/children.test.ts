@@ -1,7 +1,9 @@
-import type { Child } from '../../../src/helpers/caseTemplate/children';
 import { createChildren } from '../../../src/helpers/caseTemplate/children';
-import { CaseFormAnswer, CasePersonRole } from '../../../src/types/caseItem';
+import { CasePersonRole } from '../../../src/types/caseItem';
 import { makeAnswer } from './testHelpers';
+
+import type { Child } from '../../../src/helpers/caseTemplate/children';
+import type { CaseFormAnswer } from '../../../src/types/caseItem';
 
 describe('Case Template - children', () => {
   it('creates Children', () => {

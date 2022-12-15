@@ -214,6 +214,19 @@
             </tr>
           {{/if}}
 
+          {{#if (ne hasUnpaidElectricity undefined)}}
+            <tr>
+              <td>Elskuld</td>
+              <td>
+                {{#if hasUnpaidElectricity}}
+                  Ja
+                {{else}}
+                  Nej
+                {{/if}}
+              </td>
+            </tr>
+          {{/if}}
+
           {{#if (ne hasOwnerContractApproved undefined)}}
             <tr>
               <td>Är uthyrning godkänd av hyresvärd</td>
@@ -318,8 +331,8 @@
 
       {{#each persons}}
         <h2>
-          {{#if (eq this.role 'applicant')}} Sökandes utgifter {{/if}}
-          {{#if (eq this.role 'coApplicant')}} Medsökandes utgifter {{/if}}
+          {{#if (eq this.role 'applicant')}} Sökandes utgifter{{/if}}
+          {{#if (eq this.role 'coApplicant')}} Medsökandes utgifter{{/if}}
         </h2>
         <table>
           {{#each this.expenses}}
@@ -340,17 +353,29 @@
               </td>
             </tr>
           {{/each}}
+          {{#if (ne this.needBuscard undefined)}}
+          <tr>
+            <td>Behöver busskort</td>
+            <td>
+              {{#if this.needBuscard}}
+                Ja
+              {{else}}
+                Nej
+              {{/if}}
+            </td>
+          </tr>
+          {{/if}}
         </table>
       {{/each}}
 
-      {{! Sub section for showing appliacnt expenses }}
+      {{! Sub section for showing applicant expenses }}
       {{#if financials.expenses.applicant}}
         <section>
           <h2>Sökandes utgifter</h2>
         </section>
       {{/if}}
 
-      {{! Sub section for showing co-appliacnt expenses }}
+      {{! Sub section for showing co-applicant expenses }}
       {{#if financials.expenses.coApplicant}}
         <section>
           <h2>Medsökandes utgifter</h2>

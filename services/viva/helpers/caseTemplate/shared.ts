@@ -24,6 +24,7 @@ type PersonTags =
   | 'amount'
   | 'annat'
   | 'applicant'
+  | 'buscard'
   | 'citizenship'
   | 'coapplicant'
   | 'date'
@@ -35,6 +36,7 @@ type PersonTags =
   | 'medicin'
   | 'other'
   | 'phonenumber'
+  | 'reskostnad'
   | 'tandvard';
 
 type OccupationTags =
@@ -52,16 +54,26 @@ type NoteTags = 'message';
 
 type HousingTags =
   | 'address'
+  | 'child'
+  | 'condo'
+  | 'debtElectricity'
   | 'debtRent'
+  | 'homeless'
   | 'homelessDescription'
+  | 'house'
   | 'layout'
+  | 'lease'
   | 'numberPeopleLiving'
+  | 'other'
   | 'otherLivingDescription'
   | 'ownerContractApproved'
   | 'ownRoom'
+  | 'parents'
   | 'postalAddress'
   | 'postalCode'
   | 'rent'
+  | 'roommate'
+  | 'sublease'
   | 'value';
 
 type ChildTags = 'school';
@@ -186,4 +198,29 @@ export function toDateString(maybeDateNumber?: CaseFormAnswerValue): string {
     return formatTimestampToDate(maybeDateNumber);
   }
   return '';
+}
+
+export function parseFloatSafe(value: string): number | undefined {
+  const float = parseFloat(value);
+  return isNaN(float) ? undefined : float;
+}
+
+export function asBooleanSafe(value: unknown): boolean | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  return !!value;
+}
+
+export function fromYesNoBoolean(value: string | undefined): boolean | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (typeof value === 'string') {
+    return value.toLocaleLowerCase() === 'ja';
+  }
+
+  return false;
 }
