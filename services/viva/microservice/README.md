@@ -32,7 +32,7 @@ sls deploy
 
 ## Viva Api
 
-#### Request type
+### Request type
 
 `POST`
 
