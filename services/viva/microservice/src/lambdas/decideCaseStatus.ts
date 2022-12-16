@@ -2,7 +2,7 @@ import config from '../libs/config';
 
 import * as dynamoDb from '../libs/dynamoDb';
 import log from '../libs/logs';
-import { VIVA_APPLICATION_RECEIVED } from '../libs/constants';
+import { VIVA_APPLICATION_LOCKED } from '../libs/constants';
 import { getStatusByType } from '../libs/caseStatuses';
 
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
@@ -45,7 +45,7 @@ function updateCaseStatusAndState(keys: CaseKeys, newStatus: CaseStatus): Promis
     ExpressionAttributeNames: { '#status': 'status', '#state': 'state' },
     ExpressionAttributeValues: {
       ':newStatusType': newStatus,
-      ':newState': VIVA_APPLICATION_RECEIVED,
+      ':newState': VIVA_APPLICATION_LOCKED,
     },
     ReturnValues: 'NONE',
   };

@@ -256,7 +256,11 @@ functions:
               - 'Completions Due Date Probably Overdue'
             detail:
               caseStatusType: [{ 'anything-but': { 'prefix': 'active:processing' } }]
-              caseState: [{ 'anything-but': 'VIVA_APPLICATION_RECEIVED' }]
+              caseState:
+                [
+                  { 'anything-but': 'VIVA_APPLICATION_RECEIVED' },
+                  { 'anything-but': 'VIVA_APPLICATION_LOCKED' },
+                ]
           retryPolicy:
             maximumEventAge: 3600
             maximumRetryAttempts: 3
