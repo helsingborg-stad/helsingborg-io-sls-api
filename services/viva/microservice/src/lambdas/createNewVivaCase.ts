@@ -66,9 +66,9 @@ async function getApplicantCases(personalNumber: string): Promise<CaseItem[]> {
     ExpressionAttributeValues: {
       ':pk': `USER#${personalNumber}`,
     },
-    ProjectionExpression: '#s, currentFormId',
+    ProjectionExpression: '#status, currentFormId',
     ExpressionAttributeNames: {
-      '#s': 'status',
+      '#status': 'status',
     },
   };
 
@@ -88,20 +88,20 @@ async function getCoApplicantCases(personalNumber: string): Promise<CaseItem[]> 
       ':sk': SK,
     },
     Select: 'SPECIFIC_ATTRIBUTES',
-    ProjectionExpression: '#s, currentFormId',
+    ProjectionExpression: '#status, currentFormId',
     ExpressionAttributeNames: {
-      '#s': 'status',
+      '#status': 'status',
     },
   };
 
   return (await dynamoDb.call('query', queryParams)).Items;
 }
 
-function getOpenedCase(caseItem: CaseItem): boolean {
+function isOpenCase(caseItem: CaseItem): boolean {
   return !caseItem.status.type.includes('closed');
 }
 
-function getNewApplicationCase(formId: VivaParametersResponse): (caseItem: CaseItem) => boolean {
+function isCaseNewApplication(formId: VivaParametersResponse): (caseItem: CaseItem) => boolean {
   return ({ currentFormId }) => isFormNewApplication(formId, currentFormId);
 }
 
@@ -116,7 +116,7 @@ export async function createNewVivaCase(
     return false;
   }
 
-  const formId = await dependencies.getFormTemplateId();
+  const formIdCollection = await dependencies.getFormTemplateId();
 
   const cases = (
     await Promise.all([
@@ -125,17 +125,17 @@ export async function createNewVivaCase(
     ])
   ).flat();
 
-  const newApplicationCases = cases.filter(getNewApplicationCase(formId));
-  const hasOpenedNewApplicationCases = newApplicationCases.filter(getOpenedCase).length > 0;
+  const newApplicationCases = cases.filter(isCaseNewApplication(formIdCollection));
+  const hasOpenedNewApplicationCases = newApplicationCases.filter(isOpenCase).length > 0;
 
   if (hasOpenedNewApplicationCases) {
     return false;
   }
 
   const formIdList = [
-    formId.newApplicationFormId,
-    formId.newApplicationCompletionFormId,
-    formId.newApplicationRandomCheckFormId,
+    formIdCollection.newApplicationFormId,
+    formIdCollection.newApplicationCompletionFormId,
+    formIdCollection.newApplicationRandomCheckFormId,
   ];
 
   const initialFormEncryption = createCaseHelper.getFormEncryptionAttributes();
@@ -188,7 +188,7 @@ export async function createNewVivaCase(
       },
       completions: null,
     },
-    currentFormId: formId.newApplicationFormId,
+    currentFormId: formIdCollection.newApplicationFormId,
   };
 
   await dependencies.createCase({
