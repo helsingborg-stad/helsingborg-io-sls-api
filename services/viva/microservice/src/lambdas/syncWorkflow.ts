@@ -1,13 +1,7 @@
 import log from '../libs/logs';
 import config from '../libs/config';
 import * as dynamoDb from '../libs/dynamoDb';
-import {
-  ACTIVE_ONGOING,
-  ACTIVE_SUBMITTED,
-  ACTIVE_PROCESSING,
-  CLOSED_REJECTED_VIVA,
-  CLOSED_PARTIALLY_APPROVED_VIVA,
-} from '../libs/constants';
+import { CLOSED_REJECTED_VIVA, CLOSED_PARTIALLY_APPROVED_VIVA } from '../libs/constants';
 
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
@@ -118,12 +112,11 @@ export async function syncWorkflow(
   const { personalNumber } = input.detail.user;
 
   const caseList = await dependencies.getCasesByStatusType(personalNumber, [
-    ACTIVE_ONGOING,
-    ACTIVE_SUBMITTED,
-    ACTIVE_PROCESSING,
+    'active',
     CLOSED_REJECTED_VIVA,
     CLOSED_PARTIALLY_APPROVED_VIVA,
   ]);
+
   const isEmptyCaseList = caseList.length === 0;
   if (isEmptyCaseList) {
     return true;
