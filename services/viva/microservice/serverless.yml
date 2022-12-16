@@ -232,6 +232,8 @@ functions:
           pattern:
             source:
               - vivaMs.checkCompletionsStatus
+            detail-type:
+              - checkCompletionsStatusRequired
             detail:
               caseStatusType: [{ 'anything-but': { 'prefix': 'active:ongoing' } }]
               caseState:
