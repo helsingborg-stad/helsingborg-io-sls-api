@@ -1,13 +1,13 @@
 [
   {
-    "Source": "bankId.collect",
+    "Source": "OFFbankId.collect",
     "Detail": "{ \"user\": { \"personalNumber\": \"198603232391\" } }",
     "Resources": ["MILTON"],
     "DetailType": "BankIdCollectComplete",
     "EventBusName": "default"
   },
   {
-    "Source": "OFFbankId.collect",
+    "Source": "bankId.collect",
     "Detail": "{ \"user\": { \"personalNumber\": \"198602132394\" } }",
     "Resources": ["BROR"],
     "DetailType": "BankIdCollectComplete",
