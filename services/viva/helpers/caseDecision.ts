@@ -3,6 +3,7 @@ import {
   CLOSED_APPROVED_VIVA,
   CLOSED_REJECTED_VIVA,
   CLOSED_PARTIALLY_APPROVED_VIVA,
+  VIVA_APPLICATION_LOCKED,
 } from '../libs/constants';
 
 import type {
@@ -11,9 +12,8 @@ import type {
   VivaWorkflowDecision,
 } from '../types/vivaWorkflow';
 
-export default function decideNewCaseStatus(workflow: VivaWorkflow) {
-  const islocked = !!workflow.application.islocked;
-  const paymentList = makeArray(workflow?.payments?.payment);
+export default function decideNewCaseStatus(workflow: VivaWorkflow): string | undefined {
+  const paymentList = makeArray(workflow.payments?.payment);
   const decisionList = getLatestDecision(workflow.decision);
   const decisionTypeCode = getDecisionTypeCode(decisionList);
 
@@ -22,11 +22,23 @@ export default function decideNewCaseStatus(workflow: VivaWorkflow) {
     return getCaseStatusType(decisionTypeCode, hasPayment);
   }
 
-  if (islocked) {
+  if (isWorkflowLocked(workflow)) {
     return ACTIVE_PROCESSING;
   }
 
   return undefined;
+}
+
+export function calculateNewState(workflow: VivaWorkflow): string | undefined {
+  if (isWorkflowLocked(workflow)) {
+    return VIVA_APPLICATION_LOCKED;
+  }
+
+  return undefined;
+}
+
+function isWorkflowLocked(workflow: VivaWorkflow) {
+  return !!workflow.application.islocked;
 }
 
 function getLatestDecision(
@@ -50,7 +62,7 @@ function getDecisionTypeCode(decisionList: VivaWorkflowDecision[]): number | und
   return decisionList.reduce((typeCode, decision) => typeCode | parseInt(decision.typecode, 10), 0);
 }
 
-function getCaseStatusType(decisionTypeCode: number, hasPayment: boolean) {
+function getCaseStatusType(decisionTypeCode: number, hasPayment: boolean): string {
   if (decisionTypeCode === 1 && hasPayment) {
     return CLOSED_APPROVED_VIVA;
   }
