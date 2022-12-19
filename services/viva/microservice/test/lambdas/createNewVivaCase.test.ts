@@ -1,14 +1,19 @@
+import { createNewVivaCase } from '../../src/lambdas/createNewVivaCase';
+
+import { getStatusByType } from '../../src/libs/caseStatuses';
 import {
+  CLOSED,
   CASE_PROVIDER_VIVA,
   VIVA_CASE_CREATED,
   NEW_APPLICATION_VIVA,
+  ACTIVE_ONGOING_NEW_APPLICATION,
 } from '../../src/libs/constants';
-import { getStatusByType } from '../../src/libs/caseStatuses';
+
+import { DEFAULT_CURRENT_POSITION } from '../../src/helpers/constants';
+
 import { EncryptionType, CasePersonRole } from '../../src/types/caseItem';
 import type { Dependencies } from '../../src/lambdas/createNewVivaCase';
-import type { CaseForm } from '../../src/types/caseItem';
-import { createNewVivaCase } from '../../src/lambdas/createNewVivaCase';
-import { DEFAULT_CURRENT_POSITION } from '../../src/helpers/constants';
+import type { CaseForm, CaseItem } from '../../src/types/caseItem';
 
 jest.useFakeTimers('modern').setSystemTime(new Date('2022-01-01'));
 
@@ -50,7 +55,14 @@ function createDependencies(partialDependencies: Partial<Dependencies> = {}) {
   return {
     getTemplates: () => Promise.resolve({}),
     getFormTemplateId: () => Promise.resolve(readParametersResponse),
-    getUserCasesCount: () => Promise.resolve({ Count: 0 }),
+    getApplicantCases: () =>
+      Promise.resolve([
+        {
+          status: { type: CLOSED },
+          currentFormId: readParametersResponse.newApplicationFormId,
+        },
+      ] as CaseItem[]),
+    getCoApplicantCases: () => Promise.resolve([] as CaseItem[]),
     createCase: () => Promise.resolve({ id: '123' }),
     isApprovedForNewApplication: () => Promise.resolve(true),
     ...partialDependencies,
@@ -106,32 +118,115 @@ it('successfully creates a new application case', async () => {
   );
 });
 
-it('stops execution when user case exists', async () => {
+test.each([
+  {
+    description: 'stops execution when opened new applications only exists for applicant',
+    getApplicantCasesResponse: [
+      {
+        status: { type: ACTIVE_ONGOING_NEW_APPLICATION },
+        currentFormId: readParametersResponse.newApplicationFormId,
+      },
+    ],
+    getCoApplicantCasesResonse: [],
+  },
+  {
+    description: 'stops execution when opened new applications only exists for coApplicant',
+    getApplicantCasesResponse: [],
+    getCoApplicantCasesResonse: [
+      {
+        status: { type: ACTIVE_ONGOING_NEW_APPLICATION },
+        currentFormId: readParametersResponse.newApplicationFormId,
+      },
+    ],
+  },
+  {
+    description: 'stops execution when opened new applications exists for both applicants',
+    getApplicantCasesResponse: [
+      {
+        status: { type: ACTIVE_ONGOING_NEW_APPLICATION },
+        currentFormId: readParametersResponse.newApplicationFormId,
+      },
+    ],
+    getCoApplicantCasesResonse: [
+      {
+        status: { type: ACTIVE_ONGOING_NEW_APPLICATION },
+        currentFormId: readParametersResponse.newApplicationFormId,
+      },
+    ],
+  },
+])('$description', async ({ getApplicantCasesResponse, getCoApplicantCasesResonse }) => {
   const createCaseMock = jest.fn().mockResolvedValueOnce(undefined);
+  const getApplicantCasesMock = jest.fn().mockResolvedValueOnce(getApplicantCasesResponse);
+  const getCoApplicantCasesMock = jest.fn().mockResolvedValueOnce(getCoApplicantCasesResonse);
 
   const result = await createNewVivaCase(
     lambdaInput,
     createDependencies({
       createCase: createCaseMock,
-      getUserCasesCount: () => Promise.resolve({ Count: 1 }),
+      getApplicantCases: getApplicantCasesMock,
+      getCoApplicantCases: getCoApplicantCasesMock,
     })
   );
 
-  expect(result).toBe(true);
+  expect(result).toBe(false);
   expect(createCaseMock).toHaveBeenCalledTimes(0);
 });
 
-it('stops execution when user personal number is not approved for new application', async () => {
+test.each([
+  {
+    description: 'creates new case when either applicants has any cases',
+    getApplicantCasesResponse: [],
+    getCoApplicantCasesResonse: [],
+  },
+  {
+    description: 'creates new case when only applicant has closed new case',
+    getApplicantCasesResponse: [
+      {
+        status: { type: CLOSED },
+        currentFormId: readParametersResponse.newApplicationFormId,
+      },
+    ],
+    getCoApplicantCasesResonse: [],
+  },
+  {
+    description: 'creates new case when only coApplicant has closed new case',
+    getApplicantCasesResponse: [],
+    getCoApplicantCasesResonse: [
+      {
+        status: { type: CLOSED },
+        currentFormId: readParametersResponse.newApplicationFormId,
+      },
+    ],
+  },
+  {
+    description: 'creates new case when both applicants have closed new cases',
+    getApplicantCasesResponse: [
+      {
+        status: { type: CLOSED },
+        currentFormId: readParametersResponse.newApplicationFormId,
+      },
+    ],
+    getCoApplicantCasesResonse: [
+      {
+        status: { type: CLOSED },
+        currentFormId: readParametersResponse.newApplicationFormId,
+      },
+    ],
+  },
+])('$description', async ({ getApplicantCasesResponse, getCoApplicantCasesResonse }) => {
   const createCaseMock = jest.fn().mockResolvedValueOnce(undefined);
+  const getApplicantCasesMock = jest.fn().mockResolvedValueOnce(getApplicantCasesResponse);
+  const getCoApplicantCasesMock = jest.fn().mockResolvedValueOnce(getCoApplicantCasesResonse);
 
   const result = await createNewVivaCase(
     lambdaInput,
     createDependencies({
       createCase: createCaseMock,
-      isApprovedForNewApplication: () => Promise.resolve(false),
+      getApplicantCases: getApplicantCasesMock,
+      getCoApplicantCases: getCoApplicantCasesMock,
     })
   );
 
   expect(result).toBe(true);
-  expect(createCaseMock).toHaveBeenCalledTimes(0);
+  expect(createCaseMock).toHaveBeenCalledTimes(1);
 });
