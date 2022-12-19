@@ -219,6 +219,8 @@ functions:
               - vivaMs.syncCaseCompletions
             detail-type:
               - syncSuccess
+            detail:
+              caseState: [{ 'anything-but': 'VIVA_APPLICATION_LOCKED' }]
           retryPolicy:
             maximumEventAge: 3600
             maximumRetryAttempts: 3
@@ -236,8 +238,6 @@ functions:
               - checkCompletionsStatusRequired
             detail:
               caseStatusType: [{ 'anything-but': { 'prefix': 'active:ongoing' } }]
-              caseState:
-                [{ 'anything-but': ['VIVA_RANDOM_CHECK_RECEIVED', 'VIVA_COMPLETION_RECEIVED'] }]
           retryPolicy:
             maximumEventAge: 3600
             maximumRetryAttempts: 3
@@ -255,8 +255,7 @@ functions:
               - 'Completions Due Date Probably Overdue'
             detail:
               caseStatusType: [{ 'anything-but': { 'prefix': 'active:processing' } }]
-              caseState:
-                [{ 'anything-but': ['VIVA_APPLICATION_RECEIVED', 'VIVA_APPLICATION_LOCKED'] }]
+              caseState: [{ 'anything-but': 'VIVA_APPLICATION_LOCKED' }]
           retryPolicy:
             maximumEventAge: 3600
             maximumRetryAttempts: 3
