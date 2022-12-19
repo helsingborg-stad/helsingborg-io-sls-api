@@ -237,10 +237,7 @@ functions:
             detail:
               caseStatusType: [{ 'anything-but': { 'prefix': 'active:ongoing' } }]
               caseState:
-                [
-                  { 'anything-but': 'VIVA_RANDOM_CHECK_RECEIVED' },
-                  { 'anything-but': 'VIVA_COMPLETION_RECEIVED' },
-                ]
+                [{ 'anything-but': ['VIVA_RANDOM_CHECK_RECEIVED', 'VIVA_COMPLETION_RECEIVED'] }]
           retryPolicy:
             maximumEventAge: 3600
             maximumRetryAttempts: 3
@@ -259,10 +256,7 @@ functions:
             detail:
               caseStatusType: [{ 'anything-but': { 'prefix': 'active:processing' } }]
               caseState:
-                [
-                  { 'anything-but': 'VIVA_APPLICATION_RECEIVED' },
-                  { 'anything-but': 'VIVA_APPLICATION_LOCKED' },
-                ]
+                [{ 'anything-but': ['VIVA_APPLICATION_RECEIVED', 'VIVA_APPLICATION_LOCKED'] }]
           retryPolicy:
             maximumEventAge: 3600
             maximumRetryAttempts: 3
