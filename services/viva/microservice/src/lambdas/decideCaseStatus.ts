@@ -2,11 +2,10 @@ import config from '../libs/config';
 
 import * as dynamoDb from '../libs/dynamoDb';
 import log from '../libs/logs';
-import { VIVA_APPLICATION_LOCKED } from '../libs/constants';
 import { getStatusByType } from '../libs/caseStatuses';
 
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
-import decideNewCaseStatus from '../helpers/caseDecision';
+import decideNewCaseStatus, { calculateNewState } from '../helpers/caseDecision';
 
 import type { CaseStatus } from '../types/caseItem';
 import type { VivaWorkflow } from '../types/vivaWorkflow';
@@ -31,10 +30,14 @@ interface SuccessEvent {
 
 export interface Dependencies {
   putSuccessEvent: (params: SuccessEvent) => Promise<void>;
-  updateCase: (keys: CaseKeys, newStatus: CaseStatus) => Promise<void>;
+  updateCase: (keys: CaseKeys, newStatus: CaseStatus, newState: string) => Promise<void>;
 }
 
-function updateCaseStatusAndState(keys: CaseKeys, newStatus: CaseStatus): Promise<void> {
+function updateCaseStatusAndState(
+  keys: CaseKeys,
+  newStatus: CaseStatus,
+  newState: string
+): Promise<void> {
   const updateParams = {
     TableName: config.cases.tableName,
     Key: {
@@ -45,7 +48,7 @@ function updateCaseStatusAndState(keys: CaseKeys, newStatus: CaseStatus): Promis
     ExpressionAttributeNames: { '#status': 'status', '#state': 'state' },
     ExpressionAttributeValues: {
       ':newStatusType': newStatus,
-      ':newState': VIVA_APPLICATION_LOCKED,
+      ':newState': newState,
     },
     ReturnValues: 'NONE',
   };
@@ -60,11 +63,16 @@ export async function decideCaseStatus(
   const { caseKeys, workflow } = input.detail;
 
   const newStatusType = decideNewCaseStatus(workflow);
-  if (newStatusType == undefined) {
+  const newState = calculateNewState(workflow);
+
+  const isUndefined = newStatusType == undefined || newState == undefined;
+  if (isUndefined) {
     return true;
   }
 
-  await dependencies.updateCase(caseKeys, getStatusByType(newStatusType));
+  const newStatus = getStatusByType(newStatusType);
+
+  await dependencies.updateCase(caseKeys, newStatus, newState);
   await dependencies.putSuccessEvent({ caseKeys });
 
   return true;
