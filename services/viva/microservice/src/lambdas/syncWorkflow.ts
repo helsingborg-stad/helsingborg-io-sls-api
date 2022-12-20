@@ -43,7 +43,7 @@ function createAttributeValueName(statusType: string): string {
   return `:statusType${name.charAt(0).toUpperCase() + name.slice(1)}`;
 }
 
-export function createAttributeValues(statusType: string) {
+export function createAttributeValues(statusType: string): Record<string, string> {
   return { [createAttributeValueName(statusType)]: statusType };
 }
 
@@ -101,7 +101,7 @@ function updateCaseDetailsWorkflow(keys: CaseKeys, newWorkflow: VivaWorkflow): P
   return dynamoDb.call('update', updateParams);
 }
 
-function isSetWorkflowId(caseItem: CaseItem) {
+function isCaseWorkflowIdValid(caseItem: CaseItem): boolean {
   return !!caseItem.details.workflowId;
 }
 
@@ -122,7 +122,7 @@ export async function syncWorkflow(
     return true;
   }
 
-  const caseListWithWorkflowId = caseList.filter(isSetWorkflowId);
+  const caseListWithWorkflowId = caseList.filter(isCaseWorkflowIdValid);
 
   await Promise.allSettled(
     caseListWithWorkflowId.map(async caseItem => {
