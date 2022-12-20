@@ -5,7 +5,7 @@ import log from '../libs/logs';
 import { getStatusByType } from '../libs/caseStatuses';
 
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
-import decideNewCaseStatus, { calculateNewState } from '../helpers/caseDecision';
+import { decideNewCaseStatus, desideNewState } from '../helpers/caseDecision';
 
 import type { CaseStatus } from '../types/caseItem';
 import type { VivaWorkflow } from '../types/vivaWorkflow';
@@ -63,10 +63,10 @@ export async function decideCaseStatus(
   const { caseKeys, workflow } = input.detail;
 
   const newStatusType = decideNewCaseStatus(workflow);
-  const newState = calculateNewState(workflow);
+  const newState = desideNewState(workflow);
 
-  const isUndefined = newStatusType == undefined || newState == undefined;
-  if (isUndefined) {
+  const isStatusStateUndefined = !(newStatusType && newState);
+  if (isStatusStateUndefined) {
     return true;
   }
 
