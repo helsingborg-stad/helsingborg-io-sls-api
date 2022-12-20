@@ -32,7 +32,7 @@ sls deploy
 
 ## Viva Api
 
-#### Request type
+### Request type
 
 `POST`
 
@@ -63,6 +63,42 @@ sls deploy
 ```
 
 ---
+
+## Sync workflow
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant EventBridge
+  participant Lambda syncWorkflow
+  participant DynamoDB Cases
+  participant VADA/Viva
+
+  EventBridge-)+Lambda syncWorkflow: {user: {personalNumber}}
+  Lambda syncWorkflow->>-DynamoDB Cases: {personalNumber, statusType[]}
+  DynamoDB Cases-->>Lambda syncWorkflow: {case[]}
+
+  loop case[]
+    Lambda syncWorkflow->>VADA/Viva: POST {personalNumber, workflowId}
+    VADA/Viva-->>+Lambda syncWorkflow: {workflow}
+    Lambda syncWorkflow->>DynamoDB Cases: Update case {caseKeys, workflow}
+    Lambda syncWorkflow-)-EventBridge: {caseKeys, workflow}
+  end
+```
+
+## Decide case status
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant EventBridge
+  participant Lambda decideCaseStatus
+  participant DynamoDB Cases
+
+  EventBridge-)+Lambda decideCaseStatus: {caseKeys, workflow}
+  Lambda decideCaseStatus->>DynamoDB Cases: {caseKeys, newStatus}
+  Lambda decideCaseStatus-)-EventBridge: {caseKeys}
+```
 
 ## Viva submit application sequence diagram
 

@@ -1,10 +1,4 @@
-import {
-  ACTIVE_ONGOING,
-  ACTIVE_SUBMITTED,
-  ACTIVE_PROCESSING,
-  CLOSED_REJECTED_VIVA,
-  CLOSED_PARTIALLY_APPROVED_VIVA,
-} from '../../src/libs/constants';
+import { CLOSED_REJECTED_VIVA, CLOSED_PARTIALLY_APPROVED_VIVA } from '../../src/libs/constants';
 import type { Dependencies, LambdaRequest } from '../../src/lambdas/syncWorkflow';
 import {
   syncWorkflow,
@@ -112,18 +106,10 @@ it('Syncs cases with multiple status types', async () => {
 });
 
 it('Creates query filter expression', async () => {
-  const statusTypeList = [
-    ACTIVE_ONGOING,
-    ACTIVE_SUBMITTED,
-    ACTIVE_PROCESSING,
-    CLOSED_REJECTED_VIVA,
-    CLOSED_PARTIALLY_APPROVED_VIVA,
-  ];
+  const statusTypeList = ['active', CLOSED_REJECTED_VIVA, CLOSED_PARTIALLY_APPROVED_VIVA];
   const filterExpression = statusTypeList.map(filterExpressionMapper).join(' or ');
   const beginsWithFilterExpressions = [
-    'begins_with(#status.#type, :statusTypeOngoing)',
-    'begins_with(#status.#type, :statusTypeSubmitted)',
-    'begins_with(#status.#type, :statusTypeProcessing)',
+    'begins_with(#status.#type, :statusTypeActive)',
     'begins_with(#status.#type, :statusTypeRejected)',
     'begins_with(#status.#type, :statusTypePartiallyApproved)',
   ].join(' or ');
@@ -133,9 +119,7 @@ it('Creates query filter expression', async () => {
 
 it('Creates query expression attribute values', async () => {
   const statusTypeList = [
-    ACTIVE_ONGOING,
-    ACTIVE_SUBMITTED,
-    ACTIVE_PROCESSING,
+    'active',
     CLOSED_REJECTED_VIVA,
     CLOSED_PARTIALLY_APPROVED_VIVA,
     'noSemicolonInName',
@@ -145,9 +129,7 @@ it('Creates query expression attribute values', async () => {
   }, {});
 
   expect(expressionAttributeValues).toEqual({
-    ':statusTypeOngoing': 'active:ongoing',
-    ':statusTypeProcessing': 'active:processing',
-    ':statusTypeSubmitted': 'active:submitted',
+    ':statusTypeActive': 'active',
     ':statusTypeRejected': 'closed:rejected:viva',
     ':statusTypePartiallyApproved': 'closed:partiallyApproved:viva',
     ':statusTypeNoSemicolonInName': 'noSemicolonInName',

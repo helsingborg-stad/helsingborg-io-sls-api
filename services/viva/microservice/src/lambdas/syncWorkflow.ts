@@ -1,13 +1,7 @@
 import log from '../libs/logs';
 import config from '../libs/config';
 import * as dynamoDb from '../libs/dynamoDb';
-import {
-  ACTIVE_ONGOING,
-  ACTIVE_SUBMITTED,
-  ACTIVE_PROCESSING,
-  CLOSED_REJECTED_VIVA,
-  CLOSED_PARTIALLY_APPROVED_VIVA,
-} from '../libs/constants';
+import { CLOSED_REJECTED_VIVA, CLOSED_PARTIALLY_APPROVED_VIVA } from '../libs/constants';
 
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
@@ -49,7 +43,7 @@ function createAttributeValueName(statusType: string): string {
   return `:statusType${name.charAt(0).toUpperCase() + name.slice(1)}`;
 }
 
-export function createAttributeValues(statusType: string) {
+export function createAttributeValues(statusType: string): Record<string, string> {
   return { [createAttributeValueName(statusType)]: statusType };
 }
 
@@ -58,7 +52,10 @@ export function filterExpressionMapper(statusType: string): string {
   return `begins_with(#status.#type, ${valueName})`;
 }
 
-async function getCasesByStatusType(personalNumber: string, statusTypeList: string[]) {
+async function getCasesByStatusType(
+  personalNumber: string,
+  statusTypeList: string[]
+): Promise<CaseItem[]> {
   const PK = `USER#${personalNumber}`;
 
   const filterExpression = statusTypeList.map(filterExpressionMapper).join(' or ');
@@ -86,7 +83,7 @@ async function getCasesByStatusType(personalNumber: string, statusTypeList: stri
   return (result.Items ?? []) as CaseItem[];
 }
 
-function updateCaseDetailsWorkflow(keys: CaseKeys, newWorkflow: VivaWorkflow) {
+function updateCaseDetailsWorkflow(keys: CaseKeys, newWorkflow: VivaWorkflow): Promise<void> {
   const updateParams = {
     TableName: config.cases.tableName,
     Key: {
@@ -104,22 +101,28 @@ function updateCaseDetailsWorkflow(keys: CaseKeys, newWorkflow: VivaWorkflow) {
   return dynamoDb.call('update', updateParams);
 }
 
-export async function syncWorkflow(input: LambdaRequest, dependencies: Dependencies) {
+function isCaseWorkflowIdValid(caseItem: CaseItem): boolean {
+  return !!caseItem.details.workflowId;
+}
+
+export async function syncWorkflow(
+  input: LambdaRequest,
+  dependencies: Dependencies
+): Promise<boolean> {
   const { personalNumber } = input.detail.user;
 
   const caseList = await dependencies.getCasesByStatusType(personalNumber, [
-    ACTIVE_ONGOING,
-    ACTIVE_SUBMITTED,
-    ACTIVE_PROCESSING,
+    'active',
     CLOSED_REJECTED_VIVA,
     CLOSED_PARTIALLY_APPROVED_VIVA,
   ]);
+
   const isEmptyCaseList = caseList.length === 0;
   if (isEmptyCaseList) {
     return true;
   }
 
-  const caseListWithWorkflowId = caseList.filter(caseItem => !!caseItem.details.workflowId);
+  const caseListWithWorkflowId = caseList.filter(isCaseWorkflowIdValid);
 
   await Promise.allSettled(
     caseListWithWorkflowId.map(async caseItem => {
