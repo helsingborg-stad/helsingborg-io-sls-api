@@ -1,0 +1,331 @@
+openapi: '3.0.3'
+info:
+  title: Forms
+  description: Api for form-builder.
+  contact:
+    name: GitHub Repo
+    url: https://github.com/helsingborg-stad/mitt-helsingborg-form-builder
+  version: '1.0'
+  license:
+    name: MIT
+    url: 'https://github.com/helsingborg-stad/mitt-helsingborg-form-builder#license'
+servers:
+  - url: https://dev.api.helsingborg.io
+  - url: https://release.api.helsingborg.io
+  - url: https://api.helsingborg.io
+
+paths:
+  /forms:
+    get:
+      tags:
+        - Forms
+      summary: Get all available forms.
+      description: This endpoint returns a list of all forms created in form-builder tool.
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: OK.
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Form'
+        '401':
+          description: Invalid JWT.
+          content:
+            'application/json':
+              schema:
+                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
+        '403':
+          $ref: '../common-openapi.yml#/components/responses/missingApiKeyResponse'
+
+components:
+  securitySchemes:
+    $ref: '../common-openapi.yml#/components/securitySchemes'
+
+  schemas:
+    Option:
+      type: object
+      additionalProperties: true
+
+    Argument:
+      type: object
+      properties:
+        option:
+          $ref: '#/components/schemas/Option'
+        locale:
+          type: string
+
+    ValidationRule:
+      type: object
+      properties:
+        method:
+          type: string
+          enum:
+            [
+              isEmpty,
+              isEmail,
+              isUrl,
+              isPostalCode,
+              isNumeric,
+              isAfter,
+              isBefore,
+              isBoolean,
+              isMobilePhone,
+              isPhone,
+              isLenght,
+              isInt,
+            ]
+        validWhen:
+          type: boolean
+        args:
+          $ref: '#/components/schemas/Argument'
+        message:
+          type: string
+
+    Validation:
+      type: object
+      properties:
+        isRequired:
+          type: boolean
+        rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationRule'
+
+    Item:
+      type: object
+      properties:
+        category:
+          type: string
+        title:
+          type: string
+        id:
+          type: string
+        type:
+          type: string
+          enum: [text, arrayText, number, arrayNumber, date, arrayDate, checkbox]
+        loadPrevious:
+          type: array
+          items:
+            type: string
+        validation:
+          $ref: '#/components/schemas/Validation'
+
+    ListInput:
+      type: object
+      properties:
+        title:
+          type: string
+        type:
+          type: string
+          enum: [text, number, date]
+        key:
+          type: string
+        id:
+          type: string
+        label:
+          type: string
+        loadPrevious:
+          type: array
+          items:
+            type: string
+        validation:
+          $ref: '#/components/schemas/Validation'
+
+    Help:
+      type: object
+      properties:
+        text:
+          type: string
+        heading:
+          type: string
+        tagline:
+          type: string
+        url:
+          type: string
+
+    Choice:
+      type: object
+      properties:
+        value:
+          type: string
+        displayText:
+          type: string
+
+    Category:
+      type: object
+      properties:
+        category:
+          type: string
+        description:
+          type: string
+
+    Component:
+      type: object
+      properties:
+        type:
+          type: string
+        text:
+          type: string
+        italic:
+          type: boolean
+        closeButtonText:
+          type: string
+        heading:
+          type: string
+        markdownText:
+          type: string
+
+    Question:
+      type: object
+      properties:
+        title:
+          type: string
+        label:
+          type: string
+        heading:
+          type: string
+        id:
+          type: string
+        description:
+          type: string
+        conditionalOn:
+          type: string
+        placeholder:
+          type: string
+        explainer:
+          type: string
+        loadPrevious:
+          type: array
+          items:
+            type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Item'
+        inputs:
+          type: array
+          items:
+            $ref: '#/components/schemas/ListInput'
+        validation:
+          $ref: '#/components/schemas/Validation'
+        help:
+          $ref: '#/components/schemas/Help'
+        choices:
+          type: array
+          items:
+            $ref: '#/components/schemas/Choice'
+        text:
+          type: string
+        labelLine:
+          type: boolean
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'
+        components:
+          type: array
+          items:
+            $ref: '#/components/schemas/Component'
+
+    Action:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [start, next, submit, sign, close, backToMain, backToMainAndNext]
+        label:
+          type: string
+        color:
+          type: string
+        hasCondition:
+          type: boolean
+        conditionalOn:
+          type: string
+        signMessage:
+          type: string
+
+    Banner:
+      type: object
+      properties:
+        iconSrc:
+          type: string
+        imageSrc:
+          type: string
+        backgroundColor:
+          type: string
+
+    Step:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        id:
+          type: string
+        group:
+          type: string
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Question'
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Action'
+        banner:
+          $ref: '#/components/schemas/Banner'
+        colorSchema:
+          type: string
+          enum: [blue, green, red, purple, neutral]
+
+    StepStructure:
+      type: object
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/StepStructure'
+        group:
+          type: string
+
+    Form:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/Step'
+        connectivityMatrix:
+          type: array
+          items:
+            type: array
+            items:
+              type: string
+              enum: [next, back, up, down, none]
+        id:
+          type: string
+        updatedAt:
+          type: number
+        formType:
+          type: string
+        provider:
+          type: string
+        subform:
+          type: boolean
+        stepStructure:
+          type: array
+          items:
+            $ref: '#/components/schemas/StepStructure'
