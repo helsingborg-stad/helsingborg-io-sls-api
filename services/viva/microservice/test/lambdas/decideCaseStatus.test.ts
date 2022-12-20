@@ -46,7 +46,7 @@ describe('decideCaseStatus', () => {
     expect(putSuccessEventMock).toHaveBeenCalledWith({ caseKeys });
   });
 
-  it('does not update case status if new status eq undefined', async () => {
+  it('does not update case status if new status is undefined', async () => {
     const updateCaseMock = jest.fn();
     const putSuccessEventMock = jest.fn();
 
@@ -66,7 +66,7 @@ describe('decideCaseStatus', () => {
     expect(putSuccessEventMock).toHaveBeenCalledTimes(0);
   });
 
-  it('does not update case status if new state eq undefined', async () => {
+  it('does not update case status if new state is undefined', async () => {
     const updateCaseMock = jest.fn();
     const putSuccessEventMock = jest.fn();
 
