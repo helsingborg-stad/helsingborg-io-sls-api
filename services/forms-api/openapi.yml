@@ -97,6 +97,34 @@ paths:
         '403':
           $ref: '../common-openapi.yml#/components/responses/missingApiKeyResponse'
 
+    put:
+      tags:
+        - Forms
+      summary: Updates a current form.
+      description: This endpoint updates a current form.
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Form'
+      responses:
+        '200':
+          description: OK.
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/GetFormResponse'
+        '401':
+          description: Invalid JWT.
+          content:
+            'application/json':
+              schema:
+                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
+        '403':
+          $ref: '../common-openapi.yml#/components/responses/missingApiKeyResponse'
+
 components:
   securitySchemes:
     $ref: '../common-openapi.yml#/components/securitySchemes'
