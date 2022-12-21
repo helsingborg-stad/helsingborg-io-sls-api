@@ -19,7 +19,7 @@ paths:
     get:
       tags:
         - Forms
-      summary: Get all available forms.
+      summary: Get all forms.
       description: This endpoint returns a list of all forms created in form-builder tool.
       security:
         - ApiKeyAuth: []
@@ -42,7 +42,7 @@ paths:
     post:
       tags:
         - Forms
-      summary: Creates a new form.
+      summary: Creates form.
       description: This endpoint creates a new form-builder form entry in the database.
       security:
         - ApiKeyAuth: []
@@ -77,7 +77,7 @@ paths:
           required: true
           schema:
             type: string
-      summary: Get form by form id.
+      summary: Get form.
       description: This endpoint returns a form-builder form by its unique id.
       security:
         - ApiKeyAuth: []
@@ -106,7 +106,7 @@ paths:
           required: true
           schema:
             type: string
-      summary: Updates a current form.
+      summary: Updates a form.
       description: This endpoint updates a current form.
       security:
         - ApiKeyAuth: []
@@ -141,7 +141,7 @@ paths:
           schema:
             type: string
       summary: Delete form.
-      description: This endpoint removes a form.
+      description: This endpoint deletes a form from database.
       security:
         - ApiKeyAuth: []
       responses:
