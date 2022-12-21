@@ -100,6 +100,12 @@ paths:
     put:
       tags:
         - Forms
+      parameters:
+        - name: formId
+          in: path
+          required: true
+          schema:
+            type: string
       summary: Updates a current form.
       description: This endpoint updates a current form.
       security:
@@ -116,6 +122,35 @@ paths:
             'application/json':
               schema:
                 $ref: '#/components/schemas/GetFormResponse'
+        '401':
+          description: Invalid JWT.
+          content:
+            'application/json':
+              schema:
+                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
+        '403':
+          $ref: '../common-openapi.yml#/components/responses/missingApiKeyResponse'
+
+    delete:
+      tags:
+        - Forms
+      parameters:
+        - name: formId
+          in: path
+          required: true
+          schema:
+            type: string
+      summary: Delete form.
+      description: This endpoint removes a form.
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: OK.
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/DeleteFormResponse'
         '401':
           description: Invalid JWT.
           content:
@@ -445,3 +480,15 @@ components:
             data:
               type: object
               $ref: '#/components/schemas/Form'
+
+    DeleteFormResponse:
+      type: object
+      properties:
+        jsonapi:
+          type: object
+          properties:
+            version:
+              type: string
+              example: '1.0'
+            data:
+              type: object
