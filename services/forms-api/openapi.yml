@@ -41,6 +41,36 @@ paths:
         '403':
           $ref: '../common-openapi.yml#/components/responses/missingApiKeyResponse'
 
+  /forms/{formId}:
+    get:
+      tags:
+        - Forms
+      parameters:
+        - name: formId
+          in: path
+          required: true
+          schema:
+            type: string
+      summary: Get form by form id.
+      description: This endpoint returns a form-builder form by its unique id.
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: OK.
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/Form'
+        '401':
+          description: Invalid JWT.
+          content:
+            'application/json':
+              schema:
+                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
+        '403':
+          $ref: '../common-openapi.yml#/components/responses/missingApiKeyResponse'
+
 components:
   securitySchemes:
     $ref: '../common-openapi.yml#/components/securitySchemes'
