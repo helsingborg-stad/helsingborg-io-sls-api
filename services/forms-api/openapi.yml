@@ -39,6 +39,34 @@ paths:
         '403':
           $ref: '../common-openapi.yml#/components/responses/missingApiKeyResponse'
 
+    post:
+      tags:
+        - Forms
+      summary: Creates a new form.
+      description: This endpoint creates a new form-builder form entry in the database.
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Form'
+      responses:
+        '201':
+          description: OK.
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/GetFormResponse'
+        '401':
+          description: Invalid JWT.
+          content:
+            'application/json':
+              schema:
+                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
+        '403':
+          $ref: '../common-openapi.yml#/components/responses/missingApiKeyResponse'
+
   /forms/{formId}:
     get:
       tags:
