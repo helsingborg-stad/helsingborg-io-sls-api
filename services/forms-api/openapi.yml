@@ -29,9 +29,7 @@ paths:
           content:
             'application/json':
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Form'
+                $ref: '#/components/schemas/FormListResponse'
         '401':
           description: Invalid JWT.
           content:
@@ -359,3 +357,22 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/StepStructure'
+
+    FormListResponse:
+      type: object
+      properties:
+        jsonapi:
+          type: object
+          properties:
+            version:
+              type: string
+              example: '1.0'
+            data:
+              type: object
+              properties:
+                count:
+                  type: number
+                forms:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Form'
