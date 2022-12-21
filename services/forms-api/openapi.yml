@@ -1,14 +1,14 @@
 openapi: '3.0.3'
 info:
   title: Forms
-  description: Api for form-builder.
+  description: Api for forms made with form-builder.
   contact:
     name: GitHub Repo
-    url: https://github.com/helsingborg-stad/mitt-helsingborg-form-builder
+    url: https://github.com/helsingborg-stad/helsingborg-io-sls-api
   version: '1.0'
   license:
     name: MIT
-    url: 'https://github.com/helsingborg-stad/mitt-helsingborg-form-builder#license'
+    url: 'https://github.com/helsingborg-stad/helsingborg-io-sls-api#license'
 servers:
   - url: https://dev.api.helsingborg.io
   - url: https://release.api.helsingborg.io
