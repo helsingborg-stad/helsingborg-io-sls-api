@@ -116,6 +116,43 @@ paths:
         '403':
           $ref: '../common-openapi.yml#/components/responses/missingApiKeyResponse'
 
+  /users/me/attachments/{filename}:
+    delete:
+      tags:
+        - Attachments
+      summary: Deletes an attachment.
+      description: |
+        This endpoint deletes an attachment from the object storage.
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            format: JWT
+          required: true
+        - name: filename
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK.
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/DeleteAttachmentResponse'
+        '401':
+          description: Invalid JWT.
+          content:
+            'application/json':
+              schema:
+                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
+        '403':
+          $ref: '../common-openapi.yml#/components/responses/missingApiKeyResponse'
+
 components:
   securitySchemes:
     $ref: '../common-openapi.yml#/components/securitySchemes'
@@ -226,4 +263,19 @@ components:
                 id:
                   type: string
                 uploadUrl:
+                  type: string
+
+    DeleteAttachmentResponse:
+      type: object
+      properties:
+        jsonapi:
+          type: object
+          properties:
+            version:
+              type: string
+              example: '1.0'
+            data:
+              type: object
+              properties:
+                type:
                   type: string
