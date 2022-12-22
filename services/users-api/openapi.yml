@@ -81,6 +81,41 @@ paths:
         '403':
           $ref: '../common-openapi.yml#/components/responses/missingApiKeyResponse'
 
+    post:
+      tags:
+        - Attachments
+      summary: Upload attachment.
+      description: |
+        This endpoint returns a signed url that a consumer can use to upload an attachment to the object storage.
+        The signed url is valid for 5 minutes until it becomes invalid for further usage and in which a new
+        signed url must be created. For every signed url created, a unique id is also created and returned in the
+        response.
+
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            format: JWT
+          required: true
+      responses:
+        '200':
+          description: OK.
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/UploadAttachmentResponse'
+        '401':
+          description: Invalid JWT.
+          content:
+            'application/json':
+              schema:
+                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
+        '403':
+          $ref: '../common-openapi.yml#/components/responses/missingApiKeyResponse'
+
 components:
   securitySchemes:
     $ref: '../common-openapi.yml#/components/securitySchemes'
@@ -175,3 +210,20 @@ components:
                         $ref: '#/components/schemas/ListAttachment'
                     totalFileSizeSumInBytes:
                       type: number
+
+    UploadAttachmentResponse:
+      type: object
+      properties:
+        jsonapi:
+          type: object
+          properties:
+            version:
+              type: string
+              example: '1.0'
+            data:
+              type: object
+              properties:
+                id:
+                  type: string
+                uploadUrl:
+                  type: string
