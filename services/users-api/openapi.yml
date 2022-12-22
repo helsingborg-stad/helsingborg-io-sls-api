@@ -46,6 +46,41 @@ paths:
         '403':
           $ref: '../common-openapi.yml#/components/responses/missingApiKeyResponse'
 
+  /users/me/attachments:
+    get:
+      tags:
+        - Attachments
+      summary: Fetch list of attachments.
+      description: |
+        This endpoints returns a lists of attachments that exists under a specific key in S3.
+
+        Note that this endpoint doesn't return the objects themselves in the response, only 
+        the metadata, like key, size and lastmodified.
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            format: JWT
+          required: true
+      responses:
+        '200':
+          description: OK.
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/GetAttachmentListResponse'
+        '401':
+          description: Invalid JWT.
+          content:
+            'application/json':
+              schema:
+                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
+        '403':
+          $ref: '../common-openapi.yml#/components/responses/missingApiKeyResponse'
+
 components:
   securitySchemes:
     $ref: '../common-openapi.yml#/components/securitySchemes'
@@ -106,3 +141,37 @@ components:
                   properties:
                     item:
                       $ref: '#/components/schemas/User'
+
+    ListAttachment:
+      type: object
+      properties:
+        Key:
+          type: string
+        Size:
+          type: number
+        LastModified:
+          type: string
+
+    GetAttachmentListResponse:
+      type: object
+      properties:
+        jsonapi:
+          type: object
+          properties:
+            version:
+              type: string
+              example: '1.0'
+            data:
+              type: object
+              properties:
+                type:
+                  type: string
+                attributes:
+                  type: object
+                  properties:
+                    files:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/ListAttachment'
+                    totalFileSizeSumInBytes:
+                      type: number
