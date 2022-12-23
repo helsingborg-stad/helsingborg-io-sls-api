@@ -30,7 +30,7 @@ paths:
         - name: User-Agent
           in: header
           schema:
-            $ref: '#/components/schemas/userAgentHeader'
+            $ref: '../common-openapi.yml#/components/schemas/userAgentHeader'
       responses:
         '200':
           description: |
@@ -53,12 +53,6 @@ components:
   securitySchemes:
     $ref: '../common-openapi.yml#/components/securitySchemes'
   schemas:
-    userAgentHeader:
-      type: string
-      # MittHelsingborg/<app version>/<app platform>
-      pattern: ^MittHelsingborg\/\d+\.\d+\.\d+\/(ios|android).*$
-      example: MittHelsingborg/1.7.0/ios/14.4
-
     versionResult:
       properties:
         jsonapi:

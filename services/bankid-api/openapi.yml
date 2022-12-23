@@ -17,6 +17,7 @@ servers:
   - url: https://dev.api.helsingborg.io
   - url: https://release.api.helsingborg.io
   - url: https://api.helsingborg.io
+  - url: https://unqoxc4wy8.execute-api.eu-north-1.amazonaws.com/dev
 
 paths:
   /auth/bankid/auth:
@@ -94,8 +95,16 @@ paths:
         Query an order previously started with `/auth` or `/sign`.
 
         See BankID docs for more in-depth info.
+
+        `authorizationCode` is only returned for Mitt Helsingborg users
+        (determined by the `User-Agent` header).
       security:
         - ApiKeyAuth: []
+      parameters:
+        - name: User-Agent
+          in: header
+          schema:
+            $ref: '../common-openapi.yml#/components/schemas/userAgentHeader'
       requestBody:
         content:
           application/json:
@@ -107,7 +116,7 @@ paths:
             OK. This does not mean that the collect is done or successful;
             it can still be pending or failed. See BankID docs for more info.
           content:
-            'application/vnd.api+json':
+            'application/json':
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/collectCompleteResponse'
@@ -116,7 +125,7 @@ paths:
         '400':
           description: Invalid `orderRef` provided. It is either malformed or has expired.
           content:
-            'application/vnd.api+json':
+            'application/json':
               schema:
                 $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
         '403':
