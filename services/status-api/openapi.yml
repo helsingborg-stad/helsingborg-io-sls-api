@@ -32,13 +32,6 @@ paths:
 
       security:
         - ApiKeyAuth: []
-      parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            format: JWT
-          required: true
       responses:
         '200':
           description: OK.
