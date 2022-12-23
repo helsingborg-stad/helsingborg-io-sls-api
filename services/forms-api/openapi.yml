@@ -30,12 +30,6 @@ paths:
             'application/json':
               schema:
                 $ref: '#/components/schemas/FormListResponse'
-        '401':
-          description: Invalid JWT.
-          content:
-            'application/json':
-              schema:
-                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
         '403':
           $ref: '../common-openapi.yml#/components/responses/missingApiKeyResponse'
 
@@ -58,12 +52,6 @@ paths:
             'application/json':
               schema:
                 $ref: '#/components/schemas/GetFormResponse'
-        '401':
-          description: Invalid JWT.
-          content:
-            'application/json':
-              schema:
-                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
         '403':
           $ref: '../common-openapi.yml#/components/responses/missingApiKeyResponse'
 
@@ -88,12 +76,6 @@ paths:
             'application/json':
               schema:
                 $ref: '#/components/schemas/GetFormResponse'
-        '401':
-          description: Invalid JWT.
-          content:
-            'application/json':
-              schema:
-                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
         '403':
           $ref: '../common-openapi.yml#/components/responses/missingApiKeyResponse'
 
@@ -122,12 +104,6 @@ paths:
             'application/json':
               schema:
                 $ref: '#/components/schemas/GetFormResponse'
-        '401':
-          description: Invalid JWT.
-          content:
-            'application/json':
-              schema:
-                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
         '403':
           $ref: '../common-openapi.yml#/components/responses/missingApiKeyResponse'
 
@@ -151,12 +127,6 @@ paths:
             'application/json':
               schema:
                 $ref: '#/components/schemas/DeleteFormResponse'
-        '401':
-          description: Invalid JWT.
-          content:
-            'application/json':
-              schema:
-                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
         '403':
           $ref: '../common-openapi.yml#/components/responses/missingApiKeyResponse'
 
