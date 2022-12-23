@@ -52,6 +52,12 @@ paths:
             'application/json':
               schema:
                 $ref: '#/components/schemas/GetFormResponse'
+        '400':
+          description: Failed validating request body.
+          content:
+            'application/json':
+              schema:
+                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
         '403':
           $ref: '../common-openapi.yml#/components/responses/missingApiKeyResponse'
 
@@ -78,6 +84,12 @@ paths:
                 $ref: '#/components/schemas/GetFormResponse'
         '403':
           $ref: '../common-openapi.yml#/components/responses/missingApiKeyResponse'
+        '404':
+          description: Form with id not found.
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/NoFormFoundResponse'
 
     put:
       tags:
@@ -88,8 +100,9 @@ paths:
           required: true
           schema:
             type: string
-      summary: Updates a form.
-      description: This endpoint updates a current form.
+      summary: Updates or creates a form.
+      description: |
+        This endpoint updates a current form. If the form does not exist, it will be created.
       security:
         - ApiKeyAuth: []
       requestBody:
@@ -122,7 +135,12 @@ paths:
         - ApiKeyAuth: []
       responses:
         '200':
-          description: OK.
+          description: |
+            OK.
+
+            <b>Note</b> 
+            <br />
+            The endpoint will return a successful response even if the item does not exist in the table.
           content:
             'application/json':
               schema:
@@ -271,6 +289,21 @@ components:
     Question:
       type: object
       properties:
+        type:
+          type: string
+          enum:
+            [
+              text,
+              number,
+              hidden,
+              date,
+              editableList,
+              fileUploaderList,
+              checkbox,
+              summaryList,
+              repeaterField,
+              bulletList,
+            ]
         title:
           type: string
         label:
@@ -462,3 +495,36 @@ components:
               example: '1.0'
             data:
               type: object
+
+    CreateFormValidationError:
+      type: object
+      properties:
+        jsonapi:
+          type: object
+          properties:
+            version:
+              type: string
+              example: '1.0'
+            data:
+              type: object
+
+    NoFormFoundResponse:
+      properties:
+        jsonapi:
+          type: object
+          properties:
+            version:
+              type: string
+              example: '1.0'
+        data:
+          type: object
+          properties:
+            status:
+              type: string
+              example: '404'
+            code:
+              type: number
+              example: 404
+            message:
+              type: string
+              example: ResourceNotFound
