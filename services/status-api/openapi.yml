@@ -21,14 +21,15 @@ paths:
         - Status
       summary: Get API status messages.
       description: |
-        This endpoint returns a list of messages that would be used and displayed by a consumer.
-        The list of messages returned in the response could be on of the following:
+        This endpoint returns a filtered list of message objects and includes only messages that are currently valid
+        based on their start and expiry dates.
 
-        1. info
-        2. warning
-        3. maintenance
+         The list of messages returned in the response could be in one of the following 
+         types (starting with the lowest severity first):
 
-        in which the severity of the message is increased with start from position1.
+         1. info
+         2. warning
+         3. maintenance
 
       security:
         - ApiKeyAuth: []
