@@ -23,13 +23,7 @@ paths:
       description: This endpoint returns an object containing user data.
       security:
         - ApiKeyAuth: []
-      parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            format: JWT
-          required: true
+        - AuthToken: []
       responses:
         '200':
           description: OK.
@@ -58,13 +52,7 @@ paths:
 
       security:
         - ApiKeyAuth: []
-      parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            format: JWT
-          required: true
+        - AuthToken: []
       responses:
         '200':
           description: OK.
@@ -90,13 +78,8 @@ paths:
         This endpoint deletes an attachment from the object storage.
       security:
         - ApiKeyAuth: []
+        - AuthToken: []
       parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            format: JWT
-          required: true
         - name: filename
           in: path
           required: true
@@ -127,13 +110,8 @@ paths:
         The signed url is valid for 5 minutes.
       security:
         - ApiKeyAuth: []
+        - AuthToken: []
       parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            format: JWT
-          required: true
         - name: filename
           in: path
           required: true
