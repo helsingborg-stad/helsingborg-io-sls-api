@@ -21,7 +21,7 @@ paths:
         - Cases
       summary: Fetch specific case by its id
       description: |
-        This endpoints returns a case by a specific id. Properties like `PK`, `SK` and `GSI1` 
+        This endpoint returns a case by a specific id. Properties like `PK`, `SK` and `GSI1` 
         are removed in the response.
       security:
         - ApiKeyAuth: []
@@ -62,7 +62,7 @@ paths:
         - Cases
       summary: Fetch all cases belonging to a user.
       description: |
-        This endpoints returns all cases beloing to a user. Properties like `PK`, `SK` and `GSI1` 
+        This endpoint returns all cases beloing to a user. Properties like `PK`, `SK` and `GSI1` 
         are removed in the response.
       security:
         - ApiKeyAuth: []
@@ -74,6 +74,44 @@ paths:
             'application/json':
               schema:
                 $ref: '#/components/schemas/GetCasesResponse'
+        '401':
+          description: Invalid JWT.
+          content:
+            'application/json':
+              schema:
+                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
+        '403':
+          $ref: '../common-openapi.yml#/components/responses/missingApiKeyResponse'
+
+    post:
+      tags:
+        - Cases
+      summary: Crates a new case for a user.
+      description: |
+        This endpoint creates a new case for a specific user.
+      security:
+        - ApiKeyAuth: []
+        - AuthToken: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Case'
+      responses:
+        '200':
+          description: OK.
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/CreateNewCaseResponse'
+        '400':
+          description: |
+            This error applies to invalid request body, failed fetching user, failed fetching user case
+            or failed creating new user case.
+          content:
+            'application/vnd.api+json':
+              schema:
+                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
         '401':
           description: Invalid JWT.
           content:
@@ -505,3 +543,21 @@ components:
                       type: array
                       items:
                         $ref: '#/components/schemas/CaseOnlyAllowedProperties'
+
+    CreateNewCaseResponse:
+      type: object
+      properties:
+        jsonapi:
+          type: object
+          properties:
+            version:
+              type: string
+              example: '1.0'
+            data:
+              type: object
+              properties:
+                type:
+                  type: string
+                attributes:
+                  type: object
+                  $ref: '#/components/schemas/CaseOnlyAllowedProperties'
