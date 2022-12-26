@@ -19,6 +19,15 @@ components:
           schema:
             $ref: '#/components/schemas/missingApiKeySchema'
 
+    resourceNotFoundResponse:
+      description: The resource was not found.
+      content:
+        'application/json':
+          schema:
+            type: object
+            example:
+              message: 'The origin server did not find a current representation for the target resource or is not willing to disclose that one exists.'
+
   schemas:
     uuid:
       type: string
