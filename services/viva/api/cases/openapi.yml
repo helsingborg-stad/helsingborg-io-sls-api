@@ -1,7 +1,7 @@
 openapi: '3.0.3'
 info:
   title: Viva cases api
-  description: Api dealing with Viva cases
+  description: Api dealing with Viva cases.
   contact:
     name: GitHub Repo
     url: https://github.com/helsingborg-stad/helsingborg-io-sls-api
@@ -38,13 +38,27 @@ paths:
               schema:
                 $ref: '../../../common-openapi.yml#/components/schemas/jsonApiError'
         '403':
-          $ref: '../../../common-openapi.yml#/components/responses/missingApiKeyResponse'
+          description: Missing Api Key or co-applicant not allowed to apply.
+          content:
+            'application/json':
+              schema:
+                oneOf:
+                  - $ref: '../../../common-openapi.yml#/components/schemas/missingApiKeySchema'
+                  - $ref: '#/components/schemas/unAuthorizedCoApplicant'
 
 components:
   securitySchemes:
     $ref: '../../../common-openapi.yml#/components/securitySchemes'
 
   schemas:
+    unAuthorizedCoApplicant:
+      type: object
+      example:
+        message: 'Co-applicant not allowed to apply'
+      properties:
+        message:
+          type: string
+
     Role:
       type: string
       enum: [applicant, coApplicant, children, unknown]
