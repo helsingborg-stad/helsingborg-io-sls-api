@@ -24,6 +24,19 @@ paths:
       security:
         - ApiKeyAuth: []
         - AuthToken: []
+      parameters:
+        - name: caseId
+          required: true
+          in: path
+          description: Case id to add co-applicant to.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Person'
       responses:
         '200':
           description: OK.
@@ -44,14 +57,14 @@ paths:
               schema:
                 oneOf:
                   - $ref: '../../../common-openapi.yml#/components/schemas/missingApiKeySchema'
-                  - $ref: '#/components/schemas/unAuthorizedCoApplicant'
+                  - $ref: '#/components/schemas/UnAuthorizedCoApplicant'
 
 components:
   securitySchemes:
     $ref: '../../../common-openapi.yml#/components/securitySchemes'
 
   schemas:
-    unAuthorizedCoApplicant:
+    UnAuthorizedCoApplicant:
       type: object
       example:
         message: 'Co-applicant not allowed to apply'
