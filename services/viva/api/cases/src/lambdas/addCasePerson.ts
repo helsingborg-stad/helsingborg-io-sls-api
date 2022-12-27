@@ -2,7 +2,9 @@ import { BadRequestError, ForbiddenError } from '@helsingborg-stad/npm-api-error
 
 import config from '../libs/config';
 import log from '../libs/logs';
-import { decodeToken, Token } from '../libs/token';
+import type { Token } from '../libs/token';
+import { decodeToken } from '../libs/token';
+import { objectWithoutProperties } from '../libs/objects';
 import { populateFormWithPreviousCaseAnswers } from '../libs/formAnswers';
 import * as response from '../libs/response';
 import * as dynamoDb from '../libs/dynamoDb';
@@ -35,10 +37,12 @@ export interface LambdaRequest {
   };
 }
 
+type CaseWithOmittedProperties = Omit<CaseItem, 'PK' | 'SK' | 'GSI1'>;
+
 interface LambdaResponse {
   type: string;
   attributes: {
-    caseItem: CaseItem;
+    caseItem: CaseWithOmittedProperties;
   };
 }
 
@@ -148,10 +152,16 @@ export async function addCasePerson(input: LambdaRequest, dependencies: Dependen
     form: formWithCoApplicant,
   });
 
+  const caseWithoutProperties = objectWithoutProperties(updateCaseResult.Attributes, [
+    'PK',
+    'SK',
+    'GSI1',
+  ]);
+
   const responseBody: LambdaResponse = {
     type: 'addCasePerson',
     attributes: {
-      caseItem: updateCaseResult.Attributes,
+      caseItem: caseWithoutProperties as unknown as CaseWithOmittedProperties,
     },
   };
 
