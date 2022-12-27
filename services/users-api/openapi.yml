@@ -1,0 +1,255 @@
+openapi: '3.0.3'
+info:
+  title: Users api
+  description: Api dealing with users and their uploaded attachments.
+  contact:
+    name: GitHub Repo
+    url: https://github.com/helsingborg-stad/helsingborg-io-sls-api
+  version: '1.0'
+  license:
+    name: MIT
+    url: 'https://github.com/helsingborg-stad/helsingborg-io-sls-api#license'
+servers:
+  - url: https://dev.api.helsingborg.io
+  - url: https://release.api.helsingborg.io
+  - url: https://api.helsingborg.io
+
+paths:
+  /users/me:
+    get:
+      tags:
+        - User
+      summary: Fetch user.
+      description: This endpoint returns an object containing user data.
+      security:
+        - ApiKeyAuth: []
+        - AuthToken: []
+      responses:
+        '200':
+          description: OK.
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/GetUserResponse'
+        '401':
+          description: Invalid JWT.
+          content:
+            'application/json':
+              schema:
+                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
+        '403':
+          $ref: '../common-openapi.yml#/components/responses/missingApiKeyResponse'
+
+  /users/me/attachments:
+    post:
+      tags:
+        - Attachments
+      summary: Upload attachment.
+      description: |
+        This endpoint returns a signed url that a consumer can use to upload an attachment to the object storage.
+        The signed url is valid for 5 minutes until it becomes invalid for further usage and in which a new
+        signed url must be created. For every signed url created, a unique id is also created and returned in the
+        response.
+
+      security:
+        - ApiKeyAuth: []
+        - AuthToken: []
+      responses:
+        '200':
+          description: OK.
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/UploadAttachmentResponse'
+        '401':
+          description: Invalid JWT.
+          content:
+            'application/json':
+              schema:
+                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
+        '403':
+          $ref: '../common-openapi.yml#/components/responses/missingApiKeyResponse'
+
+  /users/me/attachments/{filename}:
+    get:
+      tags:
+        - Attachments
+      summary: Get attachment.
+      description: |
+        This endpoint returns a signed url to the object that is requested from the object storage.
+        The signed url is valid for 5 minutes.
+      security:
+        - ApiKeyAuth: []
+        - AuthToken: []
+      parameters:
+        - name: filename
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK.
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/GetAttachmentResponse'
+        '401':
+          description: Invalid JWT.
+          content:
+            'application/json':
+              schema:
+                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
+        '403':
+          $ref: '../common-openapi.yml#/components/responses/missingApiKeyResponse'
+
+    delete:
+      tags:
+        - Attachments
+      summary: Deletes an attachment.
+      description: |
+        This endpoint deletes an attachment from the object storage.
+      security:
+        - ApiKeyAuth: []
+        - AuthToken: []
+      parameters:
+        - name: filename
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK.
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/DeleteAttachmentResponse'
+        '401':
+          description: Invalid JWT.
+          content:
+            'application/json':
+              schema:
+                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
+        '403':
+          $ref: '../common-openapi.yml#/components/responses/missingApiKeyResponse'
+
+components:
+  securitySchemes:
+    $ref: '../common-openapi.yml#/components/securitySchemes'
+
+  schemas:
+    Address:
+      type: object
+      properties:
+        city:
+          type: string
+        street:
+          type: string
+        postalCode:
+          type: string
+
+    User:
+      type: object
+      required:
+        - personalNumber
+        - firstName
+        - lastName
+      properties:
+        personalNumber:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        civilStatus:
+          type: string
+        mobilePhone:
+          type: string
+        email:
+          type: string
+        address:
+          $ref: '#/components/schemas/Address'
+        uuid:
+          $ref: '../common-openapi.yml#/components/schemas/uuid'
+        createdAt:
+          type: string
+
+    GetUserResponse:
+      type: object
+      properties:
+        jsonapi:
+          type: object
+          properties:
+            version:
+              type: string
+              example: '1.0'
+            data:
+              type: object
+              properties:
+                type:
+                  type: string
+                attributes:
+                  type: object
+                  properties:
+                    item:
+                      $ref: '#/components/schemas/User'
+
+    ListAttachment:
+      type: object
+      properties:
+        Key:
+          type: string
+        Size:
+          type: number
+        LastModified:
+          type: string
+
+    UploadAttachmentResponse:
+      type: object
+      properties:
+        jsonapi:
+          type: object
+          properties:
+            version:
+              type: string
+              example: '1.0'
+            data:
+              type: object
+              properties:
+                id:
+                  $ref: '../common-openapi.yml#/components/schemas/uuid'
+                uploadUrl:
+                  type: string
+                  example: https://example.com/abc?token=123
+
+    DeleteAttachmentResponse:
+      type: object
+      properties:
+        jsonapi:
+          type: object
+          properties:
+            version:
+              type: string
+              example: '1.0'
+            data:
+              type: object
+              properties:
+                type:
+                  type: string
+
+    GetAttachmentResponse:
+      type: object
+      properties:
+        jsonapi:
+          type: object
+          properties:
+            version:
+              type: string
+              example: '1.0'
+            data:
+              type: object
+              properties:
+                fileUrl:
+                  type: string
+                  example: https://example.com/abc?token=123
