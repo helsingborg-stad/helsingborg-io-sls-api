@@ -22,6 +22,10 @@ components:
               message: 'Missing Authentication Token'
 
   schemas:
+    uuid:
+      type: string
+      pattern: ^[a-f\d]{4}(?:[a-f\d]{4}-){4}[a-f\d]{12}$
+
     userAgentHeader:
       type: string
       # MittHelsingborg/<app version>/<app platform>
