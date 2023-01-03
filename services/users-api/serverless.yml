@@ -80,20 +80,6 @@ functions:
             type: TOKEN
             authorizerId: !ImportValue ${self:custom.stage}-authorizerId
 
-  getAttachmentList:
-    handler: src/lambdas/getAttachmentList.main
-    environment:
-      BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-AttachmentsBucketName
-    events:
-      - http:
-          path: /users/me/attachments
-          method: get
-          cors: true
-          private: true
-          authorizer:
-            type: TOKEN
-            authorizerId: !ImportValue ${self:custom.stage}-authorizerId
-
   uploadAttachment:
     handler: src/lambdas/uploadAttachment.main
     environment:

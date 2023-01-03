@@ -11,7 +11,6 @@ declare namespace _default {
 }
 export default _default;
 declare function getSignedUrl(bucketName: any, method: any, params: any): string;
-declare function getFiles(bucketName: any, prefix: any): Promise<any>;
 declare function getFile(bucketName: any, key: any): Promise<any>;
 declare function deleteFile(bucketName: any, key: any): Promise<any>;
 declare function deleteFiles(bucketName: string, keys: { Key: string }[]): Promise<any>;

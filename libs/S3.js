@@ -9,15 +9,6 @@ function getSignedUrl(bucketName, method, params) {
   });
 }
 
-async function getFiles(bucketName, prefix) {
-  return s3Client
-    .listObjectsV2({
-      Bucket: bucketName,
-      Prefix: prefix,
-    })
-    .promise();
-}
-
 async function getFile(bucketName, key) {
   return s3Client
     .getObject({
@@ -69,7 +60,6 @@ async function copyFileWithinBucket(bucketName, sourceKey, targetKey) {
 
 export default {
   getSignedUrl,
-  getFiles,
   getFile,
   deleteFile,
   deleteFiles,
