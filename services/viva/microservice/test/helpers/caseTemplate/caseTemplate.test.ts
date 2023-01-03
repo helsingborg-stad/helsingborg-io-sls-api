@@ -8,6 +8,8 @@ const MOCK_NEW_APPLICATION_CASE_ITEM = MOCK_NEW_APPLICATION_CASE_ITEM_RAW as Cas
 
 describe('Case Template', () => {
   it('generates template data for new application', () => {
+    jest.useFakeTimers().setSystemTime(new Date('2022-12-08'));
+
     const answers =
       MOCK_NEW_APPLICATION_CASE_ITEM.forms[MOCK_NEW_APPLICATION_CASE_ITEM.currentFormId].answers;
     const result = createCaseTemplate(MOCK_NEW_APPLICATION_CASE_ITEM, answers);
