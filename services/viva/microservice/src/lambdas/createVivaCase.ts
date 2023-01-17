@@ -29,6 +29,7 @@ interface DynamoDbQueryOutput {
   Count: number;
   ScannedCount: number;
 }
+
 export interface DynamoDbPutParams {
   TableName: string;
   Item: CaseItem;
@@ -118,6 +119,7 @@ export async function createVivaCase(
     if (person.role === CasePersonRole.Applicant && person.personalNumber === user.personalNumber) {
       return { ...user, ...person };
     }
+
     return person;
   });
 
@@ -148,7 +150,6 @@ export async function createVivaCase(
     Item: newRecurringCase,
   });
 
-  log.writeInfo('Viva recurring case created successfully.', newRecurringCase.id);
   return true;
 }
 
