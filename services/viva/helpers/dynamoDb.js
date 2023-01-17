@@ -4,8 +4,9 @@ import { CASE_PROVIDER_VIVA, VIVA_APPLICATION_RECEIVED } from '../libs/constants
 
 import caseHelper from './createCase';
 
-export function getCaseListByPeriod(personalNumber, { startDate, endDate }) {
+export function getCaseListByPeriod(personalNumber, application) {
   const personalNumberVerified = caseHelper.stripNonNumericalCharacters(personalNumber);
+  const { startDate, endDate } = caseHelper.getPeriodInMilliseconds(application.period);
 
   const casesQueryParams = {
     TableName: config.cases.tableName,
