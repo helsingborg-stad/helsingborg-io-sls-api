@@ -130,6 +130,18 @@ function getFormEncryptionAttributes(): CaseFormEncryption {
   };
 }
 
+function createGSI2SK(period: CasePeriod): string {
+  const dateTime = new Date(period.startDate);
+  const utcFullYear = new Date(dateTime).getUTCFullYear();
+  const utcMonth = new Date(dateTime).getUTCMonth() + 1;
+  const twoDigitsUtcMonth = utcMonth < 10 ? `0${utcMonth}` : utcMonth;
+  return `YEAR#${utcFullYear}#MONTH#${twoDigitsUtcMonth}`;
+}
+
+function createMetricGSI2PK(): string {
+  return 'METRIC#period';
+}
+
 export default {
   stripNonNumericalCharacters,
   getPeriodInMilliseconds,
@@ -140,4 +152,6 @@ export default {
   getFormEncryptionAttributes,
   createCaseApplicantPerson,
   createPeriodStartDate,
+  createMetricGSI2PK,
+  createGSI2SK,
 };
