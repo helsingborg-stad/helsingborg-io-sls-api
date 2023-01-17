@@ -20,9 +20,27 @@ import createCaseHelper from '../helpers/createCase';
 import populateFormWithVivaChildren from '../helpers/populateForm';
 
 import { CasePersonRole } from '../types/caseItem';
-import type { CaseUser, CaseItem, CaseForm, CasePeriod, CaseStatus } from '../types/caseItem';
+import type {
+  CaseUser,
+  CaseItem,
+  CaseForm,
+  CasePeriod,
+  CaseStatus,
+  CasePerson,
+} from '../types/caseItem';
 import type { VivaParametersResponse } from '../types/ssmParameters';
-import type { VivaMyPagesVivaCase, VivaMyPagesVivaApplication } from '../types/vivaMyPages';
+import type {
+  VivaMyPagesVivaCase,
+  VivaMyPagesVivaApplication,
+  VivaMyPagesApplicationPeriod,
+} from '../types/vivaMyPages';
+
+interface InitialRecurringCaseParams {
+  workflowId: string | null;
+  currentFormId: string;
+  vivaMyPages: VivaMyPagesVivaCase;
+  vivaPeriod: VivaMyPagesApplicationPeriod;
+}
 
 interface DynamoDbQueryOutput {
   Items: CaseItem[];
