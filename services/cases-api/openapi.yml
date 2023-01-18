@@ -74,6 +74,29 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                currentFormId:
+                  required: true
+                  $ref: '../common-openapi.yml#/components/schemas/uuid'
+                answers:
+                  oneOf:
+                    - $ref: '../viva-case-common-openapi.yml#/components/schemas/Answers'
+                    - $ref: '../viva-case-common-openapi.yml#/components/schemas/EncryptedAnswers'
+                currentPosition:
+                  $ref: '../viva-case-common-openapi.yml#/components/schemas/CurrentPosition'
+                signature:
+                  $ref: '#/components/schemas/updateSignature'
+                encryption:
+                  $ref: '../viva-case-common-openapi.yml#/components/schemas/Encryption'
+              required:
+                - 'currentFormId'
+                - 'currentPosition'
+
       responses:
         '200':
           description: OK.
@@ -168,7 +191,7 @@ paths:
     post:
       tags:
         - Cases
-      summary: Crates a new case for a user.
+      summary: Creates a new case for a user.
       description: |
         This endpoint creates a new case for a specific user.
       security:
@@ -215,6 +238,12 @@ components:
       properties:
         message:
           type: string
+
+    updateSignature:
+      type: object
+      properties:
+        success:
+          type: boolean
 
     GetCaseResponse:
       type: object

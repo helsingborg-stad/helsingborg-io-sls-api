@@ -197,6 +197,17 @@ components:
         value:
           $ref: '#/components/schemas/AnswerValue'
 
+    Answers:
+      type: array
+      items:
+        $ref: '#/components/schemas/Answer'
+
+    EncryptedAnswers:
+      type: object
+      properties:
+        encryptedAnswers:
+          type: string
+
     Encryption:
       type: object
       properties:
@@ -207,7 +218,7 @@ components:
         symmetricKeyName:
           type: string
 
-    currentPosition:
+    CurrentPosition:
       type: object
       properties:
         currentMainStep:
@@ -225,13 +236,13 @@ components:
       type: object
       properties:
         answers:
-          type: array
-          items:
-            $ref: '#/components/schemas/Answer'
+          oneOf:
+            - $ref: '#/components/schemas/Answers'
+            - $ref: '#/components/schemas/EncryptedAnswers'
         encryption:
           $ref: '#/components/schemas/Encryption'
         currentPosition:
-          $ref: '#/components/schemas/currentPosition'
+          $ref: '#/components/schemas/CurrentPosition'
 
     Forms:
       type: object
