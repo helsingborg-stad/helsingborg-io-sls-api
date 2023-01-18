@@ -1,9 +1,11 @@
 import type { Token } from '../../src/libs/token';
 import { addCasePerson } from '../../src/lambdas/addCasePerson';
 import { DEFAULT_CURRENT_POSITION } from '../../src/helpers/constants';
-import { CasePerson, CasePersonRole, EncryptionType } from '../../src/types/caseItem';
-import type { CaseItem, CaseForm } from '../../src/types/caseItem';
+import { CasePersonRole, EncryptionType } from '../../src/types/caseItem';
+import type { CaseItem, CaseForm, CasePerson } from '../../src/types/caseItem';
 import type { LambdaRequest, Dependencies } from '../../src/lambdas/addCasePerson';
+
+import { objectWithoutProperties } from '../../../../libs/objects';
 
 const personalNumber = '199801011212';
 const SK = 'CASE#123';
@@ -101,6 +103,7 @@ function createDependencies(partialDependencies: Partial<Dependencies> = {}): De
 it('successfully add person to case', async () => {
   const updateCaseMock = jest.fn().mockResolvedValueOnce({ Attributes: { ...caseItem } });
   const getFormTemplatesMock = jest.fn().mockResolvedValueOnce({});
+  const caseWithRemovedProperties = objectWithoutProperties(caseItem, ['PK', 'SK', 'GSI1']);
 
   const input = createInput();
   const dependencies = createDependencies({
@@ -124,7 +127,7 @@ it('successfully add person to case', async () => {
     data: {
       type: 'addCasePerson',
       attributes: {
-        caseItem: { ...caseItem },
+        caseItem: caseWithRemovedProperties,
       },
     },
   });

@@ -1,10 +1,11 @@
 import to from 'await-to-js';
 import { throwError } from '@helsingborg-stad/npm-api-error-handling';
 
-import config from '../libs/config';
+import { objectWithoutProperties } from '../libs/objects';
 import * as response from '../libs/response';
 import { decodeToken } from '../libs/token';
 import * as dynamoDb from '../libs/dynamoDb';
+import config from '../libs/config';
 import log from '../libs/logs';
 
 export async function main(event, context) {
@@ -36,10 +37,16 @@ export async function main(event, context) {
     return response.failure(error);
   }
 
+  const caseWithoutProperties = objectWithoutProperties(deleteCaseResponse.Attributes, [
+    'PK',
+    'SK',
+    'GSI1',
+  ]);
+
   return response.success(200, {
     type: 'deleteCase',
     attributes: {
-      ...deleteCaseResponse.Attributes,
+      ...caseWithoutProperties,
     },
   });
 }

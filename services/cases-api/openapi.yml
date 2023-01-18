@@ -1,0 +1,342 @@
+openapi: '3.0.3'
+info:
+  title: Cases api
+  description: Api for CRUD operations on a case.
+  contact:
+    name: GitHub Repo
+    url: https://github.com/helsingborg-stad/helsingborg-io-sls-api
+  version: '1.0'
+  license:
+    name: MIT
+    url: 'https://github.com/helsingborg-stad/helsingborg-io-sls-api#license'
+servers:
+  - url: https://dev.api.helsingborg.io
+  - url: https://release.api.helsingborg.io
+  - url: https://api.helsingborg.io
+
+paths:
+  /cases/{id}:
+    get:
+      tags:
+        - Cases
+      summary: Fetch specific case by its id
+      description: |
+        This endpoint returns a case by a specific id. Properties like `PK`, `SK` and `GSI1` 
+        are removed in the response.
+      security:
+        - ApiKeyAuth: []
+        - AuthToken: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK.
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/GetCaseResponse'
+        '400':
+          description: Failed fetching user case.
+          content:
+            'application/json':
+              schema:
+                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
+        '401':
+          description: Invalid JWT.
+          content:
+            'application/json':
+              schema:
+                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
+        '403':
+          $ref: '../common-openapi.yml#/components/responses/missingApiKeyResponse'
+        '404':
+          description: Case not found.
+          content:
+            'application/json':
+              schema:
+                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
+
+    put:
+      tags:
+        - Cases
+      summary: Updates a case
+      description: This endpoint updates a case.
+      security:
+        - ApiKeyAuth: []
+        - AuthToken: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                currentFormId:
+                  required: true
+                  $ref: '../common-openapi.yml#/components/schemas/uuid'
+                answers:
+                  oneOf:
+                    - $ref: '../viva-case-common-openapi.yml#/components/schemas/Answers'
+                    - $ref: '../viva-case-common-openapi.yml#/components/schemas/EncryptedAnswers'
+                currentPosition:
+                  $ref: '../viva-case-common-openapi.yml#/components/schemas/CurrentPosition'
+                signature:
+                  $ref: '#/components/schemas/updateSignature'
+                encryption:
+                  $ref: '../viva-case-common-openapi.yml#/components/schemas/Encryption'
+              required:
+                - 'currentFormId'
+                - 'currentPosition'
+
+      responses:
+        '200':
+          description: OK.
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/UpdateCaseResponse'
+        '400':
+          description: Missing required path parameter or bad request error.
+          content:
+            'application/json':
+              schema:
+                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
+        '401':
+          description: Invalid JWT.
+          content:
+            'application/json':
+              schema:
+                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
+        '403':
+          $ref: '../common-openapi.yml#/components/responses/missingApiKeyResponse'
+        '404':
+          description: Case or form not found.
+          content:
+            'application/json':
+              schema:
+                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
+        '500':
+          description: Internal server error.
+          content:
+            'application/json':
+              schema:
+                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
+
+    delete:
+      tags:
+        - Cases
+      summary: Deletes a case.
+      description: This endpoint deletes a case belonging to a user.
+      security:
+        - ApiKeyAuth: []
+        - AuthToken: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK.
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/DeleteCaseResponse'
+        '401':
+          description: Invalid JWT.
+          content:
+            'application/json':
+              schema:
+                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
+        '403':
+          $ref: '../common-openapi.yml#/components/responses/missingApiKeyResponse'
+
+  /cases:
+    get:
+      tags:
+        - Cases
+      summary: Fetch all cases belonging to a user.
+      description: |
+        This endpoint returns all cases beloing to a user. Properties like `PK`, `SK` and `GSI1` 
+        are removed in the response.
+      security:
+        - ApiKeyAuth: []
+        - AuthToken: []
+      responses:
+        '200':
+          description: OK.
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/GetCasesResponse'
+        '401':
+          description: Invalid JWT.
+          content:
+            'application/json':
+              schema:
+                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
+        '403':
+          $ref: '../common-openapi.yml#/components/responses/missingApiKeyResponse'
+
+    post:
+      tags:
+        - Cases
+      summary: Creates a new case for a user.
+      description: |
+        This endpoint creates a new case for a specific user.
+      security:
+        - ApiKeyAuth: []
+        - AuthToken: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '../viva-case-common-openapi.yml#/components/schemas/Case'
+      responses:
+        '200':
+          description: OK.
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/CreateNewCaseResponse'
+        '400':
+          description: |
+            This error applies to invalid request body, failed fetching user, failed fetching user case
+            or failed creating new user case.
+          content:
+            'application/vnd.api+json':
+              schema:
+                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
+        '401':
+          description: Invalid JWT.
+          content:
+            'application/json':
+              schema:
+                $ref: '../common-openapi.yml#/components/schemas/jsonApiError'
+        '403':
+          $ref: '../common-openapi.yml#/components/responses/missingApiKeyResponse'
+
+components:
+  securitySchemes:
+    $ref: '../common-openapi.yml#/components/securitySchemes'
+
+  schemas:
+    unAuthorizedCoApplicant:
+      type: object
+      example:
+        message: 'Co-applicant not allowed to apply'
+      properties:
+        message:
+          type: string
+
+    updateSignature:
+      type: object
+      properties:
+        success:
+          type: boolean
+
+    GetCaseResponse:
+      type: object
+      properties:
+        jsonapi:
+          type: object
+          properties:
+            version:
+              type: string
+              example: '1.0'
+            data:
+              type: object
+              properties:
+                type:
+                  type: string
+                attributes:
+                  type: object
+                  properties:
+                    case:
+                      $ref: '../viva-case-common-openapi.yml#/components/schemas/Case'
+
+    GetCasesResponse:
+      type: object
+      properties:
+        jsonapi:
+          type: object
+          properties:
+            version:
+              type: string
+              example: '1.0'
+            data:
+              type: object
+              properties:
+                type:
+                  type: string
+                attributes:
+                  type: object
+                  properties:
+                    cases:
+                      type: array
+                      items:
+                        $ref: '../viva-case-common-openapi.yml#/components/schemas/Case'
+
+    CreateNewCaseResponse:
+      type: object
+      properties:
+        jsonapi:
+          type: object
+          properties:
+            version:
+              type: string
+              example: '1.0'
+            data:
+              type: object
+              properties:
+                type:
+                  type: string
+                attributes:
+                  type: object
+                  $ref: '../viva-case-common-openapi.yml#/components/schemas/Case'
+
+    UpdateCaseResponse:
+      type: object
+      properties:
+        jsonapi:
+          type: object
+          properties:
+            version:
+              type: string
+              example: '1.0'
+            data:
+              type: object
+              properties:
+                type:
+                  type: string
+                attributes:
+                  type: object
+                  $ref: '../viva-case-common-openapi.yml#/components/schemas/Case'
+
+    DeleteCaseResponse:
+      type: object
+      properties:
+        jsonapi:
+          type: object
+          properties:
+            version:
+              type: string
+              example: '1.0'
+            data:
+              type: object
+              properties:
+                type:
+                  type: string
+                attributes:
+                  type: object
+                  $ref: '../viva-case-common-openapi.yml#/components/schemas/Case'

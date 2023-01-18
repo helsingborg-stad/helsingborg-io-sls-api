@@ -1,0 +1,364 @@
+components:
+  schemas:
+    Role:
+      type: string
+      enum: [applicant, coApplicant, children, unknown]
+
+    Person:
+      type: object
+      properties:
+        personalNumber:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        role:
+          $ref: '#/components/schemas/Role'
+        hasSigned:
+          type: boolean
+
+    SharedTags:
+      type: string
+      enum:
+        [
+          amount,
+          changed,
+          children,
+          description,
+          expenses,
+          firstName,
+          housing,
+          incomes,
+          lastName,
+          personalNumber,
+          type,
+          group,
+        ]
+
+    PersonTags:
+      type: string
+      enum:
+        [
+          akassa,
+          amount,
+          annat,
+          applicant,
+          buscard,
+          citizenship,
+          coapplicant,
+          date,
+          description,
+          email,
+          foreignPension,
+          lon,
+          medicin,
+          other,
+          phonenumber,
+          reskostnad,
+          tandvard,
+        ]
+
+    OccupationTags:
+      type: string
+      enum:
+        [
+          date,
+          fulltime,
+          occupation,
+          otheroccupation,
+          parentalleave,
+          parttime,
+          sickleave,
+          studies,
+          unemployed,
+        ]
+
+    NoteTags:
+      type: string
+      enum: [message]
+
+    HousingTags:
+      type: string
+      enum:
+        [
+          address,
+          child,
+          condo,
+          debtElectricity,
+          debtRent,
+          homeless,
+          homelessDescription,
+          house,
+          layout,
+          leave,
+          numberPeopleLiving,
+          other,
+          otherLivingDescription,
+          ownerContractApproved,
+          ownRoom,
+          parents,
+          postalAddress,
+          postalCode,
+          rent,
+          roomate,
+          sublease,
+          value,
+        ]
+
+    ChildTags:
+      type: string
+      enum: [school]
+
+    FinancialTags:
+      type: string
+      enum:
+        [
+          aid,
+          assets,
+          boende,
+          childcare,
+          csn,
+          electricity,
+          fastighet,
+          fordon,
+          homeinsurance,
+          insurance,
+          internet,
+          övrigt,
+          pension,
+          resident,
+          unemployment,
+        ]
+
+    ValidTag:
+      type: string
+      oneOf:
+        - $ref: '#/components/schemas/SharedTags'
+        - $ref: '#/components/schemas/PersonTags'
+        - $ref: '#/components/schemas/OccupationTags'
+        - $ref: '#/components/schemas/NoteTags'
+        - $ref: '#/components/schemas/HousingTags'
+        - $ref: '#/components/schemas/ChildTags'
+        - $ref: '#/components/schemas/FinancialTags'
+
+    Status:
+      type: object
+      properties:
+        type:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+
+    AnswerField:
+      type: object
+      properties:
+        id:
+          type: string
+        tags:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/ValidTag'
+              - type: string
+
+    AnswerAttachment:
+      type: object
+      properties:
+        externalDisplayName:
+          type: string
+        uploadedId:
+          type: string
+        deviceFileName:
+          type: string
+        mime:
+          type: string
+        id:
+          type: string
+        questionId:
+          type: string
+
+    AnswerValue:
+      oneOf:
+        - type: string
+        - type: boolean
+        - type: number
+        - type: array
+          items:
+            $ref: '#/components/schemas/AnswerAttachment'
+
+    Answer:
+      type: object
+      properties:
+        field:
+          $ref: '#/components/schemas/AnswerField'
+        value:
+          $ref: '#/components/schemas/AnswerValue'
+
+    Answers:
+      type: array
+      items:
+        $ref: '#/components/schemas/Answer'
+
+    EncryptedAnswers:
+      type: object
+      properties:
+        encryptedAnswers:
+          type: string
+
+    Encryption:
+      type: object
+      properties:
+        type:
+          type: string
+        encryptionKeyId:
+          type: string
+        symmetricKeyName:
+          type: string
+
+    CurrentPosition:
+      type: object
+      properties:
+        currentMainStep:
+          type: number
+        currentMainStepIndex:
+          type: number
+        index:
+          type: number
+        level:
+          type: number
+        numberOfMainSteps:
+          type: number
+
+    Form:
+      type: object
+      properties:
+        answers:
+          oneOf:
+            - $ref: '#/components/schemas/Answers'
+            - $ref: '#/components/schemas/EncryptedAnswers'
+        encryption:
+          $ref: '#/components/schemas/Encryption'
+        currentPosition:
+          $ref: '#/components/schemas/CurrentPosition'
+
+    Forms:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/Form'
+
+    Period:
+      type: object
+      properties:
+        startDate:
+          type: number
+        endDate:
+          type: number
+
+    RequestedCompletion:
+      type: object
+      properties:
+        description:
+          type: string
+        received:
+          type: boolean
+
+    Completions:
+      type: object
+      properties:
+        attachmentUploaded:
+          type: array
+          items:
+            type: string
+        description:
+          oneOf:
+            - type: string
+            - nullable: true
+        dueDate:
+          oneOf:
+            - type: number
+            - nullable: true
+        isAttachmentPending:
+          type: boolean
+        isCompleted:
+          type: boolean
+        isDueDateExpired:
+          type: boolean
+        isRandomCheck:
+          type: boolean
+        receivedDate:
+          oneOf:
+            - type: number
+            - nullable: true
+        requested:
+          type: array
+          items:
+            $ref: '#/components/schemas/RequestedCompletion'
+
+    Administrator:
+      type: object
+      properties:
+        email:
+          type: string
+        name:
+          type: string
+        phone:
+          oneOf:
+            - type: string
+            - nullable: true
+        title:
+          type: string
+        type:
+          type: string
+
+    Details:
+      type: object
+      properties:
+        workflowId:
+          type: string
+        period:
+          $ref: '#/components/schemas/Period'
+        workflow:
+          type: object
+          additionalProperties: true
+        completions:
+          oneOf:
+            - $ref: '#/components/schemas/Completions'
+            - nullable: true
+        administrators:
+          type: array
+          items:
+            $ref: '#/components/schemas/Administrator'
+
+    Case:
+      type: object
+      properties:
+        id:
+          type: string
+        state:
+          type: string
+        expirationTime:
+          type: number
+        createdAt:
+          type: number
+        updatedAt:
+          type: number
+        status:
+          $ref: '#/components/schemas/Status'
+        forms:
+          $ref: '#/components/schemas/Forms'
+        provider:
+          type: string
+        persons:
+          type: array
+          items:
+            $ref: '#/components/schemas/Person'
+        details:
+          $ref: '#/components/schemas/Details'
+        currentFormId:
+          type: string
+        pdf:
+          type: string
+          format: binary

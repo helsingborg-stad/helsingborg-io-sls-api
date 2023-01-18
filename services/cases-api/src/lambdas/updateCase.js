@@ -178,12 +178,7 @@ export async function main(event, context) {
     throw putEventError;
   }
 
-  const attributes = objectWithoutProperties(updateCaseResponse.Attributes, [
-    'PK',
-    'SK',
-    'GSI1',
-    'PDF',
-  ]);
+  const attributes = objectWithoutProperties(updateCaseResponse.Attributes, ['PK', 'SK', 'GSI1']);
   return response.success(200, {
     type: 'updateCase',
     attributes,
