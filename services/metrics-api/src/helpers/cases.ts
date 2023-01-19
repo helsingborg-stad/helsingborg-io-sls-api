@@ -5,8 +5,8 @@ import type { QueryParams, CaseItem } from './query/cases/types';
 async function get(): Promise<CaseItem[]> {
   const params: QueryParams = {
     key: 'GSI2PK',
-    value: `CREATED#${getDatePattern('YYYYMMDD')}`,
-    index: 'GSI2PK-SK-index',
+    value: `CREATED#${getDatePattern('YYYYMM')}`,
+    index: 'GSI2PK-index',
   };
 
   return cases.query(params);
