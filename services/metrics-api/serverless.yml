@@ -40,6 +40,12 @@ provider:
           Resource:
             - !ImportValue ${self:custom.resourcesStage}-CasesTableAllIndexArn
 
+        - Effect: Allow
+          Action:
+            - kms:Decrypt
+            - kms:GenerateDataKey
+          Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
+
 functions:
   get:
     handler: src/lambdas/get.main
