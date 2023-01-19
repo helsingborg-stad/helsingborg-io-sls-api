@@ -31,6 +31,15 @@ provider:
     stage: ${self:custom.stage}
     resourcesStage: ${self:custom.resourcesStage}
 
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+          Resource:
+            - !ImportValue ${self:custom.resourcesStage}-CasesTableAllIndexArn
+
 functions:
   get:
     handler: src/lambdas/get.main
