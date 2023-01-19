@@ -1,6 +1,6 @@
-import MetricBuilder from './metricBuilder';
-import { MetricType } from './metrics.constants';
-import type { Metric, MetricValue } from './metrics.types';
+import MetricBuilder from '../../src/helpers/metricBuilder';
+import { MetricType } from '../../src/helpers/metrics.constants';
+import type { Metric, MetricValue } from '../../src/helpers/metrics.types';
 
 const MOCK_METRIC: Metric = {
   name: 'myMetric',
