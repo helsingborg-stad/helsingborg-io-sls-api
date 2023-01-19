@@ -2,7 +2,7 @@ import DynamoDb from 'aws-sdk/clients/dynamodb';
 
 const dynamoDbClient = new DynamoDb.DocumentClient({ apiVersion: '2012-08-10' });
 
-import { DynamoQueryHandler } from './types';
+import type { DynamoQueryHandler } from './types';
 
 export const dynamoQueryHandler: DynamoQueryHandler = {
   async get<T>(tableName: string, keys: { PK: string; SK: string }) {
