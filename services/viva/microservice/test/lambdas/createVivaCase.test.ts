@@ -162,14 +162,13 @@ function createLambdaInput(persons: VivaPersonsPerson | null = null): LambdaRequ
 }
 
 it('successfully creates a recurring application case', async () => {
-  const expectedParameters = {
+  const expectedParameters: DynamoDbPutParams = {
     TableName: 'cases',
     Item: {
       id: mockUuid,
       PK: `USER#${user.personalNumber}`,
       SK: `CASE#${mockUuid}`,
-      GSI2PK: 'METRIC#period',
-      GSI2SK: 'YEAR#2022#MONTH#01',
+      GSI2PK: 'CREATED#202201',
       currentFormId: readParametersResponse.recurringFormId,
       details: {
         period: {
@@ -224,14 +223,13 @@ it('successfully creates a recurring application case', async () => {
 });
 
 it('successfully creates a prepopulated recurring application case', async () => {
-  const expectedParameters = {
+  const expectedParameters: DynamoDbPutParams = {
     TableName: 'cases',
     Item: {
       id: mockUuid,
       PK: `USER#${user.personalNumber}`,
       SK: `CASE#${mockUuid}`,
-      GSI2PK: 'METRIC#period',
-      GSI2SK: 'YEAR#2022#MONTH#01',
+      GSI2PK: 'CREATED#202201',
       currentFormId: readParametersResponse.recurringFormId,
       details: {
         period: {
@@ -306,8 +304,7 @@ it('successfully creates a recurring application case with partner', async () =>
       PK: `USER#${user.personalNumber}`,
       SK: `CASE#${mockUuid}`,
       GSI1: `USER#${partner.personalNumber}`,
-      GSI2PK: 'METRIC#period',
-      GSI2SK: 'YEAR#2022#MONTH#01',
+      GSI2PK: 'CREATED#202201',
       currentFormId: readParametersResponse.recurringFormId,
       details: {
         period: {

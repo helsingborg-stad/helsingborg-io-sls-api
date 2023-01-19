@@ -47,7 +47,6 @@ export interface CaseItem {
   forms: Record<string, CaseForm>;
   GSI1?: string;
   GSI2PK?: string;
-  GSI2SK?: string;
   provider: string;
   persons: CasePerson[];
   details: CaseDetails;

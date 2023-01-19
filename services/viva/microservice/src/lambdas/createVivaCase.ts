@@ -86,8 +86,7 @@ function generateInitialRecurringCase(params: InitialRecurringCaseParams): CaseI
   const id = uuid.v4();
   const PK = `USER#${applicantPersonalNumber}`;
   const SK = `CASE#${id}`;
-  const GSI2PK = createCaseHelper.createMetricGSI2PK();
-  const GSI2SK = createCaseHelper.createGSI2SK(period);
+  const GSI2PK = createCaseHelper.createGSI2PK();
   const createdAt = Date.now();
   const status: CaseStatus = getStatusByType(NOT_STARTED_VIVA);
   const persons: CasePerson[] = createCaseHelper.getCasePersonList(vivaMyPages);
@@ -98,7 +97,6 @@ function generateInitialRecurringCase(params: InitialRecurringCaseParams): CaseI
     PK,
     SK,
     GSI2PK,
-    GSI2SK,
     state: VIVA_CASE_CREATED,
     expirationTime,
     createdAt,
