@@ -1,6 +1,6 @@
 import { caseQuaryHandler } from '../handlers/dynamoDb/caseQueryHandler';
 
-import { CaseQueryHandler } from './types';
+import type { CaseQueryHandler } from './types';
 
 export const caseQueries: CaseQueryHandler = {
   async get(keys: { PK: string; SK: string }) {

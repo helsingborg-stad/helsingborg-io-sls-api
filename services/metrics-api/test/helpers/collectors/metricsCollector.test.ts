@@ -1,8 +1,8 @@
-import { collectFromAll } from './metricsCollector';
-import MetricBuilder from '../metricBuilder';
+import { collectFromAll } from '../../../src/helpers/collectors/metricsCollector';
+import MetricBuilder from '../../../src/helpers/metricBuilder';
 
-import type { MetricsCollector } from './metricsCollector';
-import type { Metric } from '../metrics.types';
+import type { MetricsCollector } from '../../../src/helpers/collectors/metricsCollector';
+import type { Metric } from '../../../src/helpers/metrics.types';
 
 type MockCollectorMetaA = {
   a: string;

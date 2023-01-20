@@ -130,6 +130,14 @@ function getFormEncryptionAttributes(): CaseFormEncryption {
   };
 }
 
+function createGSI2PK(): string {
+  const dateTime = Date.now();
+  const utcFullYear = new Date(dateTime).getUTCFullYear();
+  const utcMonth = new Date(dateTime).getUTCMonth() + 1;
+  const twoDigitsUtcMonth = utcMonth < 10 ? `0${utcMonth}` : utcMonth;
+  return `CREATED#${utcFullYear}${twoDigitsUtcMonth}`;
+}
+
 export default {
   stripNonNumericalCharacters,
   getPeriodInMilliseconds,
@@ -140,4 +148,5 @@ export default {
   getFormEncryptionAttributes,
   createCaseApplicantPerson,
   createPeriodStartDate,
+  createGSI2PK,
 };

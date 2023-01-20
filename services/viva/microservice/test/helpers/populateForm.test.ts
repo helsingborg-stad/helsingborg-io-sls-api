@@ -2,7 +2,7 @@ import { describe } from 'jest-circus';
 import populateFormWithVivaChildren, {
   populateChildrenAnswers,
 } from '../../src/helpers/populateForm';
-import formTemplate from '../mock/formTemplate.json';
+import formRecurring from '../mock/formRecurring.json';
 
 import { DEFAULT_CURRENT_POSITION } from '../../src/helpers/constants';
 
@@ -161,7 +161,11 @@ describe('populateChildrenAnswers', () => {
 
 describe('populateFormWithVivaChildren', () => {
   it('filter data map on tag "children" and prepending recurring form with children from Viva', () => {
-    const results = populateFormWithVivaChildren(caseRecurringForm, formTemplate, vivaChildrenList);
+    const results = populateFormWithVivaChildren(
+      caseRecurringForm,
+      formRecurring,
+      vivaChildrenList
+    );
     expect(results).toEqual(expectedPopulatedFormWithChildren);
   });
 });

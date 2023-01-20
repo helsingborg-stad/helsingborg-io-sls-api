@@ -1,5 +1,5 @@
-import { isMetricValueWithMeta } from './metrics';
-import type { MaybeMetricMeta, MetricValue } from './metrics.types';
+import { isMetricValueWithMeta } from '../../src/helpers/metrics';
+import type { MaybeMetricMeta, MetricValue } from '../../src/helpers/metrics.types';
 
 describe('metrics', () => {
   describe('isMetricValueWithMeta', () => {

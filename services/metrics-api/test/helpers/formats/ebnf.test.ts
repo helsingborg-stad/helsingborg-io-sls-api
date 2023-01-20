@@ -1,7 +1,7 @@
-import { ebnf } from '.';
-import { MetricType } from '../metrics.constants';
+import { ebnf } from '../../../src/helpers/formats';
+import { MetricType } from '../../../src/helpers/metrics.constants';
 
-import type { MaybeMetricMeta, Metric } from '../metrics.types';
+import type { MaybeMetricMeta, Metric } from '../../../src/helpers/metrics.types';
 
 describe('EBNF adapter', () => {
   it('handles simple metric', () => {

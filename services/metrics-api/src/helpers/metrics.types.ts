@@ -6,6 +6,7 @@ export type MaybeMetricMeta = MetricMetaBase | void;
 type MetricValueNoMeta = {
   value: number;
 };
+
 type MetricMeta<TMeta extends MaybeMetricMeta> = TMeta extends void
   ? MetricValueNoMeta
   : { meta: TMeta };

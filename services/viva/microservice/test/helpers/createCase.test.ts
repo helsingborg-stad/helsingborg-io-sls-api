@@ -62,7 +62,9 @@ const vivaOfficerSingle: VivaOfficersOfficer = {
 const vivaCaseClientOnly: VivaMyPagesVivaCase = {
   client: vivaClient,
   officers: vivaOfficerSingle,
-  persons: null,
+  persons: {
+    person: { ...vivaPersonChild },
+  },
 };
 
 const vivaCaseWithPersonList: VivaMyPagesVivaCase = {
@@ -125,6 +127,12 @@ describe('getCasePersonList', () => {
         lastName: 'Christiansson',
         role: 'applicant',
         hasSigned: false,
+      },
+      {
+        personalNumber: '200002014233',
+        firstName: 'Lisa',
+        lastName: 'Nilsson',
+        role: 'children',
       },
     ]);
   });

@@ -1,17 +1,25 @@
-import { collectFromAll, ekbMetricsCollector } from '../helpers/collectors';
+import { ekbMetricsCollector } from '../helpers/collectors';
+import { collectFromAll } from '../helpers/collectors';
 import { getMetricFormatter } from '../helpers/formats';
 import { wrappers } from '../libs/lambdaWrapper';
 
 import type { ValidFormat } from '../helpers/formats';
 
-interface GetMetricsRequest {
+export interface GetMetricsRequest {
   format: ValidFormat;
 }
 
-async function getMetrics({ format }: GetMetricsRequest): Promise<string> {
+export interface Dependencies {
+  ekbMetricsCollector: typeof ekbMetricsCollector;
+}
+
+export async function getMetrics(
+  { format }: GetMetricsRequest,
+  dependencies: Dependencies
+): Promise<string> {
+  const metrics = await collectFromAll([dependencies.ekbMetricsCollector]);
   const formatter = getMetricFormatter(format);
-  const metrics = await collectFromAll([ekbMetricsCollector]);
   return formatter.formatMultiple(metrics);
 }
 
-export const main = wrappers.restRaw.wrap(getMetrics, {});
+export const main = wrappers.restRaw.wrap(getMetrics, { ekbMetricsCollector });

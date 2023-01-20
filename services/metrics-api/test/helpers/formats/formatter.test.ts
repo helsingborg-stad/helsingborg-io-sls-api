@@ -1,6 +1,6 @@
-import { getMetricFormatter, ValidFormat } from './formatter';
+import { getMetricFormatter, ValidFormat } from '../../../src/helpers/formats/formatter';
 
-import type { MetricFormatter } from './formats.types';
+import type { MetricFormatter } from '../../../src/helpers/formats/formats.types';
 
 describe('formatter (metrics)', () => {
   describe('getMetricFormatter', () => {
