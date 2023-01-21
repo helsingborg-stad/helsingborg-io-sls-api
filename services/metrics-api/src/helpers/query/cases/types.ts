@@ -7,12 +7,12 @@ export interface CaseItem {
   readonly status: CaseItemStatus;
 }
 
-export interface QueryParams {
+export interface CaseQueryParams {
   key: string;
   value: string;
   index?: string;
 }
 
 export interface CaseQueryHandler {
-  query(params: QueryParams): Promise<CaseItem[]>;
+  query(params: CaseQueryParams): Promise<CaseItem[]>;
 }
