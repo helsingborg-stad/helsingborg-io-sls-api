@@ -21,6 +21,7 @@ provider:
   versionFunctions: false
   tracing:
     lambda: true
+
   apiGateway:
     restApiId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiId
     restApiRootResourceId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
