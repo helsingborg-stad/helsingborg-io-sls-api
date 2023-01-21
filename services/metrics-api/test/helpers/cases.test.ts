@@ -2,32 +2,32 @@ import { createStatusCollection } from '../../src/helpers/cases';
 import type { CaseItem } from '../../src/helpers/query/cases/types';
 import type { StatusCollection } from '../../src/helpers/cases';
 
-const cases: CaseItem[] = [
-  { status: { type: 'notStarted:viva' } },
-  { status: { type: 'closed:approved:viva' } },
-  { status: { type: 'closed:rejected:viva' } },
-  { status: { type: 'closed:partiallyApproved' } },
-  { status: { type: 'newApplication:viva' } },
-  { status: { type: 'newApplication:viva' } },
-  { status: { type: 'newApplication:viva' } },
-  { status: { type: 'active:ongoing' } },
-  { status: { type: 'active:signature:pending' } },
-  { status: { type: 'active:signature:completed' } },
-  { status: { type: 'active:completionRequired' } },
-  { status: { type: 'active:completionRequired' } },
-  { status: { type: 'active:completionRequired' } },
-  { status: { type: 'active:completionRequired' } },
-  { status: { type: 'active:submitted:completion:viva' } },
-  { status: { type: 'active:ongoing:completion' } },
-  { status: { type: 'active:submitted:randomCheck' } },
-  { status: { type: 'active:randomCheckRequired' } },
-  { status: { type: 'active:processing' } },
-  { status: { type: 'active:submitted' } },
-  { status: { type: 'active:ongoing:newApplication' } },
-];
-
 describe('createStatusCollection', () => {
   it(`should return status collection`, async () => {
+    const cases: CaseItem[] = [
+      { status: { type: 'notStarted:viva' } },
+      { status: { type: 'closed:approved:viva' } },
+      { status: { type: 'closed:rejected:viva' } },
+      { status: { type: 'closed:partiallyApproved' } },
+      { status: { type: 'newApplication:viva' } },
+      { status: { type: 'newApplication:viva' } },
+      { status: { type: 'newApplication:viva' } },
+      { status: { type: 'active:ongoing' } },
+      { status: { type: 'active:signature:pending' } },
+      { status: { type: 'active:signature:completed' } },
+      { status: { type: 'active:completionRequired' } },
+      { status: { type: 'active:completionRequired' } },
+      { status: { type: 'active:completionRequired' } },
+      { status: { type: 'active:completionRequired' } },
+      { status: { type: 'active:submitted:completion:viva' } },
+      { status: { type: 'active:ongoing:completion' } },
+      { status: { type: 'active:submitted:randomCheck' } },
+      { status: { type: 'active:randomCheckRequired' } },
+      { status: { type: 'active:processing' } },
+      { status: { type: 'active:submitted' } },
+      { status: { type: 'active:ongoing:newApplication' } },
+    ];
+
     const expectedResult: StatusCollection = {
       ekb_cases_open_total: {
         'notStarted:viva': 1,
@@ -50,6 +50,20 @@ describe('createStatusCollection', () => {
         'closed:partiallyApproved': 1,
       },
     };
+    const result = createStatusCollection(cases);
+    expect(result).toEqual(expectedResult);
+  });
+
+  it(`should return status collection with only open cases`, async () => {
+    const cases: CaseItem[] = [{ status: { type: 'notStarted:viva' } }];
+
+    const expectedResult: StatusCollection = {
+      ekb_cases_open_total: {
+        'notStarted:viva': 1,
+      },
+      ekb_cases_closed_total: {},
+    };
+
     const result = createStatusCollection(cases);
     expect(result).toEqual(expectedResult);
   });
