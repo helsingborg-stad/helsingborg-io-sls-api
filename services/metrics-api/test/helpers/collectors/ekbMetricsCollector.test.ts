@@ -1,32 +1,57 @@
-import { ACTIVE_ONGOING } from '../../../src/libs/constants';
-import { createCaseMetricValue } from '../../../src/helpers/collectors/ekbMetricsCollector';
-import type { CaseItem } from '../../../src/helpers/query/cases/types';
+import { createCasesMetrics } from '../../../src/helpers/collectors/ekbMetricsCollector';
+import { MetricType } from '../../../src/helpers/metrics.constants';
+import type { StatusCollection } from '../../../src/helpers/cases';
+import type { CaseMeta } from '../../../src/helpers/collectors/ekbMetricsCollector';
+import type { Metric } from '../../../src/helpers/metrics.types';
 
-const cases: CaseItem[] = [
-  {
-    GSI2PK: 'CREATED#202201',
-    status: {
-      type: 'active:ongoing',
-    },
+const statusCollection: StatusCollection = {
+  ekb_cases_open_total: {
+    'notStarted:viva': 1,
+    'newApplication:viva': 10,
   },
-  {
-    GSI2PK: 'CREATED#202201',
-    status: {
-      type: 'active:ongoing:randomCheck',
-    },
+  ekb_cases_closed_total: {
+    'closed:approved:viva': 2,
   },
-];
+};
 
-describe('createCaseMetricValue', () => {
-  it(`should return 2 ekb case metric value if status contains: ${ACTIVE_ONGOING}`, async () => {
-    const expected = {
-      value: 2,
-      meta: {
-        status: ACTIVE_ONGOING,
+describe('createCasesMetrics', () => {
+  it(`should return cases metrics collection`, async () => {
+    const expectedResult: Metric<CaseMeta>[] = [
+      {
+        name: 'ekb_cases_open_total',
+        help: 'Total number of open cases',
+        type: MetricType.GAUGE,
+        values: [
+          {
+            value: 1,
+            meta: {
+              status: 'notStarted:viva',
+            },
+          },
+          {
+            value: 10,
+            meta: {
+              status: 'newApplication:viva',
+            },
+          },
+        ],
       },
-    };
+      {
+        name: 'ekb_cases_closed_total',
+        help: 'Total number of closed cases',
+        type: MetricType.GAUGE,
+        values: [
+          {
+            value: 2,
+            meta: {
+              status: 'closed:approved:viva',
+            },
+          },
+        ],
+      },
+    ];
 
-    const result = createCaseMetricValue(ACTIVE_ONGOING, cases);
-    expect(result).toEqual(expected);
+    const result = createCasesMetrics(statusCollection);
+    expect(result).toEqual(expectedResult);
   });
 });

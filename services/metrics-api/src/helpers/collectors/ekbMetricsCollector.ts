@@ -5,15 +5,15 @@ import type { StatusCollection } from '../cases';
 import type { Metric } from '../metrics.types';
 import type { MetricsCollector } from './metricsCollector';
 
-type CaseMeta = {
+export type CaseMeta = {
   status: string;
 };
 
-function createCasesMetrics(collection: StatusCollection) {
+export function createCasesMetrics(collection: StatusCollection) {
   const metrics = Object.entries(collection).map(([metricName, values]) => {
     const builder = new MetricBuilder<CaseMeta>(metricName);
 
-    builder.setHelp(MetricsHelperText[metricName]);
+    builder.setHelp(MetricsHelperText[metricName as keyof typeof MetricsHelperText]);
     builder.setType(MetricType.GAUGE);
 
     Object.entries(values).forEach(([status, value]) => {
