@@ -1,9 +1,9 @@
 import { cases } from './query';
 import { getDatePattern } from './getDatePattern';
-import type { QueryParams, CaseItem } from './query/cases/types';
+import type { CasesQueryParams, CaseItem } from './query/cases/types';
 
 async function get(): Promise<CaseItem[]> {
-  const params: QueryParams = {
+  const params: CasesQueryParams = {
     key: 'GSI2PK',
     value: `CREATED#${getDatePattern('YYYYMM')}`,
     index: 'GSI2PK-index',
