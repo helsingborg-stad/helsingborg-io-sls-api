@@ -25,6 +25,12 @@ export function createStatusCollection(cases: CaseItem[]): StatusCollection {
   return cases.reduce(casesReducer, initial);
 }
 
+export function removeEmptyMetricsValues(collection: StatusCollection): StatusCollection {
+  return Object.fromEntries(
+    Object.entries(collection).filter(([, value]) => Object.values(value).some(v => v > 0))
+  ) as StatusCollection;
+}
+
 function get(): Promise<CaseItem[]> {
   const params: CasesQueryParams = {
     key: 'GSI2PK',
