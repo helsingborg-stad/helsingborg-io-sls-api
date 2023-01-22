@@ -55,7 +55,7 @@ describe('createCasesMetrics', () => {
     expect(result).toEqual(expectedResult);
   });
 
-  it(`should return only open cases metrics collection`, async () => {
+  it(`should only return metrics containing actual values`, async () => {
     const statusCollection: StatusCollection = {
       ekb_cases_open_total: {
         'notStarted:viva': 1,
