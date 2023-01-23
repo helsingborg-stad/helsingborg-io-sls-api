@@ -1,4 +1,4 @@
-import { createStatusCollection } from '../../src/helpers/cases';
+import { createStatusCollection, removeEmptyMetricsValues } from '../../src/helpers/cases';
 import type { CaseItem } from '../../src/helpers/query/cases/types';
 import type { StatusCollection } from '../../src/helpers/cases';
 
@@ -50,6 +50,7 @@ describe('createStatusCollection', () => {
         'closed:partiallyApproved': 1,
       },
     };
+
     const result = createStatusCollection(cases);
     expect(result).toEqual(expectedResult);
   });
@@ -68,3 +69,25 @@ describe('createStatusCollection', () => {
     expect(result).toEqual(expectedResult);
   });
 });
+
+describe('removeEmptyMetricsValues', () => {
+  it(`should remove empty status collection object`, async () => {
+    const statusCollection: StatusCollection = {
+      ekb_cases_open_total: {
+        'notStarted:viva': 10,
+      },
+      ekb_cases_closed_total: {},
+    };
+
+    const expectedResult = {
+      ekb_cases_open_total: {
+        'notStarted:viva': 10,
+      },
+    };
+
+    const result = removeEmptyMetricsValues(statusCollection);
+    expect(result).toEqual(expectedResult);
+  });
+});
+
+removeEmptyMetricsValues;
