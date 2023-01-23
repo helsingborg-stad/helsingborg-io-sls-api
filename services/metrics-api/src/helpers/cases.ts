@@ -5,7 +5,7 @@ import type { CasesQueryParams, CaseItem } from './query/cases/types';
 
 export type StatusCollection = Record<MetricsKey, Record<string, number>>;
 
-function casesReducer(
+function casesToStatusCollectionReducer(
   accumulated: StatusCollection,
   { status: { type: statusType } }: CaseItem
 ): StatusCollection {
@@ -22,7 +22,7 @@ export function createStatusCollection(cases: CaseItem[]): StatusCollection {
     [MetricsKey.EKB_CASES_OPEN_TOTAL]: {},
     [MetricsKey.EKB_CASES_CLOSED_TOTAL]: {},
   };
-  return cases.reduce(casesReducer, initial);
+  return cases.reduce(casesToStatusCollectionReducer, initial);
 }
 
 export function removeEmptyMetricsValues(collection: StatusCollection): StatusCollection {
