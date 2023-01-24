@@ -54,5 +54,4 @@ functions:
       - http:
           path: metrics/ekb
           method: get
-          private: true
           cors: true
