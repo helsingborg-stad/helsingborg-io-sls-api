@@ -27,13 +27,10 @@ provider:
     resourcesStage: ${self:custom.resourcesStage}
 
   apiGateway:
-    restApiId:
-      'Fn::ImportValue': ${self:custom.stage}-ExtApiGatewayRestApiId
-    restApiRootResourceId:
-      'Fn::ImportValue': ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
+    restApiId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiId
+    restApiRootResourceId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
     restApiResources:
-      auth:
-        'Fn::ImportValue': ${self:custom.stage}-ExtApiGatewayResourceAuth
+      auth: !ImportValue ${self:custom.stage}-ExtApiGatewayResourceAuth
 
   iam:
     role:
@@ -45,6 +42,7 @@ provider:
             - !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${file(../../../config.json):${self:custom.stage}.auth.secrets.accessToken.name}-??????'
             - !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${file(../../../config.json):${self:custom.stage}.auth.secrets.refreshToken.name}-??????'
             - !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${file(../../../config.json):${self:custom.stage}.auth.secrets.authorizationCode.name}-??????'
+
 functions:
   authorizer:
     handler: src/lambdas/authorize.main
