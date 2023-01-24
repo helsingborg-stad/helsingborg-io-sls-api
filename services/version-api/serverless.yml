@@ -1,10 +1,10 @@
+org: hbgworks
 service: version-api
+
+frameworkVersion: ^3.26.0
 
 plugins:
   - serverless-bundle
-  - serverless-add-api-key
-
-projectDir: ../../
 
 custom: ${file(../../serverless.common.yml):custom}
 
@@ -12,23 +12,24 @@ package:
   individually: true
 
 provider:
-  lambdaHashingVersion: 20201221
   name: aws
   runtime: nodejs16.x
   stage: dev
   region: eu-north-1
   endpointType: regional
+  versionFunctions: false
   tracing:
     lambda: true
+
+  environment:
+    stage: ${self:custom.stage}
+    resourcesStage: ${self:custom.resourcesStage}
+
   apiGateway:
     restApiId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiId
     restApiRootResourceId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
     restApiResources:
       version: !ImportValue ${self:custom.stage}-ExtApiGatewayResourceVersion
-
-  environment:
-    stage: ${self:custom.stage}
-    resourcesStage: ${self:custom.resourcesStage}
 
   iam:
     role:
