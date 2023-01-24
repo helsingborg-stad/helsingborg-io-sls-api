@@ -8,9 +8,5 @@
   },
   "keywords": [],
   "author": "Helsingborg Stad",
-  "license": "MIT",
-  "devDependencies": {
-    "@types/aws-lambda": "^8.10.97",
-    "serverless": "^3.18.1"
-  }
+  "license": "MIT"
 }
