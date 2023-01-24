@@ -1,4 +1,4 @@
-import casesRepository, { createStatusCollection, removeEmptyMetricsValues } from '../cases';
+import casesRepository, { createStatusCollection } from '../cases';
 import MetricBuilder from '../metricBuilder';
 import { MetricsHelperText, MetricType } from '../metrics.constants';
 import type { StatusCollection } from '../cases';
@@ -10,9 +10,7 @@ export type CaseMeta = {
 };
 
 export function createCasesMetrics(collection: StatusCollection): Metric<CaseMeta>[] {
-  const collectionWithValues = removeEmptyMetricsValues(collection);
-
-  const metrics = Object.entries(collectionWithValues).map(([metricName, values]) => {
+  const metrics = Object.entries(collection).map(([metricName, values]) => {
     const builder = new MetricBuilder<CaseMeta>(metricName);
 
     builder.setHelp(MetricsHelperText[metricName as keyof typeof MetricsHelperText]);

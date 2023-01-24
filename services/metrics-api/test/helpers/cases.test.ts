@@ -1,4 +1,4 @@
-import { createStatusCollection, removeEmptyMetricsValues } from '../../src/helpers/cases';
+import { createStatusCollection } from '../../src/helpers/cases';
 import type { CaseItem } from '../../src/helpers/query/cases/types';
 import type { StatusCollection } from '../../src/helpers/cases';
 
@@ -30,24 +30,34 @@ describe('createStatusCollection', () => {
 
     const expectedResult: StatusCollection = {
       ekb_cases_open_total: {
-        'notStarted:viva': 1,
-        'newApplication:viva': 3,
-        'active:ongoing': 1,
-        'active:signature:pending': 1,
-        'active:signature:completed': 1,
         'active:completionRequired': 4,
-        'active:submitted:completion:viva': 1,
+        'active:completionRequired:viva': 0,
+        'active:newApplication:randomCheckRequired:viva': 0,
+        'active:ongoing': 1,
         'active:ongoing:completion': 1,
-        'active:submitted:randomCheck': 1,
-        'active:randomCheckRequired': 1,
-        'active:processing': 1,
-        'active:submitted': 1,
         'active:ongoing:newApplication': 1,
+        'active:processing': 1,
+        'active:processing:completionsDueDatePassed:viva': 0,
+        'active:randomCheckRequired': 1,
+        'active:randomCheckRequired:viva': 0,
+        'active:signature:completed': 1,
+        'active:signature:pending': 1,
+        'active:submitted': 1,
+        'active:submitted:completion:viva': 1,
+        'active:submitted:randomCheck': 1,
+        'active:submitted:randomCheck:viva': 0,
+        newApplication: 0,
+        'newApplication:viva': 3,
+        notStarted: 0,
+        'notStarted:viva': 1,
       },
       ekb_cases_closed_total: {
         'closed:approved:viva': 1,
-        'closed:rejected:viva': 1,
+        'closed:completionRejected:viva': 0,
         'closed:partiallyApproved': 1,
+        'closed:partiallyApproved:viva': 0,
+        'closed:randomCheckRejected:viva': 0,
+        'closed:rejected:viva': 1,
       },
     };
 
@@ -60,34 +70,33 @@ describe('createStatusCollection', () => {
 
     const expectedResult: StatusCollection = {
       ekb_cases_open_total: {
+        'active:completionRequired:viva': 0,
+        'active:newApplication:randomCheckRequired:viva': 0,
+        'active:ongoing': 0,
+        'active:ongoing:newApplication': 0,
+        'active:processing': 0,
+        'active:processing:completionsDueDatePassed:viva': 0,
+        'active:randomCheckRequired:viva': 0,
+        'active:signature:completed': 0,
+        'active:signature:pending': 0,
+        'active:submitted': 0,
+        'active:submitted:completion:viva': 0,
+        'active:submitted:randomCheck:viva': 0,
+        newApplication: 0,
+        'newApplication:viva': 0,
+        notStarted: 0,
         'notStarted:viva': 1,
       },
-      ekb_cases_closed_total: {},
+      ekb_cases_closed_total: {
+        'closed:approved:viva': 0,
+        'closed:completionRejected:viva': 0,
+        'closed:partiallyApproved:viva': 0,
+        'closed:randomCheckRejected:viva': 0,
+        'closed:rejected:viva': 0,
+      },
     };
 
     const result = createStatusCollection(cases);
     expect(result).toEqual(expectedResult);
   });
 });
-
-describe('removeEmptyMetricsValues', () => {
-  it(`should remove empty status collection object`, async () => {
-    const statusCollection: StatusCollection = {
-      ekb_cases_open_total: {
-        'notStarted:viva': 10,
-      },
-      ekb_cases_closed_total: {},
-    };
-
-    const expectedResult = {
-      ekb_cases_open_total: {
-        'notStarted:viva': 10,
-      },
-    };
-
-    const result = removeEmptyMetricsValues(statusCollection);
-    expect(result).toEqual(expectedResult);
-  });
-});
-
-removeEmptyMetricsValues;
