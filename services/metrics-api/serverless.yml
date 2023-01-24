@@ -21,6 +21,7 @@ provider:
   versionFunctions: false
   tracing:
     lambda: true
+
   apiGateway:
     restApiId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiId
     restApiRootResourceId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
@@ -53,5 +54,4 @@ functions:
       - http:
           path: metrics/ekb
           method: get
-          private: true
           cors: true

@@ -1,5 +1,5 @@
 export interface QueryParams {
-  key: string;
+  pk: string;
   value: string;
   index?: string;
 }

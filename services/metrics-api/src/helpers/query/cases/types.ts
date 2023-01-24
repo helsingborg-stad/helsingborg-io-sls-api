@@ -3,16 +3,15 @@ interface CaseItemStatus {
 }
 
 export interface CaseItem {
-  readonly GSI2PK: string;
   readonly status: CaseItemStatus;
 }
 
-export interface QueryParams {
+export interface CasesQueryParams {
   key: string;
   value: string;
   index?: string;
 }
 
-export interface CaseQueryHandler {
-  query(params: QueryParams): Promise<CaseItem[]>;
+export interface CasesQueryHandler {
+  query(params: CasesQueryParams): Promise<CaseItem[]>;
 }

@@ -1,10 +1,11 @@
 import { dynamoQueryHandler } from './queryHandler';
 import config from '../../../../libs/config';
-import type { CaseQueryHandler, QueryParams, CaseItem } from '../../cases/types';
+import type { CasesQueryHandler, CasesQueryParams, CaseItem } from '../../cases/types';
 
-export const caseQuaryHandler: CaseQueryHandler = {
-  async query(params: QueryParams) {
+export const casesQuaryHandler: CasesQueryHandler = {
+  async query(params: CasesQueryParams) {
+    const { key: pk, value, index } = params;
     const casesTableName = `${config.resourcesStage}-${config.cases.tableName}`;
-    return dynamoQueryHandler.query<CaseItem[]>(casesTableName, params);
+    return dynamoQueryHandler.query<CaseItem[]>(casesTableName, { pk, value, index });
   },
 };

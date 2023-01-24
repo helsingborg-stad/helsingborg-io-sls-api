@@ -1,7 +1,7 @@
+import { wrappers } from '../libs/lambdaWrapper';
 import { ekbMetricsCollector } from '../helpers/collectors';
 import { collectFromAll } from '../helpers/collectors';
 import { getMetricFormatter } from '../helpers/formats';
-import { wrappers } from '../libs/lambdaWrapper';
 
 import type { ValidFormat } from '../helpers/formats';
 

@@ -5,12 +5,13 @@ const dynamoDbClient = new DynamoDb.DocumentClient({ apiVersion: '2012-08-10' })
 
 export const dynamoQueryHandler: DynamoQueryHandler = {
   async query<T>(tableName: string, params: QueryParams): Promise<T> {
+    const { pk, value, index } = params;
     const queryParams = {
       TableName: tableName,
       KeyConditionExpression: '#pk = :value',
-      ExpressionAttributeNames: { '#pk': params.key },
-      ExpressionAttributeValues: { ':value': params.value },
-      ...(params.index && { IndexName: params.index }),
+      ExpressionAttributeNames: { '#pk': pk },
+      ExpressionAttributeValues: { ':value': value },
+      ...(index && { IndexName: index }),
     };
     const result = await dynamoDbClient.query(queryParams).promise();
     return result.Items as unknown as T;

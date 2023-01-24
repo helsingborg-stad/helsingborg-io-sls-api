@@ -40,7 +40,7 @@ function createDependencies(): Dependencies {
   };
 }
 
-it('should return ekb cases metrics', async () => {
+it('should return ekb cases metrics string in EBNF format', async () => {
   const expected = [
     '# HELP ekb_cases_open_total Total number of open cases',
     '# TYPE ekb_cases_open_total gauge',
