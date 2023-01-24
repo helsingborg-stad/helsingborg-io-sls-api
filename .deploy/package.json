@@ -10,9 +10,9 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "js-yaml": "^4.0.0",
+    "js-yaml": "^4.1.0",
     "js-yaml-cloudformation-schema": "^1.0.0",
-    "jsonpath": "^1.0.2",
-    "glob": "^7.1.6"
+    "jsonpath": "^1.1.1",
+    "glob": "^8.1.0"
   }
 }
