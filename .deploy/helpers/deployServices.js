@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import childProcess from 'child_process';
 import fs from 'fs';
 import path from 'path';
@@ -13,16 +12,22 @@ const deployed = [];
  * @param {array} files - List of files to services that should be deployed.
  * @return {void}
  */
-const deployServices = files => {
+function deployServices(files) {
   for (const file of files) {
-    const directory = path.parse(file).dir;
-    process.chdir(directory);
     try {
+      const directory = path.parse(file).dir;
+      process.chdir(directory);
+
       // Run yarn install if package.json exists.
       if (fs.existsSync(`${directory}/package.json`)) {
         childProcess.execSync('yarn install', { stdio: 'inherit' });
       }
+
       childProcess.execSync(`${config.deployCommand}`, { stdio: 'inherit' });
+
+      // Save deployed services in reverse order for rollback purposes.
+      deployed.unshift(directory);
+      process.chdir(config.codeBuildPath);
     } catch (ex) {
       console.log('Error deploying, starting rollback!');
       console.log(ex);
@@ -33,10 +38,7 @@ const deployServices = files => {
       rollback(deployed);
       break;
     }
-    // Save deployed services in reverse order for rollback purposes.
-    deployed.unshift(directory);
-    process.chdir(config.codeBuildPath);
   }
-};
+}
 
 export default deployServices;

@@ -9,7 +9,7 @@ import config from '../config.js';
  * @param {array} deployedServices - List of deployed services to rollback.
  * @return {void}
  */
-const rollback = deployedServices => {
+function rollback(deployedServices) {
   const regex = /Serverless: Timestamp: (\d+)/gs;
   if (deployedServices.length === 0) {
     console.log('Nothing to rollback!');
@@ -50,6 +50,7 @@ const rollback = deployedServices => {
       } catch (_error) {
         console.log(_error);
         console.log(`Error rollback to timestamp: ${timestamp} in: ${deployedService}`);
+
         // Stop the build!
         process.exit(1);
       }
@@ -62,6 +63,6 @@ const rollback = deployedServices => {
   }
   // Stop the build!
   process.exit(1);
-};
+}
 
 export default rollback;

@@ -11,7 +11,7 @@ import { CLOUDFORMATION_SCHEMA } from 'js-yaml-cloudformation-schema';
  * @param {array} secondService - Second service compare data.
  * @return {int} - Sort order int.
  */
-const sortDeploys = (firstService, secondService) => {
+function sortDeploys(firstService, secondService) {
   if (firstService.imports.length === 0) {
     return -1;
   }
@@ -35,28 +35,30 @@ const sortDeploys = (firstService, secondService) => {
   }
 
   return 0;
-};
+}
 
 /**
  * Based on export and imports in serverless templates, sort the list to get exports before any import.
  * @param {array} files - List of paths to services files.
  * @return {array} - Sorted list with exports first.
  */
-const sortFiles = files => {
+function sortFiles(files) {
   // Collect all import and exports in the serverless files.
   const services = files.map(file => {
     try {
-      const data = fs.readFileSync(file, 'utf8');
-      const doc = yaml.load(data, { schema: CLOUDFORMATION_SCHEMA });
+      const fileData = fs.readFileSync(file, 'utf8');
+      const doc = yaml.load(fileData, { schema: CLOUDFORMATION_SCHEMA });
       const imports = jsonpath.query(doc, '$..["Fn::ImportValue"]');
       imports.concat(jsonpath.query(doc, '$..["!ImportValue"]'));
+      const exports = jsonpath.query(doc, '$.resources.Outputs.*.Export.Name');
+
       return {
         file,
-        imports: imports,
-        exports: jsonpath.query(doc, '$.resources.Outputs.*.Export.Name'),
+        imports,
+        exports,
       };
-    } catch (e) {
-      console.log(e);
+    } catch (error) {
+      console.log(error);
     }
   });
 
@@ -64,7 +66,7 @@ const sortFiles = files => {
   services.sort(sortDeploys);
 
   // Get the files and skip the sorting data for return.
-  return services.map(service => service.file);
-};
+  return services.map(({ file }) => file);
+}
 
 export default sortFiles;
