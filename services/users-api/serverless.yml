@@ -1,10 +1,11 @@
+org: hbgworks
 service: users-api
+
+frameworkVersion: ^3.26.0
 
 plugins:
   - serverless-bundle
   - serverless-apigw-binary
-
-projectDir: ../../
 
 custom: ${file(../../serverless.common.yml):custom}
 
@@ -12,12 +13,12 @@ package:
   individually: true
 
 provider:
-  lambdaHashingVersion: 20201221
   name: aws
   runtime: nodejs16.x
   stage: dev
   region: eu-north-1
   endpointType: regional
+  versionFunctions: false
   tracing:
     lambda: true
 
@@ -26,13 +27,10 @@ provider:
     resourcesStage: ${self:custom.resourcesStage}
 
   apiGateway:
-    restApiId:
-      'Fn::ImportValue': ${self:custom.stage}-ExtApiGatewayRestApiId
-    restApiRootResourceId:
-      'Fn::ImportValue': ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
+    restApiId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiId
+    restApiRootResourceId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
     restApiResources:
-      users:
-        'Fn::ImportValue': ${self:custom.stage}-ExtApiGatewayResourceUsers
+      users: !ImportValue ${self:custom.stage}-ExtApiGatewayResourceUsers
 
   iam:
     role:
@@ -42,7 +40,7 @@ provider:
             - dynamodb:Query
             - dynamodb:GetItem
           Resource:
-            - 'Fn::ImportValue': ${self:custom.resourcesStage}-UsersTableArn
+            - !ImportValue ${self:custom.resourcesStage}-UsersTableArn
 
         - Effect: Allow
           Action:
@@ -52,11 +50,11 @@ provider:
             - s3:GetObject
             - s3:DeleteObject
           Resource:
-            - Fn::ImportValue: ${self:custom.resourcesStage}-AttachmentsBucketArn
-            - Fn::Join:
-                - ''
-                - - Fn::ImportValue: ${self:custom.resourcesStage}-AttachmentsBucketArn
-                  - '/*'
+            - !ImportValue ${self:custom.resourcesStage}-AttachmentsBucketArn
+            - !Join
+              - ''
+              - - !ImportValue ${self:custom.resourcesStage}-AttachmentsBucketArn
+                - '/*'
 
         - Effect: Allow
           Action:
