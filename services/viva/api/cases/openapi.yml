@@ -36,7 +36,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '../../../viva-case-common-openapi.yml#/components/schemas/Person'
+              $ref: '../../viva-case-common-openapi.yml#/components/schemas/Person'
       responses:
         '200':
           description: OK.
@@ -49,19 +49,19 @@ paths:
           content:
             'application/json':
               schema:
-                $ref: '../../../common-openapi.yml#/components/schemas/jsonApiError'
+                $ref: '../../common-openapi.yml#/components/schemas/jsonApiError'
         '403':
           description: Missing Api Key or co-applicant not allowed to apply.
           content:
             'application/json':
               schema:
                 oneOf:
-                  - $ref: '../../../common-openapi.yml#/components/schemas/missingApiKeySchema'
+                  - $ref: '../../common-openapi.yml#/components/schemas/missingApiKeySchema'
                   - $ref: '#/components/schemas/UnAuthorizedCoApplicant'
 
 components:
   securitySchemes:
-    $ref: '../../../common-openapi.yml#/components/securitySchemes'
+    $ref: '../../common-openapi.yml#/components/securitySchemes'
 
   schemas:
     UnAuthorizedCoApplicant:
@@ -90,4 +90,4 @@ components:
                   type: object
                   properties:
                     caseItem:
-                      $ref: '../../../viva-case-common-openapi.yml#/components/schemas/Case'
+                      $ref: '../../viva-case-common-openapi.yml#/components/schemas/Case'
