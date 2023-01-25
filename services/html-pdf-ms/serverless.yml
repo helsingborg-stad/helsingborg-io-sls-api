@@ -1,9 +1,10 @@
+org: hbgworks
 service: html-pdf-ms
+
+frameworkVersion: ^3.26.0
 
 plugins:
   - serverless-bundle
-
-projectDir: ../../
 
 custom: ${file(../../serverless.common.yml):custom}
 
@@ -11,14 +12,12 @@ package:
   individually: true
 
 provider:
-  lambdaHashingVersion: 20201221
   name: aws
   runtime: nodejs14.x
   stage: dev
   region: eu-north-1
   endpointType: regional
-  eventBridge:
-    useCloudFormation: true
+  versionFunctions: false
   tracing:
     apiGateway: false
     lambda: true
@@ -35,11 +34,11 @@ provider:
             - s3:GetObject
             - s3:PutObject
           Resource:
-            - Fn::ImportValue: ${self:custom.resourcesStage}-PdfStorageBucketArn
-            - Fn::Join:
-                - ''
-                - - Fn::ImportValue: ${self:custom.resourcesStage}-PdfStorageBucketArn
-                  - '/*'
+            - !ImportValue ${self:custom.resourcesStage}-PdfStorageBucketArn
+            - !Join
+              - ''
+              - - !ImportValue ${self:custom.resourcesStage}-PdfStorageBucketArn
+                - '/*'
 
         - Effect: Allow
           Action:

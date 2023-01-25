@@ -1,9 +1,10 @@
+org: hbgworks
 service: users-ms
+
+frameworkVersion: ^3.26.0
 
 plugins:
   - serverless-bundle
-
-projectDir: ../../
 
 custom: ${file(../../serverless.common.yml):custom}
 
@@ -11,15 +12,12 @@ package:
   individually: true
 
 provider:
-  lambdaHashingVersion: 20201221
   name: aws
   runtime: nodejs16.x
   stage: dev
   region: eu-north-1
   endpointType: regional
   versionFunctions: false
-  eventBridge:
-    useCloudFormation: true
   tracing:
     lambda: true
 
@@ -35,7 +33,7 @@ provider:
             - dynamodb:PutItem
             - dynamodb:GetItem
           Resource:
-            - 'Fn::ImportValue': ${self:custom.resourcesStage}-UsersTableArn
+            - !ImportValue ${self:custom.resourcesStage}-UsersTableArn
 
         - Effect: Allow
           Action:

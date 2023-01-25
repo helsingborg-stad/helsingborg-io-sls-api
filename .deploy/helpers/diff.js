@@ -11,38 +11,40 @@ import config from '../config.js';
  * @param {string} lastCommmitHashFile - File path to file that contains previous successful build commit SHA.
  * @return {array} - List of services path to deploy.
  */
-const diff = lastCommmitHashFile => {
-  const servicesPath = `${config.codeBuildPath}/${config.servicesPath}`;
-
+function diff(lastCommmitHashFile) {
   let gitDiff = [];
+
   // Check if any earlier deployed commit sha is stored and get diff fies or return all services if missing.
   if (fs.existsSync(lastCommmitHashFile)) {
-    const lastCommmitHash = fs.readFileSync(lastCommmitHashFile, 'utf8').trim();
     try {
+      const lastCommmitHash = fs.readFileSync(lastCommmitHashFile, 'utf8').trim();
+
       // Return empty file list if last deploy is on the same commit hash as the current one.
       if (process.env.CODEBUILD_RESOLVED_SOURCE_VERSION === lastCommmitHash) {
-        return []; 
+        return [];
       }
 
       gitDiff = childProcess.execSync(
         `git diff ${lastCommmitHash} ${process.env.CODEBUILD_RESOLVED_SOURCE_VERSION} --name-only`
       );
+
+      // Convert git diff output to array.
+      gitDiff = gitDiff.toString().match(/.+/g);
     } catch (_ex) {
       // git commit SHA is missing, could be deleted! Deploy everything!
-      return glob.sync(`${servicesPath}/**/serverless.yml`, { ignore: '**/node_modules/**' });
+      return getAllSlsFiles();
     }
-    // Convert git diff output to array.
-    gitDiff = gitDiff.toString().match(/.+/g);
   } else {
-    return glob.sync(`${servicesPath}/**/serverless.yml`, { ignore: '**/node_modules/**' });
+    return getAllSlsFiles();
   }
 
   const servicesDiff = [];
   for (const file of gitDiff) {
     // If something changed in libs folder we deploy all services.
     if (file.indexOf(config.libsPath) === 0) {
-      return glob.sync(`${servicesPath}/**/serverless.yml`, { ignore: '**/node_modules/**' });
+      return getAllSlsFiles();
     }
+
     // If something changed in services folders, add the path to it to services path list.
     if (file.indexOf(config.servicesPath) === 0) {
       servicesDiff.push(file);
@@ -64,6 +66,11 @@ const diff = lastCommmitHashFile => {
   });
 
   return files;
-};
+}
+
+function getAllSlsFiles() {
+  const servicesPath = `${config.codeBuildPath}/${config.servicesPath}`;
+  return glob.sync(`${servicesPath}/**/serverless.yml`, { ignore: '**/node_modules/**' });
+}
 
 export default diff;

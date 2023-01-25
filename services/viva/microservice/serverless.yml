@@ -1,9 +1,10 @@
+org: hbgworks
 service: viva-ms
+
+frameworkVersion: ^3.26.0
 
 plugins:
   - serverless-bundle
-
-projectDir: ../../../
 
 custom: ${file(../../../serverless.common.yml):custom}
 
@@ -11,15 +12,12 @@ package:
   individually: true
 
 provider:
-  lambdaHashingVersion: 20201221
   name: aws
   runtime: nodejs16.x
   stage: dev
   region: eu-north-1
   endpointType: regional
   versionFunctions: false
-  eventBridge:
-    useCloudFormation: true
   tracing:
     apiGateway: false
     lambda: true
@@ -50,16 +48,16 @@ provider:
             - s3:PutObject
             - s3:DeleteObject
           Resource:
-            - Fn::ImportValue: ${self:custom.resourcesStage}-AttachmentsBucketArn
-            - Fn::Join:
-                - ''
-                - - Fn::ImportValue: ${self:custom.resourcesStage}-AttachmentsBucketArn
-                  - '/*'
-            - Fn::ImportValue: ${self:custom.resourcesStage}-PdfStorageBucketArn
-            - Fn::Join:
-                - ''
-                - - Fn::ImportValue: ${self:custom.resourcesStage}-PdfStorageBucketArn
-                  - '/*'
+            - !ImportValue ${self:custom.resourcesStage}-AttachmentsBucketArn
+            - !Join
+              - ''
+              - - !ImportValue ${self:custom.resourcesStage}-AttachmentsBucketArn
+                - '/*'
+            - !ImportValue ${self:custom.resourcesStage}-PdfStorageBucketArn
+            - !Join
+              - ''
+              - - !ImportValue ${self:custom.resourcesStage}-PdfStorageBucketArn
+                - '/*'
 
         - Effect: Allow
           Action:
@@ -68,7 +66,7 @@ provider:
             - dynamodb:Query
             - dynamodb:GetItem
           Resource:
-            - 'Fn::ImportValue': ${self:custom.resourcesStage}-CasesTableArn
+            - !ImportValue ${self:custom.resourcesStage}-CasesTableArn
 
         - Effect: Allow
           Action:
@@ -81,14 +79,14 @@ provider:
             - dynamodb:Query
             - dynamodb:GetItem
           Resource:
-            - 'Fn::ImportValue': ${self:custom.resourcesStage}-UsersTableArn
+            - !ImportValue ${self:custom.resourcesStage}-UsersTableArn
 
         - Effect: Allow
           Action:
             - dynamodb:Query
             - dynamodb:GetItem
           Resource:
-            - 'Fn::ImportValue': ${self:custom.resourcesStage}-FormsTableArn
+            - !ImportValue ${self:custom.resourcesStage}-FormsTableArn
 
         - Effect: Allow
           Action:

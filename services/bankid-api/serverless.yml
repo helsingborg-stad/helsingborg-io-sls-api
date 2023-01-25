@@ -1,9 +1,10 @@
+org: hbgworks
 service: bankid-api
+
+frameworkVersion: ^3.26.0
 
 plugins:
   - serverless-bundle
-
-projectDir: ../../
 
 custom: ${file(../../serverless.common.yml):custom}
 
@@ -11,14 +12,18 @@ package:
   individually: true
 
 provider:
-  lambdaHashingVersion: 20201221
   name: aws
   runtime: nodejs16.x
   stage: dev
   region: eu-north-1
   endpointType: regional
+  versionFunctions: false
   tracing:
     lambda: true
+
+  environment:
+    stage: ${self:custom.stage}
+    resourcesStage: ${self:custom.resourcesStage}
 
   apiGateway:
     restApiId:
@@ -28,10 +33,6 @@ provider:
     restApiResources:
       auth:
         'Fn::ImportValue': ${self:custom.stage}-ExtApiGatewayResourceAuth
-
-  environment:
-    stage: ${self:custom.stage}
-    resourcesStage: ${self:custom.resourcesStage}
 
   iam:
     role:

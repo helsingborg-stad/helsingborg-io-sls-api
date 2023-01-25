@@ -1,10 +1,10 @@
+org: hbgworks
 service: metrics-api
+
+frameworkVersion: ^3.26.0
 
 plugins:
   - serverless-bundle
-  - serverless-add-api-key
-
-projectDir: ../../
 
 custom: ${file(../../serverless.common.yml):custom}
 
@@ -12,7 +12,6 @@ package:
   individually: true
 
 provider:
-  lambdaHashingVersion: 20201221
   name: aws
   runtime: nodejs16.x
   stage: dev
@@ -22,15 +21,15 @@ provider:
   tracing:
     lambda: true
 
+  environment:
+    stage: ${self:custom.stage}
+    resourcesStage: ${self:custom.resourcesStage}
+
   apiGateway:
     restApiId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiId
     restApiRootResourceId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
     restApiResources:
       metrics: !ImportValue ${self:custom.stage}-ExtApiGatewayResourceMetrics
-
-  environment:
-    stage: ${self:custom.stage}
-    resourcesStage: ${self:custom.resourcesStage}
 
   iam:
     role:
