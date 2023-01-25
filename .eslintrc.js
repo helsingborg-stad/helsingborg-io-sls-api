@@ -9,7 +9,7 @@ module.exports = {
     },
     babelOptions: { rootMode: 'upward' },
   },
-  ignorePatterns: ['dist/**/*', '!.deploy/**/*'],
+  ignorePatterns: ['!.*', 'dist/**/*', 'node_modules'],
   env: {
     es2021: true,
     node: true,
