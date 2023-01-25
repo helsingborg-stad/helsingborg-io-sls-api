@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import yaml from 'js-yaml';
 import fs from 'fs';
 import jsonpath from 'jsonpath';

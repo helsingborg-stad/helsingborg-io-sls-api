@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import fs from 'fs';
 import glob from 'glob';
 import path from 'path';
@@ -11,8 +12,6 @@ import config from '../config.js';
  * @return {array} - List of services path to deploy.
  */
 function diff(lastCommmitHashFile) {
-  const servicesPath = `${config.codeBuildPath}/${config.servicesPath}`;
-
   let gitDiff = [];
 
   // Check if any earlier deployed commit sha is stored and get diff fies or return all services if missing.

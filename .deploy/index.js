@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { exit, argv } from 'process';
 
 import diff from './helpers/diff.js';

@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import childProcess from 'child_process';
 import process from 'process';
 
