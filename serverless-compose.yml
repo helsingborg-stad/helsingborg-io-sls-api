@@ -1,0 +1,47 @@
+services:
+  authorizer:
+    path: services/auth/token
+
+  bankid-api:
+    path: services/bankid-api
+
+  case-ms:
+    path: services/case-ms
+
+  cases-api:
+    path: services/cases-api
+    dependsOn: authorizer
+
+  forms-api:
+    path: services/forms-api
+
+  html-pdf-ms:
+    path: services/html-pdf-ms
+
+  metrics-api:
+    path: services/metrics-api
+
+  navet-ms:
+    path: services/navet-ms
+
+  status-api:
+    path: services/status-api
+
+  stream-eventbridge-ms:
+    path: services/stream-eventbridge-ms
+
+  users-ms:
+    path: services/users-ms
+
+  users-api:
+    path: services/users-api
+    dependsOn: authorizer
+
+  version-api:
+    path: services/version-api
+
+  viva-cases-api:
+    path: services/viva/api/cases
+
+  viva-ms:
+    path: services/viva/microservice
