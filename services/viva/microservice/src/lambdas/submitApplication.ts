@@ -110,6 +110,7 @@ export async function submitApplication(
       rawDataType: 'pdf',
     })
   );
+
   if (vadaError) {
     const postError = {
       messageId,
