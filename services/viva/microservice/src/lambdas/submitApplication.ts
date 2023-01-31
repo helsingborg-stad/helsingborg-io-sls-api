@@ -84,7 +84,11 @@ export async function submitApplication(
     config.cases.providers.viva.envsKeyName
   );
 
-  if (![recurringFormId, newApplicationFormId].includes(currentFormId)) {
+  const isNotRecurringOrNewApplicationForm = ![recurringFormId, newApplicationFormId].includes(
+    currentFormId
+  );
+
+  if (isNotRecurringOrNewApplicationForm) {
     log.writeInfo('Current form is not a recurring or newApplication form', currentFormId);
     return true;
   }
@@ -95,7 +99,7 @@ export async function submitApplication(
   const applicationType = isRecurringForm ? VivaApplicationType.Recurring : VivaApplicationType.New;
   const formId = isRecurringForm ? recurringFormId : newApplicationFormId;
   const workflowId = details.workflowId ?? '';
-  const formAnswers = forms?.[formId].answers ?? [];
+  const formAnswers = forms[formId].answers ?? [];
   const answers = formAnswers.filter(answer => !dependencies.isAnswerAttachment(answer));
   const attachments = await dependencies.attachmentFromAnswers(personalNumber, formAnswers);
 
