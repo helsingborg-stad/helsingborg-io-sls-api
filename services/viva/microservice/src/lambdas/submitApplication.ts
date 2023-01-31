@@ -116,28 +116,13 @@ export async function submitApplication(
   );
 
   if (vadaError) {
-    const postError = {
+    throw new TraceException('Failed to submit Viva application. Will be retried.', requestId, {
       messageId,
       caseId: id,
       httpStatusCode: vadaError.status,
-      ...(vadaError.vadaResponse?.error?.details?.errorCode && {
-        vivaErrorCode: vadaError.vadaResponse.error.details.errorCode,
-      }),
-      ...(vadaError.vadaResponse?.error?.details?.errorMessage && {
-        vivaErrorMessage: vadaError.vadaResponse.error.details.errorMessage,
-      }),
-    };
-
-    if (postError.vivaErrorCode === '1014') {
-      log.writeWarn('Failed to submit Viva application. Will NOT retry.', postError);
-      return true;
-    }
-
-    throw new TraceException(
-      'Failed to submit Viva application. Will be retried.',
-      requestId,
-      postError
-    );
+      vivaErrorCode: vadaError.vadaResponse.error?.details?.errorCode ?? null,
+      vivaErrorMessage: vadaError.vadaResponse.error?.details?.errorMessage ?? null,
+    });
   }
 
   if (vadaResponse?.status !== 'OK') {
