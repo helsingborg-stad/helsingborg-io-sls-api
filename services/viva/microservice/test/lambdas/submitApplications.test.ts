@@ -86,15 +86,6 @@ it('returns true if `currentFormId` does not match `newApplicationFormId` or `re
   expect(result).toBe(true);
 });
 
-it('returns true if `postVivaApplication` returns `1014` error code', async () => {
-  context.postVivaApplication = () =>
-    Promise.reject({ vadaResponse: { error: { details: { errorCode: '1014' } } } });
-
-  const result = await submitApplication(input, context);
-
-  expect(result).toBe(true);
-});
-
 it('throws if `postVivaApplication` fails', async () => {
   context.postVivaApplication = () => Promise.reject({});
 

@@ -84,7 +84,11 @@ export async function submitApplication(
     config.cases.providers.viva.envsKeyName
   );
 
-  if (![recurringFormId, newApplicationFormId].includes(currentFormId)) {
+  const isNotRecurringOrNewApplicationForm = ![recurringFormId, newApplicationFormId].includes(
+    currentFormId
+  );
+
+  if (isNotRecurringOrNewApplicationForm) {
     log.writeInfo('Current form is not a recurring or newApplication form', currentFormId);
     return true;
   }
@@ -95,7 +99,7 @@ export async function submitApplication(
   const applicationType = isRecurringForm ? VivaApplicationType.Recurring : VivaApplicationType.New;
   const formId = isRecurringForm ? recurringFormId : newApplicationFormId;
   const workflowId = details.workflowId ?? '';
-  const formAnswers = forms?.[formId].answers ?? [];
+  const formAnswers = forms[formId].answers ?? [];
   const answers = formAnswers.filter(answer => !dependencies.isAnswerAttachment(answer));
   const attachments = await dependencies.attachmentFromAnswers(personalNumber, formAnswers);
 
@@ -110,29 +114,15 @@ export async function submitApplication(
       rawDataType: 'pdf',
     })
   );
+
   if (vadaError) {
-    const postError = {
+    throw new TraceException('Failed to submit Viva application. Will be retried.', requestId, {
       messageId,
       caseId: id,
       httpStatusCode: vadaError.status,
-      ...(vadaError.vadaResponse?.error?.details?.errorCode && {
-        vivaErrorCode: vadaError.vadaResponse.error.details.errorCode,
-      }),
-      ...(vadaError.vadaResponse?.error?.details?.errorMessage && {
-        vivaErrorMessage: vadaError.vadaResponse.error.details.errorMessage,
-      }),
-    };
-
-    if (postError.vivaErrorCode === '1014') {
-      log.writeWarn('Failed to submit Viva application. Will NOT retry.', postError);
-      return true;
-    }
-
-    throw new TraceException(
-      'Failed to submit Viva application. Will be retried.',
-      requestId,
-      postError
-    );
+      vivaErrorCode: vadaError.vadaResponse.error?.details?.errorCode ?? null,
+      vivaErrorMessage: vadaError.vadaResponse.error?.details?.errorMessage ?? null,
+    });
   }
 
   if (vadaResponse?.status !== 'OK') {
