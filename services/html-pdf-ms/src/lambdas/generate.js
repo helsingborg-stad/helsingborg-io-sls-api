@@ -1,4 +1,5 @@
-import chromium from 'chrome-aws-lambda';
+import chromium from '@sparticuz/chromium';
+import puppeteer from 'puppeteer-core';
 import to from 'await-to-js';
 import uuid from 'uuid';
 
@@ -69,13 +70,12 @@ export async function main(event) {
 async function htmlToPdf(html) {
   let browser = null;
   try {
-    const executablePath = await chromium.executablePath;
-
-    browser = await chromium.puppeteer.launch({
+    const browser = await puppeteer.launch({
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
-      executablePath,
+      executablePath: await chromium.executablePath(),
       headless: chromium.headless,
+      ignoreHTTPSErrors: true,
     });
 
     const page = await browser.newPage();

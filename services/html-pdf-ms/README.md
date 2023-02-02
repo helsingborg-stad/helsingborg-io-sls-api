@@ -16,7 +16,7 @@ In order for this service to function correctly, you have to setup a couple of o
 
 - Deploy the pdf storage bucket from the helsingborg-io-sls-resources repo.
 
-- Deploy the chorme-aws-lambda layer from the helsingborg-to-sls-resource repo. This is needed in order lambdas to access and use puppeteer.
+- Deploy the chrome-aws-lambda layer from the helsingborg-to-sls-resource repo. This is needed in order lambdas to access and use puppeteer.
 
 Now you are all set to deploy this service.
 
