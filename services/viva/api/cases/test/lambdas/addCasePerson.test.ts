@@ -48,6 +48,7 @@ const caseItem: CaseItem = {
   createdAt: 0,
   currentFormId: '123abc',
   details: {
+    vivaCaseId: '123',
     period: {
       startDate: 0,
       endDate: 0,

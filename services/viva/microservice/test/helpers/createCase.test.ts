@@ -60,6 +60,7 @@ const vivaOfficerSingle: VivaOfficersOfficer = {
 };
 
 const vivaCaseClientOnly: VivaMyPagesVivaCase = {
+  idenclair: '123',
   client: vivaClient,
   officers: vivaOfficerSingle,
   persons: {
@@ -68,6 +69,7 @@ const vivaCaseClientOnly: VivaMyPagesVivaCase = {
 };
 
 const vivaCaseWithPersonList: VivaMyPagesVivaCase = {
+  idenclair: '123',
   client: vivaClient,
   officers: vivaOfficerSingle,
   persons: vivaPersonList,
