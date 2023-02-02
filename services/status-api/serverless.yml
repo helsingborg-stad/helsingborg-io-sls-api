@@ -46,17 +46,6 @@ provider:
           Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
 
 functions:
-  get:
-    handler: src/lambdas/getApiStatus.main
-    environment:
-      message: ''
-    events:
-      - http:
-          path: /status
-          method: get
-          private: true
-          cors: true
-
   getMessages:
     handler: src/lambdas/getMessages.main
     events:
