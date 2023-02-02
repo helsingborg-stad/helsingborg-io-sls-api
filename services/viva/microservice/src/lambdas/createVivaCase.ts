@@ -75,6 +75,11 @@ export interface Dependencies {
   createInitialForms: () => Promise<Record<string, CaseForm>>;
 }
 
+function createVivaCaseId({ idenclair }: VivaMyPagesVivaCase): string {
+  const [, vivaCaseId] = idenclair.split('/');
+  return vivaCaseId;
+}
+
 function generateInitialRecurringCase(params: InitialRecurringCaseParams): CaseItem {
   const { workflowId, currentFormId, vivaMyPages, vivaPeriod } = params;
 
@@ -91,6 +96,7 @@ function generateInitialRecurringCase(params: InitialRecurringCaseParams): CaseI
   const status: CaseStatus = getStatusByType(NOT_STARTED_VIVA);
   const persons: CasePerson[] = createCaseHelper.getCasePersonList(vivaMyPages);
   const expirationTime = millisecondsToSeconds(getFutureTimestamp(TWELVE_HOURS));
+  const vivaCaseId = createVivaCaseId(vivaMyPages);
 
   const initialRecurringCase: CaseItem = {
     id,
@@ -106,6 +112,7 @@ function generateInitialRecurringCase(params: InitialRecurringCaseParams): CaseI
     provider: CASE_PROVIDER_VIVA,
     persons,
     details: {
+      vivaCaseId,
       workflowId,
       period,
       completions: null,

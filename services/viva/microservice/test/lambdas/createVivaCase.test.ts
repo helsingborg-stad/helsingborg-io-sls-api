@@ -144,6 +144,7 @@ function createLambdaInput(persons: VivaPersonsPerson | null = null): LambdaRequ
     detail: {
       clientUser: { ...user },
       myPages: {
+        idenclair: '01-2021-09-30/R37992',
         client: {
           pnumber: user.personalNumber,
           fname: user.firstName,
@@ -175,6 +176,7 @@ it('successfully creates a recurring application case', async () => {
           startDate: 1640995200000,
           endDate: 1643587200000,
         },
+        vivaCaseId: 'R37992',
         workflowId: null,
         completions: null,
       },
@@ -232,6 +234,7 @@ it('successfully creates a prepopulated recurring application case', async () =>
       GSI2PK: 'CREATED#202201',
       currentFormId: readParametersResponse.recurringFormId,
       details: {
+        vivaCaseId: 'R37992',
         period: {
           startDate: 1640995200000,
           endDate: 1643587200000,
@@ -307,6 +310,7 @@ it('successfully creates a recurring application case with partner', async () =>
       GSI2PK: 'CREATED#202201',
       currentFormId: readParametersResponse.recurringFormId,
       details: {
+        vivaCaseId: 'R37992',
         period: {
           startDate: 1640995200000,
           endDate: 1643587200000,
