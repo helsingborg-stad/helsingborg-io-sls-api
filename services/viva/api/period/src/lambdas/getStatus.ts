@@ -1,17 +1,18 @@
-import S3 from '../libs/S3';
-import { wrappers } from '../libs/lambdaWrapper';
 import dayjs from 'dayjs';
+import 'dayjs/locale/sv';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import advancedFormat from 'dayjs/plugin/advancedFormat';
+
+import S3 from '../libs/S3';
+import { wrappers } from '../libs/lambdaWrapper';
 import handlebars from '../helpers/htmlTemplate';
-import 'dayjs/locale/sv';
 
 dayjs.extend(isSameOrAfter);
 dayjs.extend(advancedFormat);
 
 export interface PeriodConfig {
-  responseMessageFormat: string;
-  monthlyOpenDates: string[];
+  readonly responseMessageFormat: string;
+  readonly monthlyOpenDates: string[];
 }
 
 export interface Dependencies {
@@ -43,7 +44,7 @@ function formatHandlebarsDateMessage(
   return handlebars.compile(handlebarsInput)(templateData);
 }
 
-function get<T>(list: T[], index: number): T {
+function getSafe<T>(list: T[], index: number): T {
   if (index >= list.length) {
     throw new Error(`Invalid index ${index} for list: ${list.join(', ')}`);
   }
@@ -56,7 +57,7 @@ export async function getStatus(_: never, dependencies: Dependencies): Promise<R
 
   const currentDate = dayjs();
   const currentMonthIndex = currentDate.month();
-  const periodOpenDateRaw = get(config.monthlyOpenDates, currentMonthIndex);
+  const periodOpenDateRaw = getSafe(config.monthlyOpenDates, currentMonthIndex);
   const periodOpenDate = dayjs(periodOpenDateRaw);
   const isActivePeriodOpen = currentDate.isSameOrAfter(periodOpenDate);
   const message = isActivePeriodOpen

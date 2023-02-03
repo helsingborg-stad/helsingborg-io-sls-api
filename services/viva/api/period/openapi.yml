@@ -13,7 +13,6 @@ servers:
   - url: https://dev.api.helsingborg.io
   - url: https://release.api.helsingborg.io
   - url: https://api.helsingborg.io
-  - url: https://unqoxc4wy8.execute-api.eu-north-1.amazonaws.com/dev
 
 paths:
   /viva/period/status:
@@ -22,8 +21,11 @@ paths:
         - Viva Period
       summary: Check current status
       description: |
-        This endpoint returns a status message related to the period of the calling user.
-        If the message is `null` then the period is considered open for application.
+        This endpoint returns checks if the period is open for the calling user.
+
+        If the period is closed a message is returned with details of when the period opens.
+
+        If the period is open then `null` is returned as message instead.
       security:
         - ApiKeyAuth: []
         - AuthToken: []
@@ -72,4 +74,4 @@ components:
                     message:
                       type: string
                       nullable: true
-                      example: 'Ansökan för mars öppnar 9 februari'
+                      example: 'Ansökan för mars öppnar 9e februari'

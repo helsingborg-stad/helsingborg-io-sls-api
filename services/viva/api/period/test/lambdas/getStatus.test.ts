@@ -18,9 +18,9 @@ const SWEDISH_MONTH_NAMES = [
   'december',
 ];
 
-const MOCK_PERIOD_OPEN_DATES = Array(12)
-  .fill(0)
-  .map((_, index) => dayjs('2023-01-02T00:00:00Z').add(index, 'month').toISOString());
+const MOCK_PERIOD_OPEN_DATES = Array.from({ length: 12 }, (_, index) =>
+  dayjs('2023-01-02T00:00:00Z').add(index, 'month').toISOString()
+);
 
 function createMockDependencies(
   periodOpenDate: string,
@@ -82,9 +82,7 @@ describe('viva/period getStatus', () => {
   });
 
   it('uses correct index of monthly open periods', async () => {
-    const indexArray = Array(12)
-      .fill(0)
-      .map((_, i) => i);
+    const indexArray = Array.from({ length: 12 }, (_, i) => i);
 
     const results = await indexArray.reduce(async (lastResultPromise, index) => {
       const accumulatedResponses = await lastResultPromise;
