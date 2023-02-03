@@ -42,6 +42,11 @@ services:
 
   viva-cases-api:
     path: services/viva/api/cases
+    dependsOn: authorizer
+
+  viva-period-api:
+    path: services/viva/api/period
+    dependsOn: authorizer
 
   viva-ms:
     path: services/viva/microservice
