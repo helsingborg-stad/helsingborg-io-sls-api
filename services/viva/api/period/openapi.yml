@@ -1,0 +1,77 @@
+openapi: '3.0.3'
+info:
+  title: VIVA Period API
+  description: API for VIVA Periods
+  contact:
+    name: GitHub Repo
+    url: https://github.com/helsingborg-stad/helsingborg-io-sls-api
+  version: '1.0'
+  license:
+    name: MIT
+    url: 'https://github.com/helsingborg-stad/helsingborg-io-sls-api#license'
+servers:
+  - url: https://dev.api.helsingborg.io
+  - url: https://release.api.helsingborg.io
+  - url: https://api.helsingborg.io
+
+paths:
+  /viva/period/status:
+    get:
+      tags:
+        - Viva Period
+      summary: Check current status
+      description: |
+        This endpoint returns checks if the period is open for the calling user.
+
+        If the period is closed a message is returned with details of when the period opens.
+
+        If the period is open then `null` is returned as message instead.
+      security:
+        - ApiKeyAuth: []
+        - AuthToken: []
+      responses:
+        '200':
+          description: OK. If the message is `null` then the period is considered open for application.
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/getStatusResponse'
+        '401':
+          description: Invalid JWT.
+          content:
+            'application/json':
+              schema:
+                $ref: '../../../common-openapi.yml#/components/schemas/jsonApiError'
+        '403':
+          description: Missing Api Key
+          content:
+            'application/json':
+              schema:
+                $ref: '../../../common-openapi.yml#/components/schemas/missingApiKeySchema'
+
+components:
+  securitySchemes:
+    $ref: '../../../common-openapi.yml#/components/securitySchemes'
+
+  schemas:
+    getStatusResponse:
+      type: object
+      properties:
+        jsonapi:
+          type: object
+          properties:
+            version:
+              type: string
+              example: '1.0'
+            data:
+              type: object
+              properties:
+                type:
+                  type: string
+                attributes:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      nullable: true
+                      example: 'Ansökan för mars öppnar 9e februari'
