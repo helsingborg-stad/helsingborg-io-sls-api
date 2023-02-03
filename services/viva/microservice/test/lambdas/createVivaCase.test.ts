@@ -412,3 +412,25 @@ it('stops execution when case exists based on the same Viva application period',
   expect(result).toBe(true);
   expect(createCaseMock).toHaveBeenCalledTimes(0);
 });
+
+it('does not creates a recurring application case if period is not open', async () => {
+  const lambdaInput = createLambdaInput();
+  const createCaseMock = jest.fn();
+
+  const result = await createVivaCase(lambdaInput, {
+    createCase: createCaseMock,
+    getRecurringFormId: () => Promise.resolve(readParametersResponse.recurringFormId),
+    getLastUpdatedCase: () => Promise.resolve(undefined),
+    getCaseListByPeriod: () => Promise.resolve({ Items: [], Count: 0, ScannedCount: 1 }),
+    getFormTemplates: () => Promise.resolve({}),
+    createInitialForms: () =>
+      Promise.resolve({
+        [readParametersResponse.recurringFormId]: defaultFormProperties,
+        [readParametersResponse.randomCheckFormId]: defaultFormProperties,
+        [readParametersResponse.completionFormId]: defaultFormProperties,
+      }),
+  });
+
+  expect(createCaseMock).not.toHaveBeenCalled();
+  expect(result).toBe(true);
+});
