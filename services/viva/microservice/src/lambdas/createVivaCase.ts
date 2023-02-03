@@ -1,7 +1,5 @@
 import uuid from 'uuid';
-
 import config from '../libs/config';
-
 import params from '../libs/params';
 import log from '../libs/logs';
 import { putItem } from '../libs/queries';
