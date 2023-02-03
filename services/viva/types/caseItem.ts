@@ -64,6 +64,7 @@ export interface CaseAdministrator {
 
 export interface CaseDetails {
   workflowId: string | null;
+  readonly vivaCaseId: string | null;
   period: CasePeriod;
   readonly workflow?: unknown;
   completions: CaseCompletions | null;

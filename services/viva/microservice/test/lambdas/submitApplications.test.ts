@@ -22,6 +22,7 @@ const form: CaseForm = {
 };
 
 const details: CaseDetails = {
+  vivaCaseId: '123',
   workflowId: 'workflowId',
   completions: null,
   period: {

@@ -74,6 +74,7 @@ it('successfully creates a new application case', async () => {
     PK: `USER#${user.personalNumber}`,
     currentFormId: readParametersResponse.newApplicationFormId,
     details: {
+      vivaCaseId: null,
       period: {
         startDate: 1640995200000,
         endDate: 0,

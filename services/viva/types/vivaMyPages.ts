@@ -29,6 +29,7 @@ export interface VivaMyPagesVivaCases {
 }
 
 export interface VivaMyPagesVivaCase {
+  readonly idenclair: string;
   readonly client: VivaClient;
   readonly officers?: VivaOfficersOfficer;
   readonly persons: VivaPersonsPerson | null;

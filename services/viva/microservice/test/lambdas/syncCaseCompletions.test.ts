@@ -1,12 +1,9 @@
-import {
-  syncCaseCompletions,
-  Dependencies,
-  LambdaRequest,
-} from '../../src/lambdas/syncCaseCompletions';
+import type { Dependencies, LambdaRequest } from '../../src/lambdas/syncCaseCompletions';
+import { syncCaseCompletions } from '../../src/lambdas/syncCaseCompletions';
 
 import type { CaseItem } from '../../../types/caseItem';
 import { EncryptionType } from '../../../types/caseItem';
-import { VadaWorkflowCompletions } from '../../src/types/vadaCompletions';
+import type { VadaWorkflowCompletions } from '../../src/types/vadaCompletions';
 
 const caseKeys = {
   PK: 'PK',
@@ -64,6 +61,7 @@ const caseToUpdate: CaseItem = {
   },
   provider: 'VIVA',
   details: {
+    vivaCaseId: '123',
     workflowId,
     period: {
       startDate: 1,

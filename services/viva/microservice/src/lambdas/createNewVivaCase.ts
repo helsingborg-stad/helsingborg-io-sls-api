@@ -181,6 +181,7 @@ export async function createNewVivaCase(
     provider: CASE_PROVIDER_VIVA,
     persons: initialPersonList,
     details: {
+      vivaCaseId: null,
       workflowId: null,
       period: {
         startDate: createCaseHelper.createPeriodStartDate(),

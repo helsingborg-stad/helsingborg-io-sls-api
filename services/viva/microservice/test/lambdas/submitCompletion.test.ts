@@ -42,6 +42,7 @@ function createCase(partialCase: Partial<CaseItem> = {}): CaseItem {
     provider: 'VIVA',
     persons: [],
     details: {
+      vivaCaseId: '123',
       period: {
         endDate: 1,
         startDate: 2,
