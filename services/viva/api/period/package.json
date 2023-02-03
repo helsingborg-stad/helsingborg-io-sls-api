@@ -1,0 +1,12 @@
+{
+  "name": "viva-api-period",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "../../../../scripts/test.sh"
+  },
+  "keywords": [],
+  "author": "Helsingborg Stad",
+  "license": "MIT"
+}

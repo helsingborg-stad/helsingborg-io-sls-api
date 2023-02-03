@@ -1,0 +1,66 @@
+org: hbgworks
+service: viva-period-api
+
+frameworkVersion: ^3.26.0
+
+plugins:
+  - serverless-bundle
+
+custom: ${file(../../../../serverless.common.yml):custom}
+
+package:
+  individually: true
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  stage: dev
+  region: eu-north-1
+  endpointType: regional
+  versionFunctions: false
+  tracing:
+    lambda: true
+
+  environment:
+    stage: ${self:custom.stage}
+    resourcesStage: ${self:custom.resourcesStage}
+
+  apiGateway:
+    restApiId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiId
+    restApiRootResourceId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
+    restApiResources:
+      viva-period: !ImportValue ${self:custom.stage}-ExtApiGatewayResourceVivaPeriod
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - s3:GetObject
+          Resource:
+            - !ImportValue ${self:custom.resourcesStage}-VivaPeriodBucketArn
+            - !Join
+              - ''
+              - - !ImportValue ${self:custom.resourcesStage}-VivaPeriodBucketArn
+                - '/*'
+
+        - Effect: Allow
+          Action:
+            - kms:Decrypt
+          Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
+
+functions:
+  getStatus:
+    handler: src/lambdas/getStatus.main
+    environment:
+      BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-VivaPeriodBucketName
+    timeout: 15
+    events:
+      - http:
+          path: /viva/period/status
+          method: get
+          cors: true
+          private: true
+          authorizer:
+            type: TOKEN
+            authorizerId: !ImportValue ${self:custom.stage}-authorizerId
