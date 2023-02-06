@@ -53,7 +53,7 @@ functions:
   getStatus:
     handler: src/lambdas/getStatus.main
     environment:
-      BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-VivaPeriodBucketName
+      VIVA_PERIOD_BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-VivaPeriodBucketName
     timeout: 15
     events:
       - http:

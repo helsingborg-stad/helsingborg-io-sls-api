@@ -94,6 +94,16 @@ provider:
             - kms:GenerateDataKey
           Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
 
+        - Effect: Allow
+          Action:
+            - s3:GetObject
+          Resource:
+            - !ImportValue ${self:custom.resourcesStage}-VivaPeriodBucketArn
+            - !Join
+              - ''
+              - - !ImportValue ${self:custom.resourcesStage}-VivaPeriodBucketArn
+                - '/*'
+
 functions:
   applicationStatus:
     handler: src/lambdas/applicationStatus.main
@@ -170,6 +180,8 @@ functions:
     handler: src/lambdas/createVivaCase.main
     reservedConcurrency: 1
     timeout: 30
+    environment:
+      VIVA_PERIOD_BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-VivaPeriodBucketName
     events:
       - eventBridge:
           pattern:

@@ -1,7 +1,5 @@
 import uuid from 'uuid';
-
 import config from '../libs/config';
-
 import params from '../libs/params';
 import log from '../libs/logs';
 import { putItem } from '../libs/queries';
@@ -15,11 +13,14 @@ import {
   NOT_STARTED_VIVA,
 } from '../libs/constants';
 
-import { getCaseListByPeriod, getLastUpdatedCase, getFormTemplates } from '../helpers/dynamoDb';
 import createCaseHelper from '../helpers/createCase';
 import populateFormWithVivaChildren from '../helpers/populateForm';
+import { getCaseListByPeriod, getLastUpdatedCase, getFormTemplates } from '../helpers/dynamoDb';
 
 import { CasePersonRole } from '../types/caseItem';
+import { getConfigFromS3 } from '../helpers/vivaPeriod';
+import { getCurrentPeriodInfo } from '../helpers/vivaPeriod';
+
 import type {
   CaseUser,
   CaseItem,
@@ -28,12 +29,13 @@ import type {
   CaseStatus,
   CasePerson,
 } from '../types/caseItem';
-import type { VivaParametersResponse } from '../types/ssmParameters';
 import type {
   VivaMyPagesVivaCase,
   VivaMyPagesVivaApplication,
   VivaMyPagesApplicationPeriod,
 } from '../types/vivaMyPages';
+import type { PeriodConfig } from '../helpers/vivaPeriod';
+import type { VivaParametersResponse } from '../types/ssmParameters';
 
 interface InitialRecurringCaseParams {
   workflowId: string | null;
@@ -65,14 +67,15 @@ export interface LambdaRequest {
 
 export interface Dependencies {
   createCase: (params: DynamoDbPutParams) => Promise<void>;
-  getRecurringFormId: () => Promise<string>;
-  getLastUpdatedCase: (pk: string) => Promise<CaseItem | undefined>;
+  createInitialForms: () => Promise<Record<string, CaseForm>>;
   getCaseListByPeriod: (
     personalNumber: string,
     application: VivaMyPagesVivaApplication
   ) => Promise<DynamoDbQueryOutput>;
   getFormTemplates: (formIds: string[]) => Promise<Record<string, unknown>>;
-  createInitialForms: () => Promise<Record<string, CaseForm>>;
+  getLastUpdatedCase: (pk: string) => Promise<CaseItem | undefined>;
+  getPeriodConfig(): Promise<PeriodConfig>;
+  getRecurringFormId: () => Promise<string>;
 }
 
 function createVivaCaseId({ idenclair }: VivaMyPagesVivaCase): string {
@@ -165,6 +168,13 @@ export async function createVivaCase(
     return true;
   }
 
+  const periodConfig = await dependencies.getPeriodConfig();
+  const { isPeriodOpen } = getCurrentPeriodInfo(periodConfig);
+
+  if (!isPeriodOpen) {
+    return true;
+  }
+
   const recurringFormId = await dependencies.getRecurringFormId();
 
   const newRecurringCase: CaseItem = generateInitialRecurringCase({
@@ -228,5 +238,6 @@ export const main = log.wrap(event => {
     getCaseListByPeriod,
     getFormTemplates,
     createInitialForms,
+    getPeriodConfig: getConfigFromS3,
   });
 });
