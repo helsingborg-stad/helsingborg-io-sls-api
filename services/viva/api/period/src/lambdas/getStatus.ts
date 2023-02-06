@@ -1,14 +1,8 @@
 import { wrappers } from '../libs/lambdaWrapper';
+import { getCurrentPeriodInfo } from '../helpers/vivaPeriod';
+import { getConfigFromS3, formatHandlebarsDateMessage } from '../helpers/vivaPeriod';
+
 import type { PeriodConfig } from '../helpers/vivaPeriod';
-import {
-  getSafe,
-  getCurrentDate,
-  getMonthIndex,
-  createDate,
-  isActivePeriodOpen,
-  getConfigFromS3,
-  formatHandlebarsDateMessage,
-} from '../helpers/vivaPeriod';
 
 export interface Dependencies {
   getConfig(): Promise<PeriodConfig>;
@@ -21,13 +15,9 @@ export interface Response {
 export async function getStatus(_: never, dependencies: Dependencies): Promise<Response> {
   const config = await dependencies.getConfig();
 
-  const currentDate = getCurrentDate();
-  const currentMonthIndex = getMonthIndex(currentDate);
+  const { currentDate, periodOpenDate, isPeriodOpen } = getCurrentPeriodInfo(config);
 
-  const periodOpenDateRaw = getSafe(config.monthlyOpenDates, currentMonthIndex);
-  const periodOpenDate = createDate(periodOpenDateRaw);
-
-  const message = isActivePeriodOpen(currentDate, periodOpenDate)
+  const message = isPeriodOpen
     ? null
     : formatHandlebarsDateMessage(config.responseMessageFormat, { currentDate, periodOpenDate });
 

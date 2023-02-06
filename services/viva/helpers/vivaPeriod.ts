@@ -1,29 +1,30 @@
 import dayjs from 'dayjs';
-import type { Dayjs } from 'dayjs';
-import 'dayjs/locale/sv';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import advancedFormat from 'dayjs/plugin/advancedFormat';
+import 'dayjs/locale/sv';
+
 import S3 from '../libs/S3';
 import handlebars from './htmlTemplate';
 
+import type { Dayjs } from 'dayjs';
+
 dayjs.extend(isSameOrAfter);
 dayjs.extend(advancedFormat);
-
-type Date = Dayjs;
 
 export interface PeriodConfig {
   readonly responseMessageFormat: string;
   readonly monthlyOpenDates: string[];
 }
 
-export interface FormattingInput {
-  currentDate: Date;
-  periodOpenDate: Date;
+export interface PeriodInfo {
+  currentDate: Dayjs;
+  periodOpenDate: Dayjs;
+  isPeriodOpen: boolean;
 }
 
-export async function getConfigFromS3(): Promise<PeriodConfig> {
-  const s3File = await S3.getFile(process.env.BUCKET_NAME, 'config.json');
-  return JSON.parse(s3File.Body);
+export interface FormattingInput {
+  currentDate: Dayjs;
+  periodOpenDate: Dayjs;
 }
 
 export function getSafe<T>(list: T[], index: number): T {
@@ -33,20 +34,9 @@ export function getSafe<T>(list: T[], index: number): T {
   return list[index];
 }
 
-export function getCurrentDate(): Date {
-  return dayjs();
-}
-
-export function createDate(date: string): Date {
-  return dayjs(date);
-}
-
-export function getMonthIndex(date: Date): number {
-  return date.month();
-}
-
-export function isActivePeriodOpen(currentDate: Date, periodOpenDate: Date): boolean {
-  return currentDate.isSameOrAfter(periodOpenDate);
+export async function getConfigFromS3(): Promise<PeriodConfig> {
+  const s3File = await S3.getFile(process.env.BUCKET_NAME, 'config.json');
+  return JSON.parse(s3File.Body);
 }
 
 export function formatHandlebarsDateMessage(
@@ -58,4 +48,16 @@ export function formatHandlebarsDateMessage(
     openDate: periodOpenDate.locale('sv').format('Do MMMM'),
   };
   return handlebars.compile(handlebarsInput)(templateData);
+}
+
+export function getCurrentPeriodInfo(config: PeriodConfig): PeriodInfo {
+  const currentDate = dayjs();
+  const currentMonthIndex = currentDate.month();
+
+  const periodOpenDateRaw = getSafe(config.monthlyOpenDates, currentMonthIndex);
+  const periodOpenDate = dayjs(periodOpenDateRaw);
+
+  const isPeriodOpen = currentDate.isSameOrAfter(periodOpenDate);
+
+  return { currentDate, periodOpenDate, isPeriodOpen };
 }
