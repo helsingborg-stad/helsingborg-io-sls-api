@@ -35,7 +35,7 @@ export function getSafe<T>(list: T[], index: number): T {
 }
 
 export async function getConfigFromS3(): Promise<PeriodConfig> {
-  const s3File = await S3.getFile(process.env.BUCKET_NAME, 'config.json');
+  const s3File = await S3.getFile(process.env.VIVA_PERIOD_BUCKET_NAME, 'config.json');
   return JSON.parse(s3File.Body);
 }
 
