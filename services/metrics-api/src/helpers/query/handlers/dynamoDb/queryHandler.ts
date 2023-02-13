@@ -1,4 +1,5 @@
 import DynamoDb from 'aws-sdk/clients/dynamodb';
+import type { ItemList, Key } from 'aws-sdk/clients/dynamodb';
 import type { DynamoQueryHandler, QueryParams } from './types';
 
 const dynamoDbClient = new DynamoDb.DocumentClient({ apiVersion: '2012-08-10' });
@@ -13,7 +14,18 @@ export const dynamoQueryHandler: DynamoQueryHandler = {
       ExpressionAttributeValues: { ':value': value },
       ...(index && { IndexName: index }),
     };
-    const result = await dynamoDbClient.query(queryParams).promise();
-    return result.Items as unknown as T;
+
+    let nextKey: Key | undefined = undefined;
+    const itemList: ItemList = [];
+
+    do {
+      const result = await dynamoDbClient
+        .query({ ...queryParams, ExclusiveStartKey: nextKey })
+        .promise();
+      itemList.push(...(result.Items as ItemList));
+      nextKey = result.LastEvaluatedKey;
+    } while (nextKey);
+
+    return itemList as unknown as T;
   },
 };
