@@ -108,15 +108,16 @@ function getInitialValue(field, applicants, previousAnswers) {
   let initialValue;
 
   field.loadPrevious.forEach(matchPattern => {
-    const patternParts = matchPattern.split('.');
-    if (applicantRoles.includes(patternParts[0])) {
-      const applicantRole = patternParts[0];
-      const person = applicants.find(applicant => applicant.role === applicantRole);
-      initialValue = getPersonInfo(person, patternParts.slice(1)) || initialValue;
-      return;
-    }
-
     initialValue = getCaseAnswer(previousAnswers, matchPattern) || initialValue;
+
+    if (!initialValue) {
+      const patternParts = matchPattern.split('.');
+      if (applicantRoles.includes(patternParts[0])) {
+        const applicantRole = patternParts[0];
+        const person = applicants.find(applicant => applicant.role === applicantRole);
+        initialValue = getPersonInfo(person, patternParts.slice(1)) || initialValue;
+      }
+    }
   });
 
   return initialValue ? formatAnswer(field.id, field.tags, initialValue) : undefined;
