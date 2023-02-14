@@ -53,7 +53,7 @@ Resources:
         Type: CODEPIPELINE
         BuildSpec: .deploy/cloudformation/pipelines/production/buildspec.yml
       Cache:
-        Location: !Sub "${S3BucketArtifact}/cache"
+        Location: !Sub '${S3BucketArtifact}/cache'
         Type: S3
 
   CodeBuildProjectTest:
@@ -73,7 +73,7 @@ Resources:
         Type: CODEPIPELINE
         BuildSpec: .deploy/cloudformation/pipelines/production/buildspec-test.yml
       Cache:
-        Location: !Sub "${S3BucketArtifact}/cache"
+        Location: !Sub '${S3BucketArtifact}/cache'
         Type: S3
 
   ##
@@ -84,7 +84,7 @@ Resources:
     Properties:
       ArtifactStore:
         Location: !Ref S3BucketArtifact
-        Type: "S3"
+        Type: 'S3'
         EncryptionKey:
           Id: !GetAtt KMSKey.KeyId
           Type: KMS
@@ -97,12 +97,12 @@ Resources:
               ActionTypeId:
                 Category: Source
                 Owner: AWS
-                Version: "1"
+                Version: '1'
                 Provider: CodeStarSourceConnection
               Configuration:
-                ConnectionArn: 
+                ConnectionArn:
                   Fn::ImportValue: github-connection-CodeStarConnection
-                FullRepositoryId: !Sub "${GitHubOwner}/${GitHubRepo}"
+                FullRepositoryId: !Sub '${GitHubOwner}/${GitHubRepo}'
                 BranchName: !Ref GitHubBranch
                 OutputArtifactFormat: CODEBUILD_CLONE_REF
               OutputArtifacts:
@@ -110,12 +110,11 @@ Resources:
               RunOrder: 1
         - Name: Stage
           Actions:
-            -
-              Name: DeployStage
+            - Name: DeployStage
               ActionTypeId:
                 Category: Build
                 Owner: AWS
-                Version: "1"
+                Version: '1'
                 Provider: CodeBuild
               Configuration:
                 ProjectName: !Sub ${AWS::StackName}-CodeBuildProject
@@ -134,16 +133,14 @@ Resources:
                       "value": "stage"
                     }
                   ]
-              InputArtifacts: 
-                - 
-                  Name: SourceOutput
+              InputArtifacts:
+                - Name: SourceOutput
               RunOrder: 1
-            -
-              Name: TestStage
+            - Name: TestStage
               ActionTypeId:
                 Category: Build
                 Owner: AWS
-                Version: "1"
+                Version: '1'
                 Provider: CodeBuild
               Configuration:
                 ProjectName: !Sub ${AWS::StackName}-CodeBuildProjectTest
@@ -154,9 +151,8 @@ Resources:
                       "value": "${GitHubNPMToken}"
                     }
                   ]
-              InputArtifacts: 
-                - 
-                  Name: SourceOutput
+              InputArtifacts:
+                - Name: SourceOutput
               RunOrder: 2
         - Name: Production
           Actions:
@@ -168,12 +164,11 @@ Resources:
             #     Version: "1"
             #     Provider: Manual
             #   RunOrder: 1
-            -
-              Name: DeployProd
+            - Name: DeployProd
               ActionTypeId:
                 Category: Build
                 Owner: AWS
-                Version: "1"
+                Version: '1'
                 Provider: CodeBuild
               Configuration:
                 ProjectName: !Sub ${AWS::StackName}-CodeBuildProject
@@ -192,18 +187,16 @@ Resources:
                       "value": "prod"
                     }
                   ]
-              InputArtifacts: 
-                - 
-                  Name: SourceOutput
+              InputArtifacts:
+                - Name: SourceOutput
               RunOrder: 1
         - Name: Test
           Actions:
-            -
-              Name: DeployTest
+            - Name: DeployTest
               ActionTypeId:
                 Category: Build
                 Owner: AWS
-                Version: "1"
+                Version: '1'
                 Provider: CodeBuild
               Configuration:
                 ProjectName: !Sub ${AWS::StackName}-CodeBuildProject
@@ -222,11 +215,9 @@ Resources:
                       "value": "test"
                     }
                   ]
-              InputArtifacts: 
-                - 
-                  Name: SourceOutput
+              InputArtifacts:
+                - Name: SourceOutput
               RunOrder: 2
-
 
   ##
   # IAM
@@ -253,27 +244,23 @@ Resources:
       PolicyDocument:
         Version: 2012-10-17
         Statement:
-          -
-            Effect: Allow
+          - Effect: Allow
             Action:
               - s3:*
             Resource:
               - !Sub arn:aws:s3:::${S3BucketArtifact}/*
               - !Sub arn:aws:s3:::${S3BucketArtifact}
-          -
-            Effect: Allow
+          - Effect: Allow
             Action:
               - kms:Decrypt
             Resource: !GetAtt KMSKey.Arn
-          -
-            Effect: Allow
+          - Effect: Allow
             Action:
               - logs:CreateLogGroup
               - logs:CreateLogStream
               - logs:PutLogEvents
             Resource: arn:aws:logs:*:*:*
-          -
-            Sid: cloudformation
+          - Sid: cloudformation
             Effect: Allow
             Action:
               - cloudformation:ValidateTemplate
@@ -302,8 +289,7 @@ Resources:
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
-          -
-            Effect: Allow
+          - Effect: Allow
             Principal:
               Service:
                 - codepipeline.amazonaws.com
@@ -332,7 +318,7 @@ Resources:
               - iam:ListRoles
               - iam:PassRole
             Resource:
-              - !Sub "arn:aws:iam::${AWS::AccountId}:*"
+              - !Sub 'arn:aws:iam::${AWS::AccountId}:*'
           - Sid: kms
             Effect: Allow
             Action:
@@ -357,8 +343,6 @@ Resources:
       Roles:
         - !Ref IAMRolePipeline
 
-
-
   ##
   # KMS
   ##
@@ -372,8 +356,7 @@ Resources:
         Version: 2012-10-17
         Id: Key
         Statement:
-          -
-            Sid: Allows admin of the key
+          - Sid: Allows admin of the key
             Effect: Allow
             Principal:
               AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
@@ -390,9 +373,8 @@ Resources:
               - kms:Delete*
               - kms:ScheduleKeyDeletion
               - kms:CancelKeyDeletion
-            Resource: "*"
-          -
-            Sid: Allow use of the key for CryptoGraphy Lambda
+            Resource: '*'
+          - Sid: Allow use of the key for CryptoGraphy Lambda
             Effect: Allow
             Principal:
               AWS:
@@ -404,7 +386,7 @@ Resources:
               - kms:ReEncrypt*
               - kms:GenerateDataKey*
               - kms:DescribeKey
-            Resource: "*"
+            Resource: '*'
 
   KMSAlias:
     Type: AWS::KMS::Alias
