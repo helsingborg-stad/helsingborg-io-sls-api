@@ -103,24 +103,26 @@ function getMultipleFieldAnswers(field, previousAnswers) {
   return answers;
 }
 
-function getInitialValue(field, applicants, previousAnswers) {
+function getApplicantInfoValue(pattern, applicants) {
   const applicantRoles = ['applicant', 'coApplicant'];
-  let initialValue;
+  const parts = pattern.split('.');
+  const role = parts[0];
+  if (applicantRoles.includes(role)) {
+    const person = applicants.find(applicant => applicant.role === role);
+    return getPersonInfo(person, parts.slice(1));
+  }
+  return undefined;
+}
 
-  field.loadPrevious.forEach(matchPattern => {
-    initialValue = getCaseAnswer(previousAnswers, matchPattern) || initialValue;
+function getInitialValue(field, applicants, previousAnswers) {
+  const firstValue = field.loadPrevious
+    .map(
+      pattern =>
+        getCaseAnswer(previousAnswers, pattern) || getApplicantInfoValue(pattern, applicants)
+    )
+    .filter(value => value !== undefined)[0];
 
-    if (!initialValue) {
-      const patternParts = matchPattern.split('.');
-      if (applicantRoles.includes(patternParts[0])) {
-        const applicantRole = patternParts[0];
-        const person = applicants.find(applicant => applicant.role === applicantRole);
-        initialValue = getPersonInfo(person, patternParts.slice(1)) || initialValue;
-      }
-    }
-  });
-
-  return initialValue ? formatAnswer(field.id, field.tags, initialValue) : undefined;
+  return firstValue ? formatAnswer(field.id, field.tags, firstValue) : undefined;
 }
 
 function populateAnswers(dataMap, applicants, previousAnswers) {
