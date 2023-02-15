@@ -9,6 +9,7 @@ import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import createCaseHelper from '../helpers/createCase';
 import populateFormWithVivaChildren from '../helpers/populateForm';
 import { getCaseListByPeriod, getLastUpdatedCase, getFormTemplates } from '../helpers/dynamoDb';
+import { getConfigFromS3, getCurrentPeriodInfo } from '../helpers/vivaPeriod';
 
 import { CasePersonRole } from '../types/caseItem';
 import { getConfigFromS3 } from '../helpers/vivaPeriod';
@@ -95,10 +96,7 @@ export async function createVivaCase(
 ): Promise<boolean> {
   const { clientUser: user, myPages, application } = input.detail;
 
-  const caseList: DynamoDbQueryOutput = await dependencies.getCaseListByPeriod(
-    user.personalNumber,
-    application
-  );
+  const caseList = await dependencies.getCaseListByPeriod(user.personalNumber, application);
   if (caseList.Count > 0) {
     return true;
   }
