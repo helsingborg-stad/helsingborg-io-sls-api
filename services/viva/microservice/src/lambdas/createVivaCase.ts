@@ -5,6 +5,7 @@ import log from '../libs/logs';
 import { putItem } from '../libs/queries';
 import { populateFormWithPreviousCaseAnswers } from '../libs/formAnswers';
 
+import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import createCaseHelper from '../helpers/createCase';
 import populateFormWithVivaChildren from '../helpers/populateForm';
 import { getCaseListByPeriod, getLastUpdatedCase, getFormTemplates } from '../helpers/dynamoDb';
@@ -40,6 +41,10 @@ interface LambdaDetails {
 
 export interface LambdaRequest {
   detail: LambdaDetails;
+}
+
+interface SuccessEvent {
+  keys: CaseKeys;
 }
 
 export interface Dependencies {
@@ -154,6 +159,13 @@ export async function createVivaCase(
   await dependencies.createCase({
     TableName: config.cases.tableName,
     Item: newRecurringCase,
+  });
+
+  await dependencies.putSuccessEvent({
+    keys: {
+      PK: newRecurringCase.PK,
+      SK: newRecurringCase.SK,
+    },
   });
 
   return true;

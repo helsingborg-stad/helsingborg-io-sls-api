@@ -58,6 +58,10 @@ export const eventTypeCollection = {
     source: 'vivaMs.syncCaseCompletions',
     detailType: 'syncSuccess',
   },
+  createCaseSuccess: {
+    source: 'vivaMs.createVivaCase',
+    detailType: 'createSuccess',
+  },
 };
 
 function putUserEvent(
@@ -88,4 +92,5 @@ export default {
     putUserEvent(detail, 'syncCaseCompletionsSuccess'),
   checkOpenNewApplicationSuccess: (detail: unknown) =>
     putUserEvent(detail, 'checkOpenNewApplicationSuccess'),
+  createCaseSuccess: (detail: unknown) => putUserEvent(detail, 'createCaseSuccess'),
 };
