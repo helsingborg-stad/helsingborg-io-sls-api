@@ -1871,9 +1871,9 @@
             },
             {
               "inputSelectValue": "text",
-              "key": "postalAdress",
+              "key": "postalAddress",
               "label": "Ort",
-              "loadPrevious": ["postalAdress", "applicant.address.city"],
+              "loadPrevious": ["postalAddress", "applicant.address.city"],
               "type": "text",
               "validation": {
                 "isRequired": true,
