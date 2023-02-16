@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import dayjs from 'dayjs';
 
 import { getStatusByType } from '../../src/libs/caseStatuses';
@@ -11,11 +12,20 @@ import { CASE_PROVIDER_VIVA, VIVA_CASE_CREATED, NOT_STARTED_VIVA } from '../../s
 
 import type { PeriodConfig } from '../../src/helpers/vivaPeriod';
 import type { VivaPersonsPerson } from '../../src/types/vivaMyPages';
-import type { LambdaRequest, DynamoDbPutParams } from '../../src/lambdas/createVivaCase';
-import type { CaseItem, CaseForm, CaseUser, CasePerson } from '../../src/types/caseItem';
+import type {
+  LambdaRequest,
+  DynamoDbPutParams,
+  Dependencies,
+} from '../../src/lambdas/createVivaCase';
+import type {
+  CaseItem,
+  CaseForm,
+  CaseUser,
+  CasePerson,
+  CaseFormAnswer,
+} from '../../src/types/caseItem';
 
 const MOCK_DATE = dayjs('2022-01-01T00:00:00Z');
-jest.useFakeTimers('modern').setSystemTime(MOCK_DATE.unix() * 1000);
 
 const mockUuid = '00000000-0000-0000-0000-000000000000';
 jest.mock('uuid', () => ({ v4: () => mockUuid }));
@@ -130,7 +140,7 @@ const applicantFormProperties = {
     },
     {
       field: {
-        id: 'housingInfo.postalAdress',
+        id: 'housingInfo.postalAddress',
         tags: [],
       },
       value: 'KIRUNA',
@@ -172,6 +182,83 @@ function createLambdaInput(persons: VivaPersonsPerson | null = null): LambdaRequ
       },
     },
   };
+}
+
+function createMockForm(answers: CaseFormAnswer[]): CaseForm {
+  return {
+    answers,
+    currentPosition: { ...DEFAULT_CURRENT_POSITION },
+    encryption: {
+      symmetricKeyName: mockUuid,
+      encryptionKeyId: mockUuid,
+      type: EncryptionType.Decrypted,
+    },
+  };
+}
+
+function createMockCase(mockRecurringForm: CaseForm): CaseItem {
+  return {
+    id: mockUuid,
+    PK: `USER#${user.personalNumber}`,
+    SK: `CASE#${mockUuid}`,
+    GSI2PK: 'CREATED#202201',
+    currentFormId: readParametersResponse.recurringFormId,
+    details: {
+      vivaCaseId: 'R37992',
+      period: {
+        startDate: 1640995200000,
+        endDate: 1643587200000,
+      },
+      workflowId: null,
+      completions: null,
+    },
+    forms: {
+      [readParametersResponse.recurringFormId]: mockRecurringForm,
+      [readParametersResponse.randomCheckFormId]: defaultFormProperties,
+      [readParametersResponse.completionFormId]: defaultFormProperties,
+    },
+    persons: [
+      {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        hasSigned: false,
+        personalNumber: user.personalNumber,
+        role: CasePersonRole.Applicant,
+      },
+    ],
+    provider: CASE_PROVIDER_VIVA,
+    state: VIVA_CASE_CREATED,
+    status: getStatusByType(NOT_STARTED_VIVA),
+    updatedAt: 0,
+    createdAt: 1640995200000,
+    expirationTime: 1641038400,
+  };
+}
+
+function createMockDependencies(value: Partial<Dependencies>): Dependencies {
+  return _.merge(
+    {
+      createCase: () => Promise.resolve(),
+      getRecurringFormId: () => Promise.resolve(readParametersResponse.recurringFormId),
+      getLastUpdatedCase: () => Promise.resolve(undefined),
+      getCaseListByPeriod: () =>
+        Promise.resolve({
+          Items: [],
+          Count: 0,
+          ScannedCount: 1,
+        }),
+      getFormTemplates: () =>
+        Promise.resolve({ [readParametersResponse.recurringFormId]: formRecurring }),
+      createInitialForms: () =>
+        Promise.resolve({
+          [readParametersResponse.recurringFormId]: defaultFormProperties,
+          [readParametersResponse.randomCheckFormId]: defaultFormProperties,
+          [readParametersResponse.completionFormId]: defaultFormProperties,
+        }),
+      getPeriodConfig: getMockPeriodConfig,
+    },
+    value
+  );
 }
 
 describe('createVivaCase', () => {
@@ -316,6 +403,70 @@ describe('createVivaCase', () => {
 
     expect(result).toBe(true);
     expect(createCaseMock).toHaveBeenCalledWith(expectedParameters);
+  });
+
+  it('prepopulates with previous case prioritized over user information', async () => {
+    const latestCaseAnswers: CaseFormAnswer[] = [
+      {
+        field: {
+          id: 'personalInfo.telephone',
+          tags: ['phonenumber', 'applicant'],
+        },
+        value: '0767123456',
+      },
+      {
+        field: {
+          id: 'personalInfo.email',
+          tags: ['email', 'applicant'],
+        },
+        value: 'case@example.com',
+      },
+    ];
+
+    const latestCaseItem = createMockCase(createMockForm(latestCaseAnswers));
+
+    const expectedAnswers: CaseFormAnswer[] = [
+      ...latestCaseAnswers,
+      {
+        field: {
+          id: 'housingInfo.streetAddress',
+          tags: [],
+        },
+        value: 'MANGIGATAN 2',
+      },
+      {
+        field: {
+          id: 'housingInfo.postalCode',
+          tags: [],
+        },
+        value: '98133',
+      },
+      {
+        field: {
+          id: 'housingInfo.postalAddress',
+          tags: [],
+        },
+        value: 'KIRUNA',
+      },
+    ];
+
+    const expectedCaseItem = createMockCase(createMockForm(expectedAnswers));
+
+    const createCaseMock = jest.fn();
+
+    const result = await createVivaCase(
+      createLambdaInput(),
+      createMockDependencies({
+        createCase: createCaseMock,
+        getLastUpdatedCase: () => Promise.resolve(latestCaseItem),
+      })
+    );
+
+    expect(result).toBe(true);
+    expect(createCaseMock).toHaveBeenCalledWith({
+      TableName: 'cases',
+      Item: expectedCaseItem,
+    });
   });
 
   it('successfully creates a recurring application case with partner', async () => {
