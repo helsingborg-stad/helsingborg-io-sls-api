@@ -1,12 +1,9 @@
-import AWS from 'aws-sdk';
 import deepEqual from 'deep-equal';
-
 import * as dynamoDb from '../libs/dynamoDb';
 import config from '../libs/config';
 import log from '../libs/logs';
-
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
-
+import { cases } from '../helpers/query';
 import { VivaOfficerType } from '../types/vivaMyPages';
 import type { CaseAdministrator } from '../types/caseItem';
 import type { VivaOfficer } from '../types/vivaMyPages';
@@ -18,33 +15,29 @@ interface CaseKeys {
 }
 
 interface LambdaDetails {
-  dynamodb: {
-    NewImage: Record<string, AWS.DynamoDB.AttributeValue> | undefined;
-  };
+  keys: CaseKeys;
 }
 
 interface LambdaRequest {
   detail: LambdaDetails;
 }
+
 export interface Dependencies {
-  getVivaOfficers: (personalNumber: string) => Promise<VivaOfficer | VivaOfficer[]>;
+  getOfficers: (personalNumber: string) => Promise<VivaOfficer | VivaOfficer[]>;
+  getCase: (keys: CaseKeys) => Promise<CaseItem>;
   updateCase: (keys: CaseKeys, administrators: CaseAdministrator[]) => Promise<void>;
 }
 
-const allowedOfficerTypes: string[] = [VivaOfficerType.Officer];
+const allowedOfficerTypes = [VivaOfficerType.Officer.toString()];
 
-export function createCaseAdministrators(
+export function createAdministrators(
   vivaOfficer: VivaOfficer | VivaOfficer[]
 ): CaseAdministrator[] {
-  let vivaOfficers: VivaOfficer[] = [];
+  const officers: VivaOfficer[] = [];
 
-  if (Array.isArray(vivaOfficer)) {
-    vivaOfficers = [...vivaOfficer];
-  } else {
-    vivaOfficers.push(vivaOfficer);
-  }
+  Array.isArray(vivaOfficer) ? officers.push(...vivaOfficer) : officers.push(vivaOfficer);
 
-  const vivaAdministrators = vivaOfficers.map(officer => {
+  return officers.map(officer => {
     const { name: complexName, title, mail: email, phone, type } = officer;
     const name = complexName.replace(/^CN=(.+)\/OU.*$/, `$1`);
 
@@ -54,43 +47,50 @@ export function createCaseAdministrators(
       email,
       phone,
       type,
-    };
+    } as CaseAdministrator;
   });
-
-  return vivaAdministrators;
 }
 
-function updateCaseAdministrators(keys: CaseKeys, newAdministrators: CaseAdministrator[]) {
+function updateCaseAdministrators(
+  keys: CaseKeys,
+  newAdministrators: CaseAdministrator[]
+): Promise<void> {
   const TableName = config.cases.tableName;
 
-  const dynamoDbParams = {
+  const updateParams = {
     TableName,
-    Key: keys,
+    Key: {
+      PK: keys.PK,
+      SK: keys.SK,
+    },
     UpdateExpression: 'SET details.administrators = :newAdministrators',
     ExpressionAttributeValues: { ':newAdministrators': newAdministrators },
     ReturnValues: 'NONE',
   };
 
-  return dynamoDb.call('update', dynamoDbParams);
+  return dynamoDb.call('update', updateParams);
 }
 
-export async function syncOfficers(input: LambdaRequest, dependencies: Dependencies) {
-  if (!input.detail.dynamodb.NewImage) {
+export async function syncOfficers(
+  input: LambdaRequest,
+  dependencies: Dependencies
+): Promise<boolean> {
+  if (!input.detail.keys) {
     return true;
   }
 
-  const unMarshalledCaseData = dynamoDb.unmarshall(input.detail.dynamodb.NewImage);
-  const { PK, SK, details } = unMarshalledCaseData as CaseItem;
-  const caseAdministrators = details?.administrators ?? [];
+  const caseItem = await dependencies.getCase(input.detail.keys);
+  const { PK, SK, details } = caseItem;
 
   const personalNumber = PK.substring(5);
-  const vivaOfficers = await dependencies.getVivaOfficers(personalNumber);
+  const vivaOfficers = await dependencies.getOfficers(personalNumber);
 
-  const administrators = createCaseAdministrators(vivaOfficers);
+  const administrators = createAdministrators(vivaOfficers);
   const currentAdministrators = administrators.filter(({ type }) =>
     allowedOfficerTypes.includes(type.toLowerCase())
   );
 
+  const caseAdministrators = details?.administrators ?? [];
   if (deepEqual(currentAdministrators, caseAdministrators)) {
     return true;
   }
@@ -102,7 +102,8 @@ export async function syncOfficers(input: LambdaRequest, dependencies: Dependenc
 
 export const main = log.wrap(event => {
   return syncOfficers(event, {
-    getVivaOfficers: vivaAdapter.officers.get,
+    getOfficers: vivaAdapter.officers.get,
+    getCase: cases.get,
     updateCase: updateCaseAdministrators,
   });
 });
