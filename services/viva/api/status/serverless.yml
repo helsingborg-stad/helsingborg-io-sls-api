@@ -1,0 +1,55 @@
+org: hbgworks
+service: viva-status-api
+
+frameworkVersion: ^3.26.0
+
+plugins:
+  - serverless-bundle
+
+custom: ${file(../../../../serverless.common.yml):custom}
+
+package:
+  individually: true
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  stage: dev
+  region: eu-north-1
+  endpointType: regional
+  versionFunctions: false
+  tracing:
+    lambda: true
+
+  environment:
+    stage: ${self:custom.stage}
+    resourcesStage: ${self:custom.resourcesStage}
+
+  apiGateway:
+    restApiId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiId
+    restApiRootResourceId: !ImportValue ${self:custom.stage}-ExtApiGatewayRestApiRootResourceId
+    restApiResources:
+      viva-status: !ImportValue ${self:custom.stage}-ExtApiGatewayResourceVivaStatus
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - SSM:GetParameter*
+          Resource:
+            - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${file(../../../../config.json):${self:custom.stage}.vada.envsKeyName}'
+
+functions:
+  getVivaStatus:
+    handler: src/lambdas/getStatus.main
+    timeout: 15
+    events:
+      - http:
+          path: /viva-status
+          method: get
+          cors: true
+          private: true
+          authorizer:
+            type: TOKEN
+            authorizerId: !ImportValue ${self:custom.stage}-authorizerId
