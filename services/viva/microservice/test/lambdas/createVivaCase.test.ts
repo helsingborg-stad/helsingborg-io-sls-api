@@ -26,7 +26,6 @@ import type {
 } from '../../src/types/caseItem';
 
 const MOCK_DATE = dayjs('2022-01-01T00:00:00Z');
-jest.useFakeTimers('modern').setSystemTime(MOCK_DATE.unix() * 1000);
 
 const mockUuid = '00000000-0000-0000-0000-000000000000';
 jest.mock('uuid', () => ({ v4: () => mockUuid }));
