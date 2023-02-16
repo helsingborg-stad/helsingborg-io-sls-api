@@ -16,7 +16,6 @@ provider:
   runtime: nodejs16.x
   stage: dev
   region: eu-north-1
-  endpointType: regional
   versionFunctions: false
   tracing:
     apiGateway: false
@@ -358,24 +357,7 @@ functions:
     events:
       - eventBridge:
           pattern:
-            source:
-              - casesApi.updateCase
-          retryPolicy:
-            maximumEventAge: 3600
-            maximumRetryAttempts: 3
-          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
-      - eventBridge:
-          pattern:
-            source:
-              - vivaMs.decideCaseStatus
-          retryPolicy:
-            maximumEventAge: 3600
-            maximumRetryAttempts: 3
-          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
-      - eventBridge:
-          pattern:
-            source:
-              - vivaMs.setCaseCompletions
+            source: ['casesApi.updateCase', 'vivaMs.decideCaseStatus', 'vivaMs.setCaseCompletions']
           retryPolicy:
             maximumEventAge: 3600
             maximumRetryAttempts: 3
