@@ -59,9 +59,10 @@ async function getCasesByStatusType(
   const PK = `USER#${personalNumber}`;
 
   const filterExpression = statusTypeList.map(filterExpressionMapper).join(' or ');
-  const expressionAttributeValues = statusTypeList.reduce((acc, statusType) => {
-    return { ...acc, ...createAttributeValues(statusType) };
-  }, {});
+  const expressionAttributeValues = statusTypeList.reduce(
+    (acc, statusType) => ({ ...acc, ...createAttributeValues(statusType) }),
+    {}
+  );
 
   const queryParams = {
     TableName: config.cases.tableName,
@@ -126,7 +127,7 @@ export async function syncWorkflow(
 
   await Promise.allSettled(
     caseListWithWorkflowId.map(async caseItem => {
-      const workflowId = caseItem.details.workflowId as string;
+      const workflowId = caseItem.details.workflowId ?? '';
       const workflow = await dependencies.getWorkflow({
         personalNumber,
         workflowId,
