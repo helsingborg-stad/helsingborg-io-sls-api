@@ -309,15 +309,9 @@ functions:
       - eventBridge:
           pattern:
             source:
-              - cases.database
+              - vivaMs.createVivaCase
             detail-type:
-              - INSERT
-              - MODIFY
-            detail:
-              dynamodb:
-                NewImage:
-                  provider:
-                    S: ['VIVA']
+              - createSuccess
           retryPolicy:
             maximumEventAge: 3600
             maximumRetryAttempts: 3
