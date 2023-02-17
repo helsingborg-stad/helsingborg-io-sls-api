@@ -1,0 +1,93 @@
+openapi: '3.0.3'
+info:
+  title: VIVA
+  description: Get VIVA status
+  contact:
+    name: GitHub Repo
+    url: https://github.com/helsingborg-stad/helsingborg-io-sls-api
+  version: '1.0'
+  license:
+    name: MIT
+    url: 'https://github.com/helsingborg-stad/helsingborg-io-sls-api/blob/master/LICENSE'
+servers:
+  - url: https://dev.api.helsingborg.io
+  - url: https://release.api.helsingborg.io
+  - url: https://api.helsingborg.io
+
+paths:
+  /viva-status:
+    get:
+      tags:
+        - VIVA
+      summary: Get VIVA status codes
+      description: |
+        Returns VIVA status codes and user-friendly messages
+        for the requesting user.
+      security:
+        - ApiKeyAuth: []
+        - AuthToken: []
+      responses:
+        '200':
+          description: OK.
+          content:
+            'application/vnd.api+json':
+              schema:
+                $ref: '#/components/schemas/statusResult'
+        '400':
+          description: Invalid personal number supplied.
+          content:
+            'application/vnd.api+json':
+              schema:
+                $ref: '../../../common-openapi.yml#/components/schemas/jsonApiError'
+        '403':
+          $ref: '../../../common-openapi.yml#/components/responses/missingApiKeyResponse'
+
+components:
+  securitySchemes:
+    $ref: '../../../common-openapi.yml#/components/securitySchemes'
+
+  schemas:
+    statusRequest:
+      properties:
+        personalNumber:
+          type: string
+          example: 198001239999
+      required:
+        - personalNumber
+
+    statusResult:
+      properties:
+        jsonapi:
+          type: object
+          properties:
+            version:
+              type: string
+              example: '1.0'
+        data:
+          type: object
+          properties:
+            attributes:
+              type: object
+              properties:
+                code:
+                  type: number
+                  example: 577
+                parts:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      code:
+                        type: number
+                      message:
+                        type: string
+                    required:
+                      - code
+                      - message
+                    example:
+                      - code: 512
+                        message: Du har tillåtelse att ansökan digitalt.
+                      - code: 64
+                        message: Du förväntas skicka in komplettering. Har du redan gjort det kan du bortse från det här.
+                      - code: 1
+                        message: Du har tillåtelse att ansöka om ekonomiskt bistånd.
