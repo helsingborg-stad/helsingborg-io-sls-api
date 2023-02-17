@@ -138,7 +138,7 @@ export async function submitApplication(
     });
   }
 
-  const vivaWorkflowId = vadaResponse.id as string;
+  const vivaWorkflowId = vadaResponse?.id ?? '';
   await dependencies.updateCase({ PK, SK }, vivaWorkflowId);
   await dependencies.putSuccessEvent({ personalNumber });
 
