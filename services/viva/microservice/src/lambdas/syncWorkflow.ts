@@ -127,7 +127,7 @@ export async function syncWorkflow(
 
   await Promise.allSettled(
     caseListWithWorkflowId.map(async caseItem => {
-      const workflowId = caseItem.details.workflowId ?? '';
+      const workflowId = caseItem.details.workflowId as string;
       const workflow = await dependencies.getWorkflow({
         personalNumber,
         workflowId,
