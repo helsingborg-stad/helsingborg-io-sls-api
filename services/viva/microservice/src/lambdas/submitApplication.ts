@@ -18,7 +18,10 @@ import { TraceException } from '../helpers/TraceException';
 import { VivaApplicationType } from '../types/vivaMyPages';
 import type { VivaAttachment } from '../types/vivaAttachment';
 import type { PersonalNumber, CaseItem, CaseFormAnswer } from '../types/caseItem';
-import type { PostApplicationsPayload } from '../helpers/vivaAdapterRequestClient';
+import type {
+  PostApplicationsPayload,
+  PostApplicationsResponse,
+} from '../helpers/vivaAdapterRequestClient';
 import type { VadaError } from '../types/vadaResponse';
 
 interface CaseKeys {
@@ -38,8 +41,8 @@ interface SuccessEvent {
 export interface Dependencies {
   requestId: string;
   readParams: (envsKeyName: string) => Promise<ParamsReadResponse>;
-  updateVivaCase: (params: CaseKeys, workflowId: string) => Promise<void>;
-  postVivaApplication: (params: PostApplicationsPayload) => Promise<Record<string, unknown>>;
+  updateCase: (params: CaseKeys, workflowId: string) => Promise<void>;
+  postVivaApplication: (params: PostApplicationsPayload) => Promise<PostApplicationsResponse>;
   putSuccessEvent: (params: SuccessEvent) => Promise<void>;
   attachmentFromAnswers: (
     personalNumber: PersonalNumber,
@@ -107,7 +110,10 @@ export async function submitApplication(
   const answers = formAnswers.filter(answer => !dependencies.isAnswerAttachment(answer));
   const attachments = await dependencies.attachmentFromAnswers(personalNumber, formAnswers);
 
-  const [vadaError, vadaResponse] = await to<Record<string, unknown>, VadaError>(
+  const [vadaError, vadaResponse] = await to<
+    PostApplicationsResponse | undefined,
+    VadaError | null
+  >(
     dependencies.postVivaApplication({
       applicationType,
       personalNumber,
