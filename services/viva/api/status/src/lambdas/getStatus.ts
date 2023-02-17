@@ -3,7 +3,7 @@ import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
 import type { VivaApplicationsStatusItem } from '../types/vivaApplicationsStatus';
 
-export interface Input {
+export interface LambdaRequest {
   personalNumber: string;
 }
 
@@ -11,23 +11,25 @@ export interface Dependencies {
   getStatus: (personalNumber: string) => Promise<VivaApplicationsStatusItem[]>;
 }
 
-export interface Response {
+interface StatusPart {
   code: number;
-  parts: {
-    code: number;
-    message: string;
-  }[];
+  message: string;
+}
+
+export interface LambdaResponse {
+  code: number;
+  parts: StatusPart[];
 }
 
 export async function getStatus(
-  { personalNumber }: Input,
+  { personalNumber }: LambdaRequest,
   dependencies: Dependencies
-): Promise<Response> {
+): Promise<LambdaResponse> {
   const statuses = await dependencies.getStatus(personalNumber);
 
   return {
-    code: statuses.reduce((accumulated, status) => accumulated + status.code, 0),
-    parts: statuses.map(status => ({ code: status.code, message: status.description })),
+    code: statuses.reduce((accumulated, { code }) => accumulated + code, 0),
+    parts: statuses.map(({ code, description }) => ({ code, message: description })),
   };
 }
 
