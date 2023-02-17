@@ -27,16 +27,24 @@ import type { VivaAttachment } from '../types/vivaAttachment';
 import type { CaseFormAnswer } from '../types/caseItem';
 
 interface ConfigParams {
-  vadaUrl: string;
-  xApiKeyToken: string;
-  hashSalt: string;
-  hashSaltLength: number;
+  readonly vadaUrl: string;
+  readonly xApiKeyToken: string;
+  readonly hashSalt: string;
+  readonly hashSaltLength: number;
+}
+
+interface VivaDetails {
+  readonly errorCode: string | null;
+  readonly errorMessage: string | null;
+  readonly id: string | null;
+  readonly idenclair: string | null;
+  readonly status: string | null;
 }
 
 interface AdapterError {
-  code: number;
-  description: string;
-  details: string;
+  readonly code: number;
+  readonly description: string;
+  readonly details: VivaDetails;
 }
 
 interface AdapterErrorResponseData {
