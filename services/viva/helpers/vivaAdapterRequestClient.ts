@@ -40,7 +40,16 @@ interface AdapterError {
 }
 
 interface AdapterErrorResponseData {
-  error: AdapterError;
+  readonly error: AdapterError;
+}
+
+export interface PostApplicationsResponse {
+  readonly status: string;
+  readonly id: string;
+}
+
+export interface PostCompletionsResponse {
+  readonly status: string;
 }
 
 interface AdapterResponseData<
@@ -51,6 +60,8 @@ interface AdapterResponseData<
     | VadaApplicationsStatusResponse
     | VivaMyPagesCases
     | VivaMyPagesApplication
+    | PostApplicationsResponse
+    | PostCompletionsResponse
     | unknown
 > {
   type: string;
@@ -97,10 +108,6 @@ interface AdapterPostApplicationsBody {
   rawDataType: string;
   workflowId: string;
   attachments: VivaAttachment[];
-}
-
-interface PostCompletionsResponse {
-  status: string;
 }
 
 const REQUEST_TIMEOUT_IN_MS = 30000;
@@ -240,7 +247,7 @@ function getVivaSsmParams(): Promise<ConfigParams> {
 
 async function postApplications(
   payload: PostApplicationsPayload
-): Promise<Record<string, unknown>> {
+): Promise<PostApplicationsResponse> {
   const {
     personalNumber,
     applicationType,
@@ -267,8 +274,8 @@ async function postApplications(
     },
   };
 
-  const response = (await sendVivaAdapterRequest(requestParams)) as AxiosResponse;
-  return response.data;
+  const response = await sendVivaAdapterRequest<PostApplicationsResponse>(requestParams);
+  return response.data.attributes;
 }
 
 async function postCompletions(payload: PostCompletionsPayload): Promise<PostCompletionsResponse> {
