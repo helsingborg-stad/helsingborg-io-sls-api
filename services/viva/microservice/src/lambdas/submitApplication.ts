@@ -139,7 +139,7 @@ export async function submitApplication(
   }
 
   const vivaWorkflowId = vadaResponse.id as string;
-  await dependencies.updateVivaCase({ PK, SK }, vivaWorkflowId);
+  await dependencies.updateCase({ PK, SK }, vivaWorkflowId);
   await dependencies.putSuccessEvent({ personalNumber });
 
   log.writeInfo('Record processed SUCCESSFULLY', { messageId, caseId: SK });
