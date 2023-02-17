@@ -324,9 +324,9 @@ functions:
       - eventBridge:
           pattern:
             source:
-              - bankId.collect
+              - vivaMs.applicationStatus
             detail-type:
-              - BankIdCollectComplete
+              - applicationStatusSuccess
           retryPolicy:
             maximumEventAge: 3600
             maximumRetryAttempts: 3
