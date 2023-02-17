@@ -89,11 +89,9 @@ export async function submitApplication(
     config.cases.providers.viva.envsKeyName
   );
 
-  const isNotRecurringOrNewApplicationForm = ![recurringFormId, newApplicationFormId].includes(
-    currentFormId
-  );
+  const isNotApplicationForm = ![recurringFormId, newApplicationFormId].includes(currentFormId);
 
-  if (isNotRecurringOrNewApplicationForm) {
+  if (isNotApplicationForm) {
     log.writeInfo('Current form is not a recurring or newApplication form', currentFormId);
     return true;
   }
