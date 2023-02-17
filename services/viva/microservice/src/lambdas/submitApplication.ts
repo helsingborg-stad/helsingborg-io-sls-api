@@ -120,20 +120,17 @@ export async function submitApplication(
   );
 
   if (vadaError) {
-    throw new TraceException('Failed to submit Viva application. Will be retried.', requestId, {
-      messageId,
-      caseId: id,
-      httpStatusCode: vadaError.status,
-      vivaErrorCode: vadaError.vadaResponse.error?.details?.errorCode ?? null,
-      vivaErrorMessage: vadaError.vadaResponse.error?.details?.errorMessage ?? null,
-    });
-  }
-
-  if (vadaResponse?.status !== 'OK') {
-    log.writeError('Viva response status NOT ok!', vadaResponse?.status);
-    throw new TraceException('Viva application receive failed. Will be retried.', requestId, {
-      vadaResponse: { ...vadaResponse },
-    });
+    throw new TraceException(
+      'Failed to submit Viva application. Will retry.',
+      dependencies.requestId,
+      {
+        messageId,
+        caseId,
+        httpStatusCode: vadaError.status,
+        vivaErrorCode: vadaError.vadaResponse.error?.details?.errorCode ?? null,
+        vivaErrorMessage: vadaError.vadaResponse.error?.details?.errorMessage ?? null,
+      }
+    );
   }
 
   const vivaWorkflowId = vadaResponse?.id ?? '';
