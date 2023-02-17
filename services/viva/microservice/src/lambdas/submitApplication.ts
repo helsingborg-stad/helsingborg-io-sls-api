@@ -31,12 +31,16 @@ interface ParamsReadResponse {
   newApplicationFormId: string;
 }
 
+interface SuccessEvent {
+  personalNumber: string;
+}
+
 export interface Dependencies {
   requestId: string;
   readParams: (envsKeyName: string) => Promise<ParamsReadResponse>;
   updateVivaCase: (params: CaseKeys, workflowId: string) => Promise<void>;
   postVivaApplication: (params: PostApplicationsPayload) => Promise<Record<string, unknown>>;
-  putSuccessEvent: (params: { personalNumber: string }) => Promise<void>;
+  putSuccessEvent: (params: SuccessEvent) => Promise<void>;
   attachmentFromAnswers: (
     personalNumber: PersonalNumber,
     answerList: CaseFormAnswer[]
