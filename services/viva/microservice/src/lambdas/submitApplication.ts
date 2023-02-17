@@ -56,8 +56,6 @@ export interface LambdaRequest {
   caseItem: CaseItem;
 }
 
-export type LambdaResponse = boolean;
-
 export function updateVivaCase(keys: CaseKeys, workflowId: string): Promise<void> {
   const updateParams = {
     TableName: config.cases.tableName,
@@ -82,7 +80,7 @@ export function updateVivaCase(keys: CaseKeys, workflowId: string): Promise<void
 export async function submitApplication(
   input: LambdaRequest,
   dependencies: Dependencies
-): Promise<LambdaResponse> {
+): Promise<boolean> {
   const { caseItem, messageId } = input;
   const { requestId } = dependencies;
 
