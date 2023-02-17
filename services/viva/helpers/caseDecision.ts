@@ -24,7 +24,7 @@ export function decideNewCaseStatus(workflow: VivaWorkflow): string | undefined 
   return isWorkflowLocked(workflow) ? ACTIVE_PROCESSING : undefined;
 }
 
-export function desideNewState(workflow: VivaWorkflow): string | undefined {
+export function decideNewState(workflow: VivaWorkflow): string | undefined {
   return isWorkflowLocked(workflow) ? VIVA_APPLICATION_LOCKED : undefined;
 }
 
