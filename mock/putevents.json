@@ -14,6 +14,13 @@
     "EventBusName": "default"
   },
   {
+    "Source": "bankId.collect",
+    "Detail": "{ \"user\": { \"personalNumber\": \"198602102389\" } }",
+    "Resources": ["PETRONELLA"],
+    "DetailType": "BankIdCollectComplete",
+    "EventBusName": "default"
+  },
+  {
     "Source": "OFFvivaMs.submitApplication",
     "Detail": "{ \"personalNumber\": \"198602132394\" }",
     "Resources": ["BROR"],
