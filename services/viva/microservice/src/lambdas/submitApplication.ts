@@ -82,9 +82,7 @@ export async function submitApplication(
   dependencies: Dependencies
 ): Promise<boolean> {
   const { caseItem, messageId } = input;
-  const { requestId } = dependencies;
-
-  const { PK, SK, pdf, currentFormId, details, forms, id } = caseItem;
+  const { PK, SK, pdf, currentFormId, details, forms, id: caseId } = caseItem;
   const { recurringFormId, newApplicationFormId } = await dependencies.readParams(
     config.cases.providers.viva.envsKeyName
   );
@@ -142,7 +140,8 @@ export async function submitApplication(
   await dependencies.updateCase({ PK, SK }, vivaWorkflowId);
   await dependencies.putSuccessEvent({ personalNumber });
 
-  log.writeInfo('Record processed SUCCESSFULLY', { messageId, caseId: SK });
+  log.writeInfo('Record processed SUCCESSFULLY', { messageId, caseId });
+
   return true;
 }
 
