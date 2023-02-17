@@ -159,15 +159,16 @@ export const main = log.wrap((event: SQSEvent, context: Context) => {
     caseId: caseItem.id,
   });
 
-  const lambdaEvent = { caseItem, messageId };
-
-  return submitApplication(lambdaEvent, {
-    requestId,
-    readParams: params.read,
-    updateVivaCase,
-    postVivaApplication: vivaAdapter.applications.post,
-    putSuccessEvent: putVivaMsEvent.applicationReceivedSuccess,
-    attachmentFromAnswers: attachment.createFromAnswers,
-    isAnswerAttachment: attachment.isAnswerAttachment,
-  });
+  return submitApplication(
+    { caseItem, messageId },
+    {
+      requestId,
+      readParams: params.read,
+      updateCase: updateVivaCase,
+      postVivaApplication: vivaAdapter.applications.post,
+      putSuccessEvent: putVivaMsEvent.applicationReceivedSuccess,
+      attachmentFromAnswers: attachment.createFromAnswers,
+      isAnswerAttachment: attachment.isAnswerAttachment,
+    }
+  );
 });
