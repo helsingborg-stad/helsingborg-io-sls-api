@@ -10,6 +10,7 @@ export interface CasesQueryParams {
   key: string;
   value: string;
   index?: string;
+  returnAttributes?: string;
 }
 
 export interface CasesQueryHandler {

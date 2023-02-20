@@ -4,8 +4,13 @@ import type { CasesQueryHandler, CasesQueryParams, CaseItem } from '../../cases/
 
 export const casesQuaryHandler: CasesQueryHandler = {
   async query(params: CasesQueryParams) {
-    const { key: pk, value, index } = params;
+    const { key: pk, value, index, returnAttributes: projection } = params;
     const casesTableName = `${config.resourcesStage}-${config.cases.tableName}`;
-    return dynamoQueryHandler.query<CaseItem[]>(casesTableName, { pk, value, index });
+    return dynamoQueryHandler.query<CaseItem[]>(casesTableName, {
+      pk,
+      value,
+      index,
+      projection,
+    });
   },
 };

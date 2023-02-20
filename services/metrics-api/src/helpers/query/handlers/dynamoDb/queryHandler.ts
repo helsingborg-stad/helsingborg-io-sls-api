@@ -6,13 +6,20 @@ const dynamoDbClient = new DynamoDb.DocumentClient({ apiVersion: '2012-08-10' })
 
 export const dynamoQueryHandler: DynamoQueryHandler = {
   async query<T>(tableName: string, params: QueryParams): Promise<T> {
-    const { pk, value, index } = params;
+    const { pk, value, index, projection } = params;
     const queryParams = {
       TableName: tableName,
       KeyConditionExpression: '#pk = :value',
-      ExpressionAttributeNames: { '#pk': pk },
+      ExpressionAttributeNames: {
+        '#pk': pk,
+        ...(projection && { '#projectionName': projection }),
+      },
       ExpressionAttributeValues: { ':value': value },
       ...(index && { IndexName: index }),
+      ...(projection && {
+        Select: 'SPECIFIC_ATTRIBUTES',
+        ProjectionExpression: '#projectionName',
+      }),
     };
 
     let nextKey: Key | undefined = undefined;

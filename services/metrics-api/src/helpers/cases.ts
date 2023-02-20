@@ -76,6 +76,7 @@ function get(): Promise<CaseItem[]> {
     key: 'GSI2PK',
     value: `CREATED#${getDatePattern('YYYYMM')}`,
     index: 'GSI2PK-index',
+    returnAttributes: 'status',
   };
 
   return cases.query(params);
