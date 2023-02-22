@@ -40,7 +40,7 @@ beforeEach(() => {
     postVivaApplication: () => Promise.resolve({ status: 'OK', id: postVivaResponseId }),
     putSuccessEvent: () => Promise.resolve(),
     readParams: () => Promise.resolve({ newApplicationFormId, recurringFormId: recurrentFormId }),
-    updateVivaCase: () => Promise.resolve(),
+    updateCase: () => Promise.resolve(),
     attachmentFromAnswers: () => Promise.resolve([]),
     isAnswerAttachment: () => true,
   };
@@ -95,7 +95,7 @@ it('throws if `postVivaApplication` fails', async () => {
 });
 
 it('throws if `postVivaApplication` is successful but `status` is not `OK`', async () => {
-  context.postVivaApplication = () => Promise.resolve({ status: 'NOT_OK' });
+  context.postVivaApplication = () => Promise.reject({ status: 'NOT_OK', id: '' });
 
   await expect(submitApplication(input, context)).rejects.toThrow();
 });
@@ -118,8 +118,8 @@ test.each([
   }
 );
 
-it('calls `updateVivaCase` with correct parameters', async () => {
-  const updateVivaCaseSpy = jest.spyOn(context, 'updateVivaCase');
+it('calls `updateCase` with correct parameters', async () => {
+  const updateVivaCaseSpy = jest.spyOn(context, 'updateCase');
 
   await submitApplication(input, context);
 

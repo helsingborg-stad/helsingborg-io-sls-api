@@ -1,7 +1,8 @@
-import { CaseAdministrator } from '../../src/types/caseItem';
+import type { CaseItem, CaseAdministrator } from '../../src/types/caseItem';
 import { syncOfficers } from '../../src/lambdas/syncOfficers';
 
-import { VivaOfficer, VivaOfficerType } from '../../src/types/vivaMyPages';
+import type { VivaOfficer } from '../../src/types/vivaMyPages';
+import { VivaOfficerType } from '../../src/types/vivaMyPages';
 
 function makeVivaOfficer(partialVivaOfficer: Partial<VivaOfficer> = {}) {
   return {
@@ -18,6 +19,14 @@ function makeVivaOfficer(partialVivaOfficer: Partial<VivaOfficer> = {}) {
 const PK = 'USER#199001011234';
 const SK = 'CASE#11111111-2222-3333-4444-555555555555';
 
+const mockCase = {
+  PK,
+  SK,
+  details: {
+    administrators: [],
+  },
+} as unknown as CaseItem;
+
 it('successfully updates case with new officers', async () => {
   const expectedCaseAdministrators: CaseAdministrator[] = [
     {
@@ -31,54 +40,21 @@ it('successfully updates case with new officers', async () => {
   const updateCaseOfficersMock = jest.fn().mockResolvedValueOnce(undefined);
   const lambdaInput = {
     detail: {
-      dynamodb: {
-        NewImage: {
-          PK: {
-            S: PK,
-          },
-          SK: {
-            S: SK,
-          },
-          details: {
-            M: {
-              administrators: {
-                L: [],
-              },
-            },
-          },
-        },
+      keys: {
+        PK,
+        SK,
       },
     },
   };
 
   const result = await syncOfficers(lambdaInput, {
-    getVivaOfficers: () => Promise.resolve([makeVivaOfficer()]),
+    getOfficers: () => Promise.resolve([makeVivaOfficer()]),
+    getCase: () => Promise.resolve(mockCase),
     updateCase: updateCaseOfficersMock,
   });
 
   expect(result).toBe(true);
   expect(updateCaseOfficersMock).toHaveBeenCalledWith({ PK, SK }, expectedCaseAdministrators);
-});
-
-it('returns true if `NewImage` property is undefined', async () => {
-  const updateCaseOfficersMock = jest.fn().mockResolvedValueOnce(undefined);
-
-  const result = await syncOfficers(
-    {
-      detail: {
-        dynamodb: {
-          NewImage: undefined,
-        },
-      },
-    },
-    {
-      getVivaOfficers: () => Promise.resolve([makeVivaOfficer()]),
-      updateCase: updateCaseOfficersMock,
-    }
-  );
-
-  expect(result).toBeTruthy();
-  expect(updateCaseOfficersMock).toHaveBeenCalledTimes(0);
 });
 
 it('updates the case with only allowed officers', async () => {
@@ -93,30 +69,19 @@ it('updates the case with only allowed officers', async () => {
   ];
   const lambdaInput = {
     detail: {
-      dynamodb: {
-        NewImage: {
-          PK: {
-            S: PK,
-          },
-          SK: {
-            S: SK,
-          },
-          details: {
-            M: {
-              administrators: {
-                L: [],
-              },
-            },
-          },
-        },
+      keys: {
+        PK,
+        SK,
       },
     },
   };
+
   const updateCaseOfficersMock = jest.fn().mockResolvedValueOnce(undefined);
 
   const result = await syncOfficers(lambdaInput, {
-    getVivaOfficers: () =>
+    getOfficers: () =>
       Promise.resolve([makeVivaOfficer(), makeVivaOfficer({ type: 'Not allowed type' })]),
+    getCase: () => Promise.resolve(mockCase),
     updateCase: updateCaseOfficersMock,
   });
 
@@ -125,51 +90,35 @@ it('updates the case with only allowed officers', async () => {
 });
 
 it('does not update case if officers are the same in viva as in the case', async () => {
+  const mockCase = {
+    PK,
+    SK,
+    details: {
+      administrators: [
+        {
+          email: 'mail@test.com',
+          name: 'Karl Karlsson',
+          title: 'Socialsekreterare',
+          phone: null,
+          type: VivaOfficerType.Officer,
+        },
+      ],
+    },
+  } as unknown as CaseItem;
+
   const lambdaInput = {
     detail: {
-      dynamodb: {
-        NewImage: {
-          PK: {
-            S: PK,
-          },
-          SK: {
-            S: SK,
-          },
-          details: {
-            M: {
-              administrators: {
-                L: [
-                  {
-                    M: {
-                      name: {
-                        S: 'Karl Karlsson',
-                      },
-                      type: {
-                        S: VivaOfficerType.Officer,
-                      },
-                      title: {
-                        S: 'Socialsekreterare',
-                      },
-                      email: {
-                        S: 'mail@test.com',
-                      },
-                      phone: {
-                        NULL: true,
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          },
-        },
+      keys: {
+        PK,
+        SK,
       },
     },
   };
   const updateCaseOfficersMock = jest.fn().mockResolvedValueOnce(undefined);
 
   const result = await syncOfficers(lambdaInput, {
-    getVivaOfficers: () => Promise.resolve([makeVivaOfficer()]),
+    getOfficers: () => Promise.resolve([makeVivaOfficer()]),
+    getCase: () => Promise.resolve(mockCase),
     updateCase: updateCaseOfficersMock,
   });
 

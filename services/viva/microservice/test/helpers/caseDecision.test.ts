@@ -1,4 +1,4 @@
-import { decideNewCaseStatus, desideNewState } from '../../src/helpers/caseDecision';
+import { decideNewCaseStatus, decideNewState } from '../../src/helpers/caseDecision';
 import {
   ACTIVE_PROCESSING,
   CLOSED_APPROVED_VIVA,
@@ -181,7 +181,7 @@ describe('Decide new case status', () => {
 
 describe('Decide new state', () => {
   it('returns undefined if application islocked set to null', () => {
-    const results = desideNewState(createWorkflow());
+    const results = decideNewState(createWorkflow());
     expect(results).toBeUndefined();
   });
 
@@ -192,7 +192,7 @@ describe('Decide new state', () => {
       },
     } as VivaWorkflow;
 
-    const results = desideNewState(createWorkflow(workflowMock));
+    const results = decideNewState(createWorkflow(workflowMock));
     expect(results).toBe(VIVA_APPLICATION_LOCKED);
   });
 });
