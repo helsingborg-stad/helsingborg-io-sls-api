@@ -175,6 +175,7 @@ functions:
     timeout: 30
     events:
       - eventBridge:
+          enabled: false
           pattern:
             source:
               - vivaMs.personApplicationStatus
@@ -362,6 +363,7 @@ functions:
     timeout: 30
     events:
       - eventBridge:
+          enabled: false
           pattern:
             source:
               - vivaMs.applicationStatus
