@@ -352,7 +352,8 @@ functions:
     events:
       - eventBridge:
           pattern:
-            source: ['casesApi.updateCase', 'vivaMs.decideCaseStatus', 'vivaMs.setCaseCompletions']
+            source:
+              - 'vivaMs.decideCaseStatus'
           retryPolicy:
             maximumEventAge: 3600
             maximumRetryAttempts: 3
