@@ -31,10 +31,15 @@ export interface LambdaRequest {
   detail: LambdaDetail;
 }
 
+interface SuccessEvent {
+  caseKeys: CaseKeys;
+  caseState: string;
+}
+
 export interface Dependencies {
   getCasesByStatusType: (personalNumber: string, statusTypeList: string[]) => Promise<CaseItem[]>;
   updateCase: (caseKeys: CaseKeys, newWorkflow: VivaWorkflow) => Promise<void>;
-  syncWorkflowSuccess: (detail: Record<string, unknown>) => Promise<void>;
+  syncWorkflowSuccess: (detail: SuccessEvent) => Promise<void>;
   getWorkflow: (params: GetWorkflowParams) => Promise<VivaWorkflow>;
 }
 
