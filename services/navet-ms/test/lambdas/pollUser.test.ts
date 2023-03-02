@@ -1,7 +1,6 @@
-import { pollUser, Input, Dependencies } from '../../src/lambdas/pollUser';
-
+import { pollUser } from '../../src/lambdas/pollUser';
 import { getNavetPersonPost } from '../../src/helpers/navet';
-
+import type { Input, Dependencies } from '../../src/lambdas/pollUser';
 import type { CaseUser } from '../../src/helpers/types';
 
 const firstName = 'MockUser';
@@ -127,9 +126,9 @@ it('successfully fetches a navet user without adress', async () => {
     {
       ...mockUser,
       address: {
-        city: undefined,
-        postalCode: undefined,
-        street: undefined,
+        city: null,
+        postalCode: null,
+        street: null,
       },
     },
     'navetMsPollUserSuccess',
