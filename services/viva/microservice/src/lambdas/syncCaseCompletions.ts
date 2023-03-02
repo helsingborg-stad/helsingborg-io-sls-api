@@ -14,6 +14,14 @@ import type { CaseUser, CaseItem, PersonalNumber } from '../types/caseItem';
 import type { VivaApplicationsStatusItem } from '../types/vivaApplicationsStatus';
 import type { VadaWorkflowCompletions } from '../types/vadaCompletions';
 
+interface SuccessEvent {
+  vivaApplicantStatusCodeList: VivaApplicationsStatusItem[];
+  workflowCompletions: VadaWorkflowCompletions;
+  caseKeys: CaseKeys;
+  caseState: string;
+  caseStatusType: string;
+}
+
 interface CaseKeys {
   PK: string;
   SK: string;
@@ -28,16 +36,8 @@ export interface LambdaRequest {
   detail: LambdaDetail;
 }
 
-interface PutSuccessEvent {
-  vivaApplicantStatusCodeList: VivaApplicationsStatusItem[];
-  workflowCompletions: VadaWorkflowCompletions;
-  caseKeys: CaseKeys;
-  caseState: string;
-  caseStatusType: string;
-}
-
 export interface Dependencies {
-  putSuccessEvent: (params: PutSuccessEvent) => Promise<void>;
+  triggerEvent: (params: SuccessEvent) => Promise<void>;
   updateCase: (keys: CaseKeys, newCompletions: VadaWorkflowCompletions) => Promise<void>;
   validateStatusCode: (
     statusList: VivaApplicationsStatusItem[],
@@ -98,7 +98,7 @@ export async function syncCaseCompletions(input: LambdaRequest, dependencies: De
   };
   await dependencies.updateCase(caseKeys, workflowCompletions);
 
-  await dependencies.putSuccessEvent({
+  await dependencies.triggerEvent({
     vivaApplicantStatusCodeList,
     workflowCompletions,
     caseKeys,
@@ -111,7 +111,7 @@ export async function syncCaseCompletions(input: LambdaRequest, dependencies: De
 
 export const main = log.wrap(event => {
   return syncCaseCompletions(event, {
-    putSuccessEvent: putVivaMsEvent.syncCaseCompletionsSuccess,
+    triggerEvent: putVivaMsEvent.syncCaseCompletionsSuccess,
     updateCase: updateCaseCompletions,
     validateStatusCode: validateApplicationStatus,
     getLatestWorkflowId: completionsHelper.get.workflow.latest.id,
