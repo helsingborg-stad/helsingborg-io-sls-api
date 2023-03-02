@@ -4,6 +4,7 @@ import { syncCaseCompletions } from '../../src/lambdas/syncCaseCompletions';
 import type { CaseItem } from '../../../types/caseItem';
 import { EncryptionType } from '../../../types/caseItem';
 import type { VadaWorkflowCompletions } from '../../src/types/vadaCompletions';
+import type { CaseUser } from '../../src/types/caseItem';
 
 const caseKeys = {
   PK: 'PK',
@@ -18,7 +19,7 @@ const input: LambdaRequest = {
       personalNumber: '199801011234',
       firstName: 'Otto',
       lastName: 'Ottosson',
-    },
+    } as CaseUser,
     status: [
       {
         code: 64,
@@ -104,7 +105,7 @@ function createDependencies(
   partialDependencies: Partial<Dependencies> = {}
 ): Dependencies {
   return {
-    putSuccessEvent: () => Promise.resolve(),
+    triggerEvent: () => Promise.resolve(),
     updateCase: () => Promise.resolve(),
     validateStatusCode: () => statusCode,
     getLatestWorkflowId: () => Promise.resolve(workflowId),
