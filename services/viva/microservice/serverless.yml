@@ -122,17 +122,9 @@ functions:
           pattern:
             source:
               - usersMs.findUser
-            detail-type:
-              - usersMsFindUserSuccess
-          retryPolicy:
-            maximumEventAge: 3600
-            maximumRetryAttempts: 3
-          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
-      - eventBridge:
-          pattern:
-            source:
               - vivaMs.submitApplication
             detail-type:
+              - usersMsFindUserSuccess
               - applicationReceivedSuccess
           retryPolicy:
             maximumEventAge: 3600
