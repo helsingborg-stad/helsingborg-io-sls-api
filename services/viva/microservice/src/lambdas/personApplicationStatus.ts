@@ -1,5 +1,4 @@
 import log from '../libs/logs';
-
 import {
   VIVA_STATUS_NEW_APPLICATION_OPEN,
   VIVA_STATUS_APPLICATION_PERIOD_OPEN,
@@ -10,18 +9,13 @@ import {
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import validateApplicationStatus from '../helpers/validateApplicationStatus';
 
+import type { CaseUser } from '../types/caseItem';
 import type { VivaApplicationsStatusItem } from '../types/vivaApplicationsStatus';
 
-interface User {
-  personalNumber: string;
-}
-
-interface RecurringApplicationSuccessEvent {
-  user: User;
-}
+type SuccessEvent = LambdaDetail;
 
 interface LambdaDetail {
-  user: User;
+  user: CaseUser;
   status: VivaApplicationsStatusItem[];
 }
 
@@ -30,15 +24,15 @@ export interface LambdaRequest {
 }
 
 export interface Dependencies {
-  recurringOpenEvent: (event: RecurringApplicationSuccessEvent) => Promise<void>;
-  newOpenEvent: (event: LambdaDetail) => Promise<void>;
+  triggerRecurringOpenEvent: (params: SuccessEvent) => Promise<void>;
+  triggerNewOpenEvent: (params: SuccessEvent) => Promise<void>;
 }
 
 export async function personApplicationStatus(
   input: LambdaRequest,
   dependencies: Dependencies
 ): Promise<boolean> {
-  const { user, status } = input.detail;
+  const { status } = input.detail;
 
   const recurringPeriodIsOpenStatusCodes = [
     VIVA_STATUS_APPLICATION_PERIOD_OPEN,
@@ -46,21 +40,20 @@ export async function personApplicationStatus(
     VIVA_STATUS_WEB_APPLICATION_ACTIVE,
     VIVA_STATUS_WEB_APPLICATION_ALLOWED,
   ];
-  if (validateApplicationStatus(status, recurringPeriodIsOpenStatusCodes)) {
-    await dependencies.recurringOpenEvent({ user });
-  }
-
   const newApplicationIsOpenStatusCodes = [VIVA_STATUS_NEW_APPLICATION_OPEN];
-  if (validateApplicationStatus(status, newApplicationIsOpenStatusCodes)) {
-    await dependencies.newOpenEvent(input.detail);
-  }
+
+  validateApplicationStatus(status, recurringPeriodIsOpenStatusCodes) &&
+    (await dependencies.triggerRecurringOpenEvent(input.detail));
+
+  validateApplicationStatus(status, newApplicationIsOpenStatusCodes) &&
+    (await dependencies.triggerNewOpenEvent(input.detail));
 
   return true;
 }
 
 export const main = log.wrap(event =>
   personApplicationStatus(event, {
-    recurringOpenEvent: putVivaMsEvent.checkOpenPeriodSuccess,
-    newOpenEvent: putVivaMsEvent.checkOpenNewApplicationSuccess,
+    triggerRecurringOpenEvent: putVivaMsEvent.checkOpenPeriodSuccess,
+    triggerNewOpenEvent: putVivaMsEvent.checkOpenNewApplicationSuccess,
   })
 );
