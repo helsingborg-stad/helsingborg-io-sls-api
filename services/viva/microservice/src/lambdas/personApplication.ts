@@ -5,7 +5,7 @@ import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
 import type { CaseUser } from '../types/caseItem';
 import type { VivaMyPagesVivaCase, VivaMyPagesVivaApplication } from '../types/vivaMyPages';
-import type { VivaApplicationsStatusItem } from 'types/vivaApplicationsStatus';
+import type { VivaApplicationsStatusItem } from '../types/vivaApplicationsStatus';
 
 export interface SuccessEvent extends LambdaDetail {
   myPages: VivaMyPagesVivaCase;
