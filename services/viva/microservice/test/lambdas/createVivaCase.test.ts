@@ -32,9 +32,11 @@ const mockUuid = '00000000-0000-0000-0000-000000000000';
 jest.mock('uuid', () => ({ v4: () => mockUuid }));
 
 const user: CaseUser = {
+  uuid: mockUuid,
   personalNumber: '199402011234',
   firstName: 'FirstName',
   lastName: 'LastName',
+  civilStatus: null,
   mobilePhone: '0701234567',
   email: 'someMail@example.com',
   address: {
@@ -42,6 +44,7 @@ const user: CaseUser = {
     street: 'MANGIGATAN 2',
     postalCode: '98133',
   },
+  createdAt: MOCK_DATE.unix(),
 };
 
 const partner: CasePerson = {
