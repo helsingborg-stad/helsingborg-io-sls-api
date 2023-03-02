@@ -75,7 +75,7 @@ function makeDependencies(dependencies: Partial<Dependencies> = {}): Dependencie
   return {
     getParsedNavetPersonPost: getNavetPersonPost,
     requestNavetUserXml: () => Promise.resolve(makeNavetXmlResponse()),
-    putSuccessEvent: () => Promise.resolve(),
+    triggerEvent: () => Promise.resolve(),
     ...dependencies,
   };
 }
@@ -94,13 +94,13 @@ it('successfully fetches a navet user', async () => {
   const result = await pollUser(
     makeInput(),
     makeDependencies({
-      putSuccessEvent: putSuccessEventMock,
+      triggerEvent: putSuccessEventMock,
     })
   );
 
   expect(result).toBe(true);
   expect(putSuccessEventMock).toHaveBeenCalledWith(
-    mockUser,
+    { user: mockUser },
     'navetMsPollUserSuccess',
     'navetMs.pollUser'
   );
@@ -116,7 +116,7 @@ it('successfully fetches a navet user without adress', async () => {
   const result = await pollUser(
     makeInput(),
     makeDependencies({
-      putSuccessEvent: putSuccessEventMock,
+      triggerEvent: putSuccessEventMock,
       requestNavetUserXml: () => Promise.resolve(navetUserXmlWithoutAdress),
     })
   );
@@ -124,11 +124,13 @@ it('successfully fetches a navet user without adress', async () => {
   expect(result).toBe(true);
   expect(putSuccessEventMock).toHaveBeenCalledWith(
     {
-      ...mockUser,
-      address: {
-        city: null,
-        postalCode: null,
-        street: null,
+      user: {
+        ...mockUser,
+        address: {
+          city: null,
+          postalCode: null,
+          street: null,
+        },
       },
     },
     'navetMsPollUserSuccess',
