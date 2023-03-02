@@ -1,11 +1,14 @@
-import { checkApplicationStatus, LambdaRequest } from '../../src/lambdas/applicationStatus';
-import { VivaApplicationsStatusItem } from '../../src/types/vivaApplicationsStatus';
+import { checkApplicationStatus } from '../../src/lambdas/applicationStatus';
+import type { LambdaRequest } from '../../src/lambdas/applicationStatus';
+import type { VivaApplicationsStatusItem } from '../../src/types/vivaApplicationsStatus';
 
-const MOCK_INPUT: LambdaRequest = {
+const MOCK_INPUT = {
   detail: {
-    personalNumber: '202001019999',
+    user: {
+      personalNumber: '202001019999',
+    },
   },
-};
+} as LambdaRequest;
 
 const MOCK_STATUSES: VivaApplicationsStatusItem[] = [
   {
@@ -19,22 +22,24 @@ function getStatus(): Promise<VivaApplicationsStatusItem[]> {
 }
 
 describe('applicationStatus', () => {
+  const mockEvent = jest.fn();
   it('returns true on success', async () => {
     const result = await checkApplicationStatus(MOCK_INPUT, {
       getStatus,
-      putSuccessEvent: jest.fn(),
+      triggerEvent: mockEvent,
     });
     expect(result).toBe(true);
   });
 
   it('puts out the status list', async () => {
-    const successEvent = jest.fn();
-
     await checkApplicationStatus(MOCK_INPUT, {
       getStatus,
-      putSuccessEvent: successEvent,
+      triggerEvent: mockEvent,
     });
 
-    expect(successEvent).toHaveBeenCalledWith({ user: MOCK_INPUT.detail, status: MOCK_STATUSES });
+    expect(mockEvent).toHaveBeenCalledWith({
+      user: MOCK_INPUT.detail.user,
+      status: MOCK_STATUSES,
+    });
   });
 });
