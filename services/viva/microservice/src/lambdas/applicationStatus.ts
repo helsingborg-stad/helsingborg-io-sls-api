@@ -15,7 +15,7 @@ export interface LambdaRequest {
 
 interface Dependencies {
   getStatus: (personalNumber: string) => Promise<VivaApplicationsStatusItem[]>;
-  putSuccessEvent: (event: SuccessEvent) => Promise<void>;
+  triggerEvent: (params: SuccessEvent) => Promise<void>;
 }
 
 export async function checkApplicationStatus(
@@ -26,7 +26,7 @@ export async function checkApplicationStatus(
 
   const status = await dependencies.getStatus(user.personalNumber);
 
-  await dependencies.putSuccessEvent({ user, status });
+  await dependencies.triggerEvent({ user, status });
 
   return true;
 }
@@ -34,6 +34,6 @@ export async function checkApplicationStatus(
 export const main = log.wrap(event =>
   checkApplicationStatus(event, {
     getStatus: vivaAdapter.applications.status,
-    putSuccessEvent: putVivaMsEvent.applicationStatusSuccess,
+    triggerEvent: putVivaMsEvent.applicationStatusSuccess,
   })
 );
