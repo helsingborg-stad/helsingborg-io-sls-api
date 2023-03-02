@@ -1,4 +1,5 @@
 import type { ValidTags } from '../helpers/caseTemplate/shared';
+import type { VivaWorkflow } from './vivaWorkflow';
 
 export interface CaseUser {
   readonly personalNumber: string;
@@ -72,7 +73,7 @@ export interface CaseDetails {
   workflowId: string | null;
   readonly vivaCaseId: string | null;
   period: CasePeriod;
-  readonly workflow?: unknown;
+  readonly workflow?: VivaWorkflow;
   completions: CaseCompletions | null;
   administrators?: CaseAdministrator[];
 }
