@@ -1,20 +1,16 @@
 import log from '../libs/logs';
-
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 import type { VivaApplicationsStatusItem } from '../types/vivaApplicationsStatus';
+import type { CaseUser } from 'types/caseItem';
 
-interface User {
-  personalNumber: string;
+interface SuccessEvent {
+  user: CaseUser;
+  status: VivaApplicationsStatusItem[];
 }
 
 export interface LambdaRequest {
-  detail: User;
-}
-
-interface SuccessEvent {
-  user: User;
-  status: VivaApplicationsStatusItem[];
+  detail: CaseUser;
 }
 
 interface Dependencies {
