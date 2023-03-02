@@ -12,24 +12,24 @@ import type {
   VivaWorkflowDecision,
 } from '../types/vivaWorkflow';
 
-export function decideNewCaseStatus(workflow: VivaWorkflow): string | undefined {
-  const latestDecision = getLatestDecision(workflow.decision);
+export function decideNewCaseStatus(workflow: VivaWorkflow | undefined): string | undefined {
+  const latestDecision = getLatestDecision(workflow?.decision);
   const decisionTypeCode = getDecisionTypeCode(latestDecision);
 
   if (decisionTypeCode) {
-    const hasPayment = makeArray(workflow.payments?.payment).length > 0;
+    const hasPayment = makeArray(workflow?.payments?.payment).length > 0;
     return getCaseStatusType(decisionTypeCode, hasPayment);
   }
 
   return isWorkflowLocked(workflow) ? ACTIVE_PROCESSING : undefined;
 }
 
-export function decideNewState(workflow: VivaWorkflow): string | undefined {
+export function decideNewState(workflow: VivaWorkflow | undefined): string | undefined {
   return isWorkflowLocked(workflow) ? VIVA_APPLICATION_LOCKED : undefined;
 }
 
-function isWorkflowLocked(workflow: VivaWorkflow): boolean {
-  return !!workflow.application.islocked;
+function isWorkflowLocked(workflow: VivaWorkflow | undefined): boolean {
+  return !!workflow?.application.islocked;
 }
 
 function getLatestDecision(
