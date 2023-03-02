@@ -1,7 +1,6 @@
 import { personApplication } from '../../src/lambdas/personApplication';
 
 import type { LambdaRequest, Dependencies } from '../../src/lambdas/personApplication';
-import type { CaseUser } from '../../../types/caseItem';
 import type { VivaMyPagesVivaCase } from '../../../types/vivaMyPages';
 
 const mockPersonalNumber = '199009123412';
@@ -16,9 +15,9 @@ function createInput(): LambdaRequest {
     detail: {
       user: {
         personalNumber: mockPersonalNumber,
-      } as CaseUser,
+      },
     },
-  };
+  } as LambdaRequest;
 }
 
 function createDependencies(dependencies: Partial<Dependencies> = {}): Dependencies {
@@ -32,7 +31,7 @@ function createDependencies(dependencies: Partial<Dependencies> = {}): Dependenc
           end: '2021-01-31',
         },
       }),
-    putSuccessEvent: () => Promise.resolve(undefined),
+    triggerEvent: () => Promise.resolve(undefined),
     ...dependencies,
   };
 }
@@ -45,7 +44,7 @@ it('successfully fetches MyPages info from Viva', async () => {
     createInput(),
     createDependencies({
       getMyPages: mockGetVivaPerson,
-      putSuccessEvent: mockPutSuccessEvent,
+      triggerEvent: mockPutSuccessEvent,
     })
   );
 
