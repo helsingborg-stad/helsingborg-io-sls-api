@@ -14,6 +14,7 @@ interface CaseKeys {
 
 interface LambdaDetails {
   caseKeys: CaseKeys;
+  caseState: string;
 }
 
 export interface LambdaRequest {
