@@ -83,7 +83,7 @@ export async function getCaseList(
   const { personalNumber } = input;
   dependencies.triggerEvent(personalNumber);
 
-  const cases = await dependencies.getCases(input.personalNumber);
+  const cases = await dependencies.getCases(personalNumber);
   const casesWithoutProperties = cases.map(item =>
     objectWithoutProperties(item, ['PK', 'SK', 'GSI1'])
   );
