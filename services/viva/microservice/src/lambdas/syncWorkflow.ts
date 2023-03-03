@@ -144,7 +144,7 @@ export async function syncWorkflow(
         SK: caseItem.SK,
       };
       await dependencies.updateCase(caseKeys, workflow);
-      await dependencies.syncWorkflowSuccess({ caseKeys, workflow });
+      await dependencies.syncWorkflowSuccess({ caseKeys, caseState: caseItem.state });
     })
   );
 
