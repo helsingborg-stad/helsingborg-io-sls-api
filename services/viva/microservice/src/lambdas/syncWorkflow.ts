@@ -124,12 +124,16 @@ export async function syncWorkflow(
     CLOSED_PARTIALLY_APPROVED_VIVA,
   ]);
 
-  const isEmptyCaseList = caseList.length === 0;
+  let isEmptyCaseList = caseList.length === 0;
   if (isEmptyCaseList) {
     return true;
   }
 
   const caseListWithWorkflowId = caseList.filter(isCaseWorkflowIdValid);
+  isEmptyCaseList = caseListWithWorkflowId.length === 0;
+  if (isEmptyCaseList) {
+    return true;
+  }
 
   await Promise.allSettled(
     caseListWithWorkflowId.map(async caseItem => {
