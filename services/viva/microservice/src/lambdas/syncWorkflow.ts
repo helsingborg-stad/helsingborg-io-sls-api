@@ -6,7 +6,7 @@ import { CLOSED_REJECTED_VIVA, CLOSED_PARTIALLY_APPROVED_VIVA } from '../libs/co
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 
-import type { CaseItem } from '../types/caseItem';
+import type { CaseUser, CaseItem } from '../types/caseItem';
 import type { VivaWorkflow } from '../types/vivaWorkflow';
 
 interface GetWorkflowParams {
@@ -14,26 +14,22 @@ interface GetWorkflowParams {
   workflowId: string;
 }
 
-interface User {
-  personalNumber: string;
-}
-
 interface CaseKeys {
   PK: string;
   SK: string;
 }
 
+interface SuccessEvent {
+  caseKeys: CaseKeys;
+  caseState: string;
+}
+
 interface LambdaDetail {
-  user: User;
+  user: CaseUser;
 }
 
 export interface LambdaRequest {
   detail: LambdaDetail;
-}
-
-interface SuccessEvent {
-  caseKeys: CaseKeys;
-  caseState: string;
 }
 
 export interface Dependencies {
