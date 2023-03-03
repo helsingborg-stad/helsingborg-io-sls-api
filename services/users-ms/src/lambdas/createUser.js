@@ -15,7 +15,7 @@ export async function main(event) {
 
   if (checkFirstTimeLoginUserDetailKeys) {
     await addUserToDynamoDb(user);
-    await putUserEvent.createSuccess({ user });
+    await putUserEvent.createSuccess(event.detail);
     log.writeInfo('User successfully added to the users table');
   }
 

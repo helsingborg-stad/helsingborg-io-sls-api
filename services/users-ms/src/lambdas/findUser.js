@@ -8,13 +8,13 @@ export async function main(event) {
   const { user } = event.detail;
 
   const storedUser = await getUser(user.personalNumber);
-  if (storedUser == undefined) {
+  if (storedUser === undefined) {
     log.writeInfo('User not found in the users table', storedUser);
-    await putUserEvent.notFound(user);
+    await putUserEvent.notFound(event.detail);
     return true;
   }
 
-  await putUserEvent.exists({ user });
+  await putUserEvent.exists(event.detail);
   return true;
 }
 
