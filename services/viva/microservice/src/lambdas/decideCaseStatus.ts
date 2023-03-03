@@ -6,6 +6,8 @@ import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import { decideNewCaseStatus, decideNewState } from '../helpers/caseDecision';
 import { cases } from '../helpers/query';
 import type { CaseItem, CaseStatus } from '../types/caseItem';
+import type { VadaWorkflowCompletions } from 'types/vadaCompletions';
+import type { VivaApplicationsStatusItem } from 'types/vivaApplicationsStatus';
 
 type SuccessEvent = LambdaDetail;
 
@@ -15,8 +17,11 @@ interface CaseKeys {
 }
 
 interface LambdaDetail {
+  vivaApplicantStatusCodeList: VivaApplicationsStatusItem[];
+  workflowCompletions: VadaWorkflowCompletions;
   caseKeys: CaseKeys;
   caseState: string;
+  caseStatusType: string;
 }
 
 export interface LambdaRequest {
@@ -56,7 +61,7 @@ export async function decideCaseStatus(
   input: LambdaRequest,
   dependencies: Dependencies
 ): Promise<boolean> {
-  const { caseKeys, caseState } = input.detail;
+  const { caseKeys } = input.detail;
 
   const caseItem = await dependencies.getCase(caseKeys);
   const newStatusType = decideNewCaseStatus(caseItem.details?.workflow);
@@ -64,14 +69,13 @@ export async function decideCaseStatus(
 
   const isStatusStateUndefined = !(newStatusType && newState);
   if (isStatusStateUndefined) {
-    await dependencies.triggerEvent({ caseKeys, caseState });
+    await dependencies.triggerEvent(input.detail);
     return true;
   }
 
   const newStatus = getStatusByType(newStatusType);
-
   await dependencies.updateCase(caseKeys, newStatus, newState);
-  await dependencies.triggerEvent({ caseKeys, caseState: newState });
+  await dependencies.triggerEvent({ ...input.detail, caseState: newState });
 
   return true;
 }
