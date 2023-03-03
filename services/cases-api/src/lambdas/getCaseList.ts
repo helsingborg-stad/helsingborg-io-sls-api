@@ -25,8 +25,13 @@ export interface Dependencies {
   triggerEvent: (personalNumber: string) => void;
 }
 
-function putSuccessEvent(personalNumber: string): void {
-  putEvent({ personalNumber }, 'casesApiInvokeSuccess', 'casesApi.getCaseList');
+function triggerEvent(personalNumber: string): void {
+  const params: SuccessEvent = {
+    user: {
+      personalNumber,
+    },
+  };
+  putEvent(params, 'casesApiInvokeSuccess', 'casesApi.getCaseList');
 }
 
 function getUserCoApplicantCaseList(personalNumber: string): Promise<{ Items: CaseItem[] }> {
@@ -75,7 +80,8 @@ export async function getCaseList(
   input: Input,
   dependencies: Dependencies
 ): Promise<FunctionResponse> {
-  dependencies.putSuccessEvent(input.personalNumber);
+  const { personalNumber } = input;
+  dependencies.triggerEvent(personalNumber);
 
   const cases = await dependencies.getCases(input.personalNumber);
   const casesWithoutProperties = cases.map(item =>
@@ -90,6 +96,6 @@ export async function getCaseList(
 }
 
 export const main = wrappers.restJSON.wrap(getCaseList, {
-  putSuccessEvent,
+  triggerEvent,
   getCases: getUserCaseList,
 });
