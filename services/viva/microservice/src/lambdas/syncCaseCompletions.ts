@@ -58,9 +58,10 @@ function updateCaseCompletions(
       PK: keys.PK,
       SK: keys.SK,
     },
-    UpdateExpression: 'SET details.completions = :workflowCompletions',
+    UpdateExpression: 'SET details.completions = :workflowCompletions, updatedAt = :newUpdatedAt',
     ExpressionAttributeValues: {
       ':workflowCompletions': newCompletions,
+      ':newUpdatedAt': Date.now(),
     },
     ReturnValues: 'NONE',
   };
