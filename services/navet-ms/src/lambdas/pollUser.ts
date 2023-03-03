@@ -19,7 +19,7 @@ export interface Dependencies {
   triggerEvent: (params: SuccessEvent, detailType: string, source: string) => Promise<void>;
 }
 
-function createEventDetail(user: NavetUser): CaseUser {
+function createCaseUser(user: NavetUser): CaseUser {
   return {
     personalNumber: user.PersonId.PersonNr,
     firstName: user.Namn.Fornamn,
@@ -33,18 +33,34 @@ function createEventDetail(user: NavetUser): CaseUser {
   };
 }
 
-export async function pollUser(input: Input, dependencies: Dependencies) {
-  const { user } = input.detail;
+export async function pollUser(input: Input, dependencies: Dependencies): Promise<boolean> {
+  // const { user } = input.detail;
 
-  const navetXmlResponse = await dependencies.requestNavetUserXml(user.personalNumber);
-  const navetUser = await dependencies.getParsedNavetPersonPost(navetXmlResponse);
-  const eventDetail = createEventDetail(navetUser);
+  // const navetXmlResponse = await dependencies.requestNavetUserXml(user.personalNumber);
+  // const navetUser = await dependencies.getParsedNavetPersonPost(navetXmlResponse);
+  const navetUser = {
+    PersonId: {
+      PersonNr: '198602102389',
+    },
+    Namn: {
+      Fornamn: 'Petronella',
+      Efternamn: 'Malteskog',
+    },
+    Adresser: {
+      Folkbokforingsadress: {
+        Utdelningsadress2: 'Kungsgatan 1',
+        PostNr: '12345',
+        Postort: 'Stockholm',
+      },
+    },
+    Civilstand: {
+      CivilstandKod: 'OG',
+    },
+  };
 
-  await dependencies.triggerEvent(
-    { user: eventDetail },
-    'navetMsPollUserSuccess',
-    'navetMs.pollUser'
-  );
+  const caseUser = createCaseUser(navetUser);
+
+  await dependencies.triggerEvent({ user: caseUser }, 'navetMsPollUserSuccess', 'navetMs.pollUser');
 
   return true;
 }

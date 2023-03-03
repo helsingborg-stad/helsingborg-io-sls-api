@@ -71,6 +71,7 @@ async function getCasesByStatusType(
 
   const queryParams = {
     TableName: config.cases.tableName,
+    ProjectionExpression: 'PK, SK, details',
     KeyConditionExpression: 'PK = :pk',
     FilterExpression: `(${filterExpression}) and provider = :provider`,
     ExpressionAttributeNames: {
