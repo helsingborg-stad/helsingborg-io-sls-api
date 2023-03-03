@@ -35,7 +35,7 @@ export interface DynamoDbPutParams {
 }
 
 interface LambdaDetails {
-  clientUser: CaseUser;
+  user: CaseUser;
   myPages: VivaMyPagesVivaCase;
   application: VivaMyPagesVivaApplication;
 }
@@ -94,7 +94,7 @@ export async function createVivaCase(
   input: LambdaRequest,
   dependencies: Dependencies
 ): Promise<boolean> {
-  const { clientUser: user, myPages, application } = input.detail;
+  const { user, myPages, application } = input.detail;
 
   const caseList = await dependencies.getCaseListByPeriod(user.personalNumber, application);
   if (caseList.Count > 0) {
@@ -103,7 +103,6 @@ export async function createVivaCase(
 
   const periodConfig = await dependencies.getPeriodConfig();
   const { isPeriodOpen } = getCurrentPeriodInfo(periodConfig);
-
   if (!isPeriodOpen) {
     return true;
   }
