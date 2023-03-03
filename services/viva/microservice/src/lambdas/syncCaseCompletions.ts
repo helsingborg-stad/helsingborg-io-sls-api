@@ -83,11 +83,6 @@ export async function syncCaseCompletions(input: LambdaRequest, dependencies: De
   }
 
   const latestWorkflowId = await dependencies.getLatestWorkflowId(personalNumber);
-  const workflowCompletions = await dependencies.getWorkflowCompletions({
-    personalNumber,
-    workflowId: latestWorkflowId,
-  });
-
   const userCase = await dependencies.getCaseOnWorkflowId(personalNumber, latestWorkflowId);
   if (!userCase) {
     return true;
@@ -97,6 +92,10 @@ export async function syncCaseCompletions(input: LambdaRequest, dependencies: De
     PK: userCase.PK,
     SK: userCase.SK,
   };
+  const workflowCompletions = await dependencies.getWorkflowCompletions({
+    personalNumber,
+    workflowId: latestWorkflowId,
+  });
   await dependencies.updateCase(caseKeys, workflowCompletions);
 
   await dependencies.triggerEvent({
