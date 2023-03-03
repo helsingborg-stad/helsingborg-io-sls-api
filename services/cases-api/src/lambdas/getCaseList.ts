@@ -6,19 +6,23 @@ import config from '../libs/config';
 
 import type { CaseItem } from '../types/case';
 
+interface SuccessEvent {
+  user: Input;
+}
+
 export type CaseWithOmittedProperties = Omit<CaseItem, 'PK' | 'SK' | 'GSI1'>;
 
 export interface FunctionResponse {
   attributes: { cases: CaseWithOmittedProperties[] };
 }
 
-export interface Dependencies {
-  putSuccessEvent: (personalNumber: string) => void;
-  getCases: (personalNumber: string) => Promise<CaseItem[]>;
+interface Input {
+  personalNumber: string;
 }
 
-interface FunctionInput {
-  personalNumber: string;
+export interface Dependencies {
+  getCases: (personalNumber: string) => Promise<CaseItem[]>;
+  triggerEvent: (personalNumber: string) => void;
 }
 
 function putSuccessEvent(personalNumber: string): void {
@@ -68,7 +72,7 @@ async function getUserCaseList(personalNumber: string): Promise<CaseItem[]> {
 }
 
 export async function getCaseList(
-  input: FunctionInput,
+  input: Input,
   dependencies: Dependencies
 ): Promise<FunctionResponse> {
   dependencies.putSuccessEvent(input.personalNumber);
