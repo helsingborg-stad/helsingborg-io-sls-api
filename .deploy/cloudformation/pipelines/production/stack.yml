@@ -56,25 +56,25 @@ Resources:
         Location: !Sub '${S3BucketArtifact}/cache'
         Type: S3
 
-  CodeBuildProjectTest:
-    Type: AWS::CodeBuild::Project
-    Properties:
-      Name: !Sub ${AWS::StackName}-CodeBuildProjectTest
-      Description: !Sub ${AWS::StackName}-CodeBuildProjectTest
-      EncryptionKey: !GetAtt KMSKey.Arn
-      ServiceRole: !GetAtt IAMRoleBuildProject.Arn
-      Artifacts:
-        Type: CODEPIPELINE
-      Environment:
-        Type: LINUX_CONTAINER
-        ComputeType: BUILD_GENERAL1_SMALL
-        Image: aws/codebuild/standard:5.0
-      Source:
-        Type: CODEPIPELINE
-        BuildSpec: .deploy/cloudformation/pipelines/production/buildspec-test.yml
-      Cache:
-        Location: !Sub '${S3BucketArtifact}/cache'
-        Type: S3
+  # CodeBuildProjectTest:
+  #   Type: AWS::CodeBuild::Project
+  #   Properties:
+  #     Name: !Sub ${AWS::StackName}-CodeBuildProjectTest
+  #     Description: !Sub ${AWS::StackName}-CodeBuildProjectTest
+  #     EncryptionKey: !GetAtt KMSKey.Arn
+  #     ServiceRole: !GetAtt IAMRoleBuildProject.Arn
+  #     Artifacts:
+  #       Type: CODEPIPELINE
+  #     Environment:
+  #       Type: LINUX_CONTAINER
+  #       ComputeType: BUILD_GENERAL1_SMALL
+  #       Image: aws/codebuild/standard:6.0
+  #     Source:
+  #       Type: CODEPIPELINE
+  #       BuildSpec: .deploy/cloudformation/pipelines/production/buildspec-test.yml
+  #     Cache:
+  #       Location: !Sub '${S3BucketArtifact}/cache'
+  #       Type: S3
 
   ##
   # CodePipeline
@@ -136,24 +136,24 @@ Resources:
               InputArtifacts:
                 - Name: SourceOutput
               RunOrder: 1
-            - Name: TestStage
-              ActionTypeId:
-                Category: Build
-                Owner: AWS
-                Version: '1'
-                Provider: CodeBuild
-              Configuration:
-                ProjectName: !Sub ${AWS::StackName}-CodeBuildProjectTest
-                EnvironmentVariables: !Sub |
-                  [
-                    {
-                      "name": "NPM_TOKEN",
-                      "value": "${GitHubNPMToken}"
-                    }
-                  ]
-              InputArtifacts:
-                - Name: SourceOutput
-              RunOrder: 2
+            # - Name: TestStage
+            #   ActionTypeId:
+            #     Category: Build
+            #     Owner: AWS
+            #     Version: '1'
+            #     Provider: CodeBuild
+            #   Configuration:
+            #     ProjectName: !Sub ${AWS::StackName}-CodeBuildProjectTest
+            #     EnvironmentVariables: !Sub |
+            #       [
+            #         {
+            #           "name": "NPM_TOKEN",
+            #           "value": "${GitHubNPMToken}"
+            #         }
+            #       ]
+            #   InputArtifacts:
+            #     - Name: SourceOutput
+            #   RunOrder: 2
         - Name: Production
           Actions:
             # -
@@ -311,7 +311,7 @@ Resources:
               - codebuild:BatchGetBuilds
             Resource:
               - !GetAtt CodeBuildProject.Arn
-              - !GetAtt CodeBuildProjectTest.Arn
+              # - !GetAtt CodeBuildProjectTest.Arn
           - Sid: general
             Effect: Allow
             Action:
