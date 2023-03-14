@@ -41,6 +41,7 @@ function createCase(partialCase: Partial<CaseItem> = {}): CaseItem {
     } as unknown as Record<string, CaseForm>,
     provider: 'VIVA',
     persons: [],
+    contacts: [],
     details: {
       vivaCaseId: '123',
       period: {

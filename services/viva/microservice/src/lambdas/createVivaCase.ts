@@ -1,17 +1,8 @@
-import uuid from 'uuid';
 import config from '../libs/config';
 import params from '../libs/params';
 import log from '../libs/logs';
 import { putItem } from '../libs/queries';
-import { getStatusByType } from '../libs/caseStatuses';
 import { populateFormWithPreviousCaseAnswers } from '../libs/formAnswers';
-import { getFutureTimestamp, millisecondsToSeconds } from '../libs/timestampHelper';
-import {
-  CASE_PROVIDER_VIVA,
-  TWELVE_HOURS,
-  VIVA_CASE_CREATED,
-  NOT_STARTED_VIVA,
-} from '../libs/constants';
 
 import createCaseHelper from '../helpers/createCase';
 import populateFormWithVivaChildren from '../helpers/populateForm';
@@ -20,29 +11,12 @@ import { getCaseListByPeriod, getLastUpdatedCase, getFormTemplates } from '../he
 import { CasePersonRole } from '../types/caseItem';
 import { getConfigFromS3 } from '../helpers/vivaPeriod';
 import { getCurrentPeriodInfo } from '../helpers/vivaPeriod';
+import EkbCaseFactory from '../helpers/case/EkbCaseFactory';
 
-import type {
-  CaseUser,
-  CaseItem,
-  CaseForm,
-  CasePeriod,
-  CaseStatus,
-  CasePerson,
-} from '../types/caseItem';
-import type {
-  VivaMyPagesVivaCase,
-  VivaMyPagesVivaApplication,
-  VivaMyPagesApplicationPeriod,
-} from '../types/vivaMyPages';
+import type { CaseUser, CaseItem, CaseForm, CasePerson } from '../types/caseItem';
+import type { VivaMyPagesVivaCase, VivaMyPagesVivaApplication } from '../types/vivaMyPages';
 import type { PeriodConfig } from '../helpers/vivaPeriod';
 import type { VivaParametersResponse } from '../types/ssmParameters';
-
-interface InitialRecurringCaseParams {
-  workflowId: string | null;
-  currentFormId: string;
-  vivaMyPages: VivaMyPagesVivaCase;
-  vivaPeriod: VivaMyPagesApplicationPeriod;
-}
 
 interface DynamoDbQueryOutput {
   Items: CaseItem[];
@@ -76,54 +50,6 @@ export interface Dependencies {
   getLastUpdatedCase: (pk: string) => Promise<CaseItem | undefined>;
   getPeriodConfig(): Promise<PeriodConfig>;
   getRecurringFormId: () => Promise<string>;
-}
-
-function createVivaCaseId({ idenclair }: VivaMyPagesVivaCase): string {
-  const [, vivaCaseId] = idenclair.split('/');
-  return vivaCaseId;
-}
-
-function generateInitialRecurringCase(params: InitialRecurringCaseParams): CaseItem {
-  const { workflowId, currentFormId, vivaMyPages, vivaPeriod } = params;
-
-  const period: CasePeriod = createCaseHelper.getPeriodInMilliseconds(vivaPeriod);
-  const applicantPersonalNumber: string = createCaseHelper.stripNonNumericalCharacters(
-    vivaMyPages.client.pnumber
-  );
-
-  const id = uuid.v4();
-  const PK = `USER#${applicantPersonalNumber}`;
-  const SK = `CASE#${id}`;
-  const GSI2PK = createCaseHelper.createGSI2PK();
-  const createdAt = Date.now();
-  const status: CaseStatus = getStatusByType(NOT_STARTED_VIVA);
-  const persons: CasePerson[] = createCaseHelper.getCasePersonList(vivaMyPages);
-  const expirationTime = millisecondsToSeconds(getFutureTimestamp(TWELVE_HOURS));
-  const vivaCaseId = createVivaCaseId(vivaMyPages);
-
-  const initialRecurringCase: CaseItem = {
-    id,
-    PK,
-    SK,
-    GSI2PK,
-    state: VIVA_CASE_CREATED,
-    expirationTime,
-    createdAt,
-    updatedAt: 0,
-    status,
-    forms: {},
-    provider: CASE_PROVIDER_VIVA,
-    persons,
-    details: {
-      vivaCaseId,
-      workflowId,
-      period,
-      completions: null,
-    },
-    currentFormId,
-  };
-
-  return initialRecurringCase;
 }
 
 async function createInitialForms(): Promise<Record<string, CaseForm>> {
@@ -175,13 +101,14 @@ export async function createVivaCase(
     return true;
   }
 
-  const recurringFormId = await dependencies.getRecurringFormId();
+  const caseFactory = new EkbCaseFactory({
+    getRecurringFormId: dependencies.getRecurringFormId,
+  });
 
-  const newRecurringCase: CaseItem = generateInitialRecurringCase({
-    workflowId: application?.workflowid ?? null,
-    currentFormId: recurringFormId,
+  const newRecurringCase = await caseFactory.createCase({
     vivaMyPages: myPages,
     vivaPeriod: application.period,
+    workflowId: application?.workflowid ?? null,
   });
 
   setCaseCoApplicant(newRecurringCase);
@@ -209,6 +136,8 @@ export async function createVivaCase(
     formTemplates,
     previousForms: latestClosedCase?.forms,
   }) as Record<string, CaseForm>;
+
+  const recurringFormId = await dependencies.getRecurringFormId();
 
   const vivaChildrenList: CasePerson[] = createCaseHelper.getVivaChildren(newRecurringCase.persons);
   if (vivaChildrenList.length > 0) {

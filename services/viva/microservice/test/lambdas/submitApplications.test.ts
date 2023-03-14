@@ -69,6 +69,7 @@ beforeEach(() => {
       },
       provider: 'provider',
       persons: [],
+      contacts: [],
     },
   };
 });

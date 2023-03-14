@@ -34,6 +34,7 @@ const caseToUpdate: CaseItem = {
   currentFormId: '123ABC',
   id: 'caseId',
   persons: [],
+  contacts: [],
   state: 'SOME_STATE',
   expirationTime: 123,
   createdAt: 123,
