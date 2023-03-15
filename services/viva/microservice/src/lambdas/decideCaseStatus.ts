@@ -6,8 +6,8 @@ import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import { decideNewCaseStatus, decideNewState } from '../helpers/caseDecision';
 import { cases } from '../helpers/query';
 import type { CaseItem, CaseStatus } from '../types/caseItem';
-import type { VadaWorkflowCompletions } from 'types/vadaCompletions';
-import type { VivaApplicationsStatusItem } from 'types/vivaApplicationsStatus';
+import type { VadaWorkflowCompletions } from '../types/vadaCompletions';
+import type { VivaApplicationsStatusItem } from '../types/vivaApplicationsStatus';
 
 type SuccessEvent = LambdaDetail;
 
@@ -16,7 +16,7 @@ interface CaseKeys {
   SK: string;
 }
 
-interface LambdaDetail {
+export interface LambdaDetail {
   vivaApplicantStatusCodeList: VivaApplicationsStatusItem[];
   workflowCompletions: VadaWorkflowCompletions;
   caseKeys: CaseKeys;
