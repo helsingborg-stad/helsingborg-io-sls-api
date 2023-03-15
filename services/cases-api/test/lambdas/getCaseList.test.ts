@@ -13,7 +13,7 @@ const defaultPersonalNumber = '1234567890';
 
 function getDependencies(partialDependencies: Partial<Dependencies> = {}): Dependencies {
   return {
-    putSuccessEvent: jest.fn(),
+    triggerEvent: jest.fn(),
     getCases: () => Promise.resolve(defaultCases as CaseItem[]),
     ...partialDependencies,
   };
