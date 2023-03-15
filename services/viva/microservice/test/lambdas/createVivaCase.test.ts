@@ -168,7 +168,7 @@ function getMockPeriodConfig(openDateIso?: string): Promise<PeriodConfig> {
 function createLambdaInput(persons: VivaPersonsPerson | null = null): LambdaRequest {
   return {
     detail: {
-      clientUser: { ...user },
+      user,
       myPages: {
         idenclair: '01-2021-09-30/R37992',
         client: {
