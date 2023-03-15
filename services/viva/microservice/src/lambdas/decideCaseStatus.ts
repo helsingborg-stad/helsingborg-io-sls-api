@@ -75,7 +75,11 @@ export async function decideCaseStatus(
 
   const newStatus = getStatusByType(newStatusType);
   await dependencies.updateCase(caseKeys, newStatus, newState);
-  await dependencies.triggerEvent({ ...input.detail, caseState: newState });
+  await dependencies.triggerEvent({
+    ...input.detail,
+    caseState: newState,
+    caseStatusType: newStatusType,
+  });
 
   return true;
 }
