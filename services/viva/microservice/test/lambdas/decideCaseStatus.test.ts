@@ -1,8 +1,11 @@
 import { getStatusByType } from '../../src/libs/caseStatuses';
-import { ACTIVE_PROCESSING, VIVA_APPLICATION_LOCKED } from '../../src/libs/constants';
+import {
+  ACTIVE_PROCESSING,
+  VIVA_APPLICATION_LOCKED,
+  ACTIVE_SUBMITTED,
+} from '../../src/libs/constants';
 import { decideCaseStatus } from '../../src/lambdas/decideCaseStatus';
-import type { LambdaRequest } from '../../src/lambdas/decideCaseStatus';
-import type { VivaWorkflow } from '../../src/types/vivaWorkflow';
+import type { LambdaRequest, LambdaDetail } from '../../src/lambdas/decideCaseStatus';
 import type { CaseItem } from '../../src/types/caseItem';
 
 const caseKeys = {
@@ -10,23 +13,33 @@ const caseKeys = {
   SK: 'CASE#11111111-2222-3333-4444-555555555555',
 };
 
-const caseState = 'SOME_STATE';
+const caseState = 'VIVA_APPLICATION_LOCKED';
 
-function createLambdaInput(params: Partial<VivaWorkflow> = {}): LambdaRequest {
+function createLambdaInput(params: Partial<LambdaDetail>): LambdaRequest {
   return {
     detail: {
+      vivaApplicantStatusCodeList: [],
+      workflowCompletions: {
+        requested: [],
+        description: null,
+        receivedDate: null,
+        dueDate: null,
+        attachmentUploaded: [],
+        isCompleted: false,
+        isRandomCheck: false,
+        isAttachmentPending: false,
+        isDueDateExpired: false,
+      },
       caseKeys,
       caseState,
-      workflow: {
-        workflowid: 'XYZ123',
-        ...params,
-      },
+      caseStatusType: ACTIVE_SUBMITTED,
+      ...params,
     },
-  } as LambdaRequest;
+  };
 }
 
-function createCase(params: Partial<CaseItem>): Promise<CaseItem> {
-  return Promise.resolve({
+function createCase(params: Partial<CaseItem>): CaseItem {
+  return {
     details: {
       workflow: {
         workflowid: 'XYZ123',
@@ -36,22 +49,17 @@ function createCase(params: Partial<CaseItem>): Promise<CaseItem> {
       },
     },
     ...params,
-  } as CaseItem);
+  } as CaseItem;
 }
 
 describe('decideCaseStatus', () => {
   it('successfully updates a case with new status and state', async () => {
     const updateCaseMock = jest.fn();
     const triggerEventMock = jest.fn();
+    const lambdaInput = createLambdaInput({ caseKeys });
 
-    const lambdaInput = {
-      application: {
-        islocked: '2022-01-01T00:00:00+01:00',
-      },
-    } as VivaWorkflow;
-
-    const result = await decideCaseStatus(createLambdaInput(lambdaInput), {
-      getCase: createCase,
+    const result = await decideCaseStatus(lambdaInput, {
+      getCase: () => Promise.resolve(createCase(caseKeys)),
       updateCase: updateCaseMock,
       triggerEvent: triggerEventMock,
     });
@@ -62,27 +70,26 @@ describe('decideCaseStatus', () => {
       getStatusByType(ACTIVE_PROCESSING),
       VIVA_APPLICATION_LOCKED
     );
-    expect(triggerEventMock).toHaveBeenCalledWith({ caseKeys, caseState: VIVA_APPLICATION_LOCKED });
+    expect(triggerEventMock).toHaveBeenCalledWith({
+      ...lambdaInput.detail,
+      caseStatusType: ACTIVE_PROCESSING,
+      caseState: VIVA_APPLICATION_LOCKED,
+    });
   });
 
   it('does not update case status if new status is undefined', async () => {
     const updateCaseMock = jest.fn();
     const triggerEventMock = jest.fn();
 
-    const lambdaInput = {
-      application: {
-        islocked: null,
-      },
-    } as VivaWorkflow;
-
     const mockCase = {
+      ...caseKeys,
       details: {
         workflow: undefined,
       },
     } as CaseItem;
 
-    const result = await decideCaseStatus(createLambdaInput(lambdaInput), {
-      getCase: () => createCase(mockCase),
+    const result = await decideCaseStatus(createLambdaInput({ caseKeys }), {
+      getCase: () => Promise.resolve(createCase(mockCase)),
       updateCase: updateCaseMock,
       triggerEvent: triggerEventMock,
     });
@@ -97,6 +104,7 @@ describe('decideCaseStatus', () => {
     const triggerEventMock = jest.fn();
 
     const mockCase = {
+      ...caseKeys,
       details: {
         workflow: {
           application: {
@@ -106,8 +114,8 @@ describe('decideCaseStatus', () => {
       },
     } as CaseItem;
 
-    const result = await decideCaseStatus(createLambdaInput(), {
-      getCase: () => createCase(mockCase),
+    const result = await decideCaseStatus(createLambdaInput({}), {
+      getCase: () => Promise.resolve(createCase(mockCase)),
       updateCase: updateCaseMock,
       triggerEvent: triggerEventMock,
     });
