@@ -34,29 +34,10 @@ function createCaseUser(user: NavetUser): CaseUser {
 }
 
 export async function pollUser(input: Input, dependencies: Dependencies): Promise<boolean> {
-  // const { user } = input.detail;
+  const { user } = input.detail;
 
-  // const navetXmlResponse = await dependencies.requestNavetUserXml(user.personalNumber);
-  // const navetUser = await dependencies.getParsedNavetPersonPost(navetXmlResponse);
-  const navetUser = {
-    PersonId: {
-      PersonNr: '198602102389',
-    },
-    Namn: {
-      Fornamn: 'Petronella',
-      Efternamn: 'Malteskog',
-    },
-    Adresser: {
-      Folkbokforingsadress: {
-        Utdelningsadress2: 'Kungsgatan 1',
-        PostNr: '12345',
-        Postort: 'Stockholm',
-      },
-    },
-    Civilstand: {
-      CivilstandKod: 'OG',
-    },
-  };
+  const navetXmlResponse = await dependencies.requestNavetUserXml(user.personalNumber);
+  const navetUser = await dependencies.getParsedNavetPersonPost(navetXmlResponse);
 
   const caseUser = createCaseUser(navetUser);
 
