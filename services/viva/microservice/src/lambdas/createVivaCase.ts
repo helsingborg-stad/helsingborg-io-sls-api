@@ -1,3 +1,4 @@
+import S3 from '../libs/S3';
 import config from '../libs/config';
 import params from '../libs/params';
 import log from '../libs/logs';
@@ -12,11 +13,14 @@ import { CasePersonRole } from '../types/caseItem';
 import { getConfigFromS3 } from '../helpers/vivaPeriod';
 import { getCurrentPeriodInfo } from '../helpers/vivaPeriod';
 import EkbCaseFactory from '../helpers/case/EkbCaseFactory';
+import S3CaseContactsFactory from '../helpers/caseContacts/S3CaseContactsFactory';
 
 import type { CaseUser, CaseItem, CaseForm, CasePerson } from '../types/caseItem';
 import type { VivaMyPagesVivaCase, VivaMyPagesVivaApplication } from '../types/vivaMyPages';
 import type { PeriodConfig } from '../helpers/vivaPeriod';
 import type { VivaParametersResponse } from '../types/ssmParameters';
+import type { ICaseFactory } from '../helpers/case/CaseFactory';
+import type { ICaseContactsFactory } from '../helpers/caseContacts/CaseContactsFactory';
 
 interface DynamoDbQueryOutput {
   Items: CaseItem[];
@@ -50,6 +54,8 @@ export interface Dependencies {
   getLastUpdatedCase: (pk: string) => Promise<CaseItem | undefined>;
   getPeriodConfig(): Promise<PeriodConfig>;
   getRecurringFormId: () => Promise<string>;
+  caseFactory: ICaseFactory<unknown>;
+  contactsFactory: ICaseContactsFactory;
 }
 
 async function createInitialForms(): Promise<Record<string, CaseForm>> {
@@ -101,11 +107,7 @@ export async function createVivaCase(
     return true;
   }
 
-  const caseFactory = new EkbCaseFactory({
-    getRecurringFormId: dependencies.getRecurringFormId,
-  });
-
-  const newRecurringCase = await caseFactory.createCase({
+  const newRecurringCase = await dependencies.caseFactory.createCase({
     vivaMyPages: myPages,
     vivaPeriod: application.period,
     workflowId: application?.workflowid ?? null,
@@ -160,6 +162,17 @@ export async function createVivaCase(
 }
 
 export const main = log.wrap(event => {
+  const contactsFactory = new S3CaseContactsFactory({
+    bucketName: process.env.EKB_CONFIG_BUCKET_NAME ?? '',
+    contactsFileKey: 'contacts.json',
+    getFromS3: (bucket, key) => S3.getFile(bucket, key).then(s3 => s3.Body),
+  });
+
+  const caseFactory = new EkbCaseFactory({
+    getRecurringFormId: getRecurringFormId,
+    getContacts: () => contactsFactory.getContacts(),
+  });
+
   return createVivaCase(event, {
     createCase: putItem,
     getRecurringFormId,
@@ -168,5 +181,8 @@ export const main = log.wrap(event => {
     getFormTemplates,
     createInitialForms,
     getPeriodConfig: getConfigFromS3,
+
+    caseFactory,
+    contactsFactory,
   });
 });

@@ -13,11 +13,12 @@ import {
 import { getFutureTimestamp, millisecondsToSeconds } from '../../libs/timestampHelper';
 import createCaseHelper from '../createCase';
 
-import type { CaseItem } from '../../types/caseItem';
+import type { CaseItem, Contact } from '../../types/caseItem';
 import type { VivaMyPagesApplicationPeriod, VivaMyPagesVivaCase } from '../../types/vivaMyPages';
 
 export interface Dependencies {
   getRecurringFormId(): Promise<string>;
+  getContacts(): Promise<Contact[]>;
 }
 
 export interface CreateCaseParams {
@@ -44,6 +45,7 @@ export default class EkbCaseFactory implements ICaseFactory<CreateCaseParams> {
     const applicantPersonalNumber: string = createCaseHelper.stripNonNumericalCharacters(
       vivaMyPages.client.pnumber
     );
+    const contacts = await this.dependencies.getContacts();
 
     return new CaseBuilder()
       .setId(newId)
@@ -65,7 +67,7 @@ export default class EkbCaseFactory implements ICaseFactory<CreateCaseParams> {
       })
       .setCurrentFormId(formId)
 
-      .setContacts([])
+      .setContacts(contacts)
       .build();
   }
 }
