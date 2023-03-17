@@ -55,7 +55,6 @@ export interface Dependencies {
   getPeriodConfig(): Promise<PeriodConfig>;
   getRecurringFormId: () => Promise<string>;
   caseFactory: ICaseFactory<unknown>;
-  contactsFactory: ICaseContactsFactory;
 }
 
 async function createInitialForms(): Promise<Record<string, CaseForm>> {
@@ -181,8 +180,6 @@ export const main = log.wrap(event => {
     getFormTemplates,
     createInitialForms,
     getPeriodConfig: getConfigFromS3,
-
     caseFactory,
-    contactsFactory,
   });
 });

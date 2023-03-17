@@ -24,6 +24,7 @@ import type {
   CasePerson,
   CaseFormAnswer,
 } from '../../src/types/caseItem';
+import EkbCaseFactory from '../../src/helpers/case/EkbCaseFactory';
 
 const MOCK_DATE = dayjs('2022-01-01T00:00:00Z');
 
@@ -236,9 +237,18 @@ function createMockCase(mockRecurringForm: CaseForm): CaseItem {
   };
 }
 
+const mockCaseFactory = new EkbCaseFactory({
+  async getContacts() {
+    return [];
+  },
+  async getRecurringFormId() {
+    return readParametersResponse.recurringFormId;
+  },
+});
+
 function createMockDependencies(value: Partial<Dependencies>): Dependencies {
   return _.merge(
-    {
+    <Dependencies>{
       createCase: () => Promise.resolve(),
       getRecurringFormId: () => Promise.resolve(readParametersResponse.recurringFormId),
       getLastUpdatedCase: () => Promise.resolve(undefined),
@@ -257,6 +267,7 @@ function createMockDependencies(value: Partial<Dependencies>): Dependencies {
           [readParametersResponse.completionFormId]: defaultFormProperties,
         }),
       getPeriodConfig: getMockPeriodConfig,
+      caseFactory: mockCaseFactory,
     },
     value
   );
@@ -312,20 +323,23 @@ describe('createVivaCase', () => {
     const lambdaInput = createLambdaInput();
     const createCaseMock = jest.fn();
 
-    const result = await createVivaCase(lambdaInput, {
-      createCase: createCaseMock,
-      getRecurringFormId: () => Promise.resolve(readParametersResponse.recurringFormId),
-      getLastUpdatedCase: () => Promise.resolve(undefined),
-      getCaseListByPeriod: () => Promise.resolve({ Items: [], Count: 0, ScannedCount: 1 }),
-      getFormTemplates: () => Promise.resolve({}),
-      createInitialForms: () =>
-        Promise.resolve({
-          [readParametersResponse.recurringFormId]: defaultFormProperties,
-          [readParametersResponse.randomCheckFormId]: defaultFormProperties,
-          [readParametersResponse.completionFormId]: defaultFormProperties,
-        }),
-      getPeriodConfig: getMockPeriodConfig,
-    });
+    const result = await createVivaCase(
+      lambdaInput,
+      createMockDependencies({
+        createCase: createCaseMock,
+        getRecurringFormId: () => Promise.resolve(readParametersResponse.recurringFormId),
+        getLastUpdatedCase: () => Promise.resolve(undefined),
+        getCaseListByPeriod: () => Promise.resolve({ Items: [], Count: 0, ScannedCount: 1 }),
+        getFormTemplates: () => Promise.resolve({}),
+        createInitialForms: () =>
+          Promise.resolve({
+            [readParametersResponse.recurringFormId]: defaultFormProperties,
+            [readParametersResponse.randomCheckFormId]: defaultFormProperties,
+            [readParametersResponse.completionFormId]: defaultFormProperties,
+          }),
+        getPeriodConfig: getMockPeriodConfig,
+      })
+    );
 
     expect(result).toBe(true);
     expect(createCaseMock).toHaveBeenCalledWith(expectedParameters);
@@ -383,26 +397,29 @@ describe('createVivaCase', () => {
     const lambdaInput = createLambdaInput();
     const createCaseMock = jest.fn();
 
-    const result = await createVivaCase(lambdaInput, {
-      createCase: createCaseMock,
-      getRecurringFormId: () => Promise.resolve(readParametersResponse.recurringFormId),
-      getLastUpdatedCase: () => Promise.resolve(latestCaseItem),
-      getCaseListByPeriod: () =>
-        Promise.resolve({
-          Items: [],
-          Count: 0,
-          ScannedCount: 1,
-        }),
-      getFormTemplates: () =>
-        Promise.resolve({ [readParametersResponse.recurringFormId]: formRecurring }),
-      createInitialForms: () =>
-        Promise.resolve({
-          [readParametersResponse.recurringFormId]: defaultFormProperties,
-          [readParametersResponse.randomCheckFormId]: defaultFormProperties,
-          [readParametersResponse.completionFormId]: defaultFormProperties,
-        }),
-      getPeriodConfig: getMockPeriodConfig,
-    });
+    const result = await createVivaCase(
+      lambdaInput,
+      createMockDependencies({
+        createCase: createCaseMock,
+        getRecurringFormId: () => Promise.resolve(readParametersResponse.recurringFormId),
+        getLastUpdatedCase: () => Promise.resolve(latestCaseItem),
+        getCaseListByPeriod: () =>
+          Promise.resolve({
+            Items: [],
+            Count: 0,
+            ScannedCount: 1,
+          }),
+        getFormTemplates: () =>
+          Promise.resolve({ [readParametersResponse.recurringFormId]: formRecurring }),
+        createInitialForms: () =>
+          Promise.resolve({
+            [readParametersResponse.recurringFormId]: defaultFormProperties,
+            [readParametersResponse.randomCheckFormId]: defaultFormProperties,
+            [readParametersResponse.completionFormId]: defaultFormProperties,
+          }),
+        getPeriodConfig: getMockPeriodConfig,
+      })
+    );
 
     expect(result).toBe(true);
     expect(createCaseMock).toHaveBeenCalledWith(expectedParameters);
@@ -549,23 +566,26 @@ describe('createVivaCase', () => {
 
     const createCaseMock = jest.fn();
 
-    const result = await createVivaCase(lambdaInput, {
-      createCase: createCaseMock,
-      getRecurringFormId: () => Promise.resolve(readParametersResponse.recurringFormId),
-      getLastUpdatedCase: () => Promise.resolve(undefined),
-      getCaseListByPeriod: () => Promise.resolve({ Items: [], Count: 0, ScannedCount: 1 }),
-      getFormTemplates: () =>
-        Promise.resolve({
-          [readParametersResponse.recurringFormId]: partnerFormProperties,
-        }),
-      createInitialForms: () =>
-        Promise.resolve({
-          [readParametersResponse.recurringFormId]: partnerFormProperties,
-          [readParametersResponse.randomCheckFormId]: partnerFormProperties,
-          [readParametersResponse.completionFormId]: partnerFormProperties,
-        }),
-      getPeriodConfig: getMockPeriodConfig,
-    });
+    const result = await createVivaCase(
+      lambdaInput,
+      createMockDependencies({
+        createCase: createCaseMock,
+        getRecurringFormId: () => Promise.resolve(readParametersResponse.recurringFormId),
+        getLastUpdatedCase: () => Promise.resolve(undefined),
+        getCaseListByPeriod: () => Promise.resolve({ Items: [], Count: 0, ScannedCount: 1 }),
+        getFormTemplates: () =>
+          Promise.resolve({
+            [readParametersResponse.recurringFormId]: partnerFormProperties,
+          }),
+        createInitialForms: () =>
+          Promise.resolve({
+            [readParametersResponse.recurringFormId]: partnerFormProperties,
+            [readParametersResponse.randomCheckFormId]: partnerFormProperties,
+            [readParametersResponse.completionFormId]: partnerFormProperties,
+          }),
+        getPeriodConfig: getMockPeriodConfig,
+      })
+    );
 
     expect(result).toBe(true);
     expect(createCaseMock).toHaveBeenCalledWith(expectedParameters);
@@ -575,15 +595,18 @@ describe('createVivaCase', () => {
     const lambdaInput = createLambdaInput();
     const createCaseMock = jest.fn();
 
-    const result = await createVivaCase(lambdaInput, {
-      createCase: createCaseMock,
-      getRecurringFormId: () => Promise.resolve(readParametersResponse.recurringFormId),
-      getLastUpdatedCase: () => Promise.resolve(undefined),
-      getCaseListByPeriod: () => Promise.resolve({ Items: [], Count: 1, ScannedCount: 1 }),
-      getFormTemplates: () => Promise.resolve({}),
-      createInitialForms: () => Promise.resolve({}),
-      getPeriodConfig: getMockPeriodConfig,
-    });
+    const result = await createVivaCase(
+      lambdaInput,
+      createMockDependencies({
+        createCase: createCaseMock,
+        getRecurringFormId: () => Promise.resolve(readParametersResponse.recurringFormId),
+        getLastUpdatedCase: () => Promise.resolve(undefined),
+        getCaseListByPeriod: () => Promise.resolve({ Items: [], Count: 1, ScannedCount: 1 }),
+        getFormTemplates: () => Promise.resolve({}),
+        createInitialForms: () => Promise.resolve({}),
+        getPeriodConfig: getMockPeriodConfig,
+      })
+    );
 
     expect(result).toBe(true);
     expect(createCaseMock).toHaveBeenCalledTimes(0);
@@ -593,20 +616,23 @@ describe('createVivaCase', () => {
     const lambdaInput = createLambdaInput();
     const createCaseMock = jest.fn();
 
-    const result = await createVivaCase(lambdaInput, {
-      createCase: createCaseMock,
-      getRecurringFormId: () => Promise.resolve(readParametersResponse.recurringFormId),
-      getLastUpdatedCase: () => Promise.resolve(undefined),
-      getCaseListByPeriod: () => Promise.resolve({ Items: [], Count: 0, ScannedCount: 1 }),
-      getFormTemplates: () => Promise.resolve({}),
-      createInitialForms: () =>
-        Promise.resolve({
-          [readParametersResponse.recurringFormId]: defaultFormProperties,
-          [readParametersResponse.randomCheckFormId]: defaultFormProperties,
-          [readParametersResponse.completionFormId]: defaultFormProperties,
-        }),
-      getPeriodConfig: () => getMockPeriodConfig('2022-01-01T00:01:00Z'),
-    });
+    const result = await createVivaCase(
+      lambdaInput,
+      createMockDependencies({
+        createCase: createCaseMock,
+        getRecurringFormId: () => Promise.resolve(readParametersResponse.recurringFormId),
+        getLastUpdatedCase: () => Promise.resolve(undefined),
+        getCaseListByPeriod: () => Promise.resolve({ Items: [], Count: 0, ScannedCount: 1 }),
+        getFormTemplates: () => Promise.resolve({}),
+        createInitialForms: () =>
+          Promise.resolve({
+            [readParametersResponse.recurringFormId]: defaultFormProperties,
+            [readParametersResponse.randomCheckFormId]: defaultFormProperties,
+            [readParametersResponse.completionFormId]: defaultFormProperties,
+          }),
+        getPeriodConfig: () => getMockPeriodConfig('2022-01-01T00:01:00Z'),
+      })
+    );
 
     expect(createCaseMock).not.toHaveBeenCalled();
     expect(result).toBe(true);
