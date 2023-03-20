@@ -20,7 +20,6 @@ import type { VivaMyPagesVivaCase, VivaMyPagesVivaApplication } from '../types/v
 import type { PeriodConfig } from '../helpers/vivaPeriod';
 import type { VivaParametersResponse } from '../types/ssmParameters';
 import type { ICaseFactory } from '../helpers/case/CaseFactory';
-import type { ICaseContactsFactory } from '../helpers/caseContacts/CaseContactsFactory';
 
 interface DynamoDbQueryOutput {
   Items: CaseItem[];
