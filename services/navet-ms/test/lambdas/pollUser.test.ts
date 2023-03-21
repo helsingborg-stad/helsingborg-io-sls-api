@@ -1,17 +1,6 @@
 import { pollUser } from '../../src/lambdas/pollUser';
-import { getNavetPersonPost } from '../../src/helpers/navet';
 import type { Input, Dependencies } from '../../src/lambdas/pollUser';
 import type { CaseUser } from '../../src/helpers/types';
-
-interface NavetParamsAddress {
-  street: string | null;
-  postalCode: string | null;
-  city: string | null;
-}
-
-interface NavetParams {
-  address: NavetParamsAddress | null;
-}
 
 const firstName = 'Petronella';
 const lastName = 'Malteskog';
@@ -32,61 +21,11 @@ const mockUser: CaseUser = {
   },
 };
 
-function createNavetXmlResponse(params: NavetParams): string {
-  const { address } = params;
-  return `
-  <?xml version='1.0' encoding='UTF-8'?>
-  <S:Envelope xmlns:S="http://schemas.xmlsoap.org/soap/envelope/">
-      <S:Body>
-          <ns0:PersonpostXMLResponse xmlns:ns1="http://www.skatteverket.se/folkbokforing/na/personpostXML/v2" xmlns:ns0="http://xmls.skatteverket.se/se/skatteverket/folkbokforing/na/epersondata/V1">
-              <ns0:Folkbokforingsposter>
-                  <Folkbokforingspost>
-                      <Personpost>
-                          <PersonId>
-                              <PersonNr>${personalNumber}</PersonNr>
-                          </PersonId>
-                          <Fodelsedatum>${personalNumber.slice(0, -4)}</Fodelsedatum>
-                          <Namn>
-                              <Fornamn>${firstName}</Fornamn>
-                              <Efternamn>${lastName}</Efternamn>
-                          </Namn>
-                          ${
-                            address &&
-                            `
-                            <Adresser>
-                                <Folkbokforingsadress>
-                                    <Utdelningsadress2>${address.street}</Utdelningsadress2>
-                                    <PostNr>${address.postalCode}</PostNr>
-                                    <Postort>${address.city}</Postort>
-                                </Folkbokforingsadress>
-                            </Adresser>
-                            `
-                          }
-                          <Civilstand>
-                              <CivilstandKod>OG</CivilstandKod>
-                          </Civilstand>
-                      </Personpost>
-                  </Folkbokforingspost>
-              </ns0:Folkbokforingsposter>
-          </ns0:PersonpostXMLResponse>
-      </S:Body>
-  </S:Envelope>
-  `;
-}
-
 function createDependencies(dependencies: Partial<Dependencies> = {}): Dependencies {
   return {
-    getParsedNavetPersonPost: getNavetPersonPost,
-    requestNavetUserXml: () =>
-      Promise.resolve(
-        createNavetXmlResponse({
-          address: {
-            city,
-            postalCode,
-            street,
-          },
-        })
-      ),
+    provider: {
+      getUserInfo: () => Promise.resolve(mockUser),
+    },
     triggerEvent: () => Promise.resolve(),
     ...dependencies,
   };
@@ -95,7 +34,9 @@ function createDependencies(dependencies: Partial<Dependencies> = {}): Dependenc
 function createInput(params: Partial<Input> = {}): Input {
   return {
     detail: {
-      user: mockUser,
+      user: {
+        personalNumber,
+      },
     },
     ...params,
   };
@@ -113,7 +54,9 @@ it('successfully fetches a navet user', async () => {
 
   expect(result).toBe(true);
   expect(eventMock).toHaveBeenCalledWith(
-    { user: mockUser },
+    {
+      user: mockUser,
+    },
     'navetMsPollUserSuccess',
     'navetMs.pollUser'
   );
@@ -125,12 +68,13 @@ it('successfully fetches a navet user without address', async () => {
   const result = await pollUser(
     createInput(),
     createDependencies({
-      requestNavetUserXml: () =>
-        Promise.resolve(
-          createNavetXmlResponse({
+      provider: {
+        getUserInfo: () =>
+          Promise.resolve({
+            ...mockUser,
             address: null,
-          })
-        ),
+          }),
+      },
       triggerEvent: eventMock,
     })
   );
@@ -140,11 +84,7 @@ it('successfully fetches a navet user without address', async () => {
     {
       user: {
         ...mockUser,
-        address: {
-          city: null,
-          postalCode: null,
-          street: null,
-        },
+        address: null,
       },
     },
     'navetMsPollUserSuccess',
