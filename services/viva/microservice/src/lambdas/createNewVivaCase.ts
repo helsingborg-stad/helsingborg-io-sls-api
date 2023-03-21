@@ -180,6 +180,7 @@ export async function createNewVivaCase(
     forms: prePopulatedForms,
     provider: CASE_PROVIDER_VIVA,
     persons: initialPersonList,
+    contacts: [],
     details: {
       vivaCaseId: null,
       workflowId: null,

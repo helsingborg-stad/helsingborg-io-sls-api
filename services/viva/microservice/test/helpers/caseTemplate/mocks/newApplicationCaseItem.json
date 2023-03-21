@@ -1203,6 +1203,12 @@
       "role": "coApplicant"
     }
   ],
+  "contacts": [
+    {
+      "name": "Kontaktcenter",
+      "description": "Ring Kontaktcenter på [042-10 50 00](tel://042105000). Där kan du få svar om ditt ärende."
+    }
+  ],
   "provider": "VIVA",
   "state": "VIVA_APPLICATION_RECEIVED",
   "status": {

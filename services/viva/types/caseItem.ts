@@ -35,10 +35,15 @@ export interface CaseCompletions {
   readonly requested: RequestedCaseCompletions[];
 }
 
+export interface Contact {
+  name: string;
+  description: string;
+}
+
 export interface CaseItem {
-  readonly id: string;
-  readonly PK: string;
-  readonly SK: string;
+  id: string;
+  PK: string;
+  SK: string;
   state: string;
   expirationTime: number;
   createdAt: number;
@@ -49,6 +54,7 @@ export interface CaseItem {
   GSI2PK?: string;
   provider: string;
   persons: CasePerson[];
+  contacts: Contact[];
   details: CaseDetails;
   currentFormId: string;
   pdf?: Buffer;

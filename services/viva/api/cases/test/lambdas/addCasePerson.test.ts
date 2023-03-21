@@ -69,6 +69,7 @@ const caseItem: CaseItem = {
   },
   provider: 'VIVA',
   persons: [coApplicant],
+  contacts: [],
 };
 
 function createInput(partialInput: Partial<LambdaRequest> = {}): LambdaRequest {

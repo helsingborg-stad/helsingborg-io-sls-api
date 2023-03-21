@@ -104,6 +104,16 @@ provider:
               - - !ImportValue ${self:custom.resourcesStage}-VivaPeriodBucketArn
                 - '/*'
 
+        - Effect: Allow
+          Action:
+            - s3:GetObject
+          Resource:
+            - !ImportValue ${self:custom.resourcesStage}-EkbConfigBucketArn
+            - !Join
+              - ''
+              - - !ImportValue ${self:custom.resourcesStage}-EkbConfigBucketArn
+                - '/*'
+
 functions:
   applicationStatus:
     handler: src/lambdas/applicationStatus.main
@@ -182,6 +192,7 @@ functions:
     timeout: 30
     environment:
       VIVA_PERIOD_BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-VivaPeriodBucketName
+      EKB_CONFIG_BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-EkbConfigBucketName
     events:
       - eventBridge:
           pattern:
