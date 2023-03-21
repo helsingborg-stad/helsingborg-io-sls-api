@@ -54,16 +54,16 @@ export interface NavetPerson {
 }
 
 export interface Adress {
-  street: string;
-  postalCode: string;
-  city: string;
+  street: string | null;
+  postalCode: string | null;
+  city: string | null;
 }
 
 export interface CaseUser {
   personalNumber: string;
   firstName: string;
   lastName: string;
-  address: Adress;
+  address: Adress | null;
   civilStatus: string;
 }
 
