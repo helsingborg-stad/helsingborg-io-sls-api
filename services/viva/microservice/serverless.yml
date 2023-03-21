@@ -343,6 +343,7 @@ functions:
     timeout: 30
     events:
       - eventBridge:
+          enabled: false
           pattern:
             source:
               - vivaMs.createVivaCase
