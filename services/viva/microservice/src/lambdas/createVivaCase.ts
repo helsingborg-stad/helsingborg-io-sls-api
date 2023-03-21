@@ -12,16 +12,15 @@ import { getCaseListByPeriod, getLastUpdatedCase, getFormTemplates } from '../he
 import { getConfigFromS3, getCurrentPeriodInfo } from '../helpers/vivaPeriod';
 
 import { CasePersonRole } from '../types/caseItem';
-import { getConfigFromS3 } from '../helpers/vivaPeriod';
-import { getCurrentPeriodInfo } from '../helpers/vivaPeriod';
 import EkbCaseFactory from '../helpers/case/EkbCaseFactory';
 import S3CaseContactsFactory from '../helpers/caseContacts/S3CaseContactsFactory';
 
 import type { CaseUser, CaseItem, CaseForm, CasePerson } from '../types/caseItem';
 import type { VivaMyPagesVivaCase, VivaMyPagesVivaApplication } from '../types/vivaMyPages';
 import type { PeriodConfig } from '../helpers/vivaPeriod';
-import type { VivaParametersResponse } from '../types/ssmParameters';
 import type { ICaseFactory } from '../helpers/case/CaseFactory';
+import type { VivaParametersResponse } from '../types/ssmParameters';
+import type { EventDetailCaseKeys } from '../types/eventDetail';
 
 interface DynamoDbQueryOutput {
   Items: CaseItem[];
@@ -45,7 +44,7 @@ export interface LambdaRequest {
 }
 
 interface SuccessEvent {
-  keys: CaseKeys;
+  keys: EventDetailCaseKeys;
 }
 
 export interface Dependencies {
@@ -59,6 +58,7 @@ export interface Dependencies {
   getLastUpdatedCase: (pk: string) => Promise<CaseItem | undefined>;
   getPeriodConfig(): Promise<PeriodConfig>;
   getRecurringFormId: () => Promise<string>;
+  putSuccessEvent: (event: SuccessEvent) => Promise<void>;
   caseFactory: ICaseFactory<unknown>;
 }
 
@@ -188,6 +188,7 @@ export const main = log.wrap(event => {
     getFormTemplates,
     createInitialForms,
     getPeriodConfig: getConfigFromS3,
+    putSuccessEvent: putVivaMsEvent.createCaseSuccess,
     caseFactory,
   });
 });
