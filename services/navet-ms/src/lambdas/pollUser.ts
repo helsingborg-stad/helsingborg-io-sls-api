@@ -1,12 +1,16 @@
 import log from '../libs/logs';
 import { putEvent } from '../libs/awsEventBridge';
 import civilRegistrationProvider from '../helpers/provider';
-import type { CivilRegistrationProvider, CaseUser } from '../helpers/types';
+import type { CivilRegistrationProvider } from '../helpers/types';
 
 type SuccessEvent = LambdaDetail;
 
+interface User {
+  personalNumber: string;
+}
+
 export interface LambdaDetail {
-  readonly user: CaseUser;
+  readonly user: User;
 }
 
 export interface Input {
@@ -20,13 +24,7 @@ export interface Dependencies {
 
 export async function pollUser(input: Input, dependencies: Dependencies): Promise<boolean> {
   const user = await dependencies.provider.getUserInfo(input.detail.user.personalNumber);
-  await dependencies.triggerEvent(
-    {
-      user,
-    },
-    'navetMsPollUserSuccess',
-    'navetMs.pollUser'
-  );
+  await dependencies.triggerEvent({ user }, 'navetMsPollUserSuccess', 'navetMs.pollUser');
   return true;
 }
 
