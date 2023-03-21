@@ -270,6 +270,7 @@ function createMockDependencies(value: Partial<Dependencies>): Dependencies {
           [readParametersResponse.completionFormId]: defaultFormProperties,
         }),
       getPeriodConfig: getMockPeriodConfig,
+      putSuccessEvent: () => Promise.resolve(),
       caseFactory: mockCaseFactory,
     },
     value
