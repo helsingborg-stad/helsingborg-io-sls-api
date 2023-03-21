@@ -27,4 +27,4 @@ const navetProvider: CivilRegistrationProvider = {
   },
 };
 
-export default mockProvider;
+export default navetProvider;
