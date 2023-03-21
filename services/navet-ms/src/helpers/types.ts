@@ -1,7 +1,18 @@
-export interface NavetClientError {
+export interface ClientResponseError {
   response: {
     data: string;
   };
+}
+
+export interface ClientResponse {
+  data: string;
+}
+
+export interface NavetPayloadParams {
+  personalNumber: string;
+  orderNumber: string;
+  organisationNumber: string;
+  xmlEnvUrl: string;
 }
 
 export interface NavetPersonId {
@@ -32,22 +43,30 @@ export interface NavetUser {
   Civilstand: NavetPersonMaritalStatus;
 }
 
-export interface NavetUserResponse {
-  Folkbokforingspost: {
-    Personpost: NavetUser;
-    Sekretessmarkering: string;
-    SkyddadFolkbokforing: string;
-  };
+export interface NavetCivilRegistration {
+  Personpost: NavetUser;
+  Sekretessmarkering: string;
+  SkyddadFolkbokforing: string;
+}
+
+export interface NavetPerson {
+  Folkbokforingspost: NavetCivilRegistration;
+}
+
+export interface Adress {
+  street: string;
+  postalCode: string;
+  city: string;
 }
 
 export interface CaseUser {
   personalNumber: string;
   firstName: string;
   lastName: string;
-  address: {
-    street: string;
-    postalCode: string;
-    city: string;
-  };
+  address: Adress;
   civilStatus: string;
+}
+
+export interface CivilRegistrationProvider {
+  getUserInfo(personalNumber: string): Promise<CaseUser>;
 }
