@@ -79,12 +79,6 @@ provider:
             - dynamodb:GetItem
           Resource:
             - !ImportValue ${self:custom.resourcesStage}-UsersTableArn
-
-        - Effect: Allow
-          Action:
-            - dynamodb:Query
-            - dynamodb:GetItem
-          Resource:
             - !ImportValue ${self:custom.resourcesStage}-FormsTableArn
 
         - Effect: Allow
