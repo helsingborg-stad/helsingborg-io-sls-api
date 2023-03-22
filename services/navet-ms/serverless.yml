@@ -48,6 +48,11 @@ provider:
             - events:PutEvents
           Resource: '*'
 
+        - Effect: Allow
+          Action:
+            - kms:Decrypt
+          Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
+
 functions:
   poll:
     handler: src/lambdas/pollUser.main
