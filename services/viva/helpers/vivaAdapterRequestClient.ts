@@ -300,8 +300,8 @@ async function postCompletions(payload: PostCompletionsPayload): Promise<PostCom
     },
   };
 
-  const response = (await sendVivaAdapterRequest(requestParams)) as AxiosResponse;
-  return response.data;
+  const response = await sendVivaAdapterRequest<PostCompletionsResponse>(requestParams);
+  return response.data.attributes;
 }
 
 export default {
