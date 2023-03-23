@@ -13,14 +13,19 @@ import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 import type { VivaAttachment } from '../types/vivaAttachment';
 
 import type { PostCompletionsPayload } from '../helpers/vivaAdapterRequestClient';
-import type { CaseItem, CaseForm, CaseFormAnswer } from '../types/caseItem';
+import type { CaseItem, CaseForm, CaseFormAnswer, CaseStatus } from '../types/caseItem';
 import type { EventDetailCaseKeys } from '../types/eventDetail';
 import type { VivaParametersResponse } from '../types/ssmParameters';
 
 interface LambdaDetail {
   readonly caseKeys: EventDetailCaseKeys;
-  readonly status?: Record<string, unknown>;
-  readonly state?: string;
+  readonly status: CaseStatus;
+  readonly state: string;
+}
+
+interface CaseKeys {
+  readonly PK: string;
+  readonly SK: string;
 }
 
 export interface LambdaRequest {
@@ -28,11 +33,12 @@ export interface LambdaRequest {
 }
 
 interface UpdateCaseParameters {
-  caseKeys: EventDetailCaseKeys;
+  keys: CaseKeys;
   newState: typeof VIVA_COMPLETION_RECEIVED | typeof VIVA_RANDOM_CHECK_RECEIVED;
   currentFormId: string;
   initialCompletionForm: Record<string, CaseForm>;
 }
+
 interface PostCompletionsResponse {
   status: string;
 }
@@ -56,12 +62,12 @@ function getReceivedState(currentFormId: string, randomCheckFormId: string) {
 }
 
 function updateCase(params: UpdateCaseParameters): Promise<void> {
-  const { caseKeys, currentFormId, initialCompletionForm, newState } = params;
+  const { keys, currentFormId, initialCompletionForm, newState } = params;
   const updateParams = {
     TableName: config.cases.tableName,
     Key: {
-      PK: caseKeys.PK,
-      SK: caseKeys.SK,
+      PK: keys.PK,
+      SK: keys.SK,
     },
     UpdateExpression: 'SET #state = :newState, forms.#formId = :resetedCompletionForm',
     ExpressionAttributeNames: {
@@ -134,12 +140,16 @@ export async function submitCompletion(input: LambdaRequest, dependencies: Depen
     [currentFormId],
     initialCompletionFormEncryption
   );
+  const newState = getReceivedState(currentFormId, randomCheckFormId);
 
   const updateCaseParams: UpdateCaseParameters = {
-    caseKeys,
+    keys: {
+      PK: caseKeys.PK,
+      SK: caseKeys.SK,
+    },
     currentFormId,
     initialCompletionForm,
-    newState: getReceivedState(currentFormId, randomCheckFormId),
+    newState,
   };
 
   await dependencies.updateCase(updateCaseParams);
