@@ -55,7 +55,7 @@ function getReceivedState(currentFormId: string, randomCheckFormId: string) {
     : VIVA_COMPLETION_RECEIVED;
 }
 
-async function updateCase(params: UpdateCaseParameters): Promise<void> {
+function updateCase(params: UpdateCaseParameters): Promise<void> {
   const { caseKeys, currentFormId, initialCompletionForm, newState } = params;
   const updateParams = {
     TableName: config.cases.tableName,
@@ -75,7 +75,7 @@ async function updateCase(params: UpdateCaseParameters): Promise<void> {
     ReturnValues: 'NONE',
   };
 
-  await dynamoDb.call('update', updateParams);
+  return dynamoDb.call('update', updateParams);
 }
 
 function deleteS3Attachments(attachments: VivaAttachment[]) {
