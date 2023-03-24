@@ -1,8 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import createCaseUser from './cases';
 import { getNavetPersonInfo, requestNavet } from './navet';
 import type { CivilRegistrationProvider, CaseUser } from '../helpers/types';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const mockProvider: CivilRegistrationProvider = {
   getUserInfo(personalNumber: string): Promise<CaseUser> {
     return Promise.resolve({
