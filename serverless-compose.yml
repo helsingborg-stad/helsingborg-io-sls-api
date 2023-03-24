@@ -48,5 +48,9 @@ services:
     path: services/viva/api/period
     dependsOn: authorizer
 
+  viva-status-api:
+    path: services/viva/api/status
+    dependsOn: authorizer
+
   viva-ms:
     path: services/viva/microservice
