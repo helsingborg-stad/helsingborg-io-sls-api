@@ -1,40 +1,67 @@
 import { getStatusByType } from '../../src/libs/caseStatuses';
-import { ACTIVE_PROCESSING, VIVA_APPLICATION_LOCKED } from '../../src/libs/constants';
+import {
+  ACTIVE_PROCESSING,
+  VIVA_APPLICATION_LOCKED,
+  ACTIVE_SUBMITTED,
+} from '../../src/libs/constants';
 import { decideCaseStatus } from '../../src/lambdas/decideCaseStatus';
-import type { LambdaRequest } from '../../src/lambdas/decideCaseStatus';
-import type { VivaWorkflow } from '../../src/types/vivaWorkflow';
+import type { LambdaRequest, LambdaDetail } from '../../src/lambdas/decideCaseStatus';
+import type { CaseItem } from '../../src/types/caseItem';
 
 const caseKeys = {
   PK: 'USER#198602102389',
   SK: 'CASE#11111111-2222-3333-4444-555555555555',
 };
 
-function createLambdaInput(workflowParams: Partial<VivaWorkflow> = {}): LambdaRequest {
+const caseState = 'VIVA_APPLICATION_LOCKED';
+
+function createLambdaInput(params: Partial<LambdaDetail>): LambdaRequest {
   return {
     detail: {
+      vivaApplicantStatusCodeList: [],
+      workflowCompletions: {
+        requested: [],
+        description: null,
+        receivedDate: null,
+        dueDate: null,
+        attachmentUploaded: [],
+        isCompleted: false,
+        isRandomCheck: false,
+        isAttachmentPending: false,
+        isDueDateExpired: false,
+      },
       caseKeys,
+      caseState,
+      caseStatusType: ACTIVE_SUBMITTED,
+      ...params,
+    },
+  };
+}
+
+function createCase(params: Partial<CaseItem>): CaseItem {
+  return {
+    details: {
       workflow: {
         workflowid: 'XYZ123',
-        ...workflowParams,
+        application: {
+          islocked: '2022-01-01T00:00:00+01:00',
+        },
       },
     },
-  } as unknown as LambdaRequest;
+    ...params,
+  } as CaseItem;
 }
 
 describe('decideCaseStatus', () => {
   it('successfully updates a case with new status and state', async () => {
     const updateCaseMock = jest.fn();
-    const putSuccessEventMock = jest.fn();
+    const triggerEventMock = jest.fn();
+    const lambdaInput = createLambdaInput({ caseKeys });
 
-    const lambdaInput = {
-      application: {
-        islocked: '2022-01-01T00:00:00+01:00',
-      },
-    } as VivaWorkflow;
-
-    const result = await decideCaseStatus(createLambdaInput(lambdaInput), {
+    const result = await decideCaseStatus(lambdaInput, {
+      getCase: () => Promise.resolve(createCase(caseKeys)),
       updateCase: updateCaseMock,
-      putSuccessEvent: putSuccessEventMock,
+      triggerEvent: triggerEventMock,
     });
 
     expect(result).toBe(true);
@@ -43,53 +70,58 @@ describe('decideCaseStatus', () => {
       getStatusByType(ACTIVE_PROCESSING),
       VIVA_APPLICATION_LOCKED
     );
-    expect(putSuccessEventMock).toHaveBeenCalledWith({ caseKeys });
+    expect(triggerEventMock).toHaveBeenCalledWith({
+      ...lambdaInput.detail,
+      caseStatusType: ACTIVE_PROCESSING,
+      caseState: VIVA_APPLICATION_LOCKED,
+    });
   });
 
   it('does not update case status if new status is undefined', async () => {
     const updateCaseMock = jest.fn();
-    const putSuccessEventMock = jest.fn();
+    const triggerEventMock = jest.fn();
 
-    const lambdaInput = {
-      application: {
-        islocked: null,
+    const mockCase = {
+      ...caseKeys,
+      details: {
+        workflow: undefined,
       },
-    } as VivaWorkflow;
+    } as CaseItem;
 
-    const result = await decideCaseStatus(createLambdaInput(lambdaInput), {
+    const result = await decideCaseStatus(createLambdaInput({ caseKeys }), {
+      getCase: () => Promise.resolve(createCase(mockCase)),
       updateCase: updateCaseMock,
-      putSuccessEvent: putSuccessEventMock,
+      triggerEvent: triggerEventMock,
     });
 
     expect(result).toBe(true);
     expect(updateCaseMock).toHaveBeenCalledTimes(0);
-    expect(putSuccessEventMock).toHaveBeenCalledTimes(0);
+    expect(triggerEventMock).toHaveBeenCalledTimes(1);
   });
 
-  it('does not update case status if new state is undefined', async () => {
+  it('does not update case state if new state is undefined', async () => {
     const updateCaseMock = jest.fn();
-    const putSuccessEventMock = jest.fn();
+    const triggerEventMock = jest.fn();
 
-    const lambdaInput = {
-      application: {
-        islocked: null,
-      },
-      decision: {
-        decisions: {
-          decision: {
-            typecode: '01',
+    const mockCase = {
+      ...caseKeys,
+      details: {
+        workflow: {
+          application: {
+            islocked: null,
           },
         },
       },
-    } as VivaWorkflow;
+    } as CaseItem;
 
-    const result = await decideCaseStatus(createLambdaInput(lambdaInput), {
+    const result = await decideCaseStatus(createLambdaInput({}), {
+      getCase: () => Promise.resolve(createCase(mockCase)),
       updateCase: updateCaseMock,
-      putSuccessEvent: putSuccessEventMock,
+      triggerEvent: triggerEventMock,
     });
 
     expect(result).toBe(true);
     expect(updateCaseMock).toHaveBeenCalledTimes(0);
-    expect(putSuccessEventMock).toHaveBeenCalledTimes(0);
+    expect(triggerEventMock).toHaveBeenCalledTimes(1);
   });
 });

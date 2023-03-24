@@ -5,40 +5,43 @@ import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 
 import type { CaseUser } from '../types/caseItem';
 import type { VivaMyPagesVivaCase, VivaMyPagesVivaApplication } from '../types/vivaMyPages';
+import type { VivaApplicationsStatusItem } from '../types/vivaApplicationsStatus';
+
+export interface SuccessEvent extends LambdaDetail {
+  myPages: VivaMyPagesVivaCase;
+  application: VivaMyPagesVivaApplication;
+}
 
 export interface LambdaDetail {
   user: CaseUser;
+  status: VivaApplicationsStatusItem[];
 }
 
 export interface LambdaRequest {
   detail: LambdaDetail;
 }
 
-export interface SuccessEvent {
-  clientUser: CaseUser;
-  myPages: VivaMyPagesVivaCase;
-  application: VivaMyPagesVivaApplication;
-}
-
 export interface Dependencies {
   getMyPages: (personalNumber: string) => Promise<VivaMyPagesVivaCase>;
   getApplication: (personalNumber: string) => Promise<VivaMyPagesVivaApplication>;
-  putSuccessEvent: (parameters: SuccessEvent) => Promise<void>;
+  triggerEvent: (params: SuccessEvent) => Promise<void>;
 }
 
 export async function personApplication(
   input: LambdaRequest,
   dependencies: Dependencies
 ): Promise<boolean> {
-  const clientUser = input.detail.user;
+  const {
+    user: { personalNumber },
+  } = input.detail;
 
-  const myPages = await dependencies.getMyPages(clientUser.personalNumber);
-  const application = await dependencies.getApplication(clientUser.personalNumber);
+  const myPages = await dependencies.getMyPages(personalNumber);
+  const application = await dependencies.getApplication(personalNumber);
 
-  await dependencies.putSuccessEvent({
-    clientUser,
+  await dependencies.triggerEvent({
     myPages,
     application,
+    ...input.detail,
   });
 
   return true;
@@ -48,6 +51,6 @@ export const main = log.wrap(event => {
   return personApplication(event, {
     getMyPages: vivaAdapter.myPages.get,
     getApplication: vivaAdapter.applications.get,
-    putSuccessEvent: putVivaMsEvent.personDetailSuccess,
+    triggerEvent: putVivaMsEvent.personDetailSuccess,
   });
 });

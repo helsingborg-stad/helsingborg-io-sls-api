@@ -32,9 +32,11 @@ const mockUuid = '00000000-0000-0000-0000-000000000000';
 jest.mock('uuid', () => ({ v4: () => mockUuid }));
 
 const user: CaseUser = {
+  uuid: mockUuid,
   personalNumber: '199402011234',
   firstName: 'FirstName',
   lastName: 'LastName',
+  civilStatus: null,
   mobilePhone: '0701234567',
   email: 'someMail@example.com',
   address: {
@@ -42,6 +44,7 @@ const user: CaseUser = {
     street: 'MANGIGATAN 2',
     postalCode: '98133',
   },
+  createdAt: MOCK_DATE.unix(),
 };
 
 const partner: CasePerson = {
@@ -165,7 +168,7 @@ function getMockPeriodConfig(openDateIso?: string): Promise<PeriodConfig> {
 function createLambdaInput(persons: VivaPersonsPerson | null = null): LambdaRequest {
   return {
     detail: {
-      clientUser: { ...user },
+      user,
       myPages: {
         idenclair: '01-2021-09-30/R37992',
         client: {
@@ -267,6 +270,7 @@ function createMockDependencies(value: Partial<Dependencies>): Dependencies {
           [readParametersResponse.completionFormId]: defaultFormProperties,
         }),
       getPeriodConfig: getMockPeriodConfig,
+      putSuccessEvent: () => Promise.resolve(),
       caseFactory: mockCaseFactory,
     },
     value

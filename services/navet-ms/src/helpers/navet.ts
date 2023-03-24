@@ -1,76 +1,67 @@
 import { InternalServerError, UnauthorizedError } from '@helsingborg-stad/npm-api-error-handling';
-import to from 'await-to-js';
-
 import * as request from '../libs/request';
 import params from '../libs/params';
 import config from '../libs/config';
+import createNavetRequestClient from './client';
+import { parseNavetPerson, parseErrorMessageFromXML } from './parser';
+import type { NavetUser, NavetPayloadParams, NavetPerson } from './types';
 
-import getNavetRequestClient from './client';
-import {
-  getPersonPostSoapRequestPayload,
-  getErrorMessageFromXML,
-  getPersonPostCollection,
-} from './parser';
+function createNavetRequestPayload(params: NavetPayloadParams): string {
+  return `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v1="${params.xmlEnvUrl}">
+  <soapenv:Header/>
+  <soapenv:Body>
+    <v1:PersonpostRequest>
+      <v1:Bestallning>
+        <v1:OrgNr>${params.organisationNumber}</v1:OrgNr>
+        <v1:BestallningsId>${params.orderNumber}</v1:BestallningsId>
+      </v1:Bestallning>
+      <v1:PersonId>${params.personalNumber}</v1:PersonId>
+    </v1:PersonpostRequest>
+  </soapenv:Body>
+</soapenv:Envelope>`;
+}
 
-import type { NavetUser, NavetClientError, NavetUserResponse } from './types';
-
-export async function requestNavetUser(personalNumber: string): Promise<string> {
+export async function requestNavet(personalNumber: string): Promise<string> {
   const ssmParams = await params.read(config.navet.envsKeyName);
+  const navetRequestClient = await createNavetRequestClient(ssmParams);
 
-  const [getNavetClientError, navetRequestClient] = await to(getNavetRequestClient(ssmParams));
-  if (getNavetClientError) {
-    throw getNavetClientError;
-  }
+  const navetResponse = await request.call(
+    navetRequestClient,
+    'post',
+    ssmParams.personpostXmlEndpoint,
+    createNavetRequestPayload({
+      personalNumber,
+      orderNumber: ssmParams.orderNr,
+      organisationNumber: ssmParams.orgNr,
+      xmlEnvUrl: ssmParams.personpostXmlEnvUrl,
+    })
+  );
 
-  const personPostSoapRequestPayload = getPersonPostSoapRequestPayload({
-    personalNumber,
-    orderNumber: ssmParams.orderNr,
-    organisationNumber: ssmParams.orgNr,
-    xmlEnvUrl: ssmParams.personpostXmlEnvUrl,
-  });
-
-  const [postNavetClientError, navetResponse] = (await to(
-    request.call(
-      navetRequestClient,
-      'post',
-      ssmParams.personpostXmlEndpoint,
-      personPostSoapRequestPayload
-    )
-  )) as [NavetClientError, { data: string }];
-
-  if (postNavetClientError?.response?.data) {
-    throw getErrorMessageFromXML(postNavetClientError.response.data);
-  }
-
-  if (postNavetClientError) {
-    throw postNavetClientError;
+  if (navetResponse?.respons?.data) {
+    throw parseErrorMessageFromXML(navetResponse?.response?.data);
   }
 
   return navetResponse.data;
 }
 
-export async function getNavetPersonPost(xml: string): Promise<NavetUser> {
-  const [getPersonPostError, parsedNavetPerson] = await to(getPersonPostCollection(xml));
-  if (getPersonPostError) {
-    throw getPersonPostError;
-  }
+export async function getNavetPersonInfo(xml: string): Promise<NavetUser> {
+  const person = await parseNavetPerson(xml);
 
-  const { Folkbokforingspost } = parsedNavetPerson as NavetUserResponse;
-  if (Folkbokforingspost?.Personpost === undefined) {
+  const { Folkbokforingspost } = person;
+  if (Folkbokforingspost.Personpost == undefined) {
     throw new InternalServerError();
   }
 
-  if (isPersonConfidential(parsedNavetPerson as NavetUserResponse)) {
+  if (isPersonConfidential(person)) {
     throw new UnauthorizedError();
   }
 
   return Folkbokforingspost.Personpost;
 }
 
-export function isPersonConfidential(navetPerson: NavetUserResponse): boolean {
-  const {
-    Folkbokforingspost: { Sekretessmarkering, SkyddadFolkbokforing },
-  } = navetPerson;
-
-  return [Sekretessmarkering, SkyddadFolkbokforing].includes('J');
+function isPersonConfidential(person: NavetPerson): boolean {
+  return [
+    person.Folkbokforingspost.Sekretessmarkering,
+    person.Folkbokforingspost.SkyddadFolkbokforing,
+  ].includes('J');
 }

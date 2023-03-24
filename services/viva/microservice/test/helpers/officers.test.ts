@@ -1,6 +1,6 @@
-import { createCaseAdministrators } from '../../src/lambdas/syncOfficers';
+import { createAdministrators } from '../../src/lambdas/syncOfficers';
 
-import { CaseAdministrator } from '../../src/types/caseItem';
+import type { CaseAdministrator } from '../../src/types/caseItem';
 
 function getAdministratorObject({
   email = 'email',
@@ -22,7 +22,7 @@ describe('parseVivaOfficers', () => {
   it('successfully parses a viva officers array to `CaseAdministrator` format', () => {
     const expectedResult = [getAdministratorObject({})];
 
-    const result = createCaseAdministrators([
+    const result = createAdministrators([
       {
         mail: 'email',
         name: 'CN=Karl Karlsson/OU=extern/O=ASDF',
@@ -39,7 +39,7 @@ describe('parseVivaOfficers', () => {
   it('successfully parses a viva officer object to case `CaseAdministrator` format', () => {
     const expectedResult = [getAdministratorObject({})];
 
-    const result = createCaseAdministrators({
+    const result = createAdministrators({
       mail: 'email',
       name: 'Karl Karlsson',
       phone: null,

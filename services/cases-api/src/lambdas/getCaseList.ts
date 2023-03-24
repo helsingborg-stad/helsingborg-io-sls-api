@@ -6,23 +6,32 @@ import config from '../libs/config';
 
 import type { CaseItem } from '../types/case';
 
+interface SuccessEvent {
+  user: Input;
+}
+
 export type CaseWithOmittedProperties = Omit<CaseItem, 'PK' | 'SK' | 'GSI1'>;
 
 export interface FunctionResponse {
   attributes: { cases: CaseWithOmittedProperties[] };
 }
 
-export interface Dependencies {
-  putSuccessEvent: (personalNumber: string) => void;
-  getCases: (personalNumber: string) => Promise<CaseItem[]>;
-}
-
-interface FunctionInput {
+interface Input {
   personalNumber: string;
 }
 
-function putSuccessEvent(personalNumber: string): void {
-  putEvent({ personalNumber }, 'casesApiInvokeSuccess', 'casesApi.getCaseList');
+export interface Dependencies {
+  getCases: (personalNumber: string) => Promise<CaseItem[]>;
+  triggerEvent: (personalNumber: string) => void;
+}
+
+function triggerEvent(personalNumber: string): void {
+  const params: SuccessEvent = {
+    user: {
+      personalNumber,
+    },
+  };
+  putEvent(params, 'casesApiInvokeSuccess', 'casesApi.getCaseList');
 }
 
 function getUserCoApplicantCaseList(personalNumber: string): Promise<{ Items: CaseItem[] }> {
@@ -68,12 +77,13 @@ async function getUserCaseList(personalNumber: string): Promise<CaseItem[]> {
 }
 
 export async function getCaseList(
-  input: FunctionInput,
+  input: Input,
   dependencies: Dependencies
 ): Promise<FunctionResponse> {
-  dependencies.putSuccessEvent(input.personalNumber);
+  const { personalNumber } = input;
+  dependencies.triggerEvent(personalNumber);
 
-  const cases = await dependencies.getCases(input.personalNumber);
+  const cases = await dependencies.getCases(personalNumber);
   const casesWithoutProperties = cases.map(item =>
     objectWithoutProperties(item, ['PK', 'SK', 'GSI1'])
   );
@@ -86,6 +96,6 @@ export async function getCaseList(
 }
 
 export const main = wrappers.restJSON.wrap(getCaseList, {
-  putSuccessEvent,
+  triggerEvent,
   getCases: getUserCaseList,
 });

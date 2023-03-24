@@ -63,6 +63,12 @@ function createInput(partialInput: Partial<LambdaRequest> = {}): LambdaRequest {
         PK,
         SK,
       },
+      status: {
+        type: 'myStatusType',
+        name: 'myStatusName',
+        description: 'myStatusDescription',
+      },
+      state: 'SOME STRING',
     },
     ...partialInput,
   };
@@ -181,7 +187,7 @@ it('calls `updateCase` with correct parameters for form id: completionFormId', a
   };
 
   const updateCaseParams = {
-    caseKeys: {
+    keys: {
       PK,
       SK,
     },

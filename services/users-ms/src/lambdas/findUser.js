@@ -1,32 +1,31 @@
 import to from 'await-to-js';
-
 import config from '../libs/config';
 import * as dynamoDb from '../libs/dynamoDb';
 import putUserEvent from '../helpers/putUserEvent';
 import log from '../libs/logs';
 
 export async function main(event) {
-  const userDetail = event.detail;
+  const { user } = event.detail;
 
-  const userItem = await getUser(userDetail.personalNumber);
-  if (userItem == undefined) {
-    log.writeInfo('User not found in the users table', userItem);
-    await putUserEvent.notFound(userDetail);
+  const storedUser = await getUser(user.personalNumber);
+  if (storedUser === undefined) {
+    log.writeInfo('User not found in the users table', storedUser);
+    await putUserEvent.notFound(event.detail);
     return true;
   }
 
-  await putUserEvent.exists(userItem);
+  await putUserEvent.exists(event.detail);
   return true;
 }
 
 async function getUser(personalNumber) {
-  const params = {
+  const getParams = {
     TableName: config.users.tableName,
     Key: {
       personalNumber,
     },
   };
 
-  const [, getResult] = await to(dynamoDb.call('get', params));
-  return getResult.Item;
+  const [, result] = await to(dynamoDb.call('get', getParams));
+  return result.Item;
 }

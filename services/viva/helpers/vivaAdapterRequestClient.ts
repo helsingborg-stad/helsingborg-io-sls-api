@@ -27,20 +27,37 @@ import type { VivaAttachment } from '../types/vivaAttachment';
 import type { CaseFormAnswer } from '../types/caseItem';
 
 interface ConfigParams {
-  vadaUrl: string;
-  xApiKeyToken: string;
-  hashSalt: string;
-  hashSaltLength: number;
+  readonly vadaUrl: string;
+  readonly xApiKeyToken: string;
+  readonly hashSalt: string;
+  readonly hashSaltLength: number;
+}
+
+interface VivaDetails {
+  readonly errorCode: string | null;
+  readonly errorMessage: string | null;
+  readonly id: string | null;
+  readonly idenclair: string | null;
+  readonly status: string | null;
 }
 
 interface AdapterError {
-  code: number;
-  description: string;
-  details: string;
+  readonly code: number;
+  readonly description: string;
+  readonly details: VivaDetails;
 }
 
 interface AdapterErrorResponseData {
-  error: AdapterError;
+  readonly error: AdapterError;
+}
+
+export interface PostApplicationsResponse {
+  readonly status: string;
+  readonly id: string;
+}
+
+export interface PostCompletionsResponse {
+  readonly status: string;
 }
 
 interface AdapterResponseData<
@@ -51,6 +68,8 @@ interface AdapterResponseData<
     | VadaApplicationsStatusResponse
     | VivaMyPagesCases
     | VivaMyPagesApplication
+    | PostApplicationsResponse
+    | PostCompletionsResponse
     | unknown
 > {
   type: string;
@@ -97,10 +116,6 @@ interface AdapterPostApplicationsBody {
   rawDataType: string;
   workflowId: string;
   attachments: VivaAttachment[];
-}
-
-interface PostCompletionsResponse {
-  status: string;
 }
 
 const REQUEST_TIMEOUT_IN_MS = 30000;
@@ -240,7 +255,7 @@ function getVivaSsmParams(): Promise<ConfigParams> {
 
 async function postApplications(
   payload: PostApplicationsPayload
-): Promise<Record<string, unknown>> {
+): Promise<PostApplicationsResponse> {
   const {
     personalNumber,
     applicationType,
@@ -267,8 +282,8 @@ async function postApplications(
     },
   };
 
-  const response = (await sendVivaAdapterRequest(requestParams)) as AxiosResponse;
-  return response.data;
+  const response = await sendVivaAdapterRequest<PostApplicationsResponse>(requestParams);
+  return response.data.attributes;
 }
 
 async function postCompletions(payload: PostCompletionsPayload): Promise<PostCompletionsResponse> {
@@ -285,8 +300,8 @@ async function postCompletions(payload: PostCompletionsPayload): Promise<PostCom
     },
   };
 
-  const response = (await sendVivaAdapterRequest(requestParams)) as AxiosResponse;
-  return response.data;
+  const response = await sendVivaAdapterRequest<PostCompletionsResponse>(requestParams);
+  return response.data.attributes;
 }
 
 export default {

@@ -13,7 +13,7 @@ import { DEFAULT_CURRENT_POSITION } from '../../src/helpers/constants';
 
 import { EncryptionType, CasePersonRole } from '../../src/types/caseItem';
 import type { Dependencies } from '../../src/lambdas/createNewVivaCase';
-import type { CaseForm, CaseItem } from '../../src/types/caseItem';
+import type { CaseForm, CaseItem, CaseUser } from '../../src/types/caseItem';
 
 jest.useFakeTimers('modern').setSystemTime(new Date('2022-01-01'));
 
@@ -24,7 +24,7 @@ const user = {
   firstName: 'FirstName',
   lastName: 'LastName',
   personalNumber: '199402011234',
-};
+} as CaseUser;
 
 const readParametersResponse = {
   recurringFormId: '1',

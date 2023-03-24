@@ -6,7 +6,7 @@ import { CLOSED_REJECTED_VIVA, CLOSED_PARTIALLY_APPROVED_VIVA } from '../libs/co
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 
-import type { CaseItem } from '../types/caseItem';
+import type { CaseUser, CaseItem } from '../types/caseItem';
 import type { VivaWorkflow } from '../types/vivaWorkflow';
 
 interface GetWorkflowParams {
@@ -14,17 +14,18 @@ interface GetWorkflowParams {
   workflowId: string;
 }
 
-interface User {
-  personalNumber: string;
-}
-
 interface CaseKeys {
   PK: string;
   SK: string;
 }
 
+interface SuccessEvent {
+  caseKeys: CaseKeys;
+  caseState: string;
+}
+
 interface LambdaDetail {
-  user: User;
+  user: CaseUser;
 }
 
 export interface LambdaRequest {
@@ -34,7 +35,7 @@ export interface LambdaRequest {
 export interface Dependencies {
   getCasesByStatusType: (personalNumber: string, statusTypeList: string[]) => Promise<CaseItem[]>;
   updateCase: (caseKeys: CaseKeys, newWorkflow: VivaWorkflow) => Promise<void>;
-  syncWorkflowSuccess: (detail: Record<string, unknown>) => Promise<void>;
+  syncWorkflowSuccess: (detail: SuccessEvent) => Promise<void>;
   getWorkflow: (params: GetWorkflowParams) => Promise<VivaWorkflow>;
 }
 
@@ -59,12 +60,14 @@ async function getCasesByStatusType(
   const PK = `USER#${personalNumber}`;
 
   const filterExpression = statusTypeList.map(filterExpressionMapper).join(' or ');
-  const expressionAttributeValues = statusTypeList.reduce((acc, statusType) => {
-    return { ...acc, ...createAttributeValues(statusType) };
-  }, {});
+  const expressionAttributeValues = statusTypeList.reduce(
+    (acc, statusType) => ({ ...acc, ...createAttributeValues(statusType) }),
+    {}
+  );
 
   const queryParams = {
     TableName: config.cases.tableName,
+    ProjectionExpression: 'PK, SK, details',
     KeyConditionExpression: 'PK = :pk',
     FilterExpression: `(${filterExpression}) and provider = :provider`,
     ExpressionAttributeNames: {
@@ -117,12 +120,16 @@ export async function syncWorkflow(
     CLOSED_PARTIALLY_APPROVED_VIVA,
   ]);
 
-  const isEmptyCaseList = caseList.length === 0;
+  let isEmptyCaseList = caseList.length === 0;
   if (isEmptyCaseList) {
     return true;
   }
 
   const caseListWithWorkflowId = caseList.filter(isCaseWorkflowIdValid);
+  isEmptyCaseList = caseListWithWorkflowId.length === 0;
+  if (isEmptyCaseList) {
+    return true;
+  }
 
   await Promise.allSettled(
     caseListWithWorkflowId.map(async caseItem => {
@@ -137,7 +144,7 @@ export async function syncWorkflow(
         SK: caseItem.SK,
       };
       await dependencies.updateCase(caseKeys, workflow);
-      await dependencies.syncWorkflowSuccess({ caseKeys, workflow });
+      await dependencies.syncWorkflowSuccess({ caseKeys, caseState: caseItem.state });
     })
   );
 

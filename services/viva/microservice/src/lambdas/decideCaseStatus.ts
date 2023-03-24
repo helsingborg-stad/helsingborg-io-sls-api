@@ -1,35 +1,36 @@
 import config from '../libs/config';
-
 import * as dynamoDb from '../libs/dynamoDb';
 import log from '../libs/logs';
 import { getStatusByType } from '../libs/caseStatuses';
-
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
-import { decideNewCaseStatus, desideNewState } from '../helpers/caseDecision';
+import { decideNewCaseStatus, decideNewState } from '../helpers/caseDecision';
+import { cases } from '../helpers/query';
+import type { CaseItem, CaseStatus } from '../types/caseItem';
+import type { VadaWorkflowCompletions } from '../types/vadaCompletions';
+import type { VivaApplicationsStatusItem } from '../types/vivaApplicationsStatus';
 
-import type { CaseStatus } from '../types/caseItem';
-import type { VivaWorkflow } from '../types/vivaWorkflow';
+type SuccessEvent = LambdaDetail;
 
 interface CaseKeys {
   PK: string;
   SK: string;
 }
 
-interface LambdaDetail {
+export interface LambdaDetail {
+  vivaApplicantStatusCodeList: VivaApplicationsStatusItem[];
+  workflowCompletions: VadaWorkflowCompletions;
   caseKeys: CaseKeys;
-  workflow: VivaWorkflow;
+  caseState: string;
+  caseStatusType: string;
 }
 
 export interface LambdaRequest {
   detail: LambdaDetail;
 }
 
-interface SuccessEvent {
-  caseKeys: CaseKeys;
-}
-
 export interface Dependencies {
-  putSuccessEvent: (params: SuccessEvent) => Promise<void>;
+  getCase: (keys: CaseKeys) => Promise<CaseItem>;
+  triggerEvent: (params: SuccessEvent) => Promise<void>;
   updateCase: (keys: CaseKeys, newStatus: CaseStatus, newState: string) => Promise<void>;
 }
 
@@ -60,27 +61,33 @@ export async function decideCaseStatus(
   input: LambdaRequest,
   dependencies: Dependencies
 ): Promise<boolean> {
-  const { caseKeys, workflow } = input.detail;
+  const { caseKeys } = input.detail;
 
-  const newStatusType = decideNewCaseStatus(workflow);
-  const newState = desideNewState(workflow);
+  const caseItem = await dependencies.getCase(caseKeys);
+  const newStatusType = decideNewCaseStatus(caseItem.details?.workflow);
+  const newState = decideNewState(caseItem.details?.workflow);
 
   const isStatusStateUndefined = !(newStatusType && newState);
   if (isStatusStateUndefined) {
+    await dependencies.triggerEvent(input.detail);
     return true;
   }
 
   const newStatus = getStatusByType(newStatusType);
-
   await dependencies.updateCase(caseKeys, newStatus, newState);
-  await dependencies.putSuccessEvent({ caseKeys });
+  await dependencies.triggerEvent({
+    ...input.detail,
+    caseState: newState,
+    caseStatusType: newStatusType,
+  });
 
   return true;
 }
 
 export const main = log.wrap(event => {
   return decideCaseStatus(event, {
-    putSuccessEvent: putVivaMsEvent.decideCaseStatusSuccess,
+    getCase: cases.get,
     updateCase: updateCaseStatusAndState,
+    triggerEvent: putVivaMsEvent.decideCaseStatusSuccess,
   });
 });

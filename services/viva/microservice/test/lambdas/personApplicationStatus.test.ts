@@ -11,7 +11,7 @@ function createInput(status: VivaApplicationsStatusItem[]): LambdaRequest {
       },
       status: [...status],
     },
-  };
+  } as LambdaRequest;
 }
 
 describe('personApplicationStatus', () => {
@@ -38,8 +38,8 @@ describe('personApplicationStatus', () => {
         },
       ]),
       {
-        recurringOpenEvent: mockRecurringOpenEvent,
-        newOpenEvent: () => Promise.resolve(),
+        triggerRecurringOpenEvent: mockRecurringOpenEvent,
+        triggerNewOpenEvent: () => Promise.resolve(),
       }
     );
 
@@ -58,8 +58,8 @@ describe('personApplicationStatus', () => {
         },
       ]),
       {
-        recurringOpenEvent: () => Promise.resolve(),
-        newOpenEvent: mockNewOpenEvent,
+        triggerRecurringOpenEvent: () => Promise.resolve(),
+        triggerNewOpenEvent: mockNewOpenEvent,
       }
     );
 
@@ -87,8 +87,8 @@ describe('personApplicationStatus', () => {
         },
       ]),
       {
-        recurringOpenEvent: mockRecurringOpenEvent,
-        newOpenEvent: mockNewOpenEvent,
+        triggerRecurringOpenEvent: mockRecurringOpenEvent,
+        triggerNewOpenEvent: mockNewOpenEvent,
       }
     );
 

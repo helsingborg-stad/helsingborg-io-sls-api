@@ -14,6 +14,14 @@ import type { CaseUser, CaseItem, PersonalNumber } from '../types/caseItem';
 import type { VivaApplicationsStatusItem } from '../types/vivaApplicationsStatus';
 import type { VadaWorkflowCompletions } from '../types/vadaCompletions';
 
+interface SuccessEvent {
+  vivaApplicantStatusCodeList: VivaApplicationsStatusItem[];
+  workflowCompletions: VadaWorkflowCompletions;
+  caseKeys: CaseKeys;
+  caseState: string;
+  caseStatusType: string;
+}
+
 interface CaseKeys {
   PK: string;
   SK: string;
@@ -28,16 +36,8 @@ export interface LambdaRequest {
   detail: LambdaDetail;
 }
 
-interface PutSuccessEvent {
-  vivaApplicantStatusCodeList: VivaApplicationsStatusItem[];
-  workflowCompletions: VadaWorkflowCompletions;
-  caseKeys: CaseKeys;
-  caseState: string;
-  caseStatusType: string;
-}
-
 export interface Dependencies {
-  putSuccessEvent: (params: PutSuccessEvent) => Promise<void>;
+  triggerEvent: (params: SuccessEvent) => Promise<void>;
   updateCase: (keys: CaseKeys, newCompletions: VadaWorkflowCompletions) => Promise<void>;
   validateStatusCode: (
     statusList: VivaApplicationsStatusItem[],
@@ -58,9 +58,10 @@ function updateCaseCompletions(
       PK: keys.PK,
       SK: keys.SK,
     },
-    UpdateExpression: 'SET details.completions = :workflowCompletions',
+    UpdateExpression: 'SET details.completions = :workflowCompletions, updatedAt = :newUpdatedAt',
     ExpressionAttributeValues: {
       ':workflowCompletions': newCompletions,
+      ':newUpdatedAt': Date.now(),
     },
     ReturnValues: 'NONE',
   };
@@ -82,11 +83,6 @@ export async function syncCaseCompletions(input: LambdaRequest, dependencies: De
   }
 
   const latestWorkflowId = await dependencies.getLatestWorkflowId(personalNumber);
-  const workflowCompletions = await dependencies.getWorkflowCompletions({
-    personalNumber,
-    workflowId: latestWorkflowId,
-  });
-
   const userCase = await dependencies.getCaseOnWorkflowId(personalNumber, latestWorkflowId);
   if (!userCase) {
     return true;
@@ -96,9 +92,13 @@ export async function syncCaseCompletions(input: LambdaRequest, dependencies: De
     PK: userCase.PK,
     SK: userCase.SK,
   };
+  const workflowCompletions = await dependencies.getWorkflowCompletions({
+    personalNumber,
+    workflowId: latestWorkflowId,
+  });
   await dependencies.updateCase(caseKeys, workflowCompletions);
 
-  await dependencies.putSuccessEvent({
+  await dependencies.triggerEvent({
     vivaApplicantStatusCodeList,
     workflowCompletions,
     caseKeys,
@@ -111,7 +111,7 @@ export async function syncCaseCompletions(input: LambdaRequest, dependencies: De
 
 export const main = log.wrap(event => {
   return syncCaseCompletions(event, {
-    putSuccessEvent: putVivaMsEvent.syncCaseCompletionsSuccess,
+    triggerEvent: putVivaMsEvent.syncCaseCompletionsSuccess,
     updateCase: updateCaseCompletions,
     validateStatusCode: validateApplicationStatus,
     getLatestWorkflowId: completionsHelper.get.workflow.latest.id,

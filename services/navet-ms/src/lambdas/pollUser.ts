@@ -1,13 +1,16 @@
-import { putEvent } from '../libs/awsEventBridge';
-
 import log from '../libs/logs';
+import { putEvent } from '../libs/awsEventBridge';
+import civilRegistrationProvider from '../helpers/provider';
+import type { CivilRegistrationProvider } from '../helpers/types';
 
-import { requestNavetUser, getNavetPersonPost } from '../helpers/navet';
+type SuccessEvent = LambdaDetail;
 
-import type { NavetUser, CaseUser } from '../helpers/types';
+interface User {
+  personalNumber: string;
+}
 
 export interface LambdaDetail {
-  readonly user: CaseUser;
+  readonly user: User;
 }
 
 export interface Input {
@@ -15,43 +18,19 @@ export interface Input {
 }
 
 export interface Dependencies {
-  requestNavetUserXml: (personalNumber: string) => Promise<string>;
-  getParsedNavetPersonPost: (xml: string) => Promise<NavetUser>;
-  putSuccessEvent: (eventDetail: CaseUser, detailType: string, source: string) => Promise<void>;
+  provider: CivilRegistrationProvider;
+  triggerEvent: (params: SuccessEvent, detailType: string, source: string) => Promise<void>;
 }
 
-export async function pollUser(input: Input, dependencies: Dependencies) {
-  const { user } = input.detail;
-
-  const { requestNavetUserXml, getParsedNavetPersonPost, putSuccessEvent } = dependencies;
-
-  const navetXmlResponse = await requestNavetUserXml(user.personalNumber);
-  const navetUser = await getParsedNavetPersonPost(navetXmlResponse);
-  const eventDetail = getNavetPollEventDetail(navetUser);
-
-  await putSuccessEvent(eventDetail, 'navetMsPollUserSuccess', 'navetMs.pollUser');
-
+export async function pollUser(input: Input, dependencies: Dependencies): Promise<boolean> {
+  const user = await dependencies.provider.getUserInfo(input.detail.user.personalNumber);
+  await dependencies.triggerEvent({ user }, 'navetMsPollUserSuccess', 'navetMs.pollUser');
   return true;
-}
-
-function getNavetPollEventDetail(navetUser: NavetUser): CaseUser {
-  return {
-    personalNumber: navetUser.PersonId.PersonNr,
-    firstName: navetUser.Namn.Fornamn,
-    lastName: navetUser.Namn.Efternamn,
-    address: {
-      street: navetUser?.Adresser?.Folkbokforingsadress?.Utdelningsadress2,
-      postalCode: navetUser?.Adresser?.Folkbokforingsadress?.PostNr,
-      city: navetUser?.Adresser?.Folkbokforingsadress?.Postort,
-    },
-    civilStatus: navetUser.Civilstand.CivilstandKod,
-  };
 }
 
 export const main = log.wrap(async event => {
   return pollUser(event, {
-    requestNavetUserXml: requestNavetUser,
-    getParsedNavetPersonPost: getNavetPersonPost,
-    putSuccessEvent: putEvent,
+    provider: civilRegistrationProvider,
+    triggerEvent: putEvent,
   });
 });

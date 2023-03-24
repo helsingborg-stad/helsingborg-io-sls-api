@@ -1,36 +1,36 @@
 import log from '../libs/logs';
-
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
 import type { VivaApplicationsStatusItem } from '../types/vivaApplicationsStatus';
+import type { CaseUser } from '../types/caseItem';
 
-interface User {
-  personalNumber: string;
-}
-
-export interface LambdaRequest {
-  detail: User;
-}
-
-interface SuccessEvent {
-  user: User;
+export interface SuccessEvent {
+  user: CaseUser;
   status: VivaApplicationsStatusItem[];
 }
 
-interface Dependencies {
+export interface LambdaDetail {
+  user: CaseUser;
+}
+
+export interface LambdaRequest {
+  detail: LambdaDetail;
+}
+
+export interface Dependencies {
   getStatus: (personalNumber: string) => Promise<VivaApplicationsStatusItem[]>;
-  putSuccessEvent: (event: SuccessEvent) => Promise<void>;
+  triggerEvent: (params: SuccessEvent) => Promise<void>;
 }
 
 export async function checkApplicationStatus(
   input: LambdaRequest,
   dependencies: Dependencies
 ): Promise<boolean> {
-  const user = input.detail;
+  const { user } = input.detail;
 
   const status = await dependencies.getStatus(user.personalNumber);
 
-  await dependencies.putSuccessEvent({ user, status });
+  await dependencies.triggerEvent({ user, status });
 
   return true;
 }
@@ -38,6 +38,6 @@ export async function checkApplicationStatus(
 export const main = log.wrap(event =>
   checkApplicationStatus(event, {
     getStatus: vivaAdapter.applications.status,
-    putSuccessEvent: putVivaMsEvent.applicationStatusSuccess,
+    triggerEvent: putVivaMsEvent.applicationStatusSuccess,
   })
 );

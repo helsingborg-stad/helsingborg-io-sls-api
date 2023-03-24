@@ -14,6 +14,7 @@ interface CaseKeys {
 
 interface LambdaDetails {
   caseKeys: CaseKeys;
+  caseState: string;
 }
 
 export interface LambdaRequest {
@@ -49,12 +50,11 @@ export async function syncExpiryTime(
 ): Promise<boolean> {
   const { caseKeys } = input.detail;
 
-  const userCase = await dependencies.getCase(caseKeys);
-  const expireHours = expiryTime.getHoursOnStatusType(userCase.status.type);
+  const caseItem = await dependencies.getCase(caseKeys);
+  const expireHours = expiryTime.getHoursOnStatusType(caseItem.status.type);
   const newExpirationTime = millisecondsToSeconds(getFutureTimestamp(expireHours));
 
   await dependencies.updateCase(caseKeys, newExpirationTime);
-
   return true;
 }
 

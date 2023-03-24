@@ -16,7 +16,6 @@ provider:
   runtime: nodejs16.x
   stage: dev
   region: eu-north-1
-  endpointType: regional
   versionFunctions: false
   tracing:
     apiGateway: false
@@ -80,12 +79,6 @@ provider:
             - dynamodb:GetItem
           Resource:
             - !ImportValue ${self:custom.resourcesStage}-UsersTableArn
-
-        - Effect: Allow
-          Action:
-            - dynamodb:Query
-            - dynamodb:GetItem
-          Resource:
             - !ImportValue ${self:custom.resourcesStage}-FormsTableArn
 
         - Effect: Allow
@@ -103,11 +96,6 @@ provider:
               - ''
               - - !ImportValue ${self:custom.resourcesStage}-VivaPeriodBucketArn
                 - '/*'
-
-        - Effect: Allow
-          Action:
-            - s3:GetObject
-          Resource:
             - !ImportValue ${self:custom.resourcesStage}-EkbConfigBucketArn
             - !Join
               - ''
@@ -123,17 +111,9 @@ functions:
           pattern:
             source:
               - usersMs.findUser
-            detail-type:
-              - usersMsFindUserSuccess
-          retryPolicy:
-            maximumEventAge: 3600
-            maximumRetryAttempts: 3
-          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
-      - eventBridge:
-          pattern:
-            source:
               - vivaMs.submitApplication
             detail-type:
+              - usersMsFindUserSuccess
               - applicationReceivedSuccess
           retryPolicy:
             maximumEventAge: 3600
@@ -176,6 +156,7 @@ functions:
     timeout: 30
     events:
       - eventBridge:
+          enabled: false
           pattern:
             source:
               - vivaMs.personApplicationStatus
@@ -215,6 +196,21 @@ functions:
           arn: !ImportValue ${self:custom.stage}-VivaSubmissionQueueArn
           batchSize: 1
 
+  syncWorkflow:
+    handler: src/lambdas/syncWorkflow.main
+    timeout: 30
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - vivaMs.applicationStatus
+            detail-type:
+              - applicationStatusSuccess
+          retryPolicy:
+            maximumEventAge: 3600
+            maximumRetryAttempts: 3
+          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
+
   syncCaseCompletions:
     handler: src/lambdas/syncCaseCompletions.main
     timeout: 30
@@ -230,6 +226,34 @@ functions:
             maximumRetryAttempts: 3
           deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
 
+  decideCaseStatus:
+    handler: src/lambdas/decideCaseStatus.main
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - vivaMs.syncCaseCompletions
+            detail-type:
+              - 'syncSuccess'
+          retryPolicy:
+            maximumEventAge: 3600
+            maximumRetryAttempts: 3
+          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
+
+  syncExpiryTime:
+    handler: src/lambdas/syncExpiryTime.main
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - 'vivaMs.decideCaseStatus'
+            detail-type:
+              - decideCaseStatusSuccess
+          retryPolicy:
+            maximumEventAge: 3600
+            maximumRetryAttempts: 3
+          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
+
   checkCompletionsStatus:
     handler: src/lambdas/checkCompletionsStatus.main
     timeout: 30
@@ -237,9 +261,9 @@ functions:
       - eventBridge:
           pattern:
             source:
-              - vivaMs.syncCaseCompletions
+              - 'vivaMs.decideCaseStatus'
             detail-type:
-              - syncSuccess
+              - decideCaseStatusSuccess
             detail:
               caseState: [{ 'anything-but': 'VIVA_APPLICATION_LOCKED' }]
           retryPolicy:
@@ -308,74 +332,12 @@ functions:
     timeout: 30
     events:
       - eventBridge:
+          enabled: false
           pattern:
             source:
-              - cases.database
+              - vivaMs.createVivaCase
             detail-type:
-              - INSERT
-              - MODIFY
-            detail:
-              dynamodb:
-                NewImage:
-                  provider:
-                    S: ['VIVA']
-          retryPolicy:
-            maximumEventAge: 3600
-            maximumRetryAttempts: 3
-          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
-
-  syncWorkflow:
-    handler: src/lambdas/syncWorkflow.main
-    timeout: 30
-    events:
-      - eventBridge:
-          pattern:
-            source:
-              - bankId.collect
-            detail-type:
-              - BankIdCollectComplete
-          retryPolicy:
-            maximumEventAge: 3600
-            maximumRetryAttempts: 3
-          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
-
-  decideCaseStatus:
-    handler: src/lambdas/decideCaseStatus.main
-    events:
-      - eventBridge:
-          pattern:
-            source:
-              - vivaMs.syncWorkflow
-            detail-type:
-              - syncWorkflowSuccess
-          retryPolicy:
-            maximumEventAge: 3600
-            maximumRetryAttempts: 3
-          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
-
-  syncExpiryTime:
-    handler: src/lambdas/syncExpiryTime.main
-    events:
-      - eventBridge:
-          pattern:
-            source:
-              - casesApi.updateCase
-          retryPolicy:
-            maximumEventAge: 3600
-            maximumRetryAttempts: 3
-          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
-      - eventBridge:
-          pattern:
-            source:
-              - vivaMs.decideCaseStatus
-          retryPolicy:
-            maximumEventAge: 3600
-            maximumRetryAttempts: 3
-          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
-      - eventBridge:
-          pattern:
-            source:
-              - vivaMs.setCaseCompletions
+              - createSuccess
           retryPolicy:
             maximumEventAge: 3600
             maximumRetryAttempts: 3
@@ -386,6 +348,7 @@ functions:
     timeout: 30
     events:
       - eventBridge:
+          enabled: false
           pattern:
             source:
               - vivaMs.applicationStatus

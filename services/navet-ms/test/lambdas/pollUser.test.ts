@@ -1,15 +1,13 @@
-import { pollUser, Input, Dependencies } from '../../src/lambdas/pollUser';
-
-import { getNavetPersonPost } from '../../src/helpers/navet';
-
+import { pollUser } from '../../src/lambdas/pollUser';
+import type { Input, Dependencies } from '../../src/lambdas/pollUser';
 import type { CaseUser } from '../../src/helpers/types';
 
-const firstName = 'MockUser';
-const lastName = 'MockUsersson';
-const personalNumber = '199601011234';
-const city = 'Mock Town';
+const firstName = 'Petronella';
+const lastName = 'Malteskog';
+const personalNumber = '198602102389';
+const city = 'Stockholm';
 const postalCode = '12345';
-const street = 'Mock street 1337';
+const street = 'Kungsgatan 1';
 
 const mockUser: CaseUser = {
   firstName,
@@ -23,113 +21,70 @@ const mockUser: CaseUser = {
   },
 };
 
-interface MakeNavetXmlInput {
-  adress: {
-    street: string;
-    postalCode: string;
-    city: string;
-  };
-}
-function makeNavetXmlResponse(input: Partial<MakeNavetXmlInput> = {}) {
-  const { adress = mockUser.address } = input;
-  return `
-  <?xml version='1.0' encoding='UTF-8'?>
-  <S:Envelope xmlns:S="http://schemas.xmlsoap.org/soap/envelope/">
-      <S:Body>
-          <ns0:PersonpostXMLResponse xmlns:ns1="http://www.skatteverket.se/folkbokforing/na/personpostXML/v2" xmlns:ns0="http://xmls.skatteverket.se/se/skatteverket/folkbokforing/na/epersondata/V1">
-              <ns0:Folkbokforingsposter>
-                  <Folkbokforingspost>
-                      <Personpost>
-                          <PersonId>
-                              <PersonNr>${personalNumber}</PersonNr>
-                          </PersonId>
-                          <Fodelsedatum>${personalNumber.slice(0, -4)}</Fodelsedatum>
-                          <Namn>
-                              <Fornamn>${firstName}</Fornamn>
-                              <Efternamn>${lastName}</Efternamn>
-                          </Namn>
-                          ${
-                            Object.keys(adress).length > 0 &&
-                            `
-                            <Adresser>
-                                <Folkbokforingsadress>
-                                    <Utdelningsadress2>${adress.street}</Utdelningsadress2>
-                                    <PostNr>${adress.postalCode}</PostNr>
-                                    <Postort>${adress.city}</Postort>
-                                </Folkbokforingsadress>
-                            </Adresser>
-                            `
-                          }
-                          <Civilstand>
-                              <CivilstandKod>OG</CivilstandKod>
-                          </Civilstand>
-                      </Personpost>
-                  </Folkbokforingspost>
-              </ns0:Folkbokforingsposter>
-          </ns0:PersonpostXMLResponse>
-      </S:Body>
-  </S:Envelope>
-  `;
-}
-
-function makeDependencies(dependencies: Partial<Dependencies> = {}): Dependencies {
+function createDependencies(dependencies: Partial<Dependencies> = {}): Dependencies {
   return {
-    getParsedNavetPersonPost: getNavetPersonPost,
-    requestNavetUserXml: () => Promise.resolve(makeNavetXmlResponse()),
-    putSuccessEvent: () => Promise.resolve(),
+    provider: {
+      getUserInfo: () => Promise.resolve(mockUser),
+    },
+    triggerEvent: () => Promise.resolve(),
     ...dependencies,
   };
 }
 
-function makeInput(): Input {
+function createInput(params: Partial<Input> = {}): Input {
   return {
     detail: {
-      user: mockUser,
+      user: {
+        personalNumber,
+      },
     },
+    ...params,
   };
 }
 
 it('successfully fetches a navet user', async () => {
-  const putSuccessEventMock = jest.fn();
+  const eventMock = jest.fn();
 
   const result = await pollUser(
-    makeInput(),
-    makeDependencies({
-      putSuccessEvent: putSuccessEventMock,
+    createInput(),
+    createDependencies({
+      triggerEvent: eventMock,
     })
   );
 
   expect(result).toBe(true);
-  expect(putSuccessEventMock).toHaveBeenCalledWith(
-    mockUser,
+  expect(eventMock).toHaveBeenCalledWith(
+    {
+      user: mockUser,
+    },
     'navetMsPollUserSuccess',
     'navetMs.pollUser'
   );
 });
 
-it('successfully fetches a navet user without adress', async () => {
-  const putSuccessEventMock = jest.fn();
-
-  const navetUserXmlWithoutAdress = makeNavetXmlResponse({
-    adress: {},
-  } as MakeNavetXmlInput);
+it('successfully fetches a navet user without address', async () => {
+  const eventMock = jest.fn();
 
   const result = await pollUser(
-    makeInput(),
-    makeDependencies({
-      putSuccessEvent: putSuccessEventMock,
-      requestNavetUserXml: () => Promise.resolve(navetUserXmlWithoutAdress),
+    createInput(),
+    createDependencies({
+      provider: {
+        getUserInfo: () =>
+          Promise.resolve({
+            ...mockUser,
+            address: null,
+          }),
+      },
+      triggerEvent: eventMock,
     })
   );
 
   expect(result).toBe(true);
-  expect(putSuccessEventMock).toHaveBeenCalledWith(
+  expect(eventMock).toHaveBeenCalledWith(
     {
-      ...mockUser,
-      address: {
-        city: undefined,
-        postalCode: undefined,
-        street: undefined,
+      user: {
+        ...mockUser,
+        address: null,
       },
     },
     'navetMsPollUserSuccess',

@@ -1,30 +1,28 @@
 import uuid from 'uuid';
-
 import config from '../libs/config';
 import * as dynamoDb from '../libs/dynamoDb';
-
 import putUserEvent from '../helpers/putUserEvent';
 import log from '../libs/logs';
 
 export async function main(event) {
-  const userDetail = event.detail;
+  const { user } = event.detail;
 
   const checkFirstTimeLoginUserDetailKeys = ['personalNumber', 'firstName', 'lastName'].every(
     property =>
       // eslint-disable-next-line no-prototype-builtins
-      userDetail.hasOwnProperty(property)
+      user.hasOwnProperty(property)
   );
 
   if (checkFirstTimeLoginUserDetailKeys) {
-    await addUserToDynamoDb(userDetail);
-    await putUserEvent.createSuccess(userDetail);
+    await addUserToDynamoDb(user);
+    await putUserEvent.createSuccess(event.detail);
     log.writeInfo('User successfully added to the users table');
   }
 
   return true;
 }
 
-async function addUserToDynamoDb(userDetail) {
+async function addUserToDynamoDb(params) {
   const putParams = {
     TableName: config.users.tableName,
     Item: {
@@ -34,7 +32,7 @@ async function addUserToDynamoDb(userDetail) {
       mobilePhone: null,
       address: null,
       civilStatus: null,
-      ...userDetail,
+      ...params,
     },
   };
 

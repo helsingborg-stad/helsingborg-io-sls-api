@@ -25,6 +25,18 @@ const input: LambdaRequest = {
   detail: {
     user: {
       personalNumber: '199801011234',
+      firstName: 'MyFirstName',
+      lastName: 'MyLastName',
+      civilStatus: 'MyCivilStatus',
+      mobilePhone: 'MyMobilePhone',
+      email: null,
+      address: {
+        city: 'MyCity',
+        street: 'MyStreet',
+        postalCode: 'MyPostalCode',
+      },
+      uuid: 'MyUuid',
+      createdAt: 123,
     },
   },
 };
@@ -68,7 +80,7 @@ it('Syncs cases', async () => {
   expect(result).toBe(true);
   expect(dependencies.syncWorkflowSuccess).toHaveBeenCalledWith({
     caseKeys,
-    workflow: dependencies.workflow,
+    caseState: undefined,
   });
 });
 
