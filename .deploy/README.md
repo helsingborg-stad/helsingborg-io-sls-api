@@ -4,7 +4,6 @@
 
 - [Helsingborg IO SLS API - Deploy](#helsingborg-io-sls-api---deploy)
   - [Table of Contents](#table-of-contents)
-  - [Deploy script](#deploy-script)
   - [Buildspecs](#buildspecs)
     - [buildspec.yml](#buildspecyml)
     - [buildspec-test.yml](#buildspec-testyml)
@@ -17,17 +16,6 @@
       - [Production/Staging/Test](#productionstagingtest)
       - [Develop](#develop)
       - [Release](#release)
-
-## Deploy script
-
-The deploy script is located(with helpers) in this folder.  
-A deploy is triggered by running `node .deploy /path/to/cached-sha-file` from the project root folder.  
-The deploy script will check for cached previous git SHA from successful deploys and make a list of services to deploy based on this diff.
-
-If anything changes in libs folder all services will be deployes.
-If anything changes in one or more services folder, those services will be deployed but nothing else.
-
-The deploy script will find any exports and imports to do the deploys in the correct order based on what service import from an exporting service.
 
 ## Buildspecs
 
