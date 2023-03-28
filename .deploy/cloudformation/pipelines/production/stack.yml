@@ -52,9 +52,6 @@ Resources:
       Source:
         Type: CODEPIPELINE
         BuildSpec: .deploy/cloudformation/pipelines/production/buildspec.yml
-      Cache:
-        Location: !Sub '${S3BucketArtifact}/cache'
-        Type: S3
 
   # CodeBuildProjectTest:
   #   Type: AWS::CodeBuild::Project
