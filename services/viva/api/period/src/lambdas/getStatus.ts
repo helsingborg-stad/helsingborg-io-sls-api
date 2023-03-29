@@ -1,23 +1,42 @@
 import { wrappers } from '../libs/lambdaWrapper';
-import { getCurrentPeriodInfo } from '../helpers/vivaPeriod';
-import { getConfigFromS3, formatHandlebarsDateMessage } from '../helpers/vivaPeriod';
+import {
+  getVivaPeriodInfo,
+  getCurrentPeriodInfo,
+  getConfigFromS3,
+  formatHandlebarsDateMessage,
+  isProviderPeriodOpen,
+  isVivaApplicantStatusEligible,
+} from '../helpers/vivaPeriod';
+import type { PeriodConfig, ProviderPeriodInfo } from '../helpers/vivaPeriod';
 
-import type { PeriodConfig } from '../helpers/vivaPeriod';
-
-export interface Dependencies {
-  getConfig(): Promise<PeriodConfig>;
+export interface Input {
+  personalNumber: string;
 }
 
 export interface Response {
   message: string | null;
 }
 
-export async function getStatus(_: never, dependencies: Dependencies): Promise<Response> {
-  const config = await dependencies.getConfig();
+export interface Dependencies {
+  getProviderPeriodInfo(personalNumber: string): Promise<ProviderPeriodInfo>;
+  isApplicantStatusEligible(personalNumber: string): Promise<boolean>;
+  getConfig(): Promise<PeriodConfig>;
+}
 
+export async function getStatus(input: Input, dependencies: Dependencies): Promise<Response> {
+  const providerPeriodInfo = await dependencies.getProviderPeriodInfo(input.personalNumber);
+  const config = await dependencies.getConfig();
   const { currentDate, periodOpenDate, isPeriodOpen } = getCurrentPeriodInfo(config);
 
-  const message = isPeriodOpen
+  const isApplicantStatusEligible = await dependencies.isApplicantStatusEligible(
+    input.personalNumber
+  );
+
+  const isCurrentPeriodOpen = isProviderPeriodOpen(currentDate, providerPeriodInfo);
+  const isApplicantEligibleToApply = isCurrentPeriodOpen && isApplicantStatusEligible;
+  const canApplicantApply = isPeriodOpen || isApplicantEligibleToApply;
+
+  const message = canApplicantApply
     ? null
     : formatHandlebarsDateMessage(config.responseMessageFormat, { currentDate, periodOpenDate });
 
@@ -27,5 +46,7 @@ export async function getStatus(_: never, dependencies: Dependencies): Promise<R
 }
 
 export const main = wrappers.restJSON.wrap(getStatus, {
+  getProviderPeriodInfo: getVivaPeriodInfo,
+  isApplicantStatusEligible: isVivaApplicantStatusEligible,
   getConfig: getConfigFromS3,
 });

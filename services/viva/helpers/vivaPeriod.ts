@@ -1,15 +1,27 @@
 import dayjs from 'dayjs';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import advancedFormat from 'dayjs/plugin/advancedFormat';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import 'dayjs/locale/sv';
-
 import S3 from '../libs/S3';
 import handlebars from './htmlTemplate';
-
+import vadaClient from './vivaAdapterRequestClient';
+import {
+  VIVA_STATUS_APPLICATION_PERIOD_OPEN,
+  VIVA_STATUS_CASE_EXISTS,
+  VIVA_STATUS_WEB_APPLICATION_ACTIVE,
+  VIVA_STATUS_WEB_APPLICATION_ALLOWED,
+} from './constants';
+import validateApplicationStatus from './validateApplicationStatus';
 import type { Dayjs } from 'dayjs';
 
 dayjs.extend(isSameOrAfter);
 dayjs.extend(advancedFormat);
+dayjs.extend(isSameOrBefore);
+
+export interface ProviderPeriodInfo {
+  readonly end: Dayjs | null;
+}
 
 export interface PeriodConfig {
   readonly responseMessageFormat: string;
@@ -25,6 +37,29 @@ export interface PeriodInfo {
 export interface FormattingInput {
   currentDate: Dayjs;
   periodOpenDate: Dayjs;
+}
+
+export async function getVivaPeriodInfo(personalNumber: string): Promise<ProviderPeriodInfo> {
+  const vivaApplication = await vadaClient.applications.get(personalNumber);
+  return {
+    end: dayjs(vivaApplication.period.end) ?? null,
+  };
+}
+
+export function isProviderPeriodOpen(currentDate: Dayjs, periodInfo: ProviderPeriodInfo): boolean {
+  return currentDate.isSameOrBefore(periodInfo.end, 'D');
+}
+
+export async function isVivaApplicantStatusEligible(personalNumber: string): Promise<boolean> {
+  const requiredStatusCodes = [
+    VIVA_STATUS_APPLICATION_PERIOD_OPEN,
+    VIVA_STATUS_CASE_EXISTS,
+    VIVA_STATUS_WEB_APPLICATION_ACTIVE,
+    VIVA_STATUS_WEB_APPLICATION_ALLOWED,
+  ];
+
+  const statusCodes = await vadaClient.applications.status(personalNumber);
+  return validateApplicationStatus(statusCodes, requiredStatusCodes);
 }
 
 export function getSafe<T>(list: T[], index: number): T {
