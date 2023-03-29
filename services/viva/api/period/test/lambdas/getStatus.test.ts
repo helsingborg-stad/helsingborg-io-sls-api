@@ -1,6 +1,8 @@
 import dayjs from 'dayjs';
-import type { Dependencies, Response } from '../../src/lambdas/getStatus';
+import type { Dependencies, Response, Input } from '../../src/lambdas/getStatus';
 import { getStatus } from '../../src/lambdas/getStatus';
+
+const MOCK_PERSONAL_NUMBER = '191212121212';
 
 const MOCK_TIME = '2023-02-02T12:00:00Z';
 const SWEDISH_MONTH_NAMES = [
@@ -19,14 +21,29 @@ const SWEDISH_MONTH_NAMES = [
 ];
 
 const MOCK_PERIOD_OPEN_DATES = Array.from({ length: 12 }, (_, index) =>
-  dayjs('2023-01-02T00:00:00Z').add(index, 'month').toISOString()
+  dayjs('2023-01-09T00:00:00Z').add(index, 'month').toISOString()
 );
+
+function createMockInput(personalNumber: string): Input {
+  return {
+    personalNumber,
+  };
+}
 
 function createMockDependencies(
   periodOpenDate: string,
-  responseMessageFormat?: string
+  responseMessageFormat?: string,
+  providerPeriodInfo?: { end: string | null }
 ): Dependencies {
   return {
+    getProviderPeriodInfo() {
+      return Promise.resolve({
+        end: dayjs(providerPeriodInfo?.end) ?? null,
+      });
+    },
+    isApplicantStatusEligible() {
+      return Promise.resolve(true);
+    },
     getConfig() {
       return Promise.resolve({
         responseMessageFormat:
@@ -49,14 +66,17 @@ describe('viva/period getStatus', () => {
   ])(
     'return correctly formatted message when before period open date',
     async (periodOpenDate, expectedMessage) => {
-      const result = await getStatus(undefined as never, createMockDependencies(periodOpenDate));
+      const result = await getStatus(
+        createMockInput(MOCK_PERSONAL_NUMBER),
+        createMockDependencies(periodOpenDate, undefined, { end: '2023-01-31T00:00:00Z' })
+      );
       expect(result.message).toBe(expectedMessage);
     }
   );
 
   it("return 'null' message when on/after period open date", async () => {
     const result = await getStatus(
-      undefined as never,
+      createMockInput(MOCK_PERSONAL_NUMBER),
       createMockDependencies('2023-02-01T00:00:00Z')
     );
     expect(result.message).toBeNull();
@@ -74,8 +94,8 @@ describe('viva/period getStatus', () => {
     jest.setSystemTime(mockDate.unix() * 1000);
 
     const result = await getStatus(
-      undefined as never,
-      createMockDependencies(dayjs().add(1, 'day').toISOString(), '{{ nextMonth }}')
+      createMockInput(MOCK_PERSONAL_NUMBER),
+      createMockDependencies(dayjs().add(1, 'day').toISOString(), '{{ nextMonth }}', { end: null })
     );
 
     expect(result.message).toBe(expectedMonth);
@@ -89,7 +109,13 @@ describe('viva/period getStatus', () => {
       const slightlyBeforeMockDate = dayjs(MOCK_PERIOD_OPEN_DATES[index]).subtract(1, 'h');
       jest.setSystemTime(slightlyBeforeMockDate.unix() * 1000);
 
-      const result = await getStatus(undefined as never, {
+      const result = await getStatus(createMockInput(MOCK_PERSONAL_NUMBER), {
+        getProviderPeriodInfo() {
+          return Promise.resolve({ end: null });
+        },
+        isApplicantStatusEligible() {
+          return Promise.resolve(true);
+        },
         getConfig() {
           return Promise.resolve({
             responseMessageFormat: '{{ openDate }}',
@@ -107,5 +133,40 @@ describe('viva/period getStatus', () => {
     );
 
     expect(messages).toEqual(expectedDates);
+  });
+
+  it('returns null when period is closed in config but applicant is eligible to apply', async () => {
+    const result = await getStatus(
+      createMockInput(MOCK_PERSONAL_NUMBER),
+      createMockDependencies(
+        '2023-02-09T00:00:00Z',
+        'nextMonth: {{ nextMonth }}, openDate: {{ openDate }}',
+        { end: '2023-02-28T00:00:00Z' }
+      )
+    );
+    expect(result.message).toBeNull();
+  });
+
+  it('returns message when period is closed in config and applicant is NOT eligible to apply', async () => {
+    const mockTimeMs = dayjs('2023-03-01T10:00:00Z').unix() * 1000;
+    jest.useFakeTimers('modern').setSystemTime(mockTimeMs);
+
+    const result = await getStatus(createMockInput(MOCK_PERSONAL_NUMBER), {
+      getProviderPeriodInfo() {
+        return Promise.resolve({
+          end: dayjs('2023-04-31T00:00:00Z'),
+        });
+      },
+      isApplicantStatusEligible() {
+        return Promise.resolve(false);
+      },
+      getConfig() {
+        return Promise.resolve({
+          responseMessageFormat: 'nextMonth: {{ nextMonth }}, openDate: {{ openDate }}',
+          monthlyOpenDates: MOCK_PERIOD_OPEN_DATES,
+        });
+      },
+    });
+    expect(result.message).toBe('nextMonth: april, openDate: 9e mars');
   });
 });
