@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import advancedFormat from 'dayjs/plugin/advancedFormat';
-import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import isBetween from 'dayjs/plugin/isBetween';
 import 'dayjs/locale/sv';
 import S3 from '../libs/S3';
 import handlebars from './htmlTemplate';
@@ -17,9 +17,10 @@ import type { Dayjs } from 'dayjs';
 
 dayjs.extend(isSameOrAfter);
 dayjs.extend(advancedFormat);
-dayjs.extend(isSameOrBefore);
+dayjs.extend(isBetween);
 
 export interface ProviderPeriodInfo {
+  readonly start: Dayjs | null;
   readonly end: Dayjs | null;
 }
 
@@ -42,12 +43,13 @@ export interface FormattingInput {
 export async function getVivaPeriodInfo(personalNumber: string): Promise<ProviderPeriodInfo> {
   const vivaApplication = await vadaClient.applications.get(personalNumber);
   return {
+    start: dayjs(vivaApplication.period.start) ?? null,
     end: dayjs(vivaApplication.period.end) ?? null,
   };
 }
 
 export function isProviderPeriodOpen(currentDate: Dayjs, periodInfo: ProviderPeriodInfo): boolean {
-  return currentDate.isSameOrBefore(periodInfo.end, 'D');
+  return currentDate.isBetween(periodInfo.start, periodInfo.end, 'M', '[]');
 }
 
 export async function isVivaApplicantStatusEligible(personalNumber: string): Promise<boolean> {
