@@ -160,7 +160,7 @@ const applicantFormProperties = {
 
 function getMockPeriodConfig(openDateIso?: string): Promise<PeriodConfig> {
   return Promise.resolve({
-    monthlyOpenDates: [openDateIso ?? '2022-01-01T00:00:00Z'],
+    monthlyOpenDates: [openDateIso ?? '2022-01-01T12:00:00Z'],
     responseMessageFormat: '',
   });
 }
@@ -347,6 +347,21 @@ describe('createVivaCase', () => {
 
     expect(result).toBe(true);
     expect(createCaseMock).toHaveBeenCalledWith(expectedParameters);
+  });
+
+  it('successfully creates a recurring application case if user is approved to apply even if custom period is not open', async () => {
+    const lambdaInput = createLambdaInput();
+    const createCaseMock = jest.fn();
+
+    const result = await createVivaCase(
+      lambdaInput,
+      createMockDependencies({
+        createCase: createCaseMock,
+        getPeriodConfig: () => getMockPeriodConfig('2022-02-09T10:00:00Z'),
+      })
+    );
+
+    expect(result).toBe(true);
   });
 
   it('successfully creates a prepopulated recurring application case', async () => {
@@ -617,24 +632,32 @@ describe('createVivaCase', () => {
   });
 
   it('does not creates a recurring application case if period is not open', async () => {
-    const lambdaInput = createLambdaInput();
     const createCaseMock = jest.fn();
 
     const result = await createVivaCase(
-      lambdaInput,
+      {
+        detail: {
+          user,
+          myPages: {
+            idenclair: '01-2021-09-30/R37992',
+            client: {
+              pnumber: user.personalNumber,
+              fname: user.firstName,
+              lname: user.lastName,
+            },
+            persons: null,
+          },
+          application: {
+            period: {
+              start: '2022-02-01',
+              end: '2022-02-28',
+            },
+          },
+        },
+      },
       createMockDependencies({
         createCase: createCaseMock,
-        getRecurringFormId: () => Promise.resolve(readParametersResponse.recurringFormId),
-        getLastUpdatedCase: () => Promise.resolve(undefined),
-        getCaseListByPeriod: () => Promise.resolve({ Items: [], Count: 0, ScannedCount: 1 }),
-        getFormTemplates: () => Promise.resolve({}),
-        createInitialForms: () =>
-          Promise.resolve({
-            [readParametersResponse.recurringFormId]: defaultFormProperties,
-            [readParametersResponse.randomCheckFormId]: defaultFormProperties,
-            [readParametersResponse.completionFormId]: defaultFormProperties,
-          }),
-        getPeriodConfig: () => getMockPeriodConfig('2022-01-01T00:01:00Z'),
+        getPeriodConfig: () => getMockPeriodConfig('2022-01-09T00:00:00Z'),
       })
     );
 

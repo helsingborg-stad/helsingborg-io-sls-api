@@ -3,8 +3,7 @@ import type { Dependencies, Response, Input } from '../../src/lambdas/getStatus'
 import { getStatus } from '../../src/lambdas/getStatus';
 
 const MOCK_PERSONAL_NUMBER = '191212121212';
-
-const MOCK_TIME = '2023-02-02T12:00:00Z';
+const MOCK_TIME = '2022-02-01T12:00:00Z';
 const SWEDISH_MONTH_NAMES = [
   'januari',
   'februari',
@@ -21,7 +20,7 @@ const SWEDISH_MONTH_NAMES = [
 ];
 
 const MOCK_PERIOD_OPEN_DATES = Array.from({ length: 12 }, (_, index) =>
-  dayjs('2023-01-09T00:00:00Z').add(index, 'month').toISOString()
+  dayjs('2022-01-01T12:00:00Z').add(index, 'month').toISOString()
 );
 
 function createMockInput(personalNumber: string): Input {
@@ -33,11 +32,12 @@ function createMockInput(personalNumber: string): Input {
 function createMockDependencies(
   periodOpenDate: string,
   responseMessageFormat?: string,
-  providerPeriodInfo?: { end: string | null }
+  providerPeriodInfo?: { start: string | null; end: string | null }
 ): Dependencies {
   return {
     getProviderPeriodInfo() {
       return Promise.resolve({
+        start: dayjs(providerPeriodInfo?.start) ?? null,
         end: dayjs(providerPeriodInfo?.end) ?? null,
       });
     },
@@ -61,14 +61,17 @@ describe('viva/period getStatus', () => {
   });
 
   it.each([
-    ['2023-02-02T12:00:01.000Z', 'nextMonth: mars, openDate: 2a februari'],
-    ['2023-02-03T12:00:00.000Z', 'nextMonth: mars, openDate: 3e februari'],
+    ['2022-02-02T12:00:01.000Z', 'nextMonth: mars, openDate: 2a februari'],
+    ['2022-02-03T12:00:00.000Z', 'nextMonth: mars, openDate: 3e februari'],
   ])(
     'return correctly formatted message when before period open date',
     async (periodOpenDate, expectedMessage) => {
       const result = await getStatus(
         createMockInput(MOCK_PERSONAL_NUMBER),
-        createMockDependencies(periodOpenDate, undefined, { end: '2023-01-31T00:00:00Z' })
+        createMockDependencies(periodOpenDate, undefined, {
+          start: '2022-01-01T00:00:00Z',
+          end: '2022-01-31T00:00:00Z',
+        })
       );
       expect(result.message).toBe(expectedMessage);
     }
@@ -85,17 +88,20 @@ describe('viva/period getStatus', () => {
   it.each(
     SWEDISH_MONTH_NAMES.map((monthName, index) => [
       monthName,
-      dayjs('2023-01-01T00:00:00Z')
+      dayjs('2022-01-01T12:00:00Z')
         .add(index - 1, 'month')
         .toISOString(),
     ])
   )("replaces correct nextMonth '%s' for '%s'", async (expectedMonth, mockDateString) => {
-    const mockDate = dayjs(mockDateString);
-    jest.setSystemTime(mockDate.unix() * 1000);
+    const mockDateMs = dayjs(mockDateString).unix() * 1000;
+    jest.useFakeTimers('modern').setSystemTime(mockDateMs);
 
     const result = await getStatus(
       createMockInput(MOCK_PERSONAL_NUMBER),
-      createMockDependencies(dayjs().add(1, 'day').toISOString(), '{{ nextMonth }}', { end: null })
+      createMockDependencies(dayjs().add(1, 'day').toISOString(), '{{ nextMonth }}', {
+        start: '2021-01-01T12:00:00Z',
+        end: '2021-01-31T12:00:00Z',
+      })
     );
 
     expect(result.message).toBe(expectedMonth);
@@ -111,7 +117,10 @@ describe('viva/period getStatus', () => {
 
       const result = await getStatus(createMockInput(MOCK_PERSONAL_NUMBER), {
         getProviderPeriodInfo() {
-          return Promise.resolve({ end: null });
+          return Promise.resolve({
+            start: dayjs('2021-01-01T12:00:00Z'),
+            end: dayjs('2021-01-31T12:00:00Z'),
+          });
         },
         isApplicantStatusEligible() {
           return Promise.resolve(true);
@@ -139,23 +148,18 @@ describe('viva/period getStatus', () => {
     const result = await getStatus(
       createMockInput(MOCK_PERSONAL_NUMBER),
       createMockDependencies(
-        '2023-02-09T00:00:00Z',
+        '2022-01-01T2:00:00Z',
         'nextMonth: {{ nextMonth }}, openDate: {{ openDate }}',
-        { end: '2023-02-28T00:00:00Z' }
+        { start: null, end: null }
       )
     );
     expect(result.message).toBeNull();
   });
 
   it('returns message when period is closed in config and applicant is NOT eligible to apply', async () => {
-    const mockTimeMs = dayjs('2023-03-01T10:00:00Z').unix() * 1000;
-    jest.useFakeTimers('modern').setSystemTime(mockTimeMs);
-
     const result = await getStatus(createMockInput(MOCK_PERSONAL_NUMBER), {
       getProviderPeriodInfo() {
-        return Promise.resolve({
-          end: dayjs('2023-04-31T00:00:00Z'),
-        });
+        return Promise.resolve({ start: null, end: null });
       },
       isApplicantStatusEligible() {
         return Promise.resolve(false);
@@ -167,6 +171,7 @@ describe('viva/period getStatus', () => {
         });
       },
     });
-    expect(result.message).toBe('nextMonth: april, openDate: 9e mars');
+
+    expect(result.message).toBe('nextMonth: januari, openDate: 1a december');
   });
 });
