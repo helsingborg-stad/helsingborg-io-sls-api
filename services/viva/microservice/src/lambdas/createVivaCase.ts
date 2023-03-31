@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import S3 from '../libs/S3';
 import config from '../libs/config';
 import params from '../libs/params';
@@ -21,7 +22,6 @@ import type { PeriodConfig } from '../helpers/vivaPeriod';
 import type { ICaseFactory } from '../helpers/case/CaseFactory';
 import type { VivaParametersResponse } from '../types/ssmParameters';
 import type { EventDetailCaseKeys } from '../types/eventDetail';
-import dayjs from 'dayjs';
 
 interface DynamoDbQueryOutput {
   Items: CaseItem[];

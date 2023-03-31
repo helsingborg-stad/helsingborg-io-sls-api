@@ -49,7 +49,7 @@ export async function getVivaPeriodInfo(personalNumber: string): Promise<Provide
 }
 
 export function isProviderPeriodOpen(currentDate: Dayjs, periodInfo: ProviderPeriodInfo): boolean {
-  return currentDate.isBetween(periodInfo.start, periodInfo.end, 'M', '[]');
+  return currentDate.isBetween(periodInfo.start, periodInfo.end, 'day', '[]');
 }
 
 export async function isVivaApplicantStatusEligible(personalNumber: string): Promise<boolean> {
