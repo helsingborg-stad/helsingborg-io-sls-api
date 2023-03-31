@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import S3 from '../libs/S3';
 import config from '../libs/config';
 import params from '../libs/params';
@@ -9,7 +10,7 @@ import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import createCaseHelper from '../helpers/createCase';
 import populateFormWithVivaChildren from '../helpers/populateForm';
 import { getCaseListByPeriod, getLastUpdatedCase, getFormTemplates } from '../helpers/dynamoDb';
-import { getConfigFromS3, getCurrentPeriodInfo } from '../helpers/vivaPeriod';
+import { getConfigFromS3, getCurrentPeriodInfo, isProviderPeriodOpen } from '../helpers/vivaPeriod';
 
 import { CasePersonRole } from '../types/caseItem';
 import EkbCaseFactory from '../helpers/case/EkbCaseFactory';
@@ -102,8 +103,15 @@ export async function createVivaCase(
   }
 
   const periodConfig = await dependencies.getPeriodConfig();
-  const { isPeriodOpen } = getCurrentPeriodInfo(periodConfig);
-  if (!isPeriodOpen) {
+  const { isPeriodOpen, currentDate } = getCurrentPeriodInfo(periodConfig);
+  const isCurrentPeriodOpen = isProviderPeriodOpen(currentDate, {
+    start: dayjs(application.period.start),
+    end: dayjs(application.period.end),
+  });
+
+  const canApplicantApply = isPeriodOpen || isCurrentPeriodOpen;
+
+  if (!canApplicantApply) {
     return true;
   }
 
