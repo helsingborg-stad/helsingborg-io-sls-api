@@ -39,6 +39,7 @@ beforeEach(() => {
     requestId: 'requestId',
     postVivaApplication: () => Promise.resolve({ status: 'OK', id: postVivaResponseId }),
     putSuccessEvent: () => Promise.resolve(),
+    triggerSubmitWithError: () => Promise.resolve(),
     readParams: () => Promise.resolve({ newApplicationFormId, recurringFormId: recurrentFormId }),
     updateCase: () => Promise.resolve(),
     attachmentFromAnswers: () => Promise.resolve([]),

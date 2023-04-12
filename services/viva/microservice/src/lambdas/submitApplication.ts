@@ -38,22 +38,30 @@ interface SuccessEvent {
   personalNumber: string;
 }
 
+interface ErrorEvent {
+  messageId: string;
+  caseId: string;
+  errorDetails: VadaError;
+  errorCode: string;
+}
+
+export interface LambdaRequest {
+  messageId: string;
+  caseItem: CaseItem;
+}
+
 export interface Dependencies {
   requestId: string;
   readParams: (envsKeyName: string) => Promise<ParamsReadResponse>;
   updateCase: (params: CaseKeys, workflowId: string) => Promise<void>;
   postVivaApplication: (params: PostApplicationsPayload) => Promise<PostApplicationsResponse>;
   putSuccessEvent: (params: SuccessEvent) => Promise<void>;
+  triggerSubmitWithError: (params: ErrorEvent) => Promise<void>;
   attachmentFromAnswers: (
     personalNumber: PersonalNumber,
     answerList: CaseFormAnswer[]
   ) => Promise<VivaAttachment[]>;
   isAnswerAttachment: (answer: CaseFormAnswer) => boolean;
-}
-
-export interface LambdaRequest {
-  messageId: string;
-  caseItem: CaseItem;
 }
 
 export function updateVivaCase(keys: CaseKeys, workflowId: string): Promise<void> {
@@ -120,6 +128,28 @@ export async function submitApplication(
   );
 
   if (vadaError) {
+    const vivaErrorCode = vadaError.vadaResponse.error?.details?.errorCode ?? null;
+    const vivaErrorMessage = vadaError.vadaResponse.error?.details?.errorMessage ?? null;
+
+    if (vivaErrorCode === '1014') {
+      const errorMessage = `Viva responded with error code ${vivaErrorCode}. Will NOT retry.`;
+      log.writeWarn(errorMessage, {
+        messageId,
+        caseId,
+        vivaErrorCode,
+        vivaErrorMessage,
+      });
+
+      await dependencies.triggerSubmitWithError({
+        messageId,
+        caseId,
+        errorDetails: vadaError,
+        errorCode: vivaErrorCode,
+      });
+
+      return true;
+    }
+
     throw new TraceException(
       'Failed to submit Viva application. Will retry.',
       dependencies.requestId,
@@ -127,8 +157,8 @@ export async function submitApplication(
         messageId,
         caseId,
         httpStatusCode: vadaError.status,
-        vivaErrorCode: vadaError.vadaResponse.error?.details?.errorCode ?? null,
-        vivaErrorMessage: vadaError.vadaResponse.error?.details?.errorMessage ?? null,
+        vivaErrorCode,
+        vivaErrorMessage,
       }
     );
   }
@@ -169,6 +199,7 @@ export const main = log.wrap((event: SQSEvent, context: Context) => {
       updateCase: updateVivaCase,
       postVivaApplication: vivaAdapter.applications.post,
       putSuccessEvent: putVivaMsEvent.applicationReceivedSuccess,
+      triggerSubmitWithError: putVivaMsEvent.applicationSubmitWithError,
       attachmentFromAnswers: attachment.createFromAnswers,
       isAnswerAttachment: attachment.isAnswerAttachment,
     }
