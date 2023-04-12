@@ -26,7 +26,10 @@ import {
   CLOSED_RANDOM_CHECK_REJECTED_VIVA,
 } from '../../../../libs/constants';
 
-export type StatusCollection = Record<MetricsKey, Record<string, number>>;
+export type StatusCollection = {
+  [MetricsKey.EKB_CASES_OPEN_TOTAL]: Record<string, number>;
+  [MetricsKey.EKB_CASES_CLOSED_TOTAL]: Record<string, number>;
+};
 
 function casesToStatusCollectionReducer(
   accumulated: StatusCollection,
