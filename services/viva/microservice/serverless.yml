@@ -196,6 +196,21 @@ functions:
           arn: !ImportValue ${self:custom.stage}-VivaSubmissionQueueArn
           batchSize: 1
 
+  handleApplicationSubmitWithError:
+    handler: src/lambdas/handleApplicationSubmitWithError.main
+    timeout: 30
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - vivaMs.applicationStatus
+            detail-type:
+              - applicationSubmitWithError
+          retryPolicy:
+            maximumEventAge: 3600
+            maximumRetryAttempts: 3
+          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
+
   syncWorkflow:
     handler: src/lambdas/syncWorkflow.main
     timeout: 30
