@@ -46,10 +46,20 @@ export class AwsSqsService implements SqsService {
   private async getQueueApproximateMessageCount(queueUrl: string): Promise<number> {
     const command = new GetQueueAttributesCommand({
       QueueUrl: queueUrl,
-      AttributeNames: ['ApproximateNumberOfMessages'],
+      AttributeNames: ['ApproximateNumberOfMessages', 'ApproximateNumberOfMessagesNotVisible'],
     });
 
     const result = await this.sqsClient.send(command);
-    return parseInt(result.Attributes?.['ApproximateNumberOfMessages'] ?? '-1', 10);
+    const numberOfMessagesAvailable = parseInt(
+      result.Attributes?.['ApproximateNumberOfMessages'] ?? '-1',
+      10
+    );
+    const numberOfMessagesInFlight = parseInt(
+      result.Attributes?.['ApproximateNumberOfMessagesNotVisible'] ?? '-1',
+      10
+    );
+
+    if (numberOfMessagesAvailable == -1 && numberOfMessagesInFlight == -1) return -1;
+    return Math.max(0, numberOfMessagesAvailable) + Math.max(0, numberOfMessagesInFlight);
   }
 }

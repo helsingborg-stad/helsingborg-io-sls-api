@@ -19,25 +19,41 @@ describe('AWS SQS Service', () => {
                 'http://example.com/000000000000/queue-A',
                 'http://example.com/000000000000/queue-B',
                 'http://example.com/000000000000/queue-C',
+                'http://example.com/000000000000/queue-D',
+                'http://example.com/000000000000/queue-E',
               ],
             };
           case 'ListDeadLetterSourceQueuesCommand': {
             const url = (command as ListDeadLetterSourceQueuesCommand).input.QueueUrl;
-            return url?.includes('queue-B') ? { queueUrls: ['a'] } : {};
+            return url?.includes('queue-B') || url?.includes('queue-D') ? { queueUrls: ['a'] } : {};
           }
           case 'GetQueueAttributesCommand': {
             const url = (command as GetQueueAttributesCommand).input.QueueUrl;
             return url?.includes('queue-B')
-              ? { Attributes: { ApproximateNumberOfMessages: '5' } }
+              ? {
+                  Attributes: {
+                    ApproximateNumberOfMessages: '5',
+                    ApproximateNumberOfMessagesNotVisible: '0',
+                  },
+                }
               : url?.includes('queue-C')
-              ? { Attributes: { ApproximateNumberOfMessages: '100000' } }
+              ? {
+                  Attributes: {
+                    ApproximateNumberOfMessages: '100000',
+                    ApproximateNumberOfMessagesNotVisible: '900',
+                  },
+                }
+              : url?.includes('queue-D')
+              ? { Attributes: { ApproximateNumberOfMessages: '2' } }
+              : url?.includes('queue-E')
+              ? { Attributes: { ApproximateNumberOfMessagesNotVisible: '7' } }
               : {};
           }
         }
       },
     } as unknown as SQSClient;
 
-    const expected = expect.arrayContaining<Queue>([
+    const expected = [
       {
         name: 'queue-A',
         approximateMessageCount: -1,
@@ -50,14 +66,25 @@ describe('AWS SQS Service', () => {
       },
       {
         name: 'queue-C',
-        approximateMessageCount: 100000,
+        approximateMessageCount: 100900,
         isDeadLetterQueue: false,
       },
-    ]);
+      {
+        name: 'queue-D',
+        approximateMessageCount: 2,
+        isDeadLetterQueue: true,
+      },
+      {
+        name: 'queue-E',
+        approximateMessageCount: 7,
+        isDeadLetterQueue: false,
+      },
+    ];
 
     const service = new AwsSqsService(mockClient);
     const result = await service.getQueues();
 
-    expect(result).toEqual(expected);
+    expect(result).toEqual(expect.arrayContaining<Queue>(expected));
+    expect(result).toHaveLength(expected.length);
   });
 });
