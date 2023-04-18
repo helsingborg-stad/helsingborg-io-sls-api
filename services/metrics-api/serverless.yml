@@ -46,6 +46,13 @@ provider:
             - kms:GenerateDataKey
           Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
 
+        - Effect: Allow
+          Action:
+            - sqs:ListQueues
+            - sqs:ListDeadLetterSourceQueues
+            - sqs:GetQueueAttributes
+          Resource: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:*
+
 functions:
   get:
     handler: src/lambdas/get.main

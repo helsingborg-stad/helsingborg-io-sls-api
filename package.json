@@ -66,6 +66,7 @@
   },
   "main": "index.js",
   "dependencies": {
+    "@aws-sdk/client-sqs": "^3.306.0",
     "@helsingborg-stad/npm-api-error-handling": "^0.15.1",
     "@sparticuz/chromium": "110",
     "await-to-js": "^2.1.1",
