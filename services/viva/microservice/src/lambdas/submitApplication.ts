@@ -42,7 +42,6 @@ interface ErrorEvent {
   messageId: string;
   caseId: string;
   errorDetails: VadaError;
-  errorCode: string;
 }
 
 export interface LambdaRequest {
@@ -136,7 +135,6 @@ export async function submitApplication(
       messageId,
       caseId,
       errorDetails: vadaError,
-      errorCode: vivaErrorCode ?? 'UNKNOWN',
     });
 
     if (vivaErrorCode === '1014') {
