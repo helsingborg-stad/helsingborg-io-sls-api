@@ -130,6 +130,14 @@ export async function submitApplication(
   if (vadaError) {
     const vivaErrorCode = vadaError.vadaResponse.error?.details?.errorCode ?? null;
     const vivaErrorMessage = vadaError.vadaResponse.error?.details?.errorMessage ?? null;
+    const vivaErrorDetails = vadaError.vadaResponse.error?.details ?? null;
+
+    await dependencies.triggerSubmitWithError({
+      messageId,
+      caseId,
+      errorDetails: vadaError,
+      errorCode: vivaErrorCode ?? 'UNKNOWN',
+    });
 
     if (vivaErrorCode === '1014') {
       const errorMessage = `Viva responded with error code ${vivaErrorCode}. Will NOT retry.`;
@@ -138,13 +146,7 @@ export async function submitApplication(
         caseId,
         vivaErrorCode,
         vivaErrorMessage,
-      });
-
-      await dependencies.triggerSubmitWithError({
-        messageId,
-        caseId,
-        errorDetails: vadaError,
-        errorCode: vivaErrorCode,
+        vivaErrorDetails,
       });
 
       return true;
@@ -159,6 +161,7 @@ export async function submitApplication(
         httpStatusCode: vadaError.status,
         vivaErrorCode,
         vivaErrorMessage,
+        vivaErrorDetails,
       }
     );
   }
