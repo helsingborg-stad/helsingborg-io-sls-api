@@ -1,26 +1,34 @@
+import to from 'await-to-js';
+import type { SQSEvent, Context } from 'aws-lambda';
+
 import { VIVA_COMPLETION_RECEIVED, VIVA_RANDOM_CHECK_RECEIVED } from '../libs/constants';
 import { cases } from '../helpers/query';
-
 import * as dynamoDb from '../libs/dynamoDb';
 import S3 from '../libs/S3';
 import params from '../libs/params';
 import config from '../libs/config';
 import log from '../libs/logs';
-
 import caseHelper from '../helpers/createCase';
 import attachment from '../helpers/attachment';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
+import { validateSQSEvent } from 'helpers/validateSQSEvent';
+import { TraceException } from 'helpers/TraceException';
 import type { VivaAttachment } from '../types/vivaAttachment';
-
-import type { PostCompletionsPayload } from '../helpers/vivaAdapterRequestClient';
+import type {
+  PostCompletionsPayload,
+  PostCompletionsResponse,
+} from '../helpers/vivaAdapterRequestClient';
 import type { CaseItem, CaseForm, CaseFormAnswer, CaseStatus } from '../types/caseItem';
 import type { EventDetailCaseKeys } from '../types/eventDetail';
 import type { VivaParametersResponse } from '../types/ssmParameters';
+import type { VadaError } from 'types/vadaResponse';
 
 interface LambdaDetail {
   readonly caseKeys: EventDetailCaseKeys;
   readonly status: CaseStatus;
   readonly state: string;
+  readonly caseId: string;
+  readonly messageId: string;
 }
 
 interface CaseKeys {
@@ -39,11 +47,8 @@ interface UpdateCaseParameters {
   initialCompletionForm: Record<string, CaseForm>;
 }
 
-interface PostCompletionsResponse {
-  status: string;
-}
-
 export interface Dependencies {
+  requestId: string;
   getCase: (keys: EventDetailCaseKeys) => Promise<CaseItem>;
   readParams: (name: string) => Promise<VivaParametersResponse>;
   postCompletions: (payload: PostCompletionsPayload) => Promise<PostCompletionsResponse>;
@@ -90,12 +95,15 @@ function deleteS3Attachments(attachments: VivaAttachment[]) {
   return S3.deleteFiles(process.env.BUCKET_NAME as string, keys);
 }
 
-export async function submitCompletion(input: LambdaRequest, dependencies: Dependencies) {
-  const { caseKeys } = input.detail;
+export async function submitCompletion(
+  input: LambdaRequest,
+  dependencies: Dependencies
+): Promise<boolean> {
+  const { caseKeys, messageId, caseId } = input.detail;
 
   const caseItem = await dependencies.getCase(caseKeys);
   if (!caseItem) {
-    log.writeWarn(`Requested case item with SK: ${caseKeys.SK}, was not found in the cases table`);
+    log.writeWarn(`Viva caseKeys: ${caseKeys} could not be found. Will not NOT retry.`);
     return true;
   }
 
@@ -119,20 +127,48 @@ export async function submitCompletion(input: LambdaRequest, dependencies: Depen
 
   const workflowId = caseItem.details.workflowId;
   if (!workflowId) {
-    log.writeWarn('Viva workflowId is missing');
+    log.writeWarn(`Viva workflowId: ${workflowId} could not be found. Will not NOT retry.`);
     return true;
   }
 
-  const postCompletionResponse = await dependencies.postCompletions({
-    personalNumber,
-    workflowId,
-    attachments,
-  });
+  const [vadaError, vadaResponse] = await to<PostCompletionsResponse | undefined, VadaError | null>(
+    dependencies.postCompletions({
+      personalNumber,
+      workflowId,
+      attachments,
+    })
+  );
 
-  const isCompletionReceived = postCompletionResponse.status.toLowerCase() === 'ok';
+  if (vadaError) {
+    const vivaErrorCode = vadaError.vadaResponse.error?.details?.errorCode ?? null;
+    const vivaErrorMessage = vadaError.vadaResponse.error?.details?.errorMessage ?? null;
+    const vivaErrorDetails = vadaError.vadaResponse.error?.details ?? null;
+
+    throw new TraceException(
+      'Failed to submit Viva completions. Will retry.',
+      dependencies.requestId,
+      {
+        messageId,
+        caseId,
+        httpStatusCode: vadaError.status,
+        vivaErrorCode,
+        vivaErrorMessage,
+        vivaErrorDetails,
+      }
+    );
+  }
+
+  const isCompletionReceived = vadaResponse?.status.toLowerCase() === 'ok';
   if (!isCompletionReceived) {
-    log.writeError('Viva completion receive failed', postCompletionResponse);
-    return false;
+    throw new TraceException(
+      'Failed to submit Viva completions. Will retry.',
+      dependencies.requestId,
+      {
+        messageId,
+        caseId,
+        status: vadaResponse?.status,
+      }
+    );
   }
 
   const initialCompletionFormEncryption = caseHelper.getFormEncryptionAttributes();
@@ -155,16 +191,48 @@ export async function submitCompletion(input: LambdaRequest, dependencies: Depen
   await dependencies.updateCase(updateCaseParams);
   await dependencies.deleteAttachments(attachments);
 
+  log.writeInfo('Record processed SUCCESSFULLY', { messageId, caseId });
+
   return true;
 }
 
-export const main = log.wrap(async event => {
-  return submitCompletion(event, {
-    getCase: cases.get,
-    readParams: params.read,
-    postCompletions: vivaAdapter.completions.post,
-    updateCase,
-    getAttachments: attachment.createFromAnswers,
-    deleteAttachments: deleteS3Attachments,
+export const main = log.wrap((event: SQSEvent, context: Context) => {
+  validateSQSEvent(event, context);
+
+  const [record] = event.Records;
+  const { messageId, attributes, body } = record;
+  const { ApproximateReceiveCount: receiveCount, ApproximateFirstReceiveTimestamp: firstReceived } =
+    attributes;
+  const { awsRequestId: requestId } = context;
+
+  const { caseKeys, status, state } = JSON.parse(body) as LambdaDetail;
+  const [, caseId] = caseKeys.SK.split('CASE#');
+
+  log.writeInfo('Processing record', {
+    messageId,
+    receiveCount,
+    firstReceived,
+    caseId,
   });
+
+  return submitCompletion(
+    {
+      detail: {
+        caseKeys,
+        status,
+        state,
+        caseId,
+        messageId,
+      },
+    },
+    {
+      requestId,
+      getCase: cases.get,
+      readParams: params.read,
+      postCompletions: vivaAdapter.completions.post,
+      updateCase,
+      getAttachments: attachment.createFromAnswers,
+      deleteAttachments: deleteS3Attachments,
+    }
+  );
 });
