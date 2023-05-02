@@ -111,7 +111,6 @@ export async function submitCompletion(
   dependencies: Dependencies
 ): Promise<boolean> {
   const { caseKeys, messageId } = input;
-  const caseId = createCaseId(caseKeys);
 
   const caseItem = await dependencies.getCase(caseKeys);
   if (!caseItem) {
@@ -122,7 +121,7 @@ export async function submitCompletion(
   const { randomCheckFormId, completionFormId, newApplicationCompletionFormId } =
     await dependencies.readParams(config.cases.providers.viva.envsKeyName);
 
-  const { currentFormId } = caseItem;
+  const { currentFormId, id: caseId } = caseItem;
   const isCompletionForm = [
     randomCheckFormId,
     completionFormId,
