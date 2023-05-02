@@ -134,7 +134,17 @@ export async function submitCompletion(
 
   const personalNumber = caseItem.PK.substring(5);
   const caseAnswers = caseItem.forms[currentFormId].answers;
-  const attachments = await dependencies.getAttachments(personalNumber, caseAnswers);
+
+  const [getAttachmentsError, attachments] = await to(
+    dependencies.getAttachments(personalNumber, caseAnswers)
+  );
+  if (getAttachmentsError) {
+    log.writeWarn(
+      `Failed to read file from S3 - ${getAttachmentsError.message}. Will not NOT retry.`,
+      getAttachmentsError
+    );
+    return true;
+  }
 
   const workflowId = caseItem.details.workflowId;
   if (!workflowId) {
@@ -146,7 +156,7 @@ export async function submitCompletion(
     dependencies.postCompletions({
       personalNumber,
       workflowId,
-      attachments,
+      attachments: attachments ?? [],
     })
   );
 
@@ -206,7 +216,7 @@ export async function submitCompletion(
   };
 
   await dependencies.updateCase(updateCaseParams);
-  await dependencies.deleteAttachments(attachments);
+  await dependencies.deleteAttachments(attachments ?? []);
 
   log.writeInfo('Record processed SUCCESSFULLY', { messageId, caseId });
 
@@ -222,19 +232,19 @@ export const main = log.wrap((event: SQSEvent, context: Context) => {
     attributes;
   const { awsRequestId: requestId } = context;
 
-  const { detail } = JSON.parse(body) as LambdaRequest;
+  const lambdaRequest = JSON.parse(body) as LambdaRequest;
 
   log.writeInfo('Processing record', {
     messageId,
     receiveCount,
     firstReceived,
-    caseId: createCaseId(detail.caseKeys),
+    caseId: createCaseId(lambdaRequest.detail.caseKeys),
   });
 
   return submitCompletion(
     {
       messageId,
-      caseKeys: detail.caseKeys,
+      caseKeys: lambdaRequest.detail.caseKeys,
     },
     {
       requestId,
@@ -244,7 +254,7 @@ export const main = log.wrap((event: SQSEvent, context: Context) => {
       updateCase,
       getAttachments: attachment.createFromAnswers,
       deleteAttachments: deleteS3Attachments,
-      triggerSubmitWithError: putVivaMsEvent.completions.required,
+      triggerSubmitWithError: putVivaMsEvent.completions.submitFailed,
     }
   );
 });
