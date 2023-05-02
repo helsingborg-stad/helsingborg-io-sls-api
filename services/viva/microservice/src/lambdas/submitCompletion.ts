@@ -11,8 +11,9 @@ import log from '../libs/logs';
 import caseHelper from '../helpers/createCase';
 import attachment from '../helpers/attachment';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
-import { validateSQSEvent } from 'helpers/validateSQSEvent';
-import { TraceException } from 'helpers/TraceException';
+import { validateSQSEvent } from '../helpers/validateSQSEvent';
+import { TraceException } from '../helpers/TraceException';
+import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import type { VivaAttachment } from '../types/vivaAttachment';
 import type {
   PostCompletionsPayload,
@@ -36,6 +37,12 @@ interface CaseKeys {
   readonly SK: string;
 }
 
+interface ErrorEvent {
+  messageId: string;
+  caseId: string;
+  errorDetails: VadaError;
+}
+
 export interface LambdaRequest {
   readonly detail: LambdaDetail;
 }
@@ -53,6 +60,7 @@ export interface Dependencies {
   readParams: (name: string) => Promise<VivaParametersResponse>;
   postCompletions: (payload: PostCompletionsPayload) => Promise<PostCompletionsResponse>;
   updateCase: (params: UpdateCaseParameters) => Promise<void>;
+  triggerSubmitWithError: (params: ErrorEvent) => Promise<void>;
   getAttachments: (
     personalNumber: string,
     answerList: CaseFormAnswer[]
@@ -144,6 +152,12 @@ export async function submitCompletion(
     const vivaErrorMessage = vadaError.vadaResponse.error?.details?.errorMessage ?? null;
     const vivaErrorDetails = vadaError.vadaResponse.error?.details ?? null;
 
+    await dependencies.triggerSubmitWithError({
+      messageId,
+      caseId,
+      errorDetails: vadaError,
+    });
+
     throw new TraceException(
       'Failed to submit Viva completions. Will retry.',
       dependencies.requestId,
@@ -233,6 +247,7 @@ export const main = log.wrap((event: SQSEvent, context: Context) => {
       updateCase,
       getAttachments: attachment.createFromAnswers,
       deleteAttachments: deleteS3Attachments,
+      triggerSubmitWithError: putVivaMsEvent.completions.required,
     }
   );
 });
