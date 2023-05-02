@@ -11,9 +11,9 @@ import log from '../libs/logs';
 import caseHelper from '../helpers/createCase';
 import attachment from '../helpers/attachment';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
+import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import { validateSQSEvent } from '../helpers/validateSQSEvent';
 import { TraceException } from '../helpers/TraceException';
-import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import type { VivaAttachment } from '../types/vivaAttachment';
 import type {
   PostCompletionsPayload,
@@ -22,13 +22,12 @@ import type {
 import type { CaseItem, CaseForm, CaseFormAnswer, CaseStatus } from '../types/caseItem';
 import type { EventDetailCaseKeys } from '../types/eventDetail';
 import type { VivaParametersResponse } from '../types/ssmParameters';
-import type { VadaError } from 'types/vadaResponse';
+import type { VadaError } from '../types/vadaResponse';
 
 interface LambdaDetail {
   readonly caseKeys: EventDetailCaseKeys;
-  readonly status: CaseStatus;
-  readonly state: string;
-  readonly caseId: string;
+  readonly status?: CaseStatus;
+  readonly state?: string;
   readonly messageId: string;
 }
 
@@ -103,11 +102,16 @@ function deleteS3Attachments(attachments: VivaAttachment[]) {
   return S3.deleteFiles(process.env.BUCKET_NAME as string, keys);
 }
 
+function createCaseId(keys: CaseKeys) {
+  return keys.SK.split('CASE#')[1];
+}
+
 export async function submitCompletion(
   input: LambdaDetail,
   dependencies: Dependencies
 ): Promise<boolean> {
-  const { caseKeys, messageId, caseId } = input;
+  const { caseKeys, messageId } = input;
+  const caseId = createCaseId(caseKeys);
 
   const caseItem = await dependencies.getCase(caseKeys);
   if (!caseItem) {
@@ -220,23 +224,18 @@ export const main = log.wrap((event: SQSEvent, context: Context) => {
   const { awsRequestId: requestId } = context;
 
   const { detail } = JSON.parse(body) as LambdaRequest;
-  const { caseKeys, status, state } = detail;
-  const [, caseId] = caseKeys.SK.split('CASE#');
 
   log.writeInfo('Processing record', {
     messageId,
     receiveCount,
     firstReceived,
-    caseId,
+    caseId: createCaseId(detail.caseKeys),
   });
 
   return submitCompletion(
     {
-      caseKeys,
-      status,
-      state,
-      caseId,
       messageId,
+      caseKeys: detail.caseKeys,
     },
     {
       requestId,
