@@ -104,10 +104,10 @@ function deleteS3Attachments(attachments: VivaAttachment[]) {
 }
 
 export async function submitCompletion(
-  input: LambdaRequest,
+  input: LambdaDetail,
   dependencies: Dependencies
 ): Promise<boolean> {
-  const { caseKeys, messageId, caseId } = input.detail;
+  const { caseKeys, messageId, caseId } = input;
 
   const caseItem = await dependencies.getCase(caseKeys);
   if (!caseItem) {
@@ -219,7 +219,8 @@ export const main = log.wrap((event: SQSEvent, context: Context) => {
     attributes;
   const { awsRequestId: requestId } = context;
 
-  const { caseKeys, status, state } = JSON.parse(body) as LambdaDetail;
+  const { detail } = JSON.parse(body) as LambdaRequest;
+  const { caseKeys, status, state } = detail;
   const [, caseId] = caseKeys.SK.split('CASE#');
 
   log.writeInfo('Processing record', {
@@ -231,13 +232,11 @@ export const main = log.wrap((event: SQSEvent, context: Context) => {
 
   return submitCompletion(
     {
-      detail: {
-        caseKeys,
-        status,
-        state,
-        caseId,
-        messageId,
-      },
+      caseKeys,
+      status,
+      state,
+      caseId,
+      messageId,
     },
     {
       requestId,
