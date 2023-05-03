@@ -2,7 +2,6 @@ import { submitCompletion } from '../../src/lambdas/submitCompletion';
 import { EncryptionType } from '../../src/types/caseItem';
 import { VivaAttachmentCategory } from '../../src/types/vivaAttachment';
 import { DEFAULT_CURRENT_POSITION } from '../../src/helpers/constants';
-import { TraceException } from '../../src/helpers/TraceException';
 import type { CaseItem, CaseForm } from '../../src/types/caseItem';
 import type { VivaAttachment } from '../../src/types/vivaAttachment';
 import type { LambdaDetail, Dependencies } from '../../src/lambdas/submitCompletion';
