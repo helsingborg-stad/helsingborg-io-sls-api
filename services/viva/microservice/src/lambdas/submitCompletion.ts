@@ -24,7 +24,7 @@ import type { EventDetailCaseKeys } from '../types/eventDetail';
 import type { VivaParametersResponse } from '../types/ssmParameters';
 import type { VadaError } from '../types/vadaResponse';
 
-interface LambdaDetail {
+export interface LambdaDetail {
   readonly caseKeys: EventDetailCaseKeys;
   readonly status?: CaseStatus;
   readonly state?: string;
