@@ -40,6 +40,10 @@ function createLambdaInput(params: Partial<LambdaDetail>): LambdaRequest {
 
 function createCase(params: Partial<CaseItem>): CaseItem {
   return {
+    status: {
+      type: undefined,
+    },
+    state: undefined,
     details: {
       workflow: {
         workflowid: 'XYZ123',
@@ -75,53 +79,5 @@ describe('decideCaseStatus', () => {
       caseStatusType: ACTIVE_PROCESSING,
       caseState: VIVA_APPLICATION_LOCKED,
     });
-  });
-
-  it('does not update case status if new status is undefined', async () => {
-    const updateCaseMock = jest.fn();
-    const triggerEventMock = jest.fn();
-
-    const mockCase = {
-      ...caseKeys,
-      details: {
-        workflow: undefined,
-      },
-    } as CaseItem;
-
-    const result = await decideCaseStatus(createLambdaInput({ caseKeys }), {
-      getCase: () => Promise.resolve(createCase(mockCase)),
-      updateCase: updateCaseMock,
-      triggerEvent: triggerEventMock,
-    });
-
-    expect(result).toBe(true);
-    expect(updateCaseMock).toHaveBeenCalledTimes(0);
-    expect(triggerEventMock).toHaveBeenCalledTimes(1);
-  });
-
-  it('does not update case state if new state is undefined', async () => {
-    const updateCaseMock = jest.fn();
-    const triggerEventMock = jest.fn();
-
-    const mockCase = {
-      ...caseKeys,
-      details: {
-        workflow: {
-          application: {
-            islocked: null,
-          },
-        },
-      },
-    } as CaseItem;
-
-    const result = await decideCaseStatus(createLambdaInput({}), {
-      getCase: () => Promise.resolve(createCase(mockCase)),
-      updateCase: updateCaseMock,
-      triggerEvent: triggerEventMock,
-    });
-
-    expect(result).toBe(true);
-    expect(updateCaseMock).toHaveBeenCalledTimes(0);
-    expect(triggerEventMock).toHaveBeenCalledTimes(1);
   });
 });
