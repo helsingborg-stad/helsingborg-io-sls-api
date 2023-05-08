@@ -236,7 +236,7 @@ async function getApplicationsStatus(
   };
 
   const response = await sendVivaAdapterRequest<VadaApplicationsStatusResponse>(requestParams);
-  return response.data.attributes;
+  return response.data.attributes.status;
 }
 
 async function createVivaMyPagesAdapterRequest(personalNumber: string): Promise<AdapterRequest> {

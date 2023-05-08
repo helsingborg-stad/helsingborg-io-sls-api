@@ -3,7 +3,9 @@ import type { VadaWorkflowCompletions } from './vadaCompletions';
 import type { VivaMyPagesCases, VivaMyPagesApplication } from './vivaMyPages';
 import type { VivaWorkflow } from './vivaWorkflow';
 
-export type VadaApplicationsStatusResponse = VivaApplicationsStatusItem[];
+export interface VadaApplicationsStatusResponse {
+  status: VivaApplicationsStatusItem[];
+}
 
 export interface VadaCompletionsResponse {
   readonly completions: VadaWorkflowCompletions;
