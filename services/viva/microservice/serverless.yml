@@ -325,20 +325,9 @@ functions:
     environment:
       BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-AttachmentsBucketName
     events:
-      - eventBridge:
-          pattern:
-            source:
-              - casesApi.updateCase
-            detail-type:
-              - casesApiUpdateCaseSuccess
-            detail:
-              status:
-                type: [{ 'prefix': 'active:submitted' }]
-              state: ['VIVA_RANDOM_CHECK_REQUIRED', 'VIVA_COMPLETION_REQUIRED']
-          retryPolicy:
-            maximumEventAge: 3600
-            maximumRetryAttempts: 3
-          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
+      - sqs:
+          arn: !ImportValue ${self:custom.stage}-VivaCompletionsSubmissionQueueArn
+          batchSize: 1
 
   syncOfficers:
     handler: src/lambdas/syncOfficers.main

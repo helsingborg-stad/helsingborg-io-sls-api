@@ -26,6 +26,10 @@ export const eventTypeCollection = {
     source: 'vivaMs.submitApplication',
     detailType: 'applicationSubmitWithError',
   },
+  completionsSubmitWithError: {
+    source: 'vivaMs.submitCompletion',
+    detailType: 'completionSubmitWithError',
+  },
   checkCompletionsStatusSuccess: {
     source: 'vivaMs.checkCompletionsStatus',
     detailType: 'Completions Due Date Probably Overdue',
@@ -81,6 +85,7 @@ export default {
   completions: {
     success: (detail: unknown) => putUserEvent(detail, 'checkCompletionsStatusSuccess'),
     required: (detail: unknown) => putUserEvent(detail, 'checkCompletionsStatusRequired'),
+    submitFailed: (detail: unknown) => putUserEvent(detail, 'completionSubmitWithError'),
   },
   checkOpenPeriodSuccess: (detail: unknown) => putUserEvent(detail, 'checkOpenPeriodSuccess'),
   personDetailSuccess: (detail: unknown) => putUserEvent(detail, 'personDetailSuccess'),

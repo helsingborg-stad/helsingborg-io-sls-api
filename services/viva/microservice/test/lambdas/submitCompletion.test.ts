@@ -1,11 +1,10 @@
 import { submitCompletion } from '../../src/lambdas/submitCompletion';
 import { EncryptionType } from '../../src/types/caseItem';
 import { VivaAttachmentCategory } from '../../src/types/vivaAttachment';
+import { DEFAULT_CURRENT_POSITION } from '../../src/helpers/constants';
 import type { CaseItem, CaseForm } from '../../src/types/caseItem';
 import type { VivaAttachment } from '../../src/types/vivaAttachment';
-import type { LambdaRequest, Dependencies } from '../../src/lambdas/submitCompletion';
-
-import { DEFAULT_CURRENT_POSITION } from '../../src/helpers/constants';
+import type { LambdaDetail, Dependencies } from '../../src/lambdas/submitCompletion';
 
 const recurringFormId = 'recurringFormId';
 const randomCheckFormId = 'randomCheckFormId';
@@ -56,30 +55,30 @@ function createCase(partialCase: Partial<CaseItem> = {}): CaseItem {
   };
 }
 
-function createInput(partialInput: Partial<LambdaRequest> = {}): LambdaRequest {
+function createInput(partialInput: Partial<LambdaDetail> = {}): LambdaDetail {
   return {
-    detail: {
-      caseKeys: {
-        PK,
-        SK,
-      },
-      status: {
-        type: 'myStatusType',
-        name: 'myStatusName',
-        description: 'myStatusDescription',
-      },
-      state: 'SOME STRING',
+    messageId: '123abc',
+    caseKeys: {
+      PK,
+      SK,
     },
+    status: {
+      type: 'myStatusType',
+      name: 'myStatusName',
+      description: 'myStatusDescription',
+    },
+    state: 'SOME STRING',
     ...partialInput,
   };
 }
 
 function createDependencies(
-  caseToUse: CaseItem,
+  caseTest: CaseItem,
   partialDependencies: Partial<Dependencies> = {}
 ): Dependencies {
   return {
-    getCase: () => Promise.resolve(caseToUse),
+    requestId: '123',
+    getCase: () => Promise.resolve(caseTest),
     readParams: () =>
       Promise.resolve({
         recurringFormId,
@@ -91,6 +90,7 @@ function createDependencies(
       }),
     postCompletions: () => Promise.resolve({ status: 'OK' }),
     updateCase: () => Promise.resolve(),
+    triggerSubmitWithError: () => Promise.resolve(),
     getAttachments: () => Promise.resolve([]),
     deleteAttachments: () => Promise.resolve(undefined),
     ...partialDependencies,
@@ -130,13 +130,14 @@ it('returns true if `currentFormId` does not match `randomCheckFormId` or `compl
 });
 
 it('returns false if VADA `postCompletionResponse` is successful but `status` is ERROR`', async () => {
-  const result = await submitCompletion(
-    createInput(),
-    createDependencies(createCase({ currentFormId: randomCheckFormId }), {
-      postCompletions: () => Promise.resolve({ status: 'ERROR' }),
-    })
-  );
-  expect(result).toBe(false);
+  await expect(
+    submitCompletion(
+      createInput(),
+      createDependencies(createCase({ currentFormId: randomCheckFormId }), {
+        postCompletions: () => Promise.resolve({ status: 'ERROR' }),
+      })
+    )
+  ).rejects.toThrow();
 });
 
 it('calls postCompletion with form answer containing attachment', async () => {
