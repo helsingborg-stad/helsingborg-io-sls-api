@@ -64,14 +64,11 @@ export async function decideCaseStatus(
   const { caseKeys } = input.detail;
 
   const caseItem = await dependencies.getCase(caseKeys);
-  const newStatusType = decideNewCaseStatus(caseItem.details?.workflow);
-  const newState = decideNewState(caseItem.details?.workflow);
+  const currentCaseStatusType = caseItem.status.type;
+  const currentCaseState = caseItem.state;
 
-  const isStatusStateUndefined = !(newStatusType && newState);
-  if (isStatusStateUndefined) {
-    await dependencies.triggerEvent(input.detail);
-    return true;
-  }
+  const newStatusType = decideNewCaseStatus(caseItem.details?.workflow) ?? currentCaseStatusType;
+  const newState = decideNewState(caseItem.details?.workflow) ?? currentCaseState;
 
   const newStatus = getStatusByType(newStatusType);
   await dependencies.updateCase(caseKeys, newStatus, newState);
