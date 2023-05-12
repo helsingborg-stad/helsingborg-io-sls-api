@@ -35,7 +35,9 @@ interface ParamsReadResponse {
 }
 
 interface SuccessEvent {
-  personalNumber: string;
+  user: {
+    personalNumber: string;
+  };
 }
 
 interface ErrorEvent {
@@ -166,7 +168,11 @@ export async function submitApplication(
 
   const vivaWorkflowId = vadaResponse?.id ?? '';
   await dependencies.updateCase({ PK, SK }, vivaWorkflowId);
-  await dependencies.putSuccessEvent({ personalNumber });
+  await dependencies.putSuccessEvent({
+    user: {
+      personalNumber,
+    },
+  });
 
   log.writeInfo('Record processed SUCCESSFULLY', { messageId, caseId });
 
