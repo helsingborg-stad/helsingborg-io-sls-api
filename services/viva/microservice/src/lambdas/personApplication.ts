@@ -47,10 +47,10 @@ export async function personApplication(
   return true;
 }
 
-export const main = log.wrap(event => {
-  return personApplication(event, {
+export const main = log.wrap(event =>
+  personApplication(event, {
     getMyPages: vivaAdapter.myPages.get,
     getApplication: vivaAdapter.applications.get,
     triggerEvent: putVivaMsEvent.personDetailSuccess,
-  });
-});
+  })
+);

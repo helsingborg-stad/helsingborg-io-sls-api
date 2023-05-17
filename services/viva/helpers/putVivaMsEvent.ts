@@ -66,9 +66,17 @@ export const eventTypeCollection = {
     source: 'vivaMs.syncCaseCompletions',
     detailType: 'syncSuccess',
   },
+  syncCaseCompletionsCaseNotFound: {
+    source: 'vivaMs.syncCaseCompletions',
+    detailType: 'caseNotFound',
+  },
   createCaseSuccess: {
     source: 'vivaMs.createVivaCase',
     detailType: 'createSuccess',
+  },
+  syncExpiryTimeSuccess: {
+    source: 'vivaMs.syncExpiryTime',
+    detailType: 'syncSuccess',
   },
 };
 
@@ -101,7 +109,10 @@ export default {
   setCaseCompletionsSuccess: (detail: unknown) => putUserEvent(detail, 'setCaseCompletionsSuccess'),
   syncCaseCompletionsSuccess: (detail: unknown) =>
     putUserEvent(detail, 'syncCaseCompletionsSuccess'),
+  syncCaseCompletionsCaseNotFound: (detail: unknown) =>
+    putUserEvent(detail, 'syncCaseCompletionsCaseNotFound'),
   checkOpenNewApplicationSuccess: (detail: unknown) =>
     putUserEvent(detail, 'checkOpenNewApplicationSuccess'),
   createCaseSuccess: (detail: unknown) => putUserEvent(detail, 'createCaseSuccess'),
+  syncExpiryTimeSuccess: (detail: unknown) => putUserEvent(detail, 'syncExpiryTimeSuccess'),
 };

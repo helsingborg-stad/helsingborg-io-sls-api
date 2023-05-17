@@ -150,7 +150,7 @@ const statuses = [
     type: ACTIVE_PROCESSING_COMPLETIONS_DUE_DATE_PASSED_VIVA,
     name: 'Ansökan behandlas',
     description:
-      'Tiden för att lämna in bilder har gått ut. Din komplettering är mottagen och handläggs',
+      'Tiden för att lämna in underlag har löpt ut. Din komplettering är mottagen och behandlas av handläggare',
   },
   {
     type: CLOSED_APPROVED_VIVA,

@@ -1,5 +1,4 @@
 import log from '../libs/logs';
-
 import {
   VIVA_STATUS_COMPLETION,
   VIVA_STATUS_CASE_EXISTS,
@@ -11,12 +10,15 @@ import validateApplicationStatus from '../helpers/validateApplicationStatus';
 import type { VivaApplicationsStatusItem } from '../types/vivaApplicationsStatus';
 import type { VadaWorkflowCompletions } from '../types/vadaCompletions';
 
+type CompletionsRequiredEvent = LambdaDetail;
+type SuccessEvent = LambdaDetail;
+
 interface CaseKeys {
   PK: string;
   SK: string;
 }
 
-interface LambdaDetails {
+interface LambdaDetail {
   vivaApplicantStatusCodeList: VivaApplicationsStatusItem[];
   workflowCompletions: VadaWorkflowCompletions;
   caseKeys: CaseKeys;
@@ -25,12 +27,12 @@ interface LambdaDetails {
 }
 
 export interface LambdaRequest {
-  detail: LambdaDetails;
+  detail: LambdaDetail;
 }
 
 export interface Dependencies {
-  putCompletionsRequiredEvent: (params: LambdaDetails) => Promise<void>;
-  putSuccessEvent: (params: LambdaDetails) => Promise<void>;
+  putCompletionsRequiredEvent: (params: CompletionsRequiredEvent) => Promise<void>;
+  putSuccessEvent: (params: SuccessEvent) => Promise<void>;
 }
 
 export async function checkCompletionsStatus(input: LambdaRequest, dependencies: Dependencies) {
@@ -52,9 +54,9 @@ export async function checkCompletionsStatus(input: LambdaRequest, dependencies:
   return true;
 }
 
-export const main = log.wrap(async event => {
-  return checkCompletionsStatus(event, {
+export const main = log.wrap(event =>
+  checkCompletionsStatus(event, {
     putCompletionsRequiredEvent: putVivaMsEvent.completions.required,
     putSuccessEvent: putVivaMsEvent.completions.success,
-  });
-});
+  })
+);

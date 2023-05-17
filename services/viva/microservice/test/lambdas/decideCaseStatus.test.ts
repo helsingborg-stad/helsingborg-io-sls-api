@@ -1,9 +1,5 @@
 import { getStatusByType } from '../../src/libs/caseStatuses';
-import {
-  ACTIVE_PROCESSING,
-  VIVA_APPLICATION_LOCKED,
-  ACTIVE_SUBMITTED,
-} from '../../src/libs/constants';
+import { ACTIVE_PROCESSING, VIVA_APPLICATION_LOCKED } from '../../src/libs/constants';
 import { decideCaseStatus } from '../../src/lambdas/decideCaseStatus';
 import type { LambdaRequest, LambdaDetail } from '../../src/lambdas/decideCaseStatus';
 import type { CaseItem } from '../../src/types/caseItem';
@@ -13,26 +9,10 @@ const caseKeys = {
   SK: 'CASE#11111111-2222-3333-4444-555555555555',
 };
 
-const caseState = 'VIVA_APPLICATION_LOCKED';
-
 function createLambdaInput(params: Partial<LambdaDetail>): LambdaRequest {
   return {
     detail: {
-      vivaApplicantStatusCodeList: [],
-      workflowCompletions: {
-        requested: [],
-        description: null,
-        receivedDate: null,
-        dueDate: null,
-        attachmentUploaded: [],
-        isCompleted: false,
-        isRandomCheck: false,
-        isAttachmentPending: false,
-        isDueDateExpired: false,
-      },
       caseKeys,
-      caseState,
-      caseStatusType: ACTIVE_SUBMITTED,
       ...params,
     },
   };

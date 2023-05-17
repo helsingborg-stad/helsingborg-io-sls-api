@@ -1,7 +1,8 @@
 import { getStatusByType } from '../../src/libs/caseStatuses';
-
-import type { Dependencies, LambdaRequest } from '../../src/lambdas/setCaseCompletions';
 import { setCaseCompletions } from '../../src/lambdas/setCaseCompletions';
+import type { Dependencies, LambdaRequest } from '../../src/lambdas/setCaseCompletions';
+import type { VivaApplicationsStatusItem } from '../../src/types/vivaApplicationsStatus';
+import type { VadaWorkflowCompletions } from '../../src/types/vadaCompletions';
 
 import {
   ACTIVE_RANDOM_CHECK_REQUIRED_VIVA,
@@ -31,9 +32,35 @@ const caseKeys = {
   SK: 'SK',
 };
 
+const vivaApplicantStatusCodeList: VivaApplicationsStatusItem[] = [
+  {
+    code: 1,
+    description: 'Lorem ipsum',
+  },
+];
+
+const workflowCompletions: VadaWorkflowCompletions = {
+  requested: [],
+  attachmentUploaded: [],
+  description: '',
+  receivedDate: null,
+  dueDate: null,
+  isCompleted: false,
+  isRandomCheck: true,
+  isAttachmentPending: false,
+  isDueDateExpired: false,
+};
+
+const caseState = ACTIVE_SUBMITTED;
+const caseStatusType = 'notStarted';
+
 const input: LambdaRequest = {
   detail: {
+    vivaApplicantStatusCodeList,
+    workflowCompletions,
     caseKeys,
+    caseState,
+    caseStatusType,
   },
 };
 
@@ -228,7 +255,7 @@ test.each([
     const updateCaseMock = jest.fn();
     const dependencies: Dependencies = {
       getCase: () => Promise.resolve(caseItem),
-      putSuccessEvent: () => Promise.resolve(),
+      triggerSuccessEvent: () => Promise.resolve(),
       readParams: () => Promise.resolve(ssmParameters),
       updateCase: updateCaseMock,
     };

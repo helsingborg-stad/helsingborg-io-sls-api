@@ -217,8 +217,8 @@ export async function generateRecurringCaseHtml(
   return true;
 }
 
-export const main = log.wrap(event => {
-  return generateRecurringCaseHtml(event, {
+export const main = log.wrap(event =>
+  generateRecurringCaseHtml(event, {
     getCase: cases.get,
     getFormIds,
     getClosedCases,
@@ -227,5 +227,5 @@ export const main = log.wrap(event => {
     updateCaseState,
     generateSuccess: putVivaMsEvent.htmlGeneratedSuccess,
     getCaseTemplateFunction,
-  });
-});
+  })
+);

@@ -1,24 +1,31 @@
-import config from '../libs/config';
-
-import params from '../libs/params';
 import log from '../libs/logs';
+import * as dynamoDb from '../libs/dynamoDb';
+import config from '../libs/config';
+import params from '../libs/params';
 import { getStatusByType } from '../libs/caseStatuses';
-
 import { cases } from '../helpers/query';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import completionsHelper from '../helpers/completions';
 import resetPersonSignature from '../helpers/resetPersonSignature';
-import { updateCaseCompletionStatus } from '../helpers/dynamoDb';
 
 import type { VivaParametersResponse } from '../types/ssmParameters';
 import type { CaseItem, CaseStatus, CasePerson } from '../types/caseItem';
+import type { VivaApplicationsStatusItem } from '../types/vivaApplicationsStatus';
+import type { VadaWorkflowCompletions } from '../types/vadaCompletions';
+
+type SuccessEvent = LambdaDetail;
 
 interface CaseKeys {
   PK: string;
   SK: string;
 }
+
 interface LambdaDetail {
+  vivaApplicantStatusCodeList: VivaApplicationsStatusItem[];
+  workflowCompletions: VadaWorkflowCompletions;
   caseKeys: CaseKeys;
+  caseState: string;
+  caseStatusType: string;
 }
 
 export interface LambdaRequest {
@@ -35,8 +42,37 @@ interface UpdateCaseParams {
 export interface Dependencies {
   getCase: (keys: CaseKeys) => Promise<CaseItem>;
   readParams: (envsKeyName: string) => Promise<VivaParametersResponse>;
-  putSuccessEvent: (params: LambdaDetail) => Promise<void>;
+  triggerSuccessEvent: (params: SuccessEvent) => Promise<void>;
   updateCase: (keys: CaseKeys, params: UpdateCaseParams) => Promise<void>;
+}
+
+function updateCase(keys: CaseKeys, params: UpdateCaseParams): Promise<void> {
+  const { newStatus, newState, newCurrentFormId, newPersons } = params;
+
+  const updateParams = {
+    TableName: config.cases.tableName,
+    Key: {
+      PK: keys.PK,
+      SK: keys.SK,
+    },
+    UpdateExpression:
+      'SET #currentFormId = :newCurrentFormId, #status = :newStatus, #persons = :newPersons, #state = :newState',
+    ExpressionAttributeNames: {
+      '#currentFormId': 'currentFormId',
+      '#status': 'status',
+      '#persons': 'persons',
+      '#state': 'state',
+    },
+    ExpressionAttributeValues: {
+      ':newCurrentFormId': newCurrentFormId,
+      ':newPersons': newPersons,
+      ':newStatus': newStatus,
+      ':newState': newState,
+    },
+    ReturnValues: 'NONE',
+  };
+
+  return dynamoDb.call('update', updateParams);
 }
 
 export async function setCaseCompletions(input: LambdaRequest, dependencies: Dependencies) {
@@ -45,6 +81,7 @@ export async function setCaseCompletions(input: LambdaRequest, dependencies: Dep
   const caseItem = await dependencies.getCase(caseKeys);
   const { completions } = caseItem.details;
   if (!completions) {
+    log.writeWarn('Completions not found in case with id:', caseItem.id);
     return true;
   }
 
@@ -72,24 +109,24 @@ export async function setCaseCompletions(input: LambdaRequest, dependencies: Dep
     completions,
   });
 
-  const caseUpdateAttributes = {
+  const caseUpdateParams: UpdateCaseParams = {
     newStatus: getStatusByType(statusType),
     newState: state,
     newCurrentFormId: completionsHelper.get.formId(completionsFormIds, completions),
     newPersons: caseItem.persons.map(resetPersonSignature),
   };
 
-  await dependencies.updateCase(caseKeys, caseUpdateAttributes);
-  await dependencies.putSuccessEvent(input.detail);
+  await dependencies.updateCase(caseKeys, caseUpdateParams);
+  await dependencies.triggerSuccessEvent(input.detail);
 
   return true;
 }
 
-export const main = log.wrap(event => {
-  return setCaseCompletions(event, {
+export const main = log.wrap(event =>
+  setCaseCompletions(event, {
     getCase: cases.get,
     readParams: params.read,
-    putSuccessEvent: putVivaMsEvent.setCaseCompletionsSuccess,
-    updateCase: updateCaseCompletionStatus,
-  });
-});
+    triggerSuccessEvent: putVivaMsEvent.setCaseCompletionsSuccess,
+    updateCase,
+  })
+);

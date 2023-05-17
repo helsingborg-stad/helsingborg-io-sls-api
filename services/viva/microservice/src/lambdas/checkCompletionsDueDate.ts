@@ -6,15 +6,8 @@ import {
   COMPLETIONS_DUE_DATE_PASSED,
   ACTIVE_PROCESSING_COMPLETIONS_DUE_DATE_PASSED_VIVA,
 } from '../libs/constants';
-import { cases } from '../helpers/query';
-import {
-  VIVA_STATUS_CASE_EXISTS,
-  VIVA_STATUS_WEB_APPLICATION_ACTIVE,
-  VIVA_STATUS_WEB_APPLICATION_ALLOWED,
-} from '../helpers/constants';
-import validateApplicationStatus from '../helpers/validateApplicationStatus';
 
-import type { CaseItem, CaseStatus } from '../types/caseItem';
+import type { CaseStatus } from '../types/caseItem';
 import type { VivaApplicationsStatusItem } from '../types/vivaApplicationsStatus';
 import type { VadaWorkflowCompletions } from '../types/vadaCompletions';
 
@@ -23,7 +16,7 @@ interface CaseKeys {
   SK: string;
 }
 
-interface LambdaDetails {
+interface LambdaDetail {
   vivaApplicantStatusCodeList: VivaApplicationsStatusItem[];
   workflowCompletions: VadaWorkflowCompletions;
   caseKeys: CaseKeys;
@@ -32,29 +25,27 @@ interface LambdaDetails {
 }
 
 export interface LambdaRequest {
-  detail: LambdaDetails;
+  detail: LambdaDetail;
 }
 
 export interface Dependencies {
-  getCase: (keys: CaseKeys) => Promise<CaseItem>;
-  updateCase: (keys: CaseKeys, attributes: UpdateCaseAttributes) => Promise<void>;
+  updateCase: (keys: CaseKeys, params: UpdateCaseParams) => Promise<void>;
 }
 
-interface UpdateCaseAttributes {
+interface UpdateCaseParams {
   newStatus: CaseStatus;
   newState: string;
 }
 
-function updateCase(keys: CaseKeys, attributes: UpdateCaseAttributes): Promise<void> {
-  const { newStatus, newState } = attributes;
+function updateCase(keys: CaseKeys, params: UpdateCaseParams): Promise<void> {
+  const { newStatus, newState } = params;
   const updateParams = {
     TableName: config.cases.tableName,
     Key: {
       PK: keys.PK,
       SK: keys.SK,
     },
-    UpdateExpression:
-      'SET #status = :newStatus, #state = :newState, details.completions.requested = :completionsRequested, details.completions.dueDate = :completionsDueDate',
+    UpdateExpression: 'SET #status = :newStatus, #state = :newState',
     ExpressionAttributeNames: {
       '#status': 'status',
       '#state': 'state',
@@ -62,8 +53,6 @@ function updateCase(keys: CaseKeys, attributes: UpdateCaseAttributes): Promise<v
     ExpressionAttributeValues: {
       ':newStatus': newStatus,
       ':newState': newState,
-      ':completionsRequested': [],
-      ':completionsDueDate': null,
     },
     ReturnValues: 'NONE',
   };
@@ -72,33 +61,25 @@ function updateCase(keys: CaseKeys, attributes: UpdateCaseAttributes): Promise<v
 }
 
 export async function checkCompletionsDueDate(input: LambdaRequest, dependencies: Dependencies) {
-  const { caseKeys, vivaApplicantStatusCodeList } = input.detail;
+  const { caseKeys, workflowCompletions } = input.detail;
+  const caseId = caseKeys.SK.split('#')[1];
 
-  const requiredStatusCodes = [
-    VIVA_STATUS_CASE_EXISTS,
-    VIVA_STATUS_WEB_APPLICATION_ACTIVE,
-    VIVA_STATUS_WEB_APPLICATION_ALLOWED,
-  ];
-  if (!validateApplicationStatus(vivaApplicantStatusCodeList, requiredStatusCodes)) {
+  if (!workflowCompletions?.isDueDateExpired) {
+    log.writeInfo(`Due date not expired. Will NOT update case with id: ${caseId}`);
     return true;
   }
 
-  const userCase = await dependencies.getCase(caseKeys);
-  if (!userCase.details.completions?.isDueDateExpired) {
-    return true;
-  }
-
-  await dependencies.updateCase(caseKeys, {
+  const updateCaseParams: UpdateCaseParams = {
     newStatus: getStatusByType(ACTIVE_PROCESSING_COMPLETIONS_DUE_DATE_PASSED_VIVA),
     newState: COMPLETIONS_DUE_DATE_PASSED,
-  });
+  };
+  await dependencies.updateCase(caseKeys, updateCaseParams);
 
   return true;
 }
 
-export const main = log.wrap(async event => {
-  return checkCompletionsDueDate(event, {
-    getCase: cases.get,
+export const main = log.wrap(event =>
+  checkCompletionsDueDate(event, {
     updateCase,
-  });
-});
+  })
+);

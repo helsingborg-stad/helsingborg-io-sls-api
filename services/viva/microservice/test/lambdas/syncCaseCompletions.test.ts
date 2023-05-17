@@ -105,7 +105,8 @@ function createDependencies(
   partialDependencies: Partial<Dependencies> = {}
 ): Dependencies {
   return {
-    triggerEvent: () => Promise.resolve(),
+    triggerSuccessEvent: () => Promise.resolve(),
+    triggerCaseNotFoundEvent: () => Promise.resolve(),
     updateCase: () => Promise.resolve(),
     validateStatusCode: () => statusCode,
     getLatestWorkflowId: () => Promise.resolve(workflowId),

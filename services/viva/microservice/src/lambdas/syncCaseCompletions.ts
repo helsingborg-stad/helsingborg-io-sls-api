@@ -22,6 +22,12 @@ interface SuccessEvent {
   caseStatusType: string;
 }
 
+interface CaseNotFoundEvent {
+  user: CaseUser;
+  vivaApplicantStatusCodeList: VivaApplicationsStatusItem[];
+  vivaLatestWorkflowId: string;
+}
+
 interface CaseKeys {
   PK: string;
   SK: string;
@@ -37,7 +43,8 @@ export interface LambdaRequest {
 }
 
 export interface Dependencies {
-  triggerEvent: (params: SuccessEvent) => Promise<void>;
+  triggerSuccessEvent: (params: SuccessEvent) => Promise<void>;
+  triggerCaseNotFoundEvent: (params: CaseNotFoundEvent) => Promise<void>;
   updateCase: (keys: CaseKeys, newCompletions: VadaWorkflowCompletions) => Promise<void>;
   validateStatusCode: (
     statusList: VivaApplicationsStatusItem[],
@@ -85,6 +92,11 @@ export async function syncCaseCompletions(input: LambdaRequest, dependencies: De
   const latestWorkflowId = await dependencies.getLatestWorkflowId(personalNumber);
   const userCase = await dependencies.getCaseOnWorkflowId(personalNumber, latestWorkflowId);
   if (!userCase) {
+    await dependencies.triggerCaseNotFoundEvent({
+      user: input.detail.user,
+      vivaApplicantStatusCodeList,
+      vivaLatestWorkflowId: latestWorkflowId,
+    });
     return true;
   }
 
@@ -98,7 +110,7 @@ export async function syncCaseCompletions(input: LambdaRequest, dependencies: De
   });
   await dependencies.updateCase(caseKeys, workflowCompletions);
 
-  await dependencies.triggerEvent({
+  await dependencies.triggerSuccessEvent({
     vivaApplicantStatusCodeList,
     workflowCompletions,
     caseKeys,
@@ -109,13 +121,14 @@ export async function syncCaseCompletions(input: LambdaRequest, dependencies: De
   return true;
 }
 
-export const main = log.wrap(event => {
-  return syncCaseCompletions(event, {
-    triggerEvent: putVivaMsEvent.syncCaseCompletionsSuccess,
+export const main = log.wrap(event =>
+  syncCaseCompletions(event, {
+    triggerSuccessEvent: putVivaMsEvent.syncCaseCompletionsSuccess,
+    triggerCaseNotFoundEvent: putVivaMsEvent.syncCaseCompletionsCaseNotFound,
     updateCase: updateCaseCompletions,
     validateStatusCode: validateApplicationStatus,
     getLatestWorkflowId: completionsHelper.get.workflow.latest.id,
     getWorkflowCompletions: vivaAdapter.workflow.getCompletions,
     getCaseOnWorkflowId: completionsHelper.get.caseOnWorkflowId,
-  });
-});
+  })
+);

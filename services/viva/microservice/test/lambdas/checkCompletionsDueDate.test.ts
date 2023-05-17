@@ -3,16 +3,11 @@ import {
   COMPLETIONS_DUE_DATE_PASSED,
   ACTIVE_PROCESSING_COMPLETIONS_DUE_DATE_PASSED_VIVA,
 } from '../../../libs/constants';
-import {
-  checkCompletionsDueDate,
-  Dependencies,
-  LambdaRequest,
-} from '../../src/lambdas/checkCompletionsDueDate';
-import type { CaseItem } from '../../src/types/caseItem';
+import { checkCompletionsDueDate } from '../../src/lambdas/checkCompletionsDueDate';
+import type { Dependencies, LambdaRequest } from '../../src/lambdas/checkCompletionsDueDate';
 
 function createDependencies(partialDependencies: Partial<Dependencies> = {}): Dependencies {
   return {
-    getCase: () => Promise.resolve({} as CaseItem),
     updateCase: () => Promise.resolve(),
     ...partialDependencies,
   };
@@ -32,6 +27,9 @@ it('updates the case if completions due date has passed', async () => {
           code: 512,
         },
       ],
+      workflowCompletions: {
+        isDueDateExpired: true,
+      },
       caseKeys: {
         PK: '123',
         SK: 'ABC',
@@ -40,13 +38,6 @@ it('updates the case if completions due date has passed', async () => {
   } as LambdaRequest;
   const updateCaseMock = jest.fn();
   const dependencies = createDependencies({
-    getCase: jest.fn().mockResolvedValue({
-      details: {
-        completions: {
-          isDueDateExpired: true,
-        },
-      },
-    }),
     updateCase: updateCaseMock,
   });
   const result = await checkCompletionsDueDate(lambdaInput, dependencies);
@@ -75,6 +66,9 @@ it('returns true if viva application status code list is invalid', async () => {
           code: 3,
         },
       ],
+      workflowCompletions: {
+        isDueDateExpired: false,
+      },
       caseKeys: {
         PK: '123',
         SK: 'ABC',
@@ -83,13 +77,6 @@ it('returns true if viva application status code list is invalid', async () => {
   } as LambdaRequest;
   const updateCaseMock = jest.fn();
   const dependencies = createDependencies({
-    getCase: jest.fn().mockResolvedValue({
-      details: {
-        completions: {
-          isDueDateExpired: true,
-        },
-      },
-    }),
     updateCase: updateCaseMock,
   });
   const result = await checkCompletionsDueDate(lambdaInput, dependencies);
@@ -98,7 +85,7 @@ it('returns true if viva application status code list is invalid', async () => {
   expect(dependencies.updateCase).toHaveBeenCalledTimes(0);
 });
 
-it('returns true if the case attribute details.completions is null', async () => {
+it('returns true if isDueDateExpired is undefined', async () => {
   const lambdaInput = {
     detail: {
       vivaApplicantStatusCodeList: [
@@ -120,11 +107,6 @@ it('returns true if the case attribute details.completions is null', async () =>
   } as LambdaRequest;
   const updateCaseMock = jest.fn();
   const dependencies = createDependencies({
-    getCase: jest.fn().mockResolvedValue({
-      details: {
-        completions: null,
-      },
-    }),
     updateCase: updateCaseMock,
   });
   const result = await checkCompletionsDueDate(lambdaInput, dependencies);

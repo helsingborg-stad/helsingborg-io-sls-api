@@ -1,11 +1,16 @@
-import log from '../libs/logs';
-import { getFutureTimestamp, millisecondsToSeconds } from '../libs/timestampHelper';
 import config from '../libs/config';
 import * as dynamoDb from '../libs/dynamoDb';
-import { cases } from '../helpers/query';
+import log from '../libs/logs';
+import putVivaMsEvent from 'helpers/putVivaMsEvent';
+import { getFutureTimestamp, millisecondsToSeconds } from '../libs/timestampHelper';
 import expiryTime from '../helpers/caseExpiryTime';
 
-import type { CaseItem } from '../types/caseItem';
+interface SuccessEvent {
+  caseKeys: CaseKeys;
+  caseStatusType: string;
+  caseState: string;
+  expirationTime: number;
+}
 
 interface CaseKeys {
   PK: string;
@@ -14,6 +19,7 @@ interface CaseKeys {
 
 interface LambdaDetails {
   caseKeys: CaseKeys;
+  caseStatusType: string;
   caseState: string;
 }
 
@@ -22,7 +28,7 @@ export interface LambdaRequest {
 }
 
 export interface Dependencies {
-  getCase: (keys: CaseKeys) => Promise<CaseItem>;
+  triggerEvent: (params: SuccessEvent) => Promise<void>;
   updateCase: (keys: CaseKeys, time: number) => Promise<void>;
 }
 
@@ -48,19 +54,24 @@ export async function syncExpiryTime(
   input: LambdaRequest,
   dependencies: Dependencies
 ): Promise<boolean> {
-  const { caseKeys } = input.detail;
+  const { caseKeys, caseStatusType } = input.detail;
 
-  const caseItem = await dependencies.getCase(caseKeys);
-  const expireHours = expiryTime.getHoursOnStatusType(caseItem.status.type);
+  const expireHours = expiryTime.getHoursOnStatusType(caseStatusType);
   const newExpirationTime = millisecondsToSeconds(getFutureTimestamp(expireHours));
 
   await dependencies.updateCase(caseKeys, newExpirationTime);
+
+  await dependencies.triggerEvent({
+    ...input.detail,
+    expirationTime: newExpirationTime,
+  });
+
   return true;
 }
 
-export const main = log.wrap(event => {
-  return syncExpiryTime(event, {
-    getCase: cases.get,
+export const main = log.wrap(event =>
+  syncExpiryTime(event, {
+    triggerEvent: putVivaMsEvent.syncExpiryTimeSuccess,
     updateCase: updateCaseExpirationTime,
-  });
-});
+  })
+);

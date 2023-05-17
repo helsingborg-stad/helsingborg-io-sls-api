@@ -6,10 +6,12 @@ import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import { decideNewCaseStatus, decideNewState } from '../helpers/caseDecision';
 import { cases } from '../helpers/query';
 import type { CaseItem, CaseStatus } from '../types/caseItem';
-import type { VadaWorkflowCompletions } from '../types/vadaCompletions';
-import type { VivaApplicationsStatusItem } from '../types/vivaApplicationsStatus';
 
-type SuccessEvent = LambdaDetail;
+interface SuccessEvent {
+  caseKeys: CaseKeys;
+  caseStatusType: string;
+  caseState: string;
+}
 
 interface CaseKeys {
   PK: string;
@@ -17,11 +19,7 @@ interface CaseKeys {
 }
 
 export interface LambdaDetail {
-  vivaApplicantStatusCodeList: VivaApplicationsStatusItem[];
-  workflowCompletions: VadaWorkflowCompletions;
   caseKeys: CaseKeys;
-  caseState: string;
-  caseStatusType: string;
 }
 
 export interface LambdaRequest {
@@ -34,21 +32,20 @@ export interface Dependencies {
   updateCase: (keys: CaseKeys, newStatus: CaseStatus, newState: string) => Promise<void>;
 }
 
-function updateCaseStatusAndState(
-  keys: CaseKeys,
-  newStatus: CaseStatus,
-  newState: string
-): Promise<void> {
+function updateCase(keys: CaseKeys, newStatus: CaseStatus, newState: string): Promise<void> {
   const updateParams = {
     TableName: config.cases.tableName,
     Key: {
       PK: keys.PK,
       SK: keys.SK,
     },
-    UpdateExpression: 'SET #status = :newStatusType, #state = :newState',
-    ExpressionAttributeNames: { '#status': 'status', '#state': 'state' },
+    UpdateExpression: 'SET #status = :newStatus, #state = :newState',
+    ExpressionAttributeNames: {
+      '#status': 'status',
+      '#state': 'state',
+    },
     ExpressionAttributeValues: {
-      ':newStatusType': newStatus,
+      ':newStatus': newStatus,
       ':newState': newState,
     },
     ReturnValues: 'NONE',
@@ -72,19 +69,20 @@ export async function decideCaseStatus(
 
   const newStatus = getStatusByType(newStatusType);
   await dependencies.updateCase(caseKeys, newStatus, newState);
+
   await dependencies.triggerEvent({
-    ...input.detail,
-    caseState: newState,
+    caseKeys,
     caseStatusType: newStatusType,
+    caseState: newState,
   });
 
   return true;
 }
 
-export const main = log.wrap(event => {
-  return decideCaseStatus(event, {
+export const main = log.wrap(event =>
+  decideCaseStatus(event, {
     getCase: cases.get,
-    updateCase: updateCaseStatusAndState,
+    updateCase,
     triggerEvent: putVivaMsEvent.decideCaseStatusSuccess,
-  });
-});
+  })
+);

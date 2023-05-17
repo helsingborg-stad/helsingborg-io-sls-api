@@ -100,10 +100,10 @@ export async function syncOfficers(
   return true;
 }
 
-export const main = log.wrap(event => {
-  return syncOfficers(event, {
+export const main = log.wrap(event =>
+  syncOfficers(event, {
     getOfficers: vivaAdapter.officers.get,
     getCase: cases.get,
     updateCase: updateCaseAdministrators,
-  });
-});
+  })
+);
