@@ -64,7 +64,7 @@ export async function checkCompletionsDueDate(input: LambdaRequest, dependencies
   const { caseKeys, workflowCompletions } = input.detail;
   const caseId = caseKeys.SK.split('#')[1];
 
-  if (!workflowCompletions?.isDueDateExpired) {
+  if (!workflowCompletions.isDueDateExpired) {
     log.writeInfo(`Due date not expired. Will NOT update case with id: ${caseId}`);
     return true;
   }

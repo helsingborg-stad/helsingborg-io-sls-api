@@ -294,10 +294,10 @@ functions:
           pattern:
             source:
               - vivaMs.checkCompletionsStatus
-            detail-type:
-              - checkCompletionsStatusRequired
             detail:
               caseStatusType: [{ 'anything-but': { 'prefix': 'active:ongoing' } }]
+            detail-type:
+              - checkCompletionsStatusRequired
           retryPolicy:
             maximumEventAge: 3600
             maximumRetryAttempts: 3

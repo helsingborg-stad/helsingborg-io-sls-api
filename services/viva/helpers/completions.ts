@@ -47,7 +47,7 @@ function getCompletionFormId(
   return isRandomCheck(completions) ? randomCheckFormId : completionFormId;
 }
 
-function createCompletionsResult(params: ConditionParams): CompletionsResult {
+function createCompletionsResult(params: ConditionParams): Partial<CompletionsResult> {
   const rules: CompletionsRule[] = [
     {
       condition: ({ completions }) => completions.isCompleted,
@@ -89,9 +89,9 @@ function createCompletionsResult(params: ConditionParams): CompletionsResult {
     },
   ];
 
-  const defaultResult: CompletionsResult = {
-    statusType: ACTIVE_COMPLETION_REQUIRED_VIVA,
-    state: VIVA_COMPLETION_REQUIRED,
+  const defaultResult: Partial<CompletionsResult> = {
+    statusType: undefined,
+    state: undefined,
   };
 
   const firstMatchingRule = rules.find(({ condition }) => condition(params));

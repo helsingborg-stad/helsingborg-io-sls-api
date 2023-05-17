@@ -110,8 +110,8 @@ export async function setCaseCompletions(input: LambdaRequest, dependencies: Dep
   });
 
   const caseUpdateParams: UpdateCaseParams = {
-    newStatus: getStatusByType(statusType),
-    newState: state,
+    newStatus: statusType ? getStatusByType(statusType) : caseItem.status,
+    newState: state ?? caseItem.state,
     newCurrentFormId: completionsHelper.get.formId(completionsFormIds, completions),
     newPersons: caseItem.persons.map(resetPersonSignature),
   };
