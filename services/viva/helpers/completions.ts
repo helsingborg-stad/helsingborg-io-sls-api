@@ -3,57 +3,80 @@ import config from '../libs/config';
 import * as dynamoDb from '../libs/dynamoDb';
 import {
   // status type
+  ACTIVE_SUBMITTED,
   ACTIVE_RANDOM_CHECK_REQUIRED_VIVA,
   ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA,
   ACTIVE_COMPLETION_REQUIRED_VIVA,
   ACTIVE_COMPLETION_SUBMITTED_VIVA,
-  ACTIVE_SUBMITTED,
-  ACTIVE_NEW_APPLICATION_RANDOM_CHECK_VIVA,
+  ACTIVE_PROCESSING_COMPLETIONS_DUE_DATE_PASSED_VIVA,
 
   // state
+  VIVA_APPLICATION_RECEIVED,
   VIVA_RANDOM_CHECK_REQUIRED,
   VIVA_COMPLETION_REQUIRED,
-  VIVA_APPLICATION_RECEIVED,
+  COMPLETIONS_DUE_DATE_PASSED,
 } from '../libs/constants';
 
 import vivaAdapter from './vivaAdapterRequestClient';
 
 import type { CaseItem, CaseCompletions, RequestedCaseCompletions } from '../types/caseItem';
 
-interface CompletionForms {
+interface FormIds {
+  recurringFormId: string;
   randomCheckFormId: string;
   completionFormId: string;
 }
 
 interface ConditionParams {
   completions: CaseCompletions;
-  isNewApplication: boolean;
+  forms: FormIds;
 }
 
-interface CompletionsResult {
-  statusType: string;
-  state: string;
+interface CompletionDecisionResult {
+  statusType: string | undefined;
+  state: string | undefined;
+  formId: string | undefined;
 }
 
-interface CompletionsRule {
+interface CompletionsDecisionRule {
   condition: (params: ConditionParams) => boolean;
-  result: CompletionsResult;
+  result: CompletionDecisionResult;
 }
 
-function getCompletionFormId(
-  { randomCheckFormId, completionFormId }: CompletionForms,
-  completions: CaseCompletions
-): string {
-  return isRandomCheck(completions) ? randomCheckFormId : completionFormId;
-}
-
-function createCompletionsResult(params: ConditionParams): Partial<CompletionsResult> {
-  const rules: CompletionsRule[] = [
+function createCompletionsResult(params: ConditionParams): CompletionDecisionResult {
+  const rules: CompletionsDecisionRule[] = [
     {
       condition: ({ completions }) => completions.isCompleted,
       result: {
         statusType: ACTIVE_SUBMITTED,
         state: VIVA_APPLICATION_RECEIVED,
+        formId: params.forms.recurringFormId,
+      },
+    },
+    {
+      condition: ({ completions }) => completions.isDueDateExpired,
+      result: {
+        statusType: ACTIVE_PROCESSING_COMPLETIONS_DUE_DATE_PASSED_VIVA,
+        state: COMPLETIONS_DUE_DATE_PASSED,
+        formId: params.forms.recurringFormId,
+      },
+    },
+    {
+      condition: ({ completions }) =>
+        isRandomCheck(completions) && completions.isAttachmentPending === false,
+      result: {
+        statusType: ACTIVE_RANDOM_CHECK_REQUIRED_VIVA,
+        state: VIVA_RANDOM_CHECK_REQUIRED,
+        formId: params.forms.randomCheckFormId,
+      },
+    },
+    {
+      condition: ({ completions }) =>
+        !isRandomCheck(completions) && completions.isAttachmentPending === false,
+      result: {
+        statusType: ACTIVE_COMPLETION_REQUIRED_VIVA,
+        state: VIVA_COMPLETION_REQUIRED,
+        formId: params.forms.completionFormId,
       },
     },
     {
@@ -61,22 +84,7 @@ function createCompletionsResult(params: ConditionParams): Partial<CompletionsRe
       result: {
         statusType: ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA,
         state: VIVA_RANDOM_CHECK_REQUIRED,
-      },
-    },
-    {
-      condition: ({ completions, isNewApplication }) =>
-        isRandomCheck(completions) && isNewApplication && !completions.isAttachmentPending,
-      result: {
-        statusType: ACTIVE_NEW_APPLICATION_RANDOM_CHECK_VIVA,
-        state: VIVA_RANDOM_CHECK_REQUIRED,
-      },
-    },
-    {
-      condition: ({ completions, isNewApplication }) =>
-        isRandomCheck(completions) && !isNewApplication && !completions.isAttachmentPending,
-      result: {
-        statusType: ACTIVE_RANDOM_CHECK_REQUIRED_VIVA,
-        state: VIVA_RANDOM_CHECK_REQUIRED,
+        formId: params.forms.randomCheckFormId,
       },
     },
     {
@@ -85,13 +93,15 @@ function createCompletionsResult(params: ConditionParams): Partial<CompletionsRe
       result: {
         statusType: ACTIVE_COMPLETION_SUBMITTED_VIVA,
         state: VIVA_COMPLETION_REQUIRED,
+        formId: params.forms.completionFormId,
       },
     },
   ];
 
-  const defaultResult: Partial<CompletionsResult> = {
+  const defaultResult: CompletionDecisionResult = {
     statusType: undefined,
     state: undefined,
+    formId: undefined,
   };
 
   const firstMatchingRule = rules.find(({ condition }) => condition(params));
@@ -104,7 +114,7 @@ function isRandomCheck({ isRandomCheck, requested }: CaseCompletions): boolean {
 }
 
 function isAnyRequestedReceived(requested: RequestedCaseCompletions[]): boolean {
-  return requested.some(item => item.received);
+  return requested.some(({ received }) => received);
 }
 
 async function getLatestVivaWorkflowId(personalNumber: string): Promise<string> {
@@ -135,7 +145,6 @@ async function getCaseByWorkflowId(
 export default {
   createCompletionsResult,
   get: {
-    formId: getCompletionFormId,
     caseOnWorkflowId: getCaseByWorkflowId,
     workflow: {
       latest: {

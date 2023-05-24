@@ -27,12 +27,13 @@ interface CreateParams {
   isDueDateExpired?: boolean;
 }
 
-const completionsForms = {
-  randomCheckFormId: '123ABC',
-  completionFormId: '456CDF',
-  newApplicationFormId: '789EFG',
-  newApplicationCompletionFormId: '101HJK',
-  newApplicationRandomCheckFormId: '112LMN',
+const ssmParameters = {
+  recurringFormId: 'recurringFormId',
+  completionFormId: 'completionFormId',
+  randomCheckFormId: 'randomCheckFormId',
+  newApplicationFormId: 'newApplicationFormId',
+  newApplicationRandomCheckFormId: 'newApplicationRandomCheckFormId',
+  newApplicationCompletionFormId: 'newApplicationCompletionFormId',
 };
 
 const requestedAllFalseList: RequestedCaseCompletions[] = [
@@ -65,7 +66,7 @@ const requestedSomeTrueList: RequestedCaseCompletions[] = [
   },
 ];
 
-function createConditionOption(params: CreateParams = {}): CaseCompletions {
+function createConditionOption(params: Partial<CreateParams> = {}): CaseCompletions {
   return {
     requested: [...(params.requested ?? requestedAllFalseList)],
     description: 'Some description',
@@ -77,64 +78,24 @@ function createConditionOption(params: CreateParams = {}): CaseCompletions {
     isAttachmentPending: false,
     attachmentUploaded: [],
     ...params,
-  } as CaseCompletions;
+  };
 }
-
-describe('Select form (getCompletionFormId)', () => {
-  test.each([
-    {
-      conditionOption: createConditionOption({
-        isRandomCheck: true,
-      }),
-      expectedResult: completionsForms.randomCheckFormId,
-      description: `isAttachmentPending is false, isRandomCheck is true, expect randomCheckFormId: ${completionsForms.randomCheckFormId}`,
-    },
-    {
-      conditionOption: createConditionOption({
-        isRandomCheck: true,
-        isAttachmentPending: true,
-      }),
-      expectedResult: completionsForms.randomCheckFormId,
-      description: `isAttachmentPending is true, isRandomCheck is true expect randomCheckFormId: ${completionsForms.randomCheckFormId}`,
-    },
-    {
-      conditionOption: createConditionOption(),
-      expectedResult: completionsForms.completionFormId,
-      description: `isAttachmentPending is false, isRandomCheck is false, expect completionFormId: ${completionsForms.completionFormId}`,
-    },
-    {
-      conditionOption: createConditionOption({
-        isAttachmentPending: true,
-      }),
-      expectedResult: completionsForms.completionFormId,
-      description: `isAttachmentPending is true, isRandomCheck is false, expect completionFormId: ${completionsForms.completionFormId}`,
-    },
-    {
-      conditionOption: createConditionOption({
-        requested: requestedSomeTrueList,
-      }),
-      expectedResult: completionsForms.completionFormId,
-      description: `some requested is true, expect completionFormId: ${completionsForms.completionFormId}`,
-    },
-  ])('$description', ({ conditionOption, expectedResult }) => {
-    const result = completionsHelper.get.formId(completionsForms, conditionOption);
-    expect(result).toBe(expectedResult);
-  });
-});
 
 describe('Recurring - Random select', () => {
   test.each([
     {
+      description: `yet to be submitted, expect ${ACTIVE_RANDOM_CHECK_REQUIRED_VIVA}`,
       conditionOption: createConditionOption({
         isRandomCheck: true,
       }),
       expectedResult: {
         statusType: ACTIVE_RANDOM_CHECK_REQUIRED_VIVA,
         state: VIVA_RANDOM_CHECK_REQUIRED,
+        formId: ssmParameters.randomCheckFormId,
       },
-      description: `yet to be submitted, expect ${ACTIVE_RANDOM_CHECK_REQUIRED_VIVA}`,
     },
     {
+      description: `submitted with attachments, expect ${ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA}`,
       conditionOption: createConditionOption({
         isRandomCheck: true,
         isAttachmentPending: true,
@@ -142,10 +103,11 @@ describe('Recurring - Random select', () => {
       expectedResult: {
         statusType: ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA,
         state: VIVA_RANDOM_CHECK_REQUIRED,
+        formId: ssmParameters.randomCheckFormId,
       },
-      description: `submitted with attachments, expect ${ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA}`,
     },
     {
+      description: `one or more requested received, expect ${ACTIVE_COMPLETION_REQUIRED_VIVA}`,
       conditionOption: createConditionOption({
         requested: requestedSomeTrueList,
         isRandomCheck: true,
@@ -153,13 +115,13 @@ describe('Recurring - Random select', () => {
       expectedResult: {
         statusType: ACTIVE_COMPLETION_REQUIRED_VIVA,
         state: VIVA_COMPLETION_REQUIRED,
+        formId: ssmParameters.completionFormId,
       },
-      description: `one or more requested received, expect ${ACTIVE_COMPLETION_REQUIRED_VIVA}`,
     },
   ])('$description', ({ conditionOption, expectedResult }) => {
     const results = completionsHelper.createCompletionsResult({
-      isNewApplication: false,
       completions: conditionOption,
+      forms: ssmParameters,
     });
     expect(results).toEqual(expectedResult);
   });
@@ -168,16 +130,18 @@ describe('Recurring - Random select', () => {
 describe('Recurring - None requested received', () => {
   test.each([
     {
+      description: `set status to ${ACTIVE_COMPLETION_SUBMITTED_VIVA} when attachment pending`,
       conditionOption: createConditionOption({
         isAttachmentPending: true,
       }),
       expectedResult: {
         statusType: ACTIVE_COMPLETION_SUBMITTED_VIVA,
         state: VIVA_COMPLETION_REQUIRED,
+        formId: ssmParameters.completionFormId,
       },
-      description: `set status to ${ACTIVE_COMPLETION_SUBMITTED_VIVA} when attachment pending`,
     },
     {
+      description: `set status to ${ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA} when attachment pending and is random check`,
       conditionOption: createConditionOption({
         isRandomCheck: true,
         isAttachmentPending: true,
@@ -185,13 +149,13 @@ describe('Recurring - None requested received', () => {
       expectedResult: {
         statusType: ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA,
         state: VIVA_RANDOM_CHECK_REQUIRED,
+        formId: ssmParameters.randomCheckFormId,
       },
-      description: `set status to ${ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA} when attachment pending and is random check`,
     },
   ])('$description', ({ conditionOption, expectedResult }) => {
     const results = completionsHelper.createCompletionsResult({
-      isNewApplication: false,
       completions: conditionOption,
+      forms: ssmParameters,
     });
     expect(results).toEqual(expectedResult);
   });
@@ -200,6 +164,7 @@ describe('Recurring - None requested received', () => {
 describe('Recurring - Requested received', () => {
   test.each([
     {
+      description: `submitted with attachments, expect ${ACTIVE_COMPLETION_SUBMITTED_VIVA}`,
       conditionOption: createConditionOption({
         requested: requestedSomeTrueList,
         isAttachmentPending: true,
@@ -207,23 +172,24 @@ describe('Recurring - Requested received', () => {
       expectedResult: {
         statusType: ACTIVE_COMPLETION_SUBMITTED_VIVA,
         state: VIVA_COMPLETION_REQUIRED,
+        formId: ssmParameters.completionFormId,
       },
-      description: `submitted with attachments, expect ${ACTIVE_COMPLETION_SUBMITTED_VIVA}`,
     },
     {
+      description: `completion requested, expect ${ACTIVE_COMPLETION_REQUIRED_VIVA}`,
       conditionOption: createConditionOption({
         requested: requestedSomeTrueList,
       }),
       expectedResult: {
         statusType: ACTIVE_COMPLETION_REQUIRED_VIVA,
         state: VIVA_COMPLETION_REQUIRED,
+        formId: ssmParameters.completionFormId,
       },
-      description: `completion requested, expect ${ACTIVE_COMPLETION_REQUIRED_VIVA}`,
     },
   ])('$description', ({ conditionOption, expectedResult }) => {
     const results = completionsHelper.createCompletionsResult({
-      isNewApplication: false,
       completions: conditionOption,
+      forms: ssmParameters,
     });
     expect(results).toEqual(expectedResult);
   });
@@ -232,93 +198,54 @@ describe('Recurring - Requested received', () => {
 describe('Recurring - Completions completed', () => {
   test.each([
     {
-      conditionOption: createConditionOption({
-        isCompleted: true,
-      }),
-      expectedResult: {
-        statusType: ACTIVE_SUBMITTED,
-        state: VIVA_APPLICATION_RECEIVED,
-      },
       description: `set status to ${ACTIVE_SUBMITTED} if completed and requested is empty`,
-    },
-    {
       conditionOption: createConditionOption({
-        requested: requestedSomeTrueList,
         isCompleted: true,
       }),
       expectedResult: {
         statusType: ACTIVE_SUBMITTED,
         state: VIVA_APPLICATION_RECEIVED,
+        formId: ssmParameters.recurringFormId,
       },
+    },
+    {
       description: `set status to ${ACTIVE_SUBMITTED} if completed and some requested is true`,
-    },
-    {
-      conditionOption: createConditionOption({
-        isCompleted: true,
-      }),
-      expectedResult: {
-        statusType: ACTIVE_SUBMITTED,
-        state: VIVA_APPLICATION_RECEIVED,
-      },
-      description: `set status to ${ACTIVE_SUBMITTED} if completed and all requested is false`,
-    },
-    {
-      conditionOption: createConditionOption({
-        isCompleted: true,
-      }),
-      expectedResult: {
-        statusType: ACTIVE_SUBMITTED,
-        state: VIVA_APPLICATION_RECEIVED,
-      },
-      description: `set status to ${ACTIVE_SUBMITTED} if completed regardless of other completions attribute state`,
-    },
-  ])('$description', ({ conditionOption, expectedResult }) => {
-    const results = completionsHelper.createCompletionsResult({
-      isNewApplication: false,
-      completions: conditionOption,
-    });
-    expect(results).toEqual(expectedResult);
-  });
-});
-
-describe('New Application', () => {
-  test.each([
-    {
-      conditionOption: createConditionOption({
-        isRandomCheck: true,
-      }),
-      expectedResult: {
-        statusType: ACTIVE_NEW_APPLICATION_RANDOM_CHECK_VIVA,
-        state: VIVA_RANDOM_CHECK_REQUIRED,
-      },
-      description: `yet to be submitted, expect ${ACTIVE_NEW_APPLICATION_RANDOM_CHECK_VIVA}`,
-    },
-    {
-      conditionOption: createConditionOption({
-        isRandomCheck: true,
-        isAttachmentPending: true,
-      }),
-      expectedResult: {
-        statusType: ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA,
-        state: VIVA_RANDOM_CHECK_REQUIRED,
-      },
-      description: `submitted with attachments, expect ${ACTIVE_RANDOM_CHECK_SUBMITTED_VIVA}`,
-    },
-    {
       conditionOption: createConditionOption({
         requested: requestedSomeTrueList,
-        isRandomCheck: true,
+        isCompleted: true,
       }),
       expectedResult: {
-        statusType: ACTIVE_COMPLETION_REQUIRED_VIVA,
-        state: VIVA_COMPLETION_REQUIRED,
+        statusType: ACTIVE_SUBMITTED,
+        state: VIVA_APPLICATION_RECEIVED,
+        formId: ssmParameters.recurringFormId,
       },
-      description: `one or more requested received, expect ${ACTIVE_COMPLETION_REQUIRED_VIVA}`,
+    },
+    {
+      description: `set status to ${ACTIVE_SUBMITTED} if completed and all requested is false`,
+      conditionOption: createConditionOption({
+        isCompleted: true,
+      }),
+      expectedResult: {
+        statusType: ACTIVE_SUBMITTED,
+        state: VIVA_APPLICATION_RECEIVED,
+        formId: ssmParameters.recurringFormId,
+      },
+    },
+    {
+      description: `set status to ${ACTIVE_SUBMITTED} if completed regardless of other completions attribute state`,
+      conditionOption: createConditionOption({
+        isCompleted: true,
+      }),
+      expectedResult: {
+        statusType: ACTIVE_SUBMITTED,
+        state: VIVA_APPLICATION_RECEIVED,
+        formId: ssmParameters.recurringFormId,
+      },
     },
   ])('$description', ({ conditionOption, expectedResult }) => {
     const results = completionsHelper.createCompletionsResult({
-      isNewApplication: true,
       completions: conditionOption,
+      forms: ssmParameters,
     });
     expect(results).toEqual(expectedResult);
   });

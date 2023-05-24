@@ -20,7 +20,7 @@ interface CaseKeys {
   SK: string;
 }
 
-interface LambdaDetail {
+export interface LambdaDetail {
   vivaApplicantStatusCodeList: VivaApplicationsStatusItem[];
   workflowCompletions: VadaWorkflowCompletions;
   caseKeys: CaseKeys;
@@ -76,43 +76,26 @@ function updateCase(keys: CaseKeys, params: UpdateCaseParams): Promise<void> {
 }
 
 export async function setCaseCompletions(input: LambdaRequest, dependencies: Dependencies) {
-  const { caseKeys } = input.detail;
+  const { caseKeys, caseState, caseStatusType } = input.detail;
 
   const caseItem = await dependencies.getCase(caseKeys);
+
   const { completions } = caseItem.details;
   if (!completions) {
     log.writeWarn('Completions not found in case with id:', caseItem.id);
     return true;
   }
 
-  const {
-    completionFormId,
-    randomCheckFormId,
-    newApplicationFormId,
-    newApplicationCompletionFormId,
-    newApplicationRandomCheckFormId,
-  } = await dependencies.readParams(config.cases.providers.viva.envsKeyName);
-
-  const isNewApplication = [
-    newApplicationFormId,
-    newApplicationRandomCheckFormId,
-    newApplicationCompletionFormId,
-  ].includes(caseItem.currentFormId);
-
-  const completionsFormIds = {
-    randomCheckFormId: isNewApplication ? newApplicationRandomCheckFormId : randomCheckFormId,
-    completionFormId: isNewApplication ? newApplicationCompletionFormId : completionFormId,
-  };
-
-  const { statusType, state } = completionsHelper.createCompletionsResult({
-    isNewApplication,
+  const forms = await dependencies.readParams(config.cases.providers.viva.envsKeyName);
+  const { statusType, state, formId } = completionsHelper.createCompletionsResult({
     completions,
+    forms,
   });
 
   const caseUpdateParams: UpdateCaseParams = {
-    newStatus: statusType ? getStatusByType(statusType) : caseItem.status,
-    newState: state ?? caseItem.state,
-    newCurrentFormId: completionsHelper.get.formId(completionsFormIds, completions),
+    newStatus: getStatusByType(statusType ?? caseStatusType),
+    newState: state ?? caseState,
+    newCurrentFormId: formId ?? caseItem.currentFormId,
     newPersons: caseItem.persons.map(resetPersonSignature),
   };
 
