@@ -297,10 +297,12 @@ functions:
             detail:
               caseStatusType:
                 [
-                  { 'anything-but': { 'prefix': 'notStarted:viva' } },
+                  { 'anything-but': { 'prefix': 'notStarted' } },
+                  { 'anything-but': { 'prefix': 'closed' } },
                   { 'anything-but': { 'prefix': 'active:ongoing' } },
                   { 'anything-but': { 'prefix': 'active:processing' } },
                 ]
+              caseState: [{ 'anything-but': 'VIVA_APPLICATION_LOCKED' }]
           retryPolicy:
             maximumEventAge: 3600
             maximumRetryAttempts: 3
@@ -318,6 +320,7 @@ functions:
               - 'Completions Due Date Probably Overdue'
             detail:
               caseStatusType: [{ 'anything-but': { 'prefix': 'active:processing' } }]
+              caseState: [{ 'anything-but': 'VIVA_APPLICATION_LOCKED' }]
           retryPolicy:
             maximumEventAge: 3600
             maximumRetryAttempts: 3
