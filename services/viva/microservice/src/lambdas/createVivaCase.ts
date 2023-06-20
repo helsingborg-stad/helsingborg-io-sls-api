@@ -184,7 +184,7 @@ export const main = log.wrap(event => {
   });
 
   const caseFactory = new EkbCaseFactory({
-    getRecurringFormId: getRecurringFormId,
+    getRecurringFormId,
     getContacts: () => contactsFactory.getContacts(),
   });
 
