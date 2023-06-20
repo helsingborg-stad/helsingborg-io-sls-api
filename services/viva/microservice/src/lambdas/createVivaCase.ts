@@ -179,7 +179,7 @@ export async function createVivaCase(
 }
 
 export const main = log.wrap(async event => {
-  const administratorName = await getAdministratorName(event.user.personalNumber);
+  const administratorName = await getAdministratorName(event.detail.user.personalNumber);
 
   const contactsFactory = await administratorNameDecorator(
     new S3CaseContactsFactory({
