@@ -3,6 +3,7 @@ import * as dynamoDb from '../libs/dynamoDb';
 import config from '../libs/config';
 import log from '../libs/logs';
 import vivaAdapter from '../helpers/vivaAdapterRequestClient';
+import createAdministrators from '../helpers/createAdministrators';
 import { cases } from '../helpers/query';
 import { VivaOfficerType } from '../types/vivaMyPages';
 import type { CaseAdministrator } from '../types/caseItem';
@@ -29,27 +30,6 @@ export interface Dependencies {
 }
 
 const allowedOfficerTypes = [VivaOfficerType.Officer.toString()];
-
-export function createAdministrators(
-  vivaOfficer: VivaOfficer | VivaOfficer[]
-): CaseAdministrator[] {
-  const officers: VivaOfficer[] = [];
-
-  Array.isArray(vivaOfficer) ? officers.push(...vivaOfficer) : officers.push(vivaOfficer);
-
-  return officers.map(officer => {
-    const { name: complexName, title, mail: email, phone, type } = officer;
-    const name = complexName.replace(/^CN=(.+)\/OU.*$/, `$1`);
-
-    return {
-      name,
-      title,
-      email,
-      phone,
-      type,
-    } as CaseAdministrator;
-  });
-}
 
 function updateCaseAdministrators(
   keys: CaseKeys,

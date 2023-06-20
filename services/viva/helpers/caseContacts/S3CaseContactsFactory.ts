@@ -1,7 +1,7 @@
 import type { Contact } from '../../types/caseItem';
 import type { ICaseContactsFactory } from './CaseContactsFactory';
 
-interface Dependencies {
+export interface Dependencies {
   bucketName: string;
   contactsFileKey: string;
   getFromS3(bucket: string, key: string): Promise<string>;

@@ -1,4 +1,4 @@
-import { createAdministrators } from '../../src/lambdas/syncOfficers';
+import createAdministrators from '../../src/helpers/createAdministrators';
 
 import type { CaseAdministrator } from '../../src/types/caseItem';
 
