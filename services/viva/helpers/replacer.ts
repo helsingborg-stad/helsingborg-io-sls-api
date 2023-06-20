@@ -5,5 +5,6 @@ interface ReplacerParams {
 }
 
 export default function replacer({ source, tagert, pattern }: ReplacerParams): string {
-  return source.replace(`/${pattern}/g`, tagert);
+  const re = new RegExp(`\\${pattern}`, 'g');
+  return source.replace(re, tagert);
 }
