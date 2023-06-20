@@ -9,12 +9,14 @@ import { populateFormWithPreviousCaseAnswers } from '../libs/formAnswers';
 import putVivaMsEvent from '../helpers/putVivaMsEvent';
 import createCaseHelper from '../helpers/createCase';
 import populateFormWithVivaChildren from '../helpers/populateForm';
+import getAdministratorName from '../helpers/getAdministratorName';
 import { getCaseListByPeriod, getLastUpdatedCase, getFormTemplates } from '../helpers/dynamoDb';
 import { getConfigFromS3, getCurrentPeriodInfo, isProviderPeriodOpen } from '../helpers/vivaPeriod';
 
 import { CasePersonRole } from '../types/caseItem';
 import EkbCaseFactory from '../helpers/case/EkbCaseFactory';
 import S3CaseContactsFactory from '../helpers/caseContacts/S3CaseContactsFactory';
+import administratorNameDecorator from '../helpers/caseContacts/administratorNameDecorator';
 
 import type { CaseUser, CaseItem, CaseForm, CasePerson } from '../types/caseItem';
 import type { VivaMyPagesVivaCase, VivaMyPagesVivaApplication } from '../types/vivaMyPages';
@@ -176,12 +178,17 @@ export async function createVivaCase(
   return true;
 }
 
-export const main = log.wrap(event => {
-  const contactsFactory = new S3CaseContactsFactory({
-    bucketName: process.env.EKB_CONFIG_BUCKET_NAME ?? '',
-    contactsFileKey: 'contacts.json',
-    getFromS3: (bucket, key) => S3.getFile(bucket, key).then(s3 => s3.Body),
-  });
+export const main = log.wrap(async event => {
+  const administratorName = await getAdministratorName(event.user.personalNumber);
+
+  const contactsFactory = await administratorNameDecorator(
+    new S3CaseContactsFactory({
+      bucketName: process.env.EKB_CONFIG_BUCKET_NAME ?? '',
+      contactsFileKey: 'contacts.json',
+      getFromS3: (bucket, key) => S3.getFile(bucket, key).then(s3 => s3.Body),
+    }),
+    administratorName
+  );
 
   const caseFactory = new EkbCaseFactory({
     getRecurringFormId,
