@@ -167,7 +167,7 @@ const statuses = [
     type: CLOSED_REJECTED_VIVA,
     name: 'Avslagen',
     description:
-      'Din ansökan är inte godkänd och du kommer inte att få någon utbetalning. Vill du överklaga beslutet lämnar du en skriftlig motivering med e-post eller brev till din handläggare',
+      'Din ansökan är inte godkänd och du kommer inte att få någon utbetalning. Vill du överklaga beslutet lämnar du en skriftlig motivering via brev till din handläggare',
   },
   {
     type: CLOSED_COMPLETION_REJECTED_VIVA,
