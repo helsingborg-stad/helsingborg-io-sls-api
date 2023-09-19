@@ -94,4 +94,54 @@ describe('createRecurringCaseTemplate', () => {
       })
     );
   });
+
+  it('successfully create template if date is set', () => {
+    const answers: CaseFormAnswer[] = [
+      {
+        field: {
+          id: 'salaryWithCoapplicant.0.amount',
+          tags: ['incomes', 'lon', 'amount', 'group:applicant:salary:0', 'applicant'],
+        },
+        value: '23401',
+      },
+      {
+        field: {
+          id: '123',
+          tags: ['incomes', 'lon', 'date', 'group:applicant:salary:0', 'applicant'],
+        },
+        value: 1695138316311,
+      },
+    ];
+
+    const result = createRecurringCaseTemplate(createCaseItem(), answers);
+
+    expect(result).toEqual(
+      createExpectedResult({
+        financials: {
+          expenses: {
+            applicant: [],
+            coApplicant: [],
+            children: [],
+            housing: [],
+          },
+          incomes: {
+            applicant: [
+              {
+                belongsTo: 'APPLICANT',
+                currency: 'kr',
+                date: '2023-09-19',
+                description: '',
+                group: 'group:applicant:salary:0',
+                title: 'Lön',
+                type: 'income',
+                value: '23401',
+              },
+            ],
+            coApplicant: [],
+            resident: [],
+          },
+        },
+      })
+    );
+  });
 });

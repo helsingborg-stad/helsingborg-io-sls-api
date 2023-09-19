@@ -1,4 +1,4 @@
-export function formatTimestampToDate(timestamp: number) {
+export function formatTimestampToDate(timestamp: number): string {
   const [date] = new Date(timestamp).toISOString().split('T');
   return date;
 }
