@@ -206,7 +206,7 @@ function createFinancialPosts({ answers, filterTags = [], initialPost = {} }) {
       ...(hasAppliesToTag && { belongsTo: answer.value }),
       ...(hasAmountTag && { value: answer.value }),
       ...(hasDescriptionTag && { description: answer.value }),
-      ...(hasDateTag && { date: formatTimestampToDate(answer.value) }),
+      ...(hasDateTag && answer.value && { date: formatTimestampToDate(answer.value) }),
       ...(group && { group }),
       ...(vivaPostType && { title: vivaPostType }),
       ...(hasFromAddressTag && { fromAddress: answer.value }),
