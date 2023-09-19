@@ -217,6 +217,7 @@ function createFinancialPosts({ answers, filterTags = [], initialPost = {} }) {
       posts[index] = post;
       return posts;
     }
+
     return [...posts, post];
   }, []);
 }

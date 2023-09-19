@@ -1,5 +1,5 @@
 import createRecurringCaseTemplate from '../../src/helpers/createRecurringCaseTemplate';
-import { EncryptionType, CasePersonRole } from '../../src/types/caseItem';
+import { CasePersonRole } from '../../src/types/caseItem';
 import type { CaseFormAnswer, CaseItem, CasePerson } from '../../src/types/caseItem';
 
 function createPersons(): CasePerson[] {
@@ -19,51 +19,16 @@ function createPersons(): CasePerson[] {
   ];
 }
 
-function createAnswers(): CaseFormAnswer[] {
-  return [
-    {
-      field: {
-        id: 'salaryWithCoapplicant.0.amount',
-        tags: ['incomes', 'lon', 'amount', 'group:applicant:salary:0', 'applicant'],
-      },
-      value: '23401',
-    },
-    {
-      field: {
-        id: '789',
-        tags: ['incomes', 'lon', 'date', 'group:applicant:salary:0', 'applicant'],
-      },
-      value: '',
-    },
-  ];
-}
-
 function createCaseItem(): Partial<CaseItem> {
   return {
-    forms: {
-      '123': {
-        answers: [...createAnswers()],
-        encryption: {
-          type: EncryptionType.Decrypted,
-        },
-        currentPosition: {
-          currentMainStep: 0,
-          currentMainStepIndex: 0,
-          index: 0,
-          level: 0,
-          numberOfMainSteps: 0,
-        },
-      },
-    },
     persons: [...createPersons()],
   };
 }
 
-function createExpectedResult() {
+function createExpectedResult(params: Record<string, unknown>) {
   return {
     assets: [undefined, undefined, undefined, undefined, undefined, undefined],
     notes: [],
-    period: undefined,
     persons: [
       ...createPersons().map(person => ({
         ...person,
@@ -74,37 +39,59 @@ function createExpectedResult() {
     ],
     children: [],
     housing: {},
-    financials: {
-      expenses: {
-        applicant: [],
-        coApplicant: [],
-        children: [],
-        housing: [],
-      },
-      incomes: {
-        applicant: [
-          {
-            belongsTo: 'APPLICANT',
-            currency: 'kr',
-            date: '',
-            description: '',
-            group: 'group:applicant:salary:0',
-            title: 'Lön',
-            type: 'income',
-            value: '23401',
-          },
-        ],
-        coApplicant: [],
-        resident: [],
-      },
-    },
+    financials: {},
+    ...params,
   };
 }
 
 describe('createRecurringCaseTemplate', () => {
-  it('successfully create Viva case template', () => {
-    const result = createRecurringCaseTemplate(createCaseItem(), createAnswers());
+  it('successfully create template if date is not set', () => {
+    const answers: CaseFormAnswer[] = [
+      {
+        field: {
+          id: 'salaryWithCoapplicant.0.amount',
+          tags: ['incomes', 'lon', 'amount', 'group:applicant:salary:0', 'applicant'],
+        },
+        value: '23401',
+      },
+      {
+        field: {
+          id: '789',
+          tags: ['incomes', 'lon', 'date', 'group:applicant:salary:0', 'applicant'],
+        },
+        value: '',
+      },
+    ];
 
-    expect(result).toEqual(createExpectedResult());
+    const result = createRecurringCaseTemplate(createCaseItem(), answers);
+
+    expect(result).toEqual(
+      createExpectedResult({
+        financials: {
+          expenses: {
+            applicant: [],
+            coApplicant: [],
+            children: [],
+            housing: [],
+          },
+          incomes: {
+            applicant: [
+              {
+                belongsTo: 'APPLICANT',
+                currency: 'kr',
+                date: '',
+                description: '',
+                group: 'group:applicant:salary:0',
+                title: 'Lön',
+                type: 'income',
+                value: '23401',
+              },
+            ],
+            coApplicant: [],
+            resident: [],
+          },
+        },
+      })
+    );
   });
 });
