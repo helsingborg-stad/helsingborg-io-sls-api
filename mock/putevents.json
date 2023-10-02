@@ -14,7 +14,7 @@
     "EventBusName": "default"
   },
   {
-    "Source": "bankId.collect",
+    "Source": "OFFbankId.collect",
     "Detail": "{ \"user\": { \"personalNumber\": \"198602102389\" } }",
     "Resources": ["PETRONELLA"],
     "DetailType": "BankIdCollectComplete",
@@ -39,6 +39,13 @@
     "Detail": "{ \"personalNumber\": \"198602132394\" }",
     "Resources": ["BROR"],
     "DetailType": "casesApiInvokeSuccess",
+    "EventBusName": "default"
+  },
+  {
+    "Source": "vivaMs.generateRecurringCaseHtml",
+    "Detail": "{ \"pdfStorageBucketKey\": \"html/test.html\", \"keys\": { \"PK\": \"USER#198602132394\", \"SK\": \"CASE#123abc\" } }",
+    "Resources": ["PDF"],
+    "DetailType": "htmlGeneratedSuccess",
     "EventBusName": "default"
   }
 ]
