@@ -1,5 +1,5 @@
 import { generate } from '../../src/lambdas/generate';
-import type { Dependencies, FunctionInput } from '../../src/lambdas/generate';
+import type { Dependencies, LambdaRequest } from '../../src/lambdas/generate';
 
 function createDependencies(): Dependencies {
   return {
@@ -7,18 +7,20 @@ function createDependencies(): Dependencies {
     savePdf: jest.fn().mockResolvedValue('123'),
     createPdf: jest.fn().mockResolvedValue(Buffer.from('ABC')),
     sendSuccessEvent: jest.fn().mockResolvedValue(undefined),
+    requestId: '123',
   };
 }
 
 it('returns true if pdf was saved successfully', async () => {
   const mockDependencies = createDependencies();
-  const input: FunctionInput = {
+  const input: LambdaRequest = {
     detail: {
       pdfStorageBucketKey: '123',
       keys: {
         PK: '123',
         SK: '456',
       },
+      messageId: '123',
     },
   };
 

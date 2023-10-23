@@ -59,13 +59,6 @@ functions:
     environment:
       PDF_STORAGE_BUCKET_NAME: !ImportValue ${self:custom.resourcesStage}-PdfStorageBucketName
     events:
-      - eventBridge:
-          pattern:
-            source:
-              - vivaMs.generateRecurringCaseHtml
-            detail-type:
-              - htmlGeneratedSuccess
-          retryPolicy:
-            maximumEventAge: 3600
-            maximumRetryAttempts: 3
-          deadLetterQueueArn: !ImportValue ${self:custom.resourcesStage}-EventBridgeDeadLetterQueueArn
+      - sqs:
+          arn: !ImportValue ${self:custom.stage}-HtmlPdfQueueArn
+          batchSize: 1

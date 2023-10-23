@@ -5,7 +5,8 @@ import {
   EMPTY_EXPENSE_POST,
   EMPTY_INCOME_POST,
 } from './constants';
-import formatPeriodDates, { formatTimestampToDate } from './formatPeriodDates';
+import formatPeriodDates from './formatPeriodDates';
+import { toDateString } from '../helpers/caseTemplate/shared';
 import * as formHelpers from './formHelpers';
 import { encode } from 'html-entities';
 
@@ -206,7 +207,7 @@ function createFinancialPosts({ answers, filterTags = [], initialPost = {} }) {
       ...(hasAppliesToTag && { belongsTo: answer.value }),
       ...(hasAmountTag && { value: answer.value }),
       ...(hasDescriptionTag && { description: answer.value }),
-      ...(hasDateTag && { date: formatTimestampToDate(answer.value) }),
+      ...(hasDateTag && { date: toDateString(answer.value) }),
       ...(group && { group }),
       ...(vivaPostType && { title: vivaPostType }),
       ...(hasFromAddressTag && { fromAddress: answer.value }),
@@ -217,6 +218,7 @@ function createFinancialPosts({ answers, filterTags = [], initialPost = {} }) {
       posts[index] = post;
       return posts;
     }
+
     return [...posts, post];
   }, []);
 }
