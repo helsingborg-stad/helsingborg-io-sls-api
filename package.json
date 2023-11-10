@@ -73,7 +73,7 @@
     "await-to-js": "^2.1.1",
     "aws-sdk": "^2.1301.0",
     "aws-xray-sdk": "^3.4.1",
-    "axios": "^0.24.0",
+    "axios": "^1.6.0",
     "dayjs": "^1.11.7",
     "dayjs-plugin-utc": "^0.1.2",
     "deep-equal": "^2.2.0",
